@@ -11,14 +11,10 @@ actor AccountModel {
     private let appRouter: AppRouter
     private weak var appModel: AppModel?
 
-    init(di: ActiveSessionDIContainer, appRouter: AppRouter, state: AccountState? = nil) async {
+    init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
         qrPreviewModel = await QrPreviewModel(router: appRouter)
-        if let state {
-            subject = CurrentValueSubject(state)
-        } else {
-            subject = CurrentValueSubject(AccountState(session: .initial))
-        }
+        subject = CurrentValueSubject(AccountState(session: .initial))
         authorizedSessionRepository = di.authorizedSessionRepository()
     }
 
@@ -35,7 +31,30 @@ actor AccountModel {
         case .success(let user):
             subject.send(AccountState(subject.value, session: .loaded(user)))
         case .failure(let error):
-            subject.send(AccountState(subject.value, session: .failed(previous: subject.value.session, "\(error)")))
+            switch error {
+            case .noConnection(let error):
+                subject.send(AccountState(subject.value, session: .failed(previous: subject.value.session, "\(error)")))
+            case .notAuthorized(let error):
+                await appRouter.alert(
+                    config: Alert.Config(
+                        title: "alert_title_unauthorized".localized,
+                        message: "\(error)",
+                        actions: [
+                            Alert.Action(
+                                title: "alert_action_auth".localized,
+                                handler: { [weak self] _ in
+                                    guard let self else { return }
+                                    Task {
+                                        await self.appModel?.logout()
+                                    }
+                                }
+                            )
+                        ]
+                    )
+                )
+            case .other:
+                await appModel?.logout()
+            }
         }
     }
 

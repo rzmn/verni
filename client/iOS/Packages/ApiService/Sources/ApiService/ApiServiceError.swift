@@ -2,6 +2,7 @@ public enum ApiServiceError: Error {
     case noConnection(Error)
     case decodingFailed(Error)
     case internalError(Error)
+    case unauthorized
 }
 
 extension ApiServiceError: CustomStringConvertible {
@@ -13,6 +14,8 @@ extension ApiServiceError: CustomStringConvertible {
             return "decoding failed due error: \(error)"
         case .internalError(let error):
             return "internal error: \(error)"
+        case .unauthorized:
+            return "unauthorized"
         }
     }
 }

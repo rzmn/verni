@@ -269,6 +269,8 @@ private extension Api {
                 return .failure(.internalError(error))
             case .internalError(let error):
                 return .failure(.internalError(error))
+            case .unauthorized:
+                return .failure(.api(.tokenExpired, description: nil))
             }
         }
     }

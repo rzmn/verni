@@ -2,15 +2,30 @@ import UIKit
 import DesignSystem
 import Logging
 
+private actor SerialScheduler {
+    private var previousTask: Task<Void, Error>?
+
+    func run(_ block: @Sendable @escaping () async throws -> Void) {
+        previousTask = Task { [previousTask] in
+            let _ = await previousTask?.result
+            return try await block()
+        }
+    }
+}
+
 @MainActor
 class AppRouter: NSObject {
     let logger = Logger.shared.with(prefix: "[router] ")
+
+    private let scheduler: SerialScheduler
+
     private let window: UIWindow
     private var viewControllers: [UIViewController] = []
     private var dismissHandlers: [UIViewController: [() -> Void]] = [:]
 
     init(window: UIWindow) {
         self.window = window
+        self.scheduler = SerialScheduler()
     }
 
     func alert(config: Alert.Config) async {
@@ -46,6 +61,12 @@ class AppRouter: NSObject {
     }
 
     func present(_ viewController: UIViewController, animated: Bool = true, onDismiss: (() -> Void)? = nil) async {
+        await scheduler.run {
+            await self.doPresent(viewController, animated: animated, onDismiss: onDismiss)
+        }
+    }
+
+    private func doPresent(_ viewController: UIViewController, animated: Bool = true, onDismiss: (() -> Void)? = nil) async {
         viewController.presentationController?.delegate = self
         if let navigationController = viewController as? UINavigationController {
             navigationController.delegate = self
@@ -85,6 +106,12 @@ class AppRouter: NSObject {
     }
 
     func pop(_ viewController: UIViewController) async {
+        await scheduler.run {
+            await self.doPop(viewController)
+        }
+    }
+
+    func doPop(_ viewController: UIViewController) async {
         guard viewControllers.last === viewController else {
             return
         }

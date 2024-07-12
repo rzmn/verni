@@ -34,55 +34,8 @@ actor LaunchModel {
             await appModel.startAuthenticatedSession(di: session)
         case .failure(let reason):
             switch reason {
-            case .sessionExpired:
-                await appModel.startAuthenticationSession()
             case .hasNoSession:
                 await appModel.startAuthenticationSession()
-            case .noConnection(let error):
-                await presenter.display(
-                    Alert.Config(
-                        title: "no_connection_hint".localized,
-                        message: "\(error)",
-                        actions: [
-                            Alert.Action(
-                                title: "alert_action_refresh".localized,
-                                handler: { alert in
-                                    Task {
-                                        await self.awake()
-                                        await self.appRouter.pop(alert)
-                                    }
-                                }
-                            ),
-                            Alert.Action(
-                                title: "alert_action_auth".localized,
-                                handler: { alert in
-                                    Task {
-                                        await appModel.startAuthenticationSession()
-                                        await self.appRouter.pop(alert)
-                                    }
-                                }
-                            ),
-                        ]
-                    )
-                )
-            case .other(let error):
-                await presenter.display(
-                    Alert.Config(
-                        title: "unknown_error_hint".localized,
-                        message: "\(error)",
-                        actions: [
-                            Alert.Action(
-                                title: "alert_action_ok".localized,
-                                handler: { alert in
-                                    Task {
-                                        await appModel.startAuthenticationSession()
-                                        await self.appRouter.pop(alert)
-                                    }
-                                }
-                            )
-                        ]
-                    )
-                )
             }
         }
     }

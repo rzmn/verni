@@ -10,17 +10,8 @@ actor MainModel {
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
-        let authorizedSessionRepository = di.authorizedSessionRepository()
-        let warmedUpUserInfo: User?
-        if case .success(let user) = await authorizedSessionRepository.getHostInfo() {
-            warmedUpUserInfo = user
-        } else {
-            warmedUpUserInfo = nil
-        }
         friendsModel = await FriendsModel(di: di, appRouter: appRouter)
-        accountModel = await AccountModel(di: di, appRouter: appRouter, state: warmedUpUserInfo.flatMap {
-            AccountState(session: .loaded($0))
-        })
+        accountModel = await AccountModel(di: di, appRouter: appRouter)
         await friendsModel.setMainModel(self)
     }
 

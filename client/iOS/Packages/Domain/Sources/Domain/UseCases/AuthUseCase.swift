@@ -15,10 +15,7 @@ public enum SignupFailureReason: Error {
 }
 
 public enum AwakeFailureReason: Error {
-    case sessionExpired(Error)
     case hasNoSession
-    case noConnection(Error)
-    case other(Error)
 }
 
 public enum ValidationFailureReason: Error {

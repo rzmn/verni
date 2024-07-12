@@ -15,30 +15,10 @@ public class DefaultAuthUseCase {
 
 extension DefaultAuthUseCase: AuthUseCase {
     public func awake() async -> Result<ActiveSession, AwakeFailureReason> {
-        let apiError: ApiError
-        switch await ActiveSession.awake(anonymousApi: api, factory: apiServiceFactory) {
-        case .success(let session):
-            if let session {
-                return .success(session)
-            } else {
-                return.failure(.hasNoSession)
-            }
-        case .failure(let error):
-            apiError = error
+        guard let session = await ActiveSession.awake(anonymousApi: api, factory: apiServiceFactory) else {
+            return.failure(.hasNoSession)
         }
-        switch apiError {
-        case .api(let code, _):
-            switch code {
-            case .tokenExpired:
-                return .failure(.sessionExpired(apiError))
-            default:
-                return .failure(.other(apiError))
-            }
-        case .noConnection(let error):
-            return .failure(.noConnection(error))
-        case .internalError(let error):
-            return .failure(.other(error))
-        }
+        return .success(session)
     }
     
     public func login(credentials: Credentials) async -> Result<ActiveSession, LoginFailureReason> {
@@ -47,6 +27,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         case .success(let token):
             return .success(
                 await ActiveSession.awake(
+                    anonymousApi: api,
                     accessToken: token.accessToken,
                     refreshToken: token.refreshToken,
                     factory: apiServiceFactory
@@ -78,6 +59,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         case .success(let token):
             return .success(
                 await ActiveSession.awake(
+                    anonymousApi: api,
                     accessToken: token.accessToken,
                     refreshToken: token.refreshToken,
                     factory: apiServiceFactory
