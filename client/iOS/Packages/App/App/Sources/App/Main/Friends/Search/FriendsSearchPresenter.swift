@@ -19,7 +19,6 @@ class FriendsSearchPresenter {
                 model: model
             )
         )
-        navigationController.navigationBar.barTintColor = .p.background
         navigationController.navigationBar.backgroundColor = .p.background
         navigationController.navigationBar.prefersLargeTitles = true
         navigationController.navigationBar.isTranslucent = false

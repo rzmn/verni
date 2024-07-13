@@ -94,7 +94,11 @@ class UserView: UIView {
 
     private func render(state: UserState) {
         avatar.config = Avatar.Config(letter: state.user.id.prefix(1).uppercased(), style: .large)
-        name.text = state.user.id
+        if case .me = state.user.status {
+            name.text = String(format: "login_your_format".localized, state.user.id)
+        } else {
+            name.text = state.user.id
+        }
         buttons.forEach {
             $0.isHidden = true
         }

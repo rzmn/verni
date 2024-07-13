@@ -11,14 +11,14 @@ actor AccountModel {
     }
     let subject: CurrentValueSubject<AccountState, Never>
     private let qrPreviewModel: QrPreviewModel
-    private let authorizedSessionRepository: UsersRepository
+    private let usersRepository: UsersRepository
     private let appRouter: AppRouter
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
         qrPreviewModel = await QrPreviewModel(di: di, router: appRouter)
         subject = CurrentValueSubject(AccountState(session: .initial))
-        authorizedSessionRepository = di.authorizedSessionRepository()
+        usersRepository = di.usersRepository()
     }
 
     private var flowContinuation: CheckedContinuation<FlowResult, Never>?
@@ -35,7 +35,7 @@ actor AccountModel {
     }
 
     func refresh() async {
-        switch await authorizedSessionRepository.getHostInfo() {
+        switch await usersRepository.getHostInfo() {
         case .success(let user):
             subject.send(AccountState(subject.value, session: .loaded(user)))
         case .failure(let error):

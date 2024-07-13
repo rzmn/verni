@@ -7,8 +7,9 @@ public protocol DIContainer {
 }
 
 public protocol ActiveSessionDIContainer {
+    func logoutUseCase() -> LogoutUseCase
     func friendListRepository() -> FriendsRepository
-    func authorizedSessionRepository() -> UsersRepository
+    func usersRepository() -> UsersRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
     func qrInviteUseCase() -> QRInviteUseCase
 }

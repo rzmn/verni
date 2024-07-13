@@ -15,6 +15,7 @@ actor MainPresenter {
             return
         }
         let viewController = MainViewController(model: model)
+        viewController.modalTransitionStyle = .flipHorizontal
         await appRouter.present(viewController)
     }
 }

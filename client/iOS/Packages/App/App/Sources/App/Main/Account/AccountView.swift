@@ -42,6 +42,9 @@ class AccountView: UIView {
 
     private func setupView() {
         [logout, refreshPlaceholder, avatar, login].forEach(addSubview)
+        [avatar, login].forEach {
+            $0.alpha = 0
+        }
         backgroundColor = .p.background
         logout.addAction({ [weak self] in
             await self?.model.logout()
@@ -55,10 +58,10 @@ class AccountView: UIView {
                 self.handle(state: state)
             }
             .store(in: &subscriptions)
-        handle(state: model.subject.value)
+        handle(state: model.subject.value, animated: false)
     }
 
-    private func handle(state: AccountState) {
+    private func handle(state: AccountState, animated: Bool = true) {
         let contentViews = [avatar, login]
         let placeholderViews = [refreshPlaceholder]
         switch state.session {
@@ -68,14 +71,22 @@ class AccountView: UIView {
                 style: .large
             )
             login.text = String(format: "account_hello".localized, user.id)
-            contentViews.forEach { $0.isHidden = false }
+            if animated {
+                UIView.animate(withDuration: 0.15) {
+                    contentViews.forEach { $0.alpha = 1 }
+                }
+            } else {
+                UIView.performWithoutAnimation {
+                    contentViews.forEach { $0.alpha = 1 }
+                }
+            }
             placeholderViews.forEach { $0.isHidden = true }
             setNeedsLayout()
         case .initial, .loading:
-            contentViews.forEach { $0.isHidden = true }
+            contentViews.forEach { $0.alpha = 0 }
             placeholderViews.forEach { $0.isHidden = true }
         case .failed:
-            contentViews.forEach { $0.isHidden = true }
+            contentViews.forEach { $0.alpha = 0 }
             placeholderViews.forEach { $0.isHidden = false }
         }
     }

@@ -49,6 +49,9 @@ extension DefaultAuthorizedSessionRepository: UsersRepository {
     }
 
     public func searchUsers(query: String) async -> Result<[User], RepositoryError> {
+        if query.isEmpty {
+            return .success([])
+        }
         switch await api.searchUsers(query: query) {
         case .success(let dto):
             return .success(dto.map(\.domain))

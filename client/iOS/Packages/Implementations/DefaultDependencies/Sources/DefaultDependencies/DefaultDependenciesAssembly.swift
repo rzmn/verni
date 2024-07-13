@@ -12,12 +12,20 @@ internal import DefaultFriendsRepositoryImplementation
 internal import DefaultFriendInteractionsUseCaseImplementation
 internal import DefaultQRInviteUseCaseImplementation
 
-extension ActiveSession: ActiveSessionDIContainer {
+extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
+    public func logout() async {
+        invalidate()
+    }
+
+    public func logoutUseCase() -> any LogoutUseCase {
+        self
+    }
+
     public func friendListRepository() -> FriendsRepository {
         DefaultFriendsRepository(api: api)
     }
     
-    public func authorizedSessionRepository() -> UsersRepository {
+    public func usersRepository() -> UsersRepository {
         DefaultAuthorizedSessionRepository(api: api)
     }
     

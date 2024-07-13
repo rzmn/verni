@@ -14,7 +14,7 @@ actor FriendsSearchModel {
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.di = di
-        usersRepository = di.authorizedSessionRepository()
+        usersRepository = di.usersRepository()
         self.appRouter = appRouter
     }
 

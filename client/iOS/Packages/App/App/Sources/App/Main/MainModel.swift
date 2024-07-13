@@ -12,12 +12,14 @@ actor MainModel {
     }
     private lazy var presenter = MainPresenter(model: self, appRouter: appRouter)
     private let appRouter: AppRouter
+    private let logoutUseCase: LogoutUseCase
     private weak var appModel: AppModel?
     let friendsModel: FriendsModel
     let accountModel: AccountModel
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
+        logoutUseCase = di.logoutUseCase()
         friendsModel = await FriendsModel(di: di, appRouter: appRouter)
         accountModel = await AccountModel(di: di, appRouter: appRouter)
     }
@@ -56,6 +58,7 @@ actor MainModel {
             return assertionFailure("main flow: already finished")
         }
         updateFlowContinuation(nil)
+        await logoutUseCase.logout()
         for handler in ([self.accountModel, self.friendsModel] as [AnyObject & CancelableFlow]) where handler !== sender {
             await handler.handleCancel()
         }

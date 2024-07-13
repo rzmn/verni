@@ -68,7 +68,7 @@ public class ActiveSession: TokenRefresher {
         }
     }
 
-    func invalidate() {
+    public func invalidate() {
         UserDefaults.standard.removeObject(forKey: refreshTokenKey)
     }
 }

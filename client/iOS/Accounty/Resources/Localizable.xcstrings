@@ -298,6 +298,17 @@
         }
       }
     },
+    "friend_search_empty_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Users Found\nTry another search query"
+          }
+        }
+      }
+    },
     "friend_unfriend" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -404,6 +415,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Login length at least %d"
+          }
+        }
+      }
+    },
+    "login_your_format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (you)"
           }
         }
       }
