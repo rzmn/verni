@@ -1,6 +1,7 @@
 import UIKit
 import DesignSystem
 import Combine
+import Base
 
 private let topPadding: CGFloat = 22
 private let vSpacing: CGFloat = 12
@@ -46,31 +47,21 @@ class UserView: UIView {
     private func setupView() {
         [[name, avatar], buttons as [UIView]].flatMap { $0 }.forEach(addSubview)
         backgroundColor = .p.background
-        acceptButton.addAction(UIAction(handler: { _ in
-            Task.detached {
-                await self.model.acceptRequest()
-            }
-        }), for: .touchUpInside)
-        sendButton.addAction(UIAction(handler: { _ in
-            Task.detached {
-                await self.model.sendRequest()
-            }
-        }), for: .touchUpInside)
-        rejectButton.addAction(UIAction(handler: { _ in
-            Task.detached {
-                await self.model.rejectRequest()
-            }
-        }), for: .touchUpInside)
-        unfriendButton.addAction(UIAction(handler: { _ in
-            Task.detached {
-                await self.model.unfriend()
-            }
-        }), for: .touchUpInside)
-        rollbackButton.addAction(UIAction(handler: { _ in
-            Task.detached {
-                await self.model.rollbackRequest()
-            }
-        }), for: .touchUpInside)
+        acceptButton.addAction({ [weak self] in
+            await self?.model.acceptRequest()
+        }, for: .touchUpInside)
+        sendButton.addAction({ [weak self] in
+            await self?.model.sendRequest()
+        }, for: .touchUpInside)
+        rejectButton.addAction({ [weak self] in
+            await self?.model.rejectRequest()
+        }, for: .touchUpInside)
+        unfriendButton.addAction({ [weak self] in
+            await self?.model.unfriend()
+        }, for: .touchUpInside)
+        rollbackButton.addAction({ [weak self] in
+            await self?.model.rollbackRequest()
+        }, for: .touchUpInside)
     }
 
     override func layoutSubviews() {

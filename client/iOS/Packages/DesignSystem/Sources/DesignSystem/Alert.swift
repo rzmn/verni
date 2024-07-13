@@ -3,9 +3,9 @@ import UIKit
 public enum Alert {
     public struct Action {
         public let title: String
-        public let handler: ((UIViewController) -> Void)?
+        public let handler: ((UIViewController) async -> Void)?
 
-        public init(title: String, handler: ((UIViewController) -> Void)? = nil) {
+        public init(title: String, handler: ((UIViewController) async -> Void)? = nil) {
             self.title = title
             self.handler = handler
         }

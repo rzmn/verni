@@ -1,5 +1,6 @@
 import UIKit
 import DesignSystem
+import Combine
 
 private let topPadding: CGFloat = 88
 private let bottomPadding: CGFloat = 66
@@ -28,7 +29,8 @@ class SignupView: UIView {
             title: "continue".localized
         )
     )
-    let model: SignupModel
+    private let model: SignupModel
+    private var subscriptions = Set<AnyCancellable>()
 
     init(model: SignupModel) {
         self.model = model
@@ -42,15 +44,25 @@ class SignupView: UIView {
 
     private func setupView() {
         [title, login, confirm].forEach(addSubview)
-        login.addAction(UIAction(handler: { [weak self] _ in
+        login.addAction({ [weak self] in
             guard let self else { return }
             login.text.flatMap(model.updateLogin)
-        }), for: .editingChanged)
-        confirm.addAction(UIAction(handler: { [weak self] _ in
-            Task { [weak self] in
-                await self?.model.confirmLogin()
+        }, for: .editingChanged)
+        confirm.addAction({ [weak self] in
+            await self?.model.confirmLogin()
+        }, for: .touchUpInside)
+        model.subject
+            .receive(on: RunLoop.main)
+            .sink { state in
+                self.login.render(
+                    TextField.Config(
+                        placeholder: "login_placeholder".localized,
+                        content: .login,
+                        formatHint: state.loginHint
+                    )
+                )
             }
-        }), for: .touchUpInside)
+            .store(in: &subscriptions)
         backgroundColor = .p.background
     }
 

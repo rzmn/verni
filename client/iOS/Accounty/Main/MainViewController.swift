@@ -27,14 +27,6 @@ class MainViewController: UITabBarController {
                     rootViewController: root
                 )
                 vc.navigationBar.prefersLargeTitles = true
-                vc.navigationBar.largeTitleTextAttributes = [
-                    .foregroundColor: UIColor.p.primary,
-                    .font: UIFont.p.title1
-                ]
-                vc.navigationBar.titleTextAttributes = [
-                    .foregroundColor: UIColor.p.primary,
-                    .font: UIFont.p.title2
-                ]
                 vc.tabBarItem = UITabBarItem(
                     title: nil,
                     image: UIImage(systemName: "person.2.fill")?
@@ -52,14 +44,6 @@ class MainViewController: UITabBarController {
                 )
                 vc.navigationBar.prefersLargeTitles = true
                 vc.navigationBar.tintColor = .p.primary
-                vc.navigationBar.largeTitleTextAttributes = [
-                    .foregroundColor: UIColor.p.primary,
-                    .font: UIFont.p.title1
-                ]
-                vc.navigationBar.titleTextAttributes = [
-                    .foregroundColor: UIColor.p.primary,
-                    .font: UIFont.p.title2
-                ]
                 vc.tabBarItem = UITabBarItem(
                     title: nil,
                     image: UIImage(systemName: "person.circle.fill")?

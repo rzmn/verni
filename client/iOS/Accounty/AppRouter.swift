@@ -1,23 +1,13 @@
 import UIKit
 import DesignSystem
 import Logging
-
-private actor SerialScheduler {
-    private var previousTask: Task<Void, Error>?
-
-    func run(_ block: @Sendable @escaping () async throws -> Void) {
-        previousTask = Task { [previousTask] in
-            let _ = await previousTask?.result
-            return try await block()
-        }
-    }
-}
+import Base
 
 @MainActor
 class AppRouter: NSObject {
     let logger = Logger.shared.with(prefix: "[router] ")
 
-    private let scheduler: SerialScheduler
+    private let scheduler: AsyncSerialScheduler
 
     private let window: UIWindow
     private var viewControllers: [UIViewController] = []
@@ -25,39 +15,16 @@ class AppRouter: NSObject {
 
     init(window: UIWindow) {
         self.window = window
-        self.scheduler = SerialScheduler()
+        self.scheduler = AsyncSerialScheduler()
     }
 
     func alert(config: Alert.Config) async {
-        struct Box {
-            weak var controller: UIViewController?
-        }
-        var box = Box()
-        let controller = AlertController(
-            config: Alert.Config(
-                title: config.title,
-                message: config.message,
-                actions: config.actions.map { action in
-                    Alert.Action(
-                        title: action.title
-                    ) { controller in
-                        Task {
-                            await self.pop(controller)
-                            action.handler?(controller)
-                        }
-                    }
-                }
-            )
-        ) {
-            guard let controller = box.controller else {
-                return
-            }
-            Task {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        await present(
+            AlertController(config: config) { controller in
                 await self.pop(controller)
             }
-        }
-        box.controller = controller
-        await present(controller)
+        )
     }
 
     func present(_ viewController: UIViewController, animated: Bool = true, onDismiss: (() -> Void)? = nil) async {

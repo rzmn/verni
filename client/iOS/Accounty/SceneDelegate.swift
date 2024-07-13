@@ -1,4 +1,5 @@
 import UIKit
+import DesignSystem
 import DefaultDependencies
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -6,6 +7,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        SetupAppearance()
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             let appRouter = AppRouter(window: window)
@@ -24,26 +26,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Task {
             await model?.resolve(url: context.url.absoluteString)
         }
-    }
-
-    func sceneDidDisconnect(_ scene: UIScene) {
-        // empty
-    }
-
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        // empty
-    }
-
-    func sceneWillResignActive(_ scene: UIScene) {
-        // empty
-    }
-
-    func sceneWillEnterForeground(_ scene: UIScene) {
-        // empty
-    }
-
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        // empty
     }
 }
 

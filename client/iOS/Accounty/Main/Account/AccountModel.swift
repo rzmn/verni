@@ -40,15 +40,9 @@ actor AccountModel {
                         title: "alert_title_unauthorized".localized,
                         message: "\(error)",
                         actions: [
-                            Alert.Action(
-                                title: "alert_action_auth".localized,
-                                handler: { [weak self] _ in
-                                    guard let self else { return }
-                                    Task {
-                                        await self.appModel?.logout()
-                                    }
-                                }
-                            )
+                            Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
+                                await self?.appModel?.logout()
+                            }
                         ]
                     )
                 )
@@ -71,18 +65,10 @@ actor AccountModel {
                 title: "account_logout".localized,
                 message: "confirm_general_title".localized,
                 actions: [
-                    Alert.Action(
-                        title: "alert_action_ok".localized,
-                        handler: { alert in
-                            Task { [weak self] in
-                                await self?.appModel?.logout()
-                            }
-                        }
-                    ),
-                    Alert.Action(
-                        title: "alert_action_cancel".localized,
-                        handler: { _ in }
-                    ),
+                    Alert.Action(title: "alert_action_ok".localized) { [weak self] _ in
+                        await self?.appModel?.logout()
+                    },
+                    Alert.Action(title: "alert_action_cancel".localized),
                 ]
             )
         )

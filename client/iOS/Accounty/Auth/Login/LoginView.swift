@@ -53,22 +53,16 @@ class LoginView: UIView {
         [title, login, confirm, signup].forEach(addSubview)
         backgroundColor = .p.background
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        login.addAction(UIAction(handler: { [weak self] _ in
+        login.addAction({ [weak self] in
             guard let self else { return }
             login.text.flatMap(model.updateLogin)
-        }), for: .editingChanged)
-        confirm.addAction(UIAction(handler: { [weak self] _ in
-            Task { [weak self] in
-                guard let self else { return }
-                await model.confirmLogin()
-            }
-        }), for: .touchUpInside)
-        signup.addAction(UIAction(handler: { [weak self] _ in
-            Task { [weak self] in
-                guard let self else { return }
-                await model.signup()
-            }
-        }), for: .touchUpInside)
+        }, for: .editingChanged)
+        confirm.addAction({ [weak self] in
+            await self?.model.confirmLogin()
+        }, for: .touchUpInside)
+        signup.addAction({ [weak self] in
+            await self?.model.signup()
+        }, for: .touchUpInside)
         model.subject
             .receive(on: RunLoop.main)
             .sink { state in

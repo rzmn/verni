@@ -1,4 +1,5 @@
 import UIKit
+import Base
 
 private let topPadding: CGFloat = 16
 private let titleSubtitleSpace: CGFloat = 12
@@ -30,11 +31,17 @@ class AlertContentView: UIView {
             )
         )
         action.handler.flatMap { handler in
-            b.addAction(UIAction(handler: { _ in
-                sequence(first: self, next: \.next)
-                    .first(where: { $0 is UIViewController })
-                    .flatMap { ($0 as? UIViewController).flatMap(handler) }
-            }), for: .touchUpInside)
+            b.addAction({ [weak self] in
+                guard let self else {
+                    return
+                }
+                guard let controller = sequence(first: self, next: \.next)
+                    .first(where: { $0 is UIViewController }) as? UIViewController
+                else {
+                    return
+                }
+                await handler(controller)
+            }, for: .touchUpInside)
         }
         return b
     }

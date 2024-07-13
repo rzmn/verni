@@ -1,5 +1,6 @@
 import UIKit
 import DesignSystem
+import Combine
 
 private let topPadding: CGFloat = 88
 private let bottomPadding: CGFloat = 66
@@ -31,6 +32,7 @@ class LoginPasswordView: UIView {
     }()
 
     private let model: LoginModel
+    private var subscriptions = Set<AnyCancellable>()
 
     init(model: LoginModel) {
         self.model = model
@@ -45,16 +47,25 @@ class LoginPasswordView: UIView {
     private func setupView() {
         [title, password, confirm].forEach(addSubview)
         backgroundColor = .p.background
-        password.addAction(UIAction(handler: { [weak self] _ in
+        password.addAction({ [weak self] in
             guard let self else { return }
             password.text.flatMap(model.updatePassword)
-        }), for: .editingChanged)
-        confirm.addAction(UIAction(handler: { [weak self] _ in
-            Task { [weak self] in
-                guard let self else { return }
-                await model.confirmPassword()
+        }, for: .editingChanged)
+        confirm.addAction({ [weak self] in
+            await self?.model.confirmPassword()
+        }, for: .touchUpInside)
+        model.subject
+            .receive(on: RunLoop.main)
+            .sink { state in
+                self.password.render(
+                    TextField.Config(
+                        placeholder: "signup_pwd_placeholder".localized,
+                        content: .login,
+                        formatHint: state.passwordHint
+                    )
+                )
             }
-        }), for: .touchUpInside)
+            .store(in: &subscriptions)
     }
 
     override func layoutSubviews() {

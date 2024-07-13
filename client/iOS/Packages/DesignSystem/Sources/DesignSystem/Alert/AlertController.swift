@@ -3,10 +3,25 @@ import UIKit
 public class AlertController: UIViewController {
     private class View: UIView {
         private let content: AlertContentView
-        private let onBackgroundTapHandler: () -> Void
+        private let dismissHandler: () async -> Void
 
-        init(config: Alert.Config, onBackgroundTapHandler: @escaping () -> Void) {
-            self.onBackgroundTapHandler = onBackgroundTapHandler
+        init(config _config: Alert.Config, dismissHandler: @escaping () async -> Void, automaticallyDismissOnAction: Bool = true) {
+            let config: Alert.Config
+            if automaticallyDismissOnAction {
+                config = Alert.Config(
+                    title: _config.title,
+                    message: _config.message,
+                    actions: _config.actions.map { action in
+                        Alert.Action(title: action.title) { controller in
+                            await dismissHandler()
+                            await action.handler?(controller)
+                        }
+                    }
+                )
+            } else {
+                config = _config
+            }
+            self.dismissHandler = dismissHandler
             content = AlertContentView(config: config)
             super.init(frame: .zero)
             setupView()
@@ -23,7 +38,9 @@ public class AlertController: UIViewController {
         }
 
         @objc private func onTapBackground() {
-            onBackgroundTapHandler()
+            Task {
+                await self.dismissHandler()
+            }
         }
 
         override func layoutSubviews() {
@@ -38,10 +55,10 @@ public class AlertController: UIViewController {
         }
     }
 
-    private let onDismiss: () -> Void
+    private let onDismiss: (UIViewController) async -> Void
     private let config: Alert.Config
 
-    public init(config: Alert.Config, onDismiss: @escaping () -> Void) {
+    public init(config: Alert.Config, onDismiss: @escaping (UIViewController) async -> Void) {
         self.onDismiss = onDismiss
         self.config = config
         super.init(nibName: nil, bundle: nil)
@@ -56,8 +73,10 @@ public class AlertController: UIViewController {
     public override func loadView() {
         view = {
             let v = View(config: config) { [weak self] in
-                self?.dismiss(animated: true)
-                self?.onDismiss()
+                guard let self else { return }
+                Task {
+                    await self.onDismiss(self)
+                }
             }
             return v
         }()

@@ -43,18 +43,12 @@ class AccountView: UIView {
     private func setupView() {
         [logout, refreshPlaceholder, avatar, login].forEach(addSubview)
         backgroundColor = .p.background
-        logout.addAction(UIAction(handler: { [weak self] _ in
-            Task { [weak self] in
-                guard let self else { return }
-                await model.logout()
-            }
-        }), for: .touchUpInside)
-        refreshPlaceholder.addAction(UIAction(handler: { _ in
-            Task { [weak self] in
-                guard let self else { return }
-                await model.refresh()
-            }
-        }), for: .touchUpInside)
+        logout.addAction({ [weak self] in
+            await self?.model.logout()
+        }, for: .touchUpInside)
+        refreshPlaceholder.addAction({ [weak self] in
+            await self?.model.refresh()
+        }, for: .touchUpInside)
         model.subject
             .receive(on: DispatchQueue.main)
             .sink { state in

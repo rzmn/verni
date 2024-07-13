@@ -95,19 +95,14 @@ class FriendsView: UIView {
             }.store(in: &subscriptions)
         table.refreshControl = {
             let ptr = UIRefreshControl()
-            ptr.addAction(UIAction(handler: { [weak self] _ in
-                Task { [weak self] in
-                    guard let self else { return }
-                    await model.refresh()
-                }
-            }), for: .valueChanged)
+            ptr.addAction({ [weak self] in
+                await self?.model.refresh()
+            }, for: .valueChanged)
             return ptr
         }()
-        emptyPlaceholder.addAction(UIAction(handler: { _ in
-            Task {
-                await self.model.searchForFriends()
-            }
-        }), for: .touchUpInside)
+        emptyPlaceholder.addAction({ [weak self] in
+            await self?.model.searchForFriends()
+        }, for: .touchUpInside)
         handle(state: state)
     }
 

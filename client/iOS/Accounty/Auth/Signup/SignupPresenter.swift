@@ -15,7 +15,12 @@ actor SignupPresenter {
         guard let model = await model else {
             return
         }
-        appRouter.push(SignupViewController(model: model))
+        let navigationController = UINavigationController(
+            rootViewController: SignupViewController(model: model)
+        )
+        navigationController.navigationBar.tintColor = .p.accent
+        navigationController.navigationBar.barTintColor = .p.accent
+        await appRouter.present(navigationController)
     }
 
     @MainActor

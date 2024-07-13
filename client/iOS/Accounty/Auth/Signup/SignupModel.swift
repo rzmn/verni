@@ -56,12 +56,14 @@ actor SignupModel {
     func updateLogin(_ login: String) {
         logI { "login updated: \(login)" }
         subject.send(SignupState(state: subject.value, login: login))
+        validator.submit(login: login)
     }
 
     @MainActor
     func updatePassword(_ password: String) {
         logI { "password updated: \(password)" }
         subject.send(SignupState(state: subject.value, password: password))
+        validator.submit(login: password)
     }
 
     @MainActor

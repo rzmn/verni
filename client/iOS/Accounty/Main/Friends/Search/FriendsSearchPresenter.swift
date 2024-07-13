@@ -23,9 +23,6 @@ class FriendsSearchPresenter {
         navigationController.navigationBar.backgroundColor = .p.background
         navigationController.navigationBar.prefersLargeTitles = true
         navigationController.navigationBar.isTranslucent = false
-        navigationController.navigationBar.titleTextAttributes = [
-            .font: UIFont.p.title2
-        ]
         await appRouter.present(navigationController)
     }
 }

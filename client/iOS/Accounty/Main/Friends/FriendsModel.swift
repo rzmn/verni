@@ -106,15 +106,9 @@ actor FriendsModel {
                         title: "no_connection_hint".localized,
                         message: "\(error)",
                         actions: [
-                            Alert.Action(
-                                title: "alert_action_try_again".localized,
-                                handler: { [weak self] _ in
-                                    guard let self else { return }
-                                    Task {
-                                        await self.showUser(uid: uid)
-                                    }
-                                }
-                            ),
+                            Alert.Action(title: "alert_action_try_again".localized) { [weak self] _ in
+                                await self?.showUser(uid: uid)
+                            },
                             Alert.Action(
                                 title: "alert_action_ok".localized
                             )
@@ -127,15 +121,9 @@ actor FriendsModel {
                         title: "alert_title_unauthorized".localized,
                         message: "\(error)",
                         actions: [
-                            Alert.Action(
-                                title: "alert_action_auth".localized,
-                                handler: { [weak self] _ in
-                                    guard let self else { return }
-                                    Task {
-                                        await self.mainModel?.logout()
-                                    }
-                                }
-                            )
+                            Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
+                                await self?.mainModel?.logout()
+                            }
                         ]
                     )
                 )

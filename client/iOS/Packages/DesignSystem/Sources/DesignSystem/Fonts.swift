@@ -10,6 +10,10 @@ extension UIFont {
             UIFont(name: "Menlo-Bold", size: 18) ?? .systemFont(ofSize: 18, weight: .bold)
         }
 
+        public static var title3: UIFont {
+            UIFont(name: "Menlo-Bold", size: 15) ?? .systemFont(ofSize: 18, weight: .bold)
+        }
+
         public static var text: UIFont {
             UIFont(name: "Menlo", size: 16) ?? .systemFont(ofSize: 16)
         }
