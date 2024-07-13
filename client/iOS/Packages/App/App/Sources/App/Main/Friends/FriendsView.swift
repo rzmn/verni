@@ -24,8 +24,8 @@ class FriendsView: UIView {
         tableView: table,
         cellProvider: cellProvider
     )
-    private let emptyPlaceholder = RefreshPlaceholder(
-        config: RefreshPlaceholder.Config(
+    private let emptyPlaceholder = Placeholder(
+        config: Placeholder.Config(
             message: "friend_list_empty_placeholder".localized,
             icon: UIImage(systemName: "person.crop.rectangle.badge.plus")
         )

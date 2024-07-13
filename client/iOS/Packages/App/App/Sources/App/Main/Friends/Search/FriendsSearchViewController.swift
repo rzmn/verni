@@ -30,8 +30,8 @@ class FriendsSearchViewController: UITableViewController {
         tableView: tableView,
         cellProvider: cellProvider
     )
-    private let emptyPlaceholder = RefreshPlaceholder(
-        config: RefreshPlaceholder.Config(
+    private let emptyPlaceholder = Placeholder(
+        config: Placeholder.Config(
             message: "friend_search_empty_placeholder".localized,
             icon: UIImage(systemName: "eyes")
         )

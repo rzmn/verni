@@ -3,7 +3,7 @@ import UIKit
 private let hPadding: CGFloat = 22
 private let iconTitleSpacing: CGFloat = 12
 private let iconSize: CGFloat = 36
-public class RefreshPlaceholder: UIControl {
+public class Placeholder: UIControl {
     public struct Config {
         public let message: String
         public let icon: UIImage?

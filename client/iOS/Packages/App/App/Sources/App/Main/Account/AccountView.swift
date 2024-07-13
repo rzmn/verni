@@ -22,8 +22,8 @@ class AccountView: UIView {
             title: "account_logout".localized
         )
     )
-    private let refreshPlaceholder = RefreshPlaceholder(
-        config: RefreshPlaceholder.Config(
+    private let refreshPlaceholder = Placeholder(
+        config: Placeholder.Config(
             message: "refresh_account_info".localized,
             icon: UIImage(systemName: "arrow.clockwise")
         )
