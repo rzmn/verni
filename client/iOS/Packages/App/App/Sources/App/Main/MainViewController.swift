@@ -1,5 +1,5 @@
 import UIKit
-import DesignSystem
+internal import DesignSystem
 
 class MainViewController: UITabBarController {
     private let model: MainModel

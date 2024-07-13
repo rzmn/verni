@@ -1,7 +1,8 @@
 import UIKit
 import Domain
 import DI
-import DesignSystem
+internal import DesignSystem
+internal import ProgressHUD
 
 actor LaunchModel {
     private let authUseCase: any AuthUseCaseReturningActiveSession
@@ -41,5 +42,15 @@ extension LaunchModel {
             .font: UIFont.p.title2
         ]
         UINavigationBar.appearance().standardAppearance = appearance
+
+        ProgressHUD.animationType = .circleStrokeSpin
+        ProgressHUD.colorAnimation = .p.accent
+        UIImage(systemName: "network.slash").flatMap {
+            ProgressHUD.imageError = $0.withTintColor(.p.accent, renderingMode: .alwaysOriginal)
+        }
+        ProgressHUD.fontStatus = .p.title3
+        ProgressHUD.colorStatus = .p.primary
+        ProgressHUD.mediaSize = 44
+        
     }
 }

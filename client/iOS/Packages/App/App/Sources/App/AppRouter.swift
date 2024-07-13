@@ -1,7 +1,8 @@
 import UIKit
-import DesignSystem
 import Logging
 import Base
+internal import DesignSystem
+internal import ProgressHUD
 
 @MainActor
 public class AppRouter: NSObject {
@@ -13,9 +14,42 @@ public class AppRouter: NSObject {
     private var viewControllers: [UIViewController] = []
     private var dismissHandlers: [UIViewController: [() -> Void]] = [:]
 
+    private var hudWorkItem: DispatchWorkItem?
+
     public init(window: UIWindow) {
         self.window = window
         self.scheduler = AsyncSerialScheduler()
+    }
+
+    func showHud(graceTime: TimeInterval? = nil) {
+        hudWorkItem?.cancel()
+        hudWorkItem = nil
+        if let graceTime {
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.doShowHud()
+            }
+            hudWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Int(graceTime * 1000)), execute: workItem)
+        } else {
+            doShowHud()
+        }
+    }
+
+    func hudFailure(description: String? = nil) {
+        hudWorkItem?.cancel()
+        hudWorkItem = nil
+        ProgressHUD.error(description, delay: 2)
+    }
+
+    func hideHud() {
+        hudWorkItem?.cancel()
+        hudWorkItem = nil
+        ProgressHUD.dismiss()
+    }
+
+    private func doShowHud() {
+        hudWorkItem = nil
+        ProgressHUD.animate()
     }
 
     func alert(config: Alert.Config) async {

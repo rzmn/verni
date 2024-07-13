@@ -1,5 +1,5 @@
 import UIKit
-import DesignSystem
+internal import DesignSystem
 
 actor LoginPresenter {
     private weak var model: LoginModel?

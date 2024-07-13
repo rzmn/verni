@@ -1,7 +1,7 @@
 import Domain
 import Combine
 import DI
-import DesignSystem
+internal import DesignSystem
 
 private extension UserState {
     func withFriendStatus(_ status: User.FriendStatus) -> UserState {

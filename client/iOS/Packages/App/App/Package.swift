@@ -20,6 +20,7 @@ let package = Package(
         .package(path: "../../Interfaces/Domain"),
         .package(path: "../../Shared/Logging"),
         .package(path: "../../Shared/Base"),
+        .package(url: "https://github.com/relatedcode/ProgressHUD.git", revision: "9364904a42cb25f58d026451140c4080a868e72e")
     ],
     targets: [
         .target(
@@ -29,7 +30,8 @@ let package = Package(
                 "DI",
                 "Domain",
                 "Logging",
-                "Base"
+                "Base",
+                "ProgressHUD"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

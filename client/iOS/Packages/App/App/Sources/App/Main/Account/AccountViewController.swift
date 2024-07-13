@@ -1,6 +1,6 @@
 import UIKit
 import Combine
-import DesignSystem
+internal import DesignSystem
 
 class AccountViewController: UIViewController {
     private let model: AccountModel

@@ -1,7 +1,7 @@
 import UIKit
 import Combine
 import Domain
-import DesignSystem
+internal import DesignSystem
 
 class FriendView: UIView {
     private var subscriptions = Set<AnyCancellable>()

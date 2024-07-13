@@ -1,6 +1,6 @@
 import UIKit
 import Domain
-import DesignSystem
+internal import DesignSystem
 
 class QrPreviewView: UIView {
     private let qrView: UIView

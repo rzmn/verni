@@ -1,7 +1,7 @@
 import Combine
 import Domain
 import DI
-import DesignSystem
+internal import DesignSystem
 
 actor FriendsModel {
     enum FlowResult {
@@ -30,9 +30,13 @@ actor FriendsModel {
             assertionFailure("friends flow is already running")
         }
         friendListRepository.friendsUpdated
-            .sink { _ in
-                Task {
-                    await self.refresh()
+            .sink { [weak self ] _ in
+                Task { [weak self] in
+                    guard let self else { return }
+                    guard case .success(let data) = await loadData() else {
+                        return
+                    }
+                    subject.send(FriendsState(subject.value, content: .loaded(data)))
                 }
             }
             .store(in: &subscriptions)
@@ -44,12 +48,32 @@ actor FriendsModel {
     }
 
     func refresh() async {
+        let hudShown: Bool
+        if case .initial = subject.value.content {
+            hudShown = true
+            await appRouter.showHud(graceTime: 0.5)
+        } else {
+            hudShown = false
+        }
         subject.send(FriendsState(subject.value, content: .loading(previous: subject.value.content)))
         switch await loadData() {
         case .success(let data):
+            if hudShown {
+                await appRouter.hideHud()
+            }
             subject.send(FriendsState(subject.value, content: .loaded(data)))
         case .failure(let error):
-            subject.send(FriendsState(subject.value, content: .failed(previous: subject.value.content, "error \(error)")))
+            if hudShown {
+                await appRouter.hideHud()
+            }
+            switch error {
+            case .noConnection:
+                subject.send(FriendsState(subject.value, content: .failed(previous: subject.value.content, "no_connection_hint".localized)))
+            case .notAuthorized(let error):
+                await showNotAuthorizedAlert(error: error)
+            case .other:
+                subject.send(FriendsState(subject.value, content: .failed(previous: subject.value.content, "unknown_error_hint".localized)))
+            }
         }
     }
 
@@ -90,14 +114,14 @@ actor FriendsModel {
         await model.start()
     }
 
-    private func loadData() async -> Result<FriendsState.Content, Error> {
+    private func loadData() async -> Result<FriendsState.Content, RepositoryError> {
         await friendListRepository.getFriends(set: [.friends, .incoming, .pending]).map { data in
             FriendsState.Content(
                 upcomingRequests: data[.incoming] ?? [],
                 pendingRequests: data[.pending] ?? [],
                 friends: data[.friends] ?? []
             )
-        }.mapError { $0 as Error }
+        }
     }
 
     func showUser(uid: User.ID) async {
@@ -125,17 +149,7 @@ actor FriendsModel {
                     )
                 )
             case .notAuthorized(let error):
-                await appRouter.alert(
-                    config: Alert.Config(
-                        title: "alert_title_unauthorized".localized,
-                        message: "\(error)",
-                        actions: [
-                            Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
-                                await self?.handle(flowResult: .loggedOut)
-                            }
-                        ]
-                    )
-                )
+                await showNotAuthorizedAlert(error: error)
             case .other(let error):
                 await appRouter.alert(
                     config: Alert.Config(
@@ -150,6 +164,20 @@ actor FriendsModel {
                 )
             }
         }
+    }
+
+    private func showNotAuthorizedAlert(error: Error) async {
+        await appRouter.alert(
+            config: Alert.Config(
+                title: "alert_title_unauthorized".localized,
+                message: "\(error)",
+                actions: [
+                    Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
+                        await self?.handle(flowResult: .loggedOut)
+                    }
+                ]
+            )
+        )
     }
 
     func showUser(user: User) async {

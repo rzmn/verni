@@ -1,7 +1,7 @@
 import UIKit
-import DesignSystem
 import Combine
 import Base
+internal import DesignSystem
 
 private let topPadding: CGFloat = 22
 private let vSpacing: CGFloat = 12

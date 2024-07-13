@@ -1,7 +1,7 @@
 import UIKit
 import Domain
 import Combine
-import DesignSystem
+internal import DesignSystem
 
 class FriendsView: UIView {
     private let model: FriendsModel

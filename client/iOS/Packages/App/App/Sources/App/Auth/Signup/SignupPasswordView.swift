@@ -1,6 +1,6 @@
 import UIKit
-import DesignSystem
 import Combine
+internal import DesignSystem
 
 private let topPadding: CGFloat = 88
 private let bottomPadding: CGFloat = 66

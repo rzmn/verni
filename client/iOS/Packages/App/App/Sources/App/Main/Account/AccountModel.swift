@@ -1,8 +1,8 @@
 import Combine
 import Domain
 import DI
-import DesignSystem
 import UIKit
+internal import DesignSystem
 
 actor AccountModel {
     enum FlowResult {
