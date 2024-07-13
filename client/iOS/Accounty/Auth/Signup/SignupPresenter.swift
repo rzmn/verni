@@ -11,7 +11,7 @@ actor SignupPresenter {
     }
 
     @MainActor
-    func start() async {
+    func start(onDismiss: @escaping () async -> Void) async {
         guard let model = await model else {
             return
         }
@@ -20,7 +20,11 @@ actor SignupPresenter {
         )
         navigationController.navigationBar.tintColor = .p.accent
         navigationController.navigationBar.barTintColor = .p.accent
-        await appRouter.present(navigationController)
+        await appRouter.present(navigationController) {
+            Task {
+                await onDismiss()
+            }
+        }
     }
 
     @MainActor

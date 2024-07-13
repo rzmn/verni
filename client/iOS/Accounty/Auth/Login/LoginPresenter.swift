@@ -21,6 +21,8 @@ actor LoginPresenter {
             )
         )
         navigation.modalPresentationStyle = .fullScreen
+        navigation.navigationBar.tintColor = .p.accent
+        navigation.navigationBar.barTintColor = .p.accent
         await appRouter.present(navigation)
     }
 

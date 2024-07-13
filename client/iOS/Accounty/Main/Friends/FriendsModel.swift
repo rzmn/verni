@@ -4,6 +4,10 @@ import DI
 import DesignSystem
 
 actor FriendsModel {
+    enum FlowResult {
+        case loggedOut
+        case canceled
+    }
     let subject = CurrentValueSubject<FriendsState, Never>(FriendsState(content: .initial))
 
     private let appRouter: AppRouter
@@ -11,7 +15,6 @@ actor FriendsModel {
     private let usersRepository: UsersRepository
     private let di: ActiveSessionDIContainer
     private var subscriptions = Set<AnyCancellable>()
-    private weak var mainModel: MainModel?
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.di = di
@@ -20,11 +23,12 @@ actor FriendsModel {
         self.appRouter = appRouter
     }
 
-    func setMainModel(_ model: MainModel) {
-        mainModel = model
-    }
+    private var flowContinuation: CheckedContinuation<FlowResult, Never>?
 
-    func start() async {
+    func performFlow() async -> FlowResult {
+        if flowContinuation != nil {
+            assertionFailure("friends flow is already running")
+        }
         friendListRepository.friendsUpdated
             .sink { _ in
                 Task {
@@ -32,6 +36,11 @@ actor FriendsModel {
                 }
             }
             .store(in: &subscriptions)
+        return await withCheckedContinuation { continuation in
+            Task {
+                flowContinuation = continuation
+            }
+        }
     }
 
     func refresh() async {
@@ -122,7 +131,7 @@ actor FriendsModel {
                         message: "\(error)",
                         actions: [
                             Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
-                                await self?.mainModel?.logout()
+                                await self?.handle(flowResult: .loggedOut)
                             }
                         ]
                     )
@@ -145,9 +154,47 @@ actor FriendsModel {
 
     func showUser(user: User) async {
         let model = UserModel(di: di, user: user, appRouter: appRouter)
-        if let mainModel {
-            await model.setMainModel(mainModel)
+        Task.detached {
+            switch await model.performFlow() {
+            case .loggedOut:
+                await self.handle(flowResult: .loggedOut)
+            case .canceled:
+                break
+            }
         }
-        await model.start()
+    }
+}
+
+extension FriendsModel: CancelableFlow {
+    func handleCancel() async {
+        await handle(flowResult: .canceled)
+    }
+
+    private func handle(flowResult: FlowResult) async {
+        guard let flowContinuation = flowContinuation else {
+            return assertionFailure("friends flow: got logout after flow is finished")
+        }
+        subscriptions.forEach { cancellable in
+            cancellable.cancel()
+        }
+        subscriptions.removeAll()
+        self.flowContinuation = nil
+        flowContinuation.resume(returning: flowResult)
+    }
+}
+
+extension FriendsModel: UrlResolver {
+    func canResolve(url: InternalUrl) async -> Bool {
+        guard case .users(let users) = url, case .show = users else {
+            return false
+        }
+        return true
+    }
+    
+    func resolve(url: InternalUrl) async {
+        guard case .users(let users) = url, case .show(let id) = users else {
+            return
+        }
+        await showUser(uid: id)
     }
 }

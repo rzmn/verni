@@ -48,7 +48,7 @@ class SignupPasswordView: UIView {
         backgroundColor = .p.background
         password.addAction({ [weak self] in
             guard let self else { return }
-            password.text.flatMap(model.updatePassword)
+            await model.updatePassword(password.text ?? "")
         }, for: .editingChanged)
         confirm.addAction({ [weak self] in
             await self?.model.confirmPassword()

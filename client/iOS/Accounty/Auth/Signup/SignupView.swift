@@ -46,7 +46,7 @@ class SignupView: UIView {
         [title, login, confirm].forEach(addSubview)
         login.addAction({ [weak self] in
             guard let self else { return }
-            login.text.flatMap(model.updateLogin)
+            await model.updateLogin(login.text ?? "")
         }, for: .editingChanged)
         confirm.addAction({ [weak self] in
             await self?.model.confirmLogin()

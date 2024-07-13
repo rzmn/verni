@@ -17,6 +17,10 @@ class AccountViewController: UIViewController {
 
     override func loadView() {
         view = AccountView(model: model)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
         navigationItem.title = "account_nav_title".localized
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "qrcode"),
@@ -30,7 +34,7 @@ class AccountViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         Task.detached {
-            await self.model.start()
+            await self.model.refresh()
         }
     }
 

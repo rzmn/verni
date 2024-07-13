@@ -10,11 +10,15 @@ class UserPresenter {
     }
 
     @MainActor
-    func start() async {
+    func start(onDismiss: @escaping () async -> Void) async {
         guard let model else {
             return
         }
         let viewController = UserViewController(model: model)
-        await appRouter.present(viewController)
+        await appRouter.present(viewController) {
+            Task {
+                await onDismiss()
+            }
+        }
     }
 }

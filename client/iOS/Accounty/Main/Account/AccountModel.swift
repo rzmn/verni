@@ -5,11 +5,14 @@ import DesignSystem
 import UIKit
 
 actor AccountModel {
+    enum FlowResult {
+        case loggedOut
+        case canceled
+    }
     let subject: CurrentValueSubject<AccountState, Never>
     private let qrPreviewModel: QrPreviewModel
     private let authorizedSessionRepository: UsersRepository
     private let appRouter: AppRouter
-    private weak var appModel: AppModel?
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
@@ -18,12 +21,17 @@ actor AccountModel {
         authorizedSessionRepository = di.authorizedSessionRepository()
     }
 
-    func setAppModel(_ appModel: AppModel) {
-        self.appModel = appModel
-    }
+    private var flowContinuation: CheckedContinuation<FlowResult, Never>?
 
-    func start() async {
-        await refresh()
+    func performFlow() async -> FlowResult {
+        if flowContinuation != nil {
+            assertionFailure("account flow is already running")
+        }
+        return await withCheckedContinuation { continuation in
+            Task {
+                flowContinuation = continuation
+            }
+        }
     }
 
     func refresh() async {
@@ -41,13 +49,13 @@ actor AccountModel {
                         message: "\(error)",
                         actions: [
                             Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
-                                await self?.appModel?.logout()
+                                await self?.handle(flowResult: .loggedOut)
                             }
                         ]
                     )
                 )
             case .other:
-                await appModel?.logout()
+                await logout()
             }
         }
     }
@@ -66,11 +74,25 @@ actor AccountModel {
                 message: "confirm_general_title".localized,
                 actions: [
                     Alert.Action(title: "alert_action_ok".localized) { [weak self] _ in
-                        await self?.appModel?.logout()
+                        await self?.handle(flowResult: .loggedOut)
                     },
                     Alert.Action(title: "alert_action_cancel".localized),
                 ]
             )
         )
+    }
+}
+
+extension AccountModel: CancelableFlow {
+    func handleCancel() async {
+        await handle(flowResult: .canceled)
+    }
+
+    private func handle(flowResult: FlowResult) async {
+        guard let flowContinuation = flowContinuation else {
+            return assertionFailure("account flow: got logout after flow is finished")
+        }
+        self.flowContinuation = nil
+        flowContinuation.resume(returning: flowResult)
     }
 }

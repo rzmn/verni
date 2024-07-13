@@ -9,14 +9,14 @@ actor LoginModel {
     let logger = Logger.shared.with(prefix: "[login]")
 
     private lazy var presenter = LoginPresenter(model: self, appRouter: appRouter)
+    private let signupModel: SignupModel
     private let appRouter: AppRouter
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let validator: CredentialsValidator
     private var subscriptions = Set<AnyCancellable>()
 
-    private weak var authModel: AuthModel?
-
     init(di: DIContainer, appRouter: AppRouter) async {
+        self.signupModel = await SignupModel(di: di, appRouter: appRouter)
         self.appRouter = appRouter
         self.authUseCase = di.authUseCase()
         self.validator = CredentialsValidator(useCase: authUseCase)
@@ -44,29 +44,36 @@ actor LoginModel {
             .store(in: &subscriptions)
     }
 
-    func setAuthModel(_ model: AuthModel) {
-        authModel = model
+    
+    private var flowContinuation: CheckedContinuation<ActiveSessionDIContainer, Never>?
+    private func updateFlowContinuation(_ continuation: CheckedContinuation<ActiveSessionDIContainer, Never>?) {
+        flowContinuation = continuation
     }
 
-    func start() async {
-        await presenter.start()
+    func performFlow() async -> ActiveSessionDIContainer {
+        if flowContinuation != nil {
+            assertionFailure("login flow is already running")
+        }
+        return await withCheckedContinuation { continuation in
+            Task {
+                updateFlowContinuation(continuation)
+                await presenter.start()
+            }
+        }
     }
 
-    @MainActor
     func updateLogin(_ login: String) {
         logI { "login updated: \(login)" }
         subject.send(LoginState(state: subject.value, login: login))
         validator.submit(login: login)
     }
 
-    @MainActor
     func updatePassword(_ password: String) {
         logI { "password updated: \(password)" }
         subject.send(LoginState(state: subject.value, password: password))
         validator.submit(password: password)
     }
 
-    @MainActor
     func confirmLogin() async {
         logI { "confirm login" }
         switch await authUseCase.validateLogin(subject.value.login) {
@@ -104,7 +111,12 @@ actor LoginModel {
         )
         switch loginResult {
         case .success(let session):
-            await authModel?.startAuthenticatedSession(di: session)
+            guard let flowContinuation else {
+                assertionFailure("login flow was finished after cancellation")
+                break
+            }
+            self.flowContinuation = nil
+            flowContinuation.resume(returning: session)
         case .failure(let reason):
             switch reason {
             case .incorrectCredentials(let error):
@@ -131,10 +143,19 @@ actor LoginModel {
         }
     }
 
-    @MainActor
     func signup() async {
         logI { "signup" }
-        await authModel?.signup.start()
+        switch await signupModel.performFlow() {
+        case .signedUp(let session):
+            guard let flowContinuation else {
+                assertionFailure("signup flow was finished when login flow is finished")
+                break
+            }
+            self.flowContinuation = nil
+            flowContinuation.resume(returning: session)
+        case .canceled:
+            break
+        }
     }
 }
 

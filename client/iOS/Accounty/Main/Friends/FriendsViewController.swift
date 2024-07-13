@@ -32,9 +32,6 @@ class FriendsViewController: UIViewController {
                 action: #selector(onAddFriendViaSearch)
             ),
         ]
-        Task.detached {
-            await self.model.start()
-        }
         navigationItem.rightBarButtonItems?.forEach {
             $0.tintColor = .p.accent
         }

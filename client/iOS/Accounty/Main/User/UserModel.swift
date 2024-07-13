@@ -10,11 +10,15 @@ private extension UserState {
 }
 
 actor UserModel {
+    enum FlowResult {
+        case loggedOut
+        case canceled
+    }
+
     let subject: CurrentValueSubject<UserState, Never>
     private let useCase: FriendInteractionsUseCase
     private let router: AppRouter
     private lazy var presenter = UserPresenter(appRouter: router, model: self)
-    private weak var mainModel: MainModel?
 
     init(di: ActiveSessionDIContainer, user: User, appRouter: AppRouter) {
         useCase = di.friendInterationsUseCase()
@@ -22,12 +26,25 @@ actor UserModel {
         self.router = appRouter
     }
 
-    func setMainModel(_ model: MainModel) {
-        mainModel = model
+    private var flowContinuation: CheckedContinuation<FlowResult, Never>?
+    private func updateFlowContinuation(_ continuation: CheckedContinuation<FlowResult, Never>?) {
+        flowContinuation = continuation
     }
 
-    func start() async {
-        await presenter.start()
+    func performFlow() async -> FlowResult {
+        if flowContinuation != nil {
+            assertionFailure("friends flow is already running")
+        }
+        return await withCheckedContinuation { continuation in
+            Task {
+                flowContinuation = continuation
+                await presenter.start { [weak self] in
+                    guard let self, let flowContinuation = await flowContinuation else { return }
+                    await updateFlowContinuation(nil)
+                    flowContinuation.resume(returning: .canceled)
+                }
+            }
+        }
     }
 
     private func handleRepositoryError(_ error: RepositoryError) async {
@@ -41,7 +58,12 @@ actor UserModel {
                     message: "\(error)",
                     actions: [
                         Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
-                            await self?.mainModel?.logout()
+                            guard let self else { return }
+                            guard let flowContinuation = await flowContinuation else {
+                                return assertionFailure("friends flow: got logout after flow is finished")
+                            }
+                            await updateFlowContinuation(nil)
+                            flowContinuation.resume(returning: .loggedOut)
                         }
                     ]
                 )

@@ -1,7 +1,15 @@
 import Domain
 import DI
+import Base
+
+protocol CancelableFlow: AnyObject {
+    func handleCancel() async
+}
 
 actor MainModel {
+    enum FlowResult {
+        case loggedOut
+    }
     private lazy var presenter = MainPresenter(model: self, appRouter: appRouter)
     private let appRouter: AppRouter
     private weak var appModel: AppModel?
@@ -12,32 +20,55 @@ actor MainModel {
         self.appRouter = appRouter
         friendsModel = await FriendsModel(di: di, appRouter: appRouter)
         accountModel = await AccountModel(di: di, appRouter: appRouter)
-        await friendsModel.setMainModel(self)
     }
 
-    func setAppModel(_ appModel: AppModel) async {
-        self.appModel = appModel
-        await accountModel.setAppModel(appModel)
+    private var flowContinuation: CheckedContinuation<FlowResult, Never>?
+    private func updateFlowContinuation(_ continuation: CheckedContinuation<FlowResult, Never>?) {
+        flowContinuation = continuation
     }
-
-    @MainActor
-    func start() async {
+    func performFlow() async -> FlowResult {
         await presenter.start()
+        Task.detached {
+            switch await self.accountModel.performFlow() {
+            case .loggedOut:
+                await self.logout(sender: self.accountModel)
+            case .canceled:
+                break
+            }
+        }
+        Task.detached {
+            switch await self.friendsModel.performFlow() {
+            case .loggedOut:
+                await self.logout(sender: self.friendsModel)
+            case .canceled:
+                break
+            }
+        }
+        return await withCheckedContinuation { continuation in
+            Task {
+                self.flowContinuation = continuation
+            }
+        }
     }
 
-    func logout() async {
-        await appModel?.logout()
+    private func logout<T: AnyObject & CancelableFlow>(sender: T) async {
+        guard let flowContinuation else {
+            return assertionFailure("main flow: already finished")
+        }
+        updateFlowContinuation(nil)
+        for handler in ([self.accountModel, self.friendsModel] as [AnyObject & CancelableFlow]) where handler !== sender {
+            await handler.handleCancel()
+        }
+        flowContinuation.resume(returning: .loggedOut)
     }
 }
 
 extension MainModel: UrlResolver {
+    func canResolve(url: InternalUrl) async -> Bool {
+        await friendsModel.canResolve(url: url)
+    }
+
     func resolve(url: InternalUrl) async {
-        switch url {
-        case .users(let users):
-            switch users {
-            case .show(let uid):
-                await friendsModel.showUser(uid: uid)
-            }
-        }
+        await friendsModel.resolve(url: url)
     }
 }

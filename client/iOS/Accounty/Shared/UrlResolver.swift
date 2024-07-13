@@ -29,6 +29,15 @@ enum InternalUrl {
     }
 }
 
-protocol UrlResolver {
+protocol UrlResolver: AnyObject {
+    func canResolve(url: InternalUrl) async -> Bool
     func resolve(url: InternalUrl) async
+}
+
+extension Array {
+    mutating func remove(_ element: Element) where Element == any UrlResolver {
+        removeAll {
+            element === $0
+        }
+    }
 }

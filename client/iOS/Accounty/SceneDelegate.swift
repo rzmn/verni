@@ -14,6 +14,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window = window
             Task {
                 model = await AppModel(di: DefaultDependenciesAssembly(), appRouter: appRouter)
+                await model?.performFlow()
             }
         }
     }
@@ -23,8 +24,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let context = URLContexts.first else {
             return
         }
+        guard let url = InternalUrl(string: context.url.absoluteString) else {
+            return
+        }
+        guard let model else {
+            return
+        }
         Task {
-            await model?.resolve(url: context.url.absoluteString)
+            if await model.canResolve(url: url) {
+                await model.resolve(url: url)
+            }
         }
     }
 }

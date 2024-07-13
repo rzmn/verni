@@ -5,6 +5,11 @@ import Domain
 import DI
 
 actor SignupModel {
+    enum FlowResult {
+        case signedUp(ActiveSessionDIContainer)
+        case canceled
+    }
+
     let subject = CurrentValueSubject<SignupState, Never>(SignupState(login: "", password: ""))
     let logger = Logger.shared.with(prefix: "[signup]")
 
@@ -13,7 +18,6 @@ actor SignupModel {
     private let appRouter: AppRouter
     private let validator: CredentialsValidator
     private var subscriptions = Set<AnyCancellable>()
-    private weak var authModel: AuthModel?
 
     init(di: DIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
@@ -43,30 +47,39 @@ actor SignupModel {
             .store(in: &subscriptions)
     }
 
-    func setAuthModel(authModel: AuthModel) {
-        self.authModel = authModel
+    private var flowContinuation: CheckedContinuation<FlowResult, Never>?
+    private func updateFlowContinuation(_ continuation: CheckedContinuation<FlowResult, Never>?) {
+        flowContinuation = continuation
     }
 
-    @MainActor
-    func start() async {
-        await presenter.start()
+    func performFlow() async -> FlowResult {
+        if flowContinuation != nil {
+            assertionFailure("signup flow is already running")
+        }
+        return await withCheckedContinuation { continuation in
+            Task {
+                updateFlowContinuation(continuation)
+                await presenter.start { [weak self] in
+                    guard let self, let flowContinuation = await flowContinuation else { return }
+                    await updateFlowContinuation(nil)
+                    flowContinuation.resume(returning: .canceled)
+                }
+            }
+        }
     }
 
-    @MainActor
     func updateLogin(_ login: String) {
         logI { "login updated: \(login)" }
         subject.send(SignupState(state: subject.value, login: login))
         validator.submit(login: login)
     }
 
-    @MainActor
     func updatePassword(_ password: String) {
         logI { "password updated: \(password)" }
         subject.send(SignupState(state: subject.value, password: password))
         validator.submit(login: password)
     }
 
-    @MainActor
     func confirmLogin() async {
         logI { "confirm login" }
         switch await authUseCase.validateLogin(subject.value.login) {
@@ -82,7 +95,6 @@ actor SignupModel {
         }
     }
 
-    @MainActor
     func confirmPassword() async {
         logI { "confirm password" }
         switch await authUseCase.validatePassword(subject.value.password) {
@@ -105,7 +117,12 @@ actor SignupModel {
         )
         switch loginResult {
         case .success(let session):
-            await authModel?.startAuthenticatedSession(di: session)
+            guard let flowContinuation else {
+                assertionFailure("signup flow was finished after cancellation")
+                break
+            }
+            self.flowContinuation = nil
+            flowContinuation.resume(returning: .signedUp(session))
         case .failure(let reason):
             switch reason {
             case .alreadyTaken(let error):

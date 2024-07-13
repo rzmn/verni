@@ -6,6 +6,6 @@ public extension UIControl {
             Task.detached { @MainActor in
                 await block()
             }
-        }), for: .touchUpInside)
+        }), for: event)
     }
 }

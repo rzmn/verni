@@ -55,7 +55,7 @@ class LoginView: UIView {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         login.addAction({ [weak self] in
             guard let self else { return }
-            login.text.flatMap(model.updateLogin)
+            await model.updateLogin(login.text ?? "")
         }, for: .editingChanged)
         confirm.addAction({ [weak self] in
             await self?.model.confirmLogin()
