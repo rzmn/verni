@@ -1,5 +1,5 @@
 import UIKit
-import DesignSystem
+import App
 import DefaultDependencies
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -7,7 +7,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        SetupAppearance()
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             let appRouter = AppRouter(window: window)
@@ -24,16 +23,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let context = URLContexts.first else {
             return
         }
-        guard let url = InternalUrl(string: context.url.absoluteString) else {
-            return
-        }
         guard let model else {
             return
         }
         Task {
-            if await model.canResolve(url: url) {
-                await model.resolve(url: url)
-            }
+            await model.handle(url: context.url.absoluteString)
         }
     }
 }

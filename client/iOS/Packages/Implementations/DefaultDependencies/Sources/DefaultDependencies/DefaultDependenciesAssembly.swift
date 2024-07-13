@@ -10,6 +10,7 @@ internal import DefaultNetworkingImplementation
 internal import DefaultAuthorizedSessionRepositoryImplementation
 internal import DefaultFriendsRepositoryImplementation
 internal import DefaultFriendInteractionsUseCaseImplementation
+internal import DefaultQRInviteUseCaseImplementation
 
 extension ActiveSession: ActiveSessionDIContainer {
     public func friendListRepository() -> FriendsRepository {
@@ -22,6 +23,10 @@ extension ActiveSession: ActiveSessionDIContainer {
     
     public func friendInterationsUseCase() -> FriendInteractionsUseCase {
         DefaultFriendInteractionsUseCase(api: api)
+    }
+
+    public func qrInviteUseCase() -> any QRInviteUseCase {
+        DefaultQRInviteUseCase()
     }
 }
 
