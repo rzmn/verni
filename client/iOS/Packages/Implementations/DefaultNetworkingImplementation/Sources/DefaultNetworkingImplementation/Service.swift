@@ -156,7 +156,7 @@ extension Service: NetworkService {
             logD { "\(request.path): get JSON: \(String(data: data, encoding: .utf8) ?? "nil")" }
         } catch {
             let handle: (Error) -> NetworkServiceError = { error in
-                if (error as NSError).domain == NSURLErrorDomain && ([.networkConnectionLost, .timedOut] as [URLError.Code]).map(\.rawValue).contains((error as NSError).code) {
+                if (error as NSError).domain == NSURLErrorDomain && ([.networkConnectionLost, .timedOut, .notConnectedToInternet] as [URLError.Code]).map(\.rawValue).contains((error as NSError).code) {
                     self.logE { "\(request.path): failed to run data task due connection problem" }
                     return .noConnection(error)
                 } else {

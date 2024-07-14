@@ -68,11 +68,27 @@ actor FriendsModel {
             }
             switch error {
             case .noConnection:
-                subject.send(FriendsState(subject.value, content: .failed(previous: subject.value.content, "no_connection_hint".localized)))
+                subject.send(
+                    FriendsState(
+                        subject.value,
+                        content: .failed(previous: subject.value.content, FriendsState.Failure(
+                            hint: "no_connection_hint".localized,
+                            iconName: "network.slash"
+                        ))
+                    )
+                )
             case .notAuthorized(let error):
                 await showNotAuthorizedAlert(error: error)
             case .other:
-                subject.send(FriendsState(subject.value, content: .failed(previous: subject.value.content, "unknown_error_hint".localized)))
+                subject.send(
+                    FriendsState(
+                        subject.value,
+                        content: .failed(previous: subject.value.content, FriendsState.Failure(
+                            hint: "unknown_error_hint".localized,
+                            iconName: "exclamationmark.triangle"
+                        ))
+                    )
+                )
             }
         }
     }

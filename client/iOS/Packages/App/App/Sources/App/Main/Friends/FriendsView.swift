@@ -3,6 +3,15 @@ import Domain
 import Combine
 internal import DesignSystem
 
+private extension Placeholder.Config {
+    static var listIsEmpty: Self {
+        Self(
+            message: "friend_list_empty_placeholder".localized,
+            icon: UIImage(systemName: "person.crop.rectangle.badge.plus")
+        )
+    }
+}
+
 class FriendsView: UIView {
     private let model: FriendsModel
     private let table = {
@@ -24,12 +33,7 @@ class FriendsView: UIView {
         tableView: table,
         cellProvider: cellProvider
     )
-    private let emptyPlaceholder = Placeholder(
-        config: Placeholder.Config(
-            message: "friend_list_empty_placeholder".localized,
-            icon: UIImage(systemName: "person.crop.rectangle.badge.plus")
-        )
-    )
+    private let emptyPlaceholder = Placeholder(config: .listIsEmpty)
     private var subscriptions = Set<AnyCancellable>()
     private var state: FriendsState {
         didSet {
@@ -53,17 +57,27 @@ class FriendsView: UIView {
         case .initial:
             emptyPlaceholder.isHidden = true
         case .loaded:
-            emptyPlaceholder.isHidden = !sections.isEmpty
+            let emptyState = sections.isEmpty
+            if emptyState {
+                emptyPlaceholder.render(.listIsEmpty)
+            }
+            emptyPlaceholder.isHidden = !emptyState
         case .loading(let previous):
-            if previous.error != nil {
-                emptyPlaceholder.isHidden = true
+            if let error = previous.error {
+                emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+                emptyPlaceholder.isHidden = false
             } else if case .initial = previous {
                 emptyPlaceholder.isHidden = true
             } else {
-                emptyPlaceholder.isHidden = !sections.isEmpty
+                let emptyState = sections.isEmpty
+                if emptyState {
+                    emptyPlaceholder.render(.listIsEmpty)
+                }
+                emptyPlaceholder.isHidden = !emptyState
             }
-        case .failed:
-            emptyPlaceholder.isHidden = true
+        case .failed(_, let error):
+            emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+            emptyPlaceholder.isHidden = false
         }
     }
 

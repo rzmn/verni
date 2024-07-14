@@ -16,14 +16,13 @@ public class Placeholder: UIControl {
 
     private lazy var title = {
         let label = UILabel()
-        label.text = config.message
         label.numberOfLines = 0
         label.font = .p.secondaryText
         label.textAlignment = .center
         return label
     }()
     private lazy var icon = {
-        let v = UIImageView(image: config.icon)
+        let v = UIImageView()
         v.tintColor = .p.accent
         v.contentMode = .scaleAspectFit
         return v
@@ -42,6 +41,13 @@ public class Placeholder: UIControl {
 
     private func setupView() {
         [icon, title].forEach(addSubview)
+        render(config)
+    }
+
+    public func render(_ config: Placeholder.Config) {
+        icon.image = config.icon
+        title.text = config.message
+        setNeedsLayout()
     }
 
     public override func layoutSubviews() {
