@@ -8,6 +8,8 @@ public protocol DIContainer {
 
 public protocol ActiveSessionDIContainer {
     func logoutUseCase() -> LogoutUseCase
+    func spendingsRepository() -> SpendingsRepository
+    func spendingInteractionsUseCase() -> SpendingInteractionsUseCase
     func friendListRepository() -> FriendsRepository
     func usersRepository() -> UsersRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
