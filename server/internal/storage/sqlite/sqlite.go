@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -98,6 +99,39 @@ func New(storagePath string) (*Storage, error) {
 		id INTEGER PRIMARY KEY,
 		friendA TEXT NOT NULL,
 		friendB TEXT NOT NULL
+	);`)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	stmt, err = db.Prepare(`
+	CREATE TABLE IF NOT EXISTS spendings(
+		id INTEGER PRIMARY KEY,
+		dealId INTEGER NOT NULL,
+		cost INTEGER NOT NULL,
+		user TEXT NOT NULL
+	);`)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	stmt, err = db.Prepare(`
+	CREATE TABLE IF NOT EXISTS deals(
+		id INTEGER PRIMARY KEY,
+		timestamp INTEGER NOT NULL,
+		details TEXT NOT NULL,
+		cost INTEGER NOT NULL,
+		currency TEXT NOT NULL
 	);`)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -491,6 +525,168 @@ func (s *Storage) SearchUsers(sender string, query string) ([]storage.User, erro
 	}
 	return s.GetUsers(sender, targets)
 }
+
+func (s *Storage) InsertDeal(deal storage.Deal) error {
+	const op = "storage.sqlite.InsertDeal"
+	log.Printf("%s: start", op)
+
+	ctx := context.Background()
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Printf("%s: cannot create transaction %v", op, err)
+		return err
+	}
+	result, err := tx.Exec("INSERT INTO deals(timestamp, details, cost, currency) VALUES(?, ?, ?, ?)", deal.Timestamp, deal.Details, deal.Cost, deal.Currency)
+	if err != nil {
+		tx.Rollback()
+		log.Printf("%s: cannot execute statement %v", op, err)
+		return err
+	}
+	dealId, err := result.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		log.Printf("%s: cannot get inserted id %v", op, err)
+		return err
+	}
+	for i := 0; i < len(deal.Spendings); i++ {
+		spending := deal.Spendings[i]
+		_, err = tx.Exec("INSERT INTO spendings(dealId, cost, user) VALUES(?, ?, ?)", dealId, spending.Cost, spending.UserId)
+		if err != nil {
+			tx.Rollback()
+			log.Printf("%s: cannot insert spending %v", op, err)
+			return err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		log.Printf("%s: failed to commit transaction %v", op, err)
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) GetDeals(counterparty1 string, counterparty2 string) ([]storage.IdentifiableDeal, error) {
+	const op = "storage.sqlite.GetDeals"
+	log.Printf("%s: start", op)
+	rows, err := s.db.Query(fmt.Sprintf(`SELECT
+  s1.dealId,
+  s1.user,
+  s1.cost,
+  s2.user,
+  s2.cost,
+  d.timestamp,
+  d.details,
+  d.cost,
+  d.currency
+FROM
+  spendings s1
+  JOIN spendinds s2 ON s1.dealId = s2.dealId
+  JOIN deals d ON s1.dealId = d.id
+  AND s1.user in (%[1]s, %[2]s)
+  AND s2.user in (%[1]s, %[2]s)`, counterparty1, counterparty2))
+	if err != nil {
+		return nil, fmt.Errorf("%s: create query: %w", op, err)
+	}
+	defer rows.Close()
+	var deals []storage.IdentifiableDeal
+	for rows.Next() {
+		deal := storage.IdentifiableDeal{}
+		if err := rows.Scan(&deal.Id); err != nil {
+			return nil, fmt.Errorf("%s: scan deal id error: %w", op, err)
+		}
+		for i := 0; i < 2; i++ {
+			spending := storage.Spending{}
+			if err := rows.Scan(&spending.UserId); err != nil {
+				return nil, fmt.Errorf("%s: scan spending user id error: %w", op, err)
+			}
+			if err := rows.Scan(&spending.Cost); err != nil {
+				return nil, fmt.Errorf("%s: scan spending cost error: %w", op, err)
+			}
+			deal.Spendings = append(deal.Spendings, spending)
+		}
+		if err := rows.Scan(&deal.Timestamp); err != nil {
+			return nil, fmt.Errorf("%s: scan deal timestamp error: %w", op, err)
+		}
+		if err := rows.Scan(&deal.Details); err != nil {
+			return nil, fmt.Errorf("%s: scan deal details error: %w", op, err)
+		}
+		if err := rows.Scan(&deal.Cost); err != nil {
+			return nil, fmt.Errorf("%s: scan deal cost error: %w", op, err)
+		}
+		if err := rows.Scan(&deal.Currency); err != nil {
+			return nil, fmt.Errorf("%s: scan deal currency error: %w", op, err)
+		}
+		deals = append(deals, deal)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("%s: failed %v", op, err)
+		return nil, err
+	}
+	return deals, nil
+}
+
+func (s *Storage) GetCounterparties(target string) ([]storage.SpendingsPreview, error) {
+	const op = "storage.sqlite.GetCounterparties"
+	log.Printf("%s: start", op)
+	rows, err := s.db.Query(fmt.Sprintf(`SELECT
+  d.currency,
+  s2.user,
+  s1.cost
+FROM
+  deals d
+  JOIN spendings s1 ON s1.dealId = d.id AND s1.user = %[1]s
+  JOIN spendinds s2 ON s2.dealId = d.id AND s2.user != %[1]s`, target))
+	if err != nil {
+		return nil, fmt.Errorf("%s: create query: %w", op, err)
+	}
+	defer rows.Close()
+	spendingsMap := map[string]storage.SpendingsPreview{}
+	for rows.Next() {
+		var currency string
+		if err := rows.Scan(&currency); err != nil {
+			return nil, fmt.Errorf("%s: scan currency error: %w", op, err)
+		}
+		var counterparty string
+		if err := rows.Scan(&counterparty); err != nil {
+			return nil, fmt.Errorf("%s: scan counterparty error: %w", op, err)
+		}
+		var targetsCost int
+		if err := rows.Scan(&targetsCost); err != nil {
+			return nil, fmt.Errorf("%s: scan targetsCost error: %w", op, err)
+		}
+		spendingsMap[counterparty].Balance[currency] += targetsCost
+	}
+	spendings := make([]storage.SpendingsPreview, 0, len(spendingsMap))
+
+	for _, value := range spendingsMap {
+		spendings = append(spendings, value)
+	}
+	return spendings, nil
+}
+
+// stmt, err = db.Prepare(`
+// CREATE TABLE IF NOT EXISTS spendings(
+// 	id INTEGER PRIMARY KEY,
+// 	dealId INTEGER NOT NULL,
+// 	cost INTEGER NOT NULL,
+// 	user TEXT NOT NULL
+// );`)
+// if err != nil {
+// 	return nil, fmt.Errorf("%s: %w", op, err)
+// }
+
+// _, err = stmt.Exec()
+// if err != nil {
+// 	return nil, fmt.Errorf("%s: %w", op, err)
+// }
+
+// stmt, err = db.Prepare(`
+// CREATE TABLE IF NOT EXISTS deals(
+// 	id INTEGER PRIMARY KEY,
+// 	timestamp INTEGER NOT NULL,
+// 	details TEXT NOT NULL,
+// 	cost INTEGER NOT NULL,
+// 	currency TEXT NOT NULL
+// );`)
 
 func (s *Storage) Close() {
 	log.Printf("storage closed")
