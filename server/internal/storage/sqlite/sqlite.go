@@ -663,31 +663,6 @@ FROM
 	return spendings, nil
 }
 
-// stmt, err = db.Prepare(`
-// CREATE TABLE IF NOT EXISTS spendings(
-// 	id INTEGER PRIMARY KEY,
-// 	dealId INTEGER NOT NULL,
-// 	cost INTEGER NOT NULL,
-// 	user TEXT NOT NULL
-// );`)
-// if err != nil {
-// 	return nil, fmt.Errorf("%s: %w", op, err)
-// }
-
-// _, err = stmt.Exec()
-// if err != nil {
-// 	return nil, fmt.Errorf("%s: %w", op, err)
-// }
-
-// stmt, err = db.Prepare(`
-// CREATE TABLE IF NOT EXISTS deals(
-// 	id INTEGER PRIMARY KEY,
-// 	timestamp INTEGER NOT NULL,
-// 	details TEXT NOT NULL,
-// 	cost INTEGER NOT NULL,
-// 	currency TEXT NOT NULL
-// );`)
-
 func (s *Storage) Close() {
 	log.Printf("storage closed")
 }
