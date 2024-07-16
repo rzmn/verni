@@ -567,7 +567,7 @@ func (s *Storage) InsertDeal(deal storage.Deal) error {
 func (s *Storage) GetDeals(counterparty1 string, counterparty2 string) ([]storage.IdentifiableDeal, error) {
 	const op = "storage.sqlite.GetDeals"
 	log.Printf("%s: start", op)
-	rows, err := s.db.Query(fmt.Sprintf(`SELECT
+	rows, err := s.db.Query(`SELECT
   s1.dealId,
   s1.user,
   s1.cost,
@@ -579,10 +579,10 @@ func (s *Storage) GetDeals(counterparty1 string, counterparty2 string) ([]storag
   d.currency
 FROM
   spendings s1
-  JOIN spendinds s2 ON s1.dealId = s2.dealId
+  JOIN spendings s2 ON s1.dealId = s2.dealId
   JOIN deals d ON s1.dealId = d.id
-  AND s1.user in (%[1]s, %[2]s)
-  AND s2.user in (%[1]s, %[2]s)`, counterparty1, counterparty2))
+  AND s1.user = $1
+  AND s2.user = $2`, counterparty1, counterparty2)
 	if err != nil {
 		return nil, fmt.Errorf("%s: create query: %w", op, err)
 	}
@@ -590,30 +590,18 @@ FROM
 	var deals []storage.IdentifiableDeal
 	for rows.Next() {
 		deal := storage.IdentifiableDeal{}
-		if err := rows.Scan(&deal.Id); err != nil {
-			return nil, fmt.Errorf("%s: scan deal id error: %w", op, err)
-		}
-		for i := 0; i < 2; i++ {
-			spending := storage.Spending{}
-			if err := rows.Scan(&spending.UserId); err != nil {
-				return nil, fmt.Errorf("%s: scan spending user id error: %w", op, err)
-			}
-			if err := rows.Scan(&spending.Cost); err != nil {
-				return nil, fmt.Errorf("%s: scan spending cost error: %w", op, err)
-			}
-			deal.Spendings = append(deal.Spendings, spending)
-		}
-		if err := rows.Scan(&deal.Timestamp); err != nil {
-			return nil, fmt.Errorf("%s: scan deal timestamp error: %w", op, err)
-		}
-		if err := rows.Scan(&deal.Details); err != nil {
-			return nil, fmt.Errorf("%s: scan deal details error: %w", op, err)
-		}
-		if err := rows.Scan(&deal.Cost); err != nil {
-			return nil, fmt.Errorf("%s: scan deal cost error: %w", op, err)
-		}
-		if err := rows.Scan(&deal.Currency); err != nil {
-			return nil, fmt.Errorf("%s: scan deal currency error: %w", op, err)
+		deal.Spendings = make([]storage.Spending, 2)
+		if err := rows.Scan(
+			&deal.Id,
+			&deal.Spendings[0].UserId,
+			&deal.Spendings[0].Cost,
+			&deal.Spendings[1].UserId,
+			&deal.Spendings[1].Cost,
+			&deal.Timestamp,
+			&deal.Details,
+			&deal.Cost,
+			&deal.Currency); err != nil {
+			return nil, fmt.Errorf("%s: scan deal error: %w", op, err)
 		}
 		deals = append(deals, deal)
 	}
@@ -627,14 +615,16 @@ FROM
 func (s *Storage) GetCounterparties(target string) ([]storage.SpendingsPreview, error) {
 	const op = "storage.sqlite.GetCounterparties"
 	log.Printf("%s: start", op)
-	rows, err := s.db.Query(fmt.Sprintf(`SELECT
+	rows, err := s.db.Query(`SELECT
   d.currency,
   s2.user,
   s1.cost
 FROM
   deals d
-  JOIN spendings s1 ON s1.dealId = d.id AND s1.user = %[1]s
-  JOIN spendinds s2 ON s2.dealId = d.id AND s2.user != %[1]s`, target))
+  JOIN spendings s1 ON s1.dealId = d.id
+  JOIN spendings s2 ON s2.dealId = d.id
+WHERE 
+  s1.user = $1 AND s2.user != $1`, target)
 	if err != nil {
 		return nil, fmt.Errorf("%s: create query: %w", op, err)
 	}
@@ -642,16 +632,17 @@ FROM
 	spendingsMap := map[string]storage.SpendingsPreview{}
 	for rows.Next() {
 		var currency string
-		if err := rows.Scan(&currency); err != nil {
-			return nil, fmt.Errorf("%s: scan currency error: %w", op, err)
-		}
 		var counterparty string
-		if err := rows.Scan(&counterparty); err != nil {
-			return nil, fmt.Errorf("%s: scan counterparty error: %w", op, err)
-		}
 		var targetsCost int
-		if err := rows.Scan(&targetsCost); err != nil {
-			return nil, fmt.Errorf("%s: scan targetsCost error: %w", op, err)
+		if err := rows.Scan(&currency, &counterparty, &targetsCost); err != nil {
+			return nil, fmt.Errorf("%s: scan spending data error: %w", op, err)
+		}
+		_, ok := spendingsMap[counterparty]
+		if !ok {
+			spendingsMap[counterparty] = storage.SpendingsPreview{
+				Counterparty: counterparty,
+				Balance:      map[string]int{},
+			}
 		}
 		spendingsMap[counterparty].Balance[currency] += targetsCost
 	}
