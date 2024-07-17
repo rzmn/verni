@@ -18,7 +18,7 @@ type User struct {
 }
 
 type UserCredentials struct {
-	Login    string `json:"login" validate:"required"`
+	Login    UserId `json:"login" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
@@ -30,22 +30,52 @@ type AuthToken struct {
 type Deal struct {
 	Timestamp int64      `json:"timestamp"`
 	Details   string     `json:"details"`
-	Cost      int        `json:"cost"`
+	Cost      int64      `json:"cost"`
 	Currency  string     `json:"currency"`
 	Spendings []Spending `json:"spendings"`
 }
 
 type IdentifiableDeal struct {
 	Deal
-	Id int64 `json:"id"`
+	Id string `json:"id"`
 }
 
 type Spending struct {
 	UserId string `json:"userId"`
-	Cost   int    `json:"cost"`
+	Cost   int64  `json:"cost"`
 }
 
 type SpendingsPreview struct {
-	Counterparty string         `json:"counterparty"`
-	Balance      map[string]int `json:"balance"`
+	Counterparty string           `json:"counterparty"`
+	Balance      map[string]int64 `json:"balance"`
+}
+
+type Storage interface {
+	IsUserExists(uid UserId) (bool, error)
+	CheckCredentials(credentials UserCredentials) (bool, error)
+	StoreCredentials(credentials UserCredentials) error
+
+	StoreRefreshToken(token string, uid UserId) error
+	GetRefreshToken(uid UserId) (*string, error)
+	RemoveRefreshToken(uid UserId) error
+
+	StoreFriendRequest(sender UserId, target UserId) error
+	HasFriendRequest(sender UserId, target UserId) (bool, error)
+	RemoveFriendRequest(sender UserId, target UserId) error
+
+	GetIncomingRequests(uid UserId) ([]UserId, error)
+	GetPendingRequests(uid UserId) ([]UserId, error)
+
+	StoreFriendship(friendA UserId, friendB UserId) error
+	HasFriendship(friendA UserId, friendB UserId) (bool, error)
+	RemoveFriendship(friendA UserId, friendB UserId) error
+
+	GetFriends(uid UserId) ([]UserId, error)
+
+	GetUsers(sender UserId, ids []UserId) ([]User, error)
+	SearchUsers(sender UserId, query string) ([]User, error)
+
+	InsertDeal(deal Deal) error
+	GetDeals(counterparty1 UserId, counterparty2 UserId) ([]IdentifiableDeal, error)
+	GetCounterparties(uid UserId) ([]SpendingsPreview, error)
 }

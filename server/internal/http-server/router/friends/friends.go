@@ -8,7 +8,6 @@ import (
 
 	"accounty/internal/auth/jwt"
 	"accounty/internal/storage"
-	"accounty/internal/storage/sqlite"
 
 	"accounty/internal/http-server/handlers/friends/acceptRequest"
 	"accounty/internal/http-server/handlers/friends/get"
@@ -21,7 +20,7 @@ import (
 )
 
 type sendRequestRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest.Request) *sendRequest.Error {
@@ -31,7 +30,7 @@ func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest
 		outError := sendRequest.ErrInternal()
 		return &outError
 	}
-	hasTarget, err := h.sqliteStorage.HasUser(string(request.Target))
+	hasTarget, err := h.storage.IsUserExists(request.Target)
 	if err != nil {
 		outError := sendRequest.ErrInternal()
 		return &outError
@@ -39,7 +38,7 @@ func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest
 		outError := sendRequest.ErrNoSuchUser()
 		return &outError
 	}
-	hasRequest, err := h.sqliteStorage.HasFriendRequest(*subject, string(request.Target))
+	hasRequest, err := h.storage.HasFriendRequest(storage.UserId(*subject), request.Target)
 	if err != nil {
 		outError := sendRequest.ErrInternal()
 		return &outError
@@ -47,7 +46,7 @@ func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest
 		outError := sendRequest.ErrAlreadySend()
 		return &outError
 	}
-	hasIncomingRequest, err := h.sqliteStorage.HasFriendRequest(string(request.Target), *subject)
+	hasIncomingRequest, err := h.storage.HasFriendRequest(request.Target, storage.UserId(*subject))
 	if err != nil {
 		outError := sendRequest.ErrInternal()
 		return &outError
@@ -55,7 +54,7 @@ func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest
 		outError := sendRequest.ErrHaveIncomingRequest()
 		return &outError
 	}
-	isFriends, err := h.sqliteStorage.HasFriendship(string(request.Target), *subject)
+	isFriends, err := h.storage.HasFriendship(request.Target, storage.UserId(*subject))
 	if err != nil {
 		outError := sendRequest.ErrInternal()
 		return &outError
@@ -76,7 +75,7 @@ func (h *sendRequestRequestHandler) Handle(c *gin.Context, request sendRequest.R
 		outError := sendRequest.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.StoreFriendRequest(*subject, string(request.Target)); err != nil {
+	if err := h.storage.StoreFriendRequest(storage.UserId(*subject), request.Target); err != nil {
 		outError := sendRequest.ErrInternal()
 		return &outError
 	}
@@ -84,7 +83,7 @@ func (h *sendRequestRequestHandler) Handle(c *gin.Context, request sendRequest.R
 }
 
 type acceptRequestRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *acceptRequestRequestHandler) Validate(c *gin.Context, request acceptRequest.Request) *acceptRequest.Error {
@@ -94,7 +93,7 @@ func (h *acceptRequestRequestHandler) Validate(c *gin.Context, request acceptReq
 		outError := acceptRequest.ErrInternal()
 		return &outError
 	}
-	hasRequest, err := h.sqliteStorage.HasFriendRequest(string(request.Sender), *subject)
+	hasRequest, err := h.storage.HasFriendRequest(request.Sender, storage.UserId(*subject))
 	if err != nil {
 		outError := acceptRequest.ErrInternal()
 		return &outError
@@ -115,11 +114,11 @@ func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptReque
 		outError := acceptRequest.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.RemoveFriendRequest(string(request.Sender), *subject); err != nil {
+	if err := h.storage.RemoveFriendRequest(request.Sender, storage.UserId(*subject)); err != nil {
 		outError := acceptRequest.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.StoreFriendship(string(request.Sender), *subject); err != nil {
+	if err := h.storage.StoreFriendship(request.Sender, storage.UserId(*subject)); err != nil {
 		outError := acceptRequest.ErrInternal()
 		return &outError
 	}
@@ -127,7 +126,7 @@ func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptReque
 }
 
 type getRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get.Status][]storage.UserId, *get.Error) {
@@ -142,7 +141,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 	}
 	friends := map[get.Status][]storage.UserId{}
 	if slices.Contains(request.Statuses, get.FriendStatusFriends) {
-		logins, err := h.sqliteStorage.GetFriends(*subject)
+		logins, err := h.storage.GetFriends(storage.UserId(*subject))
 		if err != nil {
 			outError := get.ErrInternal()
 			return map[get.Status][]storage.UserId{}, &outError
@@ -152,7 +151,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 		}
 	}
 	if slices.Contains(request.Statuses, get.FriendStatusSubscriber) {
-		logins, err := h.sqliteStorage.GetIncomingRequests(*subject)
+		logins, err := h.storage.GetIncomingRequests(storage.UserId(*subject))
 		if err != nil {
 			outError := get.ErrInternal()
 			return map[get.Status][]storage.UserId{}, &outError
@@ -162,7 +161,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 		}
 	}
 	if slices.Contains(request.Statuses, get.FriendStatusSubscription) {
-		logins, err := h.sqliteStorage.GetPendingRequests(*subject)
+		logins, err := h.storage.GetPendingRequests(storage.UserId(*subject))
 		if err != nil {
 			outError := get.ErrInternal()
 			return map[get.Status][]storage.UserId{}, &outError
@@ -175,7 +174,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 }
 
 // type getIncomingRequestsRequestHandler struct {
-// 	sqliteStorage *sqlite.Storage
+// 	storage *sqlite.Storage
 // }
 
 // func (h *getIncomingRequestsRequestHandler) Handle(c *gin.Context) ([]storage.UserId, *getIncomingRequests.Error) {
@@ -188,7 +187,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 // 		outError := getIncomingRequests.ErrInternal()
 // 		return []storage.UserId{}, &outError
 // 	}
-// 	logins, err := h.sqliteStorage.GetIncomingRequests(*subject)
+// 	logins, err := h.storage.GetIncomingRequests(*subject)
 // 	if err != nil {
 // 		outError := getIncomingRequests.ErrInternal()
 // 		return []storage.UserId{}, &outError
@@ -201,7 +200,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 // }
 
 // type getPendingRequestsRequestHandler struct {
-// 	sqliteStorage *sqlite.Storage
+// 	storage *sqlite.Storage
 // }
 
 // func (h *getPendingRequestsRequestHandler) Handle(c *gin.Context) ([]storage.UserId, *getPendingRequests.Error) {
@@ -214,7 +213,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 // 		outError := getPendingRequests.ErrInternal()
 // 		return []storage.UserId{}, &outError
 // 	}
-// 	logins, err := h.sqliteStorage.GetPendingRequests(*subject)
+// 	logins, err := h.storage.GetPendingRequests(*subject)
 // 	if err != nil {
 // 		outError := getPendingRequests.ErrInternal()
 // 		return []storage.UserId{}, &outError
@@ -227,7 +226,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 // }
 
 type rejectRequestRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *rejectRequestRequestHandler) Validate(c *gin.Context, request rejectRequest.Request) *rejectRequest.Error {
@@ -237,7 +236,7 @@ func (h *rejectRequestRequestHandler) Validate(c *gin.Context, request rejectReq
 		outError := rejectRequest.ErrInternal()
 		return &outError
 	}
-	hasRequest, err := h.sqliteStorage.HasFriendRequest(string(request.Sender), *subject)
+	hasRequest, err := h.storage.HasFriendRequest(request.Sender, storage.UserId(*subject))
 	if err != nil {
 		outError := rejectRequest.ErrInternal()
 		return &outError
@@ -258,7 +257,7 @@ func (h *rejectRequestRequestHandler) Handle(c *gin.Context, request rejectReque
 		outError := rejectRequest.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.RemoveFriendRequest(string(request.Sender), *subject); err != nil {
+	if err := h.storage.RemoveFriendRequest(request.Sender, storage.UserId(*subject)); err != nil {
 		outError := rejectRequest.ErrInternal()
 		return &outError
 	}
@@ -266,7 +265,7 @@ func (h *rejectRequestRequestHandler) Handle(c *gin.Context, request rejectReque
 }
 
 type rollbackRequestRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *rollbackRequestRequestHandler) Validate(c *gin.Context, request rollbackRequest.Request) *rollbackRequest.Error {
@@ -276,7 +275,7 @@ func (h *rollbackRequestRequestHandler) Validate(c *gin.Context, request rollbac
 		outError := rollbackRequest.ErrInternal()
 		return &outError
 	}
-	hasRequest, err := h.sqliteStorage.HasFriendRequest(*subject, string(request.Target))
+	hasRequest, err := h.storage.HasFriendRequest(storage.UserId(*subject), request.Target)
 	if err != nil {
 		outError := rollbackRequest.ErrInternal()
 		return &outError
@@ -297,7 +296,7 @@ func (h *rollbackRequestRequestHandler) Handle(c *gin.Context, request rollbackR
 		outError := rollbackRequest.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.RemoveFriendRequest(*subject, string(request.Target)); err != nil {
+	if err := h.storage.RemoveFriendRequest(storage.UserId(*subject), request.Target); err != nil {
 		outError := rollbackRequest.ErrInternal()
 		return &outError
 	}
@@ -305,7 +304,7 @@ func (h *rollbackRequestRequestHandler) Handle(c *gin.Context, request rollbackR
 }
 
 type unfriendRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *unfriendRequestHandler) Validate(c *gin.Context, request unfriend.Request) *unfriend.Error {
@@ -315,7 +314,7 @@ func (h *unfriendRequestHandler) Validate(c *gin.Context, request unfriend.Reque
 		outError := unfriend.ErrInternal()
 		return &outError
 	}
-	hasTarget, err := h.sqliteStorage.HasUser(string(request.Target))
+	hasTarget, err := h.storage.IsUserExists(request.Target)
 	if err != nil {
 		outError := unfriend.ErrInternal()
 		return &outError
@@ -323,7 +322,7 @@ func (h *unfriendRequestHandler) Validate(c *gin.Context, request unfriend.Reque
 		outError := unfriend.ErrNoSuchUser()
 		return &outError
 	}
-	isFriends, err := h.sqliteStorage.HasFriendship(string(request.Target), *subject)
+	isFriends, err := h.storage.HasFriendship(request.Target, storage.UserId(*subject))
 	if err != nil {
 		outError := unfriend.ErrInternal()
 		return &outError
@@ -341,21 +340,25 @@ func (h *unfriendRequestHandler) Handle(c *gin.Context, request unfriend.Request
 		outError := unfriend.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.StoreFriendRequest(string(request.Target), *subject); err != nil {
+	if err := h.storage.RemoveFriendship(request.Target, storage.UserId(*subject)); err != nil {
+		outError := unfriend.ErrInternal()
+		return &outError
+	}
+	if err := h.storage.StoreFriendRequest(request.Target, storage.UserId(*subject)); err != nil {
 		outError := unfriend.ErrInternal()
 		return &outError
 	}
 	return nil
 }
 
-func RegisterRoutes(e *gin.Engine, sqliteStorage *sqlite.Storage) {
+func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	group := e.Group("/friends", middleware.EnsureLoggedIn())
-	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{sqliteStorage: sqliteStorage}))
-	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{sqliteStorage: sqliteStorage}))
-	group.POST("/rejectRequest", rejectRequest.New(&rejectRequestRequestHandler{sqliteStorage: sqliteStorage}))
-	group.POST("/rollbackRequest", rollbackRequest.New(&rollbackRequestRequestHandler{sqliteStorage: sqliteStorage}))
-	group.POST("/unfriend", unfriend.New(&unfriendRequestHandler{sqliteStorage: sqliteStorage}))
-	group.GET("/get", get.New(&getRequestHandler{sqliteStorage: sqliteStorage}))
-	// group.GET("/getIncomingRequests", getIncomingRequests.New(&getIncomingRequestsRequestHandler{sqliteStorage: sqliteStorage}))
-	// group.GET("/getPendingRequests", getPendingRequests.New(&getPendingRequestsRequestHandler{sqliteStorage: sqliteStorage}))
+	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{storage: storage}))
+	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{storage: storage}))
+	group.POST("/rejectRequest", rejectRequest.New(&rejectRequestRequestHandler{storage: storage}))
+	group.POST("/rollbackRequest", rollbackRequest.New(&rollbackRequestRequestHandler{storage: storage}))
+	group.POST("/unfriend", unfriend.New(&unfriendRequestHandler{storage: storage}))
+	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
+	// group.GET("/getIncomingRequests", getIncomingRequests.New(&getIncomingRequestsRequestHandler{storage: storage}))
+	// group.GET("/getPendingRequests", getPendingRequests.New(&getPendingRequestsRequestHandler{storage: storage}))
 }

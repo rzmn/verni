@@ -6,7 +6,7 @@ import (
 )
 
 type Request struct {
-	Ids []string `json:"ids"`
+	Ids []storage.UserId `json:"ids"`
 }
 
 type Error struct {

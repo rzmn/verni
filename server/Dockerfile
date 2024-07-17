@@ -15,9 +15,6 @@ RUN go mod download
 # Build the Go app
 RUN go build -o main ./cmd/accounty/main.go
 
-# Expose ports to the outside world
-EXPOSE 8082
-
 RUN mkdir -p ./data && chmod a+rwx -R ./data
 
 # Command to run the executable

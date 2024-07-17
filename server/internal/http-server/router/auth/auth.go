@@ -8,7 +8,6 @@ import (
 
 	"accounty/internal/auth/jwt"
 	"accounty/internal/storage"
-	"accounty/internal/storage/sqlite"
 
 	"accounty/internal/http-server/handlers/auth/login"
 	"accounty/internal/http-server/handlers/auth/refresh"
@@ -26,7 +25,7 @@ func validateUserCredentials(credentials storage.UserCredentials) error {
 }
 
 type loginRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *loginRequestHandler) Validate(request login.Request) *login.Error {
@@ -40,7 +39,7 @@ func (h *loginRequestHandler) Validate(request login.Request) *login.Error {
 	}
 	log.Printf("%s: validated format", op)
 	log.Printf("%s: checking login/pwd pair matches", op)
-	valid, err := h.sqliteStorage.CheckCredentials(request.Credentials)
+	valid, err := h.storage.CheckCredentials(request.Credentials)
 	if err != nil {
 		log.Printf("%s: checking login/pwd pair matches failed %v", op, err)
 		outError := login.ErrInternal()
@@ -60,7 +59,7 @@ func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken,
 	const op = "router.loginRequestHandler.Handle"
 
 	log.Printf("%s: issuing tokens", op)
-	tokens, err := jwt.IssueTokens(request.Credentials.Login)
+	tokens, err := jwt.IssueTokens(string(request.Credentials.Login))
 	if err != nil {
 		log.Printf("%s: issuing tokens failed %v", op, err)
 		outError := login.ErrInternal()
@@ -68,7 +67,7 @@ func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken,
 	}
 	log.Printf("%s: issued tokens ok", op)
 	log.Printf("%s: storing refresh token", op)
-	if err := h.sqliteStorage.StoreRefreshToken(tokens.Refresh, request.Credentials.Login); err != nil {
+	if err := h.storage.StoreRefreshToken(tokens.Refresh, request.Credentials.Login); err != nil {
 		log.Printf("%s: storing refresh token failed %v", op, err)
 		outError := login.ErrInternal()
 		return nil, &outError
@@ -81,7 +80,7 @@ func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken,
 }
 
 type signupRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
@@ -93,7 +92,7 @@ func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
 		return &outError
 	}
 	log.Printf("%s: validated format", op)
-	exists, err := h.sqliteStorage.IsLoginExists(request.Credentials.Login)
+	exists, err := h.storage.IsUserExists(request.Credentials.Login)
 	if err != nil {
 		log.Printf("%s: check exists failed %v", op, err)
 		outError := signup.ErrInternal()
@@ -113,20 +112,20 @@ func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthToke
 	const op = "router.signupRequestHandler.Handle"
 
 	log.Printf("%s: start", op)
-	if err := h.sqliteStorage.StoreCredentials(request.Credentials); err != nil {
+	if err := h.storage.StoreCredentials(request.Credentials); err != nil {
 		log.Printf("storing credentials failed %v", err)
 		outError := signup.ErrInternal()
 		return nil, &outError
 	}
 	log.Printf("%s: credentials stored", op)
-	tokens, err := jwt.IssueTokens(request.Credentials.Login)
+	tokens, err := jwt.IssueTokens(string(request.Credentials.Login))
 	if err != nil {
 		log.Printf("issue tokens failed %v", err)
 		outError := signup.ErrInternal()
 		return nil, &outError
 	}
 	log.Printf("%s: tokens issued", op)
-	if err := h.sqliteStorage.StoreRefreshToken(tokens.Refresh, request.Credentials.Login); err != nil {
+	if err := h.storage.StoreRefreshToken(tokens.Refresh, request.Credentials.Login); err != nil {
 		log.Printf("store tokens failed %v", err)
 		outError := signup.ErrInternal()
 		return nil, &outError
@@ -140,7 +139,7 @@ func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthToke
 }
 
 type refreshRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthToken, *refresh.Error) {
@@ -157,7 +156,7 @@ func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthTo
 			return nil, &outError
 		}
 	}
-	tokenFromDb, err := h.sqliteStorage.GetRefreshToken(refreshedTokens.Subject)
+	tokenFromDb, err := h.storage.GetRefreshToken(storage.UserId(refreshedTokens.Subject))
 	if err != nil {
 		outError := refresh.ErrInternal()
 		return nil, &outError
@@ -166,7 +165,7 @@ func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthTo
 		outError := refresh.ErrWrongAccessToken()
 		return nil, &outError
 	}
-	if err := h.sqliteStorage.StoreRefreshToken(refreshedTokens.Refresh, refreshedTokens.Subject); err != nil {
+	if err := h.storage.StoreRefreshToken(refreshedTokens.Refresh, storage.UserId(refreshedTokens.Subject)); err != nil {
 		outError := refresh.ErrInternal()
 		return nil, &outError
 	}
@@ -176,8 +175,8 @@ func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthTo
 	}, nil
 }
 
-func RegisterRoutes(e *gin.Engine, sqliteStorage *sqlite.Storage) {
-	e.PUT("/auth/signup", signup.New(&signupRequestHandler{sqliteStorage: sqliteStorage}))
-	e.PUT("/auth/login", login.New(&loginRequestHandler{sqliteStorage: sqliteStorage}))
-	e.PUT("/auth/refresh", refresh.New(&refreshRequestHandler{sqliteStorage: sqliteStorage}))
+func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
+	e.PUT("/auth/signup", signup.New(&signupRequestHandler{storage: storage}))
+	e.PUT("/auth/login", login.New(&loginRequestHandler{storage: storage}))
+	e.PUT("/auth/refresh", refresh.New(&refreshRequestHandler{storage: storage}))
 }

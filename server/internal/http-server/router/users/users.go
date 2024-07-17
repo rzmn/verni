@@ -7,7 +7,6 @@ import (
 
 	"accounty/internal/auth/jwt"
 	"accounty/internal/storage"
-	"accounty/internal/storage/sqlite"
 
 	"accounty/internal/http-server/handlers/users/get"
 	"accounty/internal/http-server/handlers/users/getMyInfo"
@@ -18,7 +17,7 @@ import (
 )
 
 type getMyUserInfoRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *getMyUserInfoRequestHandler) Handle(c *gin.Context) (*storage.User, *getMyInfo.Error) {
@@ -31,11 +30,14 @@ func (h *getMyUserInfoRequestHandler) Handle(c *gin.Context) (*storage.User, *ge
 		outError := getMyInfo.ErrInternal()
 		return nil, &outError
 	}
-	return &storage.User{Login: storage.UserId(*subject), FriendStatus: storage.FriendStatusMe}, nil
+	return &storage.User{
+		Login:        storage.UserId(*subject),
+		FriendStatus: storage.FriendStatusMe,
+	}, nil
 }
 
 type getRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) ([]storage.User, *get.Error) {
@@ -48,7 +50,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) ([]stora
 		outError := get.ErrInternal()
 		return nil, &outError
 	}
-	users, err := h.sqliteStorage.GetUsers(*subject, request.Ids)
+	users, err := h.storage.GetUsers(storage.UserId(*subject), request.Ids)
 	if err != nil {
 		log.Printf("%s: cannot read from db %v", op, err)
 		outError := get.ErrInternal()
@@ -58,7 +60,7 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) ([]stora
 }
 
 type logoutRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
@@ -71,7 +73,7 @@ func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
 		outError := logout.ErrInternal()
 		return &outError
 	}
-	if err := h.sqliteStorage.RemoveRefreshToken(*subject); err != nil {
+	if err := h.storage.RemoveRefreshToken(storage.UserId(*subject)); err != nil {
 		log.Printf("%s: cannot remove refresh token %v", op, err)
 		outError := logout.ErrInternal()
 		return &outError
@@ -80,7 +82,7 @@ func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
 }
 
 type searchRequestHandler struct {
-	sqliteStorage *sqlite.Storage
+	storage storage.Storage
 }
 
 func (h *searchRequestHandler) Handle(c *gin.Context, request search.Request) ([]storage.User, *search.Error) {
@@ -93,7 +95,7 @@ func (h *searchRequestHandler) Handle(c *gin.Context, request search.Request) ([
 		outError := search.ErrInternal()
 		return nil, &outError
 	}
-	users, err := h.sqliteStorage.SearchUsers(*subject, request.Query)
+	users, err := h.storage.SearchUsers(storage.UserId(*subject), request.Query)
 	if err != nil {
 		log.Printf("%s: cannot read from db %v", op, err)
 		outError := search.ErrInternal()
@@ -102,10 +104,10 @@ func (h *searchRequestHandler) Handle(c *gin.Context, request search.Request) ([
 	return users, nil
 }
 
-func RegisterRoutes(e *gin.Engine, sqliteStorage *sqlite.Storage) {
+func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	group := e.Group("/users", middleware.EnsureLoggedIn())
-	group.GET("/getMyInfo", getMyInfo.New(&getMyUserInfoRequestHandler{sqliteStorage: sqliteStorage}))
-	group.GET("/get", get.New(&getRequestHandler{sqliteStorage: sqliteStorage}))
-	group.GET("/search", search.New(&searchRequestHandler{sqliteStorage: sqliteStorage}))
-	group.DELETE("/logout", logout.New(&logoutRequestHandler{sqliteStorage: sqliteStorage}))
+	group.GET("/getMyInfo", getMyInfo.New(&getMyUserInfoRequestHandler{storage: storage}))
+	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
+	group.GET("/search", search.New(&searchRequestHandler{storage: storage}))
+	group.DELETE("/logout", logout.New(&logoutRequestHandler{storage: storage}))
 }
