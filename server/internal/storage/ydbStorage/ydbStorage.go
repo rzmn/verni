@@ -225,7 +225,7 @@ VALUES($login, $password)`,
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
 		return err
@@ -332,7 +332,7 @@ WHERE
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
 		return err
@@ -445,7 +445,7 @@ WHERE
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
 		return err
@@ -483,7 +483,7 @@ VALUES($friendA, $friendB)`,
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
 		return err
@@ -567,7 +567,7 @@ WHERE
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
 		return err
@@ -908,7 +908,7 @@ VALUES($id, $dealId, $cost, $counterparty)`,
 					table.ValueParam("$id", types.TextValue(uuid.New().String())),
 					table.ValueParam("$dealId", types.TextValue(dealId)),
 					table.ValueParam("$cost", types.Int64Value(int64(deal.Spendings[i].Cost))),
-					table.ValueParam("$counterparty", types.TextValue(deal.Spendings[i].UserId)),
+					table.ValueParam("$counterparty", types.TextValue(string(deal.Spendings[i].UserId))),
 				),
 			)
 			if err != nil {
@@ -916,7 +916,95 @@ VALUES($id, $dealId, $cost, $counterparty)`,
 			}
 			defer res.Close()
 		}
-		return nil
+		return res.Err()
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) HasDeal(did string) (bool, error) {
+	const op = "storage.ydb.HasDeal"
+	log.Printf("%s: start", op)
+	var (
+		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		exists bool
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, readTx, `
+DECLARE $id AS Text;
+SELECT 
+	True
+FROM 
+	deals 
+WHERE 
+	id = $id`,
+			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(did))),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				if err := res.Scan(&exists); err != nil {
+					return err
+				}
+			}
+		}
+		if err := res.Err(); err != nil {
+			return err
+		}
+		return res.Err()
+	})
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (s *Storage) RemoveDeal(did string) error {
+	const op = "storage.ydb.RemoveDeal"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DELETE FROM 
+	deals 
+WHERE 
+	id = $id`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(did)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DELETE FROM 
+	spendings 
+WHERE 
+	dealId = $id`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(did)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
 	})
 	if err != nil {
 		return err

@@ -74,6 +74,7 @@ const (
 	CodeAlreadyFriends
 	CodeNotAFriend
 	CodeBadRequest
+	CodeDealNotFound
 )
 
 func (c Code) Message() string {

@@ -494,11 +494,11 @@ func TestDealsAndCounterparties(t *testing.T) {
 		Currency:  currency,
 		Spendings: []storage.Spending{
 			{
-				UserId: string(counterparty1),
+				UserId: counterparty1,
 				Cost:   cost1,
 			},
 			{
-				UserId: string(counterparty2),
+				UserId: counterparty2,
 				Cost:   -cost1,
 			},
 		},
@@ -513,11 +513,11 @@ func TestDealsAndCounterparties(t *testing.T) {
 		Currency:  currency,
 		Spendings: []storage.Spending{
 			{
-				UserId: string(counterparty2),
+				UserId: counterparty2,
 				Cost:   -cost2 / 2,
 			},
 			{
-				UserId: string(counterparty1),
+				UserId: counterparty1,
 				Cost:   cost2 / 2,
 			},
 		},
@@ -547,5 +547,58 @@ func TestDealsAndCounterparties(t *testing.T) {
 	}
 	if len(counterparties) != 1 || counterparties[0].Counterparty != string(counterparty1) || counterparties[0].Balance[currency] != -(cost1+cost2/2) {
 		t.Fatalf("unexpected counterparty, found: %v", counterparties)
+	}
+}
+
+func TestInsertAndRemoveDeal(t *testing.T) {
+	s := getStorage(t)
+	counterparty1 := storage.UserId(uuid.New().String())
+	counterparty2 := storage.UserId(uuid.New().String())
+	cost := int64(456)
+	currency := uuid.New().String()
+
+	deal := storage.Deal{
+		Timestamp: 123,
+		Details:   uuid.New().String(),
+		Cost:      cost,
+		Currency:  currency,
+		Spendings: []storage.Spending{
+			{
+				UserId: counterparty1,
+				Cost:   cost,
+			},
+			{
+				UserId: counterparty2,
+				Cost:   -cost,
+			},
+		},
+	}
+
+	if err := s.InsertDeal(deal); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	deals, err := s.GetDeals(counterparty1, counterparty2)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(deals) != 1 {
+		t.Fatalf("deals len should be 1, found: %v", deals)
+	}
+	exists, err := s.HasDeal(deals[0].Id)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if !exists {
+		t.Fatalf("deal should exists: %v", err)
+	}
+	if err := s.RemoveDeal(deals[0].Id); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	exists, err = s.HasDeal(deals[0].Id)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if exists {
+		t.Fatalf("deal should not exists: %v", err)
 	}
 }

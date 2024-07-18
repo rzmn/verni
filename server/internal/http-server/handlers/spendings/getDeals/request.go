@@ -1,4 +1,4 @@
-package get
+package getDeals
 
 import (
 	"accounty/internal/http-server/responses"
@@ -12,11 +12,14 @@ import (
 )
 
 type RequestHandler interface {
-	Handle(c *gin.Context, request Request) ([]storage.User, *Error)
+	Validate(c *gin.Context, request Request) *Error
+	Handle(c *gin.Context, request Request) ([]storage.IdentifiableDeal, *Error)
 }
 
 func handleError(c *gin.Context, err Error) {
 	switch err.Code {
+	case responses.CodeNoSuchUser:
+		c.JSON(http.StatusConflict, Failure(err))
 	case responses.CodeBadRequest:
 		c.JSON(http.StatusBadRequest, Failure(err))
 	default:
@@ -26,7 +29,7 @@ func handleError(c *gin.Context, err Error) {
 
 func New(requestHandler RequestHandler) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		const op = "handlers.users.get"
+		const op = "handlers.spendings.getDeals"
 
 		requestQueryString := c.Query("data")
 		log.Printf("%s: got data param: %s", op, requestQueryString)
@@ -36,11 +39,15 @@ func New(requestHandler RequestHandler) func(c *gin.Context) {
 			handleError(c, ErrBadRequest(fmt.Sprintf("%s: request failed %v", op, err)))
 			return
 		}
-		users, err := requestHandler.Handle(c, request)
+		if err := requestHandler.Validate(c, request); err != nil {
+			handleError(c, *err)
+			return
+		}
+		deals, err := requestHandler.Handle(c, request)
 		if err != nil {
 			handleError(c, *err)
 			return
 		}
-		c.JSON(http.StatusOK, Success(users))
+		c.JSON(http.StatusOK, Success(deals))
 	}
 }

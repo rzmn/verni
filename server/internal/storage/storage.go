@@ -41,7 +41,7 @@ type IdentifiableDeal struct {
 }
 
 type Spending struct {
-	UserId string `json:"userId"`
+	UserId UserId `json:"userId"`
 	Cost   int64  `json:"cost"`
 }
 
@@ -76,6 +76,9 @@ type Storage interface {
 	SearchUsers(sender UserId, query string) ([]User, error)
 
 	InsertDeal(deal Deal) error
+	HasDeal(did string) (bool, error)
+	RemoveDeal(did string) error
+
 	GetDeals(counterparty1 UserId, counterparty2 UserId) ([]IdentifiableDeal, error)
 	GetCounterparties(uid UserId) ([]SpendingsPreview, error)
 }
