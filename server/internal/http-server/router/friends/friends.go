@@ -173,58 +173,6 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 	return friends, nil
 }
 
-// type getIncomingRequestsRequestHandler struct {
-// 	storage *sqlite.Storage
-// }
-
-// func (h *getIncomingRequestsRequestHandler) Handle(c *gin.Context) ([]storage.UserId, *getIncomingRequests.Error) {
-// 	const op = "router.friends.getIncomingRequestsRequestHandler.Handle"
-// 	token := helpers.ExtractBearerToken(c)
-
-// 	subject, err := jwt.GetAccessTokenSubject(token)
-// 	if err != nil || subject == nil {
-// 		log.Printf("%s: cannot get access token %v", op, err)
-// 		outError := getIncomingRequests.ErrInternal()
-// 		return []storage.UserId{}, &outError
-// 	}
-// 	logins, err := h.storage.GetIncomingRequests(*subject)
-// 	if err != nil {
-// 		outError := getIncomingRequests.ErrInternal()
-// 		return []storage.UserId{}, &outError
-// 	}
-// 	requests := make([]storage.UserId, len(logins))
-// 	for i := range logins {
-// 		requests[i] = storage.UserId(logins[i])
-// 	}
-// 	return requests, nil
-// }
-
-// type getPendingRequestsRequestHandler struct {
-// 	storage *sqlite.Storage
-// }
-
-// func (h *getPendingRequestsRequestHandler) Handle(c *gin.Context) ([]storage.UserId, *getPendingRequests.Error) {
-// 	const op = "router.friends.getPendingRequestsHandler.Handle"
-// 	token := helpers.ExtractBearerToken(c)
-
-// 	subject, err := jwt.GetAccessTokenSubject(token)
-// 	if err != nil || subject == nil {
-// 		log.Printf("%s: cannot get access token %v", op, err)
-// 		outError := getPendingRequests.ErrInternal()
-// 		return []storage.UserId{}, &outError
-// 	}
-// 	logins, err := h.storage.GetPendingRequests(*subject)
-// 	if err != nil {
-// 		outError := getPendingRequests.ErrInternal()
-// 		return []storage.UserId{}, &outError
-// 	}
-// 	requests := make([]storage.UserId, len(logins))
-// 	for i := range logins {
-// 		requests[i] = storage.UserId(logins[i])
-// 	}
-// 	return requests, nil
-// }
-
 type rejectRequestRequestHandler struct {
 	storage storage.Storage
 }
@@ -359,6 +307,4 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	group.POST("/rollbackRequest", rollbackRequest.New(&rollbackRequestRequestHandler{storage: storage}))
 	group.POST("/unfriend", unfriend.New(&unfriendRequestHandler{storage: storage}))
 	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
-	// group.GET("/getIncomingRequests", getIncomingRequests.New(&getIncomingRequestsRequestHandler{storage: storage}))
-	// group.GET("/getPendingRequests", getPendingRequests.New(&getPendingRequestsRequestHandler{storage: storage}))
 }

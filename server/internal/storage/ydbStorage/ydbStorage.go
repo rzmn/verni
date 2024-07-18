@@ -24,7 +24,7 @@ type Storage struct {
 }
 
 func NewUnauthorized(storagePath string) (storage.Storage, error) {
-	const op = "storage.sqlite.NewUnauthorized"
+	const op = "storage.ydb.NewUnauthorized"
 	ctx := context.Background()
 	db, err := ydb.Open(ctx, storagePath)
 	if err != nil {
@@ -35,7 +35,7 @@ func NewUnauthorized(storagePath string) (storage.Storage, error) {
 }
 
 func New(storagePath string, token string) (storage.Storage, error) {
-	const op = "storage.sqlite.New"
+	const op = "storage.ydb.New"
 	ctx := context.Background()
 	db, err := ydb.Open(ctx, storagePath, ydb.WithAccessTokenCredentials(token))
 	if err != nil {
@@ -46,7 +46,7 @@ func New(storagePath string, token string) (storage.Storage, error) {
 }
 
 func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
-	const op = "storage.sqlite.new"
+	const op = "storage.ydb.new"
 	err := db.Table().Do(ctx,
 		func(ctx context.Context, s table.Session) (err error) {
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "users"),
@@ -115,7 +115,7 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 func (s *Storage) IsUserExists(uid storage.UserId) (bool, error) {
-	const op = "storage.sqlite.IsUserExists"
+	const op = "storage.ydb.IsUserExists"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -155,7 +155,7 @@ WHERE
 }
 
 func (s *Storage) CheckCredentials(credentials storage.UserCredentials) (bool, error) {
-	const op = "storage.sqlite.CheckCredentials"
+	const op = "storage.ydb.CheckCredentials"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -194,7 +194,7 @@ SELECT password FROM users where login = $login;`,
 }
 
 func (s *Storage) StoreCredentials(credentials storage.UserCredentials) error {
-	const op = "storage.sqlite.StoreCredentials"
+	const op = "storage.ydb.StoreCredentials"
 	log.Printf("%s: start", op)
 	passwordHash, err := hashPassword(credentials.Password)
 	if err != nil {
@@ -234,7 +234,7 @@ VALUES($login, $password)`,
 }
 
 func (s *Storage) GetRefreshToken(uid storage.UserId) (*string, error) {
-	const op = "storage.sqlite.GetRefreshToken"
+	const op = "storage.ydb.GetRefreshToken"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -272,7 +272,7 @@ SELECT token FROM tokens where login = $login;`,
 }
 
 func (s *Storage) StoreRefreshToken(token string, uid storage.UserId) error {
-	const op = "storage.sqlite.StoreRefreshToken"
+	const op = "storage.ydb.StoreRefreshToken"
 	log.Printf("%s: start", op)
 	var (
 		writeTx = table.TxControl(
@@ -307,7 +307,7 @@ VALUES($login, $token)`,
 }
 
 func (s *Storage) RemoveRefreshToken(uid storage.UserId) error {
-	const op = "storage.sqlite.RemoveRefreshToken"
+	const op = "storage.ydb.RemoveRefreshToken"
 	log.Printf("%s: start", op)
 	var (
 		writeTx = table.TxControl(
@@ -341,7 +341,7 @@ WHERE
 }
 
 func (s *Storage) StoreFriendRequest(sender storage.UserId, target storage.UserId) error {
-	const op = "storage.sqlite.StoreFriendRequest"
+	const op = "storage.ydb.StoreFriendRequest"
 	log.Printf("%s: start", op)
 	var (
 		writeTx = table.TxControl(
@@ -376,7 +376,7 @@ VALUES($sender, $target)`,
 }
 
 func (s *Storage) HasFriendRequest(sender storage.UserId, target storage.UserId) (bool, error) {
-	const op = "storage.sqlite.HasFriendRequest"
+	const op = "storage.ydb.HasFriendRequest"
 	log.Printf("%s: start", op)
 	var (
 		readTx     = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -418,7 +418,7 @@ WHERE
 }
 
 func (s *Storage) RemoveFriendRequest(sender storage.UserId, target storage.UserId) error {
-	const op = "storage.sqlite.RemoveFriendRequest"
+	const op = "storage.ydb.RemoveFriendRequest"
 	log.Printf("%s: start", op)
 	var (
 		writeTx = table.TxControl(
@@ -454,7 +454,7 @@ WHERE
 }
 
 func (s *Storage) StoreFriendship(friendA storage.UserId, friendB storage.UserId) error {
-	const op = "storage.sqlite.StoreFriendship"
+	const op = "storage.ydb.StoreFriendship"
 	log.Printf("%s: start", op)
 	if friendA > friendB {
 		friendA, friendB = friendB, friendA
@@ -492,7 +492,7 @@ VALUES($friendA, $friendB)`,
 }
 
 func (s *Storage) HasFriendship(friendA storage.UserId, friendB storage.UserId) (bool, error) {
-	const op = "storage.sqlite.HasFriendship"
+	const op = "storage.ydb.HasFriendship"
 	log.Printf("%s: start", op)
 	if friendA > friendB {
 		friendA, friendB = friendB, friendA
@@ -537,7 +537,7 @@ WHERE
 }
 
 func (s *Storage) RemoveFriendship(friendA storage.UserId, friendB storage.UserId) error {
-	const op = "storage.sqlite.RemoveFriendship"
+	const op = "storage.ydb.RemoveFriendship"
 	log.Printf("%s: start", op)
 	if friendA > friendB {
 		friendA, friendB = friendB, friendA
@@ -576,7 +576,7 @@ WHERE
 }
 
 func (s *Storage) GetFriends(uid storage.UserId) ([]storage.UserId, error) {
-	const op = "storage.sqlite.GetFriends"
+	const op = "storage.ydb.GetFriends"
 	log.Printf("%s: start", op)
 	var (
 		readTx  = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -623,7 +623,7 @@ WHERE
 }
 
 func (s *Storage) GetIncomingRequests(uid storage.UserId) ([]storage.UserId, error) {
-	const op = "storage.sqlite.GetIncomingRequests"
+	const op = "storage.ydb.GetIncomingRequests"
 	log.Printf("%s: start", op)
 	var (
 		readTx  = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -666,7 +666,7 @@ WHERE
 }
 
 func (s *Storage) GetPendingRequests(uid storage.UserId) ([]storage.UserId, error) {
-	const op = "storage.sqlite.GetIncomingRequests"
+	const op = "storage.ydb.GetIncomingRequests"
 	log.Printf("%s: start", op)
 	var (
 		readTx  = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -709,7 +709,7 @@ WHERE
 }
 
 func (s *Storage) filterInvalidUsers(ids []storage.UserId) ([]storage.UserId, error) {
-	const op = "storage.sqlite.filterInvalidUsers"
+	const op = "storage.ydb.filterInvalidUsers"
 	log.Printf("%s: start", op)
 	var (
 		readTx     = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
@@ -756,7 +756,7 @@ WHERE
 }
 
 func (s *Storage) GetUsers(sender storage.UserId, ids []storage.UserId) ([]storage.User, error) {
-	const op = "storage.sqlite.GetUsers"
+	const op = "storage.ydb.GetUsers"
 	log.Printf("%s: start", op)
 	if len(ids) == 0 {
 		return []storage.User{}, nil
@@ -815,7 +815,7 @@ func (s *Storage) GetUsers(sender storage.UserId, ids []storage.UserId) ([]stora
 }
 
 func (s *Storage) SearchUsers(sender storage.UserId, query string) ([]storage.User, error) {
-	const op = "storage.sqlite.SearchUsers"
+	const op = "storage.ydb.SearchUsers"
 	log.Printf("%s: start", op)
 	if len(query) == 0 {
 		return []storage.User{}, nil
@@ -861,7 +861,7 @@ WHERE
 }
 
 func (s *Storage) InsertDeal(deal storage.Deal) error {
-	const op = "storage.sqlite.InsertDeal"
+	const op = "storage.ydb.InsertDeal"
 	log.Printf("%s: start", op)
 	var (
 		writeTx = table.TxControl(
@@ -925,7 +925,7 @@ VALUES($id, $dealId, $cost, $counterparty)`,
 }
 
 func (s *Storage) GetDeals(counterparty1 storage.UserId, counterparty2 storage.UserId) ([]storage.IdentifiableDeal, error) {
-	const op = "storage.sqlite.GetDeals"
+	const op = "storage.ydb.GetDeals"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(
@@ -1000,7 +1000,7 @@ WHERE
 }
 
 func (s *Storage) GetCounterparties(target storage.UserId) ([]storage.SpendingsPreview, error) {
-	const op = "storage.sqlite.GetCounterparties"
+	const op = "storage.ydb.GetCounterparties"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(

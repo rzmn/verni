@@ -20,7 +20,6 @@ func main() {
 	cfg := config.Load()
 
 	storage, err := ydbStorage.New(os.Getenv("YDB_ENDPOINT"), os.Getenv("YDB_ACCESS_TOKEN_CREDENTIALS"))
-	// sqlStorage, err := sqlite.NewUnauthorized("grpc://localhost:2136?database=/local")
 	if err != nil {
 		log.Fatalf("failed to init storage: %s", err)
 	}
