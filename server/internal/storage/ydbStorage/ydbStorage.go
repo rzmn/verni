@@ -54,6 +54,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithColumn("password", types.TypeText),
 				options.WithPrimaryKeyColumn("login"),
 			); err != nil {
+				log.Printf("%s: create users: unexpected err %v", op, err)
 				return err
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "tokens"),
@@ -61,6 +62,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithColumn("token", types.TypeText),
 				options.WithPrimaryKeyColumn("login"),
 			); err != nil {
+				log.Printf("%s: create tokens: unexpected err %v", op, err)
 				return err
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "friendRequests"),
@@ -68,6 +70,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithColumn("target", types.TypeText),
 				options.WithPrimaryKeyColumn("sender", "target"),
 			); err != nil {
+				log.Printf("%s: create friendRequests: unexpected err %v", op, err)
 				return err
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "friends"),
@@ -75,6 +78,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithColumn("friendB", types.TypeText),
 				options.WithPrimaryKeyColumn("friendA", "friendB"),
 			); err != nil {
+				log.Printf("%s: create friends: unexpected err %v", op, err)
 				return err
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "spendings"),
@@ -84,6 +88,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithColumn("counterparty", types.TypeText),
 				options.WithPrimaryKeyColumn("id"),
 			); err != nil {
+				log.Printf("%s: create spendings: unexpected err %v", op, err)
 				return err
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "deals"),
@@ -94,12 +99,14 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithColumn("currency", types.TypeText),
 				options.WithPrimaryKeyColumn("id"),
 			); err != nil {
+				log.Printf("%s: create deals: unexpected err %v", op, err)
 				return err
 			}
 			return nil
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return &Storage{db: db, ctx: ctx}, nil
@@ -143,12 +150,10 @@ WHERE
 				}
 			}
 		}
-		if err := res.Err(); err != nil {
-			return err
-		}
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return false, err
 	}
 	return exists, nil
@@ -181,13 +186,13 @@ SELECT password FROM users where login = $login;`,
 				}
 				if checkPasswordHash(credentials.Password, passwordHash) {
 					passed = true
-					return res.Err()
 				}
 			}
 		}
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return false, err
 	}
 	return passed, nil
@@ -228,6 +233,7 @@ VALUES($login, $password)`,
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -266,6 +272,7 @@ SELECT token FROM tokens where login = $login;`,
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return nil, err
 	}
 	return token, nil
@@ -298,9 +305,10 @@ VALUES($login, $token)`,
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -335,6 +343,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -367,9 +376,10 @@ VALUES($sender, $target)`,
 			return err
 		}
 		defer res.Close()
-		return nil
+		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -412,6 +422,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return false, err
 	}
 	return hasRequest, nil
@@ -448,6 +459,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -486,6 +498,7 @@ VALUES($friendA, $friendB)`,
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -531,6 +544,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return false, err
 	}
 	return hasFriendship, nil
@@ -570,6 +584,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -617,6 +632,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return friends, err
 	}
 	return friends, nil
@@ -660,6 +676,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return senders, err
 	}
 	return senders, nil
@@ -703,6 +720,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return targets, err
 	}
 	return targets, nil
@@ -750,6 +768,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return uids, err
 	}
 	return uids, nil
@@ -763,6 +782,7 @@ func (s *Storage) GetUsers(sender storage.UserId, ids []storage.UserId) ([]stora
 	}
 	userIds, err := s.filterInvalidUsers(ids)
 	if err != nil {
+		log.Printf("%s: filter invalid ids failed err %v", op, err)
 		return []storage.User{}, err
 	}
 	log.Printf("%s: found %d users", op, len(userIds))
@@ -855,6 +875,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return []storage.User{}, err
 	}
 	return s.GetUsers(sender, targets)
@@ -919,6 +940,7 @@ VALUES($id, $dealId, $cost, $counterparty)`,
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -959,6 +981,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return false, err
 	}
 	return exists, nil
@@ -1007,6 +1030,7 @@ WHERE
 		return res.Err()
 	})
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return err
 	}
 	return nil
@@ -1086,6 +1110,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return deals, err
 	}
 	return deals, nil
@@ -1129,6 +1154,7 @@ WHERE
 		},
 	)
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return counterparties, err
 	}
 	return counterparties, nil
@@ -1199,6 +1225,7 @@ WHERE
 	)
 	spendings := make([]storage.SpendingsPreview, 0, len(spendingsMap))
 	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
 		return spendings, err
 	}
 

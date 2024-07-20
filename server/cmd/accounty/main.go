@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to init storage: %s", err)
 	}
+	defer storage.Close()
 	// migrate(sqlStorage)
 	// return
 

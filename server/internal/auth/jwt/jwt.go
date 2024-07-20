@@ -1,21 +1,22 @@
 package jwt
 
 import (
-	"time"
-	"log"
 	"errors"
+	"log"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
-	ErrBadToken = errors.New("bad token format")
+	ErrBadToken     = errors.New("bad token format")
 	ErrTokenExpired = errors.New("token expired")
-	ErrInternal = errors.New("internal error")
+	ErrInternal     = errors.New("internal error")
 )
 
 var (
 	tokenTypeRefresh = "refresh"
-	tokenTypeAccess = "access"
+	tokenTypeAccess  = "access"
 )
 
 type jwtClaims struct {
@@ -25,7 +26,7 @@ type jwtClaims struct {
 
 type Tokens struct {
 	Refresh string
-	Access string
+	Access  string
 	Subject string
 }
 
@@ -45,7 +46,7 @@ func IssueTokens(subject string) (*Tokens, error) {
 	}
 
 	return &Tokens{
-		Access: *access,
+		Access:  *access,
 		Refresh: *refresh,
 		Subject: subject,
 	}, nil
@@ -120,29 +121,31 @@ func parseToken(signedToken string, secret []byte) (*jwt.Token, error) {
 
 var (
 	refreshTokenLifetime = time.Hour * 24 * 30
-	accessTokenLifetime = time.Hour
+	accessTokenLifetime  = time.Hour
 )
 
 var accessTokenSecret = []byte("accessTokenSecret")
+
 func generateAccessToken(id string, currentTime time.Time) (*string, error) {
 	return generateToken(jwtClaims{
 		TokenType: tokenTypeAccess,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: id,
+			Subject:   id,
 			ExpiresAt: jwt.NewNumericDate(currentTime.Add(accessTokenLifetime)),
-			IssuedAt: jwt.NewNumericDate(currentTime),
+			IssuedAt:  jwt.NewNumericDate(currentTime),
 		},
 	}, accessTokenSecret)
 }
 
 var refreshTokenSecret = []byte("refreshTokenSecret")
+
 func generateRefreshToken(id string, currentTime time.Time) (*string, error) {
 	return generateToken(jwtClaims{
 		TokenType: tokenTypeRefresh,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: id,
+			Subject:   id,
 			ExpiresAt: jwt.NewNumericDate(currentTime.Add(refreshTokenLifetime)),
-			IssuedAt: jwt.NewNumericDate(currentTime),
+			IssuedAt:  jwt.NewNumericDate(currentTime),
 		},
 	}, refreshTokenSecret)
 }
