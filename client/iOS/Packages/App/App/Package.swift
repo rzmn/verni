@@ -20,7 +20,7 @@ let package = Package(
         .package(path: "../../Interfaces/Domain"),
         .package(path: "../../Shared/Logging"),
         .package(path: "../../Shared/Base"),
-        .package(url: "https://github.com/relatedcode/ProgressHUD.git", revision: "9364904a42cb25f58d026451140c4080a868e72e")
+        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
     ],
     targets: [
         .target(

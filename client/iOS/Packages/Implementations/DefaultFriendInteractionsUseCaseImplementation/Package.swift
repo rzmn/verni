@@ -17,11 +17,12 @@ let package = Package(
     dependencies: [
         .package(path: "../../Domain"),
         .package(path: "../../Api"),
+        .package(path: "../../ApiDomainConvenience"),
     ],
     targets: [
         .target(
             name: "DefaultFriendInteractionsUseCaseImplementation",
-            dependencies: ["Domain", "Api"],
+            dependencies: ["Domain", "Api", "ApiDomainConvenience"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
