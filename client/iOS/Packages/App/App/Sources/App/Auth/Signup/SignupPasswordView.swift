@@ -60,7 +60,7 @@ class SignupPasswordView: UIView {
                 self.password.render(
                     TextField.Config(
                         placeholder: "signup_pwd_placeholder".localized,
-                        content: .login,
+                        content: .password,
                         formatHint: state.passwordHint
                     )
                 )
