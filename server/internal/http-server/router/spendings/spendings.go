@@ -18,6 +18,12 @@ type createDealRequestHandler struct {
 }
 
 func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.Request) *createDeal.Error {
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		outError := createDeal.ErrInternal()
+		return &outError
+	}
 	for i := 0; i < len(request.Deal.Spendings); i++ {
 		exists, err := h.storage.IsUserExists(request.Deal.Spendings[i].UserId)
 		if err != nil {
@@ -26,6 +32,15 @@ func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.R
 		}
 		if !exists {
 			outError := createDeal.ErrNoSuchUser()
+			return &outError
+		}
+		has, err := h.storage.HasFriendship(storage.UserId(*subject), request.Deal.Spendings[i].UserId)
+		if err != nil {
+			outError := createDeal.ErrInternal()
+			return &outError
+		}
+		if !has {
+			outError := createDeal.ErrNotAFriend()
 			return &outError
 		}
 	}
@@ -56,6 +71,12 @@ type deleteDealRequestHandler struct {
 }
 
 func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.Request) *deleteDeal.Error {
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		outError := deleteDeal.ErrInternal()
+		return &outError
+	}
 	exists, err := h.storage.HasDeal(request.DealId)
 	if err != nil {
 		outError := deleteDeal.ErrInternal()
@@ -63,6 +84,31 @@ func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.R
 	}
 	if !exists {
 		outError := deleteDeal.ErrDealNotFound()
+		return &outError
+	}
+	counterparties, err := h.storage.GetCounterpartiesForDeal(request.DealId)
+	if err != nil {
+		outError := deleteDeal.ErrInternal()
+		return &outError
+	}
+	var isYourDeal bool
+	for i := 0; i < len(counterparties); i++ {
+		if counterparties[i] == storage.UserId(*subject) {
+			isYourDeal = true
+		} else {
+			isFriend, err := h.storage.HasFriendship(storage.UserId(*subject), counterparties[i])
+			if err != nil {
+				outError := deleteDeal.ErrInternal()
+				return &outError
+			}
+			if !isFriend {
+				outError := deleteDeal.ErrNotAFriend()
+				return &outError
+			}
+		}
+	}
+	if !isYourDeal {
+		outError := deleteDeal.ErrIsNotYourDeal()
 		return &outError
 	}
 	return nil
@@ -139,7 +185,7 @@ func (h *getDealsRequestHandler) Handle(c *gin.Context, request getDeals.Request
 }
 
 func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
-	group := e.Group("/spendings", middleware.EnsureLoggedIn())
+	group := e.Group("/spendings", middleware.EnsureLoggedIn(storage))
 	group.POST("/createDeal", createDeal.New(&createDealRequestHandler{storage: storage}))
 	group.POST("/deleteDeal", deleteDeal.New(&deleteDealRequestHandler{storage: storage}))
 	group.GET("/getCounterparties", getCounterparties.New(&getCounterpartiesRequestHandler{storage: storage}))

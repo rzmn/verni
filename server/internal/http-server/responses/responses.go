@@ -75,6 +75,7 @@ const (
 	CodeNotAFriend
 	CodeBadRequest
 	CodeDealNotFound
+	CodeIsNotYourDeal
 )
 
 func (c Code) Message() string {
@@ -101,6 +102,14 @@ func (c Code) Message() string {
 		return "have incoming request"
 	case CodeAlreadyFriends:
 		return "alerady friends"
+	case CodeBadRequest:
+		return "bad request"
+	case CodeDealNotFound:
+		return "deal not found"
+	case CodeNotAFriend:
+		return "should be friends"
+	case CodeIsNotYourDeal:
+		return "not your deal"
 	default:
 		return "unknown error"
 	}

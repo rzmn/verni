@@ -81,4 +81,5 @@ type Storage interface {
 
 	GetDeals(counterparty1 UserId, counterparty2 UserId) ([]IdentifiableDeal, error)
 	GetCounterparties(uid UserId) ([]SpendingsPreview, error)
+	GetCounterpartiesForDeal(did string) ([]UserId, error)
 }

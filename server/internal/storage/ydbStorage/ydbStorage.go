@@ -1062,11 +1062,13 @@ WHERE
 				for res.NextRow() {
 					deal := storage.IdentifiableDeal{}
 					deal.Spendings = make([]storage.Spending, 2)
+					var uid1 string
+					var uid2 string
 					err = res.Scan(
 						&deal.Id,
-						&deal.Spendings[0].UserId,
+						&uid1,
 						&deal.Spendings[0].Cost,
-						&deal.Spendings[1].UserId,
+						&uid2,
 						&deal.Spendings[1].Cost,
 						&deal.Timestamp,
 						&deal.Details,
@@ -1075,6 +1077,8 @@ WHERE
 					if err != nil {
 						return err
 					}
+					deal.Spendings[0].UserId = storage.UserId(uid1)
+					deal.Spendings[1].UserId = storage.UserId(uid2)
 					deals = append(deals, deal)
 				}
 			}
@@ -1085,6 +1089,49 @@ WHERE
 		return deals, err
 	}
 	return deals, nil
+}
+
+func (s *Storage) GetCounterpartiesForDeal(did string) ([]storage.UserId, error) {
+	const op = "storage.ydb.GetCounterpartiesForDeal"
+	log.Printf("%s: start", op)
+	var (
+		readTx         = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		counterparties []storage.UserId
+	)
+	err := s.db.Table().Do(s.ctx,
+		func(ctx context.Context, s table.Session) (err error) {
+			_, res, err := s.Execute(ctx, readTx, `
+DECLARE $dealId AS Text;
+SELECT 
+	counterparty 
+FROM 
+	spendings 
+WHERE 
+	dealId = $dealId`,
+				table.NewQueryParameters(
+					table.ValueParam("$dealId", types.TextValue(string(did))),
+				),
+			)
+			if err != nil {
+				return err
+			}
+			defer res.Close()
+			for res.NextResultSet(ctx) {
+				for res.NextRow() {
+					var counterparty string
+					if err := res.Scan(&counterparty); err != nil {
+						return err
+					}
+					counterparties = append(counterparties, storage.UserId(counterparty))
+				}
+			}
+			return res.Err()
+		},
+	)
+	if err != nil {
+		return counterparties, err
+	}
+	return counterparties, nil
 }
 
 func (s *Storage) GetCounterparties(target storage.UserId) ([]storage.SpendingsPreview, error) {

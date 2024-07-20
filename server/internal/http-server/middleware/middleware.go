@@ -8,12 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"accounty/internal/auth/jwt"
+	"accounty/internal/storage"
 
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/responses"
 )
 
-func EnsureLoggedIn() gin.HandlerFunc {
+func EnsureLoggedIn(s storage.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		const op = "handlers.friends.ensureLoggedInMiddleware"
 
@@ -34,9 +35,29 @@ func EnsureLoggedIn() gin.HandlerFunc {
 					Code: responses.CodeInternal,
 				}))
 			}
-		} else {
-			log.Printf("%s: access token ok", op)
-			c.Next()
+			return
 		}
+		subject, err := jwt.GetAccessTokenSubject(token)
+		if err != nil || subject == nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, responses.Failure(responses.Error{
+				Code: responses.CodeInternal,
+			}))
+			return
+		}
+		exists, err := s.IsUserExists(storage.UserId(*subject))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, responses.Failure(responses.Error{
+				Code: responses.CodeInternal,
+			}))
+			return
+		}
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, responses.Failure(responses.Error{
+				Code: responses.CodeWrongAccessToken,
+			}))
+			return
+		}
+		log.Printf("%s: access token ok", op)
+		c.Next()
 	}
 }

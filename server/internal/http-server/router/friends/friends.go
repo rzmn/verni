@@ -300,7 +300,7 @@ func (h *unfriendRequestHandler) Handle(c *gin.Context, request unfriend.Request
 }
 
 func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
-	group := e.Group("/friends", middleware.EnsureLoggedIn())
+	group := e.Group("/friends", middleware.EnsureLoggedIn(storage))
 	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{storage: storage}))
 	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{storage: storage}))
 	group.POST("/rejectRequest", rejectRequest.New(&rejectRequestRequestHandler{storage: storage}))

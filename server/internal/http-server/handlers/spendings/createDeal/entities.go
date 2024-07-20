@@ -25,6 +25,10 @@ func ErrNoSuchUser() Error {
 	return Error{responses.Error{Code: responses.CodeNoSuchUser}}
 }
 
+func ErrNotAFriend() Error {
+	return Error{responses.Error{Code: responses.CodeNotAFriend}}
+}
+
 func ErrBadRequest(description string) Error {
 	return Error{responses.Error{Code: responses.CodeBadRequest, Description: &description}}
 }

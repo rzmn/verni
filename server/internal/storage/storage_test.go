@@ -9,11 +9,19 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	_s *storage.Storage
+)
+
 func getStorage(t *testing.T) storage.Storage {
+	if _s != nil {
+		return *_s
+	}
 	storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/local")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
+	_s = &storage
 	return storage
 }
 
@@ -600,5 +608,60 @@ func TestInsertAndRemoveDeal(t *testing.T) {
 	}
 	if exists {
 		t.Fatalf("deal should not exists: %v", err)
+	}
+}
+
+func TestGetCounterpartiesForDeal(t *testing.T) {
+	s := getStorage(t)
+	counterparty1 := storage.UserId(uuid.New().String())
+	counterparty2 := storage.UserId(uuid.New().String())
+	cost := int64(456)
+	currency := uuid.New().String()
+
+	deal := storage.Deal{
+		Timestamp: 123,
+		Details:   uuid.New().String(),
+		Cost:      cost,
+		Currency:  currency,
+		Spendings: []storage.Spending{
+			{
+				UserId: counterparty1,
+				Cost:   cost,
+			},
+			{
+				UserId: counterparty2,
+				Cost:   -cost,
+			},
+		},
+	}
+
+	if err := s.InsertDeal(deal); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	deals, err := s.GetDeals(counterparty1, counterparty2)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(deals) != 1 {
+		t.Fatalf("deals len should be 1, found: %v", deals)
+	}
+	counterparties, err := s.GetCounterpartiesForDeal(deals[0].Id)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(counterparties) != 2 {
+		t.Fatalf("counterparties len should be 2, found: %v", counterparties)
+	}
+	passedUsers := map[storage.UserId]bool{}
+	for i := 0; i < len(counterparties); i++ {
+		if counterparties[i] == counterparty1 {
+			passedUsers[counterparties[i]] = true
+		}
+		if counterparties[i] == counterparty2 {
+			passedUsers[counterparties[i]] = true
+		}
+	}
+	if len(passedUsers) != 2 {
+		t.Fatalf("passedUsers len should be 2, found: %v", passedUsers)
 	}
 }

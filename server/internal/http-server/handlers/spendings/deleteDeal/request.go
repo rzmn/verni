@@ -18,7 +18,7 @@ type RequestHandler interface {
 
 func handleError(c *gin.Context, err Error) {
 	switch err.Code {
-	case responses.CodeNoSuchUser:
+	case responses.CodeDealNotFound, responses.CodeNotAFriend, responses.CodeIsNotYourDeal:
 		c.JSON(http.StatusConflict, Failure(err))
 	case responses.CodeBadRequest:
 		c.JSON(http.StatusBadRequest, Failure(err))

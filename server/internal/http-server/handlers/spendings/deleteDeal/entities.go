@@ -25,6 +25,14 @@ func ErrDealNotFound() Error {
 	return Error{responses.Error{Code: responses.CodeDealNotFound}}
 }
 
+func ErrNotAFriend() Error {
+	return Error{responses.Error{Code: responses.CodeNotAFriend}}
+}
+
+func ErrIsNotYourDeal() Error {
+	return Error{responses.Error{Code: responses.CodeIsNotYourDeal}}
+}
+
 func ErrBadRequest(description string) Error {
 	return Error{responses.Error{Code: responses.CodeBadRequest, Description: &description}}
 }

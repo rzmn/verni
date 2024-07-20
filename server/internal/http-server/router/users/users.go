@@ -105,7 +105,7 @@ func (h *searchRequestHandler) Handle(c *gin.Context, request search.Request) ([
 }
 
 func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
-	group := e.Group("/users", middleware.EnsureLoggedIn())
+	group := e.Group("/users", middleware.EnsureLoggedIn(storage))
 	group.GET("/getMyInfo", getMyInfo.New(&getMyUserInfoRequestHandler{storage: storage}))
 	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
 	group.GET("/search", search.New(&searchRequestHandler{storage: storage}))
