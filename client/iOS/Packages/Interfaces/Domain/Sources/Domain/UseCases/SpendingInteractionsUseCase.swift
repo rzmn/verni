@@ -2,18 +2,17 @@ import Foundation
 
 public enum CreateSpendingError: Error {
     case noSuchUser(Error)
-    case validation(Error)
     case privacy(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public enum DeleteSpendingError: Error {
     case noSuchSpending(Error)
     case privacy(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public protocol SpendingInteractionsUseCase {
-    func create(spending: Spending) async -> Result<SpendingsPreview, CreateSpendingError>
-    func delete(spending: Spending.ID) async -> Result<SpendingsPreview, DeleteSpendingError>
+    func create(spending: Spending) async -> Result<[SpendingsPreview], CreateSpendingError>
+    func delete(spending: Spending.ID) async -> Result<[SpendingsPreview], DeleteSpendingError>
 }

@@ -47,7 +47,7 @@ actor UserModel {
         }
     }
 
-    private func handleRepositoryError(_ error: RepositoryError) async {
+    private func handleRepositoryError(_ error: GeneralError) async {
         switch error {
         case .noConnection(let error):
             await showAlertWithOk(title: "no_connection_hint".localized, error: error)

@@ -2,12 +2,12 @@ import Foundation
 
 public enum AcceptFriendRequestError: Error {
     case noSuchRequest(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public enum RejectFriendRequestError: Error {
     case noSuchRequest(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public enum SendFriendRequestError: Error {
@@ -15,18 +15,18 @@ public enum SendFriendRequestError: Error {
     case haveIncoming(Error)
     case alreadyFriends(Error)
     case noSuchUser(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public enum RollbackFriendRequestError: Error {
     case noSuchRequest(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public enum UnfriendError: Error {
     case notAFriend(Error)
     case noSuchUser(Error)
-    case other(RepositoryError)
+    case other(GeneralError)
 }
 
 public protocol FriendInteractionsUseCase {

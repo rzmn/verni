@@ -1,6 +1,11 @@
 import Foundation
 
+public enum GetSpendingsHistoryError: Error {
+    case noSuchCounterparty(Error)
+    case other(GeneralError)
+}
+
 public protocol SpendingsRepository {
-    func getSpendingCounterparties() async -> Result<[SpendingsPreview], RepositoryError>
-    func getSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], RepositoryError>
+    func getSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError>
+    func getSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError>
 }

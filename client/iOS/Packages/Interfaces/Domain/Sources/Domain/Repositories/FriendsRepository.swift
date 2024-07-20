@@ -20,6 +20,6 @@ public struct FriendshipKindSet: OptionSet {
 }
 
 public protocol FriendsRepository {
-    func getFriends(set: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], RepositoryError>
+    func getFriends(set: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError>
     var friendsUpdated: AnyPublisher<Void, Never> { get }
 }

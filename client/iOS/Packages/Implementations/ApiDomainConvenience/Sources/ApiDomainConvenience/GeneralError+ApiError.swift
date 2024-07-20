@@ -1,7 +1,7 @@
 import Domain
 import Api
 
-extension RepositoryError {
+extension GeneralError {
     public init(apiError: ApiError) {
         switch apiError {
         case .noConnection(let error):

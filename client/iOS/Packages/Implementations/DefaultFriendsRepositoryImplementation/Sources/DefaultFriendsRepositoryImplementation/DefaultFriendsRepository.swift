@@ -16,7 +16,7 @@ extension DefaultFriendsRepository: FriendsRepository {
         api.friendsUpdated.eraseToAnyPublisher()
     }
     
-    public func getFriends(set: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], RepositoryError> {
+    public func getFriends(set: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let result = await api.getFriends(
             kinds: FriendshipKind.allCases
                 .filter({ set.contains(FriendshipKindSet(element: $0)) })
@@ -36,14 +36,14 @@ extension DefaultFriendsRepository: FriendsRepository {
         case .success(let dict):
             uids = dict.flatMap(\.value)
         case .failure(let apiError):
-            return .failure(RepositoryError(apiError: apiError))
+            return .failure(GeneralError(apiError: apiError))
         }
         let users: [UserDto]
         switch await api.getUsers(uids: uids) {
         case .success(let success):
             users = success
         case .failure(let error):
-            return .failure(RepositoryError(apiError: error))
+            return .failure(GeneralError(apiError: error))
         }
         return .success(
             users.map { user in

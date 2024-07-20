@@ -36,20 +36,22 @@ extension DefaultAuthUseCase: AuthUseCase {
         case .failure(let error):
             apiError = error
         }
+        let errorCode: ApiErrorCode
         switch apiError {
         case .api(let code, _):
-            switch code {
-            case .incorrectCredentials:
-                return .failure(.incorrectCredentials(apiError))
-            case .wrongCredentialsFormat:
-                return .failure(.wrongFormat(apiError))
-            default:
-                return .failure(.other(apiError))
-            }
+            errorCode = code
         case .noConnection(let error):
             return .failure(.noConnection(error))
         case .internalError(let error):
             return .failure(.other(error))
+        }
+        switch errorCode {
+        case .incorrectCredentials:
+            return .failure(.incorrectCredentials(apiError))
+        case .wrongCredentialsFormat:
+            return .failure(.wrongFormat(apiError))
+        default:
+            return .failure(.other(apiError))
         }
     }
     
@@ -68,20 +70,22 @@ extension DefaultAuthUseCase: AuthUseCase {
         case .failure(let error):
             apiError = error
         }
+        let errorCode: ApiErrorCode
         switch apiError {
         case .api(let code, _):
-            switch code {
-            case .loginAlreadyTaken:
-                return .failure(.alreadyTaken(apiError))
-            case .wrongCredentialsFormat:
-                return .failure(.wrongFormat(apiError))
-            default:
-                return .failure(.other(apiError))
-            }
+            errorCode = code
         case .noConnection(let error):
             return .failure(.noConnection(error))
         case .internalError(let error):
             return .failure(.other(error))
+        }
+        switch errorCode {
+        case .loginAlreadyTaken:
+            return .failure(.alreadyTaken(apiError))
+        case .wrongCredentialsFormat:
+            return .failure(.wrongFormat(apiError))
+        default:
+            return .failure(.other(apiError))
         }
     }
     

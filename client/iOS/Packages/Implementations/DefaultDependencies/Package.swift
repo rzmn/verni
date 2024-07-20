@@ -29,6 +29,8 @@ let package = Package(
         .package(path: "../DefaultFriendsRepositoryImplementation"),
         .package(path: "../DefaultFriendInteractionsUseCaseImplementation"),
         .package(path: "../DefaultQRInviteUseCaseImplementation"),
+        .package(path: "../DefaultSpendingInteractionsUseCaseImplementation"),
+        .package(path: "../DefaultSpendingsRepositoryImplementation"),
     ],
     targets: [
         .target(
@@ -48,6 +50,8 @@ let package = Package(
                 "DefaultFriendsRepositoryImplementation",
                 "DefaultFriendInteractionsUseCaseImplementation",
                 "DefaultQRInviteUseCaseImplementation",
+                "DefaultSpendingInteractionsUseCaseImplementation",
+                "DefaultSpendingsRepositoryImplementation",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

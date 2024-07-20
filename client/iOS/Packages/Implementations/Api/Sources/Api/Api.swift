@@ -214,6 +214,52 @@ extension Api {
         }
         return mapApiResponse(result)
     }
+
+    public func createDeal(deal: DealDto) async -> ApiResult<[SpendingsPreviewDto]> {
+        struct RequestParameters: _Parameters {
+            let deal: DealDto
+        }
+        let result: ApiResultInternal<SingleValueResponse<[SpendingsPreviewDto]>> = await run(
+            method: Method.Spendings.createDeal,
+            parameters: RequestParameters(
+                deal: deal
+            )
+        )
+        return mapApiResponse(result).map(\.value)
+    }
+
+    public func deleteDeal(id: DealDto.ID) async -> ApiResult<[SpendingsPreviewDto]> {
+        struct RequestParameters: _Parameters {
+            let dealId: DealDto.ID
+        }
+        let result: ApiResultInternal<SingleValueResponse<[SpendingsPreviewDto]>> = await run(
+            method: Method.Spendings.deleteDeal,
+            parameters: RequestParameters(
+                dealId: id
+            )
+        )
+        return mapApiResponse(result).map(\.value)
+    }
+
+    public func getCounterparties() async -> ApiResult<[SpendingsPreviewDto]> {
+        let result: ApiResultInternal<SingleValueResponse<[SpendingsPreviewDto]>> = await run(
+            method: Method.Spendings.getCounterparties
+        )
+        return mapApiResponse(result).map(\.value)
+    }
+
+    public func getDeals(counterparty: UserDto.ID) async -> ApiResult<[IdentifiableDealDto]> {
+        struct RequestParameters: _Parameters {
+            let counterparty: UserDto.ID
+        }
+        let result: ApiResultInternal<SingleValueResponse<[IdentifiableDealDto]>> = await run(
+            method: Method.Spendings.getCounterparties,
+            parameters: RequestParameters(
+                counterparty: counterparty
+            )
+        )
+        return mapApiResponse(result).map(\.value)
+    }
 }
 
 // MARK: - Private

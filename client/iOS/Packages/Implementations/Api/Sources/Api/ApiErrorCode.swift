@@ -12,4 +12,22 @@ public enum ApiErrorCode: Int, Decodable {
     case alreadyFriends = 11
     case notAFriend = 12
     case badRequest = 13
+    case dealNotFound = 14
+    case isNotYourDeal = 15
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

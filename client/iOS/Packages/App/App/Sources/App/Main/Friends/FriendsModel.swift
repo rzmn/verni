@@ -130,7 +130,7 @@ actor FriendsModel {
         await model.start()
     }
 
-    private func loadData() async -> Result<FriendsState.Content, RepositoryError> {
+    private func loadData() async -> Result<FriendsState.Content, GeneralError> {
         await friendListRepository.getFriends(set: [.friends, .incoming, .pending]).map { data in
             FriendsState.Content(
                 upcomingRequests: data[.incoming] ?? [],

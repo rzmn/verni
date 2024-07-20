@@ -11,6 +11,8 @@ internal import DefaultAuthorizedSessionRepositoryImplementation
 internal import DefaultFriendsRepositoryImplementation
 internal import DefaultFriendInteractionsUseCaseImplementation
 internal import DefaultQRInviteUseCaseImplementation
+internal import DefaultSpendingInteractionsUseCaseImplementation
+internal import DefaultSpendingsRepositoryImplementation
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     public func logout() async {
@@ -33,8 +35,16 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
         DefaultFriendInteractionsUseCase(api: api)
     }
 
-    public func qrInviteUseCase() -> any QRInviteUseCase {
+    public func qrInviteUseCase() -> QRInviteUseCase {
         DefaultQRInviteUseCase()
+    }
+
+    public func spendingsRepository() -> SpendingsRepository {
+        DefaultSpendingsRepository(api: api)
+    }
+
+    public func spendingInteractionsUseCase() -> SpendingInteractionsUseCase {
+        DefaultSpendingInteractionsUseCase(api: api)
     }
 }
 
@@ -107,7 +117,7 @@ extension DefaultDependenciesAssembly {
                 prefix: "[net] "
             ),
             endpoint: Endpoint(
-                path: "https://sharedexpenses.containers.cloud.ru"
+                path: "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
             )
         )
     }

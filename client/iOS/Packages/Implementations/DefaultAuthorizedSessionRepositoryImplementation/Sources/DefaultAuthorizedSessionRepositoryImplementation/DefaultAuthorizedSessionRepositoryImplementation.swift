@@ -30,25 +30,25 @@ private extension UserDto {
 }
 
 extension DefaultAuthorizedSessionRepository: UsersRepository {
-    public func getHostInfo() async -> Result<User, RepositoryError> {
+    public func getHostInfo() async -> Result<User, GeneralError> {
         switch await api.getMyInfo() {
         case .success(let dto):
             return .success(dto.domain)
         case .failure(let error):
-            return .failure(RepositoryError(apiError: error))
+            return .failure(GeneralError(apiError: error))
         }
     }
 
-    public func getUsers(ids: [User.ID]) async -> Result<[User], RepositoryError> {
+    public func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
         switch await api.getUsers(uids: ids) {
         case .success(let dto):
             return .success(dto.map(\.domain))
         case .failure(let error):
-            return .failure(RepositoryError(apiError: error))
+            return .failure(GeneralError(apiError: error))
         }
     }
 
-    public func searchUsers(query: String) async -> Result<[User], RepositoryError> {
+    public func searchUsers(query: String) async -> Result<[User], GeneralError> {
         if query.isEmpty {
             return .success([])
         }
@@ -56,7 +56,7 @@ extension DefaultAuthorizedSessionRepository: UsersRepository {
         case .success(let dto):
             return .success(dto.map(\.domain))
         case .failure(let error):
-            return .failure(RepositoryError(apiError: error))
+            return .failure(GeneralError(apiError: error))
         }
     }
 }

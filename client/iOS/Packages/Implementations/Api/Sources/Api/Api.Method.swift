@@ -89,5 +89,34 @@ extension Api {
                 }
             }
         }
+
+        enum Spendings: ApiMethod {
+            case createDeal
+            case deleteDeal
+            case getCounterparties
+            case getDeals
+
+            var path: String {
+                switch self {
+                case .createDeal:
+                    return "/spendings/createDeal"
+                case .deleteDeal:
+                    return "/spendings/deleteDeal"
+                case .getCounterparties:
+                    return "/spendings/getCounterparties"
+                case .getDeals:
+                    return "/spendings/getDeals"
+                }
+            }
+
+            var method: HttpMethod {
+                switch self {
+                case .createDeal, .deleteDeal:
+                    return .post
+                case .getCounterparties, .getDeals:
+                    return .get
+                }
+            }
+        }
     }
 }

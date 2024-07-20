@@ -1,12 +1,12 @@
 import Foundation
 
-public enum RepositoryError: Error, CustomStringConvertible {
+public enum GeneralError: Error, CustomStringConvertible {
     case noConnection(Error)
     case notAuthorized(Error)
     case other(Error)
 }
 
-extension RepositoryError {
+extension GeneralError {
     public var description: String {
         switch self {
         case .noConnection(let error):
