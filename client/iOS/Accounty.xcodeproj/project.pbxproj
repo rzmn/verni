@@ -40,6 +40,8 @@
 		61414F8A2C2F02A200B2C027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		61414F8D2C2F02A200B2C027 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		61414F8F2C2F02A200B2C027 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6171E17D2C49A3B600E730D8 /* DefaultSpendingInteractionsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSpendingInteractionsUseCaseImplementation; sourceTree = "<group>"; };
+		6171E17E2C49A3B600E730D8 /* DefaultSpendingsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSpendingsRepositoryImplementation; sourceTree = "<group>"; };
 		61D3B3D92C42AEAE000585D1 /* ApiService */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ApiService; sourceTree = "<group>"; };
 		61D3B3DA2C42AEAE000585D1 /* DI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DI; sourceTree = "<group>"; };
 		61D3B3DB2C42AEAE000585D1 /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
@@ -153,6 +155,8 @@
 		61D3B3E92C42AEAE000585D1 /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				6171E17D2C49A3B600E730D8 /* DefaultSpendingInteractionsUseCaseImplementation */,
+				6171E17E2C49A3B600E730D8 /* DefaultSpendingsRepositoryImplementation */,
 				61D3B3DE2C42AEAE000585D1 /* Api */,
 				61D3B3DF2C42AEAE000585D1 /* ApiDomainConvenience */,
 				61D3B3E02C42AEAE000585D1 /* AuthSession */,
