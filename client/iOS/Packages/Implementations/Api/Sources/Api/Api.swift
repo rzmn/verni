@@ -11,6 +11,7 @@ public class Api {
     }
 
     public let friendsUpdated = PassthroughSubject<Void, Never>()
+    public let spendingsUpdated = PassthroughSubject<Void, Never>()
     private let service: ApiService
     private var subscriptions = Set<AnyCancellable>()
 
@@ -19,6 +20,7 @@ public class Api {
         polling?.friends
             .sink {
                 self.friendsUpdated.send(())
+                self.spendingsUpdated.send(())
             }
             .store(in: &subscriptions)
     }

@@ -54,8 +54,16 @@ actor AccountModel {
                         ]
                     )
                 )
-            case .other:
-                await logout()
+            case .other(let error):
+                await appRouter.alert(
+                    config: Alert.Config(
+                        title: "unknown_error_hint".localized,
+                        message: "\(error)",
+                        actions: [
+                            Alert.Action(title: "alert_action_ok".localized)
+                        ]
+                    )
+                )
             }
         }
     }

@@ -31,4 +31,8 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             return .failure(GetSpendingsHistoryError(apiError: apiError))
         }
     }
+
+    public var spendingsUpdated: AnyPublisher<Void, Never> {
+        api.spendingsUpdated.eraseToAnyPublisher()
+    }
 }

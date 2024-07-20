@@ -3,6 +3,7 @@ import Foundation
 
 public protocol ApiPolling {
     var friends: AnyPublisher<Void, Never> { get }
+    var spendings: AnyPublisher<Void, Never> { get }
 }
 
 public class TimerBasedPolling: ApiPolling {
@@ -11,6 +12,12 @@ public class TimerBasedPolling: ApiPolling {
         .autoconnect()
 
     public var friends: AnyPublisher<Void, Never> {
+        timer
+            .map { _ in () }
+            .eraseToAnyPublisher()
+    }
+
+    public var spendings: AnyPublisher<Void, Never> {
         timer
             .map { _ in () }
             .eraseToAnyPublisher()
