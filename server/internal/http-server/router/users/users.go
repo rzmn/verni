@@ -42,8 +42,8 @@ type getRequestHandler struct {
 
 func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) ([]storage.User, *get.Error) {
 	const op = "router.friends.getRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
-
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
@@ -65,8 +65,8 @@ type logoutRequestHandler struct {
 
 func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
 	const op = "router.friends.logoutRequestHandler.Handle"
+	log.Printf("%s: start", op)
 	token := helpers.ExtractBearerToken(c)
-
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
@@ -87,8 +87,8 @@ type searchRequestHandler struct {
 
 func (h *searchRequestHandler) Handle(c *gin.Context, request search.Request) ([]storage.User, *search.Error) {
 	const op = "router.friends.searchRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
-
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)

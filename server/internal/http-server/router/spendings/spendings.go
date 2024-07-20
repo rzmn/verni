@@ -9,6 +9,7 @@ import (
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/middleware"
 	"accounty/internal/storage"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +19,8 @@ type createDealRequestHandler struct {
 }
 
 func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.Request) *createDeal.Error {
+	const op = "router.friends.createDealRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -48,6 +51,8 @@ func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.R
 }
 
 func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Request) ([]storage.SpendingsPreview, *createDeal.Error) {
+	const op = "router.friends.createDealRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	if err := h.storage.InsertDeal(request.Deal); err != nil {
 		outError := createDeal.ErrInternal()
 		return []storage.SpendingsPreview{}, &outError
@@ -71,6 +76,8 @@ type deleteDealRequestHandler struct {
 }
 
 func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.Request) *deleteDeal.Error {
+	const op = "router.friends.deleteDealRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -115,6 +122,8 @@ func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.R
 }
 
 func (h *deleteDealRequestHandler) Handle(c *gin.Context, request deleteDeal.Request) ([]storage.SpendingsPreview, *deleteDeal.Error) {
+	const op = "router.friends.deleteDealRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	if err := h.storage.RemoveDeal(request.DealId); err != nil {
 		outError := deleteDeal.ErrInternal()
 		return []storage.SpendingsPreview{}, &outError
@@ -138,6 +147,8 @@ type getCounterpartiesRequestHandler struct {
 }
 
 func (h *getCounterpartiesRequestHandler) Handle(c *gin.Context, request getCounterparties.Request) ([]storage.SpendingsPreview, *getCounterparties.Error) {
+	const op = "router.friends.getCounterpartiesRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -157,6 +168,8 @@ type getDealsRequestHandler struct {
 }
 
 func (h *getDealsRequestHandler) Validate(c *gin.Context, request getDeals.Request) *getDeals.Error {
+	const op = "router.friends.getDealsRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	exists, err := h.storage.IsUserExists(request.Counterparty)
 	if err != nil {
 		outError := getDeals.ErrInternal()
@@ -170,6 +183,8 @@ func (h *getDealsRequestHandler) Validate(c *gin.Context, request getDeals.Reque
 }
 
 func (h *getDealsRequestHandler) Handle(c *gin.Context, request getDeals.Request) ([]storage.IdentifiableDeal, *getDeals.Error) {
+	const op = "router.friends.getDealsRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {

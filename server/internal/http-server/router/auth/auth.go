@@ -85,7 +85,7 @@ type signupRequestHandler struct {
 
 func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
 	const op = "router.signupRequestHandler.Validate"
-	log.Printf("%s: validating start", op)
+	log.Printf("%s: start with request %v", op, request)
 	if err := validateUserCredentials(request.Credentials); err != nil {
 		log.Printf("%s: format validating failed %v", op, err)
 		outError := signup.ErrWrongCredentialsFormat()
@@ -110,8 +110,7 @@ func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
 
 func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthToken, *signup.Error) {
 	const op = "router.signupRequestHandler.Handle"
-
-	log.Printf("%s: start", op)
+	log.Printf("%s: start with request %v", op, request)
 	if err := h.storage.StoreCredentials(request.Credentials); err != nil {
 		log.Printf("storing credentials failed %v", err)
 		outError := signup.ErrInternal()
@@ -143,6 +142,8 @@ type refreshRequestHandler struct {
 }
 
 func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthToken, *refresh.Error) {
+	const op = "router.refreshRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	refreshedTokens, err := jwt.IssueTokensBasedOnRefreshToken(request.RefreshToken)
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {

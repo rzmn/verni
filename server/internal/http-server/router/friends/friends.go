@@ -24,6 +24,8 @@ type sendRequestRequestHandler struct {
 }
 
 func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest.Request) *sendRequest.Error {
+	const op = "router.sendRequestRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -67,8 +69,8 @@ func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest
 
 func (h *sendRequestRequestHandler) Handle(c *gin.Context, request sendRequest.Request) *sendRequest.Error {
 	const op = "router.friends.sendRequestRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
-
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
@@ -87,6 +89,8 @@ type acceptRequestRequestHandler struct {
 }
 
 func (h *acceptRequestRequestHandler) Validate(c *gin.Context, request acceptRequest.Request) *acceptRequest.Error {
+	const op = "router.friends.acceptRequestRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -106,8 +110,8 @@ func (h *acceptRequestRequestHandler) Validate(c *gin.Context, request acceptReq
 
 func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptRequest.Request) *acceptRequest.Error {
 	const op = "router.friends.acceptRequestRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
-
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
@@ -131,6 +135,7 @@ type getRequestHandler struct {
 
 func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get.Status][]storage.UserId, *get.Error) {
 	const op = "router.friends.getRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 
 	subject, err := jwt.GetAccessTokenSubject(token)
@@ -178,6 +183,8 @@ type rejectRequestRequestHandler struct {
 }
 
 func (h *rejectRequestRequestHandler) Validate(c *gin.Context, request rejectRequest.Request) *rejectRequest.Error {
+	const op = "router.friends.rejectRequestRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -197,6 +204,7 @@ func (h *rejectRequestRequestHandler) Validate(c *gin.Context, request rejectReq
 
 func (h *rejectRequestRequestHandler) Handle(c *gin.Context, request rejectRequest.Request) *rejectRequest.Error {
 	const op = "router.friends.acceptRequestRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 
 	subject, err := jwt.GetAccessTokenSubject(token)
@@ -217,6 +225,8 @@ type rollbackRequestRequestHandler struct {
 }
 
 func (h *rollbackRequestRequestHandler) Validate(c *gin.Context, request rollbackRequest.Request) *rollbackRequest.Error {
+	const op = "router.friends.rollbackRequestRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -236,8 +246,8 @@ func (h *rollbackRequestRequestHandler) Validate(c *gin.Context, request rollbac
 
 func (h *rollbackRequestRequestHandler) Handle(c *gin.Context, request rollbackRequest.Request) *rollbackRequest.Error {
 	const op = "router.friends.rollbackRequestRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
-
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
@@ -256,6 +266,8 @@ type unfriendRequestHandler struct {
 }
 
 func (h *unfriendRequestHandler) Validate(c *gin.Context, request unfriend.Request) *unfriend.Error {
+	const op = "router.friends.unfriendRequestHandler.Validate"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
@@ -282,6 +294,8 @@ func (h *unfriendRequestHandler) Validate(c *gin.Context, request unfriend.Reque
 }
 
 func (h *unfriendRequestHandler) Handle(c *gin.Context, request unfriend.Request) *unfriend.Error {
+	const op = "router.friends.unfriendRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
