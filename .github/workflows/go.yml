@@ -25,4 +25,4 @@ jobs:
       run: cd $(git rev-parse --show-toplevel) && cd ./server && go build -v cmd/accounty/main.go
 
     - name: Test
-      run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/auth/jwt && go test -v .
+      run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/auth/jwt && go test -v . && cd $(git rev-parse --show-toplevel) && cd ./server/internal/storage && go test -v
