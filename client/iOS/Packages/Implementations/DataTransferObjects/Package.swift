@@ -14,11 +14,13 @@ let package = Package(
             targets: ["DataTransferObjects"]
         ),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(path: "../../Shared/Base")
+    ],
     targets: [
         .target(
             name: "DataTransferObjects",
-            dependencies: [],
+            dependencies: ["Base"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
