@@ -3,7 +3,7 @@ import Api
 import DataTransferObjects
 internal import ApiDomainConvenience
 
-public class DefaultAuthorizedSessionRepository {
+public class DefaultUsersRepository {
     private let api: Api
 
     public init(api: Api) {
@@ -11,30 +11,11 @@ public class DefaultAuthorizedSessionRepository {
     }
 }
 
-private extension UserDto {
-    var domain: User {
-        User(id: login, status: {
-            switch friendStatus {
-            case .no:
-                return .no
-            case .incomingRequest:
-                return .incoming
-            case .outgoingRequest:
-                return .outgoing
-            case .friends:
-                return .friend
-            case .me:
-                return .me
-            }
-        }())
-    }
-}
-
-extension DefaultAuthorizedSessionRepository: UsersRepository {
+extension DefaultUsersRepository: UsersRepository {
     public func getHostInfo() async -> Result<User, GeneralError> {
         switch await api.getMyInfo() {
         case .success(let dto):
-            return .success(dto.domain)
+            return .success(User(dto: dto))
         case .failure(let error):
             return .failure(GeneralError(apiError: error))
         }
@@ -43,7 +24,7 @@ extension DefaultAuthorizedSessionRepository: UsersRepository {
     public func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
         switch await api.getUsers(uids: ids) {
         case .success(let dto):
-            return .success(dto.map(\.domain))
+            return .success(dto.map(User.init))
         case .failure(let error):
             return .failure(GeneralError(apiError: error))
         }
@@ -55,7 +36,7 @@ extension DefaultAuthorizedSessionRepository: UsersRepository {
         }
         switch await api.searchUsers(query: query) {
         case .success(let dto):
-            return .success(dto.map(\.domain))
+            return .success(dto.map(User.init))
         case .failure(let error):
             return .failure(GeneralError(apiError: error))
         }

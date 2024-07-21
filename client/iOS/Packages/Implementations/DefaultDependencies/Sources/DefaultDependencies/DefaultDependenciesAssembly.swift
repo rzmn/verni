@@ -8,7 +8,7 @@ internal import PersistentStorage
 internal import DefaultAuthUseCaseImplementation
 internal import DefaultApiServiceImplementation
 internal import DefaultNetworkingImplementation
-internal import DefaultAuthorizedSessionRepositoryImplementation
+internal import DefaultUsersRepositoryImplementation
 internal import DefaultFriendsRepositoryImplementation
 internal import DefaultFriendInteractionsUseCaseImplementation
 internal import DefaultQRInviteUseCaseImplementation
@@ -30,7 +30,7 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     }
     
     public func usersRepository() -> UsersRepository {
-        DefaultAuthorizedSessionRepository(api: api)
+        DefaultUsersRepository(api: api)
     }
     
     public func friendInterationsUseCase() -> FriendInteractionsUseCase {
@@ -47,6 +47,10 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
 
     public func spendingInteractionsUseCase() -> SpendingInteractionsUseCase {
         DefaultSpendingInteractionsUseCase(api: api)
+    }
+
+    public func usersOfflineRepository() -> UsersOfflineRepository {
+        DefaultUsersOfflineRepository(persistency: persistency)
     }
 }
 

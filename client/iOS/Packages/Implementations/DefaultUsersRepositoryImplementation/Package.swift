@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "DefaultAuthorizedSessionRepositoryImplementation",
+    name: "DefaultUsersRepositoryImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultAuthorizedSessionRepositoryImplementation",
-            targets: ["DefaultAuthorizedSessionRepositoryImplementation"]
+            name: "DefaultUsersRepositoryImplementation",
+            targets: ["DefaultUsersRepositoryImplementation"]
         ),
     ],
     dependencies: [
@@ -19,11 +19,12 @@ let package = Package(
         .package(path: "../../Api"),
         .package(path: "../../ApiDomainConvenience"),
         .package(path: "../../DataTransferObjects"),
+        .package(path: "../Interfaces/PersistentStorage"),
     ],
     targets: [
         .target(
-            name: "DefaultAuthorizedSessionRepositoryImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects"],
+            name: "DefaultUsersRepositoryImplementation",
+            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

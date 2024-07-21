@@ -29,6 +29,9 @@ class AccountViewController: UIViewController {
             action: #selector(onQr)
         )
         navigationItem.rightBarButtonItem?.tintColor = .p.accent
+        Task.detached {
+            await self.model.start()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {

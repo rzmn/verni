@@ -2,6 +2,7 @@ import Combine
 import Domain
 import DI
 import UIKit
+import Base
 internal import DesignSystem
 
 actor AccountModel {
@@ -12,13 +13,17 @@ actor AccountModel {
     let subject: CurrentValueSubject<AccountState, Never>
     private let qrPreviewModel: QrPreviewModel
     private let usersRepository: UsersRepository
+    private let usersOfflineRepository: UsersOfflineRepository
     private let appRouter: AppRouter
+    private let scheduler: AsyncSerialScheduler
 
     init(di: ActiveSessionDIContainer, appRouter: AppRouter) async {
         self.appRouter = appRouter
         qrPreviewModel = await QrPreviewModel(di: di, router: appRouter)
         subject = CurrentValueSubject(AccountState(session: .initial))
         usersRepository = di.usersRepository()
+        usersOfflineRepository = di.usersOfflineRepository()
+        scheduler = AsyncSerialScheduler()
     }
 
     private var flowContinuation: CheckedContinuation<FlowResult, Never>?
@@ -34,36 +39,49 @@ actor AccountModel {
         }
     }
 
-    func refresh() async {
-        switch await usersRepository.getHostInfo() {
-        case .success(let user):
+    func start() async {
+        await scheduler.run { [weak self] in
+            guard let self else { return }
+            guard let user = await usersOfflineRepository.getHostInfo() else {
+                return
+            }
             subject.send(AccountState(subject.value, session: .loaded(user)))
-        case .failure(let error):
-            switch error {
-            case .noConnection(let error):
-                subject.send(AccountState(subject.value, session: .failed(previous: subject.value.session, "\(error)")))
-            case .notAuthorized(let error):
-                await appRouter.alert(
-                    config: Alert.Config(
-                        title: "alert_title_unauthorized".localized,
-                        message: "\(error)",
-                        actions: [
-                            Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
-                                await self?.handle(flowResult: .loggedOut)
-                            }
-                        ]
+        }
+    }
+
+    func refresh() async {
+        await scheduler.run { [weak self] in
+            guard let self else { return }
+            switch await usersRepository.getHostInfo() {
+            case .success(let user):
+                subject.send(AccountState(subject.value, session: .loaded(user)))
+            case .failure(let error):
+                switch error {
+                case .noConnection(let error):
+                    subject.send(AccountState(subject.value, session: .failed(previous: subject.value.session, "\(error)")))
+                case .notAuthorized(let error):
+                    await appRouter.alert(
+                        config: Alert.Config(
+                            title: "alert_title_unauthorized".localized,
+                            message: "\(error)",
+                            actions: [
+                                Alert.Action(title: "alert_action_auth".localized) { [weak self] _ in
+                                    await self?.handle(flowResult: .loggedOut)
+                                }
+                            ]
+                        )
                     )
-                )
-            case .other(let error):
-                await appRouter.alert(
-                    config: Alert.Config(
-                        title: "unknown_error_hint".localized,
-                        message: "\(error)",
-                        actions: [
-                            Alert.Action(title: "alert_action_ok".localized)
-                        ]
+                case .other(let error):
+                    await appRouter.alert(
+                        config: Alert.Config(
+                            title: "unknown_error_hint".localized,
+                            message: "\(error)",
+                            actions: [
+                                Alert.Action(title: "alert_action_ok".localized)
+                            ]
+                        )
                     )
-                )
+                }
             }
         }
     }

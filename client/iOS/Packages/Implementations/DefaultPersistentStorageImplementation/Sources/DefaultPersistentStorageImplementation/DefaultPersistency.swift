@@ -4,12 +4,13 @@ import Logging
 import PersistentStorage
 internal import SwiftUI
 
-class DefaultPersistency: Persistency {
+@StorageActor class DefaultPersistency: Persistency {
     let logger: Logger
 
     private let modelContext: ModelContext
     private let hostId: UserDto.ID
     private let queue = DispatchQueue(label: "\(DefaultPersistency.self)")
+    private var refreshToken: String
 
     init(
         modelContext: ModelContext,
@@ -23,17 +24,18 @@ class DefaultPersistency: Persistency {
         self.logger = logger
     }
 
-    public var refreshToken: String {
-        didSet {
-            let newValue = refreshToken
-            queue.async {
-                self.modelContext.insert(PersistentRefreshToken(payload: newValue))
-                do {
-                    try self.modelContext.save()
-                } catch {
-                    self.logE { "failed to update token error: \(error)" }
-                }
-            }
+    func getRefreshToken() async -> String {
+        refreshToken
+    }
+
+    func update(refreshToken: String) async {
+        self.refreshToken = refreshToken
+        do {
+            try modelContext.delete(model: PersistentRefreshToken.self)
+            modelContext.insert(PersistentRefreshToken(payload: refreshToken))
+            try modelContext.save()
+        } catch {
+            self.logE { "failed to update token error: \(error)" }
         }
     }
 
@@ -42,39 +44,32 @@ class DefaultPersistency: Persistency {
     }
 
     public func user(id: UserDto.ID) async -> UserDto? {
-        await withCheckedContinuation { continuation in
-            queue.async {
-                let descriptor = {
-                    var d = FetchDescriptor<PersistentUser>(predicate: #Predicate { user in
-                        user.payload.login == id
-                    })
-                    d.fetchLimit = 1
-                    return d
-                }()
-                do {
-                    continuation.resume(returning: try self.modelContext.fetch(descriptor).map(\.payload).first)
-                } catch {
-                    self.logE { "fetch user failed error: \(error)" }
-                    continuation.resume(returning: nil)
-                    return
-                }
-            }
+        let descriptor = {
+            var d = FetchDescriptor<PersistentUser>(predicate: #Predicate { user in
+                user.payload.login == id
+            })
+            d.fetchLimit = 1
+            return d
+        }()
+        do {
+            return try modelContext.fetch(descriptor).map(\.payload).first
+        } catch {
+            self.logE { "fetch user failed error: \(error)" }
+            return nil
         }
     }
 
-    public func update(users: [UserDto]) {
-        queue.async {
-            users.map(PersistentUser.init).forEach(self.modelContext.insert)
-            do {
-                try self.modelContext.save()
-            } catch {
-                self.logE { "failed to update users error: \(error)" }
-            }
+    public func update(users: [UserDto]) async {
+        users.map(PersistentUser.init).forEach(modelContext.insert)
+        do {
+            try self.modelContext.save()
+        } catch {
+            self.logE { "failed to update users error: \(error)" }
         }
     }
 
-    func invalidate() {
-        // TODO:
+    func invalidate() async {
+        modelContext.container.deleteAllData()
     }
 }
 

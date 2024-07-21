@@ -48,14 +48,14 @@ public class ActiveSession: TokenRefresher {
         self.persistency = persistency
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
-        self.api = Api(service: apiServiceFactory.create(tokenRefresher: self), polling: TimerBasedPolling())
+        self.api = Api(service: apiServiceFactory.create(tokenRefresher: self), polling: TimerBasedPolling(), persistency: persistency)
     }
 
     public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        switch await anonymousApi.refresh(token: persistency.refreshToken) {
+        switch await anonymousApi.refresh(token: await persistency.getRefreshToken()) {
         case .success(let tokens):
             accessToken = tokens.accessToken
-            persistency.refreshToken = tokens.refreshToken
+            await persistency.update(refreshToken: tokens.refreshToken)
             return .success(())
         case .failure(let reason):
             switch reason {
@@ -77,6 +77,8 @@ public class ActiveSession: TokenRefresher {
     }
 
     public func invalidate() {
-        persistency.invalidate()
+        Task.detached {
+            await self.persistency.invalidate()
+        }
     }
 }

@@ -18,7 +18,6 @@
 		616BB05D2C42AEDE002759F0 /* AuthSession in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB05C2C42AEDE002759F0 /* AuthSession */; };
 		616BB05F2C42AEDE002759F0 /* Base in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB05E2C42AEDE002759F0 /* Base */; };
 		616BB0612C42AEDE002759F0 /* DefaultApiServiceImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0602C42AEDE002759F0 /* DefaultApiServiceImplementation */; };
-		616BB0632C42AEDE002759F0 /* DefaultAuthorizedSessionRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0622C42AEDE002759F0 /* DefaultAuthorizedSessionRepositoryImplementation */; };
 		616BB0652C42AEDE002759F0 /* DefaultAuthUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0642C42AEDE002759F0 /* DefaultAuthUseCaseImplementation */; };
 		616BB0672C42AEDE002759F0 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0662C42AEDE002759F0 /* DefaultDependencies */; };
 		616BB0692C42AEDE002759F0 /* DefaultFriendInteractionsUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0682C42AEDE002759F0 /* DefaultFriendInteractionsUseCaseImplementation */; };
@@ -30,11 +29,13 @@
 		616BB0752C42AEDE002759F0 /* Domain in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0742C42AEDE002759F0 /* Domain */; };
 		616BB0772C42AEDE002759F0 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0762C42AEDE002759F0 /* Logging */; };
 		616BB0792C42AEDE002759F0 /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = 616BB0782C42AEDE002759F0 /* Networking */; };
+		61F0738A2C4D87E600A60EE7 /* DefaultUsersRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61F073892C4D87E600A60EE7 /* DefaultUsersRepositoryImplementation */; };
 		61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61FD347B2C40242F002C1A5A /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		6116BCB52C4D5F3B00515B10 /* DefaultPersistentStorageImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultPersistentStorageImplementation; sourceTree = "<group>"; };
+		6116BCB62C4D87BB00515B10 /* DefaultUsersRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultUsersRepositoryImplementation; sourceTree = "<group>"; };
 		61414F7E2C2F02A100B2C027 /* Accounty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accounty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61414F812C2F02A100B2C027 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		61414F832C2F02A100B2C027 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,7 +54,6 @@
 		61D3B3DF2C42AEAE000585D1 /* ApiDomainConvenience */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ApiDomainConvenience; sourceTree = "<group>"; };
 		61D3B3E02C42AEAE000585D1 /* AuthSession */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthSession; sourceTree = "<group>"; };
 		61D3B3E12C42AEAE000585D1 /* DefaultApiServiceImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiServiceImplementation; sourceTree = "<group>"; };
-		61D3B3E22C42AEAE000585D1 /* DefaultAuthorizedSessionRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAuthorizedSessionRepositoryImplementation; sourceTree = "<group>"; };
 		61D3B3E32C42AEAE000585D1 /* DefaultAuthUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAuthUseCaseImplementation; sourceTree = "<group>"; };
 		61D3B3E42C42AEAE000585D1 /* DefaultDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDependencies; sourceTree = "<group>"; };
 		61D3B3E52C42AEAE000585D1 /* DefaultFriendInteractionsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultFriendInteractionsUseCaseImplementation; sourceTree = "<group>"; };
@@ -85,11 +85,11 @@
 				616BB06D2C42AEDE002759F0 /* DefaultNetworkingImplementation in Frameworks */,
 				616BB0552C42AEDE002759F0 /* Api in Frameworks */,
 				616BB0592C42AEDE002759F0 /* ApiService in Frameworks */,
+				61F0738A2C4D87E600A60EE7 /* DefaultUsersRepositoryImplementation in Frameworks */,
 				616BB0612C42AEDE002759F0 /* DefaultApiServiceImplementation in Frameworks */,
 				616BB0572C42AEDE002759F0 /* ApiDomainConvenience in Frameworks */,
 				616BB0732C42AEDE002759F0 /* DI in Frameworks */,
 				616BB0692C42AEDE002759F0 /* DefaultFriendInteractionsUseCaseImplementation in Frameworks */,
-				616BB0632C42AEDE002759F0 /* DefaultAuthorizedSessionRepositoryImplementation in Frameworks */,
 				616BB05D2C42AEDE002759F0 /* AuthSession in Frameworks */,
 				616BB0672C42AEDE002759F0 /* DefaultDependencies in Frameworks */,
 			);
@@ -159,6 +159,7 @@
 		61D3B3E92C42AEAE000585D1 /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				6116BCB62C4D87BB00515B10 /* DefaultUsersRepositoryImplementation */,
 				6116BCB52C4D5F3B00515B10 /* DefaultPersistentStorageImplementation */,
 				61C639352C4D2A0100BF5017 /* DataTransferObjects */,
 				6171E17D2C49A3B600E730D8 /* DefaultSpendingInteractionsUseCaseImplementation */,
@@ -167,7 +168,6 @@
 				61D3B3DF2C42AEAE000585D1 /* ApiDomainConvenience */,
 				61D3B3E02C42AEAE000585D1 /* AuthSession */,
 				61D3B3E12C42AEAE000585D1 /* DefaultApiServiceImplementation */,
-				61D3B3E22C42AEAE000585D1 /* DefaultAuthorizedSessionRepositoryImplementation */,
 				61D3B3E32C42AEAE000585D1 /* DefaultAuthUseCaseImplementation */,
 				61D3B3E42C42AEAE000585D1 /* DefaultDependencies */,
 				61D3B3E52C42AEAE000585D1 /* DefaultFriendInteractionsUseCaseImplementation */,
@@ -232,7 +232,6 @@
 				616BB05C2C42AEDE002759F0 /* AuthSession */,
 				616BB05E2C42AEDE002759F0 /* Base */,
 				616BB0602C42AEDE002759F0 /* DefaultApiServiceImplementation */,
-				616BB0622C42AEDE002759F0 /* DefaultAuthorizedSessionRepositoryImplementation */,
 				616BB0642C42AEDE002759F0 /* DefaultAuthUseCaseImplementation */,
 				616BB0662C42AEDE002759F0 /* DefaultDependencies */,
 				616BB0682C42AEDE002759F0 /* DefaultFriendInteractionsUseCaseImplementation */,
@@ -244,6 +243,7 @@
 				616BB0742C42AEDE002759F0 /* Domain */,
 				616BB0762C42AEDE002759F0 /* Logging */,
 				616BB0782C42AEDE002759F0 /* Networking */,
+				61F073892C4D87E600A60EE7 /* DefaultUsersRepositoryImplementation */,
 			);
 			productName = SharedExpenses;
 			productReference = 61414F7E2C2F02A100B2C027 /* Accounty.app */;
@@ -562,10 +562,6 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultApiServiceImplementation;
 		};
-		616BB0622C42AEDE002759F0 /* DefaultAuthorizedSessionRepositoryImplementation */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultAuthorizedSessionRepositoryImplementation;
-		};
 		616BB0642C42AEDE002759F0 /* DefaultAuthUseCaseImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultAuthUseCaseImplementation;
@@ -609,6 +605,10 @@
 		616BB0782C42AEDE002759F0 /* Networking */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Networking;
+		};
+		61F073892C4D87E600A60EE7 /* DefaultUsersRepositoryImplementation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultUsersRepositoryImplementation;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

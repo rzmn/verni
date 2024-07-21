@@ -4,6 +4,10 @@ import SwiftData
 import DataTransferObjects
 import PersistentStorage
 
+@globalActor public actor StorageActor: GlobalActor {
+    public static let shared = StorageActor()
+}
+
 public class DefaultPersistencyFactory {
     public let logger: Logger
 
@@ -13,7 +17,7 @@ public class DefaultPersistencyFactory {
 }
 
 extension DefaultPersistencyFactory: PersistencyFactory {
-    public func awake() -> Persistency? {
+    @StorageActor public func awake() -> Persistency? {
         logI { "awaking persistence..." }
         let dbUrl: URL
         do {
@@ -22,7 +26,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
             let contents = try FileManager.default
                 .contentsOfDirectory(at: dbDirectory, includingPropertiesForKeys: nil)
                 .filter { $0.isFileURL && DbNameBuilder.shared.isDbName($0.lastPathComponent) }
-            if contents.count != 1 {
+            if contents.isEmpty {
                 logI { "has no persistence" }
                 return nil
             }
@@ -63,7 +67,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
         }
     }
     
-    public func create(hostId: DataTransferObjects.UserDto.ID, refreshToken: String) throws -> Persistency {
+    @StorageActor public func create(hostId: UserDto.ID, refreshToken: String) throws -> Persistency {
         logI { "creating persistence..." }
         let directoryUrl = DbNameBuilder.shared.dbDirectory
         let modelContainer = try ModelContainer(

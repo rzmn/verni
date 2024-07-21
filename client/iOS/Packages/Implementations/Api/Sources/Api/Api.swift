@@ -3,6 +3,7 @@ import Networking
 import Combine
 import Base
 import DataTransferObjects
+import PersistentStorage
 
 fileprivate protocol _Parameters: Encodable, CompactDescription {}
 
@@ -14,10 +15,12 @@ public class Api {
     public let friendsUpdated = PassthroughSubject<Void, Never>()
     public let spendingsUpdated = PassthroughSubject<Void, Never>()
     private let service: ApiService
+    private let persistency: Persistency?
     private var subscriptions = Set<AnyCancellable>()
 
-    public init(service: ApiService, polling: ApiPolling? = nil) {
+    public init(service: ApiService, polling: ApiPolling? = nil, persistency: Persistency? = nil) {
         self.service = service
+        self.persistency = persistency
         polling?.friends
             .sink {
                 self.friendsUpdated.send(())
@@ -80,34 +83,51 @@ extension Api {
 
 extension Api {
     public func getMyInfo() async -> ApiResult<UserDto> {
-        let result: ApiResultInternal<SingleValueResponse<UserDto>> = await run(method: Method.Users.getMyInfo)
-        return mapApiResponse(result).map(\.value)
+        let result = await run(
+            method: Method.Users.getMyInfo
+        ) as ApiResultInternal<SingleValueResponse<UserDto>>
+        return mapApiResponse(result).map { r in
+            Task.detached {
+                await self.persistency?.update(users: [r.value])
+            }
+            return r.value
+        }
     }
 
     public func getUsers(uids: [UserDto.ID]) async -> ApiResult<[UserDto]> {
         struct RequestParameters: _Parameters {
             let ids: [UserDto.ID]
         }
-        let result: ApiResultInternal<SingleValueResponse<[UserDto]>> = await run(
+        let result = await run(
             method: Method.Users.get,
             parameters: RequestParameters(
                 ids: uids
             )
-        )
-        return mapApiResponse(result).map(\.value)
+        ) as ApiResultInternal<SingleValueResponse<[UserDto]>>
+        return mapApiResponse(result).map { r in
+            Task.detached {
+                await self.persistency?.update(users: r.value)
+            }
+            return r.value
+        }
     }
 
     public func searchUsers(query: String) async -> ApiResult<[UserDto]> {
         struct RequestParameters: _Parameters {
             let query: String
         }
-        let result: ApiResultInternal<SingleValueResponse<[UserDto]>> = await run(
+        let result = await run(
             method: Method.Users.search,
             parameters: RequestParameters(
                 query: query
             )
-        )
-        return mapApiResponse(result).map(\.value)
+        ) as ApiResultInternal<SingleValueResponse<[UserDto]>>
+        return mapApiResponse(result).map { r in
+            Task.detached {
+                await self.persistency?.update(users: r.value)
+            }
+            return r.value
+        }
     }
 }
 

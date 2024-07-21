@@ -12,6 +12,7 @@ public protocol ActiveSessionDIContainer {
     func spendingInteractionsUseCase() -> SpendingInteractionsUseCase
     func friendListRepository() -> FriendsRepository
     func usersRepository() -> UsersRepository
+    func usersOfflineRepository() -> UsersOfflineRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
     func qrInviteUseCase() -> QRInviteUseCase
 }

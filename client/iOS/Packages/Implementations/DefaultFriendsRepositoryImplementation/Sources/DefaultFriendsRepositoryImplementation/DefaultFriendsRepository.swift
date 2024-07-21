@@ -47,22 +47,7 @@ extension DefaultFriendsRepository: FriendsRepository {
             return .failure(GeneralError(apiError: error))
         }
         return .success(
-            users.map { user in
-                User(id: user.login, status: {
-                    switch user.friendStatus {
-                    case .no:
-                        return .no
-                    case .incomingRequest:
-                        return .incoming
-                    case .outgoingRequest:
-                        return .outgoing
-                    case .friends:
-                        return .friend
-                    case .me:
-                        return .me
-                    }
-                }())
-            }.reduce(into: [:], { dict, user in
+            users.map(User.init).reduce(into: [:], { dict, user in
                 switch user.status {
                 case .me, .no:
                     break
