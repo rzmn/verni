@@ -7,7 +7,7 @@ class CredentialsValidator {
     lazy var loginVerdict = loginSubject
         .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
         .flatMap { login in
-            Future<Result<Void, ValidationFailureReason>, Never>.init { promise in
+            Future<Result<Void, CredentialsValidationError>, Never>.init { promise in
                 if login.isEmpty {
                     promise(.success(.success(())))
                 } else {
@@ -22,7 +22,7 @@ class CredentialsValidator {
     lazy var passwordVerdict = passwordSubject
         .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
         .flatMap { password in
-            Future<Result<Void, ValidationFailureReason>, Never>.init { promise in
+            Future<Result<Void, CredentialsValidationError>, Never>.init { promise in
                 if password.isEmpty {
                     promise(.success(.success(())))
                 } else {

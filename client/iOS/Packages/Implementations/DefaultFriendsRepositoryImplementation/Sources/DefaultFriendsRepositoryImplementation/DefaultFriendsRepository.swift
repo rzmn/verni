@@ -16,10 +16,10 @@ extension DefaultFriendsRepository: FriendsRepository {
         api.friendsUpdated.eraseToAnyPublisher()
     }
     
-    public func getFriends(set: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
+    public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let result = await api.getFriends(
             kinds: FriendshipKind.allCases
-                .filter({ set.contains(FriendshipKindSet(element: $0)) })
+                .filter(set.contains)
                 .map { kind in
                     switch kind {
                     case .friends:

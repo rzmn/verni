@@ -14,14 +14,14 @@ public class DefaultAuthUseCase {
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
-    public func awake() async -> Result<ActiveSession, AwakeFailureReason> {
+    public func awake() async -> Result<ActiveSession, AwakeError> {
         guard let session = await ActiveSession.awake(anonymousApi: api, factory: apiServiceFactory) else {
             return.failure(.hasNoSession)
         }
         return .success(session)
     }
     
-    public func login(credentials: Credentials) async -> Result<ActiveSession, LoginFailureReason> {
+    public func login(credentials: Credentials) async -> Result<ActiveSession, LoginError> {
         let apiError: ApiError
         switch await api.login(credentials: CredentialsDto(login: credentials.login, password: credentials.password)) {
         case .success(let token):
@@ -55,7 +55,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
     }
     
-    public func signup(credentials: Credentials) async -> Result<ActiveSession, SignupFailureReason> {
+    public func signup(credentials: Credentials) async -> Result<ActiveSession, SignupError> {
         let apiError: ApiError
         switch await api.signup(credentials: CredentialsDto(login: credentials.login, password: credentials.password)) {
         case .success(let token):
@@ -89,7 +89,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
     }
     
-    public func validateLogin(_ login: String) async -> Result<Void, ValidationFailureReason> {
+    public func validateLogin(_ login: String) async -> Result<Void, CredentialsValidationError> {
         let minAllowedLength = 4
         guard login.count >= minAllowedLength else {
             return .failure(.tooShort(minAllowedLength: minAllowedLength))
@@ -97,7 +97,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         return .success(())
     }
 
-    public func validatePassword(_ password: String) async -> Result<Void, ValidationFailureReason> {
+    public func validatePassword(_ password: String) async -> Result<Void, CredentialsValidationError> {
         let minAllowedLength = 5
         guard password.count >= minAllowedLength else {
             return .failure(.tooShort(minAllowedLength: minAllowedLength))

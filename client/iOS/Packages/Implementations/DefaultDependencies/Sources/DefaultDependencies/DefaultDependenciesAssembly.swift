@@ -50,9 +50,9 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
 
 fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let impl: any AuthUseCase
-    private let awakeHook: () async -> Result<any DI.ActiveSessionDIContainer, AwakeFailureReason>
-    private let loginHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, LoginFailureReason>
-    private let signupHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, SignupFailureReason>
+    private let awakeHook: () async -> Result<any DI.ActiveSessionDIContainer, AwakeError>
+    private let loginHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, LoginError>
+    private let signupHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, SignupError>
 
     init<Impl: AuthUseCase>(impl: Impl) where Impl.AuthorizedSession == ActiveSession {
         self.impl = impl
@@ -73,23 +73,23 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
         }
     }
 
-    func awake() async -> Result<any ActiveSessionDIContainer, AwakeFailureReason> {
+    func awake() async -> Result<any ActiveSessionDIContainer, AwakeError> {
         await awakeHook()
     }
 
-    func login(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, LoginFailureReason> {
+    func login(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, LoginError> {
         await loginHook(credentials)
     }
 
-    func signup(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, SignupFailureReason> {
+    func signup(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, SignupError> {
         await signupHook(credentials)
     }
 
-    func validateLogin(_ login: String) async -> Result<Void, ValidationFailureReason> {
+    func validateLogin(_ login: String) async -> Result<Void, CredentialsValidationError> {
         await impl.validateLogin(login)
     }
 
-    func validatePassword(_ password: String) async -> Result<Void, ValidationFailureReason> {
+    func validatePassword(_ password: String) async -> Result<Void, CredentialsValidationError> {
         await impl.validatePassword(password)
     }
 }
