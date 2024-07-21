@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
-        .package(path: "../../Domain"),
+        .package(path: "../../Interfaces/Domain"),
     ],
     targets: [
         .target(

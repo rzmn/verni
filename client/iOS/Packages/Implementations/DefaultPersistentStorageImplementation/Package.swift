@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Interfaces/PersistentStorage"),
-        .package(path: "../../DataTransferObjects"),
+        .package(path: "../DataTransferObjects"),
         .package(path: "../../Shared/Logging"),
     ],
     targets: [

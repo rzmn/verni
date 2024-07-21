@@ -15,7 +15,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../DataTransferObjects"),
+        .package(path: "../../Implementations/DataTransferObjects"),
     ],
     targets: [
         .target(

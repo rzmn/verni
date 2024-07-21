@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../Api"),
-        .package(path: "../PersistentStorage")
+        .package(path: "../../Interfaces/PersistentStorage")
     ],
     targets: [
         .target(

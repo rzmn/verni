@@ -15,9 +15,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../../Domain"),
-        .package(path: "../../Networking"),
-        .package(path: "../../Logging"),
+        .package(path: "../../Interfaces/Domain"),
+        .package(path: "../../Interfaces/Networking"),
+        .package(path: "../../Shared/Logging"),
     ],
     targets: [
         .target(

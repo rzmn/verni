@@ -15,10 +15,10 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../ApiService"),
-        .package(path: "../Base"),
+        .package(path: "../../Interfaces/ApiService"),
+        .package(path: "../../Shared/Base"),
         .package(path: "../DataTransferObjects"),
-        .package(path: "../Interfaces/PersistentStorage"),
+        .package(path: "../../Interfaces/PersistentStorage"),
     ],
     targets: [
         .target(

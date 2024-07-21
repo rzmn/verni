@@ -15,8 +15,8 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../../Domain"),
-        .package(path: "../../Api"),
+        .package(path: "../../Interfaces/Domain"),
+        .package(path: "../Api"),
         .package(path: "../DataTransferObjects"),
     ],
     targets: [
