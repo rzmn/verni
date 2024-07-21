@@ -26,6 +26,10 @@ public extension Loggable {
     }
 }
 
+extension Logger: Loggable {
+    public var logger: Logger { self }
+}
+
 @inline(__always)
 private func log(_ logger: Logger, severity: Logger.Severity, _ messageBlock: () -> String) {
     guard severity <= logger.severity else {

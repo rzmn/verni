@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ApiDomainConvenience",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -17,11 +17,12 @@ let package = Package(
     dependencies: [
         .package(path: "../../Domain"),
         .package(path: "../../Api"),
+        .package(path: "../DataTransferObjects"),
     ],
     targets: [
         .target(
             name: "ApiDomainConvenience",
-            dependencies: ["Domain", "Api"],
+            dependencies: ["Domain", "Api", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

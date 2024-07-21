@@ -1,6 +1,7 @@
 import Domain
 import Api
 import Combine
+import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultFriendsRepository {

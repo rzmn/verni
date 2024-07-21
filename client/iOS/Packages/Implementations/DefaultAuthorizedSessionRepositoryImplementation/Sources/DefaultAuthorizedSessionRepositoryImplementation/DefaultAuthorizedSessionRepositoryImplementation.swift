@@ -1,5 +1,6 @@
 import Domain
 import Api
+import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultAuthorizedSessionRepository {

@@ -2,6 +2,7 @@ import ApiService
 import Networking
 import Combine
 import Base
+import DataTransferObjects
 
 fileprivate protocol _Parameters: Encodable, CompactDescription {}
 

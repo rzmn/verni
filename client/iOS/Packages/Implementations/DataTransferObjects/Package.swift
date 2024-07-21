@@ -4,20 +4,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "Domain",
+    name: "DataTransferObjects",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "Domain",
-            targets: ["Domain"]
+            name: "DataTransferObjects",
+            targets: ["DataTransferObjects"]
         ),
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "Domain",
+            name: "DataTransferObjects",
             dependencies: [],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

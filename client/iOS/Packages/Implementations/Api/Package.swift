@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Api",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -17,11 +17,12 @@ let package = Package(
     dependencies: [
         .package(path: "../ApiService"),
         .package(path: "../Base"),
+        .package(path: "../DataTransferObjects"),
     ],
     targets: [
         .target(
             name: "Api",
-            dependencies: ["ApiService", "Base"],
+            dependencies: ["ApiService", "Base", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

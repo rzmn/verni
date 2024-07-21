@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "DefaultAuthorizedSessionRepositoryImplementation",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -18,11 +18,12 @@ let package = Package(
         .package(path: "../../Domain"),
         .package(path: "../../Api"),
         .package(path: "../../ApiDomainConvenience"),
+        .package(path: "../../DataTransferObjects"),
     ],
     targets: [
         .target(
             name: "DefaultAuthorizedSessionRepositoryImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience"],
+            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

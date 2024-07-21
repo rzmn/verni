@@ -2,52 +2,60 @@ import Foundation
 import Api
 import ApiService
 import Domain
+import PersistentStorage
 
-private let refreshTokenKey: String = "refreshToken"
 public class ActiveSession: TokenRefresher {
     public var api: Api!
     private let anonymousApi: Api
 
-    public private(set) var refreshToken: String
+    public private(set) var persistency: Persistency
     public private(set) var accessToken: String?
 
-    public static func awake(anonymousApi: Api, accessToken: String?, refreshToken: String, factory: ApiServiceFactory) async -> ActiveSession {
-        UserDefaults.standard.setValue(refreshToken, forKey: refreshTokenKey)
+    public static func awake(
+        anonymousApi: Api,
+        hostId: User.ID,
+        accessToken: String?,
+        refreshToken: String,
+        apiServiceFactory: ApiServiceFactory,
+        persistencyFactory: PersistencyFactory
+    ) async throws -> ActiveSession {
+        let persistency = try persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
         return ActiveSession(
             anonymousApi: anonymousApi,
-            refreshToken: refreshToken,
+            persistency: persistency,
             accessToken: accessToken,
-            factory: factory
+            apiServiceFactory: apiServiceFactory
         )
     }
 
-    public static func awake(anonymousApi: Api, factory: ApiServiceFactory) async -> ActiveSession? {
-        let cachedToken = UserDefaults.standard.string(forKey: refreshTokenKey)
-        guard let cachedToken else {
+    public static func awake(
+        anonymousApi: Api,
+        apiServiceFactory: ApiServiceFactory,
+        persistencyFactory: PersistencyFactory
+    ) async -> ActiveSession? {
+        guard let persistency = persistencyFactory.awake() else {
             return nil
         }
         return ActiveSession(
             anonymousApi: anonymousApi,
-            refreshToken: cachedToken,
+            persistency: persistency,
             accessToken: nil,
-            factory: factory
+            apiServiceFactory: apiServiceFactory
         )
     }
 
-    init(anonymousApi: Api, refreshToken: String, accessToken: String?, factory: ApiServiceFactory) {
-        UserDefaults.standard.setValue(refreshToken, forKey: refreshTokenKey)
-        self.refreshToken = refreshToken
+    init(anonymousApi: Api, persistency: Persistency, accessToken: String?, apiServiceFactory: ApiServiceFactory) {
+        self.persistency = persistency
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
-        self.api = Api(service: factory.create(tokenRefresher: self), polling: TimerBasedPolling())
+        self.api = Api(service: apiServiceFactory.create(tokenRefresher: self), polling: TimerBasedPolling())
     }
 
     public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        switch await anonymousApi.refresh(token: refreshToken) {
+        switch await anonymousApi.refresh(token: persistency.refreshToken) {
         case .success(let tokens):
-            UserDefaults.standard.setValue(tokens.refreshToken, forKey: refreshTokenKey)
             accessToken = tokens.accessToken
-            refreshToken = tokens.refreshToken
+            persistency.refreshToken = tokens.refreshToken
             return .success(())
         case .failure(let reason):
             switch reason {
@@ -69,6 +77,6 @@ public class ActiveSession: TokenRefresher {
     }
 
     public func invalidate() {
-        UserDefaults.standard.removeObject(forKey: refreshTokenKey)
+        persistency.invalidate()
     }
 }

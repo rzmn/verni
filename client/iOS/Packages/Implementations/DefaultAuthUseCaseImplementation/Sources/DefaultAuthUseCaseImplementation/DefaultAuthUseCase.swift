@@ -2,20 +2,24 @@ import Domain
 import Api
 import ApiService
 import AuthSession
+import DataTransferObjects
+import PersistentStorage
 
 public class DefaultAuthUseCase {
     private let api: Api
     private let apiServiceFactory: ApiServiceFactory
+    private let persistencyFactory: PersistencyFactory
 
-    public init(api: Api, apiServiceFactory: ApiServiceFactory) {
+    public init(api: Api, apiServiceFactory: ApiServiceFactory, persistencyFactory: PersistencyFactory) {
         self.api = api
         self.apiServiceFactory = apiServiceFactory
+        self.persistencyFactory = persistencyFactory
     }
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
     public func awake() async -> Result<ActiveSession, AwakeError> {
-        guard let session = await ActiveSession.awake(anonymousApi: api, factory: apiServiceFactory) else {
+        guard let session = await ActiveSession.awake(anonymousApi: api, apiServiceFactory: apiServiceFactory, persistencyFactory: persistencyFactory) else {
             return.failure(.hasNoSession)
         }
         return .success(session)
@@ -25,14 +29,20 @@ extension DefaultAuthUseCase: AuthUseCase {
         let apiError: ApiError
         switch await api.login(credentials: CredentialsDto(login: credentials.login, password: credentials.password)) {
         case .success(let token):
-            return .success(
-                await ActiveSession.awake(
-                    anonymousApi: api,
-                    accessToken: token.accessToken,
-                    refreshToken: token.refreshToken,
-                    factory: apiServiceFactory
+            do {
+                return .success(
+                    try await ActiveSession.awake(
+                        anonymousApi: api,
+                        hostId: credentials.login,
+                        accessToken: token.accessToken,
+                        refreshToken: token.refreshToken,
+                        apiServiceFactory: apiServiceFactory,
+                        persistencyFactory: persistencyFactory
+                    )
                 )
-            )
+            } catch {
+                return .failure(.other(error))
+            }
         case .failure(let error):
             apiError = error
         }
@@ -59,14 +69,20 @@ extension DefaultAuthUseCase: AuthUseCase {
         let apiError: ApiError
         switch await api.signup(credentials: CredentialsDto(login: credentials.login, password: credentials.password)) {
         case .success(let token):
-            return .success(
-                await ActiveSession.awake(
-                    anonymousApi: api,
-                    accessToken: token.accessToken,
-                    refreshToken: token.refreshToken,
-                    factory: apiServiceFactory
+            do {
+                return .success(
+                    try await ActiveSession.awake(
+                        anonymousApi: api,
+                        hostId: credentials.login,
+                        accessToken: token.accessToken,
+                        refreshToken: token.refreshToken,
+                        apiServiceFactory: apiServiceFactory,
+                        persistencyFactory: persistencyFactory
+                    )
                 )
-            )
+            } catch {
+                return .failure(.other(error))
+            }
         case .failure(let error):
             apiError = error
         }

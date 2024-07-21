@@ -1,7 +1,7 @@
 import Base
 
-public struct UserDto: Decodable {
-    public enum FriendStatus: Int, Decodable {
+public struct UserDto: Codable {
+    public enum FriendStatus: Int, Codable {
         case no = 0
         case incomingRequest = 1
         case outgoingRequest = 2

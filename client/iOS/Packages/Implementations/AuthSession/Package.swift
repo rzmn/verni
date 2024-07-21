@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "AuthSession",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -15,12 +15,13 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../Api")
+        .package(path: "../Api"),
+        .package(path: "../PersistentStorage")
     ],
     targets: [
         .target(
             name: "AuthSession",
-            dependencies: ["Api"],
+            dependencies: ["Api", "PersistentStorage"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

@@ -1,6 +1,7 @@
 import Foundation
 import Api
 import Domain
+import DataTransferObjects
 
 extension Decimal {
     public init(dto: CostDto) {

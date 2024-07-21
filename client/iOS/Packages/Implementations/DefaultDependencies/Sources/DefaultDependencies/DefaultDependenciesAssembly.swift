@@ -4,6 +4,7 @@ internal import AuthSession
 internal import Api
 internal import ApiService
 internal import Networking
+internal import PersistentStorage
 internal import DefaultAuthUseCaseImplementation
 internal import DefaultApiServiceImplementation
 internal import DefaultNetworkingImplementation
@@ -13,6 +14,7 @@ internal import DefaultFriendInteractionsUseCaseImplementation
 internal import DefaultQRInviteUseCaseImplementation
 internal import DefaultSpendingInteractionsUseCaseImplementation
 internal import DefaultSpendingsRepositoryImplementation
+internal import DefaultPersistentStorageImplementation
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     public func logout() async {
@@ -104,7 +106,8 @@ public class DefaultDependenciesAssembly: DIContainer {
         AuthUseCaseAdapter(
             impl: DefaultAuthUseCase(
                 api: anonymousApi,
-                apiServiceFactory: apiServiceFactory()
+                apiServiceFactory: apiServiceFactory(), 
+                persistencyFactory: persistencyFactory()
             )
         )
     }
@@ -129,6 +132,10 @@ extension DefaultDependenciesAssembly {
             ),
             networkServiceFactory: networkServiceFactory()
         )
+    }
+
+    func persistencyFactory() -> PersistencyFactory {
+        DefaultPersistencyFactory(logger: .shared.with(prefix: "[db]"))
     }
 }
 

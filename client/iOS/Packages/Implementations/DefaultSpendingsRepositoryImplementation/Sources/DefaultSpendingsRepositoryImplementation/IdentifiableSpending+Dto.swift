@@ -1,6 +1,7 @@
 import Api
 import Domain
 import Foundation
+import DataTransferObjects
 internal import ApiDomainConvenience
 
 extension IdentifiableSpending {

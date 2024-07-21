@@ -1,6 +1,6 @@
 import Base
 
-public struct CredentialsDto: Encodable {
+public struct CredentialsDto: Codable {
     public let login: String
     public let password: String
 

@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "DefaultDependencies",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -22,6 +22,7 @@ let package = Package(
         .package(path: "../../ApiService"),
         .package(path: "../../Api"),
         .package(path: "../../AuthSession"),
+        .package(path: "../../PersistentStorage"),
         .package(path: "../Implementations/DefaultAuthUseCaseImplementation"),
         .package(path: "../Implementations/DefaultNetworkingImplementation"),
         .package(path: "../Implementations/DefaultApiServiceImplementation"),
@@ -31,6 +32,7 @@ let package = Package(
         .package(path: "../DefaultQRInviteUseCaseImplementation"),
         .package(path: "../DefaultSpendingInteractionsUseCaseImplementation"),
         .package(path: "../DefaultSpendingsRepositoryImplementation"),
+        .package(path: "../DefaultPersistentStorageImplementation"),
     ],
     targets: [
         .target(
@@ -43,6 +45,7 @@ let package = Package(
                 "ApiService",
                 "Api",
                 "AuthSession",
+                "PersistentStorage",
                 "DefaultNetworkingImplementation",
                 "DefaultApiServiceImplementation",
                 "DefaultAuthUseCaseImplementation",
@@ -52,6 +55,7 @@ let package = Package(
                 "DefaultQRInviteUseCaseImplementation",
                 "DefaultSpendingInteractionsUseCaseImplementation",
                 "DefaultSpendingsRepositoryImplementation",
+                "DefaultPersistentStorageImplementation",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

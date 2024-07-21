@@ -2,6 +2,7 @@ import Domain
 import Api
 import Combine
 import Foundation
+import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultSpendingInteractionsUseCase {

@@ -4,21 +4,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "Domain",
+    name: "DefaultPersistentStorageImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "Domain",
-            targets: ["Domain"]
+            name: "DefaultPersistentStorageImplementation",
+            targets: ["DefaultPersistentStorageImplementation"]
         ),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(path: "../../Interfaces/PersistentStorage"),
+        .package(path: "../../DataTransferObjects"),
+        .package(path: "../../Shared/Logging"),
+    ],
     targets: [
         .target(
-            name: "Domain",
-            dependencies: [],
+            name: "DefaultPersistentStorageImplementation",
+            dependencies: ["DataTransferObjects", "Logging", "PersistentStorage"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

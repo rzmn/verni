@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "DefaultAuthUseCaseImplementation",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -18,11 +18,12 @@ let package = Package(
         .package(path: "../../Domain"),
         .package(path: "../../Api"),
         .package(path: "../../AuthSession"),
+        .package(path: "../../DataTransferObjects"),
     ],
     targets: [
         .target(
             name: "DefaultAuthUseCaseImplementation",
-            dependencies: ["Domain", "Api", "AuthSession"],
+            dependencies: ["Domain", "Api", "AuthSession", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
