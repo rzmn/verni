@@ -16,6 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Interfaces/Domain"),
+        .package(path: "../../Interfaces/PersistentStorage"),
         .package(path: "../Api"),
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../DataTransferObjects"),
@@ -23,7 +24,7 @@ let package = Package(
     targets: [
         .target(
             name: "DefaultSpendingsRepositoryImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects"],
+            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

@@ -27,9 +27,14 @@ public extension DealDto {
 }
 
 @dynamicMemberLookup
-public struct IdentifiableDealDto: Decodable {
+public struct IdentifiableDealDto: Codable {
     public let id: DealDto.ID
     private let deal: DealDto
+
+    public init(id: DealDto.ID, deal: DealDto) {
+        self.id = id
+        self.deal = deal
+    }
 
     enum CodingKeys: CodingKey {
         case id
@@ -39,6 +44,12 @@ public struct IdentifiableDealDto: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(String.self, forKey: .id)
         self.deal = try DealDto(from: decoder)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try deal.encode(to: encoder)
     }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<DealDto, T>) -> T {

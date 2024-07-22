@@ -11,6 +11,11 @@ public struct UserDto: Codable {
     public typealias ID = String
     public let login: ID
     public let friendStatus: FriendStatus
+
+    public init(login: ID, friendStatus: FriendStatus) {
+        self.login = login
+        self.friendStatus = friendStatus
+    }
 }
 
 extension UserDto: CompactDescription {}

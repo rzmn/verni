@@ -6,3 +6,9 @@ extension User {
         self = User(id: dto.login, status: User.FriendStatus(dto: dto.friendStatus))
     }
 }
+
+extension UserDto {
+    public init(domain user: User) {
+        self = UserDto(login: user.id, friendStatus: FriendStatus(domain: user.status))
+    }
+}

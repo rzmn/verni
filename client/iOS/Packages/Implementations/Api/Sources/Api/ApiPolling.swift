@@ -1,27 +1,27 @@
-import Combine
 import Foundation
 
 public protocol ApiPolling {
-    var friends: AnyPublisher<Void, Never> { get }
-    var spendings: AnyPublisher<Void, Never> { get }
+    var friends: AsyncStream<Void> { get }
+    var spendings: AsyncStream<Void> { get }
 }
 
 public class TimerBasedPolling: ApiPolling {
-    private let timer = Timer
-        .publish(every: 7, on: .main, in: .common)
-        .autoconnect()
+    private let timerStream: AsyncStream<Void>
+    private let timer: Timer
 
-    public var friends: AnyPublisher<Void, Never> {
-        timer
-            .map { _ in () }
-            .eraseToAnyPublisher()
+    public init() {
+        let (stream, continuation) = AsyncStream<Void>.makeStream()
+        timerStream = stream
+        timer = Timer.scheduledTimer(withTimeInterval: 7, repeats: true) { _ in
+            continuation.yield()
+        }
     }
 
-    public var spendings: AnyPublisher<Void, Never> {
-        timer
-            .map { _ in () }
-            .eraseToAnyPublisher()
+    public var friends: AsyncStream<Void> {
+        timerStream
     }
 
-    public init() {}
+    public var spendings: AsyncStream<Void> {
+        timerStream
+    }
 }

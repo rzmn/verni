@@ -1,6 +1,5 @@
 import ApiService
 import Networking
-import Combine
 import Base
 import DataTransferObjects
 
@@ -10,20 +9,31 @@ public class Api {
     private enum RefreshTokenError: Error {
         case internalError
     }
+    public let friendsUpdated: AsyncStream<Void>
+    public let spendingsUpdated: AsyncStream<Void>
 
-    public let friendsUpdated = PassthroughSubject<Void, Never>()
-    public let spendingsUpdated = PassthroughSubject<Void, Never>()
+    private let friendsUpdatedContinuation: AsyncStream<Void>.Continuation
+    private let spendingsUpdatedContinuation: AsyncStream<Void>.Continuation
     private let service: ApiService
-    private var subscriptions = Set<AnyCancellable>()
 
     public init(service: ApiService, polling: ApiPolling? = nil) {
         self.service = service
-        polling?.friends
-            .sink {
-                self.friendsUpdated.send(())
-                self.spendingsUpdated.send(())
+        (friendsUpdated, friendsUpdatedContinuation) = AsyncStream.makeStream()
+        (spendingsUpdated, spendingsUpdatedContinuation) = AsyncStream.makeStream()
+        if let polling {
+            Task.detached { [weak self] in
+                guard let self else { return }
+                for await friendsUpdate in polling.friends {
+                    friendsUpdatedContinuation.yield(friendsUpdate)
+                }
             }
-            .store(in: &subscriptions)
+            Task.detached { [weak self] in
+                guard let self else { return }
+                for await spendingsUpdate in polling.spendings {
+                    spendingsUpdatedContinuation.yield(spendingsUpdate)
+                }
+            }
+        }
     }
 }
 
@@ -151,7 +161,7 @@ extension Api {
             )
         )
         if case .success = result {
-            friendsUpdated.send(())
+            friendsUpdatedContinuation.yield()
         }
         return mapApiResponse(result)
     }
@@ -167,7 +177,7 @@ extension Api {
             )
         )
         if case .success = result {
-            friendsUpdated.send(())
+            friendsUpdatedContinuation.yield()
         }
         return mapApiResponse(result)
     }
@@ -183,7 +193,7 @@ extension Api {
             )
         )
         if case .success = result {
-            friendsUpdated.send(())
+            friendsUpdatedContinuation.yield()
         }
         return mapApiResponse(result)
     }
@@ -199,7 +209,7 @@ extension Api {
             )
         )
         if case .success = result {
-            friendsUpdated.send(())
+            friendsUpdatedContinuation.yield()
         }
         return mapApiResponse(result)
     }
@@ -215,7 +225,7 @@ extension Api {
             )
         )
         if case .success = result {
-            friendsUpdated.send(())
+            friendsUpdatedContinuation.yield()
         }
         return mapApiResponse(result)
     }

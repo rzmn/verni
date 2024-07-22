@@ -1,36 +1,29 @@
 import Domain
 import Api
-import Combine
 import DataTransferObjects
+import PersistentStorage
 internal import ApiDomainConvenience
 
 public class DefaultFriendsRepository {
     private let api: Api
+    private let persistency: Persistency
 
-    public init(api: Api) {
+    public init(api: Api, persistency: Persistency) {
         self.api = api
+        self.persistency = persistency
     }
 }
 
 extension DefaultFriendsRepository: FriendsRepository {
-    public var friendsUpdated: AnyPublisher<Void, Never> {
-        api.friendsUpdated.eraseToAnyPublisher()
+    public var friendsUpdated: AsyncStream<Void> {
+        api.friendsUpdated
     }
     
     public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let result = await api.getFriends(
             kinds: FriendshipKind.allCases
                 .filter(set.contains)
-                .map { kind in
-                    switch kind {
-                    case .friends:
-                        return .friends
-                    case .incoming:
-                        return .subscriber
-                    case .pending:
-                        return .subscription
-                    }
-                }
+                .map(FriendshipKindDto.init)
         )
         let uids: [UserDto.ID]
         switch result {
@@ -46,25 +39,28 @@ extension DefaultFriendsRepository: FriendsRepository {
         case .failure(let error):
             return .failure(GeneralError(apiError: error))
         }
-        return .success(
-            users.map(User.init).reduce(into: [:], { dict, user in
-                switch user.status {
-                case .me, .no:
-                    break
-                case .outgoing:
-                    var array = dict[.pending] ?? []
-                    array.append(user)
-                    dict[.pending] = array
-                case .incoming:
-                    var array = dict[.incoming] ?? []
-                    array.append(user)
-                    dict[.incoming] = array
-                case .friend:
-                    var array = dict[.friends] ?? []
-                    array.append(user)
-                    dict[.friends] = array
-                }
-            })
-        )
+        let friendsByKind = users.map(User.init).reduce(into: [:], { dict, user in
+            switch user.status {
+            case .me, .no:
+                break
+            case .outgoing:
+                var array = dict[.pending] ?? []
+                array.append(user)
+                dict[.pending] = array
+            case .incoming:
+                var array = dict[.incoming] ?? []
+                array.append(user)
+                dict[.incoming] = array
+            case .friend:
+                var array = dict[.friends] ?? []
+                array.append(user)
+                dict[.friends] = array
+            }
+        }) as [FriendshipKind: [User]]
+        Task.detached { [weak self] in
+            guard let self else { return }
+            await persistency.storeFriends(friendsByKind)
+        }
+        return .success(friendsByKind)
     }
 }

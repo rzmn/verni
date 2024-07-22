@@ -8,5 +8,13 @@ public protocol Persistency {
     func user(id: User.ID) async -> User?
     func update(users: [User]) async
 
+    func getSpendingCounterparties() async -> [SpendingsPreview]?
+    func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async
+    func getSpendingsHistory(counterparty: User.ID) async -> [IdentifiableSpending]?
+    func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async
+
+    func getFriends(set: Set<FriendshipKind>) async -> [FriendshipKind : [User]]?
+    func storeFriends(_ friends: [FriendshipKind : [User]]) async
+
     func invalidate() async
 }

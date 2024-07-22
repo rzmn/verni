@@ -73,14 +73,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
             .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
         let db = try Connection(dbUrl.absoluteString)
         do {
-            try db.run(Schema.Tokens.table.create { t in
-                t.column(Schema.Tokens.Keys.id, primaryKey: true)
-                t.column(Schema.Tokens.Keys.token)
-            })
-            try db.run(Schema.Users.table.create { t in
-                t.column(Schema.Users.Keys.id, primaryKey: true)
-                t.column(Schema.Users.Keys.friendStatus)
-            })
+            try createTables(for: db)
         } catch {
             try FileManager.default.removeItem(at: dbUrl)
             throw error
@@ -95,6 +88,29 @@ extension DefaultPersistencyFactory: PersistencyFactory {
             logger: logger,
             storeInitialToken: true
         )
+    }
+
+    @StorageActor private func createTables(for db: Connection) throws {
+        try db.run(Schema.Tokens.table.create { t in
+            t.column(Schema.Tokens.Keys.id, primaryKey: true)
+            t.column(Schema.Tokens.Keys.token)
+        })
+        try db.run(Schema.Users.table.create { t in
+            t.column(Schema.Users.Keys.id, primaryKey: true)
+            t.column(Schema.Users.Keys.payload)
+        })
+        try db.run(Schema.Friends.table.create { t in
+            t.column(Schema.Friends.Keys.id, primaryKey: true)
+            t.column(Schema.Friends.Keys.payload)
+        })
+        try db.run(Schema.SpendingsHistory.table.create { t in
+            t.column(Schema.SpendingsHistory.Keys.id, primaryKey: true)
+            t.column(Schema.SpendingsHistory.Keys.payload)
+        })
+        try db.run(Schema.SpendingCounterparties.table.create { t in
+            t.column(Schema.SpendingCounterparties.Keys.id, primaryKey: true)
+            t.column(Schema.SpendingCounterparties.Keys.payload)
+        })
     }
 }
 

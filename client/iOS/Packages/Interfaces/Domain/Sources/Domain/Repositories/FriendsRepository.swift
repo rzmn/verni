@@ -1,5 +1,3 @@
-import Combine
-
 public enum FriendshipKind: Int, CaseIterable, Hashable {
     case friends
     case incoming
@@ -8,7 +6,7 @@ public enum FriendshipKind: Int, CaseIterable, Hashable {
 
 public protocol FriendsRepository {
     func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError>
-    var friendsUpdated: AnyPublisher<Void, Never> { get }
+    var friendsUpdated: AsyncStream<Void> { get }
 }
 
 public protocol FriendsOfflineRepository {

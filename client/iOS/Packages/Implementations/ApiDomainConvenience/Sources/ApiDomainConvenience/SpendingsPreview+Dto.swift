@@ -9,9 +9,20 @@ extension SpendingsPreview {
             counterparty: dto.counterparty,
             balance: dto.balance.reduce(
                 into: [:], { dict, item in
-                    dict[Currency(dto: item.key)] = Decimal(item.value) / 100
+                    dict[Currency(dto: item.key)] = Cost(dto: item.value)
                 }
             )
+        )
+    }
+}
+
+extension SpendingsPreviewDto {
+    public init(domain preview: SpendingsPreview) {
+        self.init(
+            counterparty: preview.counterparty,
+            balance: preview.balance.reduce(into: [:], { dict, item in
+                dict[item.key.stringValue] = CostDto(cost: item.value)
+            })
         )
     }
 }
