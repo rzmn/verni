@@ -17,12 +17,20 @@ let package = Package(
     dependencies: [
         .package(path: "../../Interfaces/PersistentStorage"),
         .package(path: "../DataTransferObjects"),
+        .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Shared/Logging"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3"),
     ],
     targets: [
         .target(
             name: "DefaultPersistentStorageImplementation",
-            dependencies: ["DataTransferObjects", "Logging", "PersistentStorage"],
+            dependencies: [
+                "DataTransferObjects",
+                "Logging", 
+                "PersistentStorage",
+                "ApiDomainConvenience",
+                .product(name: "SQLite", package: "SQLite.swift"),
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

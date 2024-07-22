@@ -18,12 +18,11 @@ let package = Package(
         .package(path: "../../Interfaces/ApiService"),
         .package(path: "../../Shared/Base"),
         .package(path: "../DataTransferObjects"),
-        .package(path: "../../Interfaces/PersistentStorage"),
     ],
     targets: [
         .target(
             name: "Api",
-            dependencies: ["ApiService", "Base", "DataTransferObjects", "PersistentStorage"],
+            dependencies: ["ApiService", "Base", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

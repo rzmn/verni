@@ -16,6 +16,7 @@ import (
 	"github.com/ydb-platform/ydb-go-sdk/v3/table/options"
 	"github.com/ydb-platform/ydb-go-sdk/v3/table/result"
 	"github.com/ydb-platform/ydb-go-sdk/v3/table/types"
+	yc "github.com/ydb-platform/ydb-go-yc"
 )
 
 type Storage struct {
@@ -34,10 +35,10 @@ func NewUnauthorized(storagePath string) (storage.Storage, error) {
 	return new(ctx, db)
 }
 
-func New(storagePath string, token string) (storage.Storage, error) {
+func New(storagePath string, keyPath string) (storage.Storage, error) {
 	const op = "storage.ydb.New"
 	ctx := context.Background()
-	db, err := ydb.Open(ctx, storagePath, ydb.WithAccessTokenCredentials(token))
+	db, err := ydb.Open(ctx, storagePath, yc.WithServiceAccountKeyFileCredentials(keyPath))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

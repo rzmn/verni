@@ -12,10 +12,10 @@ public class DefaultUsersOfflineRepository {
 
 extension DefaultUsersOfflineRepository: UsersOfflineRepository {
     public func getHostInfo() async -> User? {
-        await persistency.getHostInfo().map(User.init)
+        await persistency.getHostInfo()
     }
     
     public func getUser(id: User.ID) async -> User? {
-        await persistency.user(id: id).map(User.init)
+        await persistency.user(id: id)
     }
 }

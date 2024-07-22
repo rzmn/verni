@@ -15,12 +15,12 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../../Implementations/DataTransferObjects"),
+        .package(path: "../../Interface/Domain"),
     ],
     targets: [
         .target(
             name: "PersistentStorage",
-            dependencies: ["DataTransferObjects"],
+            dependencies: ["Domain"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

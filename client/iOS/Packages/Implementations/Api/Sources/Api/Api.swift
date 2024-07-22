@@ -3,7 +3,6 @@ import Networking
 import Combine
 import Base
 import DataTransferObjects
-import PersistentStorage
 
 fileprivate protocol _Parameters: Encodable, CompactDescription {}
 
@@ -15,12 +14,10 @@ public class Api {
     public let friendsUpdated = PassthroughSubject<Void, Never>()
     public let spendingsUpdated = PassthroughSubject<Void, Never>()
     private let service: ApiService
-    private let persistency: Persistency?
     private var subscriptions = Set<AnyCancellable>()
 
-    public init(service: ApiService, polling: ApiPolling? = nil, persistency: Persistency? = nil) {
+    public init(service: ApiService, polling: ApiPolling? = nil) {
         self.service = service
-        self.persistency = persistency
         polling?.friends
             .sink {
                 self.friendsUpdated.send(())
@@ -86,12 +83,7 @@ extension Api {
         let result = await run(
             method: Method.Users.getMyInfo
         ) as ApiResultInternal<SingleValueResponse<UserDto>>
-        return mapApiResponse(result).map { r in
-            Task.detached {
-                await self.persistency?.update(users: [r.value])
-            }
-            return r.value
-        }
+        return mapApiResponse(result).map(\.value)
     }
 
     public func getUsers(uids: [UserDto.ID]) async -> ApiResult<[UserDto]> {
@@ -104,12 +96,7 @@ extension Api {
                 ids: uids
             )
         ) as ApiResultInternal<SingleValueResponse<[UserDto]>>
-        return mapApiResponse(result).map { r in
-            Task.detached {
-                await self.persistency?.update(users: r.value)
-            }
-            return r.value
-        }
+        return mapApiResponse(result).map(\.value)
     }
 
     public func searchUsers(query: String) async -> ApiResult<[UserDto]> {
@@ -122,12 +109,7 @@ extension Api {
                 query: query
             )
         ) as ApiResultInternal<SingleValueResponse<[UserDto]>>
-        return mapApiResponse(result).map { r in
-            Task.detached {
-                await self.persistency?.update(users: r.value)
-            }
-            return r.value
-        }
+        return mapApiResponse(result).map(\.value)
     }
 }
 

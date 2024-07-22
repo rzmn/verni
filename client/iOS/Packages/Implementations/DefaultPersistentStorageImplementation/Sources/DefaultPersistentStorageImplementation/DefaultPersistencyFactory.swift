@@ -1,8 +1,9 @@
 import Foundation
 import Logging
-import SwiftData
-import DataTransferObjects
 import PersistentStorage
+import Domain
+internal import DataTransferObjects
+internal import SQLite
 
 @globalActor public actor StorageActor: GlobalActor {
     public static let shared = StorageActor()
@@ -41,22 +42,21 @@ extension DefaultPersistencyFactory: PersistencyFactory {
         }
         logI { "found db url: \(dbUrl)" }
         do {
-            let modelContainer = try ModelContainer(
-                for: PersistentRefreshToken.self, PersistentUser.self,
-                configurations: ModelConfiguration(url: dbUrl)
-            )
-            let context = ModelContext(modelContainer)
-            let token = try context.fetch({
-                var d = FetchDescriptor<PersistentRefreshToken>()
-                d.fetchLimit = 1
-                return d
-            }()).first
+            let db = try Connection(dbUrl.absoluteString)
+            let token = try db.prepare(Schema.Tokens.table)
+                .first { row in
+                    try row.get(Schema.Tokens.Keys.id) == hostId
+                }?
+                .get(Schema.Tokens.Keys.token)
             guard let token else {
                 logger.logE { "db does not have host/credentials info" }
                 return nil
             }
             return DefaultPersistency(
-                modelContext: ModelContext(modelContainer),
+                db: db,
+                dbInvalidationHandler: {
+                    try FileManager.default.removeItem(at: dbUrl)
+                },
                 hostId: hostId,
                 refreshToken: token,
                 logger: logger
@@ -67,22 +67,33 @@ extension DefaultPersistencyFactory: PersistencyFactory {
         }
     }
     
-    @StorageActor public func create(hostId: UserDto.ID, refreshToken: String) throws -> Persistency {
+    @StorageActor public func create(hostId: User.ID, refreshToken: String) throws -> Persistency {
         logI { "creating persistence..." }
-        let directoryUrl = DbNameBuilder.shared.dbDirectory
-        let modelContainer = try ModelContainer(
-            for: PersistentUser.self, PersistentRefreshToken.self,
-            configurations: ModelConfiguration(url: directoryUrl.appending(component: DbNameBuilder.shared.dbName(owner: hostId)))
-        )
-        let refreshToken = PersistentRefreshToken(payload: refreshToken)
-        let modelContext = ModelContext(modelContainer)
-        modelContext.insert(refreshToken)
-        try modelContext.save()
+        let dbUrl = DbNameBuilder.shared.dbDirectory
+            .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
+        let db = try Connection(dbUrl.absoluteString)
+        do {
+            try db.run(Schema.Tokens.table.create { t in
+                t.column(Schema.Tokens.Keys.id, primaryKey: true)
+                t.column(Schema.Tokens.Keys.token)
+            })
+            try db.run(Schema.Users.table.create { t in
+                t.column(Schema.Users.Keys.id, primaryKey: true)
+                t.column(Schema.Users.Keys.friendStatus)
+            })
+        } catch {
+            try FileManager.default.removeItem(at: dbUrl)
+            throw error
+        }
         return DefaultPersistency(
-            modelContext: modelContext,
+            db: db, 
+            dbInvalidationHandler: {
+                try FileManager.default.removeItem(at: dbUrl)
+            },
             hostId: hostId,
             refreshToken: refreshToken,
-            logger: logger
+            logger: logger,
+            storeInitialToken: true
         )
     }
 }
@@ -90,7 +101,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
 private extension DefaultPersistencyFactory {
     struct DbNameBuilder {
         public static let shared = DbNameBuilder()
-        private var prefix: String { "db_" }
+        private var prefix: String { "s_v1_" }
         private var suffix: String { ".sqlite" }
 
         func isDbName(_ filename: String) -> Bool {

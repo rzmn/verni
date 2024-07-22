@@ -48,7 +48,7 @@ public class ActiveSession: TokenRefresher {
         self.persistency = persistency
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
-        self.api = Api(service: apiServiceFactory.create(tokenRefresher: self), polling: TimerBasedPolling(), persistency: persistency)
+        self.api = Api(service: apiServiceFactory.create(tokenRefresher: self), polling: TimerBasedPolling())
     }
 
     public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {

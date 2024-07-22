@@ -30,7 +30,7 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     }
     
     public func usersRepository() -> UsersRepository {
-        DefaultUsersRepository(api: api)
+        DefaultUsersRepository(api: api, persistency: persistency)
     }
     
     public func friendInterationsUseCase() -> FriendInteractionsUseCase {
