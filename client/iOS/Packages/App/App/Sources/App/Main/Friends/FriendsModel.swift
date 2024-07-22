@@ -29,9 +29,9 @@ actor FriendsModel {
         if flowContinuation != nil {
             assertionFailure("friends flow is already running")
         }
-        friendListRepository.friendsUpdated
-            .sink { [weak self ] _ in
-                Task { [weak self] in
+        Task.detached {
+            for await _ in self.friendListRepository.friendsUpdated {
+                Task.detached { [weak self] in
                     guard let self else { return }
                     guard case .success(let data) = await loadData() else {
                         return
@@ -39,7 +39,7 @@ actor FriendsModel {
                     subject.send(FriendsState(subject.value, content: .loaded(data)))
                 }
             }
-            .store(in: &subscriptions)
+        }
         return await withCheckedContinuation { continuation in
             Task {
                 flowContinuation = continuation
