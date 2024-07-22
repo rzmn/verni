@@ -15,7 +15,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../../Interface/Domain"),
+        .package(path: "../Domain"),
     ],
     targets: [
         .target(
