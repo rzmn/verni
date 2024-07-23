@@ -10,3 +10,7 @@ public protocol UsersOfflineRepository {
     func getHostInfo() async -> User?
     func getUser(id: User.ID) async -> User?
 }
+
+public protocol UsersOfflineMutableRepository: UsersOfflineRepository {
+    func update(users: [User]) async
+}

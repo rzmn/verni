@@ -9,11 +9,15 @@ internal import SQLite
     public static let shared = StorageActor()
 }
 
-public class DefaultPersistencyFactory {
+open class DefaultPersistencyFactory {
     public let logger: Logger
 
     public init(logger: Logger) {
         self.logger = logger
+    }
+
+    open var dbDirectory: URL {
+        URL.documentsDirectory.appending(component: "accounty_db")
     }
 }
 
@@ -22,7 +26,6 @@ extension DefaultPersistencyFactory: PersistencyFactory {
         logI { "awaking persistence..." }
         let dbUrl: URL
         do {
-            let dbDirectory = DbNameBuilder.shared.dbDirectory
             try FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
             let contents = try FileManager.default
                 .contentsOfDirectory(at: dbDirectory, includingPropertiesForKeys: nil)
@@ -69,7 +72,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
     
     @StorageActor public func create(hostId: User.ID, refreshToken: String) throws -> Persistency {
         logI { "creating persistence..." }
-        let dbUrl = DbNameBuilder.shared.dbDirectory
+        let dbUrl = dbDirectory
             .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
         let db = try Connection(dbUrl.absoluteString)
         do {
@@ -133,10 +136,6 @@ private extension DefaultPersistencyFactory {
 
         func dbName(owner: String) -> String {
             "\(prefix)\(owner)\(suffix)"
-        }
-
-        var dbDirectory: URL {
-            URL.documentsDirectory.appending(component: "accounty_db")
         }
     }
 }

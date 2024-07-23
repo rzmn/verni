@@ -37,6 +37,22 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
+        ),
+        .testTarget(
+            name: "DefaultPersistentStorageImplementationTests",
+            dependencies: [
+                "DataTransferObjects",
+                "Logging",
+                "PersistentStorage",
+                "ApiDomainConvenience",
+                "DefaultPersistentStorageImplementation",
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
         )
     ]
 )

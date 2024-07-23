@@ -5,11 +5,11 @@ internal import ApiDomainConvenience
 
 public class DefaultSpendingsRepository {
     private let api: Api
-    private let persistency: Persistency
+    private let offline: SpendingsOfflineMutableRepository
 
-    public init(api: Api, persistency: Persistency) {
+    public init(api: Api, offline: SpendingsOfflineMutableRepository) {
         self.api = api
-        self.persistency = persistency
+        self.offline = offline
     }
 }
 
@@ -21,7 +21,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             let previews = previewsDto.map(SpendingsPreview.init)
             Task.detached { [weak self] in
                 guard let self else { return }
-                await persistency.updateSpendingCounterparties(previews)
+                await offline.updateSpendingCounterparties(previews)
             }
             return .success(previews)
         case .failure(let apiError):
@@ -36,7 +36,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             let spendings = spendingsDto.map(IdentifiableSpending.init)
             Task.detached { [weak self] in
                 guard let self else { return }
-                await persistency.updateSpendingsHistory(counterparty: counterparty, history: spendings)
+                await offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
             }
             return .success(spendings)
         case .failure(let apiError):

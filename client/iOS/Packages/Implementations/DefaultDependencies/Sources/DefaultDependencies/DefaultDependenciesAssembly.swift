@@ -26,7 +26,12 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     }
 
     public func friendListRepository() -> FriendsRepository {
-        DefaultFriendsRepository(api: api, persistency: persistency)
+        DefaultFriendsRepository(
+            api: api,
+            offline: DefaultFriendsOfflineRepository(
+                persistency: persistency
+            )
+        )
     }
 
     public func friendsOfflineRepository() -> FriendsOfflineRepository {
@@ -34,7 +39,12 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     }
 
     public func usersRepository() -> UsersRepository {
-        DefaultUsersRepository(api: api, persistency: persistency)
+        DefaultUsersRepository(
+            api: api,
+            offline: DefaultUsersOfflineRepository(
+                persistency: persistency
+            )
+        )
     }
 
     public func friendInterationsUseCase() -> FriendInteractionsUseCase {
@@ -46,7 +56,12 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     }
 
     public func spendingsRepository() -> SpendingsRepository {
-        DefaultSpendingsRepository(api: api, persistency: persistency)
+        DefaultSpendingsRepository(
+            api: api,
+            offline: DefaultSpendingsOfflineRepository(
+                persistency: persistency
+            )
+        )
     }
 
     public func spendingsOfflineRepository() -> SpendingsOfflineRepository {

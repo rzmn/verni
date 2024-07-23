@@ -15,3 +15,8 @@ public protocol SpendingsOfflineRepository {
     func getSpendingCounterparties() async -> [SpendingsPreview]?
     func getSpendingsHistory(counterparty: User.ID) async -> [IdentifiableSpending]?
 }
+
+public protocol SpendingsOfflineMutableRepository: SpendingsOfflineRepository {
+    func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async
+    func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async
+}

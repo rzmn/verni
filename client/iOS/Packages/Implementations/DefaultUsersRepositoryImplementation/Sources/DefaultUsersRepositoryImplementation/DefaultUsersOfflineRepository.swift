@@ -19,3 +19,9 @@ extension DefaultUsersOfflineRepository: UsersOfflineRepository {
         await persistency.user(id: id)
     }
 }
+
+extension DefaultUsersOfflineRepository: UsersOfflineMutableRepository {
+    public func update(users: [User]) async {
+        await persistency.update(users: users)
+    }
+}

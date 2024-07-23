@@ -14,3 +14,9 @@ extension DefaultFriendsOfflineRepository: FriendsOfflineRepository {
         await persistency.getFriends(set: set)
     }
 }
+
+extension DefaultFriendsOfflineRepository: FriendsOfflineMutableRepository {
+    public func storeFriends(_ friends: [FriendshipKind : [User]]) async {
+        await persistency.storeFriends(friends)
+    }
+}

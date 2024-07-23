@@ -44,6 +44,7 @@ private struct FriendshipKindSet: OptionSet {
     private let queue = DispatchQueue(label: "\(DefaultPersistency.self)")
     private var refreshToken: String
     private var serialScheduler: AsyncSerialScheduler
+    private var detachedTasks = [Task<Void, Never>]()
 
     init(
         db: Connection,
@@ -62,18 +63,20 @@ private struct FriendshipKindSet: OptionSet {
         guard storeInitialToken else {
             return
         }
-        Task.detached {
-            await self.serialScheduler.run { @StorageActor in
-                do {
-                    try self.db.run(Schema.Tokens.table.insert(
-                        Schema.Tokens.Keys.id <- self.hostId,
-                        Schema.Tokens.Keys.token <- refreshToken
-                    ))
-                } catch {
-                    self.logE { "failed to insert token error: \(error)" }
+        detachedTasks.append(
+            Task.detached {
+                await self.serialScheduler.run { @StorageActor in
+                    do {
+                        try self.db.run(Schema.Tokens.table.insert(
+                            Schema.Tokens.Keys.id <- self.hostId,
+                            Schema.Tokens.Keys.token <- refreshToken
+                        ))
+                    } catch {
+                        self.logE { "failed to insert token error: \(error)" }
+                    }
                 }
             }
-        }
+        )
     }
 
     func getRefreshToken() async -> String {
@@ -82,18 +85,21 @@ private struct FriendshipKindSet: OptionSet {
 
     func update(refreshToken: String) async {
         self.refreshToken = refreshToken
-        Task.detached { @StorageActor in
-            await self.serialScheduler.run { @StorageActor in
-                do {
-                    try self.db.run(Schema.Tokens.table.update(
-                        Schema.Tokens.Keys.id <- self.hostId,
-                        Schema.Tokens.Keys.token <- refreshToken
-                    ))
-                } catch {
-                    self.logE { "failed to update token error: \(error)" }
+        detachedTasks.append(
+            Task.detached { @StorageActor in
+                await self.serialScheduler.run { @StorageActor in
+                    do {
+                        try self.db.run(
+                            Schema.Tokens.table
+                                .filter(Schema.Tokens.Keys.id == self.hostId)
+                                .update(Schema.Tokens.Keys.token <- refreshToken)
+                        )
+                    } catch {
+                        self.logE { "failed to update token error: \(error)" }
+                    }
                 }
             }
-        }
+        )
     }
 
     public func getHostInfo() async -> User? {
@@ -224,7 +230,15 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
+    func close() async {
+        for task in detachedTasks {
+            await task.value
+        }
+        detachedTasks.removeAll()
+    }
+
     func invalidate() async {
+        await close()
         let handler = dbInvalidationHandler
         Task.detached { @StorageActor in
             do {

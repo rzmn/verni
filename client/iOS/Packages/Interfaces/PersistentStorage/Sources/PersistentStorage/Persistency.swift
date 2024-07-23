@@ -16,5 +16,6 @@ public protocol Persistency {
     func getFriends(set: Set<FriendshipKind>) async -> [FriendshipKind : [User]]?
     func storeFriends(_ friends: [FriendshipKind : [User]]) async
 
+    func close() async
     func invalidate() async
 }

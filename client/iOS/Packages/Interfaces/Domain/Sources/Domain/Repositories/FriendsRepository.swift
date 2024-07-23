@@ -12,3 +12,7 @@ public protocol FriendsRepository {
 public protocol FriendsOfflineRepository {
     func getFriends(set: Set<FriendshipKind>) async -> [FriendshipKind: [User]]?
 }
+
+public protocol FriendsOfflineMutableRepository: FriendsOfflineRepository {
+    func storeFriends(_ friends: [FriendshipKind: [User]]) async
+}

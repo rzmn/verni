@@ -18,3 +18,13 @@ extension DefaultSpendingsOfflineRepository: SpendingsOfflineRepository {
         await persistency.getSpendingsHistory(counterparty: counterparty)
     }
 }
+
+extension DefaultSpendingsOfflineRepository: SpendingsOfflineMutableRepository {
+    public func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async {
+        await persistency.updateSpendingCounterparties(counterparties)
+    }
+
+    public func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async {
+        await persistency.updateSpendingsHistory(counterparty: counterparty, history: history)
+    }
+}

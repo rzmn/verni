@@ -1,16 +1,15 @@
 import Domain
 import Api
 import DataTransferObjects
-import PersistentStorage
 internal import ApiDomainConvenience
 
 public class DefaultFriendsRepository {
     private let api: Api
-    private let persistency: Persistency
+    private let offline: FriendsOfflineMutableRepository
 
-    public init(api: Api, persistency: Persistency) {
+    public init(api: Api, offline: FriendsOfflineMutableRepository) {
         self.api = api
-        self.persistency = persistency
+        self.offline = offline
     }
 }
 
@@ -59,7 +58,7 @@ extension DefaultFriendsRepository: FriendsRepository {
         }) as [FriendshipKind: [User]]
         Task.detached { [weak self] in
             guard let self else { return }
-            await persistency.storeFriends(friendsByKind)
+            await offline.storeFriends(friendsByKind)
         }
         return .success(friendsByKind)
     }

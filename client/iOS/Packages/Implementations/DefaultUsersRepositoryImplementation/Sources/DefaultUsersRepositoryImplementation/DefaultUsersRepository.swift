@@ -1,16 +1,15 @@
 import Domain
 import Api
 import DataTransferObjects
-import PersistentStorage
 internal import ApiDomainConvenience
 
 public class DefaultUsersRepository {
     private let api: Api
-    private let persistency: Persistency
+    private let offline: UsersOfflineMutableRepository
 
-    public init(api: Api, persistency: Persistency) {
+    public init(api: Api, offline: UsersOfflineMutableRepository) {
         self.api = api
-        self.persistency = persistency
+        self.offline = offline
     }
 }
 
@@ -21,7 +20,7 @@ extension DefaultUsersRepository: UsersRepository {
             let user = User(dto: dto)
             Task.detached { [weak self] in
                 guard let self else { return }
-                await persistency.update(users: [user])
+                await offline.update(users: [user])
             }
             return .success(user)
         case .failure(let error):
@@ -35,7 +34,7 @@ extension DefaultUsersRepository: UsersRepository {
             let users = dto.map(User.init)
             Task.detached { [weak self] in
                 guard let self else { return }
-                await persistency.update(users: users)
+                await offline.update(users: users)
             }
             return .success(users)
         case .failure(let error):
@@ -52,7 +51,7 @@ extension DefaultUsersRepository: UsersRepository {
             let users = dto.map(User.init)
             Task.detached { [weak self] in
                 guard let self else { return }
-                await persistency.update(users: users)
+                await offline.update(users: users)
             }
             return .success(users)
         case .failure(let error):
