@@ -4,25 +4,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "ApiDomainConvenience",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "ApiDomainConvenience",
+            targets: ["ApiDomainConvenience"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/DataTransferObjects"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "ApiDomainConvenience",
+            dependencies: ["Domain", "Api", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

@@ -4,34 +4,26 @@
 import PackageDescription
 
 let package = Package(
-    name: "App",
+    name: "DefaultQRInviteUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "App",
-            targets: ["App"]
+            name: "DefaultQRInviteUseCaseImplementation",
+            targets: ["DefaultQRInviteUseCaseImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../DesignSystem"),
-        .package(path: "../../DI/DI"),
-        .package(path: "../../Domain/Domain"),
-        .package(path: "../../Infrastructure/Logging"),
-        .package(path: "../../Infrastructure/Base"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
+        .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
+        .package(path: "../../Domain"),
     ],
     targets: [
         .target(
-            name: "App",
+            name: "DefaultQRInviteUseCaseImplementation",
             dependencies: [
-                "DesignSystem",
-                "DI",
-                "Domain",
-                "Logging",
-                "Base",
-                "ProgressHUD"
+                .product(name: "QRCode", package: "qrcode"),
+                "Domain"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

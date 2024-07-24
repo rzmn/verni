@@ -4,35 +4,23 @@
 import PackageDescription
 
 let package = Package(
-    name: "App",
+    name: "DataTransferObjects",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "App",
-            targets: ["App"]
+            name: "DataTransferObjects",
+            targets: ["DataTransferObjects"]
         ),
     ],
     dependencies: [
-        .package(path: "../DesignSystem"),
-        .package(path: "../../DI/DI"),
-        .package(path: "../../Domain/Domain"),
-        .package(path: "../../Infrastructure/Logging"),
         .package(path: "../../Infrastructure/Base"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
     ],
     targets: [
         .target(
-            name: "App",
-            dependencies: [
-                "DesignSystem",
-                "DI",
-                "Domain",
-                "Logging",
-                "Base",
-                "ProgressHUD"
-            ],
+            name: "DataTransferObjects",
+            dependencies: ["Base"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

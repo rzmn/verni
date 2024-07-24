@@ -4,25 +4,24 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "DefaultNetworkingImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "DefaultNetworkingImplementation",
+            targets: ["DefaultNetworkingImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../Networking"),
+        .package(path: "../Logging"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "DefaultNetworkingImplementation",
+            dependencies: ["Logging", "Networking"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

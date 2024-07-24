@@ -4,25 +4,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "DefaultApiServiceImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "DefaultApiServiceImplementation",
+            targets: ["DefaultApiServiceImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../Networking"),
+        .package(path: "../Logging"),
+        .package(path: "../ApiService"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "DefaultApiServiceImplementation",
+            dependencies: ["Logging", "Networking", "ApiService"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

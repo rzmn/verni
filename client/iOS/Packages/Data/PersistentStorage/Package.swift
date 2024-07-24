@@ -4,25 +4,23 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "PersistentStorage",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "PersistentStorage",
+            targets: ["PersistentStorage"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../DataTransferObjects"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "PersistentStorage",
+            dependencies: ["DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

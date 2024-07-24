@@ -4,25 +4,26 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "DefaultSpendingInteractionsUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "DefaultSpendingInteractionsUseCaseImplementation",
+            targets: ["DefaultSpendingInteractionsUseCaseImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../ApiDomainConvenience"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/DataTransferObjects"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "DefaultSpendingInteractionsUseCaseImplementation",
+            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

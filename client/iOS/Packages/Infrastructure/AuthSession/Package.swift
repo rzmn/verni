@@ -4,25 +4,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "AuthSession",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "AuthSession",
+            targets: ["AuthSession"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../ApiService"),
+        .package(path: "../../Data/Api"),
+        .package(path: "../../Data/PersistentStorage"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "AuthSession",
+            dependencies: ["Api", "ApiService", "PersistentStorage"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

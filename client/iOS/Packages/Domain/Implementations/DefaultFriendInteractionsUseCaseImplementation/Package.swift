@@ -4,25 +4,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "DefaultFriendInteractionsUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "DefaultFriendInteractionsUseCaseImplementation",
+            targets: ["DefaultFriendInteractionsUseCaseImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../ApiDomainConvenience"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "DefaultFriendInteractionsUseCaseImplementation",
+            dependencies: ["Domain", "Api", "ApiDomainConvenience"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

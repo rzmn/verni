@@ -4,25 +4,26 @@
 import PackageDescription
 
 let package = Package(
-    name: "DesignSystem",
+    name: "DefaultAuthUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DesignSystem",
-            targets: ["DesignSystem"]
+            name: "DefaultAuthUseCaseImplementation",
+            targets: ["DefaultAuthUseCaseImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/DataTransferObjects"),
+        .package(path: "../../../Infrastructure/AuthSession"),
     ],
     targets: [
         .target(
-            name: "DesignSystem",
-            dependencies: [
-                "Base"
-            ],
+            name: "DefaultAuthUseCaseImplementation",
+            dependencies: ["Domain", "Api", "AuthSession", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
