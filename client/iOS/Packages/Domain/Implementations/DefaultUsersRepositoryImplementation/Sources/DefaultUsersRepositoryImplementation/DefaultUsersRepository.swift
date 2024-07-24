@@ -4,10 +4,10 @@ internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultUsersRepository {
-    private let api: Api
+    private let api: ApiProtocol
     private let offline: UsersOfflineMutableRepository
 
-    public init(api: Api, offline: UsersOfflineMutableRepository) {
+    public init(api: ApiProtocol, offline: UsersOfflineMutableRepository) {
         self.api = api
         self.offline = offline
     }
@@ -15,7 +15,7 @@ public class DefaultUsersRepository {
 
 extension DefaultUsersRepository: UsersRepository {
     public func getHostInfo() async -> Result<User, GeneralError> {
-        switch await api.getMyInfo() {
+        switch await api.run(method: Users.GetMyInfo()) {
         case .success(let dto):
             let user = User(dto: dto)
             Task.detached { [weak self] in
@@ -29,7 +29,8 @@ extension DefaultUsersRepository: UsersRepository {
     }
 
     public func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
-        switch await api.getUsers(uids: ids) {
+        let method = Users.Get(parameters: .init(ids: ids))
+        switch await api.run(method: method) {
         case .success(let dto):
             let users = dto.map(User.init)
             Task.detached { [weak self] in
@@ -46,7 +47,10 @@ extension DefaultUsersRepository: UsersRepository {
         if query.isEmpty {
             return .success([])
         }
-        switch await api.searchUsers(query: query) {
+        let method = Users.Search(
+            parameters: .init(query: query)
+        )
+        switch await api.run(method: method) {
         case .success(let dto):
             let users = dto.map(User.init)
             Task.detached { [weak self] in

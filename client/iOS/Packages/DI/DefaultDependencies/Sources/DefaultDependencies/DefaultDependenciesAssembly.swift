@@ -3,6 +3,7 @@ import Domain
 internal import AuthSession
 internal import Api
 internal import ApiService
+internal import DefaultApiImplementation
 internal import Networking
 internal import PersistentStorage
 internal import DefaultAuthUseCaseImplementation
@@ -125,7 +126,7 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 
 
 public class DefaultDependenciesAssembly: DIContainer {
-    private lazy var anonymousApi = Api(service: apiServiceFactory().create(tokenRefresher: nil))
+    private lazy var anonymousApi = anonymousApiFactory().create()
 
     public init() {}
 
@@ -134,7 +135,8 @@ public class DefaultDependenciesAssembly: DIContainer {
             impl: DefaultAuthUseCase(
                 api: anonymousApi,
                 apiServiceFactory: apiServiceFactory(), 
-                persistencyFactory: persistencyFactory()
+                persistencyFactory: persistencyFactory(),
+                apiFactoryProvider: self.autenticatedApiFactory
             )
         )
     }
@@ -161,8 +163,16 @@ extension DefaultDependenciesAssembly {
         )
     }
 
+    func anonymousApiFactory() -> ApiFactory {
+        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: nil), polling: nil)
+    }
+
+    func autenticatedApiFactory(refresher: TokenRefresher) -> ApiFactory {
+        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: refresher), polling: TimerBasedPolling())
+    }
+
     func persistencyFactory() -> PersistencyFactory {
-        DefaultPersistencyFactory(logger: .shared.with(prefix: "[db]"))
+        SQLitePersistencyFactory(logger: .shared.with(prefix: "[db]"))
     }
 }
 

@@ -15,19 +15,3 @@ public enum ApiErrorCode: Int, Decodable {
     case dealNotFound = 14
     case isNotYourDeal = 15
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

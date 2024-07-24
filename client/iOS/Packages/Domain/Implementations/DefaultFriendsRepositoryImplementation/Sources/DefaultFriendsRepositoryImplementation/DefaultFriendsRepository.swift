@@ -4,10 +4,10 @@ internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultFriendsRepository {
-    private let api: Api
+    private let api: ApiProtocol
     private let offline: FriendsOfflineMutableRepository
 
-    public init(api: Api, offline: FriendsOfflineMutableRepository) {
+    public init(api: ApiProtocol, offline: FriendsOfflineMutableRepository) {
         self.api = api
         self.offline = offline
     }
@@ -19,20 +19,24 @@ extension DefaultFriendsRepository: FriendsRepository {
     }
     
     public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
-        let result = await api.getFriends(
-            kinds: FriendshipKind.allCases
-                .filter(set.contains)
-                .map(FriendshipKindDto.init)
-        )
         let uids: [UserDto.ID]
-        switch result {
+        switch await api.run(
+            method: Friends.Get(
+                parameters: .init(
+                    statuses: FriendshipKind.allCases
+                        .filter(set.contains)
+                        .map(FriendshipKindDto.init)
+                        .map(\.rawValue)
+                )
+            )
+        ) {
         case .success(let dict):
             uids = dict.flatMap(\.value)
         case .failure(let apiError):
             return .failure(GeneralError(apiError: apiError))
         }
         let users: [UserDto]
-        switch await api.getUsers(uids: uids) {
+        switch await api.run(method: Users.Get(parameters: .init(ids: uids))) {
         case .success(let success):
             users = success
         case .failure(let error):

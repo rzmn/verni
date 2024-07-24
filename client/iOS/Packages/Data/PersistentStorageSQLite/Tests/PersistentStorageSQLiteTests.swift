@@ -4,7 +4,7 @@ import PersistentStorage
 import DataTransferObjects
 @testable import PersistentStorageSQLite
 
-private class TestPersistencyFactory: DefaultPersistencyFactory {
+private class TestPersistencyFactory: SQLitePersistencyFactory {
     convenience init() {
         self.init(logger: .shared.with(prefix: "[test] "))
     }

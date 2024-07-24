@@ -4,23 +4,26 @@
 import PackageDescription
 
 let package = Package(
-    name: "Api",
+    name: "DefaultApiImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "Api",
-            targets: ["Api"]
+            name: "DefaultApiImplementation",
+            targets: ["DefaultApiImplementation"]
         ),
     ],
     dependencies: [
+        .package(path: "../Api"),
         .package(path: "../DataTransferObjects"),
+        .package(path: "../../Infrastructure/ApiService"),
+        .package(path: "../../Infrastructure/Base"),
     ],
     targets: [
         .target(
-            name: "Api",
-            dependencies: ["DataTransferObjects"],
+            name: "DefaultApiImplementation",
+            dependencies: ["ApiService", "Api", "Base", "DataTransferObjects"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

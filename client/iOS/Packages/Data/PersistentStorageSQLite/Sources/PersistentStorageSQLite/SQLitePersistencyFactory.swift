@@ -8,7 +8,7 @@ internal import SQLite
     public static let shared = StorageActor()
 }
 
-open class DefaultPersistencyFactory {
+open class SQLitePersistencyFactory {
     public let logger: Logger
 
     public init(logger: Logger) {
@@ -20,7 +20,7 @@ open class DefaultPersistencyFactory {
     }
 }
 
-extension DefaultPersistencyFactory: PersistencyFactory {
+extension SQLitePersistencyFactory: PersistencyFactory {
     @StorageActor public func awake() -> Persistency? {
         logI { "awaking persistence..." }
         let dbUrl: URL
@@ -54,7 +54,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
                 logger.logE { "db does not have host/credentials info" }
                 return nil
             }
-            return DefaultPersistency(
+            return SQLitePersistency(
                 db: db,
                 dbInvalidationHandler: {
                     try FileManager.default.removeItem(at: dbUrl)
@@ -80,7 +80,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
             try FileManager.default.removeItem(at: dbUrl)
             throw error
         }
-        return DefaultPersistency(
+        return SQLitePersistency(
             db: db, 
             dbInvalidationHandler: {
                 try FileManager.default.removeItem(at: dbUrl)
@@ -116,7 +116,7 @@ extension DefaultPersistencyFactory: PersistencyFactory {
     }
 }
 
-private extension DefaultPersistencyFactory {
+private extension SQLitePersistencyFactory {
     struct DbNameBuilder {
         public static let shared = DbNameBuilder()
         private var prefix: String { "s_v1_" }
@@ -139,4 +139,4 @@ private extension DefaultPersistencyFactory {
     }
 }
 
-extension DefaultPersistencyFactory: Loggable {}
+extension SQLitePersistencyFactory: Loggable {}

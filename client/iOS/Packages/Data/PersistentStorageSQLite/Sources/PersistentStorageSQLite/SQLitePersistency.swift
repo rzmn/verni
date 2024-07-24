@@ -36,13 +36,13 @@ private struct FriendshipKindSet: OptionSet {
     }
 }
 
-@StorageActor class DefaultPersistency: Persistency {
+@StorageActor class SQLitePersistency: Persistency {
     let logger: Logger
 
     private let db: Connection
     private let dbInvalidationHandler: () throws -> Void
     private let hostId: UserDto.ID
-    private let queue = DispatchQueue(label: "\(DefaultPersistency.self)")
+    private let queue = DispatchQueue(label: "\(SQLitePersistency.self)")
     private var refreshToken: String
     private var serialScheduler: AsyncSerialScheduler
     private var detachedTasks = [Task<Void, Never>]()
@@ -245,4 +245,4 @@ private struct FriendshipKindSet: OptionSet {
     }
 }
 
-extension DefaultPersistency: Loggable {}
+extension SQLitePersistency: Loggable {}

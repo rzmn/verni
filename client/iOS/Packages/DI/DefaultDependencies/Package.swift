@@ -35,6 +35,7 @@ let package = Package(
         .package(path: "../../Data/PersistentStorage"),
         .package(path: "../../Data/PersistentStorageSQLite"),
         .package(path: "../../Data/Api"),
+        .package(path: "../../Data/DefaultApiImplementation"),
     ],
     targets: [
         .target(
@@ -58,6 +59,7 @@ let package = Package(
                 "DefaultSpendingInteractionsUseCaseImplementation",
                 "DefaultSpendingsRepositoryImplementation",
                 "PersistentStorageSQLite",
+                "DefaultApiImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

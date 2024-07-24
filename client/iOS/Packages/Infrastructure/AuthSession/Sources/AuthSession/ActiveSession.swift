@@ -4,33 +4,36 @@ import PersistentStorage
 import ApiService
 
 public class ActiveSession: TokenRefresher {
-    public var api: Api!
-    private let anonymousApi: Api
+    public lazy var api = apiFactoryProvider(self).create()
+    private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
+    private let anonymousApi: ApiProtocol
 
     public private(set) var persistency: Persistency
     public private(set) var accessToken: String?
 
     public static func awake(
-        anonymousApi: Api,
+        anonymousApi: ApiProtocol,
         hostId: String,
         accessToken: String?,
         refreshToken: String,
         apiServiceFactory: ApiServiceFactory,
-        persistencyFactory: PersistencyFactory
+        persistencyFactory: PersistencyFactory,
+        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async throws -> ActiveSession {
         let persistency = try persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
         return ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency,
             accessToken: accessToken,
-            apiServiceFactory: apiServiceFactory
+            apiFactoryProvider: apiFactoryProvider
         )
     }
 
     public static func awake(
-        anonymousApi: Api,
+        anonymousApi: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
-        persistencyFactory: PersistencyFactory
+        persistencyFactory: PersistencyFactory,
+        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async -> ActiveSession? {
         guard let persistency = persistencyFactory.awake() else {
             return nil
@@ -39,19 +42,31 @@ public class ActiveSession: TokenRefresher {
             anonymousApi: anonymousApi,
             persistency: persistency,
             accessToken: nil,
-            apiServiceFactory: apiServiceFactory
+            apiFactoryProvider: apiFactoryProvider
         )
     }
 
-    init(anonymousApi: Api, persistency: Persistency, accessToken: String?, apiServiceFactory: ApiServiceFactory) {
+    private init(
+        anonymousApi: ApiProtocol,
+        persistency: Persistency,
+        accessToken: String?,
+        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
+    ) {
         self.persistency = persistency
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
-        self.api = Api(service: apiServiceFactory.create(tokenRefresher: self), polling: TimerBasedPolling())
+        self.apiFactoryProvider = apiFactoryProvider
     }
 
     public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        switch await anonymousApi.refresh(token: await persistency.getRefreshToken()) {
+        let response = await anonymousApi.run(
+            method: Auth.Refresh(
+                parameters: .init(
+                    refreshToken: await persistency.getRefreshToken()
+                )
+            )
+        )
+        switch response {
         case .success(let tokens):
             accessToken = tokens.accessToken
             await persistency.update(refreshToken: tokens.refreshToken)

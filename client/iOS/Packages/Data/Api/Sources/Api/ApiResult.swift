@@ -21,7 +21,7 @@ public enum ApiResult<T> {
     case success(T)
     case failure(ApiError)
 
-    func map<R>(_ block: (T) -> R) -> ApiResult<R> {
+    public func map<R>(_ block: (T) -> R) -> ApiResult<R> {
         switch self {
         case .success(let t):
             return .success(block(t))

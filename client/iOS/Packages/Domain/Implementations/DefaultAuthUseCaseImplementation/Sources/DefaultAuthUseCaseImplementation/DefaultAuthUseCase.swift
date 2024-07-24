@@ -6,28 +6,48 @@ import DataTransferObjects
 import PersistentStorage
 
 public class DefaultAuthUseCase {
-    private let api: Api
+    private let api: ApiProtocol
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory
+    private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
 
-    public init(api: Api, apiServiceFactory: ApiServiceFactory, persistencyFactory: PersistencyFactory) {
+    public init(
+        api: ApiProtocol,
+        apiServiceFactory: ApiServiceFactory,
+        persistencyFactory: PersistencyFactory,
+        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
+    ) {
         self.api = api
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
+        self.apiFactoryProvider = apiFactoryProvider
     }
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
     public func awake() async -> Result<ActiveSession, AwakeError> {
-        guard let session = await ActiveSession.awake(anonymousApi: api, apiServiceFactory: apiServiceFactory, persistencyFactory: persistencyFactory) else {
+        guard let session = await ActiveSession.awake(
+            anonymousApi: api,
+            apiServiceFactory: apiServiceFactory,
+            persistencyFactory: persistencyFactory,
+            apiFactoryProvider: apiFactoryProvider
+        ) else {
             return.failure(.hasNoSession)
         }
         return .success(session)
     }
     
     public func login(credentials: Credentials) async -> Result<ActiveSession, LoginError> {
+        let method = Auth.Login(
+            parameters: .init(
+                credentials: CredentialsDto(
+                    login: credentials.login,
+                    password: credentials.password
+                )
+            )
+        )
         let apiError: ApiError
-        switch await api.login(credentials: CredentialsDto(login: credentials.login, password: credentials.password)) {
+        switch await api.run(method: method) {
         case .success(let token):
             do {
                 return .success(
@@ -37,7 +57,8 @@ extension DefaultAuthUseCase: AuthUseCase {
                         accessToken: token.accessToken,
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
-                        persistencyFactory: persistencyFactory
+                        persistencyFactory: persistencyFactory, 
+                        apiFactoryProvider: apiFactoryProvider
                     )
                 )
             } catch {
@@ -66,8 +87,16 @@ extension DefaultAuthUseCase: AuthUseCase {
     }
     
     public func signup(credentials: Credentials) async -> Result<ActiveSession, SignupError> {
+        let method = Auth.Signup(
+            parameters: .init(
+                credentials: CredentialsDto(
+                    login: credentials.login,
+                    password: credentials.password
+                )
+            )
+        )
         let apiError: ApiError
-        switch await api.signup(credentials: CredentialsDto(login: credentials.login, password: credentials.password)) {
+        switch await api.run(method: method) {
         case .success(let token):
             do {
                 return .success(
@@ -77,7 +106,8 @@ extension DefaultAuthUseCase: AuthUseCase {
                         accessToken: token.accessToken,
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
-                        persistencyFactory: persistencyFactory
+                        persistencyFactory: persistencyFactory, 
+                        apiFactoryProvider: apiFactoryProvider
                     )
                 )
             } catch {

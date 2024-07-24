@@ -5,24 +5,28 @@ import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultSpendingInteractionsUseCase {
-    private let api: Api
+    private let api: ApiProtocol
 
-    public init(api: Api) {
+    public init(api: ApiProtocol) {
         self.api = api
     }
 }
 
 extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
     public func create(spending: Spending) async -> Result<[SpendingsPreview], CreateSpendingError> {
-        let result = await api.createDeal(
-            deal: DealDto(
-                timestamp: Int64(spending.date.timeIntervalSince1970),
-                details: spending.details,
-                cost: Int64((NSDecimalNumber(decimal: spending.cost).doubleValue * 100)),
-                currency: spending.currency.stringValue, 
-                spendings: spending.participants.map {
-                    SpendingDto(userId: $0.key, cost: CostDto(cost: $0.value))
-                }
+        let result = await api.run(
+            method: Spendings.CreateDeal(
+                parameters: .init(
+                    deal: DealDto(
+                        timestamp: Int64(spending.date.timeIntervalSince1970),
+                        details: spending.details,
+                        cost: Int64((NSDecimalNumber(decimal: spending.cost).doubleValue * 100)),
+                        currency: spending.currency.stringValue,
+                        spendings: spending.participants.map {
+                            SpendingDto(userId: $0.key, cost: CostDto(cost: $0.value))
+                        }
+                    )
+                )
             )
         )
         switch result {
@@ -34,7 +38,7 @@ extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
     }
     
     public func delete(spending: Spending.ID) async -> Result<[SpendingsPreview], DeleteSpendingError> {
-        let result = await api.deleteDeal(id: spending)
+        let result = await api.run(method: Spendings.DeleteDeal(parameters: .init(dealId: spending)))
         switch result {
         case .success(let previews):
             return .success(previews.map(SpendingsPreview.init))

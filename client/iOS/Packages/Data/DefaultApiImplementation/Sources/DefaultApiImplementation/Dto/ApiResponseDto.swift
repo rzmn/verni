@@ -1,6 +1,6 @@
-import Foundation
+import Api
 
-enum ApiResponseDto<Response: DecodableResponse> {
+enum ApiResponseDto<Response: Decodable> {
     case success(Response)
     case failure(ApiErrorDto)
 }
@@ -21,11 +21,7 @@ extension ApiResponseDto: Decodable {
         let status = try container.decode(Status.self, forKey: .status)
         switch status {
         case .ok:
-            if let overriden = Response.overridenValue {
-                self = .success(overriden)
-            } else {
-                self = .success(try container.decode(Response.self, forKey: .response))
-            }
+            self = .success(try container.decode(Response.self, forKey: .response))
         case .failed:
             self = .failure(try container.decode(ApiErrorDto.self, forKey: .response))
         }
