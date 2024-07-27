@@ -2,9 +2,13 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"net/mail"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"accounty/internal/auth/jwt"
 	"accounty/internal/storage"
@@ -14,12 +18,16 @@ import (
 	"accounty/internal/http-server/handlers/auth/signup"
 )
 
-func validateUserCredentials(credentials storage.UserCredentials) error {
-	if len(credentials.Login) == 0 {
-		return errors.New("`login` field is nil or empty")
+func validateUserCredentialsFormat(credentials storage.UserCredentials) error {
+	_, err := mail.ParseAddress(credentials.Email)
+	if err != nil {
+		return fmt.Errorf("`email` field is invalid: %v", err)
 	}
-	if len(credentials.Password) == 0 {
-		return errors.New("`password` field is nil or empty")
+	if strings.TrimSpace(credentials.Email) != credentials.Email {
+		return fmt.Errorf("`email` field is invalid: leading or trailing spaces")
+	}
+	if len(credentials.Password) < 6 {
+		return errors.New("`password` field should contain more than 6 characters")
 	}
 	return nil
 }
@@ -32,34 +40,46 @@ func (h *loginRequestHandler) Validate(request login.Request) *login.Error {
 	const op = "router.loginRequestHandler.Validate"
 
 	log.Printf("%s: validating start", op)
-	if err := validateUserCredentials(request.Credentials); err != nil {
+	if err := validateUserCredentialsFormat(request.Credentials); err != nil {
 		log.Printf("%s: format validating failed %v", op, err)
 		outError := login.ErrWrongCredentialsFormat()
 		return &outError
 	}
 	log.Printf("%s: validated format", op)
-	log.Printf("%s: checking login/pwd pair matches", op)
+	log.Printf("%s: checking email/pwd pair matches", op)
 	valid, err := h.storage.CheckCredentials(request.Credentials)
 	if err != nil {
-		log.Printf("%s: checking login/pwd pair matches failed %v", op, err)
+		log.Printf("%s: checking email/pwd pair matches failed %v", op, err)
 		outError := login.ErrInternal()
 		return &outError
 	}
-	log.Printf("%s: checked login/pwd pair matches without errors", op)
+	log.Printf("%s: checked email/pwd pair matches without errors", op)
 	if !valid {
-		log.Printf("%s: login/pwd pair did not match", op)
+		log.Printf("%s: email/pwd pair did not match", op)
 		outError := login.ErrIncorrectCredentials()
 		return &outError
 	}
-	log.Printf("%s: login/pwd pair ok", op)
+	log.Printf("%s: email/pwd pair matches", op)
 	return nil
 }
 
 func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken, *login.Error) {
 	const op = "router.loginRequestHandler.Handle"
 
+	log.Printf("%s: getting uid", op)
+	uid, err := h.storage.GetUserId(request.Credentials.Email)
+	if err != nil {
+		log.Printf("%s: getting uid failed: %v", op, err)
+		outError := login.ErrInternal()
+		return nil, &outError
+	}
+	if uid == nil {
+		log.Printf("%s: no uid accosiated with email: %s", op, request.Credentials.Email)
+		outError := login.ErrInternal()
+		return nil, &outError
+	}
 	log.Printf("%s: issuing tokens", op)
-	tokens, err := jwt.IssueTokens(string(request.Credentials.Login))
+	tokens, err := jwt.IssueTokens(string(*uid))
 	if err != nil {
 		log.Printf("%s: issuing tokens failed %v", op, err)
 		outError := login.ErrInternal()
@@ -67,7 +87,7 @@ func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken,
 	}
 	log.Printf("%s: issued tokens ok", op)
 	log.Printf("%s: storing refresh token", op)
-	if err := h.storage.StoreRefreshToken(tokens.Refresh, request.Credentials.Login); err != nil {
+	if err := h.storage.StoreRefreshToken(tokens.Refresh, *uid); err != nil {
 		log.Printf("%s: storing refresh token failed %v", op, err)
 		outError := login.ErrInternal()
 		return nil, &outError
@@ -86,20 +106,19 @@ type signupRequestHandler struct {
 func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
 	const op = "router.signupRequestHandler.Validate"
 	log.Printf("%s: start with request %v", op, request)
-	if err := validateUserCredentials(request.Credentials); err != nil {
+	if err := validateUserCredentialsFormat(request.Credentials); err != nil {
 		log.Printf("%s: format validating failed %v", op, err)
 		outError := signup.ErrWrongCredentialsFormat()
 		return &outError
 	}
 	log.Printf("%s: validated format", op)
-	exists, err := h.storage.IsUserExists(request.Credentials.Login)
+	uid, err := h.storage.GetUserId(request.Credentials.Email)
 	if err != nil {
-		log.Printf("%s: check exists failed %v", op, err)
+		log.Printf("%s: check user exists failed %v", op, err)
 		outError := signup.ErrInternal()
 		return &outError
 	}
-	log.Printf("%s: existance check ran without errors", op)
-	if exists {
+	if uid != nil {
 		log.Printf("%s: already taken", op)
 		outError := signup.ErrLoginAlreadyTaken()
 		return &outError
@@ -111,20 +130,22 @@ func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
 func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthToken, *signup.Error) {
 	const op = "router.signupRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
-	if err := h.storage.StoreCredentials(request.Credentials); err != nil {
+	uid := storage.UserId(uuid.New().String())
+	log.Printf("%s: created new user id %s", op, uid)
+	if err := h.storage.StoreCredentials(uid, request.Credentials); err != nil {
 		log.Printf("storing credentials failed %v", err)
 		outError := signup.ErrInternal()
 		return nil, &outError
 	}
 	log.Printf("%s: credentials stored", op)
-	tokens, err := jwt.IssueTokens(string(request.Credentials.Login))
+	tokens, err := jwt.IssueTokens(string(uid))
 	if err != nil {
 		log.Printf("issue tokens failed %v", err)
 		outError := signup.ErrInternal()
 		return nil, &outError
 	}
 	log.Printf("%s: tokens issued", op)
-	if err := h.storage.StoreRefreshToken(tokens.Refresh, request.Credentials.Login); err != nil {
+	if err := h.storage.StoreRefreshToken(tokens.Refresh, uid); err != nil {
 		log.Printf("store tokens failed %v", err)
 		outError := signup.ErrInternal()
 		return nil, &outError

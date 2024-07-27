@@ -17,7 +17,8 @@ func getStorage(t *testing.T) storage.Storage {
 	if _s != nil {
 		return *_s
 	}
-	storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/local")
+	// storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/local")
+	storage, err := ydbStorage.New("grpcs://ydb.serverless.yandexcloud.net:2135/?database=/ru-central1/b1go4rr1upftm8rqi71n/etn41vv556r42hhp4jeu", "./ydbStorage/key.json")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -41,7 +42,9 @@ func TestIsUserExistsTrue(t *testing.T) {
 	s := getStorage(t)
 	uid := storage.UserId(uuid.New().String())
 	pwd := uuid.New().String()
-	if err := s.StoreCredentials(storage.UserCredentials{Login: uid, Password: pwd}); err != nil {
+	email := "x@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	exists, err := s.IsUserExists(uid)
@@ -53,12 +56,46 @@ func TestIsUserExistsTrue(t *testing.T) {
 	}
 }
 
+func TestGetUserId(t *testing.T) {
+	s := getStorage(t)
+	uid := storage.UserId(uuid.New().String())
+	pwd := uuid.New().String()
+	email := string(uid)
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	uidFromQuery, err := s.GetUserId(email)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if uidFromQuery == nil {
+		t.Fatalf("unexpected nil")
+	}
+	if *uidFromQuery != uid {
+		t.Fatalf("unexpected id mismatch, found %v", uidFromQuery)
+	}
+}
+
+func TestGetUserIdEmpty(t *testing.T) {
+	s := getStorage(t)
+	email := uuid.New().String()
+	uidFromQuery, err := s.GetUserId(email)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if uidFromQuery != nil {
+		t.Fatalf("unexpected non-nil found %v", uidFromQuery)
+	}
+}
+
 func TestCheckCredentialsTrue(t *testing.T) {
 	s := getStorage(t)
 	uid := storage.UserId(uuid.New().String())
 	pwd := uuid.New().String()
-	credentials := storage.UserCredentials{Login: uid, Password: pwd}
-	if err := s.StoreCredentials(credentials); err != nil {
+	email := "x@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	passed, err := s.CheckCredentials(credentials)
@@ -74,8 +111,9 @@ func TestCheckCredentialsFalse(t *testing.T) {
 	s := getStorage(t)
 	uid := storage.UserId(uuid.New().String())
 	pwd := uuid.New().String()
-	credentials := storage.UserCredentials{Login: uid, Password: pwd}
-	if err := s.StoreCredentials(credentials); err != nil {
+	email := "x@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	credentials.Password = uuid.New().String()
@@ -90,9 +128,9 @@ func TestCheckCredentialsFalse(t *testing.T) {
 
 func TestCheckCredentialsEmpty(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
 	pwd := uuid.New().String()
-	credentials := storage.UserCredentials{Login: uid, Password: pwd}
+	email := "x@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	passed, err := s.CheckCredentials(credentials)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -376,16 +414,22 @@ func TestGetFriendsEmpty(t *testing.T) {
 func TestGetUsers(t *testing.T) {
 	s := getStorage(t)
 	me := storage.UserId(uuid.New().String())
+	meEmail := "me@x.com"
 	mySubscriber := storage.UserId(uuid.New().String())
+	mySubscriberEmail := "mySubscriber@x.com"
 	mySubscription := storage.UserId(uuid.New().String())
+	mySubscriptionEmail := "mySubscription@x.com"
 	myFriend := storage.UserId(uuid.New().String())
+	myFriendEmail := "myFriend@x.com"
 	randomUser := storage.UserId(uuid.New().String())
+	randomUserEmail := "randomUser@x.com"
 	userWhoDoesNotExist := storage.UserId(uuid.New().String())
 
 	usersToCreate := []storage.UserId{me, mySubscriber, mySubscription, myFriend, randomUser}
+	emailsToCreate := []string{meEmail, mySubscriberEmail, mySubscriptionEmail, myFriendEmail, randomUserEmail}
 	for i := 0; i < len(usersToCreate); i++ {
 		pwd := uuid.New().String()
-		if err := s.StoreCredentials(storage.UserCredentials{Login: usersToCreate[i], Password: pwd}); err != nil {
+		if err := s.StoreCredentials(usersToCreate[i], storage.UserCredentials{Email: emailsToCreate[i], Password: pwd}); err != nil {
 			t.Fatalf("unexpected err: %v", err)
 		}
 	}
@@ -407,19 +451,19 @@ func TestGetUsers(t *testing.T) {
 	}
 	passedUsers := map[storage.UserId]bool{}
 	for i := 0; i < len(users); i++ {
-		if users[i].Login == me && users[i].FriendStatus == storage.FriendStatusMe {
+		if users[i].Id == me && users[i].FriendStatus == storage.FriendStatusMe {
 			passedUsers[me] = true
 		}
-		if users[i].Login == mySubscriber && users[i].FriendStatus == storage.FriendStatusIncomingRequest {
+		if users[i].Id == mySubscriber && users[i].FriendStatus == storage.FriendStatusIncomingRequest {
 			passedUsers[mySubscriber] = true
 		}
-		if users[i].Login == mySubscription && users[i].FriendStatus == storage.FriendStatusOutgoingRequest {
+		if users[i].Id == mySubscription && users[i].FriendStatus == storage.FriendStatusOutgoingRequest {
 			passedUsers[mySubscription] = true
 		}
-		if users[i].Login == myFriend && users[i].FriendStatus == storage.FriendStatusFriends {
+		if users[i].Id == myFriend && users[i].FriendStatus == storage.FriendStatusFriends {
 			passedUsers[myFriend] = true
 		}
-		if users[i].Login == randomUser && users[i].FriendStatus == storage.FriendStatusNo {
+		if users[i].Id == randomUser && users[i].FriendStatus == storage.FriendStatusNo {
 			passedUsers[randomUser] = true
 		}
 	}
@@ -443,28 +487,31 @@ func TestGetUsersEmpty(t *testing.T) {
 func TestSearchUsers(t *testing.T) {
 	s := getStorage(t)
 	me := storage.UserId(uuid.New().String())
+	meEmail := string(me)
 	otherUser := storage.UserId(uuid.New().String())
+	otherUserEmail := string(otherUser)
 
 	usersToCreate := []storage.UserId{me, otherUser}
+	emailsToCreate := []string{meEmail, otherUserEmail}
 	for i := 0; i < len(usersToCreate); i++ {
 		pwd := uuid.New().String()
-		if err := s.StoreCredentials(storage.UserCredentials{Login: usersToCreate[i], Password: pwd}); err != nil {
+		if err := s.StoreCredentials(usersToCreate[i], storage.UserCredentials{Email: emailsToCreate[i], Password: pwd}); err != nil {
 			t.Fatalf("unexpected err: %v", err)
 		}
 	}
-	result1, err := s.SearchUsers(me, string(otherUser))
+	result1, err := s.SearchUsers(me, string(otherUserEmail))
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if len(result1) != 1 || result1[0].Login != otherUser {
+	if len(result1) != 1 || result1[0].Id != otherUser {
 		t.Fatalf("result1 should contain only otherUser, found: %v", result1)
 	}
-	result2, err := s.SearchUsers(me, string(otherUser)[0:len(otherUser)-3])
+	result2, err := s.SearchUsers(me, string(otherUserEmail)[0:len(otherUserEmail)-3])
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if len(result2) != 1 || result2[0].Login != otherUser {
-		t.Fatalf("result2 should contain only otherUser for req %s, found: %v", string(otherUser)[0:len(otherUser)-3], result2)
+	if len(result2) != 1 || result2[0].Id != otherUser {
+		t.Fatalf("result2 should contain only otherUser for req %s, found: %v", string(otherUserEmail)[0:len(otherUserEmail)-3], result2)
 	}
 }
 
@@ -478,7 +525,7 @@ func TestSearchUsersEmpty(t *testing.T) {
 	if len(result) != 0 {
 		t.Fatalf("result should be empty, found: %v", result)
 	}
-	result, err = s.SearchUsers(me, "x")
+	result, err = s.SearchUsers(me, "+++")
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}

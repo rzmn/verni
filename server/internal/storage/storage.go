@@ -12,14 +12,21 @@ const (
 
 type UserId string
 
+type Avatar struct {
+	Url *string `json:"url"`
+}
+
 type User struct {
-	Login        UserId       `json:"login"`
+	Id           UserId       `json:"id"`
+	Email        *string      `json:"email"`
+	DisplayName  string       `json:"displayName"`
+	Avatar       Avatar       `json:"avatar"`
 	FriendStatus FriendStatus `json:"friendStatus"`
 }
 
 type UserCredentials struct {
-	Login    UserId `json:"login" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type AuthToken struct {
@@ -51,9 +58,14 @@ type SpendingsPreview struct {
 }
 
 type Storage interface {
+	GetUserId(email string) (*UserId, error)
+	StoreEmailValidationToken(email string, token string) error
+	ExtractEmailValidationToken(email string) (*string, error)
+	ValidateEmail(email string) error
+
 	IsUserExists(uid UserId) (bool, error)
 	CheckCredentials(credentials UserCredentials) (bool, error)
-	StoreCredentials(credentials UserCredentials) error
+	StoreCredentials(uid UserId, credentials UserCredentials) error
 
 	StoreRefreshToken(token string, uid UserId) error
 	GetRefreshToken(uid UserId) (*string, error)

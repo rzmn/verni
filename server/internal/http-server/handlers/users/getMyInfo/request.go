@@ -9,7 +9,7 @@ import (
 )
 
 type RequestHandler interface {
-	Handle(c *gin.Context) (*storage.User, *Error)
+	Handle(c *gin.Context) (storage.User, *Error)
 }
 
 func handleError(c *gin.Context, err Error) {
@@ -26,10 +26,6 @@ func New(requestHandler RequestHandler) func(c *gin.Context) {
 			handleError(c, *err)
 			return
 		}
-		if user == nil {
-			handleError(c, ErrInternal())
-			return
-		}
-		c.JSON(http.StatusCreated, Success(*user))
+		c.JSON(http.StatusCreated, Success(user))
 	}
 }

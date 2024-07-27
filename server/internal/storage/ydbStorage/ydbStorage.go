@@ -50,18 +50,37 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 	const op = "storage.ydb.new"
 	err := db.Table().Do(ctx,
 		func(ctx context.Context, s table.Session) (err error) {
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "users"),
-				options.WithColumn("login", types.TypeText),
+			if err := s.CreateTable(ctx, path.Join(db.Name(), "credentials"),
+				options.WithColumn("id", types.TypeText),
+				options.WithColumn("email", types.TypeText),
 				options.WithColumn("password", types.TypeText),
-				options.WithPrimaryKeyColumn("login"),
+				options.WithPrimaryKeyColumn("id"),
+			); err != nil {
+				log.Printf("%s: create credentials: unexpected err %v", op, err)
+				return err
+			}
+			if err := s.CreateTable(ctx, path.Join(db.Name(), "userInfos"),
+				options.WithColumn("id", types.TypeText),
+				options.WithColumn("displayName", types.TypeText),
+				options.WithColumn("avatarUrl", types.Optional(types.TypeText)),
+				options.WithPrimaryKeyColumn("id"),
 			); err != nil {
 				log.Printf("%s: create users: unexpected err %v", op, err)
 				return err
 			}
+			if err := s.CreateTable(ctx, path.Join(db.Name(), "emails"),
+				options.WithColumn("email", types.TypeText),
+				options.WithColumn("confirmed", types.TypeBool),
+				options.WithColumn("validationToken", types.Optional(types.TypeText)),
+				options.WithPrimaryKeyColumn("email"),
+			); err != nil {
+				log.Printf("%s: create emails: unexpected err %v", op, err)
+				return err
+			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "tokens"),
-				options.WithColumn("login", types.TypeText),
+				options.WithColumn("id", types.TypeText),
 				options.WithColumn("token", types.TypeText),
-				options.WithPrimaryKeyColumn("login"),
+				options.WithPrimaryKeyColumn("id"),
 			); err != nil {
 				log.Printf("%s: create tokens: unexpected err %v", op, err)
 				return err
@@ -122,6 +141,183 @@ func checkPasswordHash(password, hash string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
+func (s *Storage) GetUserId(email string) (*storage.UserId, error) {
+	const op = "storage.ydb.GetUserId"
+	log.Printf("%s: start", op)
+	var (
+		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		res    result.Result
+		uid    *storage.UserId
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err = s.Execute(ctx, readTx, `
+DECLARE $email AS Text;
+SELECT id FROM credentials where email = $email;`,
+			table.NewQueryParameters(
+				table.ValueParam("$email", types.TextValue(email)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				var value string
+				err = res.Scan(&value)
+				if err != nil {
+					return err
+				}
+				var uidValue = storage.UserId(value)
+				uid = &uidValue
+			}
+		}
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return nil, err
+	}
+	return uid, nil
+}
+
+func (s *Storage) StoreEmailValidationToken(email string, token string) error {
+	const op = "storage.ydb.StoreEmailValidationToken"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $email AS Text;
+DECLARE $validationToken AS Text;
+UPSERT INTO 
+	emails(email, confirmed, validationToken) 
+VALUES($email, False, $validationToken);`,
+			table.NewQueryParameters(
+				table.ValueParam("$email", types.TextValue(email)),
+				table.ValueParam("$validationToken", types.TextValue(token)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) ExtractEmailValidationToken(email string) (*string, error) {
+	const op = "storage.ydb.ExtractEmailValidationToken"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+		token *string
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $email AS Text;
+SELECT 
+	validationToken 
+FROM 
+	emails 
+WHERE 
+	email = $email AND validationToken IS NOT NULL;`,
+			table.NewQueryParameters(
+				table.ValueParam("$email", types.TextValue(email)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				var value string
+				err = res.Scan(&value)
+				if err != nil {
+					return err
+				}
+				token = &value
+			}
+		}
+		if err := res.Err(); err != nil {
+			return err
+		}
+		if token == nil {
+			return nil
+		}
+		_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $email AS Text;
+UPSERT INTO 
+	emails(email, confirmed, validationToken) 
+VALUES($email, False, NULL);`,
+			table.NewQueryParameters(
+				table.ValueParam("$email", types.TextValue(email)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return token, err
+	}
+	return token, nil
+}
+
+func (s *Storage) ValidateEmail(email string) error {
+	const op = "storage.ydb.ValidateEmail"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $email AS Text;
+UPSERT INTO 
+	emails(email, confirmed, validationToken) 
+VALUES($email, True, NULL);`,
+			table.NewQueryParameters(
+				table.ValueParam("$email", types.TextValue(email)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
 func (s *Storage) IsUserExists(uid storage.UserId) (bool, error) {
 	const op = "storage.ydb.IsUserExists"
 	log.Printf("%s: start", op)
@@ -131,14 +327,14 @@ func (s *Storage) IsUserExists(uid storage.UserId) (bool, error) {
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, readTx, `
-DECLARE $login AS Text;
+DECLARE $id AS Text;
 SELECT 
 	True
 FROM 
-	users 
+	credentials 
 WHERE 
-	login = $login`,
-			table.NewQueryParameters(table.ValueParam("$login", types.TextValue(string(uid)))),
+	id = $id;`,
+			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(string(uid)))),
 		)
 		if err != nil {
 			return err
@@ -170,9 +366,14 @@ func (s *Storage) CheckCredentials(credentials storage.UserCredentials) (bool, e
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err = s.Execute(ctx, readTx, `
-DECLARE $login AS Text;
-SELECT password FROM users where login = $login;`,
-			table.NewQueryParameters(table.ValueParam("$login", types.TextValue(string(credentials.Login)))),
+DECLARE $email AS Text;
+SELECT 
+	password 
+FROM 
+	credentials 
+WHERE 
+	email = $email;`,
+			table.NewQueryParameters(table.ValueParam("$email", types.TextValue(credentials.Email))),
 		)
 		if err != nil {
 			return err
@@ -199,7 +400,7 @@ SELECT password FROM users where login = $login;`,
 	return passed, nil
 }
 
-func (s *Storage) StoreCredentials(credentials storage.UserCredentials) error {
+func (s *Storage) StoreCredentials(uid storage.UserId, credentials storage.UserCredentials) error {
 	const op = "storage.ydb.StoreCredentials"
 	log.Printf("%s: start", op)
 	passwordHash, err := hashPassword(credentials.Password)
@@ -217,20 +418,62 @@ func (s *Storage) StoreCredentials(credentials storage.UserCredentials) error {
 	)
 	err = s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, writeTx, `
-DECLARE $login AS Text;
+DECLARE $id AS Text;
+DECLARE $email AS Text;
 DECLARE $password AS Text;
 UPSERT INTO 
-	users(login, password) 
-VALUES($login, $password)`,
+	credentials(id, email, password) 
+VALUES($id, $email, $password);
+`,
 			table.NewQueryParameters(
-				table.ValueParam("$login", types.TextValue(string(credentials.Login))),
+				table.ValueParam("$id", types.TextValue(string(uid))),
+				table.ValueParam("$email", types.TextValue(credentials.Email)),
 				table.ValueParam("$password", types.TextValue(passwordHash)),
 			),
 		)
 		if err != nil {
 			return err
 		}
-		defer res.Close()
+		res.Close()
+		_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+SELECT 
+	True
+FROM 
+	userInfos 
+WHERE 
+	id = $id;`,
+			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(string(uid)))),
+		)
+		if err != nil {
+			return err
+		}
+		var exists bool
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				if err := res.Scan(&exists); err != nil {
+					return err
+				}
+			}
+		}
+		res.Close()
+		if !exists {
+			_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DECLARE $email AS Text;
+UPSERT INTO 
+	userInfos(id, displayName, avatarUrl) 
+VALUES($id, $email, NULL);`,
+				table.NewQueryParameters(
+					table.ValueParam("$id", types.TextValue(string(uid))),
+					table.ValueParam("$email", types.TextValue(credentials.Email)),
+				),
+			)
+			if err != nil {
+				return err
+			}
+			res.Close()
+		}
 		return res.Err()
 	})
 	if err != nil {
@@ -250,10 +493,15 @@ func (s *Storage) GetRefreshToken(uid storage.UserId) (*string, error) {
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err = s.Execute(ctx, readTx, `
-DECLARE $login AS Text;
-SELECT token FROM tokens where login = $login;`,
+DECLARE $id AS Text;
+SELECT 
+	token 
+FROM 
+	tokens 
+WHERE 
+	id = $id;`,
 			table.NewQueryParameters(
-				table.ValueParam("$login", types.TextValue(string(uid))),
+				table.ValueParam("$id", types.TextValue(string(uid))),
 			),
 		)
 		if err != nil {
@@ -292,13 +540,13 @@ func (s *Storage) StoreRefreshToken(token string, uid storage.UserId) error {
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, writeTx, `
-DECLARE $login AS Text;
+DECLARE $id AS Text;
 DECLARE $token AS Text;
 UPSERT INTO 
-	tokens(login, token) 
-VALUES($login, $token)`,
+	tokens(id, token) 
+VALUES($id, $token);`,
 			table.NewQueryParameters(
-				table.ValueParam("$login", types.TextValue(string(uid))),
+				table.ValueParam("$id", types.TextValue(string(uid))),
 				table.ValueParam("$token", types.TextValue(token)),
 			),
 		)
@@ -328,13 +576,13 @@ func (s *Storage) RemoveRefreshToken(uid storage.UserId) error {
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, writeTx, `
-DECLARE $login AS Text;
+DECLARE $id AS Text;
 DELETE FROM 
 	tokens 
 WHERE 
-	login = $login`,
+	id = $id;`,
 			table.NewQueryParameters(
-				table.ValueParam("$login", types.TextValue(string(uid))),
+				table.ValueParam("$id", types.TextValue(string(uid))),
 			),
 		)
 		if err != nil {
@@ -367,7 +615,7 @@ DECLARE $sender AS Text;
 DECLARE $target AS Text;
 UPSERT INTO 
 	friendRequests(sender, target) 
-VALUES($sender, $target)`,
+VALUES($sender, $target);`,
 			table.NewQueryParameters(
 				table.ValueParam("$sender", types.TextValue(string(sender))),
 				table.ValueParam("$target", types.TextValue(string(target))),
@@ -403,7 +651,7 @@ SELECT
 FROM 
 	friendRequests 
 WHERE 
-	sender = $sender AND target = $target`,
+	sender = $sender AND target = $target;`,
 			table.NewQueryParameters(
 				table.ValueParam("$sender", types.TextValue(string(sender))),
 				table.ValueParam("$target", types.TextValue(string(target))),
@@ -447,7 +695,7 @@ DECLARE $target AS Text;
 DELETE FROM 
 	friendRequests 
 WHERE 
-	sender = $sender and target = $target`,
+	sender = $sender and target = $target;`,
 			table.NewQueryParameters(
 				table.ValueParam("$sender", types.TextValue(string(sender))),
 				table.ValueParam("$target", types.TextValue(string(target))),
@@ -486,7 +734,7 @@ DECLARE $friendA AS Text;
 DECLARE $friendB AS Text;
 UPSERT INTO 
 	friends(friendA, friendB) 
-VALUES($friendA, $friendB)`,
+VALUES($friendA, $friendB);`,
 			table.NewQueryParameters(
 				table.ValueParam("$friendA", types.TextValue(string(friendA))),
 				table.ValueParam("$friendB", types.TextValue(string(friendB))),
@@ -525,7 +773,7 @@ SELECT
 FROM 
 	friends 
 WHERE 
-	friendA = $friendA AND friendB = $friendB`,
+	friendA = $friendA AND friendB = $friendB;`,
 			table.NewQueryParameters(
 				table.ValueParam("$friendA", types.TextValue(string(friendA))),
 				table.ValueParam("$friendB", types.TextValue(string(friendB))),
@@ -572,7 +820,7 @@ DECLARE $friendB AS Text;
 DELETE FROM 
 	friends 
 WHERE 
-	friendA = $friendA AND friendB = $friendB`,
+	friendA = $friendA AND friendB = $friendB;`,
 			table.NewQueryParameters(
 				table.ValueParam("$friendA", types.TextValue(string(friendA))),
 				table.ValueParam("$friendB", types.TextValue(string(friendB))),
@@ -607,7 +855,7 @@ SELECT
 FROM 
 	friends 
 WHERE 
-	friendA = $user OR friendB = $user`,
+	friendA = $user OR friendB = $user;`,
 				table.NewQueryParameters(
 					table.ValueParam("$user", types.TextValue(string(uid))),
 				),
@@ -655,7 +903,7 @@ SELECT
 FROM 
 	friendRequests 
 WHERE 
-	target = $target`,
+	target = $target;`,
 				table.NewQueryParameters(
 					table.ValueParam("$target", types.TextValue(string(uid))),
 				),
@@ -699,7 +947,7 @@ SELECT
 FROM 
 	friendRequests 
 WHERE 
-	sender = $sender`,
+	sender = $sender;`,
 				table.NewQueryParameters(
 					table.ValueParam("$sender", types.TextValue(string(uid))),
 				),
@@ -727,27 +975,28 @@ WHERE
 	return targets, nil
 }
 
-func (s *Storage) filterInvalidUsers(ids []storage.UserId) ([]storage.UserId, error) {
-	const op = "storage.ydb.filterInvalidUsers"
-	log.Printf("%s: start", op)
+func (s *Storage) getUsersWithoutFriendRelationInfo(ids []storage.UserId) ([]storage.User, error) {
+	const op = "storage.ydb.getUsersWithoutFriendRelationInfo"
+	log.Printf("%s: start args: %v", op, ids)
 	var (
 		readTx     = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
 		unfiltered []types.Value
-		uids       []storage.UserId
+		uids       []storage.User
 	)
 	for i := 0; i < len(ids); i++ {
 		unfiltered = append(unfiltered, types.TextValue(string(ids[i])))
 	}
+
 	err := s.db.Table().Do(s.ctx,
 		func(ctx context.Context, s table.Session) (err error) {
 			_, res, err := s.Execute(ctx, readTx, `
 DECLARE $uids AS List<Text>;
 SELECT 
-	login 
+	id, displayName, avatarUrl
 FROM 
-	users 
+	userInfos
 WHERE 
-	login in $uids`,
+	id in $uids;`,
 				table.NewQueryParameters(
 					table.ValueParam("$uids", types.ListValue(unfiltered...)),
 				),
@@ -758,11 +1007,21 @@ WHERE
 			defer res.Close()
 			for res.NextResultSet(ctx) {
 				for res.NextRow() {
-					var uid string
-					if err := res.Scan(&uid); err != nil {
+					var displayName string
+					var id string
+					var avatarUrl *string
+					res.ScanNamed()
+					if err := res.Scan(&id, &displayName, &avatarUrl); err != nil {
 						return err
 					}
-					uids = append(uids, storage.UserId(uid))
+					uids = append(uids, storage.User{
+						Id:          storage.UserId(id),
+						DisplayName: displayName,
+						Avatar: storage.Avatar{
+							Url: avatarUrl,
+						},
+						FriendStatus: storage.FriendStatusNo,
+					})
 				}
 			}
 			return res.Err()
@@ -777,16 +1036,16 @@ WHERE
 
 func (s *Storage) GetUsers(sender storage.UserId, ids []storage.UserId) ([]storage.User, error) {
 	const op = "storage.ydb.GetUsers"
-	log.Printf("%s: start", op)
+	log.Printf("%s: start args: %v", op, ids)
 	if len(ids) == 0 {
 		return []storage.User{}, nil
 	}
-	userIds, err := s.filterInvalidUsers(ids)
+	users, err := s.getUsersWithoutFriendRelationInfo(ids)
 	if err != nil {
 		log.Printf("%s: filter invalid ids failed err %v", op, err)
 		return []storage.User{}, err
 	}
-	log.Printf("%s: found %d users", op, len(userIds))
+	log.Printf("%s: found %d users", op, len(users))
 
 	pendingFriends, err := s.GetPendingRequests(sender)
 	if err != nil {
@@ -813,24 +1072,20 @@ func (s *Storage) GetUsers(sender storage.UserId, ids []storage.UserId) ([]stora
 		friendsMap[friends[i]] = true
 	}
 
-	users := make([]storage.User, len(userIds))
-	for i := 0; i < len(userIds); i++ {
+	for i := 0; i < len(users); i++ {
 		var status storage.FriendStatus
-		if userIds[i] == sender {
+		if users[i].Id == sender {
 			status = storage.FriendStatusMe
-		} else if pendingFriendsMap[userIds[i]] {
+		} else if pendingFriendsMap[users[i].Id] {
 			status = storage.FriendStatusOutgoingRequest
-		} else if incomingFriendsMap[userIds[i]] {
+		} else if incomingFriendsMap[users[i].Id] {
 			status = storage.FriendStatusIncomingRequest
-		} else if friendsMap[userIds[i]] {
+		} else if friendsMap[users[i].Id] {
 			status = storage.FriendStatusFriends
 		} else {
 			status = storage.FriendStatusNo
 		}
-		users[i] = storage.User{
-			Login:        storage.UserId(userIds[i]),
-			FriendStatus: status,
-		}
+		users[i].FriendStatus = status
 	}
 	return users, nil
 }
@@ -850,11 +1105,11 @@ func (s *Storage) SearchUsers(sender storage.UserId, query string) ([]storage.Us
 			_, res, err := s.Execute(ctx, readTx, fmt.Sprintf(`
 DECLARE $query AS Text;
 SELECT 
-	login 
+	id 
 FROM 
-	users 
+	userInfos
 WHERE 
-	login LIKE '%s%%' or login = $query ORDER BY login`, query),
+	displayName LIKE '%s%%' or displayName = $query ORDER BY id;`, query),
 				table.NewQueryParameters(
 					table.ValueParam("$query", types.TextValue(query)),
 				),
@@ -903,7 +1158,7 @@ DECLARE $cost AS Int64;
 DECLARE $currency AS Text;
 INSERT INTO 
 	deals(id, timestamp, details, cost, currency) 
-VALUES($id, $timestamp, $details, $cost, $currency)`,
+VALUES($id, $timestamp, $details, $cost, $currency);`,
 			table.NewQueryParameters(
 				table.ValueParam("$id", types.TextValue(dealId)),
 				table.ValueParam("$timestamp", types.Int64Value(deal.Timestamp)),
@@ -925,7 +1180,7 @@ DECLARE $cost AS Int64;
 DECLARE $counterparty AS Text;
 INSERT INTO 
 	spendings(id, dealId, cost, counterparty) 
-VALUES($id, $dealId, $cost, $counterparty)`,
+VALUES($id, $dealId, $cost, $counterparty);`,
 				table.NewQueryParameters(
 					table.ValueParam("$id", types.TextValue(uuid.New().String())),
 					table.ValueParam("$dealId", types.TextValue(dealId)),
@@ -962,7 +1217,7 @@ SELECT
 FROM 
 	deals 
 WHERE 
-	id = $id`,
+	id = $id;`,
 			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(did))),
 		)
 		if err != nil {
@@ -1005,7 +1260,7 @@ DECLARE $id AS Text;
 DELETE FROM 
 	deals 
 WHERE 
-	id = $id`,
+	id = $id;`,
 			table.NewQueryParameters(
 				table.ValueParam("$id", types.TextValue(did)),
 			),
@@ -1019,7 +1274,7 @@ DECLARE $id AS Text;
 DELETE FROM 
 	spendings 
 WHERE 
-	dealId = $id`,
+	dealId = $id;`,
 			table.NewQueryParameters(
 				table.ValueParam("$id", types.TextValue(did)),
 			),
@@ -1072,7 +1327,7 @@ FROM
   JOIN spendings s2 ON s1.dealId = s2.dealId
   JOIN deals d ON s1.dealId = d.id
 WHERE
-  s1.counterparty = $counterparty1 AND s2.counterparty = $counterparty2`,
+  s1.counterparty = $counterparty1 AND s2.counterparty = $counterparty2;`,
 				table.NewQueryParameters(
 					table.ValueParam("$counterparty1", types.TextValue(string(counterparty1))),
 					table.ValueParam("$counterparty2", types.TextValue(string(counterparty2))),
@@ -1133,7 +1388,7 @@ SELECT
 FROM 
 	spendings 
 WHERE 
-	dealId = $dealId`,
+	dealId = $dealId;`,
 				table.NewQueryParameters(
 					table.ValueParam("$dealId", types.TextValue(string(did))),
 				),
@@ -1192,7 +1447,7 @@ FROM
   JOIN spendings s1 ON s1.dealId = d.id
   JOIN spendings s2 ON s2.dealId = d.id
 WHERE 
-  s1.counterparty = $target AND s2.counterparty != $target`,
+  s1.counterparty = $target AND s2.counterparty != $target;`,
 				table.NewQueryParameters(
 					table.ValueParam("$target", types.TextValue(string(target))),
 				),
