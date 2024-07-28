@@ -79,7 +79,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "avatars"),
 				options.WithColumn("id", types.TypeText),
-				options.WithColumn("base64", types.TypeBool),
+				options.WithColumn("data", types.TypeText),
 				options.WithPrimaryKeyColumn("id"),
 			); err != nil {
 				log.Printf("%s: create avatars: unexpected err %v", op, err)
@@ -654,7 +654,7 @@ func (s *Storage) StoreAvatarBase64(uid storage.UserId, data string) error {
 DECLARE $avatarId AS Text;
 DECLARE $data AS Text;
 INSERT INTO 
-	avatars(id, base64) 
+	avatars(id, data) 
 VALUES($avatarId, $data);`,
 			table.NewQueryParameters(
 				table.ValueParam("$avatarId", types.TextValue(avatarId)),

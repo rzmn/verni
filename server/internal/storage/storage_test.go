@@ -126,6 +126,76 @@ func TestCheckCredentialsTrue(t *testing.T) {
 	}
 }
 
+func TestUpdateDisplayName(t *testing.T) {
+	s := getStorage(t)
+	uid := storage.UserId(uuid.New().String())
+	pwd := uuid.New().String()
+	email := "mlm@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	info, err := s.GetAccountInfo(uid)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if info == nil {
+		t.Fatalf("no account info")
+	}
+	if info.User.DisplayName != email {
+		t.Fatalf("initial display name should be a email, found %s", info.User.DisplayName)
+	}
+	newDisplayName := "newDisplayName"
+	if err := s.StoreDisplayName(uid, newDisplayName); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	info, err = s.GetAccountInfo(uid)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if info == nil {
+		t.Fatalf("no account info")
+	}
+	if info.User.DisplayName != newDisplayName {
+		t.Fatalf("initial display name should be %s, found %s", newDisplayName, info.User.DisplayName)
+	}
+}
+
+func TestUpdateAvatar(t *testing.T) {
+	s := getStorage(t)
+	uid := storage.UserId(uuid.New().String())
+	pwd := uuid.New().String()
+	email := "mlm@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	info, err := s.GetAccountInfo(uid)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if info == nil {
+		t.Fatalf("no account info")
+	}
+	if info.User.Avatar.Url != nil {
+		t.Fatalf("unexpected non-nil avatar, found %s", *info.User.Avatar.Url)
+	}
+	newAvatar := "xxx"
+	if err := s.StoreAvatarBase64(uid, newAvatar); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	info, err = s.GetAccountInfo(uid)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if info == nil {
+		t.Fatalf("no account info")
+	}
+	if info.User.Avatar.Url == nil {
+		t.Fatalf("new avatar id should not be nil")
+	}
+}
+
 func TestCheckCredentialsFalse(t *testing.T) {
 	s := getStorage(t)
 	uid := storage.UserId(uuid.New().String())
