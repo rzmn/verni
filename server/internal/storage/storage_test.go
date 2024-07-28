@@ -56,6 +56,25 @@ func TestIsUserExistsTrue(t *testing.T) {
 	}
 }
 
+func TestGetAccountInfo(t *testing.T) {
+	s := getStorage(t)
+	uid := storage.UserId(uuid.New().String())
+	pwd := uuid.New().String()
+	email := "x@x.com"
+	credentials := storage.UserCredentials{Email: email, Password: pwd}
+	if err := s.StoreCredentials(uid, credentials); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	info, err := s.GetAccountInfo(uid)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if info == nil {
+		t.Fatalf("unexpected exists=false")
+	}
+	log.Printf("info: %v\n", *info)
+}
+
 func TestGetUserId(t *testing.T) {
 	s := getStorage(t)
 	uid := storage.UserId(uuid.New().String())
