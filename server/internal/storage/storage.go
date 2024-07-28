@@ -16,9 +16,14 @@ type Avatar struct {
 	Url *string `json:"url"`
 }
 
+type AccountInfo struct {
+	User          User   `json:"user"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"emailVerified"`
+}
+
 type User struct {
 	Id           UserId       `json:"id"`
-	Email        *string      `json:"email"`
 	DisplayName  string       `json:"displayName"`
 	Avatar       Avatar       `json:"avatar"`
 	FriendStatus FriendStatus `json:"friendStatus"`
@@ -58,6 +63,8 @@ type SpendingsPreview struct {
 }
 
 type Storage interface {
+	GetAccountInfo(uid UserId) (*AccountInfo, error)
+
 	GetUserId(email string) (*UserId, error)
 	StoreEmailValidationToken(email string, token string) error
 	ExtractEmailValidationToken(email string) (*string, error)
@@ -66,6 +73,9 @@ type Storage interface {
 	IsUserExists(uid UserId) (bool, error)
 	CheckCredentials(credentials UserCredentials) (bool, error)
 	StoreCredentials(uid UserId, credentials UserCredentials) error
+
+	StoreDisplayName(uid UserId, displayName string) error
+	StoreAvatarBase64(uid UserId, avatarBase64 string) error
 
 	StoreRefreshToken(token string, uid UserId) error
 	GetRefreshToken(uid UserId) (*string, error)

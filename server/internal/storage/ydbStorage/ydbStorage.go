@@ -62,7 +62,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "userInfos"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("displayName", types.TypeText),
-				options.WithColumn("avatarUrl", types.Optional(types.TypeText)),
+				options.WithColumn("avatarId", types.Optional(types.TypeText)),
 				options.WithPrimaryKeyColumn("id"),
 			); err != nil {
 				log.Printf("%s: create users: unexpected err %v", op, err)
@@ -75,6 +75,14 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				options.WithPrimaryKeyColumn("email"),
 			); err != nil {
 				log.Printf("%s: create emails: unexpected err %v", op, err)
+				return err
+			}
+			if err := s.CreateTable(ctx, path.Join(db.Name(), "avatars"),
+				options.WithColumn("id", types.TypeText),
+				options.WithColumn("base64", types.TypeBool),
+				options.WithPrimaryKeyColumn("id"),
+			); err != nil {
+				log.Printf("%s: create avatars: unexpected err %v", op, err)
 				return err
 			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "tokens"),
@@ -141,6 +149,70 @@ func checkPasswordHash(password, hash string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
+func (s *Storage) GetAccountInfo(uid storage.UserId) (*storage.AccountInfo, error) {
+	const op = "storage.ydb.GetAccountInfo"
+	log.Printf("%s: start", op)
+	var (
+		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		res    result.Result
+		result *storage.AccountInfo
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err = s.Execute(ctx, readTx, `
+DECLARE $id AS Text;
+SELECT 
+	c.email,
+	e.confirmed,
+	u.displayName,
+	u.avatarId
+FROM 
+	credentials c
+	JOIN emails e ON c.email = e.email
+	JOIN userInfos u ON c.id = u.id
+WHERE 
+	c.id = $id;`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				var email string
+				var confirmed bool
+				var displayName string
+				var avatarId *string
+				err = res.Scan(&email, &confirmed, &displayName, &avatarId)
+				if err != nil {
+					return err
+				}
+				info := storage.AccountInfo{
+					User: storage.User{
+						Id:          uid,
+						DisplayName: displayName,
+						Avatar: storage.Avatar{
+							Url: avatarId,
+						},
+						FriendStatus: storage.FriendStatusMe,
+					},
+					Email:         email,
+					EmailVerified: confirmed,
+				}
+				result = &info
+			}
+		}
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return nil, err
+	}
+	return result, nil
+}
+
 func (s *Storage) GetUserId(email string) (*storage.UserId, error) {
 	const op = "storage.ydb.GetUserId"
 	log.Printf("%s: start", op)
@@ -152,7 +224,12 @@ func (s *Storage) GetUserId(email string) (*storage.UserId, error) {
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err = s.Execute(ctx, readTx, `
 DECLARE $email AS Text;
-SELECT id FROM credentials where email = $email;`,
+SELECT 
+	id 
+FROM 
+	credentials 
+WHERE 
+	email = $email;`,
 			table.NewQueryParameters(
 				table.ValueParam("$email", types.TextValue(email)),
 			),
@@ -462,7 +539,7 @@ WHERE
 DECLARE $id AS Text;
 DECLARE $email AS Text;
 UPSERT INTO 
-	userInfos(id, displayName, avatarUrl) 
+	userInfos(id, displayName, avatarId) 
 VALUES($id, $email, NULL);`,
 				table.NewQueryParameters(
 					table.ValueParam("$id", types.TextValue(string(uid))),
@@ -474,6 +551,139 @@ VALUES($id, $email, NULL);`,
 			}
 			res.Close()
 		}
+
+		_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $email AS Text;
+SELECT 
+	True
+FROM 
+	emails 
+WHERE 
+	email = $email;`,
+			table.NewQueryParameters(table.ValueParam("$email", types.TextValue(credentials.Email))),
+		)
+		if err != nil {
+			return err
+		}
+		exists = false
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				if err := res.Scan(&exists); err != nil {
+					return err
+				}
+			}
+		}
+		res.Close()
+		if !exists {
+			_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $email AS Text;
+UPSERT INTO 
+	emails(email, confirmed, validationToken) 
+VALUES($email, False, NULL);`,
+				table.NewQueryParameters(
+					table.ValueParam("$email", types.TextValue(credentials.Email)),
+				),
+			)
+			if err != nil {
+				return err
+			}
+			res.Close()
+		}
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) StoreDisplayName(uid storage.UserId, displayName string) error {
+	const op = "storage.ydb.StoreDisplayName"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DECLARE $displayName AS Text;
+UPDATE 
+	userInfos
+SET 
+	displayName = $displayName
+WHERE
+	id = $id;`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+				table.ValueParam("$displayName", types.TextValue(displayName)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) StoreAvatarBase64(uid storage.UserId, data string) error {
+	const op = "storage.ydb.StoreAvatar"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+		avatarId = uuid.New().String()
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $avatarId AS Text;
+DECLARE $data AS Text;
+INSERT INTO 
+	avatars(id, base64) 
+VALUES($avatarId, $data);`,
+			table.NewQueryParameters(
+				table.ValueParam("$avatarId", types.TextValue(avatarId)),
+				table.ValueParam("$data", types.TextValue(data)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		res.Close()
+
+		_, res, err = s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DECLARE $avatarId AS Text;
+UPDATE 
+	userInfos
+SET 
+	avatarId = $avatarId
+WHERE
+	id = $id;`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+				table.ValueParam("$avatarId", types.TextValue(avatarId)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		res.Close()
 		return res.Err()
 	})
 	if err != nil {
@@ -992,7 +1202,7 @@ func (s *Storage) getUsersWithoutFriendRelationInfo(ids []storage.UserId) ([]sto
 			_, res, err := s.Execute(ctx, readTx, `
 DECLARE $uids AS List<Text>;
 SELECT 
-	id, displayName, avatarUrl
+	id, displayName, avatarId
 FROM 
 	userInfos
 WHERE 
@@ -1009,16 +1219,16 @@ WHERE
 				for res.NextRow() {
 					var displayName string
 					var id string
-					var avatarUrl *string
+					var avatarId *string
 					res.ScanNamed()
-					if err := res.Scan(&id, &displayName, &avatarUrl); err != nil {
+					if err := res.Scan(&id, &displayName, &avatarId); err != nil {
 						return err
 					}
 					uids = append(uids, storage.User{
 						Id:          storage.UserId(id),
 						DisplayName: displayName,
 						Avatar: storage.Avatar{
-							Url: avatarUrl,
+							Url: avatarId,
 						},
 						FriendStatus: storage.FriendStatusNo,
 					})
