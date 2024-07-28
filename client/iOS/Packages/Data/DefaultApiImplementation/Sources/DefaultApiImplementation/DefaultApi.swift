@@ -39,7 +39,8 @@ class DefaultApi: ApiProtocol {
 // MARK: Types
 
 extension DefaultApi {
-    typealias ApiResultInternal<T: Decodable> = Result<ApiResponseDto<T>, ApiServiceError>
+    typealias ApiServiceResponse<T: Decodable> = Result<ApiResponseDto<T>, ApiServiceError>
+    typealias ApiServiceResultVoid = Result<VoidApiResponseDto, ApiServiceError>
 }
 
 extension DefaultApi {
@@ -55,7 +56,7 @@ extension DefaultApi {
                     ),
                     parameters: method.parameters
                 )
-            )
+            ) as ApiServiceResponse<Method.Response>
         )
     }
 
@@ -66,7 +67,7 @@ extension DefaultApi {
         mapApiResponse(
             await service.run(
                 request: Request(method: method)
-            ) as ApiResultInternal<Method.Response>
+            ) as ApiServiceResponse<Method.Response>
         )
     }
 
@@ -77,19 +78,14 @@ extension DefaultApi {
         mapApiResponse(
             await service.run(
                 request: Request(method: method)
-            ) as ApiResultInternal<EmptyResponse>
+            ) as ApiServiceResultVoid
         )
     }
 
-    private func mapApiResponse(_ response: ApiResultInternal<EmptyResponse>) -> ApiResult<Void> {
-        let response: ApiResult<EmptyResponse> = mapApiResponse(response)
-        return response.map { _ in () }
-    }
-
-    private func mapApiResponse<T>(_ response: ApiResultInternal<T>) -> ApiResult<T> {
+    private func mapApiResponse<R: ApiResponse>(_ response: Result<R, ApiServiceError>) -> ApiResult<R.Success> {
         switch response {
         case .success(let response):
-            switch response {
+            switch response.result {
             case .success(let response):
                 return .success(response)
             case .failure(let error):
