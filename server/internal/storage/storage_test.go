@@ -5,6 +5,7 @@ import (
 	"accounty/internal/storage/ydbStorage"
 	"log"
 	"math/rand"
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -35,7 +36,7 @@ func getStorage(t *testing.T) storage.Storage {
 	if _s != nil {
 		return *_s
 	}
-	storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/Root/test")
+	storage, err := ydbStorage.New(os.Getenv("YDB_TEST_ENDPOINT"), "./ydbStorage/key.json")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
