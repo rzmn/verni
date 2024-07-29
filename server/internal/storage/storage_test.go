@@ -35,7 +35,7 @@ func getStorage(t *testing.T) storage.Storage {
 	if _s != nil {
 		return *_s
 	}
-	storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/local")
+	storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/Root/test")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
