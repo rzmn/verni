@@ -41,4 +41,4 @@ jobs:
           cd ./server/internal/storage && cat ./ydbStorage/key.json && sh storage_test.sh
       shell: bash
       env:
-        YDB_TEST_ENDPOINT: ${{ secrets.YDB_TEST_ENDPOINT }}
+        YDB_TEST_ENDPOINT: ${{ vars.YDB_TEST_ENDPOINT }}
