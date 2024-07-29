@@ -4,6 +4,7 @@ import (
 	"accounty/internal/storage"
 	"accounty/internal/storage/ydbStorage"
 	"log"
+	"math/rand"
 	"testing"
 
 	"github.com/google/uuid"
@@ -12,6 +13,23 @@ import (
 var (
 	_s *storage.Storage
 )
+
+func randomUid() storage.UserId {
+	return storage.UserId(uuid.New().String())
+}
+
+func randomPassword() string {
+	return uuid.New().String()
+}
+
+func randomEmail() string {
+	const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	email := make([]byte, 15)
+	for i := range email {
+		email[i] = characters[rand.Intn(len(characters))]
+	}
+	return string(email) + "@x.com"
+}
 
 func getStorage(t *testing.T) storage.Storage {
 	if _s != nil {
@@ -28,7 +46,7 @@ func getStorage(t *testing.T) storage.Storage {
 
 func TestIsUserExistsFalse(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	exists, err := s.IsUserExists(uid)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -40,9 +58,9 @@ func TestIsUserExistsFalse(t *testing.T) {
 
 func TestIsUserExistsTrue(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := "x@x.com"
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -58,9 +76,9 @@ func TestIsUserExistsTrue(t *testing.T) {
 
 func TestGetAccountInfo(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := "x@x.com"
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -77,9 +95,9 @@ func TestGetAccountInfo(t *testing.T) {
 
 func TestGetUserId(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := string(uid)
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -98,7 +116,7 @@ func TestGetUserId(t *testing.T) {
 
 func TestGetUserIdEmpty(t *testing.T) {
 	s := getStorage(t)
-	email := uuid.New().String()
+	email := randomEmail()
 	uidFromQuery, err := s.GetUserId(email)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -110,9 +128,9 @@ func TestGetUserIdEmpty(t *testing.T) {
 
 func TestCheckCredentialsTrue(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := "x@x.com"
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -128,9 +146,9 @@ func TestCheckCredentialsTrue(t *testing.T) {
 
 func TestUpdateDisplayName(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := "mlm@x.com"
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -163,9 +181,9 @@ func TestUpdateDisplayName(t *testing.T) {
 
 func TestUpdateAvatar(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := "mlm@x.com"
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -198,9 +216,9 @@ func TestUpdateAvatar(t *testing.T) {
 
 func TestCheckCredentialsFalse(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
-	pwd := uuid.New().String()
-	email := "x@x.com"
+	uid := randomUid()
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	if err := s.StoreCredentials(uid, credentials); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -217,8 +235,8 @@ func TestCheckCredentialsFalse(t *testing.T) {
 
 func TestCheckCredentialsEmpty(t *testing.T) {
 	s := getStorage(t)
-	pwd := uuid.New().String()
-	email := "x@x.com"
+	pwd := randomPassword()
+	email := randomEmail()
 	credentials := storage.UserCredentials{Email: email, Password: pwd}
 	passed, err := s.CheckCredentials(credentials)
 	if err != nil {
@@ -231,7 +249,7 @@ func TestCheckCredentialsEmpty(t *testing.T) {
 
 func TestStoreAndRemoveRefreshToken(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	token := uuid.New().String()
 	if err := s.StoreRefreshToken(token, uid); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -257,7 +275,7 @@ func TestStoreAndRemoveRefreshToken(t *testing.T) {
 
 func TestGetRefreshTokenEmpty(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	token, err := s.GetRefreshToken(uid)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -269,8 +287,8 @@ func TestGetRefreshTokenEmpty(t *testing.T) {
 
 func TestStoreAndRemoveFriendRequest(t *testing.T) {
 	s := getStorage(t)
-	sender := storage.UserId(uuid.New().String())
-	target := storage.UserId(uuid.New().String())
+	sender := randomUid()
+	target := randomUid()
 
 	if err := s.StoreFriendRequest(sender, target); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -303,8 +321,8 @@ func TestStoreAndRemoveFriendRequest(t *testing.T) {
 
 func TestHasFriendRequestEmpty(t *testing.T) {
 	s := getStorage(t)
-	sender := storage.UserId(uuid.New().String())
-	target := storage.UserId(uuid.New().String())
+	sender := randomUid()
+	target := randomUid()
 	exists, err := s.HasFriendRequest(sender, target)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -316,8 +334,8 @@ func TestHasFriendRequestEmpty(t *testing.T) {
 
 func TestGetIncomingRequests(t *testing.T) {
 	s := getStorage(t)
-	sender := storage.UserId(uuid.New().String())
-	target := storage.UserId(uuid.New().String())
+	sender := randomUid()
+	target := randomUid()
 
 	if err := s.StoreFriendRequest(sender, target); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -340,7 +358,7 @@ func TestGetIncomingRequests(t *testing.T) {
 
 func TestGetIncomingRequestsEmpty(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	incoming, err := s.GetIncomingRequests(uid)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -352,8 +370,8 @@ func TestGetIncomingRequestsEmpty(t *testing.T) {
 
 func TestGetPendingRequests(t *testing.T) {
 	s := getStorage(t)
-	sender := storage.UserId(uuid.New().String())
-	target := storage.UserId(uuid.New().String())
+	sender := randomUid()
+	target := randomUid()
 
 	if err := s.StoreFriendRequest(sender, target); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -376,7 +394,7 @@ func TestGetPendingRequests(t *testing.T) {
 
 func TestGetPendingRequestsEmpty(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	incoming, err := s.GetPendingRequests(uid)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -388,8 +406,8 @@ func TestGetPendingRequestsEmpty(t *testing.T) {
 
 func TestStoreAndRemoveFriendship(t *testing.T) {
 	s := getStorage(t)
-	friendA := storage.UserId(uuid.New().String())
-	friendB := storage.UserId(uuid.New().String())
+	friendA := randomUid()
+	friendB := randomUid()
 
 	if err := s.StoreFriendship(friendA, friendB); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -429,8 +447,8 @@ func TestStoreAndRemoveFriendship(t *testing.T) {
 
 func TestHasFriendshipEmpty(t *testing.T) {
 	s := getStorage(t)
-	friendA := storage.UserId(uuid.New().String())
-	friendB := storage.UserId(uuid.New().String())
+	friendA := randomUid()
+	friendB := randomUid()
 	has, err := s.HasFriendship(friendA, friendB)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -449,8 +467,8 @@ func TestHasFriendshipEmpty(t *testing.T) {
 
 func TestGetFriends(t *testing.T) {
 	s := getStorage(t)
-	friendA := storage.UserId(uuid.New().String())
-	friendB := storage.UserId(uuid.New().String())
+	friendA := randomUid()
+	friendB := randomUid()
 
 	if err := s.StoreFriendship(friendA, friendB); err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -490,7 +508,7 @@ func TestGetFriends(t *testing.T) {
 
 func TestGetFriendsEmpty(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	friends, err := s.GetFriends(uid)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -502,22 +520,22 @@ func TestGetFriendsEmpty(t *testing.T) {
 
 func TestGetUsers(t *testing.T) {
 	s := getStorage(t)
-	me := storage.UserId(uuid.New().String())
-	meEmail := "me@x.com"
-	mySubscriber := storage.UserId(uuid.New().String())
-	mySubscriberEmail := "mySubscriber@x.com"
-	mySubscription := storage.UserId(uuid.New().String())
-	mySubscriptionEmail := "mySubscription@x.com"
-	myFriend := storage.UserId(uuid.New().String())
-	myFriendEmail := "myFriend@x.com"
-	randomUser := storage.UserId(uuid.New().String())
-	randomUserEmail := "randomUser@x.com"
-	userWhoDoesNotExist := storage.UserId(uuid.New().String())
+	me := randomUid()
+	meEmail := randomEmail()
+	mySubscriber := randomUid()
+	mySubscriberEmail := randomEmail()
+	mySubscription := randomUid()
+	mySubscriptionEmail := randomEmail()
+	myFriend := randomUid()
+	myFriendEmail := randomEmail()
+	randomUser := randomUid()
+	randomUserEmail := randomEmail()
+	userWhoDoesNotExist := randomUid()
 
 	usersToCreate := []storage.UserId{me, mySubscriber, mySubscription, myFriend, randomUser}
 	emailsToCreate := []string{meEmail, mySubscriberEmail, mySubscriptionEmail, myFriendEmail, randomUserEmail}
 	for i := 0; i < len(usersToCreate); i++ {
-		pwd := uuid.New().String()
+		pwd := randomPassword()
 		if err := s.StoreCredentials(usersToCreate[i], storage.UserCredentials{Email: emailsToCreate[i], Password: pwd}); err != nil {
 			t.Fatalf("unexpected err: %v", err)
 		}
@@ -563,7 +581,7 @@ func TestGetUsers(t *testing.T) {
 
 func TestGetUsersEmpty(t *testing.T) {
 	s := getStorage(t)
-	uid := storage.UserId(uuid.New().String())
+	uid := randomUid()
 	users, err := s.GetUsers(uid, []storage.UserId{uid})
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -575,10 +593,10 @@ func TestGetUsersEmpty(t *testing.T) {
 
 func TestSearchUsers(t *testing.T) {
 	s := getStorage(t)
-	me := storage.UserId(uuid.New().String())
-	meEmail := string(me)
-	otherUser := storage.UserId(uuid.New().String())
-	otherUserEmail := string(otherUser)
+	me := randomUid()
+	meEmail := randomEmail()
+	otherUser := randomUid()
+	otherUserEmail := randomEmail()
 
 	usersToCreate := []storage.UserId{me, otherUser}
 	emailsToCreate := []string{meEmail, otherUserEmail}
@@ -606,7 +624,7 @@ func TestSearchUsers(t *testing.T) {
 
 func TestSearchUsersEmpty(t *testing.T) {
 	s := getStorage(t)
-	me := storage.UserId(uuid.New().String())
+	me := randomUid()
 	result, err := s.SearchUsers(me, "")
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -625,8 +643,8 @@ func TestSearchUsersEmpty(t *testing.T) {
 
 func TestDealsAndCounterparties(t *testing.T) {
 	s := getStorage(t)
-	counterparty1 := storage.UserId(uuid.New().String())
-	counterparty2 := storage.UserId(uuid.New().String())
+	counterparty1 := randomUid()
+	counterparty2 := randomUid()
 	cost1 := int64(456)
 	cost2 := int64(888)
 	currency := uuid.New().String()
@@ -696,8 +714,8 @@ func TestDealsAndCounterparties(t *testing.T) {
 
 func TestInsertAndRemoveDeal(t *testing.T) {
 	s := getStorage(t)
-	counterparty1 := storage.UserId(uuid.New().String())
-	counterparty2 := storage.UserId(uuid.New().String())
+	counterparty1 := randomUid()
+	counterparty2 := randomUid()
 	cost := int64(456)
 	currency := uuid.New().String()
 
@@ -749,8 +767,8 @@ func TestInsertAndRemoveDeal(t *testing.T) {
 
 func TestGetCounterpartiesForDeal(t *testing.T) {
 	s := getStorage(t)
-	counterparty1 := storage.UserId(uuid.New().String())
-	counterparty2 := storage.UserId(uuid.New().String())
+	counterparty1 := randomUid()
+	counterparty2 := randomUid()
 	cost := int64(456)
 	currency := uuid.New().String()
 
