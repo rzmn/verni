@@ -149,13 +149,13 @@ func checkPasswordHash(password, hash string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
-func (s *Storage) GetAccountInfo(uid storage.UserId) (*storage.AccountInfo, error) {
+func (s *Storage) GetAccountInfo(uid storage.UserId) (*storage.ProfileInfo, error) {
 	const op = "storage.ydb.GetAccountInfo"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
 		res    result.Result
-		result *storage.AccountInfo
+		result *storage.ProfileInfo
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err = s.Execute(ctx, readTx, `
@@ -189,7 +189,7 @@ WHERE
 				if err != nil {
 					return err
 				}
-				info := storage.AccountInfo{
+				info := storage.ProfileInfo{
 					User: storage.User{
 						Id:          uid,
 						DisplayName: displayName,

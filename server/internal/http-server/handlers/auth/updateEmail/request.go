@@ -1,14 +1,12 @@
-package login
+package updateEmail
 
 import (
+	"accounty/internal/http-server/responses"
+	"accounty/internal/storage"
 	"fmt"
-
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"accounty/internal/http-server/responses"
-	"accounty/internal/storage"
 )
 
 type RequestHandler interface {
@@ -18,8 +16,6 @@ type RequestHandler interface {
 
 func handleError(c *gin.Context, err Error) {
 	switch err.Code {
-	case responses.CodeIncorrectCredentials:
-		c.JSON(http.StatusUnauthorized, Failure(err))
 	case responses.CodeWrongFormat:
 		c.JSON(http.StatusUnprocessableEntity, Failure(err))
 	case responses.CodeBadRequest:
@@ -31,7 +27,7 @@ func handleError(c *gin.Context, err Error) {
 
 func New(requestHandler RequestHandler) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		const op = "handlers.auth.login"
+		const op = "handlers.auth.updateEmail"
 		var request Request
 		if err := c.BindJSON(&request); err != nil {
 			handleError(c, ErrBadRequest(fmt.Sprintf("%s: request failed %v", op, err)))

@@ -1,4 +1,4 @@
-package getMyInfo
+package getInfo
 
 import (
 	"accounty/internal/http-server/responses"
@@ -9,7 +9,7 @@ type Error struct {
 	responses.Error
 }
 
-func Success(user storage.User) responses.Response[storage.User] {
+func Success(user storage.ProfileInfo) responses.Response[storage.ProfileInfo] {
 	return responses.Success(user)
 }
 

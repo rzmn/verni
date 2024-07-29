@@ -62,7 +62,7 @@ func Failure(error Error) Response[Error] {
 const (
 	_ Code = iota
 	CodeIncorrectCredentials
-	CodeWrongCredentialsFormat
+	CodeWrongFormat
 	CodeLoginAlreadyTaken
 	CodeTokenExpired
 	CodeWrongAccessToken
@@ -82,8 +82,8 @@ func (c Code) Message() string {
 	switch c {
 	case CodeIncorrectCredentials:
 		return "login or password is incorrect"
-	case CodeWrongCredentialsFormat:
-		return "wrong credentials format"
+	case CodeWrongFormat:
+		return "wrong format"
 	case CodeLoginAlreadyTaken:
 		return "login already taken"
 	case CodeTokenExpired:

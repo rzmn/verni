@@ -1,14 +1,12 @@
-package login
+package updatePassword
 
 import (
+	"accounty/internal/http-server/responses"
+	"accounty/internal/storage"
 	"fmt"
-
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"accounty/internal/http-server/responses"
-	"accounty/internal/storage"
 )
 
 type RequestHandler interface {
@@ -31,7 +29,7 @@ func handleError(c *gin.Context, err Error) {
 
 func New(requestHandler RequestHandler) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		const op = "handlers.auth.login"
+		const op = "handlers.auth.updatePassword"
 		var request Request
 		if err := c.BindJSON(&request); err != nil {
 			handleError(c, ErrBadRequest(fmt.Sprintf("%s: request failed %v", op, err)))

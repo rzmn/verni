@@ -18,7 +18,7 @@ type RequestHandler interface {
 
 func handleError(c *gin.Context, err Error) {
 	switch err.Code {
-	case responses.CodeWrongCredentialsFormat:
+	case responses.CodeWrongFormat:
 		c.JSON(http.StatusUnprocessableEntity, Failure(err))
 	case responses.CodeLoginAlreadyTaken:
 		c.JSON(http.StatusConflict, Failure(err))

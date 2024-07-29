@@ -1,15 +1,14 @@
-package getMyInfo
+package getInfo
 
 import (
+	"accounty/internal/storage"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"accounty/internal/storage"
 )
 
 type RequestHandler interface {
-	Handle(c *gin.Context) (storage.User, *Error)
+	Handle(c *gin.Context) (storage.ProfileInfo, *Error)
 }
 
 func handleError(c *gin.Context, err Error) {
@@ -21,11 +20,11 @@ func handleError(c *gin.Context, err Error) {
 
 func New(requestHandler RequestHandler) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		user, err := requestHandler.Handle(c)
+		info, err := requestHandler.Handle(c)
 		if err != nil {
 			handleError(c, *err)
 			return
 		}
-		c.JSON(http.StatusCreated, Success(user))
+		c.JSON(http.StatusCreated, Success(info))
 	}
 }

@@ -16,7 +16,7 @@ type Avatar struct {
 	Url *string `json:"url"`
 }
 
-type AccountInfo struct {
+type ProfileInfo struct {
 	User          User   `json:"user"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"emailVerified"`
@@ -63,7 +63,7 @@ type SpendingsPreview struct {
 }
 
 type Storage interface {
-	GetAccountInfo(uid UserId) (*AccountInfo, error)
+	GetAccountInfo(uid UserId) (*ProfileInfo, error)
 
 	GetUserId(email string) (*UserId, error)
 	StoreEmailValidationToken(email string, token string) error

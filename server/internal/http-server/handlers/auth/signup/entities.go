@@ -22,7 +22,7 @@ func Failure(err Error) responses.Response[responses.Error] {
 }
 
 func ErrWrongCredentialsFormat() Error {
-	return Error{responses.Error{Code: responses.CodeWrongCredentialsFormat}}
+	return Error{responses.Error{Code: responses.CodeWrongFormat}}
 }
 
 func ErrLoginAlreadyTaken() Error {

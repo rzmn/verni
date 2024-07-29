@@ -1,4 +1,4 @@
-package login
+package updateEmail
 
 import (
 	"accounty/internal/http-server/responses"
@@ -6,7 +6,7 @@ import (
 )
 
 type Request struct {
-	Credentials storage.UserCredentials `json:"credentials"`
+	Email string `json:"email"`
 }
 
 type Error struct {
@@ -21,18 +21,14 @@ func Failure(err Error) responses.Response[responses.Error] {
 	return responses.Failure(err.Error)
 }
 
-func ErrIncorrectCredentials() Error {
-	return Error{responses.Error{Code: responses.CodeIncorrectCredentials}}
-}
-
-func ErrWrongCredentialsFormat() Error {
-	return Error{responses.Error{Code: responses.CodeWrongFormat}}
+func ErrInternal() Error {
+	return Error{responses.Error{Code: responses.CodeInternal}}
 }
 
 func ErrBadRequest(description string) Error {
 	return Error{responses.Error{Code: responses.CodeBadRequest, Description: &description}}
 }
 
-func ErrInternal() Error {
-	return Error{responses.Error{Code: responses.CodeInternal}}
+func ErrWrongFormat() Error {
+	return Error{responses.Error{Code: responses.CodeWrongFormat}}
 }
