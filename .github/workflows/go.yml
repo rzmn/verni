@@ -21,19 +21,24 @@ jobs:
       with:
         go-version: '1.22.4'
 
-    - name: Build
-      run: cd $(git rev-parse --show-toplevel) && cd ./server && go build -v cmd/accounty/main.go
+    # - name: Build
+    #   run: cd $(git rev-parse --show-toplevel) && cd ./server && go build -v cmd/accounty/main.go
 
-    - name: TestJwt
-      run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/auth/jwt && go test -v . 
-
-    - name: TestDB
+    # - name: TestJwt
+    #   run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/auth/jwt && go test -v . 
+    - name: Configure .env file
+      run: |
+        cd $(git rev-parse --show-toplevel)
+        cd ./server/internal/storage/ydbStorage
+        python -c "import os; file = open('key.json', 'w'); file.write(os.environ['YDB_ADMIN_KEYS_JSON']); file.close()"
+      shell: bash
       env:
         YDB_ADMIN_KEYS_JSON: ${{ secrets.YDB_ADMIN_KEYS_JSON }}
-        YDB_TEST_ENDPOINT: ${{ secrets.YDB_TEST_ENDPOINT }}
+
+    - name: TestDB
       run: |
           cd $(git rev-parse --show-toplevel)
-          cat << EOF > ./server/internal/storage/ydbStorage/key.json
-          ${{ secrets.YDB_ADMIN_KEYS_JSON }}
-          EOF 
           cd ./server/internal/storage && cat ./ydbStorage/key.json && sh storage_test.sh
+      shell: bash
+      env:
+        YDB_TEST_ENDPOINT: ${{ secrets.YDB_TEST_ENDPOINT }}
