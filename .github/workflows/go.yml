@@ -31,4 +31,9 @@ jobs:
       env:
         YDB_ADMIN_KEYS_JSON: ${{ secrets.YDB_ADMIN_KEYS_JSON }}
         YDB_TEST_ENDPOINT: ${{ secrets.YDB_TEST_ENDPOINT }}
-      run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/storage && sh storage_test.sh
+      run: |
+          cd $(git rev-parse --show-toplevel)
+          cat << EOF > ./server/internal/storage/ydbStorage/key.json
+          ${{ secrets.YDB_ADMIN_KEYS_JSON }}
+          EOF 
+          cd ./server/internal/storage && cat ./ydbStorage/key.json && sh storage_test.sh
