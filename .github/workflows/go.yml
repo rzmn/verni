@@ -21,11 +21,6 @@ jobs:
       with:
         go-version: '1.22.4'
 
-    # - name: Build
-    #   run: cd $(git rev-parse --show-toplevel) && cd ./server && go build -v cmd/accounty/main.go
-
-    # - name: TestJwt
-    #   run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/auth/jwt && go test -v . 
     - name: Configure .env file
       run: |
         cd $(git rev-parse --show-toplevel)
@@ -35,10 +30,16 @@ jobs:
       env:
         YDB_ADMIN_KEYS_JSON: ${{ secrets.YDB_ADMIN_KEYS_JSON }}
 
+    - name: Build
+      run: cd $(git rev-parse --show-toplevel) && cd ./server && go build -v cmd/accounty/main.go
+
+    - name: TestJwt
+      run: cd $(git rev-parse --show-toplevel) && cd ./server/internal/auth/jwt && go test -v . 
+
     - name: TestDB
       run: |
           cd $(git rev-parse --show-toplevel)
-          cd ./server/internal/storage && cat ./ydbStorage/key.json && sh storage_test.sh
+          cd ./server/internal/storage && go test -v . 
       shell: bash
       env:
         YDB_TEST_ENDPOINT: ${{ vars.YDB_TEST_ENDPOINT }}
