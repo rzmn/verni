@@ -35,8 +35,7 @@ func getStorage(t *testing.T) storage.Storage {
 	if _s != nil {
 		return *_s
 	}
-	// storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/local")
-	storage, err := ydbStorage.New("grpcs://ydb.serverless.yandexcloud.net:2135/?database=/ru-central1/b1go4rr1upftm8rqi71n/etn41vv556r42hhp4jeu", "./ydbStorage/key.json")
+	storage, err := ydbStorage.NewUnauthorized("grpc://localhost:2136?database=/local")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
