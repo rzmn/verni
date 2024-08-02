@@ -16,18 +16,28 @@ import (
 	"accounty/internal/http-server/handlers/auth/login"
 	"accounty/internal/http-server/handlers/auth/refresh"
 	"accounty/internal/http-server/handlers/auth/signup"
+	"accounty/internal/http-server/handlers/auth/updateEmail"
+	"accounty/internal/http-server/handlers/auth/updatePassword"
+	"accounty/internal/http-server/helpers"
 )
 
 func validateUserCredentialsFormat(credentials storage.UserCredentials) error {
-	_, err := mail.ParseAddress(credentials.Email)
-	if err != nil {
-		return fmt.Errorf("`email` field is invalid: %v", err)
-	}
-	if strings.TrimSpace(credentials.Email) != credentials.Email {
-		return fmt.Errorf("`email` field is invalid: leading or trailing spaces")
+	if err := validateEmailFormat(credentials.Email); err != nil {
+		return err
 	}
 	if len(credentials.Password) < 6 {
 		return errors.New("`password` field should contain more than 6 characters")
+	}
+	return nil
+}
+
+func validateEmailFormat(email string) error {
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return fmt.Errorf("`email` field is invalid: %v", err)
+	}
+	if strings.TrimSpace(email) != email {
+		return fmt.Errorf("`email` field is invalid: leading or trailing spaces")
 	}
 	return nil
 }
@@ -197,8 +207,137 @@ func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthTo
 	}, nil
 }
 
+type updateEmailRequestHandler struct {
+	storage storage.Storage
+}
+
+func (h *updateEmailRequestHandler) Validate(c *gin.Context, request updateEmail.Request) *updateEmail.Error {
+	const op = "router.auth.updateEmailRequestHandler.Validate"
+	if err := validateEmailFormat(request.Email); err != nil {
+		outError := updateEmail.ErrWrongFormat()
+		return &outError
+	}
+	exists, err := h.storage.IsEmailExists(request.Email)
+	if err != nil {
+		log.Printf("%s: cannot check email existence %v", op, err)
+		outError := updateEmail.ErrInternal()
+		return &outError
+	}
+	if exists {
+		log.Printf("%s: email already taken %v", op, err)
+		outError := updateEmail.ErrCodeAlreadyTaken()
+		return &outError
+	}
+	return nil
+}
+
+func (h *updateEmailRequestHandler) Handle(c *gin.Context, request updateEmail.Request) (storage.AuthToken, *updateEmail.Error) {
+	const op = "router.auth.updateEmailRequestHandler.Handle"
+	token := helpers.ExtractBearerToken(c)
+
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := updateEmail.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	uid := storage.UserId(*subject)
+	if err := h.storage.UpdateEmail(uid, request.Email); err != nil {
+		log.Printf("%s: cannot update email %v", op, err)
+		outError := updateEmail.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	log.Printf("%s: issuing tokens", op)
+	tokens, err := jwt.IssueTokens(*subject)
+	if err != nil {
+		log.Printf("%s: issuing tokens failed %v", op, err)
+		outError := updateEmail.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	log.Printf("%s: issued tokens ok", op)
+	log.Printf("%s: storing refresh token", op)
+	if err := h.storage.StoreRefreshToken(tokens.Refresh, uid); err != nil {
+		log.Printf("%s: storing refresh token failed %v", op, err)
+		outError := updateEmail.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	log.Printf("%s: storing refresh token ok", op)
+	return storage.AuthToken{
+		AccessToken:  tokens.Access,
+		RefreshToken: tokens.Refresh,
+	}, nil
+}
+
+type updatePasswordRequestHandler struct {
+	storage storage.Storage
+}
+
+func (h *updatePasswordRequestHandler) Validate(c *gin.Context, request updatePassword.Request) *updatePassword.Error {
+	const op = "router.auth.updatePasswordRequestHandler.Validate"
+	token := helpers.ExtractBearerToken(c)
+
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := updatePassword.ErrInternal()
+		return &outError
+	}
+	uid := storage.UserId(*subject)
+	passed, err := h.storage.CheckPasswordForId(uid, request.OldPassword)
+	if err != nil {
+		log.Printf("%s: cannot check password for id %v", op, err)
+		outError := updatePassword.ErrInternal()
+		return &outError
+	}
+	if !passed {
+		log.Printf("%s: password did not match", op)
+		outError := updatePassword.ErrIncorrectCredentials()
+		return &outError
+	}
+	return nil
+}
+
+func (h *updatePasswordRequestHandler) Handle(c *gin.Context, request updatePassword.Request) (storage.AuthToken, *updatePassword.Error) {
+	const op = "router.auth.updatePasswordRequestHandler.Handle"
+	token := helpers.ExtractBearerToken(c)
+
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := updatePassword.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	uid := storage.UserId(*subject)
+	if err := h.storage.UpdatePasswordForId(uid, request.NewPassword); err != nil {
+		log.Printf("%s: cannot update password: %v", op, err)
+		outError := updatePassword.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	log.Printf("%s: issuing tokens", op)
+	tokens, err := jwt.IssueTokens(*subject)
+	if err != nil {
+		log.Printf("%s: issuing tokens failed %v", op, err)
+		outError := updatePassword.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	log.Printf("%s: issued tokens ok", op)
+	log.Printf("%s: storing refresh token", op)
+	if err := h.storage.StoreRefreshToken(tokens.Refresh, uid); err != nil {
+		log.Printf("%s: storing refresh token failed %v", op, err)
+		outError := updatePassword.ErrInternal()
+		return storage.AuthToken{}, &outError
+	}
+	log.Printf("%s: storing refresh token ok", op)
+	return storage.AuthToken{
+		AccessToken:  tokens.Access,
+		RefreshToken: tokens.Refresh,
+	}, nil
+}
+
 func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	e.PUT("/auth/signup", signup.New(&signupRequestHandler{storage: storage}))
 	e.PUT("/auth/login", login.New(&loginRequestHandler{storage: storage}))
 	e.PUT("/auth/refresh", refresh.New(&refreshRequestHandler{storage: storage}))
+	e.PUT("/auth/updateEmail", updateEmail.New(&updateEmailRequestHandler{storage: storage}))
+	e.PUT("/auth/updatePassword", updatePassword.New(&updatePasswordRequestHandler{storage: storage}))
 }

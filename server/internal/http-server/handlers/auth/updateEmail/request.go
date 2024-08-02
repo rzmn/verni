@@ -10,8 +10,8 @@ import (
 )
 
 type RequestHandler interface {
-	Validate(request Request) *Error
-	Handle(request Request) (*storage.AuthToken, *Error)
+	Validate(c *gin.Context, request Request) *Error
+	Handle(c *gin.Context, request Request) (storage.AuthToken, *Error)
 }
 
 func handleError(c *gin.Context, err Error) {
@@ -33,19 +33,15 @@ func New(requestHandler RequestHandler) func(c *gin.Context) {
 			handleError(c, ErrBadRequest(fmt.Sprintf("%s: request failed %v", op, err)))
 			return
 		}
-		if err := requestHandler.Validate(request); err != nil {
+		if err := requestHandler.Validate(c, request); err != nil {
 			handleError(c, *err)
 			return
 		}
-		token, err := requestHandler.Handle(request)
+		token, err := requestHandler.Handle(c, request)
 		if err != nil {
 			handleError(c, *err)
 			return
 		}
-		if token == nil {
-			handleError(c, ErrInternal())
-			return
-		}
-		c.JSON(http.StatusCreated, Success(*token))
+		c.JSON(http.StatusCreated, Success(token))
 	}
 }

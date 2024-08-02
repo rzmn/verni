@@ -26,7 +26,7 @@ func ErrWrongCredentialsFormat() Error {
 }
 
 func ErrLoginAlreadyTaken() Error {
-	return Error{responses.Error{Code: responses.CodeLoginAlreadyTaken}}
+	return Error{responses.Error{Code: responses.CodeAlreadyTaken}}
 }
 
 func ErrBadRequest(description string) Error {

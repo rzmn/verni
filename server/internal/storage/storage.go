@@ -69,9 +69,13 @@ type Storage interface {
 	StoreEmailValidationToken(email string, token string) error
 	ExtractEmailValidationToken(email string) (*string, error)
 	ValidateEmail(email string) error
+	UpdateEmail(uid UserId, email string) error
+	IsEmailExists(email string) (bool, error)
 
 	IsUserExists(uid UserId) (bool, error)
 	CheckCredentials(credentials UserCredentials) (bool, error)
+	CheckPasswordForId(uid UserId, password string) (bool, error)
+	UpdatePasswordForId(uid UserId, password string) error
 	StoreCredentials(uid UserId, credentials UserCredentials) error
 
 	StoreDisplayName(uid UserId, displayName string) error

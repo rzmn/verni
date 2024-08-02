@@ -32,3 +32,7 @@ func ErrBadRequest(description string) Error {
 func ErrWrongFormat() Error {
 	return Error{responses.Error{Code: responses.CodeWrongFormat}}
 }
+
+func ErrCodeAlreadyTaken() Error {
+	return Error{responses.Error{Code: responses.CodeAlreadyTaken}}
+}

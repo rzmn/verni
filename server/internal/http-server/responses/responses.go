@@ -63,7 +63,7 @@ const (
 	_ Code = iota
 	CodeIncorrectCredentials
 	CodeWrongFormat
-	CodeLoginAlreadyTaken
+	CodeAlreadyTaken
 	CodeTokenExpired
 	CodeWrongAccessToken
 	CodeInternal
@@ -84,7 +84,7 @@ func (c Code) Message() string {
 		return "login or password is incorrect"
 	case CodeWrongFormat:
 		return "wrong format"
-	case CodeLoginAlreadyTaken:
+	case CodeAlreadyTaken:
 		return "login already taken"
 	case CodeTokenExpired:
 		return "token expired"

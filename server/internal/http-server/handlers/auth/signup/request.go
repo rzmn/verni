@@ -20,7 +20,7 @@ func handleError(c *gin.Context, err Error) {
 	switch err.Code {
 	case responses.CodeWrongFormat:
 		c.JSON(http.StatusUnprocessableEntity, Failure(err))
-	case responses.CodeLoginAlreadyTaken:
+	case responses.CodeAlreadyTaken:
 		c.JSON(http.StatusConflict, Failure(err))
 	case responses.CodeBadRequest:
 		c.JSON(http.StatusBadRequest, Failure(err))

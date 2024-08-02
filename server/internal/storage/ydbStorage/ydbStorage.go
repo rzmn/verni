@@ -395,6 +395,93 @@ VALUES($email, True, NULL);`,
 	return nil
 }
 
+func (s *Storage) UpdateEmail(uid storage.UserId, email string) error {
+	const op = "storage.ydb.IsEmailExists"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DECLARE $email AS Text;
+UPDATE 
+	credentials
+SET 
+	email = $email
+WHERE
+	id = $id;
+
+DELETE FROM
+	emails
+WHERE
+	email = $email;
+
+UPSERT INTO 
+	emails(email, confirmed, validationToken) 
+VALUES($email, False, NULL);
+`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+				table.ValueParam("$email", types.TextValue(email)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) IsEmailExists(email string) (bool, error) {
+	const op = "storage.ydb.IsEmailExists"
+	log.Printf("%s: start", op)
+	var (
+		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		exists bool
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, readTx, `
+DECLARE $email AS Text;
+SELECT 
+	True
+FROM 
+	emails 
+WHERE 
+	email = $email;`,
+			table.NewQueryParameters(table.ValueParam("$email", types.TextValue(email))),
+		)
+		if err != nil {
+			return err
+		}
+		exists = false
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				if err := res.Scan(&exists); err != nil {
+					return err
+				}
+			}
+		}
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return false, err
+	}
+	return exists, nil
+}
+
 func (s *Storage) IsUserExists(uid storage.UserId) (bool, error) {
 	const op = "storage.ydb.IsUserExists"
 	log.Printf("%s: start", op)
@@ -477,6 +564,95 @@ WHERE
 	return passed, nil
 }
 
+func (s *Storage) CheckPasswordForId(uid storage.UserId, password string) (bool, error) {
+	const op = "storage.ydb.CheckPasswordForId"
+	log.Printf("%s: start", op)
+	var (
+		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		res    result.Result
+		passed bool
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err = s.Execute(ctx, readTx, `
+DECLARE $id AS Text;
+SELECT 
+	password 
+FROM 
+	credentials 
+WHERE 
+	id = $id;`,
+			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(string(uid)))),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				var passwordHash string
+				err = res.Scan(&passwordHash)
+				if err != nil {
+					return err
+				}
+				if checkPasswordHash(password, passwordHash) {
+					passed = true
+				}
+			}
+		}
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return false, err
+	}
+	return passed, nil
+}
+
+func (s *Storage) UpdatePasswordForId(uid storage.UserId, password string) error {
+	const op = "storage.ydb.UpdatePasswordForId"
+	log.Printf("%s: start", op)
+	passwordHash, err := hashPassword(password)
+	if err != nil {
+		log.Printf("%s: cannot hash password %v", op, err)
+		return err
+	}
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err = s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DECLARE $password AS Text;
+UPDATE 
+	credentials
+SET 
+	password = $password
+WHERE
+	id = $id;
+`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+				table.ValueParam("$password", types.TextValue(passwordHash)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
 func (s *Storage) StoreCredentials(uid storage.UserId, credentials storage.UserCredentials) error {
 	const op = "storage.ydb.StoreCredentials"
 	log.Printf("%s: start", op)
@@ -498,9 +674,17 @@ func (s *Storage) StoreCredentials(uid storage.UserId, credentials storage.UserC
 DECLARE $id AS Text;
 DECLARE $email AS Text;
 DECLARE $password AS Text;
-UPSERT INTO 
+INSERT INTO 
 	credentials(id, email, password) 
 VALUES($id, $email, $password);
+
+INSERT INTO 
+	userInfos(id, displayName, avatarId) 
+VALUES($id, $email, NULL);
+
+INSERT INTO 
+	emails(email, confirmed, validationToken) 
+VALUES($email, False, NULL);
 `,
 			table.NewQueryParameters(
 				table.ValueParam("$id", types.TextValue(string(uid))),
@@ -511,84 +695,7 @@ VALUES($id, $email, $password);
 		if err != nil {
 			return err
 		}
-		res.Close()
-		_, res, err = s.Execute(ctx, writeTx, `
-DECLARE $id AS Text;
-SELECT 
-	True
-FROM 
-	userInfos 
-WHERE 
-	id = $id;`,
-			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(string(uid)))),
-		)
-		if err != nil {
-			return err
-		}
-		var exists bool
-		for res.NextResultSet(ctx) {
-			for res.NextRow() {
-				if err := res.Scan(&exists); err != nil {
-					return err
-				}
-			}
-		}
-		res.Close()
-		if !exists {
-			_, res, err = s.Execute(ctx, writeTx, `
-DECLARE $id AS Text;
-DECLARE $email AS Text;
-UPSERT INTO 
-	userInfos(id, displayName, avatarId) 
-VALUES($id, $email, NULL);`,
-				table.NewQueryParameters(
-					table.ValueParam("$id", types.TextValue(string(uid))),
-					table.ValueParam("$email", types.TextValue(credentials.Email)),
-				),
-			)
-			if err != nil {
-				return err
-			}
-			res.Close()
-		}
-
-		_, res, err = s.Execute(ctx, writeTx, `
-DECLARE $email AS Text;
-SELECT 
-	True
-FROM 
-	emails 
-WHERE 
-	email = $email;`,
-			table.NewQueryParameters(table.ValueParam("$email", types.TextValue(credentials.Email))),
-		)
-		if err != nil {
-			return err
-		}
-		exists = false
-		for res.NextResultSet(ctx) {
-			for res.NextRow() {
-				if err := res.Scan(&exists); err != nil {
-					return err
-				}
-			}
-		}
-		res.Close()
-		if !exists {
-			_, res, err = s.Execute(ctx, writeTx, `
-DECLARE $email AS Text;
-UPSERT INTO 
-	emails(email, confirmed, validationToken) 
-VALUES($email, False, NULL);`,
-				table.NewQueryParameters(
-					table.ValueParam("$email", types.TextValue(credentials.Email)),
-				),
-			)
-			if err != nil {
-				return err
-			}
-			res.Close()
-		}
+		defer res.Close()
 		return res.Err()
 	})
 	if err != nil {
