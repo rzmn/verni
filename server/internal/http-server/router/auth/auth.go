@@ -19,6 +19,7 @@ import (
 	"accounty/internal/http-server/handlers/auth/updateEmail"
 	"accounty/internal/http-server/handlers/auth/updatePassword"
 	"accounty/internal/http-server/helpers"
+	"accounty/internal/http-server/middleware"
 )
 
 func validateUserCredentialsFormat(credentials storage.UserCredentials) error {
@@ -338,6 +339,6 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	e.PUT("/auth/signup", signup.New(&signupRequestHandler{storage: storage}))
 	e.PUT("/auth/login", login.New(&loginRequestHandler{storage: storage}))
 	e.PUT("/auth/refresh", refresh.New(&refreshRequestHandler{storage: storage}))
-	e.PUT("/auth/updateEmail", updateEmail.New(&updateEmailRequestHandler{storage: storage}))
-	e.PUT("/auth/updatePassword", updatePassword.New(&updatePasswordRequestHandler{storage: storage}))
+	e.PUT("/auth/updateEmail", middleware.EnsureLoggedIn(storage), updateEmail.New(&updateEmailRequestHandler{storage: storage}))
+	e.PUT("/auth/updatePassword", middleware.EnsureLoggedIn(storage), updatePassword.New(&updatePasswordRequestHandler{storage: storage}))
 }

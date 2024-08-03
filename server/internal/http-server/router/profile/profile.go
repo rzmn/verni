@@ -101,6 +101,6 @@ func (h *setDisplayNameRequestHandler) Handle(c *gin.Context, request setDisplay
 func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	group := e.Group("/profile", middleware.EnsureLoggedIn(storage))
 	group.GET("/getInfo", getInfo.New(&getInfoRequestHandler{storage: storage}))
-	group.GET("/setAvatar", setAvatar.New(&setAvatarRequestHandler{storage: storage}))
-	group.GET("/setDisplayName", setDisplayName.New(&setDisplayNameRequestHandler{storage: storage}))
+	group.PUT("/setAvatar", setAvatar.New(&setAvatarRequestHandler{storage: storage}))
+	group.PUT("/setDisplayName", setDisplayName.New(&setDisplayNameRequestHandler{storage: storage}))
 }
