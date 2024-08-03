@@ -13,7 +13,7 @@ import (
 
 type RequestHandler interface {
 	Validate(request Request) *Error
-	Handle(request Request) (*storage.AuthToken, *Error)
+	Handle(request Request) (*storage.AuthenticatedSession, *Error)
 }
 
 func handleError(c *gin.Context, err Error) {

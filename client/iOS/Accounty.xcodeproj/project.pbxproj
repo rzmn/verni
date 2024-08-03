@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61088A932C5E62FC005FFFC2 /* LaunchFlow in Resources */ = {isa = PBXBuildFile; fileRef = 61088A922C5E62FC005FFFC2 /* LaunchFlow */; };
+		61088A952C5E6465005FFFC2 /* Routing in Resources */ = {isa = PBXBuildFile; fileRef = 61088A942C5E6465005FFFC2 /* Routing */; };
+		61088A972C5E70DE005FFFC2 /* AppBase in Resources */ = {isa = PBXBuildFile; fileRef = 61088A962C5E70DE005FFFC2 /* AppBase */; };
+		61088A992C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */; };
+		61088A9B2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */; };
 		611CCD692C50AE3A00289D9E /* DefaultDependencies in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD4A2C50AE3A00289D9E /* DefaultDependencies */; };
 		611CCD6A2C50AE3A00289D9E /* DI in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD4B2C50AE3A00289D9E /* DI */; };
 		611CCD6D2C50AE3A00289D9E /* DataTransferObjects in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD502C50AE3A00289D9E /* DataTransferObjects */; };
@@ -63,6 +68,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		61088A922C5E62FC005FFFC2 /* LaunchFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LaunchFlow; sourceTree = "<group>"; };
+		61088A942C5E6465005FFFC2 /* Routing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Routing; sourceTree = "<group>"; };
+		61088A962C5E70DE005FFFC2 /* AppBase */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AppBase; sourceTree = "<group>"; };
+		61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultValidationUseCasesImplementation; sourceTree = "<group>"; };
+		61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileEditingUseCaseImplementation; sourceTree = "<group>"; };
 		611CCD4A2C50AE3A00289D9E /* DefaultDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDependencies; sourceTree = "<group>"; };
 		611CCD4B2C50AE3A00289D9E /* DI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DI; sourceTree = "<group>"; };
 		611CCD502C50AE3A00289D9E /* DataTransferObjects */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataTransferObjects; sourceTree = "<group>"; };
@@ -132,6 +142,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		61088A912C5E61C9005FFFC2 /* Flows */ = {
+			isa = PBXGroup;
+			children = (
+				61088A922C5E62FC005FFFC2 /* LaunchFlow */,
+			);
+			path = Flows;
+			sourceTree = "<group>";
+		};
 		611CCD4C2C50AE3A00289D9E /* DI */ = {
 			isa = PBXGroup;
 			children = (
@@ -156,6 +174,9 @@
 		611CCD562C50AE3A00289D9E /* App */ = {
 			isa = PBXGroup;
 			children = (
+				61088A912C5E61C9005FFFC2 /* Flows */,
+				61088A962C5E70DE005FFFC2 /* AppBase */,
+				61088A942C5E6465005FFFC2 /* Routing */,
 				611CCD542C50AE3A00289D9E /* App */,
 				611CCD552C50AE3A00289D9E /* DesignSystem */,
 			);
@@ -179,6 +200,8 @@
 		611CCD662C50AE3A00289D9E /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */,
+				61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */,
 				611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */,
 				611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */,
 				611CCD602C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation */,
@@ -344,6 +367,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61088A9B2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation in Resources */,
 				611CCD7C2C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation in Resources */,
 				611CCD7F2C50AE3A00289D9E /* DefaultUsersRepositoryImplementation in Resources */,
 				611CCD7B2C50AE3A00289D9E /* DefaultFriendsRepositoryImplementation in Resources */,
@@ -362,14 +386,18 @@
 				611CCD7E2C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation in Resources */,
 				611CCD712C50AE3A00289D9E /* DesignSystem in Resources */,
 				61BBB1262C50D3CE00E3D4F3 /* Api in Resources */,
+				61088A932C5E62FC005FFFC2 /* LaunchFlow in Resources */,
+				61088A972C5E70DE005FFFC2 /* AppBase in Resources */,
 				61414F8E2C2F02A200B2C027 /* Base in Resources */,
 				611CCD6D2C50AE3A00289D9E /* DataTransferObjects in Resources */,
 				61BBB1252C50D3CE00E3D4F3 /* DefaultApiImplementation in Resources */,
 				611CCD732C50AE3A00289D9E /* Base in Resources */,
 				61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */,
+				61088A992C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation in Resources */,
 				611CCD742C50AE3A00289D9E /* DefaultApiServiceImplementation in Resources */,
 				611CCD692C50AE3A00289D9E /* DefaultDependencies in Resources */,
 				611CCD802C50AE3A00289D9E /* Domain in Resources */,
+				61088A952C5E6465005FFFC2 /* Routing in Resources */,
 				611CCD762C50AE3A00289D9E /* Logging in Resources */,
 				611CCD6F2C50AE3A00289D9E /* PersistentStorage in Resources */,
 			);

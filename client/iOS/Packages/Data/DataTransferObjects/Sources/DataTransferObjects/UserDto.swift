@@ -9,11 +9,11 @@ public struct UserDto: Codable {
         case me = 4
     }
     public typealias ID = String
-    public let login: ID
+    public let id: ID
     public let friendStatus: FriendStatus
 
     public init(login: ID, friendStatus: FriendStatus) {
-        self.login = login
+        self.id = login
         self.friendStatus = friendStatus
     }
 }

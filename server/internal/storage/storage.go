@@ -34,7 +34,8 @@ type UserCredentials struct {
 	Password string `json:"password"`
 }
 
-type AuthToken struct {
+type AuthenticatedSession struct {
+	Id           UserId `json:"id"`
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }

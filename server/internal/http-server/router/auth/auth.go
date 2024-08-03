@@ -19,6 +19,7 @@ import (
 	"accounty/internal/http-server/handlers/auth/signup"
 	"accounty/internal/http-server/handlers/auth/updateEmail"
 	"accounty/internal/http-server/handlers/auth/updatePassword"
+	"accounty/internal/http-server/handlers/auth/validateEmail"
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/middleware"
 )
@@ -75,7 +76,7 @@ func (h *loginRequestHandler) Validate(request login.Request) *login.Error {
 	return nil
 }
 
-func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken, *login.Error) {
+func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthenticatedSession, *login.Error) {
 	const op = "router.loginRequestHandler.Handle"
 
 	log.Printf("%s: getting uid", op)
@@ -105,7 +106,8 @@ func (h *loginRequestHandler) Handle(request login.Request) (*storage.AuthToken,
 		return nil, &outError
 	}
 	log.Printf("%s: storing refresh token ok", op)
-	return &storage.AuthToken{
+	return &storage.AuthenticatedSession{
+		Id:           *uid,
 		AccessToken:  tokens.Access,
 		RefreshToken: tokens.Refresh,
 	}, nil
@@ -139,7 +141,7 @@ func (h *signupRequestHandler) Validate(request signup.Request) *signup.Error {
 	return nil
 }
 
-func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthToken, *signup.Error) {
+func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthenticatedSession, *signup.Error) {
 	const op = "router.signupRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
 	uid := storage.UserId(uuid.New().String())
@@ -164,7 +166,8 @@ func (h *signupRequestHandler) Handle(request signup.Request) (*storage.AuthToke
 	}
 	log.Printf("%s: tokens stored", op)
 	log.Printf("%s: ok", op)
-	return &storage.AuthToken{
+	return &storage.AuthenticatedSession{
+		Id:           uid,
 		AccessToken:  tokens.Access,
 		RefreshToken: tokens.Refresh,
 	}, nil
@@ -174,7 +177,7 @@ type refreshRequestHandler struct {
 	storage storage.Storage
 }
 
-func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthToken, *refresh.Error) {
+func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthenticatedSession, *refresh.Error) {
 	const op = "router.refreshRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
 	refreshedTokens, err := jwt.IssueTokensBasedOnRefreshToken(request.RefreshToken)
@@ -190,7 +193,8 @@ func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthTo
 			return nil, &outError
 		}
 	}
-	tokenFromDb, err := h.storage.GetRefreshToken(storage.UserId(refreshedTokens.Subject))
+	uid := storage.UserId(refreshedTokens.Subject)
+	tokenFromDb, err := h.storage.GetRefreshToken(uid)
 	if err != nil {
 		outError := refresh.ErrInternal()
 		return nil, &outError
@@ -199,11 +203,12 @@ func (h *refreshRequestHandler) Handle(request refresh.Request) (*storage.AuthTo
 		outError := refresh.ErrWrongAccessToken()
 		return nil, &outError
 	}
-	if err := h.storage.StoreRefreshToken(refreshedTokens.Refresh, storage.UserId(refreshedTokens.Subject)); err != nil {
+	if err := h.storage.StoreRefreshToken(refreshedTokens.Refresh, uid); err != nil {
 		outError := refresh.ErrInternal()
 		return nil, &outError
 	}
-	return &storage.AuthToken{
+	return &storage.AuthenticatedSession{
+		Id:           uid,
 		AccessToken:  refreshedTokens.Access,
 		RefreshToken: refreshedTokens.Refresh,
 	}, nil
@@ -233,7 +238,7 @@ func (h *updateEmailRequestHandler) Validate(c *gin.Context, request updateEmail
 	return nil
 }
 
-func (h *updateEmailRequestHandler) Handle(c *gin.Context, request updateEmail.Request) (storage.AuthToken, *updateEmail.Error) {
+func (h *updateEmailRequestHandler) Handle(c *gin.Context, request updateEmail.Request) (storage.AuthenticatedSession, *updateEmail.Error) {
 	const op = "router.auth.updateEmailRequestHandler.Handle"
 	token := helpers.ExtractBearerToken(c)
 
@@ -241,30 +246,31 @@ func (h *updateEmailRequestHandler) Handle(c *gin.Context, request updateEmail.R
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
 		outError := updateEmail.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	uid := storage.UserId(*subject)
 	if err := h.storage.UpdateEmail(uid, request.Email); err != nil {
 		log.Printf("%s: cannot update email %v", op, err)
 		outError := updateEmail.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	log.Printf("%s: issuing tokens", op)
 	tokens, err := jwt.IssueTokens(*subject)
 	if err != nil {
 		log.Printf("%s: issuing tokens failed %v", op, err)
 		outError := updateEmail.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	log.Printf("%s: issued tokens ok", op)
 	log.Printf("%s: storing refresh token", op)
 	if err := h.storage.StoreRefreshToken(tokens.Refresh, uid); err != nil {
 		log.Printf("%s: storing refresh token failed %v", op, err)
 		outError := updateEmail.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	log.Printf("%s: storing refresh token ok", op)
-	return storage.AuthToken{
+	return storage.AuthenticatedSession{
+		Id:           uid,
 		AccessToken:  tokens.Access,
 		RefreshToken: tokens.Refresh,
 	}, nil
@@ -299,7 +305,7 @@ func (h *updatePasswordRequestHandler) Validate(c *gin.Context, request updatePa
 	return nil
 }
 
-func (h *updatePasswordRequestHandler) Handle(c *gin.Context, request updatePassword.Request) (storage.AuthToken, *updatePassword.Error) {
+func (h *updatePasswordRequestHandler) Handle(c *gin.Context, request updatePassword.Request) (storage.AuthenticatedSession, *updatePassword.Error) {
 	const op = "router.auth.updatePasswordRequestHandler.Handle"
 	token := helpers.ExtractBearerToken(c)
 
@@ -307,33 +313,60 @@ func (h *updatePasswordRequestHandler) Handle(c *gin.Context, request updatePass
 	if err != nil || subject == nil {
 		log.Printf("%s: cannot get access token %v", op, err)
 		outError := updatePassword.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	uid := storage.UserId(*subject)
 	if err := h.storage.UpdatePasswordForId(uid, request.NewPassword); err != nil {
 		log.Printf("%s: cannot update password: %v", op, err)
 		outError := updatePassword.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	log.Printf("%s: issuing tokens", op)
 	tokens, err := jwt.IssueTokens(*subject)
 	if err != nil {
 		log.Printf("%s: issuing tokens failed %v", op, err)
 		outError := updatePassword.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	log.Printf("%s: issued tokens ok", op)
 	log.Printf("%s: storing refresh token", op)
 	if err := h.storage.StoreRefreshToken(tokens.Refresh, uid); err != nil {
 		log.Printf("%s: storing refresh token failed %v", op, err)
 		outError := updatePassword.ErrInternal()
-		return storage.AuthToken{}, &outError
+		return storage.AuthenticatedSession{}, &outError
 	}
 	log.Printf("%s: storing refresh token ok", op)
-	return storage.AuthToken{
+	return storage.AuthenticatedSession{
+		Id:           uid,
 		AccessToken:  tokens.Access,
 		RefreshToken: tokens.Refresh,
 	}, nil
+}
+
+type validateEmailRequestHandler struct {
+	storage storage.Storage
+}
+
+func (h *validateEmailRequestHandler) Handle(request validateEmail.Request) *validateEmail.Error {
+	const op = "router.users.validateEmailRequestHandler.Handle"
+	log.Printf("%s: start", op)
+	if err := validateEmailFormat(request.Email); err != nil {
+		log.Printf("%s: invalid email format %v", op, err)
+		outError := validateEmail.ErrWrongFormat()
+		return &outError
+	}
+	exists, err := h.storage.IsEmailExists(request.Email)
+	if err != nil {
+		log.Printf("%s: failed to check existense %v", op, err)
+		outError := validateEmail.ErrInternal()
+		return &outError
+	}
+	if exists {
+		log.Printf("%s: email already exists %v", op, err)
+		outError := validateEmail.ErrCodeAlreadyTaken()
+		return &outError
+	}
+	return nil
 }
 
 type logoutRequestHandler struct {
@@ -365,4 +398,5 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	e.PUT("/auth/updateEmail", middleware.EnsureLoggedIn(storage), updateEmail.New(&updateEmailRequestHandler{storage: storage}))
 	e.PUT("/auth/updatePassword", middleware.EnsureLoggedIn(storage), updatePassword.New(&updatePasswordRequestHandler{storage: storage}))
 	e.DELETE("/auth/logout", middleware.EnsureLoggedIn(storage), logout.New(&logoutRequestHandler{storage: storage}))
+	e.GET("/auth/validateEmail", validateEmail.New(&validateEmailRequestHandler{storage: storage}))
 }

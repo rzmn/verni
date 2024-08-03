@@ -1,0 +1,40 @@
+package validateEmail
+
+import (
+	"accounty/internal/http-server/responses"
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type RequestHandler interface {
+	Handle(request Request) *Error
+}
+
+func handleError(c *gin.Context, err Error) {
+	switch err.Code {
+	case responses.CodeBadRequest:
+		c.JSON(http.StatusBadRequest, Failure(err))
+	case responses.CodeAlreadyTaken, responses.CodeWrongFormat:
+		c.JSON(http.StatusConflict, Failure(err))
+	default:
+		c.JSON(http.StatusInternalServerError, Failure(err))
+	}
+}
+
+func New(requestHandler RequestHandler) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		const op = "handlers.auth.validateEmail"
+		var request Request
+		if err := c.BindJSON(&request); err != nil {
+			handleError(c, ErrBadRequest(fmt.Sprintf("%s: request failed %v", op, err)))
+			return
+		}
+		if err := requestHandler.Handle(request); err != nil {
+			handleError(c, *err)
+			return
+		}
+		c.JSON(http.StatusCreated, Success())
+	}
+}

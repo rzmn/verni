@@ -13,8 +13,8 @@ public class DefaultUsersOfflineRepository {
 }
 
 extension DefaultUsersOfflineRepository: UsersOfflineRepository {
-    public func getHostInfo() async -> User? {
-        await persistency.getHostInfo().flatMap(User.init)
+    public func getHostInfo() async -> Profile? {
+        await persistency.getHostInfo().flatMap(Profile.init)
     }
     
     public func getUser(id: User.ID) async -> User? {
@@ -23,6 +23,11 @@ extension DefaultUsersOfflineRepository: UsersOfflineRepository {
 }
 
 extension DefaultUsersOfflineRepository: UsersOfflineMutableRepository {
+    public func updateHostInfo(info: Profile) async {
+        await persistency.update(hostInfo: ProfileDto(domain: info))
+        await persistency.update(users: [UserDto(domain: info.user)])
+    }
+
     public func update(users: [User]) async {
         await persistency.update(users: users.map(UserDto.init))
     }

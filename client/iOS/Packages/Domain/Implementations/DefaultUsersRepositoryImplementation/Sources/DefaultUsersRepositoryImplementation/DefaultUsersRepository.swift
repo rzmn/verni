@@ -14,15 +14,15 @@ public class DefaultUsersRepository {
 }
 
 extension DefaultUsersRepository: UsersRepository {
-    public func getHostInfo() async -> Result<User, GeneralError> {
-        switch await api.run(method: Users.GetMyInfo()) {
+    public func getHostInfo() async -> Result<Domain.Profile, GeneralError> {
+        switch await api.run(method: Profile.GetInfo()) {
         case .success(let dto):
-            let user = User(dto: dto)
+            let profile = Profile(dto: dto)
             Task.detached { [weak self] in
                 guard let self else { return }
-                await offline.update(users: [user])
+                await offline.updateHostInfo(info: profile)
             }
-            return .success(user)
+            return .success(profile)
         case .failure(let error):
             return .failure(GeneralError(apiError: error))
         }

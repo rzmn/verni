@@ -18,16 +18,9 @@ public enum AwakeError: Error {
     case hasNoSession
 }
 
-public enum CredentialsValidationError: Error {
-    case tooShort(minAllowedLength: Int)
-}
-
 public protocol AuthUseCase {
     associatedtype AuthorizedSession
     func awake() async -> Result<AuthorizedSession, AwakeError>
     func login(credentials: Credentials) async -> Result<AuthorizedSession, LoginError>
     func signup(credentials: Credentials) async -> Result<AuthorizedSession, SignupError>
-
-    func validateLogin(_ login: String) async -> Result<Void, CredentialsValidationError>
-    func validatePassword(_ password: String) async -> Result<Void, CredentialsValidationError>
 }

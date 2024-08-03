@@ -3,7 +3,7 @@ import DataTransferObjects
 
 extension User {
     public init(dto: UserDto) {
-        self = User(id: dto.login, status: User.FriendStatus(dto: dto.friendStatus))
+        self = User(id: dto.id, status: User.FriendStatus(dto: dto.friendStatus))
     }
 }
 

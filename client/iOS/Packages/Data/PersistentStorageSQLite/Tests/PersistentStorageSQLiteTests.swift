@@ -83,11 +83,11 @@ class PersistentStorageSQLiteTests: XCTestCase {
         let host = UserDto(login: UUID().uuidString, friendStatus: .me)
         let initialRefreshToken = UUID().uuidString
         let persistency = try await TestPersistencyFactory()
-            .create(hostId: host.login, refreshToken: initialRefreshToken)
+            .create(hostId: host.id, refreshToken: initialRefreshToken)
         await persistency.update(users: [host])
         let hostFromDb = await persistency.getHostInfo()
 
-        XCTAssertTrue(host.login == hostFromDb?.login)
+        XCTAssertTrue(host.id == hostFromDb?.id)
         XCTAssertTrue(host.friendStatus == hostFromDb?.friendStatus)
     }
 
@@ -96,12 +96,12 @@ class PersistentStorageSQLiteTests: XCTestCase {
         let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest)
         let initialRefreshToken = UUID().uuidString
         let persistency = try await TestPersistencyFactory()
-            .create(hostId: host.login, refreshToken: initialRefreshToken)
+            .create(hostId: host.id, refreshToken: initialRefreshToken)
         await persistency.update(users: [host, other])
 
         for user in [host, other] {
-            let userFromDb = await persistency.user(id: user.login)
-            XCTAssertTrue(user.login == userFromDb?.login)
+            let userFromDb = await persistency.user(id: user.id)
+            XCTAssertTrue(user.id == userFromDb?.id)
             XCTAssertTrue(user.friendStatus == userFromDb?.friendStatus)
         }
     }

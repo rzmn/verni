@@ -1,11 +1,11 @@
 import Base
 
 public struct CredentialsDto: Codable {
-    public let login: String
+    public let email: String
     public let password: String
 
-    public init(login: String, password: String) {
-        self.login = login
+    public init(email: String, password: String) {
+        self.email = email
         self.password = password
     }
 }

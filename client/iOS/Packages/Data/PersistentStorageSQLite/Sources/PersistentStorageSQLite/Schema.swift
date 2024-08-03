@@ -12,6 +12,15 @@ enum Schema {
         }
     }
 
+    enum Profiles {
+        static let table = Table("profiles")
+
+        enum Keys {
+            static let id = Expression<String>("id")
+            static let payload = Expression<CodableBlob<ProfileDto>>("payload")
+        }
+    }
+
     enum Users {
         static let table = Table("users")
 

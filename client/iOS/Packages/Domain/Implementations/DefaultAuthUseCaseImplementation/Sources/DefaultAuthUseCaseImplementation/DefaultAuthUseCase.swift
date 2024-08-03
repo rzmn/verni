@@ -41,7 +41,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         let method = Auth.Login(
             parameters: .init(
                 credentials: CredentialsDto(
-                    login: credentials.login,
+                    email: credentials.email,
                     password: credentials.password
                 )
             )
@@ -53,7 +53,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                 return .success(
                     try await ActiveSession.awake(
                         anonymousApi: api,
-                        hostId: credentials.login,
+                        hostId: token.id,
                         accessToken: token.accessToken,
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
@@ -90,7 +90,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         let method = Auth.Signup(
             parameters: .init(
                 credentials: CredentialsDto(
-                    login: credentials.login,
+                    email: credentials.email,
                     password: credentials.password
                 )
             )
@@ -102,7 +102,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                 return .success(
                     try await ActiveSession.awake(
                         anonymousApi: api,
-                        hostId: credentials.login,
+                        hostId: token.id,
                         accessToken: token.accessToken,
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
@@ -133,21 +133,5 @@ extension DefaultAuthUseCase: AuthUseCase {
         default:
             return .failure(.other(apiError))
         }
-    }
-    
-    public func validateLogin(_ login: String) async -> Result<Void, CredentialsValidationError> {
-        let minAllowedLength = 4
-        guard login.count >= minAllowedLength else {
-            return .failure(.tooShort(minAllowedLength: minAllowedLength))
-        }
-        return .success(())
-    }
-
-    public func validatePassword(_ password: String) async -> Result<Void, CredentialsValidationError> {
-        let minAllowedLength = 5
-        guard password.count >= minAllowedLength else {
-            return .failure(.tooShort(minAllowedLength: minAllowedLength))
-        }
-        return .success(())
     }
 }

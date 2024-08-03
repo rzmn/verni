@@ -114,14 +114,6 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     func signup(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, SignupError> {
         await signupHook(credentials)
     }
-
-    func validateLogin(_ login: String) async -> Result<Void, CredentialsValidationError> {
-        await impl.validateLogin(login)
-    }
-
-    func validatePassword(_ password: String) async -> Result<Void, CredentialsValidationError> {
-        await impl.validatePassword(password)
-    }
 }
 
 

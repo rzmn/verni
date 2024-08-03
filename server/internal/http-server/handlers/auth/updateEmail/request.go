@@ -11,7 +11,7 @@ import (
 
 type RequestHandler interface {
 	Validate(c *gin.Context, request Request) *Error
-	Handle(c *gin.Context, request Request) (storage.AuthToken, *Error)
+	Handle(c *gin.Context, request Request) (storage.AuthenticatedSession, *Error)
 }
 
 func handleError(c *gin.Context, err Error) {

@@ -103,8 +103,34 @@ private struct FriendshipKindSet: OptionSet {
         )
     }
 
-    public func getHostInfo() async -> UserDto? {
-        await user(id: hostId)
+    public func getHostInfo() async -> ProfileDto? {
+        do {
+            guard let row = try db.prepare(Schema.Profiles.table).first(where: { row in
+                guard try row.get(Schema.Profiles.Keys.id) == hostId else {
+                    return false
+                }
+                return true
+            }) else {
+                return nil
+            }
+            return try row.get(Schema.Profiles.Keys.payload).value
+        } catch {
+            self.logE { "fetch profile failed error: \(error)" }
+            return nil
+        }
+    }
+
+    func update(hostInfo: ProfileDto) async {
+        assert(hostInfo.user.id == hostId)
+        do {
+            try self.db.run(Schema.Profiles.table.upsert(
+                Schema.Profiles.Keys.id <- hostInfo.user.id,
+                Schema.Profiles.Keys.payload <- CodableBlob(value: hostInfo),
+                onConflictOf: Schema.Profiles.Keys.id
+            ))
+        } catch {
+            self.logE { "failed to update profile error: \(error)" }
+        }
     }
 
     public func user(id: UserDto.ID) async -> UserDto? {
@@ -128,7 +154,7 @@ private struct FriendshipKindSet: OptionSet {
         do {
             try users.forEach {
                 try db.run(Schema.Users.table.upsert(
-                    Schema.Users.Keys.id <- $0.login,
+                    Schema.Users.Keys.id <- $0.id,
                     Schema.Users.Keys.payload <- CodableBlob(value: $0),
                     onConflictOf: Schema.Users.Keys.id
                 ))

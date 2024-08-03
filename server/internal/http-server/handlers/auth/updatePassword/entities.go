@@ -14,7 +14,7 @@ type Error struct {
 	responses.Error
 }
 
-func Success(token storage.AuthToken) responses.Response[storage.AuthToken] {
+func Success(token storage.AuthenticatedSession) responses.Response[storage.AuthenticatedSession] {
 	return responses.Success(token)
 }
 

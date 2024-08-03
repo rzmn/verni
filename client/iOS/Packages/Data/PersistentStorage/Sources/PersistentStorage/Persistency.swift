@@ -4,7 +4,8 @@ public protocol Persistency {
     func getRefreshToken() async -> String
     func update(refreshToken: String) async
 
-    func getHostInfo() async -> UserDto?
+    func getHostInfo() async -> ProfileDto?
+    func update(hostInfo: ProfileDto) async
     func user(id: UserDto.ID) async -> UserDto?
     func update(users: [UserDto]) async
 

@@ -16,6 +16,9 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../DesignSystem"),
+        .package(path: "../Routing"),
+        .package(path: "../AppBase"),
+        .package(path: "../Flows/LaunchFlow"),
         .package(path: "../../DI/DI"),
         .package(path: "../../Domain/Domain"),
         .package(path: "../../Infrastructure/Logging"),
@@ -31,7 +34,10 @@ let package = Package(
                 "Domain",
                 "Logging",
                 "Base",
-                "ProgressHUD"
+                "ProgressHUD",
+                "Routing",
+                "AppBase",
+                "LaunchFlow",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
