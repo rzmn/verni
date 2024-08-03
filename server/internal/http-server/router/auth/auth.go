@@ -14,6 +14,7 @@ import (
 	"accounty/internal/storage"
 
 	"accounty/internal/http-server/handlers/auth/login"
+	"accounty/internal/http-server/handlers/auth/logout"
 	"accounty/internal/http-server/handlers/auth/refresh"
 	"accounty/internal/http-server/handlers/auth/signup"
 	"accounty/internal/http-server/handlers/auth/updateEmail"
@@ -335,10 +336,33 @@ func (h *updatePasswordRequestHandler) Handle(c *gin.Context, request updatePass
 	}, nil
 }
 
+type logoutRequestHandler struct {
+	storage storage.Storage
+}
+
+func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
+	const op = "router.users.logoutRequestHandler.Handle"
+	log.Printf("%s: start", op)
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := logout.ErrInternal()
+		return &outError
+	}
+	if err := h.storage.RemoveRefreshToken(storage.UserId(*subject)); err != nil {
+		log.Printf("%s: cannot remove refresh token %v", op, err)
+		outError := logout.ErrInternal()
+		return &outError
+	}
+	return nil
+}
+
 func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	e.PUT("/auth/signup", signup.New(&signupRequestHandler{storage: storage}))
 	e.PUT("/auth/login", login.New(&loginRequestHandler{storage: storage}))
 	e.PUT("/auth/refresh", refresh.New(&refreshRequestHandler{storage: storage}))
 	e.PUT("/auth/updateEmail", middleware.EnsureLoggedIn(storage), updateEmail.New(&updateEmailRequestHandler{storage: storage}))
 	e.PUT("/auth/updatePassword", middleware.EnsureLoggedIn(storage), updatePassword.New(&updatePasswordRequestHandler{storage: storage}))
+	e.DELETE("/auth/logout", middleware.EnsureLoggedIn(storage), logout.New(&logoutRequestHandler{storage: storage}))
 }

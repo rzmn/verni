@@ -9,7 +9,6 @@ import (
 	"accounty/internal/storage"
 
 	"accounty/internal/http-server/handlers/users/get"
-	"accounty/internal/http-server/handlers/users/logout"
 	"accounty/internal/http-server/handlers/users/search"
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/middleware"
@@ -36,28 +35,6 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) ([]stora
 		return nil, &outError
 	}
 	return users, nil
-}
-
-type logoutRequestHandler struct {
-	storage storage.Storage
-}
-
-func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
-	const op = "router.users.logoutRequestHandler.Handle"
-	log.Printf("%s: start", op)
-	token := helpers.ExtractBearerToken(c)
-	subject, err := jwt.GetAccessTokenSubject(token)
-	if err != nil || subject == nil {
-		log.Printf("%s: cannot get access token %v", op, err)
-		outError := logout.ErrInternal()
-		return &outError
-	}
-	if err := h.storage.RemoveRefreshToken(storage.UserId(*subject)); err != nil {
-		log.Printf("%s: cannot remove refresh token %v", op, err)
-		outError := logout.ErrInternal()
-		return &outError
-	}
-	return nil
 }
 
 type searchRequestHandler struct {
@@ -87,5 +64,4 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	group := e.Group("/users", middleware.EnsureLoggedIn(storage))
 	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
 	group.GET("/search", search.New(&searchRequestHandler{storage: storage}))
-	group.DELETE("/logout", logout.New(&logoutRequestHandler{storage: storage}))
 }
