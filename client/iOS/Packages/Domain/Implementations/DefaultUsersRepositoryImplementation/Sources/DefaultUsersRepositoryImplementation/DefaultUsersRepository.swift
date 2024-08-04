@@ -29,7 +29,7 @@ extension DefaultUsersRepository: UsersRepository {
     }
 
     public func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
-        let method = Users.Get(parameters: .init(ids: ids))
+        let method = Users.Get(ids: ids)
         switch await api.run(method: method) {
         case .success(let dto):
             let users = dto.map(User.init)
@@ -47,9 +47,7 @@ extension DefaultUsersRepository: UsersRepository {
         if query.isEmpty {
             return .success([])
         }
-        let method = Users.Search(
-            parameters: .init(query: query)
-        )
+        let method = Users.Search(query: query)
         switch await api.run(method: method) {
         case .success(let dto):
             let users = dto.map(User.init)

@@ -29,7 +29,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     }
     
     public func getSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError> {
-        let result = await api.run(method: Spendings.GetDeals(parameters: .init(counterparty: counterparty)))
+        let result = await api.run(method: Spendings.GetDeals(counterparty: counterparty))
         switch result {
         case .success(let spendingsDto):
             let spendings = spendingsDto.map(IdentifiableSpending.init)

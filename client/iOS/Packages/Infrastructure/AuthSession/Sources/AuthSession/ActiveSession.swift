@@ -61,9 +61,7 @@ public class ActiveSession: TokenRefresher {
     public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
         let response = await anonymousApi.run(
             method: Auth.Refresh(
-                parameters: .init(
-                    refreshToken: await persistency.getRefreshToken()
-                )
+                refreshToken: await persistency.getRefreshToken()
             )
         )
         switch response {

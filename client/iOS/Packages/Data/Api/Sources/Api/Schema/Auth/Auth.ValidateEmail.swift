@@ -21,8 +21,8 @@ extension Auth {
             .get
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(email: String) {
+            self.parameters = Parameters(email: email)
         }
     }
 }

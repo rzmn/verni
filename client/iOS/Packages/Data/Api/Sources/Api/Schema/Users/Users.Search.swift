@@ -6,10 +6,6 @@ extension Users {
 
         public struct Parameters: Encodable {
             let query: String
-
-            public init(query: String) {
-                self.query = query
-            }
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Users {
             .get
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(query: String) {
+            self.parameters = Parameters(query: query)
         }
     }
 }

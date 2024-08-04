@@ -12,7 +12,7 @@ public class RemoteValidationUseCases {
 
 extension RemoteValidationUseCases: EmailValidationUseCase {
     public func validateEmail(_ email: String) async -> Result<Void, EmailValidationError> {
-        let method = Auth.ValidateEmail(parameters: .init(email: email))
+        let method = Auth.ValidateEmail(email: email)
         switch await api.run(method: method) {
         case .success:
             return .success(())

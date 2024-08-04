@@ -11,7 +11,7 @@ public class DefaultFriendInteractionsUseCase {
 
 extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
     public func acceptFriendRequest(from user: User.ID) async -> Result<Void, AcceptFriendRequestError> {
-        let result = await api.run(method: Friends.AcceptRequest(parameters: .init(sender: user)))
+        let result = await api.run(method: Friends.AcceptRequest(sender: user))
         switch result {
         case .success:
             return .success(())
@@ -21,7 +21,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
     }
     
     public func rejectFriendRequest(from user: User.ID) async -> Result<Void, RejectFriendRequestError> {
-        let result = await api.run(method: Friends.RejectRequest(parameters: .init(sender: user)))
+        let result = await api.run(method: Friends.RejectRequest(sender: user))
         switch result {
         case .success:
             return .success(())
@@ -31,7 +31,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
     }
     
     public func sendFriendRequest(to user: User.ID) async -> Result<Void, SendFriendRequestError> {
-        let result = await api.run(method: Friends.SendRequest(parameters: .init(target: user)))
+        let result = await api.run(method: Friends.SendRequest(target: user))
         switch result {
         case .success:
             return .success(())
@@ -41,7 +41,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
     }
     
     public func rollbackFriendRequest(to user: User.ID) async -> Result<Void, RollbackFriendRequestError> {
-        let result = await api.run(method: Friends.RollbackRequest(parameters: .init(target: user)))
+        let result = await api.run(method: Friends.RollbackRequest(target: user))
         switch result {
         case .success:
             return .success(())
@@ -51,7 +51,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
     }
     
     public func unfriend(user: User.ID) async -> Result<Void, UnfriendError> {
-        let result = await api.run(method: Friends.Unfriend(parameters: .init(target: user)))
+        let result = await api.run(method: Friends.Unfriend(target: user))
         switch result {
         case .success:
             return .success(())

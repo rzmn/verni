@@ -39,11 +39,9 @@ extension DefaultAuthUseCase: AuthUseCase {
     
     public func login(credentials: Credentials) async -> Result<ActiveSession, LoginError> {
         let method = Auth.Login(
-            parameters: .init(
-                credentials: CredentialsDto(
-                    email: credentials.email,
-                    password: credentials.password
-                )
+            credentials: CredentialsDto(
+                email: credentials.email,
+                password: credentials.password
             )
         )
         let apiError: ApiError
@@ -88,11 +86,9 @@ extension DefaultAuthUseCase: AuthUseCase {
     
     public func signup(credentials: Credentials) async -> Result<ActiveSession, SignupError> {
         let method = Auth.Signup(
-            parameters: .init(
-                credentials: CredentialsDto(
-                    email: credentials.email,
-                    password: credentials.password
-                )
+            credentials: CredentialsDto(
+                email: credentials.email,
+                password: credentials.password
             )
         )
         let apiError: ApiError

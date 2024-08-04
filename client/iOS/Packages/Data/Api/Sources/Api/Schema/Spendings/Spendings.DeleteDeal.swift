@@ -6,10 +6,6 @@ extension Spendings {
 
         public struct Parameters: Encodable {
             let dealId: DealDto.ID
-
-            public init(dealId: DealDto.ID) {
-                self.dealId = dealId
-            }
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Spendings {
             .post
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(dealId: DealDto.ID) {
+            self.parameters = Parameters(dealId: dealId)
         }
     }
 }

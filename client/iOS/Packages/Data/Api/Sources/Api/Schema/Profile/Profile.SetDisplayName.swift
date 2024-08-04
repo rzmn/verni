@@ -7,10 +7,6 @@ extension Profile {
 
         public struct Parameters: Encodable {
             let displayName: String
-
-            public init(displayName: String) {
-                self.displayName = displayName
-            }
         }
 
         public var path: String {
@@ -19,6 +15,10 @@ extension Profile {
 
         public var method: HttpMethod {
             .put
+        }
+
+        public init(displayName: String) {
+            self.parameters = Parameters(displayName: displayName)
         }
     }
 }

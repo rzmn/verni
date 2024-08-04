@@ -6,10 +6,6 @@ extension Auth {
 
         public struct Parameters: Encodable {
             let email: String
-
-            public init(email: String) {
-                self.email = email
-            }
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Auth {
             .put
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(email: String) {
+            self.parameters = Parameters(email: email)
         }
     }
 }

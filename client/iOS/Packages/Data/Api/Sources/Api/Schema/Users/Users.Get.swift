@@ -6,10 +6,6 @@ extension Users {
 
         public struct Parameters: Encodable {
             let ids: [UserDto.ID]
-
-            public init(ids: [UserDto.ID]) {
-                self.ids = ids
-            }
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Users {
             .get
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(ids: [UserDto.ID]) {
+            self.parameters = Parameters(ids: ids)
         }
     }
 }

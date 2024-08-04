@@ -5,11 +5,7 @@ extension Friends {
         public typealias Response = Void
 
         public struct Parameters: Encodable {
-            let sender: String
-
-            public init(sender: String) {
-                self.sender = sender
-            }
+            let sender: UserDto.ID
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Friends {
             .get
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(sender: UserDto.ID) {
+            self.parameters = Parameters(sender: sender)
         }
     }
 }

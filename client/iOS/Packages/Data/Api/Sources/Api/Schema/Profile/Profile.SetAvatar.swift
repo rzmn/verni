@@ -7,10 +7,6 @@ extension Profile {
 
         public struct Parameters: Encodable {
             let dataBase64: String
-
-            public init(dataBase64: String) {
-                self.dataBase64 = dataBase64
-            }
         }
 
         public var path: String {
@@ -19,6 +15,10 @@ extension Profile {
 
         public var method: HttpMethod {
             .put
+        }
+
+        public init(dataBase64: String) {
+            self.parameters = Parameters(dataBase64: dataBase64)
         }
     }
 }

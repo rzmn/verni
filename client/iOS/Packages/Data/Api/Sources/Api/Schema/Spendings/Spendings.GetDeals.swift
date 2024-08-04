@@ -6,10 +6,6 @@ extension Spendings {
 
         public struct Parameters: Encodable {
             let counterparty: UserDto.ID
-
-            public init(counterparty: UserDto.ID) {
-                self.counterparty = counterparty
-            }
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Spendings {
             .get
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(counterparty: UserDto.ID) {
+            self.parameters = Parameters(counterparty: counterparty)
         }
     }
 }

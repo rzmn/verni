@@ -15,9 +15,15 @@ internal import DefaultFriendInteractionsUseCaseImplementation
 internal import DefaultQRInviteUseCaseImplementation
 internal import DefaultSpendingInteractionsUseCaseImplementation
 internal import DefaultSpendingsRepositoryImplementation
+internal import DefaultProfileEditingUseCaseImplementation
+internal import DefaultValidationUseCasesImplementation
 internal import PersistentStorageSQLite
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
+    public func appCommon() -> AppCommon {
+        AppCommonDependencies(api: api)
+    }
+
     public func logout() async {
         invalidate()
     }
@@ -46,6 +52,10 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
                 persistency: persistency
             )
         )
+    }
+
+    public func profileEditingUseCase() -> any ProfileEditingUseCase {
+        DefaultProfileEditingUseCase(api: api)
     }
 
     public func friendInterationsUseCase() -> FriendInteractionsUseCase {
@@ -117,10 +127,14 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 }
 
 
-public class DefaultDependenciesAssembly: DIContainer {
+public class DefaultDependenciesAssembly: DIContainer {    
     private lazy var anonymousApi = anonymousApiFactory().create()
 
     public init() {}
+
+    public func appCommon() -> any AppCommon {
+        AppCommonDependencies(api: anonymousApi)
+    }
 
     public func authUseCase() -> any AuthUseCaseReturningActiveSession {
         AuthUseCaseAdapter(

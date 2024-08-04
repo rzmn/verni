@@ -6,10 +6,6 @@ extension Friends {
 
         public struct Parameters: Encodable {
             let statuses: [Int]
-
-            public init(statuses: [Int]) {
-                self.statuses = statuses
-            }
         }
         public let parameters: Parameters
 
@@ -21,8 +17,8 @@ extension Friends {
             .get
         }
 
-        public init(parameters: Parameters) {
-            self.parameters = parameters
+        public init(statuses: [FriendshipKindDto]) {
+            self.parameters = Parameters(statuses: statuses.map(\.rawValue))
         }
     }
 }

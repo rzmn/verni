@@ -12,6 +12,36 @@
 		61088A972C5E70DE005FFFC2 /* AppBase in Resources */ = {isa = PBXBuildFile; fileRef = 61088A962C5E70DE005FFFC2 /* AppBase */; };
 		61088A992C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */; };
 		61088A9B2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */; };
+		610E9BE22C5F7551003D1A79 /* Api in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE12C5F7551003D1A79 /* Api */; };
+		610E9BE42C5F7551003D1A79 /* ApiDomainConvenience in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE32C5F7551003D1A79 /* ApiDomainConvenience */; };
+		610E9BE62C5F7551003D1A79 /* ApiService in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE52C5F7551003D1A79 /* ApiService */; };
+		610E9BE82C5F7551003D1A79 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE72C5F7551003D1A79 /* App */; };
+		610E9BEA2C5F7551003D1A79 /* AppBase in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE92C5F7551003D1A79 /* AppBase */; };
+		610E9BEC2C5F7551003D1A79 /* AuthSession in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BEB2C5F7551003D1A79 /* AuthSession */; };
+		610E9BEE2C5F7551003D1A79 /* Base in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BED2C5F7551003D1A79 /* Base */; };
+		610E9BF02C5F7551003D1A79 /* DataTransferObjects in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BEF2C5F7551003D1A79 /* DataTransferObjects */; };
+		610E9BF22C5F7551003D1A79 /* DefaultApiImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BF12C5F7551003D1A79 /* DefaultApiImplementation */; };
+		610E9BF42C5F7551003D1A79 /* DefaultApiServiceImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BF32C5F7551003D1A79 /* DefaultApiServiceImplementation */; };
+		610E9BF62C5F7551003D1A79 /* DefaultAuthUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BF52C5F7551003D1A79 /* DefaultAuthUseCaseImplementation */; };
+		610E9BF82C5F7551003D1A79 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BF72C5F7551003D1A79 /* DefaultDependencies */; };
+		610E9BFA2C5F7551003D1A79 /* DefaultFriendInteractionsUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BF92C5F7551003D1A79 /* DefaultFriendInteractionsUseCaseImplementation */; };
+		610E9BFC2C5F7551003D1A79 /* DefaultFriendsRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BFB2C5F7551003D1A79 /* DefaultFriendsRepositoryImplementation */; };
+		610E9BFE2C5F7551003D1A79 /* DefaultNetworkingImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BFD2C5F7551003D1A79 /* DefaultNetworkingImplementation */; };
+		610E9C002C5F7551003D1A79 /* DefaultProfileEditingUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BFF2C5F7551003D1A79 /* DefaultProfileEditingUseCaseImplementation */; };
+		610E9C022C5F7551003D1A79 /* DefaultQRInviteUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C012C5F7551003D1A79 /* DefaultQRInviteUseCaseImplementation */; };
+		610E9C042C5F7551003D1A79 /* DefaultSpendingInteractionsUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C032C5F7551003D1A79 /* DefaultSpendingInteractionsUseCaseImplementation */; };
+		610E9C062C5F7551003D1A79 /* DefaultSpendingsRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C052C5F7551003D1A79 /* DefaultSpendingsRepositoryImplementation */; };
+		610E9C082C5F7551003D1A79 /* DefaultUsersRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C072C5F7551003D1A79 /* DefaultUsersRepositoryImplementation */; };
+		610E9C0A2C5F7551003D1A79 /* DefaultValidationUseCasesImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C092C5F7551003D1A79 /* DefaultValidationUseCasesImplementation */; };
+		610E9C0C2C5F7551003D1A79 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C0B2C5F7551003D1A79 /* DesignSystem */; };
+		610E9C0E2C5F7551003D1A79 /* DI in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C0D2C5F7551003D1A79 /* DI */; };
+		610E9C102C5F7551003D1A79 /* Domain in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C0F2C5F7551003D1A79 /* Domain */; };
+		610E9C122C5F7551003D1A79 /* LaunchFlow in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C112C5F7551003D1A79 /* LaunchFlow */; };
+		610E9C142C5F7551003D1A79 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C132C5F7551003D1A79 /* Logging */; };
+		610E9C162C5F7551003D1A79 /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C152C5F7551003D1A79 /* Networking */; };
+		610E9C182C5F7551003D1A79 /* PersistentStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C172C5F7551003D1A79 /* PersistentStorage */; };
+		610E9C1A2C5F7551003D1A79 /* PersistentStorageSQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C192C5F7551003D1A79 /* PersistentStorageSQLite */; };
+		610E9C1C2C5F7551003D1A79 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C1B2C5F7551003D1A79 /* Routing */; };
 		611CCD692C50AE3A00289D9E /* DefaultDependencies in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD4A2C50AE3A00289D9E /* DefaultDependencies */; };
 		611CCD6A2C50AE3A00289D9E /* DI in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD4B2C50AE3A00289D9E /* DI */; };
 		611CCD6D2C50AE3A00289D9E /* DataTransferObjects in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD502C50AE3A00289D9E /* DataTransferObjects */; };
@@ -39,29 +69,6 @@
 		61414F842C2F02A100B2C027 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61414F832C2F02A100B2C027 /* SceneDelegate.swift */; };
 		61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8A2C2F02A200B2C027 /* Assets.xcassets */; };
 		61414F8E2C2F02A200B2C027 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8D2C2F02A200B2C027 /* Base */; };
-		61BBB0F62C50B46800E3D4F3 /* ApiDomainConvenience in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB0F52C50B46800E3D4F3 /* ApiDomainConvenience */; };
-		61BBB0F82C50B46800E3D4F3 /* ApiService in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB0F72C50B46800E3D4F3 /* ApiService */; };
-		61BBB0FA2C50B46800E3D4F3 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB0F92C50B46800E3D4F3 /* App */; };
-		61BBB0FC2C50B46800E3D4F3 /* AuthSession in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB0FB2C50B46800E3D4F3 /* AuthSession */; };
-		61BBB0FE2C50B46800E3D4F3 /* Base in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB0FD2C50B46800E3D4F3 /* Base */; };
-		61BBB1002C50B46800E3D4F3 /* DataTransferObjects in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB0FF2C50B46800E3D4F3 /* DataTransferObjects */; };
-		61BBB1022C50B46800E3D4F3 /* DefaultApiServiceImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1012C50B46800E3D4F3 /* DefaultApiServiceImplementation */; };
-		61BBB1042C50B46800E3D4F3 /* DefaultAuthUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1032C50B46800E3D4F3 /* DefaultAuthUseCaseImplementation */; };
-		61BBB1062C50B46800E3D4F3 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1052C50B46800E3D4F3 /* DefaultDependencies */; };
-		61BBB1082C50B46800E3D4F3 /* DefaultFriendInteractionsUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1072C50B46800E3D4F3 /* DefaultFriendInteractionsUseCaseImplementation */; };
-		61BBB10A2C50B46800E3D4F3 /* DefaultFriendsRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1092C50B46800E3D4F3 /* DefaultFriendsRepositoryImplementation */; };
-		61BBB10C2C50B46800E3D4F3 /* DefaultNetworkingImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB10B2C50B46800E3D4F3 /* DefaultNetworkingImplementation */; };
-		61BBB10E2C50B46800E3D4F3 /* DefaultQRInviteUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB10D2C50B46800E3D4F3 /* DefaultQRInviteUseCaseImplementation */; };
-		61BBB1102C50B46800E3D4F3 /* DefaultSpendingInteractionsUseCaseImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB10F2C50B46800E3D4F3 /* DefaultSpendingInteractionsUseCaseImplementation */; };
-		61BBB1122C50B46800E3D4F3 /* DefaultSpendingsRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1112C50B46800E3D4F3 /* DefaultSpendingsRepositoryImplementation */; };
-		61BBB1142C50B46800E3D4F3 /* DefaultUsersRepositoryImplementation in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1132C50B46800E3D4F3 /* DefaultUsersRepositoryImplementation */; };
-		61BBB1162C50B46800E3D4F3 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1152C50B46800E3D4F3 /* DesignSystem */; };
-		61BBB1182C50B46800E3D4F3 /* DI in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1172C50B46800E3D4F3 /* DI */; };
-		61BBB11A2C50B46800E3D4F3 /* Domain in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1192C50B46800E3D4F3 /* Domain */; };
-		61BBB11C2C50B46800E3D4F3 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB11B2C50B46800E3D4F3 /* Logging */; };
-		61BBB11E2C50B46800E3D4F3 /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB11D2C50B46800E3D4F3 /* Networking */; };
-		61BBB1202C50B46800E3D4F3 /* PersistentStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB11F2C50B46800E3D4F3 /* PersistentStorage */; };
-		61BBB1222C50B46800E3D4F3 /* PersistentStorageSQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 61BBB1212C50B46800E3D4F3 /* PersistentStorageSQLite */; };
 		61BBB1252C50D3CE00E3D4F3 /* DefaultApiImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */; };
 		61BBB1262C50D3CE00E3D4F3 /* Api in Resources */ = {isa = PBXBuildFile; fileRef = 61BBB1242C50D3CE00E3D4F3 /* Api */; };
 		61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61FD347B2C40242F002C1A5A /* Localizable.xcstrings */; };
@@ -113,29 +120,36 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61BBB1202C50B46800E3D4F3 /* PersistentStorage in Frameworks */,
-				61BBB10A2C50B46800E3D4F3 /* DefaultFriendsRepositoryImplementation in Frameworks */,
-				61BBB0FA2C50B46800E3D4F3 /* App in Frameworks */,
-				61BBB10E2C50B46800E3D4F3 /* DefaultQRInviteUseCaseImplementation in Frameworks */,
-				61BBB1162C50B46800E3D4F3 /* DesignSystem in Frameworks */,
-				61BBB1042C50B46800E3D4F3 /* DefaultAuthUseCaseImplementation in Frameworks */,
-				61BBB1102C50B46800E3D4F3 /* DefaultSpendingInteractionsUseCaseImplementation in Frameworks */,
-				61BBB0FE2C50B46800E3D4F3 /* Base in Frameworks */,
-				61BBB10C2C50B46800E3D4F3 /* DefaultNetworkingImplementation in Frameworks */,
-				61BBB11C2C50B46800E3D4F3 /* Logging in Frameworks */,
-				61BBB11E2C50B46800E3D4F3 /* Networking in Frameworks */,
-				61BBB1002C50B46800E3D4F3 /* DataTransferObjects in Frameworks */,
-				61BBB11A2C50B46800E3D4F3 /* Domain in Frameworks */,
-				61BBB0F82C50B46800E3D4F3 /* ApiService in Frameworks */,
-				61BBB1022C50B46800E3D4F3 /* DefaultApiServiceImplementation in Frameworks */,
-				61BBB1082C50B46800E3D4F3 /* DefaultFriendInteractionsUseCaseImplementation in Frameworks */,
-				61BBB0F62C50B46800E3D4F3 /* ApiDomainConvenience in Frameworks */,
-				61BBB0FC2C50B46800E3D4F3 /* AuthSession in Frameworks */,
-				61BBB1182C50B46800E3D4F3 /* DI in Frameworks */,
-				61BBB1122C50B46800E3D4F3 /* DefaultSpendingsRepositoryImplementation in Frameworks */,
-				61BBB1062C50B46800E3D4F3 /* DefaultDependencies in Frameworks */,
-				61BBB1142C50B46800E3D4F3 /* DefaultUsersRepositoryImplementation in Frameworks */,
-				61BBB1222C50B46800E3D4F3 /* PersistentStorageSQLite in Frameworks */,
+				610E9C162C5F7551003D1A79 /* Networking in Frameworks */,
+				610E9BFC2C5F7551003D1A79 /* DefaultFriendsRepositoryImplementation in Frameworks */,
+				610E9C082C5F7551003D1A79 /* DefaultUsersRepositoryImplementation in Frameworks */,
+				610E9C042C5F7551003D1A79 /* DefaultSpendingInteractionsUseCaseImplementation in Frameworks */,
+				610E9BE82C5F7551003D1A79 /* App in Frameworks */,
+				610E9BFE2C5F7551003D1A79 /* DefaultNetworkingImplementation in Frameworks */,
+				610E9C002C5F7551003D1A79 /* DefaultProfileEditingUseCaseImplementation in Frameworks */,
+				610E9C182C5F7551003D1A79 /* PersistentStorage in Frameworks */,
+				610E9C102C5F7551003D1A79 /* Domain in Frameworks */,
+				610E9BF22C5F7551003D1A79 /* DefaultApiImplementation in Frameworks */,
+				610E9BE22C5F7551003D1A79 /* Api in Frameworks */,
+				610E9C122C5F7551003D1A79 /* LaunchFlow in Frameworks */,
+				610E9BF82C5F7551003D1A79 /* DefaultDependencies in Frameworks */,
+				610E9BEE2C5F7551003D1A79 /* Base in Frameworks */,
+				610E9C1A2C5F7551003D1A79 /* PersistentStorageSQLite in Frameworks */,
+				610E9C062C5F7551003D1A79 /* DefaultSpendingsRepositoryImplementation in Frameworks */,
+				610E9C022C5F7551003D1A79 /* DefaultQRInviteUseCaseImplementation in Frameworks */,
+				610E9BEA2C5F7551003D1A79 /* AppBase in Frameworks */,
+				610E9BF02C5F7551003D1A79 /* DataTransferObjects in Frameworks */,
+				610E9BFA2C5F7551003D1A79 /* DefaultFriendInteractionsUseCaseImplementation in Frameworks */,
+				610E9BF62C5F7551003D1A79 /* DefaultAuthUseCaseImplementation in Frameworks */,
+				610E9BEC2C5F7551003D1A79 /* AuthSession in Frameworks */,
+				610E9BF42C5F7551003D1A79 /* DefaultApiServiceImplementation in Frameworks */,
+				610E9BE62C5F7551003D1A79 /* ApiService in Frameworks */,
+				610E9BE42C5F7551003D1A79 /* ApiDomainConvenience in Frameworks */,
+				610E9C142C5F7551003D1A79 /* Logging in Frameworks */,
+				610E9C0A2C5F7551003D1A79 /* DefaultValidationUseCasesImplementation in Frameworks */,
+				610E9C1C2C5F7551003D1A79 /* Routing in Frameworks */,
+				610E9C0C2C5F7551003D1A79 /* DesignSystem in Frameworks */,
+				610E9C0E2C5F7551003D1A79 /* DI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,29 +313,36 @@
 			);
 			name = Accounty;
 			packageProductDependencies = (
-				61BBB0F52C50B46800E3D4F3 /* ApiDomainConvenience */,
-				61BBB0F72C50B46800E3D4F3 /* ApiService */,
-				61BBB0F92C50B46800E3D4F3 /* App */,
-				61BBB0FB2C50B46800E3D4F3 /* AuthSession */,
-				61BBB0FD2C50B46800E3D4F3 /* Base */,
-				61BBB0FF2C50B46800E3D4F3 /* DataTransferObjects */,
-				61BBB1012C50B46800E3D4F3 /* DefaultApiServiceImplementation */,
-				61BBB1032C50B46800E3D4F3 /* DefaultAuthUseCaseImplementation */,
-				61BBB1052C50B46800E3D4F3 /* DefaultDependencies */,
-				61BBB1072C50B46800E3D4F3 /* DefaultFriendInteractionsUseCaseImplementation */,
-				61BBB1092C50B46800E3D4F3 /* DefaultFriendsRepositoryImplementation */,
-				61BBB10B2C50B46800E3D4F3 /* DefaultNetworkingImplementation */,
-				61BBB10D2C50B46800E3D4F3 /* DefaultQRInviteUseCaseImplementation */,
-				61BBB10F2C50B46800E3D4F3 /* DefaultSpendingInteractionsUseCaseImplementation */,
-				61BBB1112C50B46800E3D4F3 /* DefaultSpendingsRepositoryImplementation */,
-				61BBB1132C50B46800E3D4F3 /* DefaultUsersRepositoryImplementation */,
-				61BBB1152C50B46800E3D4F3 /* DesignSystem */,
-				61BBB1172C50B46800E3D4F3 /* DI */,
-				61BBB1192C50B46800E3D4F3 /* Domain */,
-				61BBB11B2C50B46800E3D4F3 /* Logging */,
-				61BBB11D2C50B46800E3D4F3 /* Networking */,
-				61BBB11F2C50B46800E3D4F3 /* PersistentStorage */,
-				61BBB1212C50B46800E3D4F3 /* PersistentStorageSQLite */,
+				610E9BE12C5F7551003D1A79 /* Api */,
+				610E9BE32C5F7551003D1A79 /* ApiDomainConvenience */,
+				610E9BE52C5F7551003D1A79 /* ApiService */,
+				610E9BE72C5F7551003D1A79 /* App */,
+				610E9BE92C5F7551003D1A79 /* AppBase */,
+				610E9BEB2C5F7551003D1A79 /* AuthSession */,
+				610E9BED2C5F7551003D1A79 /* Base */,
+				610E9BEF2C5F7551003D1A79 /* DataTransferObjects */,
+				610E9BF12C5F7551003D1A79 /* DefaultApiImplementation */,
+				610E9BF32C5F7551003D1A79 /* DefaultApiServiceImplementation */,
+				610E9BF52C5F7551003D1A79 /* DefaultAuthUseCaseImplementation */,
+				610E9BF72C5F7551003D1A79 /* DefaultDependencies */,
+				610E9BF92C5F7551003D1A79 /* DefaultFriendInteractionsUseCaseImplementation */,
+				610E9BFB2C5F7551003D1A79 /* DefaultFriendsRepositoryImplementation */,
+				610E9BFD2C5F7551003D1A79 /* DefaultNetworkingImplementation */,
+				610E9BFF2C5F7551003D1A79 /* DefaultProfileEditingUseCaseImplementation */,
+				610E9C012C5F7551003D1A79 /* DefaultQRInviteUseCaseImplementation */,
+				610E9C032C5F7551003D1A79 /* DefaultSpendingInteractionsUseCaseImplementation */,
+				610E9C052C5F7551003D1A79 /* DefaultSpendingsRepositoryImplementation */,
+				610E9C072C5F7551003D1A79 /* DefaultUsersRepositoryImplementation */,
+				610E9C092C5F7551003D1A79 /* DefaultValidationUseCasesImplementation */,
+				610E9C0B2C5F7551003D1A79 /* DesignSystem */,
+				610E9C0D2C5F7551003D1A79 /* DI */,
+				610E9C0F2C5F7551003D1A79 /* Domain */,
+				610E9C112C5F7551003D1A79 /* LaunchFlow */,
+				610E9C132C5F7551003D1A79 /* Logging */,
+				610E9C152C5F7551003D1A79 /* Networking */,
+				610E9C172C5F7551003D1A79 /* PersistentStorage */,
+				610E9C192C5F7551003D1A79 /* PersistentStorageSQLite */,
+				610E9C1B2C5F7551003D1A79 /* Routing */,
 			);
 			productName = SharedExpenses;
 			productReference = 61414F7E2C2F02A100B2C027 /* Accounty.app */;
@@ -642,97 +663,125 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		61BBB0F52C50B46800E3D4F3 /* ApiDomainConvenience */ = {
+		610E9BE12C5F7551003D1A79 /* Api */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Api;
+		};
+		610E9BE32C5F7551003D1A79 /* ApiDomainConvenience */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ApiDomainConvenience;
 		};
-		61BBB0F72C50B46800E3D4F3 /* ApiService */ = {
+		610E9BE52C5F7551003D1A79 /* ApiService */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ApiService;
 		};
-		61BBB0F92C50B46800E3D4F3 /* App */ = {
+		610E9BE72C5F7551003D1A79 /* App */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = App;
 		};
-		61BBB0FB2C50B46800E3D4F3 /* AuthSession */ = {
+		610E9BE92C5F7551003D1A79 /* AppBase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppBase;
+		};
+		610E9BEB2C5F7551003D1A79 /* AuthSession */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AuthSession;
 		};
-		61BBB0FD2C50B46800E3D4F3 /* Base */ = {
+		610E9BED2C5F7551003D1A79 /* Base */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Base;
 		};
-		61BBB0FF2C50B46800E3D4F3 /* DataTransferObjects */ = {
+		610E9BEF2C5F7551003D1A79 /* DataTransferObjects */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DataTransferObjects;
 		};
-		61BBB1012C50B46800E3D4F3 /* DefaultApiServiceImplementation */ = {
+		610E9BF12C5F7551003D1A79 /* DefaultApiImplementation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultApiImplementation;
+		};
+		610E9BF32C5F7551003D1A79 /* DefaultApiServiceImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultApiServiceImplementation;
 		};
-		61BBB1032C50B46800E3D4F3 /* DefaultAuthUseCaseImplementation */ = {
+		610E9BF52C5F7551003D1A79 /* DefaultAuthUseCaseImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultAuthUseCaseImplementation;
 		};
-		61BBB1052C50B46800E3D4F3 /* DefaultDependencies */ = {
+		610E9BF72C5F7551003D1A79 /* DefaultDependencies */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultDependencies;
 		};
-		61BBB1072C50B46800E3D4F3 /* DefaultFriendInteractionsUseCaseImplementation */ = {
+		610E9BF92C5F7551003D1A79 /* DefaultFriendInteractionsUseCaseImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultFriendInteractionsUseCaseImplementation;
 		};
-		61BBB1092C50B46800E3D4F3 /* DefaultFriendsRepositoryImplementation */ = {
+		610E9BFB2C5F7551003D1A79 /* DefaultFriendsRepositoryImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultFriendsRepositoryImplementation;
 		};
-		61BBB10B2C50B46800E3D4F3 /* DefaultNetworkingImplementation */ = {
+		610E9BFD2C5F7551003D1A79 /* DefaultNetworkingImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultNetworkingImplementation;
 		};
-		61BBB10D2C50B46800E3D4F3 /* DefaultQRInviteUseCaseImplementation */ = {
+		610E9BFF2C5F7551003D1A79 /* DefaultProfileEditingUseCaseImplementation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultProfileEditingUseCaseImplementation;
+		};
+		610E9C012C5F7551003D1A79 /* DefaultQRInviteUseCaseImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultQRInviteUseCaseImplementation;
 		};
-		61BBB10F2C50B46800E3D4F3 /* DefaultSpendingInteractionsUseCaseImplementation */ = {
+		610E9C032C5F7551003D1A79 /* DefaultSpendingInteractionsUseCaseImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultSpendingInteractionsUseCaseImplementation;
 		};
-		61BBB1112C50B46800E3D4F3 /* DefaultSpendingsRepositoryImplementation */ = {
+		610E9C052C5F7551003D1A79 /* DefaultSpendingsRepositoryImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultSpendingsRepositoryImplementation;
 		};
-		61BBB1132C50B46800E3D4F3 /* DefaultUsersRepositoryImplementation */ = {
+		610E9C072C5F7551003D1A79 /* DefaultUsersRepositoryImplementation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultUsersRepositoryImplementation;
 		};
-		61BBB1152C50B46800E3D4F3 /* DesignSystem */ = {
+		610E9C092C5F7551003D1A79 /* DefaultValidationUseCasesImplementation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultValidationUseCasesImplementation;
+		};
+		610E9C0B2C5F7551003D1A79 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DesignSystem;
 		};
-		61BBB1172C50B46800E3D4F3 /* DI */ = {
+		610E9C0D2C5F7551003D1A79 /* DI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DI;
 		};
-		61BBB1192C50B46800E3D4F3 /* Domain */ = {
+		610E9C0F2C5F7551003D1A79 /* Domain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Domain;
 		};
-		61BBB11B2C50B46800E3D4F3 /* Logging */ = {
+		610E9C112C5F7551003D1A79 /* LaunchFlow */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LaunchFlow;
+		};
+		610E9C132C5F7551003D1A79 /* Logging */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Logging;
 		};
-		61BBB11D2C50B46800E3D4F3 /* Networking */ = {
+		610E9C152C5F7551003D1A79 /* Networking */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Networking;
 		};
-		61BBB11F2C50B46800E3D4F3 /* PersistentStorage */ = {
+		610E9C172C5F7551003D1A79 /* PersistentStorage */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PersistentStorage;
 		};
-		61BBB1212C50B46800E3D4F3 /* PersistentStorageSQLite */ = {
+		610E9C192C5F7551003D1A79 /* PersistentStorageSQLite */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PersistentStorageSQLite;
+		};
+		610E9C1B2C5F7551003D1A79 /* Routing */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Routing;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

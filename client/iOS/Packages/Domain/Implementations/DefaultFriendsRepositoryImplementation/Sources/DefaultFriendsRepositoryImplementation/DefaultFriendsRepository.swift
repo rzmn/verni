@@ -22,12 +22,9 @@ extension DefaultFriendsRepository: FriendsRepository {
         let uids: [UserDto.ID]
         switch await api.run(
             method: Friends.Get(
-                parameters: .init(
-                    statuses: FriendshipKind.allCases
-                        .filter(set.contains)
-                        .map(FriendshipKindDto.init)
-                        .map(\.rawValue)
-                )
+                statuses: FriendshipKind.allCases
+                    .filter(set.contains)
+                    .map(FriendshipKindDto.init)
             )
         ) {
         case .success(let dict):
@@ -36,7 +33,7 @@ extension DefaultFriendsRepository: FriendsRepository {
             return .failure(GeneralError(apiError: apiError))
         }
         let users: [UserDto]
-        switch await api.run(method: Users.Get(parameters: .init(ids: uids))) {
+        switch await api.run(method: Users.Get(ids: uids)) {
         case .success(let success):
             users = success
         case .failure(let error):

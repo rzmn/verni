@@ -24,7 +24,9 @@ let package = Package(
         .package(path: "../../Domain/Implementations/DefaultQRInviteUseCaseImplementation"),
         .package(path: "../../Domain/Implementations/DefaultSpendingInteractionsUseCaseImplementation"),
         .package(path: "../../Domain/Implementations/DefaultSpendingsRepositoryImplementation"),
-        
+        .package(path: "../../Domain/Implementations/DefaultProfileEditingUseCaseImplementation"),
+        .package(path: "../../Domain/Implementations/DefaultValidationUseCasesImplementation"),
+
         .package(path: "../../Infrastructure/Networking"),
         .package(path: "../../Infrastructure/Logging"),
         .package(path: "../../Infrastructure/ApiService"),
@@ -59,7 +61,9 @@ let package = Package(
                 "DefaultSpendingInteractionsUseCaseImplementation",
                 "DefaultSpendingsRepositoryImplementation",
                 "PersistentStorageSQLite",
-                "DefaultApiImplementation"
+                "DefaultApiImplementation",
+                "DefaultProfileEditingUseCaseImplementation",
+                "DefaultValidationUseCasesImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
