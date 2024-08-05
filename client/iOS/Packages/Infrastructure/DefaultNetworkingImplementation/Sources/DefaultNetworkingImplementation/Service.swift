@@ -165,35 +165,49 @@ extension Service: NetworkService {
                 }
             }
             logD { "\(request.path): got error \(error). underlying: \((error as NSError).underlyingErrors.map { $0 as NSError })" }
-            if let backoff {
-                if backoff.shouldTryAgain {
-                    logI { "\(request.path): backoff try \(backoff.retryCount)" }
-                    let outError = error
-                    do {
-                        try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
-                        return await run(request, backoff: ExpBackoff(retryCount: backoff.retryCount + 1))
-                    } catch {
-                        logI { "\(request.path): backoff failed on try \(backoff.retryCount) error: \(error)" }
-                        return .failure(handle(outError))
-                    }
-                } else {
-                    logI { "\(request.path): stopping backoff error: \(error)" }
-                    return .failure(handle(error))
+            let backoff = backoff ?? ExpBackoff(retryCount: 0)
+            if backoff.shouldTryAgain {
+                logI { "\(request.path): backoff try \(backoff.retryCount)" }
+                let outError = error
+                do {
+                    try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
+                    return await run(request, backoff: ExpBackoff(retryCount: backoff.retryCount + 1))
+                } catch {
+                    logI { "\(request.path): backoff failed on try \(backoff.retryCount) error: \(error)" }
+                    return .failure(handle(outError))
                 }
             } else {
-                return await run(request, backoff: ExpBackoff(retryCount: 0))
+                logI { "\(request.path): stopping backoff error: \(error)" }
+                return .failure(handle(error))
             }
         }
         guard let httpResponse = response as? HTTPURLResponse else {
             logE { "\(request.path): response is not an HTTPURLResponse. found: \(response)" }
             return .failure(.badResponse(Failure(description: "bad respose type: \(response)")))
         }
+        let code = HttpCode(
+            code: httpResponse.statusCode
+        )
+        if case .serverError = code {
+            let backoff = backoff ?? ExpBackoff(retryCount: 0)
+            if backoff.shouldTryAgain {
+                do {
+                    try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
+                    return await run(request, backoff: ExpBackoff(retryCount: backoff.retryCount + 1))
+                } catch {
+                    return .success(
+                        NetworkServiceResponse(
+                            code: code,
+                            data: data
+                        )
+                    )
+                }
+            }
+        }
         logI { "\(request.path): got http response" }
         return .success(
             NetworkServiceResponse(
-                code: HttpCode(
-                    code: httpResponse.statusCode
-                ),
+                code: code,
                 data: data
             )
         )

@@ -3,8 +3,10 @@ import UIKit
 public class TextField: UITextField {
     public struct Config {
         public enum ContentType {
-            case login
+            case email
             case password
+            case newPassword
+            case repeatPassword
         }
         let content: ContentType
         let placeholder: String
@@ -63,11 +65,24 @@ public class TextField: UITextField {
         }
         hintLabel.text = config.formatHint
         switch config.content {
-        case .login:
+        case .email:
+            textContentType = .username
+            keyboardType = .emailAddress
             autocorrectionType = .no
             isSecureTextEntry = false
             autocapitalizationType = .none
         case .password:
+            textContentType = .password
+            autocorrectionType = .no
+            isSecureTextEntry = true
+            autocapitalizationType = .none
+        case .newPassword:
+            textContentType = .newPassword
+            autocorrectionType = .no
+            isSecureTextEntry = true
+            autocapitalizationType = .none
+        case .repeatPassword:
+            textContentType = .newPassword
             autocorrectionType = .no
             isSecureTextEntry = true
             autocapitalizationType = .none

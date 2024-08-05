@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"accounty/internal/config"
+	"accounty/internal/http-server/router/aasa"
 	"accounty/internal/http-server/router/auth"
 	"accounty/internal/http-server/router/friends"
 	"accounty/internal/http-server/router/profile"
@@ -36,6 +37,7 @@ func main() {
 	friends.RegisterRoutes(router, storage)
 	spendings.RegisterRoutes(router, storage)
 	profile.RegisterRoutes(router, storage)
+	aasa.RegisterRoutes(router, storage)
 
 	address := ":" + os.Getenv("PORT")
 	server := &http.Server{

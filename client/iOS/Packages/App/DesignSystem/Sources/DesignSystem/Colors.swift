@@ -70,6 +70,10 @@ extension UIColor {
                 }
             }
         }
+
+        public static var destructiveBackground: UIColor {
+            destructive.withAlphaComponent(0.16)
+        }
     }
 
     public static var p: Palette.Type {

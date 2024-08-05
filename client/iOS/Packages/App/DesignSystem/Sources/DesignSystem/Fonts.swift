@@ -7,7 +7,8 @@ extension UIFont {
         }
 
         public static var title2: UIFont {
-            UIFont(name: "Menlo-Bold", size: 18) ?? .systemFont(ofSize: 18, weight: .bold)
+            let font = UIFont(name: "SF Pro", size: 17)
+            return font ?? .systemFont(ofSize: 18, weight: .bold)
         }
 
         public static var title3: UIFont {

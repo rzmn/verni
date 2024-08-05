@@ -73,6 +73,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         logI { "creating persistence..." }
         let dbUrl = dbDirectory
             .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
+        try? FileManager.default.removeItem(at: dbUrl)
         let db = try Connection(dbUrl.absoluteString)
         do {
             try createTables(for: db)

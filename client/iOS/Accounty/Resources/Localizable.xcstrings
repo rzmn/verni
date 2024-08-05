@@ -210,6 +210,39 @@
         }
       }
     },
+    "email_already_taken" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already Taken"
+          }
+        }
+      }
+    },
+    "email_invalid_fmt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid Format"
+          }
+        }
+      }
+    },
+    "email_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter Email"
+          }
+        }
+      }
+    },
     "friend_list_empty_placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -353,13 +386,24 @@
         }
       }
     },
+    "login_go_to_signin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign In"
+          }
+        }
+      }
+    },
     "login_go_to_signup" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sign Up"
+            "value" : "Create Account"
           }
         }
       }
@@ -375,6 +419,28 @@
         }
       }
     },
+    "login_pwd_didnt_match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password did not match"
+          }
+        }
+      }
+    },
+    "login_pwd_matches" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password mathes"
+          }
+        }
+      }
+    },
     "login_pwd_placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -382,6 +448,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enter password"
+          }
+        }
+      }
+    },
+    "login_pwd_repeat_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter password again"
           }
         }
       }
@@ -491,7 +568,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "🔐 Sign Up"
+            "value" : "Registration"
           }
         }
       }

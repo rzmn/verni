@@ -23,11 +23,15 @@ public class Button: UIButton {
         switch config.style {
         case .primary:
             setTitleColor(.p.primary, for: .normal)
+            backgroundColor = .p.backgroundContent
         case .secondary:
             setTitleColor(.secondaryLabel, for: .normal)
         case .destructive:
             setTitleColor(.p.destructive, for: .normal)
+            backgroundColor = .p.destructiveBackground
         }
+        layer.masksToBounds = true
+        layer.cornerRadius = 10
     }
     
     required init?(coder: NSCoder) {
