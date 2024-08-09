@@ -17,11 +17,12 @@ let package = Package(
     dependencies: [
         .package(path: "../Networking"),
         .package(path: "../Logging"),
+        .package(path: "../Base"),
     ],
     targets: [
         .target(
             name: "DefaultNetworkingImplementation",
-            dependencies: ["Logging", "Networking"],
+            dependencies: ["Logging", "Networking", "Base"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

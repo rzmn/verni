@@ -1,5 +1,5 @@
 {
-  "originHash" : "a38132eedb59b04c460f717b3396596e026eb79a0ca302e922d78ef338cba28e",
+  "originHash" : "9b06cbb77069fb0bec8f02465c35fa7ac281199be2ccd1c9cd8ffbb08fba13cc",
   "pins" : [
     {
       "identity" : "progresshud",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/rzmn/ProgressHUD.git",
       "state" : {
         "branch" : "rzmn/without-privacy-manifest",
-        "revision" : "597e61d95c1821e3032a13928bdb4d8b8b6cca25"
+        "revision" : "d0a164ab1d8dca9ffd9c16654b9a7378d49a1405"
       }
     },
     {

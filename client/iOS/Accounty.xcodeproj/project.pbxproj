@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		61088A972C5E70DE005FFFC2 /* AppBase in Resources */ = {isa = PBXBuildFile; fileRef = 61088A962C5E70DE005FFFC2 /* AppBase */; };
-		61088A992C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */; };
-		61088A9B2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */; };
 		610E9BE22C5F7551003D1A79 /* Api in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE12C5F7551003D1A79 /* Api */; };
 		610E9BE42C5F7551003D1A79 /* ApiDomainConvenience in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE32C5F7551003D1A79 /* ApiDomainConvenience */; };
 		610E9BE62C5F7551003D1A79 /* ApiService in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE52C5F7551003D1A79 /* ApiService */; };
@@ -38,46 +35,14 @@
 		610E9C162C5F7551003D1A79 /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C152C5F7551003D1A79 /* Networking */; };
 		610E9C182C5F7551003D1A79 /* PersistentStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C172C5F7551003D1A79 /* PersistentStorage */; };
 		610E9C1A2C5F7551003D1A79 /* PersistentStorageSQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9C192C5F7551003D1A79 /* PersistentStorageSQLite */; };
-		611CCD692C50AE3A00289D9E /* DefaultDependencies in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD4A2C50AE3A00289D9E /* DefaultDependencies */; };
-		611CCD6A2C50AE3A00289D9E /* DI in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD4B2C50AE3A00289D9E /* DI */; };
-		611CCD6D2C50AE3A00289D9E /* DataTransferObjects in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD502C50AE3A00289D9E /* DataTransferObjects */; };
-		611CCD6F2C50AE3A00289D9E /* PersistentStorage in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD522C50AE3A00289D9E /* PersistentStorage */; };
-		611CCD702C50AE3A00289D9E /* App in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD542C50AE3A00289D9E /* App */; };
-		611CCD712C50AE3A00289D9E /* DesignSystem in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD552C50AE3A00289D9E /* DesignSystem */; };
-		611CCD722C50AE3A00289D9E /* ApiService in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD572C50AE3A00289D9E /* ApiService */; };
-		611CCD732C50AE3A00289D9E /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD582C50AE3A00289D9E /* Base */; };
-		611CCD742C50AE3A00289D9E /* DefaultApiServiceImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */; };
-		611CCD752C50AE3A00289D9E /* DefaultNetworkingImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */; };
-		611CCD762C50AE3A00289D9E /* Logging in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD5B2C50AE3A00289D9E /* Logging */; };
-		611CCD772C50AE3A00289D9E /* Networking in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD5C2C50AE3A00289D9E /* Networking */; };
-		611CCD782C50AE3A00289D9E /* ApiDomainConvenience in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */; };
-		611CCD792C50AE3A00289D9E /* DefaultAuthUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */; };
-		611CCD7A2C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD602C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation */; };
-		611CCD7B2C50AE3A00289D9E /* DefaultFriendsRepositoryImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD612C50AE3A00289D9E /* DefaultFriendsRepositoryImplementation */; };
-		611CCD7C2C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD622C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation */; };
-		611CCD7D2C50AE3A00289D9E /* DefaultSpendingInteractionsUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD632C50AE3A00289D9E /* DefaultSpendingInteractionsUseCaseImplementation */; };
-		611CCD7E2C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD642C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation */; };
-		611CCD7F2C50AE3A00289D9E /* DefaultUsersRepositoryImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */; };
-		611CCD802C50AE3A00289D9E /* Domain in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD672C50AE3A00289D9E /* Domain */; };
-		611CCD822C50AEA600289D9E /* AuthSession in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD812C50AEA600289D9E /* AuthSession */; };
-		611CCD862C50B1D400289D9E /* PersistentStorageSQLite in Resources */ = {isa = PBXBuildFile; fileRef = 611CCD852C50B1D400289D9E /* PersistentStorageSQLite */; };
-		6126313C2C5FC49400445300 /* AuthenticatedFlow in Resources */ = {isa = PBXBuildFile; fileRef = 6126313A2C5FC49400445300 /* AuthenticatedFlow */; };
-		6126313D2C5FC49400445300 /* UnauthenticatedFlow in Resources */ = {isa = PBXBuildFile; fileRef = 6126313B2C5FC49400445300 /* UnauthenticatedFlow */; };
-		612631432C5FC60800445300 /* SignInFlow in Resources */ = {isa = PBXBuildFile; fileRef = 612631412C5FC60700445300 /* SignInFlow */; };
-		612631442C5FC60800445300 /* SignUpFlow in Resources */ = {isa = PBXBuildFile; fileRef = 612631422C5FC60700445300 /* SignUpFlow */; };
 		612631472C60AAFF00445300 /* SF-Pro.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 612631462C60AAFF00445300 /* SF-Pro.ttf */; };
-		612A06FF2C6104BE00F79192 /* AccountFlow in Resources */ = {isa = PBXBuildFile; fileRef = 612A06FE2C6104BE00F79192 /* AccountFlow */; };
 		612A07012C610DB300F79192 /* AuthenticatedFlow in Frameworks */ = {isa = PBXBuildFile; productRef = 612A07002C610DB300F79192 /* AuthenticatedFlow */; };
 		612A07032C610DB600F79192 /* UnauthenticatedFlow in Frameworks */ = {isa = PBXBuildFile; productRef = 612A07022C610DB600F79192 /* UnauthenticatedFlow */; };
 		61414F822C2F02A100B2C027 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61414F812C2F02A100B2C027 /* AppDelegate.swift */; };
 		61414F842C2F02A100B2C027 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61414F832C2F02A100B2C027 /* SceneDelegate.swift */; };
 		61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8A2C2F02A200B2C027 /* Assets.xcassets */; };
 		61414F8E2C2F02A200B2C027 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8D2C2F02A200B2C027 /* Base */; };
-		618ED7662C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */; };
 		618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */; };
-		618EDBEA2C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */; };
-		61BBB1252C50D3CE00E3D4F3 /* DefaultApiImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */; };
-		61BBB1262C50D3CE00E3D4F3 /* Api in Resources */ = {isa = PBXBuildFile; fileRef = 61BBB1242C50D3CE00E3D4F3 /* Api */; };
 		61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61FD347B2C40242F002C1A5A /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
@@ -434,45 +399,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */,
-				61088A9B2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation in Resources */,
-				611CCD7C2C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation in Resources */,
-				612A06FF2C6104BE00F79192 /* AccountFlow in Resources */,
-				611CCD7F2C50AE3A00289D9E /* DefaultUsersRepositoryImplementation in Resources */,
-				611CCD7B2C50AE3A00289D9E /* DefaultFriendsRepositoryImplementation in Resources */,
-				611CCD772C50AE3A00289D9E /* Networking in Resources */,
-				611CCD6A2C50AE3A00289D9E /* DI in Resources */,
-				611CCD862C50B1D400289D9E /* PersistentStorageSQLite in Resources */,
-				611CCD782C50AE3A00289D9E /* ApiDomainConvenience in Resources */,
-				611CCD7A2C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation in Resources */,
 				61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */,
-				611CCD7D2C50AE3A00289D9E /* DefaultSpendingInteractionsUseCaseImplementation in Resources */,
-				611CCD792C50AE3A00289D9E /* DefaultAuthUseCaseImplementation in Resources */,
-				611CCD752C50AE3A00289D9E /* DefaultNetworkingImplementation in Resources */,
-				611CCD722C50AE3A00289D9E /* ApiService in Resources */,
-				611CCD822C50AEA600289D9E /* AuthSession in Resources */,
-				611CCD702C50AE3A00289D9E /* App in Resources */,
-				612631442C5FC60800445300 /* SignUpFlow in Resources */,
-				611CCD7E2C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation in Resources */,
-				612631432C5FC60800445300 /* SignInFlow in Resources */,
-				6126313C2C5FC49400445300 /* AuthenticatedFlow in Resources */,
-				611CCD712C50AE3A00289D9E /* DesignSystem in Resources */,
-				6126313D2C5FC49400445300 /* UnauthenticatedFlow in Resources */,
-				618ED7662C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation in Resources */,
-				61BBB1262C50D3CE00E3D4F3 /* Api in Resources */,
-				61088A972C5E70DE005FFFC2 /* AppBase in Resources */,
 				612631472C60AAFF00445300 /* SF-Pro.ttf in Resources */,
 				61414F8E2C2F02A200B2C027 /* Base in Resources */,
-				611CCD6D2C50AE3A00289D9E /* DataTransferObjects in Resources */,
-				61BBB1252C50D3CE00E3D4F3 /* DefaultApiImplementation in Resources */,
-				611CCD732C50AE3A00289D9E /* Base in Resources */,
 				61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */,
-				61088A992C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation in Resources */,
-				618EDBEA2C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation in Resources */,
-				611CCD742C50AE3A00289D9E /* DefaultApiServiceImplementation in Resources */,
-				611CCD692C50AE3A00289D9E /* DefaultDependencies in Resources */,
-				611CCD802C50AE3A00289D9E /* Domain in Resources */,
-				611CCD762C50AE3A00289D9E /* Logging in Resources */,
-				611CCD6F2C50AE3A00289D9E /* PersistentStorage in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -629,7 +559,7 @@
 				CODE_SIGN_ENTITLEMENTS = Accounty/Resources/Accounty.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = NPZKGHFT2A;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -645,7 +575,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -668,7 +598,7 @@
 				CODE_SIGN_ENTITLEMENTS = Accounty/Resources/Accounty.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = NPZKGHFT2A;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -684,7 +614,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
