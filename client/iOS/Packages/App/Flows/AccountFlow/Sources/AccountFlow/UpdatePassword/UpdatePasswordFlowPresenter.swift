@@ -9,6 +9,10 @@ class UpdatePasswordFlowPresenter: Presenter {
         self.flow = flow
     }
 
+    @MainActor func presentHint(message: String) {
+        router.hudFailure(description: message)
+    }
+
     @MainActor
     func presentPasswordEditing(onPop: @escaping @MainActor () async -> Void) {
         let controller = UpdatePasswordViewController(model: flow)

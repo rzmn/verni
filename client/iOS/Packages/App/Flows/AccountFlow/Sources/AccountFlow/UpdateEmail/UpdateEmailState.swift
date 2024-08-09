@@ -7,4 +7,11 @@ struct UpdateEmailState: Equatable {
     }
     let email: String
     let confirmation: Confirmation
+
+    var canConfirm: Bool {
+        guard case .uncorfirmed(let currentCode, _) = confirmation else {
+            return false
+        }
+        return !currentCode.isEmpty
+    }
 }

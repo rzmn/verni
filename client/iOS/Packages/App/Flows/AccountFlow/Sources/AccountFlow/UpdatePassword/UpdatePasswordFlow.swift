@@ -76,6 +76,8 @@ extension UpdatePasswordFlow: Flow {
                     switch error {
                     case .tooShort(let minAllowedLength):
                         return String(format: "password_too_short".localized, minAllowedLength)
+                    case .invalidFormat:
+                        return "password_invalid_format".localized
                     }
                 }
             }
@@ -113,48 +115,45 @@ extension UpdatePasswordFlow: Flow {
     }
 
     func updatePassword() async {
-        if let matchHint = repeatNewPasswordHint.value {
-            await presenter.presentHint(message: matchHint)
-        } else if let formatHint = newPasswordHint.value {
-            await presenter.presentHint(message: formatHint)
-        } else if !repeatNewPasswordSubject.value.isEmpty {
-            let newPassword = repeatNewPasswordSubject.value
-            switch await profileEditing.updatePassword(old: oldPasswordSubject.value, new: newPassword) {
-            case .success:
-                SecAddSharedWebCredential(
-                    "d5d29sfljfs1v5kq0382.apigw.yandexcloud.net" as CFString,
-                    profile.email as CFString,
-                    newPassword as CFString, { error in
-                        print("\(error.debugDescription)")
-                    }
-                )
-                switch await profileRepository.getHostInfo() {
-                case .success(let profile):
-                    await handle(result: .success(profile))
-                case .failure(let reason):
-                    switch reason {
-                    case .noConnection:
-                        await presenter.presentNoConnection()
-                    case .notAuthorized:
-                        await presenter.presentNotAuthorized()
-                    case .other(let error):
-                        await presenter.presentInternalError(error)
-                    }
+        guard subject.value.canConfirm else {
+            return await presenter.errorHaptic()
+        }
+        let newPassword = repeatNewPasswordSubject.value
+        switch await profileEditing.updatePassword(old: oldPasswordSubject.value, new: newPassword) {
+        case .success:
+            SecAddSharedWebCredential(
+                "d5d29sfljfs1v5kq0382.apigw.yandexcloud.net" as CFString,
+                profile.email as CFString,
+                newPassword as CFString, { error in
+                    print("\(error.debugDescription)")
                 }
-            case .failure(let error):
-                switch error {
-                case .validationError:
-                    // TODO: separate wrong old password and wrong fmt cases ?
-                    await presenter.presentHint(message: "change_password_format_error".localized)
+            )
+            switch await profileRepository.getHostInfo() {
+            case .success(let profile):
+                await handle(result: .success(profile))
+            case .failure(let reason):
+                switch reason {
+                case .noConnection:
+                    await presenter.presentNoConnection()
+                case .notAuthorized:
+                    await presenter.presentNotAuthorized()
                 case .other(let error):
-                    switch error {
-                    case .noConnection:
-                        await presenter.presentNoConnection()
-                    case .notAuthorized:
-                        await presenter.presentNotAuthorized()
-                    case .other(let error):
-                        await presenter.presentInternalError(error)
-                    }
+                    await presenter.presentInternalError(error)
+                }
+            }
+        case .failure(let error):
+            switch error {
+            case .validationError:
+                // TODO: separate wrong old password and wrong fmt cases ?
+                await presenter.presentHint(message: "change_password_format_error".localized)
+            case .other(let error):
+                switch error {
+                case .noConnection:
+                    await presenter.presentNoConnection()
+                case .notAuthorized:
+                    await presenter.presentNotAuthorized()
+                case .other(let error):
+                    await presenter.presentInternalError(error)
                 }
             }
         }

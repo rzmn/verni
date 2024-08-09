@@ -1,5 +1,6 @@
 public enum PasswordValidationError: Error {
     case tooShort(minAllowedLength: Int)
+    case invalidFormat
 }
 
 public protocol PasswordValidationUseCase {

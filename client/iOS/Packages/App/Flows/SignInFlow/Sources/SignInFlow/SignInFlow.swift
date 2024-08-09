@@ -20,6 +20,7 @@ public actor SignInFlow {
     private let signUpFlow: SignUpFlow
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let localEmailValidator: EmailValidationUseCase
+    private let passwordValidator: PasswordValidationUseCase
     private let router: AppRouter
 
     private lazy var presenter = SignInFlowPresenter(router: router, flow: self)
@@ -31,6 +32,7 @@ public actor SignInFlow {
     ) async {
         authUseCase = di.authUseCase()
         localEmailValidator = di.appCommon().localEmailValidationUseCase()
+        passwordValidator = di.appCommon().passwordValidationUseCase()
         self.router = router
         self.signUpFlow = await SignUpFlow(di: di, router: router)
     }
@@ -48,6 +50,7 @@ extension SignInFlow: TabEmbedFlow {
     }
 
     func openSignIn() async {
+        await presenter.submitHaptic()
         emailSubject
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .flatMap { email in
@@ -77,6 +80,7 @@ extension SignInFlow: TabEmbedFlow {
             }
             .sink(receiveValue: emailHintSubject.send)
             .store(in: &subscriptions)
+
         Publishers.CombineLatest3(emailSubject, passwordSubject, emailHintSubject)
             .receive(on: RunLoop.main)
             .map { value in
@@ -94,6 +98,9 @@ extension SignInFlow: TabEmbedFlow {
     }
 
     func signIn() async {
+        guard subject.value.canConfirm else {
+            return await presenter.errorHaptic()
+        }
         let credentials = Credentials(
             email: subject.value.email,
             password: subject.value.password
@@ -110,6 +117,7 @@ extension SignInFlow: TabEmbedFlow {
             )
             await handle(session: session)
         case .failure(let failure):
+            await presenter.errorHaptic()
             switch failure {
             case .incorrectCredentials:
                 await presenter.presentIncorrectCredentials()
@@ -124,6 +132,7 @@ extension SignInFlow: TabEmbedFlow {
     }
 
     func createAccount() async {
+        await presenter.submitHaptic()
         guard let session = await signUpFlow.perform() else {
             return
         }

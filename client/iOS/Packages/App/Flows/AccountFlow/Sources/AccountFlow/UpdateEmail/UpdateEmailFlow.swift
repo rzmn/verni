@@ -99,7 +99,10 @@ extension UpdateEmailFlow: Flow {
     }
 
     func confirm() async {
-        switch await emailConfirmationUseCase.confirm(code: confirmationCodeSubject.value) {
+        guard subject.value.canConfirm else {
+            return await presenter.errorHaptic()
+        }
+        switch await emailConfirmationUseCase.confirm(code: confirmationCodeSubject.value.trimmingCharacters(in: CharacterSet.whitespaces)) {
         case .success:
             cancelCountdownTimer()
             confirmedSubject.send(true)

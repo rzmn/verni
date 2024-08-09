@@ -51,7 +51,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Update Email"
+            "value" : "Manage Email"
           }
         }
       }
@@ -272,6 +272,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continue"
+          }
+        }
+      }
+    },
+    "display_name_invalid_format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display Name should contain only letters or digits"
+          }
+        }
+      }
+    },
+    "display_name_invalid_lehght" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display name should contain at least 4 characters"
           }
         }
       }
@@ -693,6 +715,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Internet Connection"
+          }
+        }
+      }
+    },
+    "password_invalid_format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password should contain only letters or digits"
           }
         }
       }

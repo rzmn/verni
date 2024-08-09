@@ -9,10 +9,12 @@ public class Button: UIButton {
         }
         public let style: Style
         public let title: String
+        public let enabled: Bool
 
-        public init(style: Style, title: String) {
+        public init(style: Style, title: String, enabled: Bool = true) {
             self.style = style
             self.title = title
+            self.enabled = enabled
         }
     }
 
@@ -34,13 +36,18 @@ public class Button: UIButton {
         switch config.style {
         case .primary:
             setTitleColor(.p.primary, for: .normal)
+            setTitleColor(.p.primary.withAlphaComponent(0.34), for: .highlighted)
             backgroundColor = .p.backgroundContent
         case .secondary:
             setTitleColor(.secondaryLabel, for: .normal)
+            setTitleColor(.secondaryLabel.withAlphaComponent(0.34), for: .highlighted)
+            backgroundColor = .clear
         case .destructive:
             setTitleColor(.p.destructive, for: .normal)
+            setTitleColor(.p.destructive.withAlphaComponent(0.34), for: .highlighted)
             backgroundColor = .p.destructiveBackground
         }
+        alpha = config.enabled ? 1 : 0.64
         setNeedsLayout()
     }
 }

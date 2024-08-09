@@ -23,6 +23,11 @@ extension LocalValidationUseCases: PasswordValidationUseCase {
         guard password.count >= minLength else {
             return .failure(.tooShort(minAllowedLength: minLength))
         }
+        guard password.allSatisfy({ character in
+            character.isNumber || character.isLetter
+        }) else {
+            return .failure(.invalidFormat)
+        }
         return .success(())
     }
 }

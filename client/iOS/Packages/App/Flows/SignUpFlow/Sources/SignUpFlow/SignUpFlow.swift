@@ -83,6 +83,8 @@ extension SignUpFlow: Flow {
                     switch error {
                     case .tooShort(let minAllowedLength):
                         return String(format: "password_too_short".localized, minAllowedLength)
+                    case .invalidFormat:
+                        return "password_invalid_format".localized
                     }
                 }
             }
@@ -116,10 +118,10 @@ extension SignUpFlow: Flow {
                         guard let passwordsMatchHint else {
                             return nil
                         }
-                        if passwordsMatchHint {
-                            return "login_pwd_matches".localized
-                        } else {
+                        if !passwordsMatchHint {
                             return "login_pwd_didnt_match".localized
+                        } else {
+                            return nil
                         }
                     }()
                 )
@@ -136,6 +138,9 @@ extension SignUpFlow: Flow {
     }
 
     func signIn() async {
+        guard subject.value.canConfirm else {
+            return await presenter.errorHaptic()
+        }
         let credentials = Credentials(
             email: subject.value.email,
             password: subject.value.password
@@ -150,6 +155,7 @@ extension SignUpFlow: Flow {
             await flowContinuation.willFinishHandler?(session)
             flowContinuation.continuation.resume(returning: session)
         case .failure(let failure):
+            await presenter.errorHaptic()
             switch failure {
             case .alreadyTaken:
                 await presenter.presentAlreadyTaken()

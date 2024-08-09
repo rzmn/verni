@@ -43,6 +43,7 @@ class SignInView: View<SignInFlow> {
             icon: UIImage(systemName: "xmark.circle.fill")
         )
     )
+    private var keyboardBottomInset: CGFloat = 0
     private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
@@ -59,11 +60,13 @@ class SignInView: View<SignInFlow> {
             guard let model, let password else { return }
             model.update(password: password.text ?? "")
         }, for: .editingChanged)
-        confirm.addAction({ [weak model] in
-            await model?.signIn()
+        confirm.addAction({ [weak self] in
+            self?.endEditing(true)
+            await self?.model.signIn()
         }, for: .touchUpInside)
-        createAccount.addAction({ [weak model] in
-            await model?.createAccount()
+        createAccount.addAction({ [weak self] in
+            self?.endEditing(true)
+            await self?.model.createAccount()
         }, for: .touchUpInside)
         email.delegate = self
         password.delegate = self
@@ -73,6 +76,24 @@ class SignInView: View<SignInFlow> {
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         render(state: model.subject.value)
+        KeyboardObserver.shared.notifier
+            .sink { [weak self] event in
+                guard let self, !isInInteractiveTransition else { return }
+                switch event.kind {
+                case .willChangeFrame(let frame):
+                    keyboardBottomInset = max(0, bounds.maxY - convert(frame, to: window).minY)
+                case .willHide:
+                    keyboardBottomInset = 0
+                }
+                setNeedsLayout()
+                UIView.animate(
+                    withDuration: event.animationDuration,
+                    delay: 0,
+                    options: event.options,
+                    animations: layoutIfNeeded
+                )
+            }
+            .store(in: &subscriptions)
     }
 
     override func layoutSubviews() {
@@ -108,9 +129,10 @@ class SignInView: View<SignInFlow> {
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
+        let confirmEmailMaxY = keyboardBottomInset == 0 ? createAccount.frame.minY : (bounds.maxY - keyboardBottomInset)
         confirm.frame = CGRect(
             x: .p.defaultHorizontal,
-            y: createAccount.frame.minY - .p.vButtonSpacing - .p.buttonHeight,
+            y: confirmEmailMaxY - .p.vButtonSpacing - .p.buttonHeight,
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
@@ -124,6 +146,19 @@ class SignInView: View<SignInFlow> {
                 formatHint: state.emailHint
             )
         )
+        password.render(
+            TextField.Config(
+                placeholder: "login_pwd_placeholder".localized,
+                content: .password
+            )
+        )
+        confirm.render(
+            config: Button.Config(
+                style: .primary,
+                title: "login_go_to_signin".localized,
+                enabled: state.canConfirm
+            )
+        )
     }
 
     @objc private func onTap() {
@@ -135,9 +170,7 @@ extension SignInView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         switch textField {
         case password:
-            Task.detached {
-                await self.model.signIn()
-            }
+            confirm.sendActions(for: .touchUpInside)
         case email:
             password.becomeFirstResponder()
         default:

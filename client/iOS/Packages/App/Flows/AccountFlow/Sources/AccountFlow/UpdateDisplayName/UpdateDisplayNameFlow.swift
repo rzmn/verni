@@ -33,7 +33,17 @@ extension UpdateDisplayNameFlow: Flow {
             self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
             self.displayNameSubject
                 .map {
-                    UpdateDisplayNameState(displayName: $0, displayNameHint: nil)
+                    let displayNameHint: String?
+                    if $0.isEmpty {
+                        displayNameHint = nil
+                    } else if $0.count < 4 {
+                        displayNameHint = "display_name_invalid_lehght".localized
+                    } else if !$0.allSatisfy({ $0.isNumber || $0.isLetter }) {
+                        displayNameHint = "display_name_invalid_format".localized
+                    } else {
+                        displayNameHint = nil
+                    }
+                    return UpdateDisplayNameState(displayName: $0, displayNameHint: displayNameHint)
                 }
                 .sink(receiveValue: self.subject.send)
                 .store(in: &self.subscriptions)
@@ -47,6 +57,9 @@ extension UpdateDisplayNameFlow: Flow {
     }
 
     func confirmDisplayName() async {
+        guard subject.value.canConfirm else {
+            return await presenter.errorHaptic()
+        }
         await presenter.presentLoading()
         switch await profileEditing.setDisplayName(subject.value.displayName) {
         case .success:

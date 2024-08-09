@@ -30,16 +30,19 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             content: .unspecified
         )
     )
+    private var keyboardBottomInset: CGFloat = 0
 
     override func setupView() {
         [email, resendCode, enterCode, confirmEmail].forEach(addSubview)
         backgroundColor = .p.background
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
+        enterCode.delegate = self
         resendCode.addAction({ [weak model] in
             await model?.resendCode()
         }, for: .touchUpInside)
-        confirmEmail.addAction({ [weak model] in
-            await model?.confirm()
+        confirmEmail.addAction({ [weak self] in
+            self?.endEditing(true)
+            await self?.model.confirm()
         }, for: .touchUpInside)
         enterCode.addAction({ [weak model, weak enterCode] in
             model?.update(code: enterCode?.text ?? "")
@@ -49,6 +52,23 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         render(state: model.subject.value)
+        KeyboardObserver.shared.notifier
+            .sink { [weak self] event in
+                guard let self, !isInInteractiveTransition else { return }
+                switch event.kind {
+                case .willChangeFrame(let frame):
+                    keyboardBottomInset = max(0, bounds.maxY - convert(frame, to: window).minY)
+                case .willHide:
+                    keyboardBottomInset = 0
+                }
+                setNeedsLayout()
+                UIView.animate(
+                    withDuration: event.animationDuration,
+                    delay: 0,
+                    options: event.options,
+                    animations: layoutIfNeeded
+                )
+            }.store(in: &subscriptions)
     }
 
     @objc private func onTap() {
@@ -76,9 +96,10 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
+        let confirmEmailMaxY = keyboardBottomInset == 0 ? resendCode.frame.minY : (bounds.maxY - keyboardBottomInset)
         confirmEmail.frame = CGRect(
             x: .p.defaultHorizontal,
-            y: resendCode.frame.minY - .p.defaultVertical - .p.buttonHeight,
+            y: confirmEmailMaxY - .p.defaultVertical - .p.buttonHeight,
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
@@ -112,10 +133,29 @@ class UpdateEmailView: View<UpdateEmailFlow> {
                 resendCode.isEnabled = true
                 resendCode.alpha = 1
             }
+            confirmEmail.render(
+                config: Button.Config(
+                    style: .primary,
+                    title: "confirm_verification_email_code".localized,
+                    enabled: state.canConfirm
+                )
+            )
             enterCode.isHidden = false
             confirmEmail.isHidden = false
             email.text = "\(state.email) (unconfirmed)"
         }
         setNeedsLayout()
+    }
+}
+
+extension UpdateEmailView: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case enterCode:
+            confirmEmail.sendActions(for: .touchUpInside)
+        default:
+            break
+        }
+        return true
     }
 }

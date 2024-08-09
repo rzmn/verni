@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 public protocol Presenter {
     var router: AppRouter { get }
@@ -9,6 +9,11 @@ public protocol Presenter {
     @MainActor func presentNotAuthorized()
     @MainActor func presentNoConnection()
     @MainActor func presentInternalError(_ error: Error)
+
+    @MainActor func errorHaptic()
+    @MainActor func successHaptic()
+    @MainActor func warningHaptic()
+    @MainActor func submitHaptic()
 }
 
 public extension Presenter {
@@ -18,10 +23,6 @@ public extension Presenter {
 
     @MainActor func dismissLoading() {
         router.hideHud()
-    }
-
-    @MainActor func presentHint(message: String) {
-        router.hudFailure(description: message)
     }
 
     @MainActor func presentLoading() {
@@ -38,5 +39,21 @@ public extension Presenter {
 
     @MainActor func presentNotAuthorized() {
         router.hudFailure(description: "alert_title_unauthorized".localized)
+    }
+
+    @MainActor func errorHaptic() {
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+    }
+
+    @MainActor func successHaptic() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    @MainActor func submitHaptic() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred(intensity: 0.66)
+    }
+
+    @MainActor func warningHaptic() {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
     }
 }

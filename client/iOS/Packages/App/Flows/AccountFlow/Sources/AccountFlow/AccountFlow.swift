@@ -62,6 +62,7 @@ extension AccountFlow: TabEmbedFlow {
     }
 
     func updateAvatar() async {
+        await presenter.submitHaptic()
         let flow = UpdateAvatarFlow(di: di, router: router)
         guard case .success(let profile) = await flow.perform() else {
             return
@@ -70,6 +71,7 @@ extension AccountFlow: TabEmbedFlow {
     }
 
     func updateEmail() async {
+        await presenter.submitHaptic()
         let profile: Profile
         if case .loaded(let _profile) = subject.value.info {
             profile = _profile
@@ -106,6 +108,7 @@ extension AccountFlow: TabEmbedFlow {
     }
 
     func updatePassword() async {
+        await presenter.submitHaptic()
         let profile: Profile
         if case .loaded(let _profile) = subject.value.info {
             profile = _profile
@@ -142,6 +145,7 @@ extension AccountFlow: TabEmbedFlow {
     }
 
     func updateDisplayName() async {
+        await presenter.submitHaptic()
         let flow = UpdateDisplayNameFlow(di: di, router: router)
         _ = await flow.perform(
             willFinish: { [weak self] result in

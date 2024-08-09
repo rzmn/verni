@@ -29,7 +29,7 @@ class SignUpView: View<SignUpFlow> {
             title: "login_go_to_signup".localized
         )
     )
-
+    private var keyboardBottomInset: CGFloat = 0
     private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
@@ -58,6 +58,24 @@ class SignUpView: View<SignUpFlow> {
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         render(state: model.subject.value)
+        KeyboardObserver.shared.notifier
+            .sink { [weak self] event in
+                guard let self, !isInInteractiveTransition else { return }
+                switch event.kind {
+                case .willChangeFrame(let frame):
+                    keyboardBottomInset = max(0, bounds.maxY - convert(frame, to: window).minY)
+                case .willHide:
+                    keyboardBottomInset = 0
+                }
+                setNeedsLayout()
+                UIView.animate(
+                    withDuration: event.animationDuration,
+                    delay: 0,
+                    options: event.options,
+                    animations: layoutIfNeeded
+                )
+            }
+            .store(in: &subscriptions)
     }
 
     override func layoutSubviews() {
@@ -80,9 +98,10 @@ class SignUpView: View<SignUpFlow> {
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
+        let bottomInset = keyboardBottomInset == 0 ? safeAreaInsets.bottom : keyboardBottomInset
         confirm.frame = CGRect(
             x: .p.defaultHorizontal,
-            y: bounds.maxY - safeAreaInsets.bottom - .p.buttonHeight - .p.defaultVertical,
+            y: bounds.maxY - bottomInset - .p.buttonHeight - .p.defaultVertical,
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
@@ -110,6 +129,13 @@ class SignUpView: View<SignUpFlow> {
                 formatHint: state.passwordConfirmationHint
             )
         )
+        confirm.render(
+            config: Button.Config(
+                style: .primary,
+                title: "login_go_to_signup".localized,
+                enabled: state.canConfirm
+            )
+        )
     }
 
     @objc private func onTap() {
@@ -121,9 +147,7 @@ extension SignUpView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         switch textField {
         case passwordRepeat:
-            Task.detached {
-                await self.model.signIn()
-            }
+            confirm.sendActions(for: .touchUpInside)
         case email:
             password.becomeFirstResponder()
         case password:

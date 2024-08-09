@@ -84,7 +84,7 @@ public class TextField: UITextField {
             autocapitalizationType = .none
         case .unspecified:
             textContentType = .none
-            autocorrectionType = .default
+            autocorrectionType = .no
             isSecureTextEntry = false
             autocapitalizationType = .sentences
         case .unspecifiedSecure:

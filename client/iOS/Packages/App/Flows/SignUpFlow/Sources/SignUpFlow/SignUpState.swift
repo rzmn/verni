@@ -8,6 +8,16 @@ struct SignUpState: Equatable {
     let passwordHint: String?
     let passwordConfirmationHint: String?
 
+    var canConfirm: Bool {
+        if email.isEmpty || password.isEmpty || passwordConfirmation.isEmpty {
+            return false
+        }
+        if emailHint != nil || passwordHint != nil || passwordConfirmationHint != nil {
+            return false
+        }
+        return true
+    }
+
     static var initial: Self {
         SignUpState(email: "", password: "", passwordConfirmation: "", emailHint: nil, passwordHint: nil, passwordConfirmationHint: nil)
     }
