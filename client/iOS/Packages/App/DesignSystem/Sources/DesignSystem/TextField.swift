@@ -6,7 +6,8 @@ public class TextField: UITextField {
             case email
             case password
             case newPassword
-            case repeatPassword
+            case unspecified
+            case unspecifiedSecure
         }
         let content: ContentType
         let placeholder: String
@@ -81,8 +82,13 @@ public class TextField: UITextField {
             autocorrectionType = .no
             isSecureTextEntry = true
             autocapitalizationType = .none
-        case .repeatPassword:
-            textContentType = .newPassword
+        case .unspecified:
+            textContentType = .none
+            autocorrectionType = .default
+            isSecureTextEntry = false
+            autocapitalizationType = .sentences
+        case .unspecifiedSecure:
+            textContentType = .none
             autocorrectionType = .no
             isSecureTextEntry = true
             autocapitalizationType = .none

@@ -1,4 +1,4 @@
-public indirect enum Loadable<T, E> {
+public indirect enum Loadable<T: Equatable, E: Equatable>: Equatable {
     case initial
     case loading(previous: Loadable<T, E>)
     case loaded(T)

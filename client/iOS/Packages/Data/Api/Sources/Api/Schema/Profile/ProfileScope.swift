@@ -1,7 +1,7 @@
 protocol ProfileScope: Scope {}
 extension ProfileScope {
     var scope: String {
-        "/friends"
+        "/profile"
     }
 }
 

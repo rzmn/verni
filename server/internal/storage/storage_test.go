@@ -195,8 +195,8 @@ func TestUpdateAvatar(t *testing.T) {
 	if info == nil {
 		t.Fatalf("no account info")
 	}
-	if info.User.Avatar.Url != nil {
-		t.Fatalf("unexpected non-nil avatar, found %s", *info.User.Avatar.Url)
+	if info.User.Avatar.Id != nil {
+		t.Fatalf("unexpected non-nil avatar, found %s", *info.User.Avatar.Id)
 	}
 	newAvatar := "xxx"
 	if err := s.StoreAvatarBase64(uid, newAvatar); err != nil {
@@ -209,8 +209,18 @@ func TestUpdateAvatar(t *testing.T) {
 	if info == nil {
 		t.Fatalf("no account info")
 	}
-	if info.User.Avatar.Url == nil {
+	if info.User.Avatar.Id == nil {
 		t.Fatalf("new avatar id should not be nil")
+	}
+	avatars, err := s.GetAvatarsBase64([]storage.AvatarId{*info.User.Avatar.Id})
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(avatars) != 1 {
+		t.Fatalf("avatars len should be 1, found: %v", avatars)
+	}
+	if *avatars[*info.User.Avatar.Id].Base64Data != newAvatar {
+		t.Fatalf("avatars data did not match, found: %v-%v", *avatars[*info.User.Avatar.Id].Base64Data, newAvatar)
 	}
 }
 

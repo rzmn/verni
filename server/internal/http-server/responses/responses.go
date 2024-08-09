@@ -76,6 +76,8 @@ const (
 	CodeBadRequest
 	CodeDealNotFound
 	CodeIsNotYourDeal
+	CodeNotDelivered
+	CodeAlreadyConfirmed
 )
 
 func (c Code) Message() string {

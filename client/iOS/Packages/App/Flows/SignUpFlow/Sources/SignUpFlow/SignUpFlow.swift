@@ -24,7 +24,7 @@ public actor SignUpFlow {
     private let localPasswordValidator: PasswordValidationUseCase
     private let router: AppRouter
     private lazy var presenter = SignUpFlowPresenter(router: router, flow: self)
-    private var flowContinuation: CheckedContinuation<ActiveSessionDIContainer, Never>?
+    private var flowContinuation: Continuation?
 
     public init(di: DIContainer, router: AppRouter) async {
         self.router = router
@@ -35,7 +35,7 @@ public actor SignUpFlow {
 }
 
 extension SignUpFlow: Flow {
-    public func perform() async -> ActiveSessionDIContainer? {
+    public func perform(willFinish: ((ActiveSessionDIContainer?) async -> Void)?) async -> ActiveSessionDIContainer? {
         emailSubject
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .flatMap { email in
@@ -131,7 +131,7 @@ extension SignUpFlow: Flow {
 
         await presenter.presentSignUp()
         return await withCheckedContinuation { continuation in
-            self.flowContinuation = continuation
+            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
         }
     }
 
@@ -147,7 +147,8 @@ extension SignUpFlow: Flow {
                 break
             }
             self.flowContinuation = nil
-            flowContinuation.resume(returning: session)
+            await flowContinuation.willFinishHandler?(session)
+            flowContinuation.continuation.resume(returning: session)
         case .failure(let failure):
             switch failure {
             case .alreadyTaken:

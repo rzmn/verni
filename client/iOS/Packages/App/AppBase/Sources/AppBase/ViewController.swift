@@ -18,6 +18,8 @@ open class View<Model>: UIView {
 
 open class ViewController<V: View<Model>, Model>: UIViewController {
     public var onClose: (@MainActor (UIViewController) async -> Void)?
+    public var onPop: (@MainActor () async -> Void)?
+
     let model: Model
 
     var contentView: V {
@@ -37,3 +39,5 @@ open class ViewController<V: View<Model>, Model>: UIViewController {
         fatalError()
     }
 }
+
+extension ViewController: NavigationStackMember {}

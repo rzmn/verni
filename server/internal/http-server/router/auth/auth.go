@@ -10,16 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	"accounty/internal/auth/confirmation"
 	"accounty/internal/auth/jwt"
 	"accounty/internal/storage"
 
+	"accounty/internal/http-server/handlers/auth/confirmEmail"
 	"accounty/internal/http-server/handlers/auth/login"
 	"accounty/internal/http-server/handlers/auth/logout"
 	"accounty/internal/http-server/handlers/auth/refresh"
+	"accounty/internal/http-server/handlers/auth/sendEmailConfirmationCode"
 	"accounty/internal/http-server/handlers/auth/signup"
 	"accounty/internal/http-server/handlers/auth/updateEmail"
 	"accounty/internal/http-server/handlers/auth/updatePassword"
-	"accounty/internal/http-server/handlers/auth/validateEmail"
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/middleware"
 )
@@ -343,28 +345,80 @@ func (h *updatePasswordRequestHandler) Handle(c *gin.Context, request updatePass
 	}, nil
 }
 
-type validateEmailRequestHandler struct {
-	storage storage.Storage
+type confirmEmailRequestHandler struct {
+	storage      storage.Storage
+	confirmation confirmation.EmailConfirmation
 }
 
-func (h *validateEmailRequestHandler) Handle(request validateEmail.Request) *validateEmail.Error {
-	const op = "router.users.validateEmailRequestHandler.Handle"
+func (h *confirmEmailRequestHandler) Handle(c *gin.Context, request confirmEmail.Request) *confirmEmail.Error {
+	const op = "router.users.confirmEmailRequestHandler.Handle"
 	log.Printf("%s: start", op)
-	if err := validateEmailFormat(request.Email); err != nil {
-		log.Printf("%s: invalid email format %v", op, err)
-		outError := validateEmail.ErrWrongFormat()
+
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := confirmEmail.ErrInternal()
 		return &outError
 	}
-	exists, err := h.storage.IsEmailExists(request.Email)
-	if err != nil {
-		log.Printf("%s: failed to check existense %v", op, err)
-		outError := validateEmail.ErrInternal()
+	account, err := h.storage.GetAccountInfo(storage.UserId(*subject))
+	if err != nil || account == nil {
+		log.Printf("%s: cannot get account info %v", op, err)
+		outError := confirmEmail.ErrInternal()
 		return &outError
 	}
-	if exists {
-		log.Printf("%s: email already exists %v", op, err)
-		outError := validateEmail.ErrCodeAlreadyTaken()
+	if account.EmailVerified {
+		log.Printf("%s: email already verified", op)
+		return nil
+	}
+	if err := h.confirmation.ConfirmEmail(account.Email, request.Code); err != nil {
+		log.Printf("%s: confirmation failed: %v", op, err)
+		if errors.Is(err, confirmation.ErrCodeDidNotMatch) {
+			outError := confirmEmail.ErrIncorrect()
+			return &outError
+		} else {
+			outError := confirmEmail.ErrInternal()
+			return &outError
+		}
+	}
+	return nil
+}
+
+type sendEmailConfirmationCodeRequestHandler struct {
+	storage      storage.Storage
+	confirmation confirmation.EmailConfirmation
+}
+
+func (h *sendEmailConfirmationCodeRequestHandler) Handle(c *gin.Context, request sendEmailConfirmationCode.Request) *sendEmailConfirmationCode.Error {
+	const op = "router.users.confirmEmailRequestHandler.Handle"
+	log.Printf("%s: start", op)
+
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := sendEmailConfirmationCode.ErrInternal()
 		return &outError
+	}
+	account, err := h.storage.GetAccountInfo(storage.UserId(*subject))
+	if err != nil || account == nil {
+		log.Printf("%s: cannot get account info %v", op, err)
+		outError := sendEmailConfirmationCode.ErrInternal()
+		return &outError
+	}
+	if account.EmailVerified {
+		log.Printf("%s: email already verified", op)
+		outError := sendEmailConfirmationCode.ErrAlreadyConfirmed()
+		return &outError
+	}
+	if err := h.confirmation.SendConfirmationCode(account.Email); err != nil {
+		if errors.Is(err, confirmation.ErrNotDeliveded) {
+			outError := sendEmailConfirmationCode.ErrNotDelivered()
+			return &outError
+		} else {
+			outError := sendEmailConfirmationCode.ErrInternal()
+			return &outError
+		}
 	}
 	return nil
 }
@@ -398,5 +452,6 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	e.PUT("/auth/updateEmail", middleware.EnsureLoggedIn(storage), updateEmail.New(&updateEmailRequestHandler{storage: storage}))
 	e.PUT("/auth/updatePassword", middleware.EnsureLoggedIn(storage), updatePassword.New(&updatePasswordRequestHandler{storage: storage}))
 	e.DELETE("/auth/logout", middleware.EnsureLoggedIn(storage), logout.New(&logoutRequestHandler{storage: storage}))
-	e.GET("/auth/validateEmail", validateEmail.New(&validateEmailRequestHandler{storage: storage}))
+	e.PUT("/auth/confirmEmail", middleware.EnsureLoggedIn(storage), confirmEmail.New(&confirmEmailRequestHandler{storage: storage, confirmation: confirmation.EmailConfirmation{Storage: storage}}))
+	e.PUT("/auth/sendEmailConfirmationCode", middleware.EnsureLoggedIn(storage), sendEmailConfirmationCode.New(&sendEmailConfirmationCodeRequestHandler{storage: storage, confirmation: confirmation.EmailConfirmation{Storage: storage}}))
 }

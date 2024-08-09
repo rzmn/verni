@@ -1,9 +1,9 @@
 import DataTransferObjects
 
 extension Profile {
-    public struct SetDisplayName: ApiMethod, FriendsScope {
+    public struct SetDisplayName: ApiMethod, ProfileScope {
         public typealias Response = Void
-        public var parameters: Parameters
+        public let parameters: Parameters
 
         public struct Parameters: Encodable {
             let displayName: String

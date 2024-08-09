@@ -70,7 +70,7 @@ class SignInView: View<SignInFlow> {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         model.subject
             .receive(on: RunLoop.main)
-            .sink(receiveValue: weak(self, type(of: self).render))
+            .sink(receiveValue: render)
             .store(in: &subscriptions)
         render(state: model.subject.value)
     }

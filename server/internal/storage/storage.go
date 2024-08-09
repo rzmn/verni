@@ -11,9 +11,15 @@ const (
 )
 
 type UserId string
+type AvatarId string
+
+type AvatarData struct {
+	Id         AvatarId `json:"id"`
+	Base64Data *string  `json:"base64Data"`
+}
 
 type Avatar struct {
-	Url *string `json:"url"`
+	Id *AvatarId `json:"id"`
 }
 
 type ProfileInfo struct {
@@ -81,6 +87,7 @@ type Storage interface {
 
 	StoreDisplayName(uid UserId, displayName string) error
 	StoreAvatarBase64(uid UserId, avatarBase64 string) error
+	GetAvatarsBase64(aids []AvatarId) (map[AvatarId]AvatarData, error)
 
 	StoreRefreshToken(token string, uid UserId) error
 	GetRefreshToken(uid UserId) (*string, error)

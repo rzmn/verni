@@ -1,4 +1,4 @@
-package validateEmail
+package sendEmailConfirmationCode
 
 import (
 	"accounty/internal/http-server/responses"
@@ -9,15 +9,15 @@ import (
 )
 
 type RequestHandler interface {
-	Handle(request Request) *Error
+	Handle(c *gin.Context, request Request) *Error
 }
 
 func handleError(c *gin.Context, err Error) {
 	switch err.Code {
+	case responses.CodeNotDelivered, responses.CodeAlreadyConfirmed:
+		c.JSON(http.StatusConflict, Failure(err))
 	case responses.CodeBadRequest:
 		c.JSON(http.StatusBadRequest, Failure(err))
-	case responses.CodeAlreadyTaken, responses.CodeWrongFormat:
-		c.JSON(http.StatusConflict, Failure(err))
 	default:
 		c.JSON(http.StatusInternalServerError, Failure(err))
 	}
@@ -25,13 +25,13 @@ func handleError(c *gin.Context, err Error) {
 
 func New(requestHandler RequestHandler) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		const op = "handlers.auth.validateEmail"
+		const op = "handlers.auth.sendEmailConfirmationCode"
 		var request Request
 		if err := c.BindJSON(&request); err != nil {
 			handleError(c, ErrBadRequest(fmt.Sprintf("%s: request failed %v", op, err)))
 			return
 		}
-		if err := requestHandler.Handle(request); err != nil {
+		if err := requestHandler.Handle(c, request); err != nil {
 			handleError(c, *err)
 			return
 		}

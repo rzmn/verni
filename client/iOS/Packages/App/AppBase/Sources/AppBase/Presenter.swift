@@ -4,11 +4,17 @@ public protocol Presenter {
     var router: AppRouter { get }
 
     @MainActor func presentLoading()
+    @MainActor func dismissLoading()
+    @MainActor func presentNotAuthorized()
     @MainActor func presentNoConnection()
     @MainActor func presentInternalError(_ error: Error)
 }
 
 public extension Presenter {
+    @MainActor func dismissLoading() {
+        router.hideHud()
+    }
+
     @MainActor func presentLoading() {
         router.showHud(graceTime: 0.5)
     }
@@ -19,5 +25,9 @@ public extension Presenter {
 
     @MainActor func presentInternalError(_ error: Error) {
         router.hudFailure(description: "\(error)")
+    }
+
+    @MainActor func presentNotAuthorized() {
+        router.hudFailure(description: "alert_title_unauthorized".localized)
     }
 }

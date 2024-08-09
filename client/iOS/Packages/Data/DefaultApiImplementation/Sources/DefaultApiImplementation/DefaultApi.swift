@@ -77,7 +77,10 @@ extension DefaultApi {
     where Method: ApiMethod, Method.Response == Void, Method.Parameters: Encodable {
         mapApiResponse(
             await service.run(
-                request: Request(method: method)
+                request: RequestWithParameters(
+                    request: Request(method: method),
+                    parameters: method.parameters
+                )
             ) as ApiServiceResultVoid
         )
     }

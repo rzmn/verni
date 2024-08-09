@@ -194,7 +194,7 @@ WHERE
 						Id:          uid,
 						DisplayName: displayName,
 						Avatar: storage.Avatar{
-							Url: avatarId,
+							Id: (*storage.AvatarId)(avatarId),
 						},
 						FriendStatus: storage.FriendStatusMe,
 					},
@@ -325,12 +325,12 @@ WHERE
 		defer res.Close()
 		for res.NextResultSet(ctx) {
 			for res.NextRow() {
-				var value string
+				var value *string
 				err = res.Scan(&value)
 				if err != nil {
 					return err
 				}
-				token = &value
+				token = value
 			}
 		}
 		if err := res.Err(); err != nil {
@@ -396,7 +396,7 @@ VALUES($email, True, NULL);`,
 }
 
 func (s *Storage) UpdateEmail(uid storage.UserId, email string) error {
-	const op = "storage.ydb.IsEmailExists"
+	const op = "storage.ydb.UpdateEmail"
 	log.Printf("%s: start", op)
 	var (
 		writeTx = table.TxControl(
@@ -742,6 +742,63 @@ WHERE
 		return err
 	}
 	return nil
+}
+
+func (s *Storage) GetAvatarsBase64(aids []storage.AvatarId) (map[storage.AvatarId]storage.AvatarData, error) {
+	const op = "storage.ydb.GetAvatarsBase64"
+	log.Printf("%s: start", op)
+
+	var (
+		readTx     = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		unfiltered []types.Value
+		result     map[storage.AvatarId]storage.AvatarData
+	)
+	for i := 0; i < len(aids); i++ {
+		unfiltered = append(unfiltered, types.TextValue(string(aids[i])))
+	}
+
+	err := s.db.Table().Do(s.ctx,
+		func(ctx context.Context, s table.Session) (err error) {
+			_, res, err := s.Execute(ctx, readTx, `
+DECLARE $aids AS List<Text>;
+SELECT 
+	id, data
+FROM 
+	avatars
+WHERE 
+	id in $aids;`,
+				table.NewQueryParameters(
+					table.ValueParam("$aids", types.ListValue(unfiltered...)),
+				),
+			)
+			if err != nil {
+				return err
+			}
+			defer res.Close()
+
+			result = map[storage.AvatarId]storage.AvatarData{}
+
+			for res.NextResultSet(ctx) {
+				for res.NextRow() {
+					var id string
+					var data string
+					res.ScanNamed()
+					if err := res.Scan(&id, &data); err != nil {
+						return err
+					}
+					result[storage.AvatarId(id)] = storage.AvatarData{
+						Base64Data: &data,
+					}
+				}
+			}
+			return res.Err()
+		},
+	)
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return result, err
+	}
+	return result, nil
 }
 
 func (s *Storage) StoreAvatarBase64(uid storage.UserId, data string) error {
@@ -1335,7 +1392,7 @@ WHERE
 						Id:          storage.UserId(id),
 						DisplayName: displayName,
 						Avatar: storage.Avatar{
-							Url: avatarId,
+							Id: (*storage.AvatarId)(avatarId),
 						},
 						FriendStatus: storage.FriendStatusNo,
 					})

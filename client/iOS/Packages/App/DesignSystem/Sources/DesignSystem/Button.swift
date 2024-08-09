@@ -18,8 +18,19 @@ public class Button: UIButton {
 
     public init(config: Config) {
         super.init(frame: .zero)
-        setTitle(config.title, for: .normal)
         titleLabel?.font = .p.title2
+        titleLabel?.numberOfLines = 0
+        layer.masksToBounds = true
+        layer.cornerRadius = 10
+        render(config: config)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
+
+    public func render(config: Config) {
+        setTitle(config.title, for: .normal)
         switch config.style {
         case .primary:
             setTitleColor(.p.primary, for: .normal)
@@ -30,11 +41,6 @@ public class Button: UIButton {
             setTitleColor(.p.destructive, for: .normal)
             backgroundColor = .p.destructiveBackground
         }
-        layer.masksToBounds = true
-        layer.cornerRadius = 10
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError()
+        setNeedsLayout()
     }
 }

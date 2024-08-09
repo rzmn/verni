@@ -8,13 +8,24 @@ public struct UserDto: Codable {
         case friends = 3
         case me = 4
     }
+    public struct Avatar: Codable {
+        public let url: String?
+
+        public init(url: String?) {
+            self.url = url
+        }
+    }
     public typealias ID = String
     public let id: ID
     public let friendStatus: FriendStatus
+    public let displayName: String
+    public let avatar: Avatar
 
-    public init(login: ID, friendStatus: FriendStatus) {
+    public init(login: ID, friendStatus: FriendStatus, displayName: String, avatar: Avatar) {
         self.id = login
         self.friendStatus = friendStatus
+        self.displayName = displayName
+        self.avatar = avatar
     }
 }
 

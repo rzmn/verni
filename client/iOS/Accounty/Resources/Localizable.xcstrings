@@ -34,6 +34,50 @@
         }
       }
     },
+    "account_update_avatar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Avatar"
+          }
+        }
+      }
+    },
+    "account_update_display_name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Display Name"
+          }
+        }
+      }
+    },
+    "account_update_email" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Email"
+          }
+        }
+      }
+    },
+    "account_update_password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Password"
+          }
+        }
+      }
+    },
     "alert_action_already_friends" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -188,6 +232,17 @@
         }
       }
     },
+    "common_confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm"
+          }
+        }
+      }
+    },
     "confirm_general_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -195,6 +250,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Are You Sure?"
+          }
+        }
+      }
+    },
+    "confirm_verification_email_code" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm"
           }
         }
       }
@@ -239,6 +305,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enter Email"
+          }
+        }
+      }
+    },
+    "enter_new_display_name_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter New Display Name"
+          }
+        }
+      }
+    },
+    "enter_new_pwd_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter New Password"
+          }
+        }
+      }
+    },
+    "enter_old_pwd_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter Old Password"
+          }
+        }
+      }
+    },
+    "enter_old_pwd_placeholder_again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter New Password Again"
+          }
+        }
+      }
+    },
+    "enter_verification_email_code" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter Verification Code"
           }
         }
       }
@@ -385,6 +506,9 @@
           }
         }
       }
+    },
+    "Key" : {
+      "extractionState" : "manual"
     },
     "login_go_to_signin" : {
       "extractionState" : "manual",
@@ -540,6 +664,17 @@
         }
       }
     },
+    "resend_verification_email_code" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resend Code"
+          }
+        }
+      }
+    },
     "signup_pwd_placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -602,6 +737,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wrong login or password"
+          }
+        }
+      }
+    },
+    "wrong_format_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wrong Format"
           }
         }
       }

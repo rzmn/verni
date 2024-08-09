@@ -1,4 +1,4 @@
-public struct Profile {
+public struct Profile: Equatable {
     public let user: User
     public let email: String
     public let isEmailVerified: Bool

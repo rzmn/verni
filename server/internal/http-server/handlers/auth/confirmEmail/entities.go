@@ -1,11 +1,11 @@
-package validateEmail
+package confirmEmail
 
 import (
 	"accounty/internal/http-server/responses"
 )
 
 type Request struct {
-	Email string `json:"email"`
+	Code string `json:"code"`
 }
 
 type Error struct {
@@ -28,10 +28,6 @@ func ErrBadRequest(description string) Error {
 	return Error{responses.Error{Code: responses.CodeBadRequest, Description: &description}}
 }
 
-func ErrWrongFormat() Error {
-	return Error{responses.Error{Code: responses.CodeWrongFormat}}
-}
-
-func ErrCodeAlreadyTaken() Error {
-	return Error{responses.Error{Code: responses.CodeAlreadyTaken}}
+func ErrIncorrect() Error {
+	return Error{responses.Error{Code: responses.CodeIncorrectCredentials}}
 }

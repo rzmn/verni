@@ -11,7 +11,7 @@ public actor AuthenticatedFlow {
     private let presenter: AuthenticatedFlowPresenter
     private let accountFlow: AccountFlow
 
-    private var flowContinuation: CheckedContinuation<TerminationEvent, Never>?
+    private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         presenter = await AuthenticatedFlowPresenter(router: router)
@@ -24,10 +24,10 @@ extension AuthenticatedFlow: Flow {
         case logout
     }
 
-    public func perform() async -> TerminationEvent {
+    public func perform(willFinish: ((TerminationEvent) async -> Void)?) async -> TerminationEvent {
         await presenter.start(tabs: [accountFlow])
         return await withCheckedContinuation { continuation in
-            flowContinuation = continuation
+            flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
             Task.detached { [weak self] in
                 guard let self else { return }
                 let termination = await accountFlow.perform()
@@ -36,7 +36,9 @@ extension AuthenticatedFlow: Flow {
                 }
                 switch termination {
                 case .logout:
-                    flowContinuation.resume(returning: .logout)
+                    let result: FlowResult = .logout
+                    await flowContinuation.willFinishHandler?(result)
+                    flowContinuation.continuation.resume(returning: result)
                 }
             }
         }

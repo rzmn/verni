@@ -20,7 +20,7 @@ class SignUpView: View<SignUpFlow> {
     private let passwordRepeat = TextField(
         config: TextField.Config(
             placeholder: "login_pwd_repeat_placeholder".localized,
-            content: .repeatPassword
+            content: .newPassword
         )
     )
     private let confirm = Button(
@@ -55,7 +55,7 @@ class SignUpView: View<SignUpFlow> {
         }, for: .touchUpInside)
         model.subject
             .receive(on: RunLoop.main)
-            .sink(receiveValue: weak(self, type(of: self).render))
+            .sink(receiveValue: render)
             .store(in: &subscriptions)
         render(state: model.subject.value)
     }
@@ -106,7 +106,7 @@ class SignUpView: View<SignUpFlow> {
         passwordRepeat.render(
             TextField.Config(
                 placeholder: "login_pwd_repeat_placeholder".localized,
-                content: .repeatPassword,
+                content: .newPassword,
                 formatHint: state.passwordConfirmationHint
             )
         )

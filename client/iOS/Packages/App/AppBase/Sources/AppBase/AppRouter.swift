@@ -1,6 +1,6 @@
 import UIKit
 import Logging
-import Base
+internal import Base
 internal import ProgressHUD
 
 @MainActor
@@ -62,11 +62,12 @@ public class AppRouter: NSObject {
     }
 
     private func doPresent(_ viewController: UIViewController, animated: Bool) async {
-        viewController.presentationController?.delegate = self
-        if let navigationController = viewController as? UINavigationController {
-            navigationController.delegate = self
+        if !(viewController.isKind(of: UIImagePickerController.self)) {
+            viewController.presentationController?.delegate = self
+            if let navigationController = viewController as? UINavigationController {
+                navigationController.delegate = self
+            }
         }
-
         if let last = viewControllers.last {
             await withCheckedContinuation { continuation in
                 last.present(viewController, animated: animated) { [weak self, weak viewController] in
@@ -90,7 +91,12 @@ public class AppRouter: NSObject {
     }
 
     public func push(_ controller: Routable) {
-        guard let navigation = viewControllers.last as? UINavigationController else {
+        let navigation: UINavigationController
+        if let controller = viewControllers.last as? UINavigationController {
+            navigation = controller
+        } else if let tabBar = viewControllers.last as? UITabBarController, let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
+            navigation = controller
+        } else {
             return assertionFailure("cannot push from non-navigation controller")
         }
         let viewController = controller.create { [unowned self] viewController in
@@ -98,6 +104,34 @@ public class AppRouter: NSObject {
         }
         hideHud()
         navigation.pushViewController(viewController, animated: true)
+    }
+
+    public func navigationPop(viewController: UIViewController? = nil) async {
+        let navigation: UINavigationController
+        if let controller = viewControllers.last as? UINavigationController {
+            navigation = controller
+        } else if let tabBar = viewControllers.last as? UITabBarController, let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
+            navigation = controller
+        } else {
+            return assertionFailure("cannot push from non-navigation controller")
+        }
+        guard !navigation.viewControllers.isEmpty else {
+            return assertionFailure("navigation stack is empty")
+        }
+        if let viewController {
+            guard let index = navigation.viewControllers.firstIndex(of: viewController) else {
+                return assertionFailure("view controller is not is hierarchy")
+            }
+            if index > 0 {
+                hideHud()
+                navigation.popToViewController(navigation.viewControllers[index - 1], animated: true)
+            } else {
+                return assertionFailure("cannot pop root view controller")
+            }
+        } else {
+            hideHud()
+            navigation.popViewController(animated: true)
+        }
     }
 
     public func pop(_ viewController: UIViewController) async {

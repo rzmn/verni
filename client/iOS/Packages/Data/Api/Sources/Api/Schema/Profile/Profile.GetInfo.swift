@@ -1,7 +1,7 @@
 import DataTransferObjects
 
 extension Profile {
-    public struct GetInfo: ApiMethod, FriendsScope {
+    public struct GetInfo: ApiMethod, ProfileScope {
         public typealias Response = ProfileDto
 
         public init() {}

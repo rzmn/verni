@@ -3,28 +3,27 @@ import UIKit
 extension UIFont {
     public enum Predefined {
         public static var title1: UIFont {
-            UIFont(name: "Menlo-Bold", size: 28) ?? .systemFont(ofSize: 28, weight: .bold)
+            UIFont(name: "Hiragino Mincho ProN W6", size: 28) ?? .systemFont(ofSize: 28, weight: .bold)
         }
 
         public static var title2: UIFont {
-            let font = UIFont(name: "SF Pro", size: 17)
-            return font ?? .systemFont(ofSize: 18, weight: .bold)
+            return UIFont(name: "SF Pro", size: 17) ?? .systemFont(ofSize: 18, weight: .bold)
         }
 
         public static var title3: UIFont {
-            UIFont(name: "Menlo-Bold", size: 15) ?? .systemFont(ofSize: 18, weight: .bold)
+            UIFont(name: "Hiragino Mincho ProN W6", size: 15) ?? .systemFont(ofSize: 18, weight: .bold)
         }
 
         public static var text: UIFont {
-            UIFont(name: "Menlo", size: 16) ?? .systemFont(ofSize: 16)
+            UIFont(name: "SF Pro", size: 16) ?? .systemFont(ofSize: 16)
         }
 
         public static var secondaryText: UIFont {
-            UIFont(name: "Menlo", size: 13) ?? .systemFont(ofSize: 13)
+            UIFont(name: "SF Pro", size: 13) ?? .systemFont(ofSize: 13)
         }
 
         public static var placeholder: UIFont {
-            UIFont(name: "Menlo", size: 13) ?? .systemFont(ofSize: 13)
+            UIFont(name: "SF Pro", size: 13) ?? .systemFont(ofSize: 13)
         }
     }
     public static var p: Predefined.Type {

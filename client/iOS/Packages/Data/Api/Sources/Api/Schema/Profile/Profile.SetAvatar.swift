@@ -1,7 +1,7 @@
 import DataTransferObjects
 
 extension Profile {
-    public struct SetAvatar: ApiMethod, FriendsScope {
+    public struct SetAvatar: ApiMethod, ProfileScope {
         public typealias Response = Void
         public var parameters: Parameters
 

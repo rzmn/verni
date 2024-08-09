@@ -1,8 +1,9 @@
-import Foundation
+import Domain
 
-struct AccountState {
+struct AccountState: Equatable {
+    let info: Loadable<Profile, String>
 
     static var initial: Self {
-        AccountState()
+        AccountState(info: .initial)
     }
 }

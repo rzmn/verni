@@ -23,7 +23,7 @@ public actor SignInFlow {
     private let router: AppRouter
 
     private lazy var presenter = SignInFlowPresenter(router: router, flow: self)
-    private var flowContinuation: CheckedContinuation<ActiveSessionDIContainer, Never>?
+    private var flowContinuation: Continuation?
 
     public init(
         di: DIContainer,
@@ -41,9 +41,9 @@ extension SignInFlow: TabEmbedFlow {
         await presenter.tabViewController
     }
 
-    public func perform() async -> ActiveSessionDIContainer {
+    public func perform(willFinish: ((ActiveSessionDIContainer) async -> Void)?) async -> ActiveSessionDIContainer {
         await withCheckedContinuation { continuation in
-            self.flowContinuation = continuation
+            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
         }
     }
 
@@ -101,17 +101,13 @@ extension SignInFlow: TabEmbedFlow {
         await presenter.presentLoading()
         switch await authUseCase.login(credentials: credentials) {
         case .success(let session):
-            guard let flowContinuation else {
-                break
-            }
             SecAddSharedWebCredential(
                 "d5d29sfljfs1v5kq0382.apigw.yandexcloud.net" as CFString,
                 credentials.email as CFString,
                 credentials.password as CFString, { error in
                     print("\(error.debugDescription)")
                 })
-            self.flowContinuation = nil
-            flowContinuation.resume(returning: session)
+            await handle(session: session)
         case .failure(let failure):
             switch failure {
             case .incorrectCredentials:
@@ -130,11 +126,7 @@ extension SignInFlow: TabEmbedFlow {
         guard let session = await signUpFlow.perform() else {
             return
         }
-        guard let flowContinuation else {
-            return
-        }
-        self.flowContinuation = nil
-        flowContinuation.resume(returning: session)
+        await handle(session: session)
     }
 
     @MainActor func update(email: String) {
@@ -143,5 +135,15 @@ extension SignInFlow: TabEmbedFlow {
 
     @MainActor func update(password: String) {
         passwordSubject.send(password)
+    }
+
+    private func handle(session: ActiveSessionDIContainer) async {
+        guard let flowContinuation else {
+            return
+        }
+        _ = await session.usersRepository().getHostInfo()
+        self.flowContinuation = nil
+        await flowContinuation.willFinishHandler?(session)
+        flowContinuation.continuation.resume(returning: session)
     }
 }
