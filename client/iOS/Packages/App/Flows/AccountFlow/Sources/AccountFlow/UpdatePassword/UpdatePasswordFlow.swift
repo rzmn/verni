@@ -130,6 +130,8 @@ extension UpdatePasswordFlow: Flow {
             )
             switch await profileRepository.getHostInfo() {
             case .success(let profile):
+                await presenter.successHaptic()
+                await presenter.presentSuccess()
                 await handle(result: .success(profile))
             case .failure(let reason):
                 switch reason {
@@ -180,6 +182,10 @@ extension UpdatePasswordFlow: Flow {
         }
         self.flowContinuation = nil
         await flowContinuation.willFinishHandler?(result)
+        if case .failure(let error) = result, case .canceledManually = error {
+        } else {
+            await presenter.cancelPasswordEditing()
+        }
         flowContinuation.continuation.resume(returning: result)
     }
 }

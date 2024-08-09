@@ -106,6 +106,7 @@ extension UpdateEmailFlow: Flow {
         case .success:
             cancelCountdownTimer()
             confirmedSubject.send(true)
+            await presenter.successHaptic()
             await presenter.presentSuccess()
         case .failure(let error):
             switch error {

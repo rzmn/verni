@@ -13,11 +13,18 @@ class UpdatePasswordFlowPresenter: Presenter {
         router.hudFailure(description: message)
     }
 
+    private weak var controller: UpdatePasswordViewController?
     @MainActor
     func presentPasswordEditing(onPop: @escaping @MainActor () async -> Void) {
         let controller = UpdatePasswordViewController(model: flow)
+        self.controller = controller
         controller.navigationItem.largeTitleDisplayMode = .never
         controller.onPop = onPop
         router.push(controller)
+    }
+
+    @MainActor
+    func cancelPasswordEditing() async {
+        await router.navigationPop(viewController: controller)
     }
 }
