@@ -2,6 +2,7 @@ import Domain
 import DI
 import AppBase
 import UIKit
+import AVKit
 
 actor UpdateAvatarFlow {
     private let router: AppRouter
@@ -33,6 +34,12 @@ extension UpdateAvatarFlow: Flow {
     }
 
     func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
+        let result = await doPerform()
+        await willFinish?(result)
+        return result
+    }
+
+    private func doPerform() async -> Result<Profile, TerminationEvent> {
         let photo: UIImage
         switch await pickPhoto() {
         case .failure(let error):
@@ -46,7 +53,21 @@ extension UpdateAvatarFlow: Flow {
         case .success(let image):
             photo = image
         }
-        guard let data = photo.jpegData(compressionQuality: 0.6) else {
+        guard let ciImage = CIImage(image: photo) else {
+            await presenter.presentWrongFormat()
+            return .failure(.canceled)
+        }
+        let cropped = ciImage
+            .cropped(to: AVMakeRect(aspectRatio: CGSize(width: 1, height: 1), insideRect: ciImage.extent))
+        let side: CGFloat = 256
+        let scaled = cropped
+            .transformed(
+                by: CGAffineTransform(
+                    scaleX: min(1, side / cropped.extent.width),
+                    y: min(1, side / cropped.extent.height)
+                )
+            )
+        guard let data = UIImage(ciImage: scaled).jpegData(compressionQuality: 0.6) else {
             await presenter.presentWrongFormat()
             return .failure(.canceled)
         }
@@ -55,7 +76,7 @@ extension UpdateAvatarFlow: Flow {
         case .success:
             switch await profileRepository.getHostInfo() {
             case .success(let profile):
-                await presenter.dismissLoading()
+                await presenter.presentSuccess()
                 return .success(profile)
             case .failure(let error):
                 switch error {
@@ -133,9 +154,9 @@ extension UpdateAvatarFlow {
         }
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
+            if let image = info[.editedImage] as? UIImage {
                 onImage(.success(image))
-            } else if let image = info[.editedImage] as? UIImage {
+            } else if let image = info[.originalImage] as? UIImage {
                 onImage(.success(image))
             } else {
                 return onImage(.failure(.internalError))

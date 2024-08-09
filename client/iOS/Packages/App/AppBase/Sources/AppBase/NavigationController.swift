@@ -1,5 +1,6 @@
 import UIKit
 internal import Base
+internal import DesignSystem
 
 public class NavigationController: UINavigationController {
     private var onClose: (@MainActor (UIViewController) async -> Void)?
@@ -17,7 +18,12 @@ public class NavigationController: UINavigationController {
         super.init(rootViewController: rootViewController)
         super.delegate = delegateAdapter
     }
-    
+
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        navigationBar.tintColor = .p.primary
+    }
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

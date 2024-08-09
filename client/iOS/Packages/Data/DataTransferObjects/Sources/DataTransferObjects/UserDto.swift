@@ -9,10 +9,12 @@ public struct UserDto: Codable {
         case me = 4
     }
     public struct Avatar: Codable {
-        public let url: String?
+        public typealias ID = String
 
-        public init(url: String?) {
-            self.url = url
+        public let id: ID?
+
+        public init(id: ID?) {
+            self.id = id
         }
     }
     public typealias ID = String

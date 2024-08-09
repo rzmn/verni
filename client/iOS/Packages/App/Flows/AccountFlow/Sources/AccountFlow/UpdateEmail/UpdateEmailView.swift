@@ -35,6 +35,15 @@ class UpdateEmailView: View<UpdateEmailFlow> {
         [email, resendCode, enterCode, confirmEmail].forEach(addSubview)
         backgroundColor = .p.background
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
+        resendCode.addAction({ [weak model] in
+            await model?.resendCode()
+        }, for: .touchUpInside)
+        confirmEmail.addAction({ [weak model] in
+            await model?.confirm()
+        }, for: .touchUpInside)
+        enterCode.addAction({ [weak model, weak enterCode] in
+            model?.update(code: enterCode?.text ?? "")
+        }, for: .editingChanged)
         model.subject
             .receive(on: RunLoop.main)
             .sink(receiveValue: render)
@@ -82,8 +91,27 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             enterCode.isHidden = true
             confirmEmail.isHidden = true
             email.text = "\(state.email) (confirmed)"
-        case .uncorfirmed:
+        case .uncorfirmed(_, let hint):
             resendCode.isHidden = false
+            if let hint {
+                resendCode.render(
+                    config: Button.Config(
+                        style: .secondary,
+                        title: String(format: "email_code_send_countdown".localized, hint)
+                    )
+                )
+                resendCode.isEnabled = false
+                resendCode.alpha = 0.64
+            } else {
+                resendCode.render(
+                    config: Button.Config(
+                        style: .secondary,
+                        title: "resend_verification_email_code".localized
+                    )
+                )
+                resendCode.isEnabled = true
+                resendCode.alpha = 1
+            }
             enterCode.isHidden = false
             confirmEmail.isHidden = false
             email.text = "\(state.email) (unconfirmed)"

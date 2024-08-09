@@ -5,14 +5,23 @@ public protocol Presenter {
 
     @MainActor func presentLoading()
     @MainActor func dismissLoading()
+    @MainActor func presentSuccess()
     @MainActor func presentNotAuthorized()
     @MainActor func presentNoConnection()
     @MainActor func presentInternalError(_ error: Error)
 }
 
 public extension Presenter {
+    @MainActor func presentSuccess() {
+        router.hudSuccess()
+    }
+
     @MainActor func dismissLoading() {
         router.hideHud()
+    }
+
+    @MainActor func presentHint(message: String) {
+        router.hudFailure(description: message)
     }
 
     @MainActor func presentLoading() {

@@ -17,11 +17,13 @@ internal import DefaultSpendingInteractionsUseCaseImplementation
 internal import DefaultSpendingsRepositoryImplementation
 internal import DefaultProfileEditingUseCaseImplementation
 internal import DefaultValidationUseCasesImplementation
+internal import DefaultAvatarsRepositoryImplementation
+internal import DefaultEmailConfirmationUseCaseImplementation
 internal import PersistentStorageSQLite
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     public func appCommon() -> AppCommon {
-        AppCommonDependencies(api: api)
+        AppCommonDependencies(api: api, avatarsRepository: avatarsRepository)
     }
 
     public func logout() async {
@@ -55,7 +57,11 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     }
 
     public func profileEditingUseCase() -> any ProfileEditingUseCase {
-        DefaultProfileEditingUseCase(api: api)
+        DefaultProfileEditingUseCase(api: api, persistency: persistency)
+    }
+
+    public func emailConfirmationUseCase() -> EmailConfirmationUseCase {
+        DefaultEmailConfirmationUseCase(api: api, persistency: persistency)
     }
 
     public func friendInterationsUseCase() -> FriendInteractionsUseCase {
@@ -129,11 +135,12 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 
 public class DefaultDependenciesAssembly: DIContainer {    
     private lazy var anonymousApi = anonymousApiFactory().create()
+    private lazy var avatarsRepository = DefaultAvatarsRepository(api: anonymousApi)
 
     public init() {}
 
     public func appCommon() -> any AppCommon {
-        AppCommonDependencies(api: anonymousApi)
+        AppCommonDependencies(api: anonymousApi, avatarsRepository: avatarsRepository)
     }
 
     public func authUseCase() -> any AuthUseCaseReturningActiveSession {
@@ -141,7 +148,8 @@ public class DefaultDependenciesAssembly: DIContainer {
             impl: DefaultAuthUseCase(
                 api: anonymousApi,
                 apiServiceFactory: apiServiceFactory(), 
-                persistencyFactory: persistencyFactory(),
+                persistencyFactory: persistencyFactory(), 
+                avatarsRepository: avatarsRepository,
                 apiFactoryProvider: self.autenticatedApiFactory
             )
         )

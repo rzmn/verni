@@ -106,7 +106,8 @@ extension SignInFlow: TabEmbedFlow {
                 credentials.email as CFString,
                 credentials.password as CFString, { error in
                     print("\(error.debugDescription)")
-                })
+                }
+            )
             await handle(session: session)
         case .failure(let failure):
             switch failure {

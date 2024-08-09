@@ -4,9 +4,9 @@ public struct User: Equatable {
     public let id: ID
     public let status: FriendStatus
     public let displayName: String
-    public let avatar: UIImage?
+    public let avatar: Avatar?
 
-    public init(id: ID, status: FriendStatus = .no, displayName: String, avatar: UIImage?) {
+    public init(id: ID, status: FriendStatus = .no, displayName: String, avatar: Avatar?) {
         self.id = id
         self.status = status
         self.displayName = displayName

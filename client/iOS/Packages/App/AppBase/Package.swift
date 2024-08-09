@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../../Infrastructure/Base"),
         .package(path: "../../Infrastructure/Logging"),
+        .package(path: "../../Domain/Domain"),
         .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest"),
     ],
     targets: [
@@ -25,7 +26,8 @@ let package = Package(
             dependencies: [
                 "Base",
                 "Logging",
-                "ProgressHUD"
+                "ProgressHUD",
+                "Domain",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

@@ -19,6 +19,7 @@
 	</array>
 	<key>UIAppFonts</key>
 	<array>
+		<string>SF-Pro-Display-Semibold.otf</string>
 		<string>SF-Pro.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>

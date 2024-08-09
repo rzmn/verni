@@ -9,18 +9,21 @@ public class DefaultAuthUseCase {
     private let api: ApiProtocol
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory
+    private let avatarsRepository: AvatarsRepository
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
 
     public init(
         api: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
+        avatarsRepository: AvatarsRepository,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) {
         self.api = api
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
         self.apiFactoryProvider = apiFactoryProvider
+        self.avatarsRepository = avatarsRepository
     }
 }
 
@@ -29,7 +32,8 @@ extension DefaultAuthUseCase: AuthUseCase {
         guard let session = await ActiveSession.awake(
             anonymousApi: api,
             apiServiceFactory: apiServiceFactory,
-            persistencyFactory: persistencyFactory,
+            persistencyFactory: persistencyFactory, 
+            avatarsRepository: avatarsRepository,
             apiFactoryProvider: apiFactoryProvider
         ) else {
             return.failure(.hasNoSession)
@@ -56,6 +60,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
                         persistencyFactory: persistencyFactory, 
+                        avatarsRepository: avatarsRepository, 
                         apiFactoryProvider: apiFactoryProvider
                     )
                 )
@@ -103,6 +108,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
                         persistencyFactory: persistencyFactory, 
+                        avatarsRepository: avatarsRepository,
                         apiFactoryProvider: apiFactoryProvider
                     )
                 )

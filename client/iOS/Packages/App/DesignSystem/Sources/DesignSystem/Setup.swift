@@ -6,7 +6,11 @@ public func SetupAppearance() {
     let appearance = UINavigationBarAppearance()
     appearance.backButtonAppearance.normal.titleTextAttributes = [
         .font: UIFont.p.title3,
-        .foregroundColor: UIColor.p.accent
+        .foregroundColor: UIColor.p.primary
+    ]
+    appearance.backButtonAppearance.normal.titleTextAttributes = [
+        .font: UIFont.p.title3,
+        .foregroundColor: UIColor.p.primary
     ]
     appearance.largeTitleTextAttributes = [
         .foregroundColor: UIColor.p.primary,

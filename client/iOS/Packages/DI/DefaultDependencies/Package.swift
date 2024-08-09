@@ -26,6 +26,8 @@ let package = Package(
         .package(path: "../../Domain/Implementations/DefaultSpendingsRepositoryImplementation"),
         .package(path: "../../Domain/Implementations/DefaultProfileEditingUseCaseImplementation"),
         .package(path: "../../Domain/Implementations/DefaultValidationUseCasesImplementation"),
+        .package(path: "../../Domain/Implementations/DefaultAvatarsRepositoryImplementation"),
+        .package(path: "../../Domain/Implementations/DefaultEmailConfirmationUseCaseImplementation"),
 
         .package(path: "../../Infrastructure/Networking"),
         .package(path: "../../Infrastructure/Logging"),
@@ -63,7 +65,9 @@ let package = Package(
                 "PersistentStorageSQLite",
                 "DefaultApiImplementation",
                 "DefaultProfileEditingUseCaseImplementation",
-                "DefaultValidationUseCasesImplementation"
+                "DefaultValidationUseCasesImplementation",
+                "DefaultAvatarsRepositoryImplementation",
+                "DefaultEmailConfirmationUseCaseImplementation",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

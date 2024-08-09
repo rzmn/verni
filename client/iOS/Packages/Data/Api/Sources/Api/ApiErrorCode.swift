@@ -14,4 +14,6 @@ public enum ApiErrorCode: Int, Decodable {
     case badRequest = 13
     case dealNotFound = 14
     case isNotYourDeal = 15
+    case notDelivered = 16
+    case alreadyConfirmed = 17
 }

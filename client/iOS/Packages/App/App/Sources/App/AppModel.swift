@@ -22,7 +22,10 @@ public actor App {
 
     public func start() async {
         logI { "launching app" }
-        await SetupAppearance()
+        Task { @MainActor in
+            SetupAppearance()
+            AvatarView.repository = di.appCommon().avatarsRepository()
+        }
         switch await authUseCase.awake() {
         case .success(let session):
             await startAuthorizedSession(session: session)

@@ -1,13 +1,16 @@
 import Domain
 import Api
 import Foundation
+import PersistentStorage
 internal import ApiDomainConvenience
 
 public class DefaultProfileEditingUseCase {
     private let api: ApiProtocol
+    private let persistency: Persistency
 
-    public init(api: ApiProtocol) {
+    public init(api: ApiProtocol, persistency: Persistency) {
         self.api = api
+        self.persistency = persistency
     }
 }
 
@@ -45,7 +48,10 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
     public func updatePassword(old: String, new: String) async -> Result<Void, PasswordUpdateError> {
         let method = Auth.UpdatePassword(old: old, new: new)
         switch await api.run(method: method) {
-        case .success:
+        case .success(let tokens):
+            Task.detached {
+                await self.persistency.update(refreshToken: tokens.refreshToken)
+            }
             return .success(())
         case .failure(let apiError):
             return .failure(PasswordUpdateError(apiError: apiError))

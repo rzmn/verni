@@ -50,6 +50,7 @@ extension UpdateDisplayNameFlow: Flow {
         await presenter.presentLoading()
         switch await profileEditing.setDisplayName(subject.value.displayName) {
         case .success:
+            await presenter.presentSuccess()
             switch await profileReposiroty.getHostInfo() {
             case .success(let profile):
                 await handle(result: .success(profile))

@@ -4,8 +4,8 @@ public protocol AuthUseCaseReturningActiveSession: AuthUseCase where Self.Author
 
 public protocol AppCommon {
     func localEmailValidationUseCase() -> EmailValidationUseCase
-    func remoteEmailValidationUseCase() -> EmailValidationUseCase
     func passwordValidationUseCase() -> PasswordValidationUseCase
+    func avatarsRepository() -> AvatarsRepository
 }
 
 public protocol AppCommonCovertible {
@@ -27,5 +27,6 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
     func usersRepository() -> UsersRepository
     func usersOfflineRepository() -> UsersOfflineRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
+    func emailConfirmationUseCase() -> EmailConfirmationUseCase
     func qrInviteUseCase() -> QRInviteUseCase
 }

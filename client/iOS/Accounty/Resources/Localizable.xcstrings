@@ -1,17 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "account_hello" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "👋 Hello, %@   "
-          }
-        }
-      }
-    },
     "account_logout" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -232,6 +221,17 @@
         }
       }
     },
+    "change_password_format_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current password or new password format is invalid"
+          }
+        }
+      }
+    },
     "common_confirm" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -283,6 +283,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Already Taken"
+          }
+        }
+      }
+    },
+    "email_code_already_confirmed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your email is already confirmed"
+          }
+        }
+      }
+    },
+    "email_code_is_wrong" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmation code is wrong\nCode that was send has been invalidated\nYou can send another one"
+          }
+        }
+      }
+    },
+    "email_code_not_deliveded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot deliver confirmation code to your email"
+          }
+        }
+      }
+    },
+    "email_code_send_countdown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can resend after %@s..."
+          }
+        }
+      }
+    },
+    "email_code_send_success" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code has been sent"
           }
         }
       }
@@ -638,6 +693,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Internet Connection"
+          }
+        }
+      }
+    },
+    "password_repeat_did_not_match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password Repeat Did Not Match"
           }
         }
       }

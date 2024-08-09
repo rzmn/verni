@@ -10,6 +10,26 @@ class UpdateEmailFlowPresenter: Presenter {
     }
 
     @MainActor
+    func codeSent() {
+        router.hudSuccess(description: "email_code_send_success".localized)
+    }
+
+    @MainActor
+    func codeIsWrong() {
+        router.hudFailure(description: "email_code_is_wrong".localized)
+    }
+
+    @MainActor
+    func codeNotDelivered() {
+        router.hudFailure(description: "email_code_not_deliveded".localized)
+    }
+
+    @MainActor
+    func emailAlreadyConfirmed() {
+        router.hudFailure(description: "email_code_already_confirmed".localized)
+    }
+
+    @MainActor
     func presentEmailEditing(onPop: @escaping @MainActor () async -> Void) {
         let controller = UpdateEmailViewController(model: flow)
         controller.navigationItem.largeTitleDisplayMode = .never

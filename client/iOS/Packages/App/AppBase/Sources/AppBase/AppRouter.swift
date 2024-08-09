@@ -34,6 +34,12 @@ public class AppRouter: NSObject {
         }
     }
 
+    public func hudSuccess(description: String? = nil) {
+        hudWorkItem?.cancel()
+        hudWorkItem = nil
+        ProgressHUD.success(description)
+    }
+
     public func hudFailure(description: String? = nil) {
         hudWorkItem?.cancel()
         hudWorkItem = nil
@@ -62,8 +68,8 @@ public class AppRouter: NSObject {
     }
 
     private func doPresent(_ viewController: UIViewController, animated: Bool) async {
+        viewController.presentationController?.delegate = self
         if !(viewController.isKind(of: UIImagePickerController.self)) {
-            viewController.presentationController?.delegate = self
             if let navigationController = viewController as? UINavigationController {
                 navigationController.delegate = self
             }

@@ -73,6 +73,9 @@
 		61414F842C2F02A100B2C027 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61414F832C2F02A100B2C027 /* SceneDelegate.swift */; };
 		61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8A2C2F02A200B2C027 /* Assets.xcassets */; };
 		61414F8E2C2F02A200B2C027 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8D2C2F02A200B2C027 /* Base */; };
+		618ED7662C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */; };
+		618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */; };
+		618EDBEA2C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */; };
 		61BBB1252C50D3CE00E3D4F3 /* DefaultApiImplementation in Resources */ = {isa = PBXBuildFile; fileRef = 61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */; };
 		61BBB1262C50D3CE00E3D4F3 /* Api in Resources */ = {isa = PBXBuildFile; fileRef = 61BBB1242C50D3CE00E3D4F3 /* Api */; };
 		61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61FD347B2C40242F002C1A5A /* Localizable.xcstrings */; };
@@ -117,6 +120,9 @@
 		61414F8A2C2F02A200B2C027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		61414F8D2C2F02A200B2C027 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		61414F8F2C2F02A200B2C027 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
+		618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro-Display-Semibold.otf"; sourceTree = "<group>"; };
+		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
 		61FD347B2C40242F002C1A5A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -222,6 +228,8 @@
 		611CCD662C50AE3A00289D9E /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */,
+				618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */,
 				61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */,
 				61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */,
 				611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */,
@@ -267,6 +275,7 @@
 		612631452C60AACB00445300 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */,
 				612631462C60AAFF00445300 /* SF-Pro.ttf */,
 			);
 			path = Fonts;
@@ -424,6 +433,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */,
 				61088A9B2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation in Resources */,
 				611CCD7C2C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation in Resources */,
 				612A06FF2C6104BE00F79192 /* AccountFlow in Resources */,
@@ -447,6 +457,7 @@
 				6126313C2C5FC49400445300 /* AuthenticatedFlow in Resources */,
 				611CCD712C50AE3A00289D9E /* DesignSystem in Resources */,
 				6126313D2C5FC49400445300 /* UnauthenticatedFlow in Resources */,
+				618ED7662C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation in Resources */,
 				61BBB1262C50D3CE00E3D4F3 /* Api in Resources */,
 				61088A972C5E70DE005FFFC2 /* AppBase in Resources */,
 				612631472C60AAFF00445300 /* SF-Pro.ttf in Resources */,
@@ -456,6 +467,7 @@
 				611CCD732C50AE3A00289D9E /* Base in Resources */,
 				61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */,
 				61088A992C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation in Resources */,
+				618EDBEA2C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation in Resources */,
 				611CCD742C50AE3A00289D9E /* DefaultApiServiceImplementation in Resources */,
 				611CCD692C50AE3A00289D9E /* DefaultDependencies in Resources */,
 				611CCD802C50AE3A00289D9E /* Domain in Resources */,

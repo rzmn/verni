@@ -3,7 +3,7 @@ import UIKit
 extension UIFont {
     public enum Predefined {
         public static var title1: UIFont {
-            UIFont(name: "Hiragino Mincho ProN W6", size: 28) ?? .systemFont(ofSize: 28, weight: .bold)
+            UIFont(name: "SF Pro Display Semibold", size: 36) ?? .systemFont(ofSize: 28, weight: .bold)
         }
 
         public static var title2: UIFont {
@@ -11,7 +11,7 @@ extension UIFont {
         }
 
         public static var title3: UIFont {
-            UIFont(name: "Hiragino Mincho ProN W6", size: 15) ?? .systemFont(ofSize: 18, weight: .bold)
+            UIFont(name: "SF Pro Display Semibold", size: 15) ?? .systemFont(ofSize: 18, weight: .bold)
         }
 
         public static var text: UIFont {

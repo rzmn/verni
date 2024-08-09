@@ -63,7 +63,10 @@ extension AccountFlow: TabEmbedFlow {
 
     func updateAvatar() async {
         let flow = UpdateAvatarFlow(di: di, router: router)
-        _ = await flow.perform()
+        guard case .success(let profile) = await flow.perform() else {
+            return
+        }
+        subject.send(AccountState(info: .loaded(profile)))
     }
 
     func updateEmail() async {
@@ -103,7 +106,30 @@ extension AccountFlow: TabEmbedFlow {
     }
 
     func updatePassword() async {
-        let flow = UpdatePasswordFlow(di: di, router: router)
+        let profile: Profile
+        if case .loaded(let _profile) = subject.value.info {
+            profile = _profile
+        }
+        else if let _profile = await profileOfflineRepository.getHostInfo() {
+            profile = _profile
+        } else {
+            await presenter.presentLoading()
+            switch await profileRepository.getHostInfo() {
+            case .success(let _profile):
+                profile = _profile
+            case .failure(let error):
+                switch error {
+                case .noConnection:
+                    await presenter.presentNoConnection()
+                case .notAuthorized:
+                    await presenter.presentNotAuthorized()
+                case .other(let error):
+                    await presenter.presentInternalError(error)
+                }
+                return
+            }
+        }
+        let flow = UpdatePasswordFlow(di: di, router: router, profile: profile)
         _ = await flow.perform(
             willFinish: { [weak self] result in
                 guard let self else { return }

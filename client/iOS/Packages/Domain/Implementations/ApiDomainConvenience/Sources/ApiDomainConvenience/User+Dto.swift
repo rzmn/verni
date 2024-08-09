@@ -4,14 +4,14 @@ import UIKit
 
 extension User {
     public init(dto: UserDto) {
-        let data = dto.avatar.url.flatMap {
-            NSData.init(base64Encoded: $0) as Data?
+        let data = dto.avatar.id.flatMap {
+            Avatar(id: $0)
         }
         self = User(
             id: dto.id,
             status: User.FriendStatus(dto: dto.friendStatus),
             displayName: dto.displayName,
-            avatar: data.flatMap(UIImage.init)
+            avatar: data
         )
     }
 }
@@ -22,7 +22,10 @@ extension UserDto {
             login: user.id,
             friendStatus: FriendStatus(domain: user.status),
             displayName: user.displayName,
-            avatar: Avatar(url: user.avatar?.pngData()?.base64EncodedString())
+            avatar: Avatar(
+                id: user.avatar?.id
+            )
+
         )
     }
 }

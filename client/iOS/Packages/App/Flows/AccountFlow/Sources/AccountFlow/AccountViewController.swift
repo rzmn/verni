@@ -1,30 +1,51 @@
 import AppBase
 import UIKit
-
-private class CustomView: UIView {
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        layer.masksToBounds = true
-        layer.cornerRadius = 44 / 2
-        backgroundColor = .cyan
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError()
-    }
-    
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
-        CGSize(width: 44, height: 44)
-    }
-}
+import Combine
 
 class AccountViewController: ViewController<AccountView, AccountFlow> {
+    private lazy var avatarView = {
+        let size: CGFloat = 44
+        let frame = CGRect(origin: .zero, size: CGSize(width: size, height: size))
+        let view = AvatarView(frame: frame)
+        view.fitSize = frame.size
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = size / 2
+        view.contentMode = .scaleAspectFill
+        return view
+    }()
+    private var subscriptions = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        let view = CustomView(frame: CGRect(origin: .zero, size: CGSize(width: 44, height: 44)))
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            customView: view
+            customView: avatarView
         )
+        render(state: model.subject.value)
+        model.subject
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: render)
+            .store(in: &subscriptions)
+    }
+
+    private func render(state: AccountState) {
+        switch state.info {
+        case .initial:
+            avatarView.avatarId = nil
+        case .loading(let previous):
+            if case .loaded(let t) = previous {
+                avatarView.avatarId = t.user.avatar?.id
+            } else {
+                avatarView.avatarId = nil
+            }
+        case .loaded(let t):
+            avatarView.avatarId = t.user.avatar?.id
+        case .failed(let previous, _):
+            if case .loaded(let t) = previous {
+                avatarView.avatarId = t.user.avatar?.id
+            } else {
+                avatarView.avatarId = nil
+            }
+        }
     }
 }
 

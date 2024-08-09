@@ -20,7 +20,7 @@ open class ViewController<V: View<Model>, Model>: UIViewController {
     public var onClose: (@MainActor (UIViewController) async -> Void)?
     public var onPop: (@MainActor () async -> Void)?
 
-    let model: Model
+    public let model: Model
 
     var contentView: V {
         view as! V

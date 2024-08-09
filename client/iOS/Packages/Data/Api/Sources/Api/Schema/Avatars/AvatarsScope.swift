@@ -1,8 +1,8 @@
-//
-//  File.swift
-//  
-//
-//  Created by n.razumnyi on 8/7/24.
-//
+protocol AvatarsScope: Scope {}
+extension AvatarsScope {
+    var scope: String {
+        "/avatars"
+    }
+}
 
-import Foundation
+public enum Avatars {}
