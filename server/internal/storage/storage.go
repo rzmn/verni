@@ -85,6 +85,9 @@ type Storage interface {
 	UpdatePasswordForId(uid UserId, password string) error
 	StoreCredentials(uid UserId, credentials UserCredentials) error
 
+	StorePushToken(uid UserId, token string) error
+	GetPushToken(uid UserId) (*string, error)
+
 	StoreDisplayName(uid UserId, displayName string) error
 	StoreAvatarBase64(uid UserId, avatarBase64 string) error
 	GetAvatarsBase64(aids []AvatarId) (map[AvatarId]AvatarData, error)

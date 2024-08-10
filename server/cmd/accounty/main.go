@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"accounty/internal/apns"
 	"accounty/internal/config"
 	"accounty/internal/http-server/router/aasa"
 	"accounty/internal/http-server/router/auth"
@@ -21,6 +22,10 @@ import (
 )
 
 func main() {
+	pushSender, err := apns.New("./internal/apns/apns_prod.p12", os.Getenv("APNS_CERT_PASSWORD"))
+	if err != nil {
+		return
+	}
 	cfg := config.Load()
 
 	storage, err := ydbStorage.New(os.Getenv("YDB_ENDPOINT"), "./internal/storage/ydbStorage/key.json")
@@ -35,7 +40,7 @@ func main() {
 	router := gin.New()
 	auth.RegisterRoutes(router, storage)
 	users.RegisterRoutes(router, storage)
-	friends.RegisterRoutes(router, storage)
+	friends.RegisterRoutes(router, storage, pushSender)
 	spendings.RegisterRoutes(router, storage)
 	profile.RegisterRoutes(router, storage)
 	aasa.RegisterRoutes(router, storage)

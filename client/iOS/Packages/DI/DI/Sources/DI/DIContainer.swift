@@ -25,6 +25,7 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
     func friendListRepository() -> FriendsRepository
     func friendsOfflineRepository() -> FriendsOfflineRepository
     func usersRepository() -> UsersRepository
+    func pushRegistrationUseCase() -> PushRegistrationUseCase
     func usersOfflineRepository() -> UsersOfflineRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
     func emailConfirmationUseCase() -> EmailConfirmationUseCase

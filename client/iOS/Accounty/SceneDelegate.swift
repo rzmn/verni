@@ -1,18 +1,21 @@
 import UIKit
 import App
-import DefaultDependencies
+
+private extension UIApplicationDelegate {
+    var _app: App? {
+        (self as? AppDelegate)?.app
+    }
+}
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-    private var app: App?
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
-            Task.detached { @MainActor [unowned self] in
-                app = await App(di: DefaultDependenciesAssembly(), on: window)
-                await app?.start()
+            Task.detached { @MainActor in
+                await UIApplication.shared.delegate?._app?.start(on: window)
             }
         }
     }
@@ -22,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let context = URLContexts.first else {
             return
         }
-        guard let app else {
+        guard let app = UIApplication.shared.delegate?._app else {
             return
         }
         Task {

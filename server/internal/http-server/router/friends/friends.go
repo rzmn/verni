@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"accounty/internal/apns"
 	"accounty/internal/auth/jwt"
 	"accounty/internal/storage"
 
@@ -20,7 +21,8 @@ import (
 )
 
 type sendRequestRequestHandler struct {
-	storage storage.Storage
+	storage    storage.Storage
+	pushSender apns.PushNotificationSender
 }
 
 func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest.Request) *sendRequest.Error {
@@ -81,11 +83,25 @@ func (h *sendRequestRequestHandler) Handle(c *gin.Context, request sendRequest.R
 		outError := sendRequest.ErrInternal()
 		return &outError
 	}
+	profile, err := h.storage.GetAccountInfo(storage.UserId(*subject))
+	if err != nil {
+		log.Printf("%s: cannot get account info for push notification %v", op, err)
+	} else {
+		receiverToken, err := h.storage.GetPushToken(request.Target)
+		if err != nil {
+			log.Printf("%s: cannot get receiver push token info %v", op, err)
+		} else if receiverToken == nil {
+			log.Printf("%s: receiver push token is nil", op)
+		} else {
+			h.pushSender.GotFriendRequest(*receiverToken, profile.User.DisplayName)
+		}
+	}
 	return nil
 }
 
 type acceptRequestRequestHandler struct {
-	storage storage.Storage
+	storage    storage.Storage
+	pushSender apns.PushNotificationSender
 }
 
 func (h *acceptRequestRequestHandler) Validate(c *gin.Context, request acceptRequest.Request) *acceptRequest.Error {
@@ -125,6 +141,19 @@ func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptReque
 	if err := h.storage.StoreFriendship(request.Sender, storage.UserId(*subject)); err != nil {
 		outError := acceptRequest.ErrInternal()
 		return &outError
+	}
+	profile, err := h.storage.GetAccountInfo(storage.UserId(*subject))
+	if err != nil {
+		log.Printf("%s: cannot get account info for push notification %v", op, err)
+	} else {
+		senderToken, err := h.storage.GetPushToken(request.Sender)
+		if err != nil {
+			log.Printf("%s: cannot get sender push token info %v", op, err)
+		} else if senderToken == nil {
+			log.Printf("%s: sender push token is nil", op)
+		} else {
+			h.pushSender.GotFriendRequest(*senderToken, profile.User.DisplayName)
+		}
 	}
 	return nil
 }
@@ -313,12 +342,12 @@ func (h *unfriendRequestHandler) Handle(c *gin.Context, request unfriend.Request
 	return nil
 }
 
-func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
+func RegisterRoutes(e *gin.Engine, storage storage.Storage, pushSender apns.PushNotificationSender) {
 	group := e.Group("/friends", middleware.EnsureLoggedIn(storage))
-	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{storage: storage}))
+	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{storage: storage, pushSender: pushSender}))
 	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
 	group.POST("/rejectRequest", rejectRequest.New(&rejectRequestRequestHandler{storage: storage}))
 	group.POST("/rollbackRequest", rollbackRequest.New(&rollbackRequestRequestHandler{storage: storage}))
-	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{storage: storage}))
+	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{storage: storage, pushSender: pushSender}))
 	group.POST("/unfriend", unfriend.New(&unfriendRequestHandler{storage: storage}))
 }

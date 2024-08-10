@@ -6,16 +6,19 @@ internal import SignInFlow
 internal import DesignSystem
 internal import ProgressHUD
 internal import AccountFlow
+internal import FriendsFlow
 
 public actor AuthenticatedFlow {
     private let presenter: AuthenticatedFlowPresenter
     private let accountFlow: AccountFlow
+    private let friendsFlow: FriendsFlow
 
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         presenter = await AuthenticatedFlowPresenter(router: router)
         accountFlow = await AccountFlow(di: di, router: router)
+        friendsFlow = await FriendsFlow(di: di, router: router)
     }
 }
 
@@ -25,7 +28,7 @@ extension AuthenticatedFlow: Flow {
     }
 
     public func perform(willFinish: ((TerminationEvent) async -> Void)?) async -> TerminationEvent {
-        await presenter.start(tabs: [accountFlow])
+        await presenter.start(tabs: [friendsFlow, accountFlow])
         return await withCheckedContinuation { continuation in
             flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
             Task.detached { [weak self] in

@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "AccountFlow",
+    name: "FriendsFlow",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AccountFlow",
-            targets: ["AccountFlow"]
+            name: "FriendsFlow",
+            targets: ["FriendsFlow"]
         ),
     ],
     dependencies: [
@@ -24,7 +24,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AccountFlow",
+            name: "FriendsFlow",
             dependencies: [
                 "DesignSystem",
                 "DI",

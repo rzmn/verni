@@ -23,6 +23,7 @@ class AuthenticatedFlowPresenter: Presenter {
         tabBarController.setViewControllers(viewControllers, animated: false)
         tabBarController.modalTransitionStyle = .flipHorizontal
         tabBarController.modalPresentationStyle = .fullScreen
+        tabBarController.selectedIndex = tabs.count - 1
         await router.present(tabBarController)
     }
 }

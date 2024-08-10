@@ -19,6 +19,7 @@ internal import DefaultProfileEditingUseCaseImplementation
 internal import DefaultValidationUseCasesImplementation
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultEmailConfirmationUseCaseImplementation
+internal import DefaultPushRegistrationUseCaseImplementation
 internal import PersistentStorageSQLite
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
@@ -58,6 +59,10 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
 
     public func profileEditingUseCase() -> any ProfileEditingUseCase {
         DefaultProfileEditingUseCase(api: api, persistency: persistency)
+    }
+
+    public func pushRegistrationUseCase() -> PushRegistrationUseCase {
+        DefaultPushRegistrationUseCase(api: api)
     }
 
     public func emailConfirmationUseCase() -> EmailConfirmationUseCase {

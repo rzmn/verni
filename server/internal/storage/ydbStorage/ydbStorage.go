@@ -85,6 +85,14 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create avatars: unexpected err %v", op, err)
 				return err
 			}
+			if err := s.CreateTable(ctx, path.Join(db.Name(), "pushTokens"),
+				options.WithColumn("id", types.TypeText),
+				options.WithColumn("token", types.TypeText),
+				options.WithPrimaryKeyColumn("id"),
+			); err != nil {
+				log.Printf("%s: create pushTokens: unexpected err %v", op, err)
+				return err
+			}
 			if err := s.CreateTable(ctx, path.Join(db.Name(), "tokens"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("token", types.TypeText),
@@ -703,6 +711,86 @@ VALUES($email, False, NULL);
 		return err
 	}
 	return nil
+}
+
+func (s *Storage) StorePushToken(uid storage.UserId, token string) error {
+	const op = "storage.ydb.StorePushToken"
+	log.Printf("%s: start", op)
+	var (
+		writeTx = table.TxControl(
+			table.BeginTx(
+				table.WithSerializableReadWrite(),
+			),
+			table.CommitTx(),
+		)
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err := s.Execute(ctx, writeTx, `
+DECLARE $id AS Text;
+DECLARE $token AS Text;
+UPSERT INTO 
+	pushTokens(id, token) 
+VALUES($id, $token);`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+				table.ValueParam("$token", types.TextValue(token)),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return err
+	}
+	return nil
+}
+
+func (s *Storage) GetPushToken(uid storage.UserId) (*string, error) {
+	const op = "storage.ydb.GetPushToken"
+	log.Printf("%s: start", op)
+	var (
+		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
+		res    result.Result
+		token  *string
+	)
+	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
+		_, res, err = s.Execute(ctx, readTx, `
+DECLARE $id AS Text;
+SELECT 
+	token 
+FROM 
+	pushTokens 
+WHERE 
+	id = $id;`,
+			table.NewQueryParameters(
+				table.ValueParam("$id", types.TextValue(string(uid))),
+			),
+		)
+		if err != nil {
+			return err
+		}
+		defer res.Close()
+		for res.NextResultSet(ctx) {
+			for res.NextRow() {
+				var value string
+				err = res.Scan(&value)
+				if err != nil {
+					return err
+				}
+				token = &value
+			}
+		}
+		return res.Err()
+	})
+	if err != nil {
+		log.Printf("%s: unexpected err %v", op, err)
+		return nil, err
+	}
+	return token, nil
 }
 
 func (s *Storage) StoreDisplayName(uid storage.UserId, displayName string) error {

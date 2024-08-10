@@ -3,7 +3,7 @@ import UIKit
 
 class AccountFlowPresenter: Presenter {
     let router: AppRouter
-    private weak var flow: AccountFlow!
+    private unowned var flow: AccountFlow
 
     lazy var tabViewController = {
         let controller = AccountViewController(model: flow)

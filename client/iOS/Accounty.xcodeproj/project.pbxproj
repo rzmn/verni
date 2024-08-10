@@ -42,9 +42,35 @@
 		61414F842C2F02A100B2C027 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61414F832C2F02A100B2C027 /* SceneDelegate.swift */; };
 		61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8A2C2F02A200B2C027 /* Assets.xcassets */; };
 		61414F8E2C2F02A200B2C027 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8D2C2F02A200B2C027 /* Base */; };
+		614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614AC19D2C6802EE005B2CD5 /* NotificationService.swift */; };
+		614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */; };
 		61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61FD347B2C40242F002C1A5A /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		614AC1A02C6802EE005B2CD5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 61414F762C2F02A100B2C027 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 614AC19A2C6802EE005B2CD5;
+			remoteInfo = NotificationService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		614AC1A62C6802EE005B2CD5 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		61088A962C5E70DE005FFFC2 /* AppBase */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AppBase; sourceTree = "<group>"; };
@@ -85,6 +111,11 @@
 		61414F8A2C2F02A200B2C027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		61414F8D2C2F02A200B2C027 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		61414F8F2C2F02A200B2C027 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		614AC1962C67E315005B2CD5 /* FriendsFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FriendsFlow; sourceTree = "<group>"; };
+		614AC19B2C6802EE005B2CD5 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		614AC19D2C6802EE005B2CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		614AC19F2C6802EE005B2CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultPushRegistrationUseCaseImplementation; sourceTree = "<group>"; };
 		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
 		618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro-Display-Semibold.otf"; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
@@ -129,6 +160,13 @@
 				610E9C0C2C5F7551003D1A79 /* DesignSystem in Frameworks */,
 				610E9C0E2C5F7551003D1A79 /* DI in Frameworks */,
 				612A07012C610DB300F79192 /* AuthenticatedFlow in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		614AC1982C6802EE005B2CD5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,6 +231,7 @@
 		611CCD662C50AE3A00289D9E /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */,
 				618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */,
 				618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */,
 				61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */,
@@ -231,6 +270,7 @@
 		612631402C5FC5AD00445300 /* Authenticated */ = {
 			isa = PBXGroup;
 			children = (
+				614AC1962C67E315005B2CD5 /* FriendsFlow */,
 				612A06FE2C6104BE00F79192 /* AccountFlow */,
 				6126313A2C5FC49400445300 /* AuthenticatedFlow */,
 			);
@@ -251,6 +291,7 @@
 			children = (
 				61B74FDF2C305ECA001182A2 /* Packages */,
 				61414F802C2F02A100B2C027 /* Accounty */,
+				614AC19C2C6802EE005B2CD5 /* NotificationService */,
 				61414F7F2C2F02A100B2C027 /* Products */,
 				61B74FF22C3080D6001182A2 /* Frameworks */,
 			);
@@ -260,6 +301,7 @@
 			isa = PBXGroup;
 			children = (
 				61414F7E2C2F02A100B2C027 /* Accounty.app */,
+				614AC19B2C6802EE005B2CD5 /* NotificationService.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -272,6 +314,15 @@
 				61414F832C2F02A100B2C027 /* SceneDelegate.swift */,
 			);
 			path = Accounty;
+			sourceTree = "<group>";
+		};
+		614AC19C2C6802EE005B2CD5 /* NotificationService */ = {
+			isa = PBXGroup;
+			children = (
+				614AC19D2C6802EE005B2CD5 /* NotificationService.swift */,
+				614AC19F2C6802EE005B2CD5 /* Info.plist */,
+			);
+			path = NotificationService;
 			sourceTree = "<group>";
 		};
 		61B74FDF2C305ECA001182A2 /* Packages */ = {
@@ -316,10 +367,12 @@
 				61414F7A2C2F02A100B2C027 /* Sources */,
 				61414F7B2C2F02A100B2C027 /* Frameworks */,
 				61414F7C2C2F02A100B2C027 /* Resources */,
+				614AC1A62C6802EE005B2CD5 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				614AC1A12C6802EE005B2CD5 /* PBXTargetDependency */,
 			);
 			name = Accounty;
 			packageProductDependencies = (
@@ -358,6 +411,23 @@
 			productReference = 61414F7E2C2F02A100B2C027 /* Accounty.app */;
 			productType = "com.apple.product-type.application";
 		};
+		614AC19A2C6802EE005B2CD5 /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 614AC1A32C6802EE005B2CD5 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				614AC1972C6802EE005B2CD5 /* Sources */,
+				614AC1982C6802EE005B2CD5 /* Frameworks */,
+				614AC1992C6802EE005B2CD5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotificationService;
+			productName = NotificationService;
+			productReference = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -369,6 +439,9 @@
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					61414F7D2C2F02A100B2C027 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					614AC19A2C6802EE005B2CD5 = {
 						CreatedOnToolsVersion = 15.4;
 					};
 				};
@@ -389,6 +462,7 @@
 			projectRoot = "";
 			targets = (
 				61414F7D2C2F02A100B2C027 /* Accounty */,
+				614AC19A2C6802EE005B2CD5 /* NotificationService */,
 			);
 		};
 /* End PBXProject section */
@@ -406,6 +480,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		614AC1992C6802EE005B2CD5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -418,7 +499,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		614AC1972C6802EE005B2CD5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		614AC1A12C6802EE005B2CD5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 614AC19A2C6802EE005B2CD5 /* NotificationService */;
+			targetProxy = 614AC1A02C6802EE005B2CD5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		61414F8C2C2F02A200B2C027 /* LaunchScreen.storyboard */ = {
@@ -554,6 +651,7 @@
 		61414F932C2F02A200B2C027 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Accounty/Resources/Accounty.entitlements;
@@ -566,10 +664,11 @@
 				INFOPLIST_FILE = Accounty/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Сплитевайсе";
 				INFOPLIST_KEY_NSCameraUsageDescription = "For Adding Friends Via QR Code";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Set Avatar Image";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -593,6 +692,7 @@
 		61414F942C2F02A200B2C027 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Accounty/Resources/Accounty.entitlements;
@@ -605,10 +705,11 @@
 				INFOPLIST_FILE = Accounty/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Сплитевайсе";
 				INFOPLIST_KEY_NSCameraUsageDescription = "For Adding Friends Via QR Code";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Set Avatar Image";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -623,6 +724,58 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		614AC1A42C6802EE005B2CD5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NPZKGHFT2A;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		614AC1A52C6802EE005B2CD5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NPZKGHFT2A;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -646,6 +799,15 @@
 			buildConfigurations = (
 				61414F932C2F02A200B2C027 /* Debug */,
 				61414F942C2F02A200B2C027 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		614AC1A32C6802EE005B2CD5 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				614AC1A42C6802EE005B2CD5 /* Debug */,
+				614AC1A52C6802EE005B2CD5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

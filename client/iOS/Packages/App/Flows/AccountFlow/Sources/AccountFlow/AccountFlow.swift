@@ -4,7 +4,6 @@ import DI
 import AppBase
 import Combine
 internal import DesignSystem
-internal import ProgressHUD
 
 public actor AccountFlow {
     let subject = CurrentValueSubject<AccountState, Never>(.initial)

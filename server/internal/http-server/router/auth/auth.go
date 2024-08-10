@@ -18,6 +18,7 @@ import (
 	"accounty/internal/http-server/handlers/auth/login"
 	"accounty/internal/http-server/handlers/auth/logout"
 	"accounty/internal/http-server/handlers/auth/refresh"
+	"accounty/internal/http-server/handlers/auth/registerForPushNotifications"
 	"accounty/internal/http-server/handlers/auth/sendEmailConfirmationCode"
 	"accounty/internal/http-server/handlers/auth/signup"
 	"accounty/internal/http-server/handlers/auth/updateEmail"
@@ -351,7 +352,7 @@ type confirmEmailRequestHandler struct {
 }
 
 func (h *confirmEmailRequestHandler) Handle(c *gin.Context, request confirmEmail.Request) *confirmEmail.Error {
-	const op = "router.users.confirmEmailRequestHandler.Handle"
+	const op = "router.auth.confirmEmailRequestHandler.Handle"
 	log.Printf("%s: start", op)
 
 	token := helpers.ExtractBearerToken(c)
@@ -390,7 +391,7 @@ type sendEmailConfirmationCodeRequestHandler struct {
 }
 
 func (h *sendEmailConfirmationCodeRequestHandler) Handle(c *gin.Context, request sendEmailConfirmationCode.Request) *sendEmailConfirmationCode.Error {
-	const op = "router.users.confirmEmailRequestHandler.Handle"
+	const op = "router.auth.confirmEmailRequestHandler.Handle"
 	log.Printf("%s: start", op)
 
 	token := helpers.ExtractBearerToken(c)
@@ -423,12 +424,34 @@ func (h *sendEmailConfirmationCodeRequestHandler) Handle(c *gin.Context, request
 	return nil
 }
 
+type registerForPushNotificationsRequestHandler struct {
+	storage storage.Storage
+}
+
+func (h *registerForPushNotificationsRequestHandler) Handle(c *gin.Context, request registerForPushNotifications.Request) *registerForPushNotifications.Error {
+	const op = "router.auth.registerForPushNotificationsRequestHandler.Handle"
+	log.Printf("%s: start", op)
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		log.Printf("%s: cannot get access token %v", op, err)
+		outError := registerForPushNotifications.ErrInternal()
+		return &outError
+	}
+	if err := h.storage.StorePushToken(storage.UserId(*subject), request.Token); err != nil {
+		log.Printf("%s: cannot store push token %v", op, err)
+		outError := registerForPushNotifications.ErrInternal()
+		return &outError
+	}
+	return nil
+}
+
 type logoutRequestHandler struct {
 	storage storage.Storage
 }
 
 func (h *logoutRequestHandler) Handle(c *gin.Context) *logout.Error {
-	const op = "router.users.logoutRequestHandler.Handle"
+	const op = "router.auth.logoutRequestHandler.Handle"
 	log.Printf("%s: start", op)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
@@ -454,4 +477,5 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
 	e.DELETE("/auth/logout", middleware.EnsureLoggedIn(storage), logout.New(&logoutRequestHandler{storage: storage}))
 	e.PUT("/auth/confirmEmail", middleware.EnsureLoggedIn(storage), confirmEmail.New(&confirmEmailRequestHandler{storage: storage, confirmation: confirmation.EmailConfirmation{Storage: storage}}))
 	e.PUT("/auth/sendEmailConfirmationCode", middleware.EnsureLoggedIn(storage), sendEmailConfirmationCode.New(&sendEmailConfirmationCodeRequestHandler{storage: storage, confirmation: confirmation.EmailConfirmation{Storage: storage}}))
+	e.PUT("/auth/registerForPushNotifications", middleware.EnsureLoggedIn(storage), registerForPushNotifications.New(&registerForPushNotificationsRequestHandler{storage: storage}))
 }

@@ -74,6 +74,25 @@ func TestIsUserExistsTrue(t *testing.T) {
 	}
 }
 
+func TestStorePushToken(t *testing.T) {
+	s := getStorage(t)
+	uid := randomUid()
+	token := uuid.New().String()
+	if err := s.StorePushToken(uid, token); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	tokenFromDb, err := s.GetPushToken(uid)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if tokenFromDb == nil {
+		t.Fatalf("unexpected nil")
+	}
+	if *tokenFromDb != token {
+		t.Fatalf("should be equal")
+	}
+}
+
 func TestGetAccountInfo(t *testing.T) {
 	s := getStorage(t)
 	uid := randomUid()
