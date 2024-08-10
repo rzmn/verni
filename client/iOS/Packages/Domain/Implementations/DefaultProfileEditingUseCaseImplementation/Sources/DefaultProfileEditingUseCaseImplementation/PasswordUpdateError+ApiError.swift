@@ -10,6 +10,10 @@ extension PasswordUpdateError {
             self = .other(.other(error))
         case .api(let errorCode, _):
             switch errorCode {
+            case .incorrectCredentials:
+                self = .incorrectOldPassword
+            case .wrongCredentialsFormat:
+                self = .validationError(.invalidFormat)
             default:
                 self = .other(GeneralError(apiError: apiError))
             }

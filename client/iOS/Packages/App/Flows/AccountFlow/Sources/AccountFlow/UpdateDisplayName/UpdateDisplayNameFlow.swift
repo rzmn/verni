@@ -68,29 +68,15 @@ extension UpdateDisplayNameFlow: Flow {
             switch await profileReposiroty.getHostInfo() {
             case .success(let profile):
                 await handle(result: .success(profile))
-            case .failure(let reason):
-                switch reason {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+            case .failure(let error):
+                await presenter.presentGeneralError(error)
             }
         case .failure(let reason):
             switch reason {
             case .wrongFormat:
                 await presenter.presentWrongFormat()
             case .other(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+                await presenter.presentGeneralError(error)
             }
         }
     }

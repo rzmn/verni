@@ -133,30 +133,17 @@ extension UpdatePasswordFlow: Flow {
                 await presenter.successHaptic()
                 await presenter.presentSuccess()
                 await handle(result: .success(profile))
-            case .failure(let reason):
-                switch reason {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+            case .failure(let error):
+                await presenter.presentGeneralError(error)
             }
         case .failure(let error):
             switch error {
             case .validationError:
-                // TODO: separate wrong old password and wrong fmt cases ?
                 await presenter.presentHint(message: "change_password_format_error".localized)
+            case .incorrectOldPassword:
+                await presenter.presentHint(message: "change_password_old_wrong".localized)
             case .other(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+                await presenter.presentGeneralError(error)
             }
         }
     }

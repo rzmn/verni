@@ -113,14 +113,7 @@ extension UpdateEmailFlow: Flow {
             case .codeIsWrong:
                 await presenter.codeIsWrong()
             case .other(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+                await presenter.presentGeneralError(error)
             }
         }
     }
@@ -142,14 +135,7 @@ extension UpdateEmailFlow: Flow {
             case .alreadyConfirmed:
                 await presenter.emailAlreadyConfirmed()
             case .other(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+                await presenter.presentGeneralError(error)
             }
         }
     }

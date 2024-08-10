@@ -79,14 +79,7 @@ extension UpdateAvatarFlow: Flow {
                 await presenter.presentSuccess()
                 return .success(profile)
             case .failure(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+                await presenter.presentGeneralError(error)
                 return .failure(.canceled)
             }
         case .failure(let error):
@@ -94,14 +87,7 @@ extension UpdateAvatarFlow: Flow {
             case .wrongFormat:
                 await presenter.presentWrongFormat()
             case .other(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
+                await presenter.presentGeneralError(error)
             }
             return .failure(.canceled)
         }

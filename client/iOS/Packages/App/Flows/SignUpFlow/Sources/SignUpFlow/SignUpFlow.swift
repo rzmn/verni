@@ -161,7 +161,7 @@ extension SignUpFlow: Flow {
                 await presenter.presentAlreadyTaken()
             case .wrongFormat:
                 await presenter.presentWrongFormat()
-            case .noConnection(_):
+            case .noConnection:
                 await presenter.presentNoConnection()
             case .other(let error):
                 await presenter.presentInternalError(error)

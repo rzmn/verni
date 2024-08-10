@@ -7,6 +7,7 @@ public enum EmailUpdateError: Error {
 
 public enum PasswordUpdateError: Error {
     case validationError(PasswordValidationError)
+    case incorrectOldPassword
     case other(GeneralError)
 }
 

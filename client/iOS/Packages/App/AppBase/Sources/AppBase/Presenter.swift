@@ -1,4 +1,5 @@
 import UIKit
+import Domain
 
 public protocol Presenter {
     var router: AppRouter { get }
@@ -6,9 +7,12 @@ public protocol Presenter {
     @MainActor func presentLoading()
     @MainActor func dismissLoading()
     @MainActor func presentSuccess()
+
     @MainActor func presentNotAuthorized()
     @MainActor func presentNoConnection()
     @MainActor func presentInternalError(_ error: Error)
+
+    @MainActor func presentGeneralError(_ error: GeneralError)
 
     @MainActor func errorHaptic()
     @MainActor func successHaptic()
@@ -39,6 +43,17 @@ public extension Presenter {
 
     @MainActor func presentNotAuthorized() {
         router.hudFailure(description: "alert_title_unauthorized".localized)
+    }
+
+    @MainActor func presentGeneralError(_ error: GeneralError) {
+        switch error {
+        case .noConnection:
+            presentNoConnection()
+        case .notAuthorized:
+            presentNotAuthorized()
+        case .other(let error):
+            presentInternalError(error)
+        }
     }
 
     @MainActor func errorHaptic() {

@@ -227,7 +227,18 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Current password or new password format is invalid"
+            "value" : "New password format is invalid"
+          }
+        }
+      }
+    },
+    "change_password_old_wrong" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Old password is wrong"
           }
         }
       }
