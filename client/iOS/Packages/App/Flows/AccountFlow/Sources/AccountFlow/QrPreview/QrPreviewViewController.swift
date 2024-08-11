@@ -1,11 +1,12 @@
 import UIKit
+import Domain
 import AppBase
 
-class UpdatePasswordViewController: ViewController<UpdatePasswordView, UpdatePasswordFlow> {}
+class QrPreviewViewController: ViewController<QrPreviewView, QrPreviewFlow> {}
 
-extension UpdatePasswordViewController: Routable {
+extension QrPreviewViewController: Routable {
     var name: String {
-        "update password"
+        "qr preview"
     }
 
     func create(onClose: @escaping @MainActor (UIViewController) async -> Void) -> UIViewController {

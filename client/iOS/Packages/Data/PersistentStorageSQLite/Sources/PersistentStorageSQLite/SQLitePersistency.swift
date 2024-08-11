@@ -189,7 +189,7 @@ private struct FriendshipKindSet: OptionSet {
                 onConflictOf: Schema.SpendingCounterparties.Keys.id
             ))
         } catch {
-            self.logE { "failed to update token error: \(error)" }
+            self.logE { "failed to update spending counterparties: \(error)" }
         }
     }
 
@@ -218,7 +218,7 @@ private struct FriendshipKindSet: OptionSet {
                 onConflictOf: Schema.SpendingsHistory.Keys.id
             ))
         } catch {
-            self.logE { "failed to update token error: \(error)" }
+            self.logE { "failed to update spending history: \(error)" }
         }
     }
 
@@ -247,7 +247,7 @@ private struct FriendshipKindSet: OptionSet {
                 onConflictOf: Schema.Friends.Keys.id
             ))
         } catch {
-            self.logE { "failed to update token error: \(error)" }
+            self.logE { "failed to update friends: \(error)" }
         }
     }
 
@@ -259,6 +259,7 @@ private struct FriendshipKindSet: OptionSet {
     }
 
     func invalidate() async {
+        logI { "invalidating db..." }
         await close()
         let handler = dbInvalidationHandler
         Task.detached { @StorageActor in

@@ -66,7 +66,22 @@ public class ActiveSession: TokenRefresher {
         self.avatarsRepository = avatarsRepository
     }
 
+    private var refreshTask: Task<Result<Void, RefreshTokenFailureReason>, Never>?
     public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
+        if let refreshTask {
+            let result = await refreshTask.value
+            self.refreshTask = nil
+            return result
+        } else {
+            let task = Task {
+                await doRefreshTokens()
+            }
+            refreshTask = task
+            return await task.value
+        }
+    }
+
+    private func doRefreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
         let response = await anonymousApi.run(
             method: Auth.Refresh(
                 refreshToken: await persistency.getRefreshToken()

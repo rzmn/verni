@@ -562,6 +562,28 @@
         }
       }
     },
+    "friends_add_button_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add friend"
+          }
+        }
+      }
+    },
+    "friends_add_by_qr" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Via QR"
+          }
+        }
+      }
+    },
     "friends_nav_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -594,9 +616,6 @@
           }
         }
       }
-    },
-    "Key" : {
-      "extractionState" : "manual"
     },
     "login_go_to_signin" : {
       "extractionState" : "manual",

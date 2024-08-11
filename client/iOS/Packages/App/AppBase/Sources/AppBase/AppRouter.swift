@@ -20,6 +20,14 @@ public class AppRouter: NSObject {
         self.scheduler = AsyncSerialScheduler()
     }
 
+    @MainActor
+    public func open(url appUrl: AppUrl) {
+        guard let url = appUrl.url else {
+            return
+        }
+        UIApplication.shared.open(url)
+    }
+
     public func showHud(graceTime: TimeInterval? = nil) {
         hudWorkItem?.cancel()
         hudWorkItem = nil
@@ -57,14 +65,27 @@ public class AppRouter: NSObject {
         ProgressHUD.animate()
     }
 
-    public func present(_ controller: Routable, animated: Bool = true) async {
+    public func present(_ controller: Routable, animated: Bool = true, onPop: (@MainActor () async -> Void)? = nil) async {
         await scheduler.run { [unowned self] in
             let viewController = controller.create { [unowned self] viewController in
                 await pop(viewController)
             }
+            if let onPop {
+                await addHandler(onPop, to: viewController)
+            }
             await hideHud()
             await doPresent(viewController, animated: animated)
         }
+    }
+
+    private func addHandler(_ handler: @escaping @MainActor () async -> Void, to viewController: UIViewController) {
+        var handlers = dismissHandlers[viewController] ?? []
+        handlers.append {
+            Task.detached {
+                await handler()
+            }
+        }
+        dismissHandlers[viewController] = handlers
     }
 
     private func doPresent(_ viewController: UIViewController, animated: Bool) async {
@@ -97,12 +118,17 @@ public class AppRouter: NSObject {
     }
 
     public func push(_ controller: Routable) {
-        let navigation: UINavigationController
-        if let controller = viewControllers.last as? UINavigationController {
-            navigation = controller
-        } else if let tabBar = viewControllers.last as? UITabBarController, let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
-            navigation = controller
-        } else {
+        var navigation: UINavigationController?
+        for current in viewControllers.reversed() {
+            if let controller = current as? UINavigationController {
+                navigation = controller
+                break
+            } else if let tabBar = current as? UITabBarController, let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
+                navigation = controller
+                break
+            }
+        }
+        guard let navigation else {
             return assertionFailure("cannot push from non-navigation controller")
         }
         let viewController = controller.create { [unowned self] viewController in

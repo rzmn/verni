@@ -1,11 +1,11 @@
-import UIKit
 import AppBase
+import UIKit
 
-class UpdatePasswordViewController: ViewController<UpdatePasswordView, UpdatePasswordFlow> {}
+class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewFlow> {}
 
-extension UpdatePasswordViewController: Routable {
+extension UserPreviewViewController: Routable {
     var name: String {
-        "update password"
+        "user preview"
     }
 
     func create(onClose: @escaping @MainActor (UIViewController) async -> Void) -> UIViewController {

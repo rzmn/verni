@@ -22,7 +22,7 @@ import (
 )
 
 func main() {
-	pushSender, err := apns.New("./internal/apns/apns_prod.p12", os.Getenv("APNS_CERT_PASSWORD"))
+	pushSender, err := apns.New("./internal/apns/apns_prod.p12", "./internal/apns/key.json")
 	if err != nil {
 		return
 	}

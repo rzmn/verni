@@ -24,11 +24,11 @@ actor UpdateDisplayNameFlow {
 }
 
 extension UpdateDisplayNameFlow: Flow {
-    enum FailureReason: Error {
+    enum TerminationEvent: Error {
         case canceledManually
     }
 
-    func perform(willFinish: ((Result<Profile, FailureReason>) async -> Void)?) async -> Result<Profile, FailureReason> {
+    func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
             self.displayNameSubject
@@ -86,7 +86,7 @@ extension UpdateDisplayNameFlow: Flow {
         displayNameSubject.send(displayName)
     }
 
-    private func handle(result: Result<Profile, FailureReason>) async {
+    private func handle(result: Result<Profile, TerminationEvent>) async {
         guard let flowContinuation else {
             return
         }

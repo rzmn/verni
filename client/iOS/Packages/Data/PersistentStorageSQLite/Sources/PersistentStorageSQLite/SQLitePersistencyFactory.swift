@@ -26,8 +26,10 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         let dbUrl: URL
         do {
             try FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
-            let contents = try FileManager.default
+            let dbDirectoryContent = try FileManager.default
                 .contentsOfDirectory(at: dbDirectory, includingPropertiesForKeys: nil)
+            logD { "searching in \(dbDirectoryContent)" }
+            let contents = dbDirectoryContent
                 .filter { $0.isFileURL && DbNameBuilder.shared.isDbName($0.lastPathComponent) }
             if contents.isEmpty {
                 logI { "has no persistence" }
@@ -74,6 +76,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         let dbUrl = dbDirectory
             .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
         try? FileManager.default.removeItem(at: dbUrl)
+        try? FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
         let db = try Connection(dbUrl.absoluteString)
         do {
             try createTables(for: db)

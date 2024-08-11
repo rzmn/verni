@@ -157,6 +157,19 @@ extension AccountFlow: TabEmbedFlow {
         )
     }
 
+    func showQr() async {
+        guard let profile = subject.value.info.value else {
+            return
+        }
+        let flow: QrPreviewFlow
+        do {
+            flow = try await QrPreviewFlow(di: di, router: router, profile: profile)
+        } catch {
+            return await presenter.presentInternalError(error)
+        }
+        await flow.perform()
+    }
+
     func logout() async {
         guard let flowContinuation else {
             return

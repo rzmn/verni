@@ -2,18 +2,30 @@ import Domain
 import Foundation
 
 public enum AppUrl {
-    static let scheme: String = "rzmnse"
+    private var scheme: String {
+        "rzmnse"
+    }
 
     public enum Users {
         case show(User.ID)
     }
     case users(Users)
 
+    public var url: URL? {
+        switch self {
+        case .users(let action):
+            switch action {
+            case .show(let id):
+                return URL(string: "\(scheme)://u/\(id)")
+            }
+        }
+    }
+
     public init?(string: String) {
         guard let url = URL(string: string) else {
             return nil
         }
-        guard let scheme = url.scheme, scheme == Self.scheme else {
+        guard let scheme = url.scheme, scheme == scheme else {
             return nil
         }
         guard let host = url.host() else {

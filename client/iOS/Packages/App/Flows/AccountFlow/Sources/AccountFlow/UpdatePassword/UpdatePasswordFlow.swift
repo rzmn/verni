@@ -35,12 +35,11 @@ actor UpdatePasswordFlow {
 }
 
 extension UpdatePasswordFlow: Flow {
-    enum FailureReason: Error {
+    enum TerminationEvent: Error {
         case canceledManually
     }
 
-    func perform(willFinish: ((Result<Profile, FailureReason>) async -> Void)?) async -> Result<Profile, FailureReason> {
-
+    func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
         Publishers.CombineLatest(newPasswordSubject, repeatNewPasswordSubject)
             .map { password, repeatPassword in
                 if repeatPassword.isEmpty {
@@ -163,7 +162,7 @@ extension UpdatePasswordFlow: Flow {
         repeatNewPasswordSubject.send(repeatNewPassword)
     }
 
-    private func handle(result: Result<Profile, FailureReason>) async {
+    private func handle(result: Result<Profile, TerminationEvent>) async {
         guard let flowContinuation else {
             return
         }

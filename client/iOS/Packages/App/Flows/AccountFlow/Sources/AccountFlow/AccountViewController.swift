@@ -20,6 +20,16 @@ class AccountViewController: ViewController<AccountView, AccountFlow> {
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             customView: avatarView
         )
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "qrcode"),
+            primaryAction: UIAction(
+                handler: { _ in
+                    Task.detached { [weak self] in
+                        await self?.model.showQr()
+                    }
+                }
+            )
+        )
         render(state: model.subject.value)
         model.subject
             .receive(on: RunLoop.main)

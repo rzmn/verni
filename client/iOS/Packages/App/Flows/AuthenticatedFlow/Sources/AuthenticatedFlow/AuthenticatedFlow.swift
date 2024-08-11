@@ -13,12 +13,15 @@ public actor AuthenticatedFlow {
     private let accountFlow: AccountFlow
     private let friendsFlow: FriendsFlow
 
+    private var urlResolvers = UrlResolverContainer()
+
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         presenter = await AuthenticatedFlowPresenter(router: router)
         accountFlow = await AccountFlow(di: di, router: router)
         friendsFlow = await FriendsFlow(di: di, router: router)
+        await urlResolvers.add(friendsFlow)
     }
 }
 
@@ -45,5 +48,15 @@ extension AuthenticatedFlow: Flow {
                 }
             }
         }
+    }
+}
+
+extension AuthenticatedFlow: UrlResolver {
+    public func canResolve(url: AppUrl) async -> Bool {
+        await urlResolvers.canResolve(url: url)
+    }
+    
+    public func resolve(url: AppUrl) async {
+        await urlResolvers.resolve(url: url)
     }
 }

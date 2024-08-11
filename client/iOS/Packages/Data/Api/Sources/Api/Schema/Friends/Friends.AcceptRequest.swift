@@ -14,7 +14,7 @@ extension Friends {
         }
 
         public var method: HttpMethod {
-            .get
+            .post
         }
 
         public init(sender: UserDto.ID) {

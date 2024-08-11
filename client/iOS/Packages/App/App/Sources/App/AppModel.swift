@@ -65,8 +65,11 @@ public actor App {
     private func startAuthorizedSession(session: ActiveSessionDIContainer, router: AppRouter) async {
         currentSession = session
         logI { "starting authenticated session \(session)" }
-        switch await AuthenticatedFlow(di: session, router: router).perform() {
+        let flow = await AuthenticatedFlow(di: session, router: router)
+        await urlResolvers.add(flow)
+        switch await flow.perform() {
         case .logout:
+            await urlResolvers.remove(flow)
             await startAnonynousSession(router: router)
         }
     }

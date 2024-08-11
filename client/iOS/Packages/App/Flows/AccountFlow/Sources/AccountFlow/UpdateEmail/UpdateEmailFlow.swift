@@ -35,11 +35,11 @@ actor UpdateEmailFlow {
 }
 
 extension UpdateEmailFlow: Flow {
-    enum FailureReason: Error {
+    enum TerminationEvent: Error {
         case canceledManually
     }
 
-    func perform(willFinish: ((Result<Profile, FailureReason>) async -> Void)?) async -> Result<Profile, FailureReason> {
+    func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
         let email = Just(subject.value.email)
 
         Publishers.CombineLatest4(confirmedSubject, confirmationCodeSubject, resendCountdownTimerSubject, email)
@@ -65,7 +65,7 @@ extension UpdateEmailFlow: Flow {
         }
     }
 
-    private func handle(result: Result<Profile, FailureReason>) async {
+    private func handle(result: Result<Profile, TerminationEvent>) async {
         guard let flowContinuation else {
             return
         }

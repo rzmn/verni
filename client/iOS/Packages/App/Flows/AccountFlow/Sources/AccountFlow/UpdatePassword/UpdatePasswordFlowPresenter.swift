@@ -2,7 +2,7 @@ import AppBase
 
 class UpdatePasswordFlowPresenter: Presenter {
     let router: AppRouter
-    private weak var flow: UpdatePasswordFlow!
+    private unowned var flow: UpdatePasswordFlow
 
     init(router: AppRouter, flow: UpdatePasswordFlow) {
         self.router = router

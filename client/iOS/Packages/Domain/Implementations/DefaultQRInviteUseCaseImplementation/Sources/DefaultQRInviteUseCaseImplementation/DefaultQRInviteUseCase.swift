@@ -6,7 +6,7 @@ public class DefaultQRInviteUseCase: QRInviteUseCase {
     public init() {}
 
     @MainActor
-    public func createView(background: UIColor, tint: UIColor, url: String, extraBottomPadding: CGFloat = 0) async throws -> UIView {
+    public func createView(background: UIColor, tint: UIColor, url: String) async throws -> UIView {
         let image = await Task {
             try QRCode.build
                 .text(url)
@@ -19,23 +19,18 @@ public class DefaultQRInviteUseCase: QRInviteUseCase {
                 .generate.image(dimension: 1600)
         }.result
         return QrCodeView(
-            image: try image.get(),
-            extraBottomPadding: extraBottomPadding
+            image: try image.get()
         )
     }
 }
 
 class QrCodeView: UIView {
     private let imageView = UIImageView()
-    private let background = UIImageView()
-    private let extraBottomPadding: CGFloat
 
-    init(image: CGImage, extraBottomPadding: CGFloat) {
-        self.extraBottomPadding = extraBottomPadding
+    init(image: CGImage) {
         super.init(frame: .zero)
         imageView.image = UIImage(cgImage: image)
-        background.image = UIImage(cgImage: image)
-        [background, imageView].forEach(addSubview)
+        [imageView].forEach(addSubview)
     }
     
     required init?(coder: NSCoder) {
@@ -51,19 +46,13 @@ class QrCodeView: UIView {
             width: side,
             height: side
         )
-        background.frame = CGRect(
-            x: imageView.frame.minX,
-            y: imageView.frame.minY + extraBottomPadding,
-            width: side,
-            height: side
-        )
     }
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         let side = min(size.width, size.height)
         return CGSize(
             width: side,
-            height: side + extraBottomPadding
+            height: side
         )
     }
 }
