@@ -112,26 +112,24 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             enterCode.isHidden = true
             confirmEmail.isHidden = true
             email.text = "\(state.email) (confirmed)"
-        case .uncorfirmed(_, let hint):
+        case .uncorfirmed(_, let countdown):
             resendCode.isHidden = false
-            if let hint {
+            if let countdown {
                 resendCode.render(
                     config: Button.Config(
                         style: .secondary,
-                        title: String(format: "email_code_send_countdown".localized, hint)
+                        title: String(format: "email_code_send_countdown".localized, countdown),
+                        enabled: state.canResendCode
                     )
                 )
-                resendCode.isEnabled = false
-                resendCode.alpha = 0.64
             } else {
                 resendCode.render(
                     config: Button.Config(
                         style: .secondary,
-                        title: "resend_verification_email_code".localized
+                        title: "resend_verification_email_code".localized,
+                        enabled: state.canResendCode
                     )
                 )
-                resendCode.isEnabled = true
-                resendCode.alpha = 1
             }
             confirmEmail.render(
                 config: Button.Config(

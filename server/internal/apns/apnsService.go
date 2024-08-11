@@ -86,6 +86,6 @@ func New(certPath string, configPath string) (PushNotificationSender, error) {
 		return PushNotificationSender{}, err
 	}
 	return PushNotificationSender{
-		client: apns2.NewClient(cert).Development(),
+		client: apns2.NewClient(cert).Production(),
 	}, nil
 }

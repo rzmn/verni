@@ -124,6 +124,9 @@ extension UpdateEmailFlow: Flow {
     }
 
     func resendCode() async {
+        guard subject.value.canResendCode else {
+            return await presenter.errorHaptic()
+        }
         switch await emailConfirmationUseCase.sendConfirmationCode() {
         case .success:
             await presenter.codeSent()

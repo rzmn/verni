@@ -657,7 +657,7 @@
 				CODE_SIGN_ENTITLEMENTS = Accounty/Resources/Accounty.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = NPZKGHFT2A;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -698,7 +698,7 @@
 				CODE_SIGN_ENTITLEMENTS = Accounty/Resources/Accounty.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = NPZKGHFT2A;
 				GENERATE_INFOPLIST_FILE = YES;
