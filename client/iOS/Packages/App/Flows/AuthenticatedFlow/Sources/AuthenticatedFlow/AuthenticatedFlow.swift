@@ -30,24 +30,26 @@ extension AuthenticatedFlow: Flow {
         case logout
     }
 
-    public func perform(willFinish: ((TerminationEvent) async -> Void)?) async -> TerminationEvent {
+    public func perform() async -> TerminationEvent {
         await presenter.start(tabs: [friendsFlow, accountFlow])
         return await withCheckedContinuation { continuation in
-            flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            flowContinuation = continuation
             Task.detached { [weak self] in
                 guard let self else { return }
-                let termination = await accountFlow.perform()
-                guard let flowContinuation = await self.flowContinuation else {
-                    return
-                }
-                switch termination {
+                switch await accountFlow.perform() {
                 case .logout:
-                    let result: FlowResult = .logout
-                    await flowContinuation.willFinishHandler?(result)
-                    flowContinuation.continuation.resume(returning: result)
+                    await handle(event: .logout)
                 }
             }
         }
+    }
+
+    private func handle(event: TerminationEvent) {
+        guard let flowContinuation else {
+            return
+        }
+        self.flowContinuation = nil
+        flowContinuation.resume(returning: event)
     }
 }
 

@@ -35,7 +35,7 @@ public actor SignUpFlow {
 }
 
 extension SignUpFlow: Flow {
-    public func perform(willFinish: ((ActiveSessionDIContainer?) async -> Void)?) async -> ActiveSessionDIContainer? {
+    public func perform() async -> ActiveSessionDIContainer? {
         emailSubject
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .flatMap { email in
@@ -133,7 +133,7 @@ extension SignUpFlow: Flow {
 
         await presenter.presentSignUp()
         return await withCheckedContinuation { continuation in
-            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.flowContinuation = continuation
         }
     }
 
@@ -152,8 +152,7 @@ extension SignUpFlow: Flow {
                 break
             }
             self.flowContinuation = nil
-            await flowContinuation.willFinishHandler?(session)
-            flowContinuation.continuation.resume(returning: session)
+            flowContinuation.resume(returning: session)
         case .failure(let failure):
             await presenter.errorHaptic()
             switch failure {

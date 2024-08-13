@@ -28,9 +28,9 @@ extension AddFriendByQrFlow: Flow {
         case internalError(Error)
     }
 
-    func perform(willFinish: ((Result<AppUrl, TerminationEvent>) async -> Void)?) async -> Result<AppUrl, TerminationEvent> {
+    func perform() async -> Result<AppUrl, TerminationEvent> {
         await withCheckedContinuation { continuation in
-            self.continuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.continuation = continuation
             Task.detached { @MainActor [weak self] in
                 await self?.presentDataScanner()
             }
@@ -60,11 +60,11 @@ extension AddFriendByQrFlow: Flow {
 
     private func handle(result: Result<AppUrl, TerminationEvent>, dataScannerToDismiss: DataScannerViewController? = nil) async {
         guard let continuation else { return }
-        await continuation.willFinishHandler?(result)
+        self.continuation = nil
         if let dataScannerToDismiss {
             await router.pop(dataScannerToDismiss)
         }
-        continuation.continuation.resume(returning: result)
+        continuation.resume(returning: result)
     }
 }
 

@@ -1,29 +1,44 @@
 import Foundation
 import Combine
 
-public struct FlowContinuation<T> {
-    public let continuation: CheckedContinuation<T, Never>
-    public let willFinishHandler: ((T) async -> Void)?
-
-    public init(continuation: CheckedContinuation<T, Never>, willFinishHandler: ((T) async -> Void)?) {
-        self.continuation = continuation
-        self.willFinishHandler = willFinishHandler
-    }
-}
-
 public protocol Flow {
     associatedtype FlowResult
-    typealias Continuation = FlowContinuation<FlowResult>
-
-    func perform(
-        willFinish: ((FlowResult) async -> Void)?
-    ) async -> FlowResult
+    func perform() async -> FlowResult
 }
 
-public extension Flow {
-    func perform() async -> FlowResult {
-        await perform(willFinish: nil)
+extension Flow {
+    public typealias Continuation = CheckedContinuation<FlowResult, Never>
+}
+
+public protocol FlowEventHandler<FlowEvent>: Identifiable {
+    associatedtype FlowEvent
+    func handle(event: FlowEvent) async
+}
+
+public struct AnyFlowEventHandler<FlowEvent>: FlowEventHandler {
+    public let id: AnyHashable
+    private let handleImpl: (FlowEvent) async -> Void
+
+    public init<Impl: FlowEventHandler>(_ impl: Impl) where Impl.FlowEvent == FlowEvent {
+        id = impl.id
+        handleImpl = impl.handle(event:)
     }
+
+    public init(id: AnyHashable, handle: @escaping (FlowEvent) async -> Void) {
+        self.id = id
+        handleImpl = handle
+    }
+
+    public func handle(event: FlowEvent) async {
+        await handleImpl(event)
+    }
+}
+
+public protocol FlowEvents {
+    associatedtype FlowEvent
+
+    func addHandler<T: FlowEventHandler>(handler: T) async where T.FlowEvent == FlowEvent
+    func removeHandler<T: FlowEventHandler>(handler: T) async where T.FlowEvent == FlowEvent
 }
 
 public protocol TabEmbedFlow: Flow {

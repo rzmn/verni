@@ -4,12 +4,12 @@ import Domain
 import DI
 import Security
 
-actor UpdatePasswordFlow {
+public actor UpdatePasswordFlow {
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
     private lazy var presenter = UpdatePasswordFlowPresenter(router: router, flow: self)
 
-    public let subject = CurrentValueSubject<UpdatePasswordState, Never>(.initial)
+    let subject = CurrentValueSubject<UpdatePasswordState, Never>(.initial)
 
     private let oldPasswordSubject = CurrentValueSubject<String, Never>(UpdatePasswordState.initial.oldPassword)
     private let newPasswordSubject = CurrentValueSubject<String, Never>(UpdatePasswordState.initial.newPassword)
@@ -25,7 +25,7 @@ actor UpdatePasswordFlow {
 
     private var flowContinuation: Continuation?
 
-    init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) {
+    public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) {
         self.router = router
         self.profile = profile
         self.profileEditing = di.profileEditingUseCase()
@@ -35,11 +35,11 @@ actor UpdatePasswordFlow {
 }
 
 extension UpdatePasswordFlow: Flow {
-    enum TerminationEvent: Error {
+    public enum TerminationEvent: Error {
         case canceledManually
     }
 
-    func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
+    public func perform() async -> Result<Profile, TerminationEvent> {
         Publishers.CombineLatest(newPasswordSubject, repeatNewPasswordSubject)
             .map { password, repeatPassword in
                 if repeatPassword.isEmpty {
@@ -103,7 +103,7 @@ extension UpdatePasswordFlow: Flow {
             .store(in: &subscriptions)
 
         return await withCheckedContinuation { continuation in
-            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.flowContinuation = continuation
             Task.detached { @MainActor in
                 await self.presenter.presentPasswordEditing { [weak self] in
                     guard let self else { return }
@@ -167,11 +167,6 @@ extension UpdatePasswordFlow: Flow {
             return
         }
         self.flowContinuation = nil
-        await flowContinuation.willFinishHandler?(result)
-        if case .failure(let error) = result, case .canceledManually = error {
-        } else {
-            await presenter.cancelPasswordEditing()
-        }
-        flowContinuation.continuation.resume(returning: result)
+        flowContinuation.resume(returning: result)
     }
 }

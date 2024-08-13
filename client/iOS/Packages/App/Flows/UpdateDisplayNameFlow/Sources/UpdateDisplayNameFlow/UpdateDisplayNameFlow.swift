@@ -3,7 +3,7 @@ import Domain
 import DI
 import Combine
 
-actor UpdateDisplayNameFlow {
+public actor UpdateDisplayNameFlow {
     let subject = CurrentValueSubject<UpdateDisplayNameState, Never>(.initial)
 
     private let displayNameSubject = CurrentValueSubject<String, Never>("")
@@ -14,9 +14,10 @@ actor UpdateDisplayNameFlow {
     private lazy var presenter = UpdateDisplayNameFlowPresenter(router: router, flow: self)
     private var subscriptions = Set<AnyCancellable>()
 
+    private var flowHandlers = [AnyHashable: AnyFlowEventHandler<FlowEvent>]()
     private var flowContinuation: Continuation?
 
-    init(di: ActiveSessionDIContainer, router: AppRouter) {
+    public init(di: ActiveSessionDIContainer, router: AppRouter) {
         self.router = router
         self.profileReposiroty = di.usersRepository()
         self.profileEditing = di.profileEditingUseCase()
@@ -24,13 +25,13 @@ actor UpdateDisplayNameFlow {
 }
 
 extension UpdateDisplayNameFlow: Flow {
-    enum TerminationEvent: Error {
+    public enum TerminationEvent: Error {
         case canceledManually
     }
 
-    func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
+    public func perform() async -> Result<Profile, TerminationEvent> {
         return await withCheckedContinuation { continuation in
-            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.flowContinuation = continuation
             self.displayNameSubject
                 .map {
                     let displayNameHint: String?
@@ -91,11 +92,24 @@ extension UpdateDisplayNameFlow: Flow {
             return
         }
         self.flowContinuation = nil
-        await flowContinuation.willFinishHandler?(result)
         if case .failure(let error) = result, case .canceledManually = error {
         } else {
             await presenter.dismissDisplayNameEditing()
         }
-        flowContinuation.continuation.resume(returning: result)
+        flowContinuation.resume(returning: result)
+    }
+}
+
+extension UpdateDisplayNameFlow: FlowEvents {
+    public enum FlowEvent {
+        case profileUpdated(Profile)
+    }
+
+    public func addHandler<T>(handler: T) async where T : FlowEventHandler, FlowEvent == T.FlowEvent {
+        flowHandlers[handler.id] = AnyFlowEventHandler(handler)
+    }
+
+    public func removeHandler<T>(handler: T) async where T : FlowEventHandler, FlowEvent == T.FlowEvent {
+        flowHandlers[handler.id] = nil
     }
 }

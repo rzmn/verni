@@ -4,6 +4,11 @@ import DI
 import AppBase
 import Combine
 internal import DesignSystem
+internal import UpdateEmailFlow
+internal import UpdateDisplayNameFlow
+internal import UpdatePasswordFlow
+internal import QrPreviewFlow
+internal import UpdateAvatarFlow
 
 public actor AccountFlow {
     let subject = CurrentValueSubject<AccountState, Never>(.initial)
@@ -34,7 +39,7 @@ extension AccountFlow: TabEmbedFlow {
         case logout
     }
     
-    public func perform(willFinish: ((TerminationEvent) async -> Void)?) async -> TerminationEvent {
+    public func perform() async -> TerminationEvent {
         subject.send(AccountState(info: .loading(previous: subject.value.info)))
         if let profile = await profileOfflineRepository.getHostInfo() {
             subject.send(AccountState(info: .loaded(profile)))
@@ -56,7 +61,7 @@ extension AccountFlow: TabEmbedFlow {
             }
         }
         return await withCheckedContinuation { continuation in
-            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.flowContinuation = continuation
         }
     }
 
@@ -71,94 +76,54 @@ extension AccountFlow: TabEmbedFlow {
 
     func updateEmail() async {
         await presenter.submitHaptic()
-        let profile: Profile
-        if case .loaded(let _profile) = subject.value.info {
-            profile = _profile
+        guard let profile = await getProfile() else {
+            return
         }
-        else if let _profile = await profileOfflineRepository.getHostInfo() {
-            profile = _profile
-        } else {
-            await presenter.presentLoading()
-            switch await profileRepository.getHostInfo() {
-            case .success(let _profile):
-                profile = _profile
-            case .failure(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
+        let flow = await UpdateEmailFlow(di: di, router: router, profile: profile)
+        let handler = AnyFlowEventHandler(
+            id: unsafeBitCast(self, to: Int.self),
+            handle: { [unowned self] (event: UpdateEmailFlow.FlowEvent) in
+                switch event {
+                case .profileUpdated(let profile):
+                    subject.send(AccountState(info: .loaded(profile)))
                 }
-                return
-            }
-        }
-        let flow = UpdateEmailFlow(di: di, router: router, profile: profile)
-        _ = await flow.perform(
-            willFinish: { [weak self] result in
-                guard let self else { return }
-                guard case .success(let profile) = result else {
-                    return
-                }
-                subject.send(AccountState(info: .loaded(profile)))
             }
         )
+        await flow.addHandler(handler: handler)
+        _ = await flow.perform()
+        await flow.removeHandler(handler: handler)
     }
 
     func updatePassword() async {
         await presenter.submitHaptic()
-        let profile: Profile
-        if case .loaded(let _profile) = subject.value.info {
-            profile = _profile
-        }
-        else if let _profile = await profileOfflineRepository.getHostInfo() {
-            profile = _profile
-        } else {
-            await presenter.presentLoading()
-            switch await profileRepository.getHostInfo() {
-            case .success(let _profile):
-                profile = _profile
-            case .failure(let error):
-                switch error {
-                case .noConnection:
-                    await presenter.presentNoConnection()
-                case .notAuthorized:
-                    await presenter.presentNotAuthorized()
-                case .other(let error):
-                    await presenter.presentInternalError(error)
-                }
-                return
-            }
+        guard let profile = await getProfile() else {
+            return
         }
         let flow = UpdatePasswordFlow(di: di, router: router, profile: profile)
-        _ = await flow.perform(
-            willFinish: { [weak self] result in
-                guard let self else { return }
-                guard case .success(let profile) = result else {
-                    return
-                }
-                subject.send(AccountState(info: .loaded(profile)))
-            }
-        )
+        _ = await flow.perform()
     }
 
     func updateDisplayName() async {
         await presenter.submitHaptic()
+
         let flow = UpdateDisplayNameFlow(di: di, router: router)
-        _ = await flow.perform(
-            willFinish: { [weak self] result in
-                guard let self else { return }
-                guard case .success(let profile) = result else {
-                    return
+        let handler = AnyFlowEventHandler(
+            id: unsafeBitCast(self, to: Int.self),
+            handle: { [unowned self] (event: UpdateDisplayNameFlow.FlowEvent) in
+                switch event {
+                case .profileUpdated(let profile):
+                    subject.send(AccountState(info: .loaded(profile)))
                 }
-                subject.send(AccountState(info: .loaded(profile)))
             }
         )
+        await flow.addHandler(handler: handler)
+        _ = await flow.perform()
+        await flow.removeHandler(handler: handler)
     }
 
     func showQr() async {
-        guard let profile = subject.value.info.value else {
+        await presenter.submitHaptic()
+        guard let profile = await getProfile() else {
             return
         }
         let flow: QrPreviewFlow
@@ -175,8 +140,34 @@ extension AccountFlow: TabEmbedFlow {
             return
         }
         self.flowContinuation = nil
-        let result: FlowResult = .logout
-        await flowContinuation.willFinishHandler?(result)
-        flowContinuation.continuation.resume(returning: result)
+        flowContinuation.resume(returning: .logout)
+    }
+}
+
+extension AccountFlow {
+    private func getProfile() async -> Profile? {
+        if case .loaded(let profile) = subject.value.info {
+            return profile
+        }
+        else if let profile = await profileOfflineRepository.getHostInfo() {
+            return profile
+        } else {
+            await presenter.presentLoading()
+            switch await profileRepository.getHostInfo() {
+            case .success(let profile):
+                await presenter.dismissLoading()
+                return profile
+            case .failure(let error):
+                switch error {
+                case .noConnection:
+                    await presenter.presentNoConnection()
+                case .notAuthorized:
+                    await presenter.presentNotAuthorized()
+                case .other(let error):
+                    await presenter.presentInternalError(error)
+                }
+                return nil
+            }
+        }
     }
 }

@@ -4,22 +4,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "AccountFlow",
+    name: "UpdatePasswordFlow",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AccountFlow",
-            targets: ["AccountFlow"]
+            name: "UpdatePasswordFlow",
+            targets: ["UpdatePasswordFlow"]
         ),
     ],
     dependencies: [
-        .package(path: "../UpdateAvatarFlow"),
-        .package(path: "../QrPreviewFlow"),
-        .package(path: "../UpdateDisplayNameFlow"),
-        .package(path: "../UpdateEmailFlow"),
-        .package(path: "../UpdatePasswordFlow"),
         .package(path: "../../AppBase"),
         .package(path: "../../DesignSystem"),
         .package(path: "../../../DI/DI"),
@@ -29,7 +24,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AccountFlow",
+            name: "UpdatePasswordFlow",
             dependencies: [
                 "DesignSystem",
                 "DI",
@@ -37,11 +32,6 @@ let package = Package(
                 "Logging",
                 "Base",
                 "AppBase",
-                "UpdateEmailFlow",
-                "UpdateDisplayNameFlow",
-                "UpdatePasswordFlow",
-                "QrPreviewFlow",
-                "UpdateAvatarFlow",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

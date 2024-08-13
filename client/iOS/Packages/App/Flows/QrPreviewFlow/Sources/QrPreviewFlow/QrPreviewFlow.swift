@@ -4,7 +4,7 @@ import AppBase
 import UIKit
 internal import DesignSystem
 
-actor QrPreviewFlow {
+public actor QrPreviewFlow {
     enum QrGenerateError: Error {
         case invalidUrl
         case internalError(Error)
@@ -14,7 +14,7 @@ actor QrPreviewFlow {
     private let router: AppRouter
     private var continuation: Continuation?
 
-    init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) async throws {
+    public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) async throws {
         self.router = router
         guard let url = AppUrl.users(.show(profile.user.id)).url else {
             throw QrGenerateError.invalidUrl
@@ -37,11 +37,11 @@ actor QrPreviewFlow {
 }
 
 extension QrPreviewFlow: Flow {
-    typealias FlowResult = Void
+    public typealias FlowResult = Void
 
-    func perform(willFinish: ((FlowResult) async -> Void)?) async -> FlowResult {
+    public func perform() async -> FlowResult {
         await withCheckedContinuation { continuation in
-            self.continuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.continuation = continuation
             Task.detached { @MainActor [weak self] in
                 guard let self else { return }
                 let controller = QrPreviewViewController(model: self)
@@ -58,7 +58,6 @@ extension QrPreviewFlow: Flow {
             return
         }
         self.continuation = nil
-        await continuation.willFinishHandler?(())
-        continuation.continuation.resume(returning: ())
+        continuation.resume(returning: ())
     }
 }

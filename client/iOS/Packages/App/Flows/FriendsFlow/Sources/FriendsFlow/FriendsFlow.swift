@@ -29,7 +29,7 @@ public actor FriendsFlow {
 
     func addViaQr() async {
         let flow = await AddFriendByQrFlow(router: router)
-        switch await flow.perform(willFinish: nil) {
+        switch await flow.perform() {
         case .success(let url):
             await router.open(url: url)
         case .failure:
@@ -106,11 +106,8 @@ public actor FriendsFlow {
 }
 
 extension FriendsFlow: TabEmbedFlow {
-    public func perform(willFinish: ((Int) async -> Void)?) async -> Int {
-        .zero
-    }
-    
-    public typealias FlowResult = Int
+    public typealias FlowResult = Void
+    public func perform() async -> FlowResult {}
 
     @MainActor public func viewController() async -> Routable {
         await presenter.tabViewController

@@ -35,9 +35,9 @@ extension UserPreviewFlow: Flow {
         case canceledManually
     }
 
-    func perform(willFinish: ((TerminationEvent) async -> Void)?) async -> TerminationEvent {
+    func perform() async -> TerminationEvent {
         return await withCheckedContinuation { continuation in
-            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.flowContinuation = continuation
             Task.detached { @MainActor in
                 await self.presenter.openUserPreview { [weak self] in
                     guard let self else { return }
@@ -52,12 +52,11 @@ extension UserPreviewFlow: Flow {
             return
         }
         self.flowContinuation = nil
-        await flowContinuation.willFinishHandler?(result)
         if case .canceledManually = result {
         } else {
             await presenter.closeUserPreview()
         }
-        flowContinuation.continuation.resume(returning: result)
+        flowContinuation.resume(returning: result)
     }
 }
 

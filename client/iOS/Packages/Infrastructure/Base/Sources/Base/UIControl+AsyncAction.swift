@@ -8,4 +8,10 @@ public extension UIControl {
             }
         }), for: event)
     }
+
+    func addAction(_ block: @escaping @MainActor () -> Void, for event: Event) {
+        addAction(UIAction(handler: { _ in
+            block()
+        }), for: event)
+    }
 }

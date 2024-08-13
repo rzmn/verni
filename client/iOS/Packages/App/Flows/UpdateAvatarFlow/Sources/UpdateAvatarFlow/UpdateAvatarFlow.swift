@@ -4,14 +4,14 @@ import AppBase
 import UIKit
 import AVKit
 
-actor UpdateAvatarFlow {
+public actor UpdateAvatarFlow {
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
     private let profileRepository: UsersRepository
     private var pickPhotoDelegateAdapter: PickPhotoDelegateAdapter?
     private let presenter: UpdateAvatarFlowPresenter
 
-    init(di: ActiveSessionDIContainer, router: AppRouter) {
+    public init(di: ActiveSessionDIContainer, router: AppRouter) {
         self.router = router
         self.profileEditing = di.profileEditingUseCase()
         self.profileRepository = di.usersRepository()
@@ -29,13 +29,12 @@ extension UpdateAvatarFlow: Flow {
         case internalError
     }
 
-    enum TerminationEvent: Error {
+    public enum TerminationEvent: Error {
         case canceled
     }
 
-    func perform(willFinish: ((Result<Profile, TerminationEvent>) async -> Void)?) async -> Result<Profile, TerminationEvent> {
+    public func perform() async -> Result<Profile, TerminationEvent> {
         let result = await doPerform()
-        await willFinish?(result)
         return result
     }
 

@@ -43,9 +43,9 @@ extension SignInFlow: TabEmbedFlow {
         await presenter.tabViewController
     }
 
-    public func perform(willFinish: ((ActiveSessionDIContainer) async -> Void)?) async -> ActiveSessionDIContainer {
+    public func perform() async -> ActiveSessionDIContainer {
         await withCheckedContinuation { continuation in
-            self.flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            self.flowContinuation = continuation
         }
     }
 
@@ -153,7 +153,6 @@ extension SignInFlow: TabEmbedFlow {
         }
         _ = await session.usersRepository().getHostInfo()
         self.flowContinuation = nil
-        await flowContinuation.willFinishHandler?(session)
-        flowContinuation.continuation.resume(returning: session)
+        flowContinuation.resume(returning: session)
     }
 }

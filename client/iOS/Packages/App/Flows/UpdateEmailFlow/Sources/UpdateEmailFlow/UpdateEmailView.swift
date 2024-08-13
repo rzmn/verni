@@ -38,11 +38,11 @@ class UpdateEmailView: View<UpdateEmailFlow> {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         enterCode.delegate = self
         resendCode.addAction({ [weak model] in
-            await model?.resendCode()
+            model?.resendCode()
         }, for: .touchUpInside)
         confirmEmail.addAction({ [weak self] in
             self?.endEditing(true)
-            await self?.model.confirm()
+            self?.model.confirm()
         }, for: .touchUpInside)
         enterCode.addAction({ [weak model, weak enterCode] in
             model?.update(code: enterCode?.text ?? "")
@@ -112,9 +112,9 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             enterCode.isHidden = true
             confirmEmail.isHidden = true
             email.text = "\(state.email) (confirmed)"
-        case .uncorfirmed(_, let countdown):
+        case .uncorfirmed(let uncorfirmed):
             resendCode.isHidden = false
-            if let countdown {
+            if let countdown = uncorfirmed.resendCountdownHint {
                 resendCode.render(
                     config: Button.Config(
                         style: .secondary,

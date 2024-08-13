@@ -22,10 +22,10 @@ public actor UnauthenticatedFlow {
 }
 
 extension UnauthenticatedFlow: Flow {
-    public func perform(willFinish: ((ActiveSessionDIContainer) async -> Void)?) async -> ActiveSessionDIContainer {
+    public func perform() async -> ActiveSessionDIContainer {
         await presenter.start(tabs: [signInFlow])
         return await withCheckedContinuation { continuation in
-            flowContinuation = Continuation(continuation: continuation, willFinishHandler: willFinish)
+            flowContinuation = continuation
             Task.detached { [weak self] in
                 guard let self else { return }
                 await handle(result: await signInFlow.perform())
@@ -38,7 +38,6 @@ extension UnauthenticatedFlow: Flow {
             return
         }
         self.flowContinuation = nil
-        await flowContinuation.willFinishHandler?(result)
-        flowContinuation.continuation.resume(returning: result)
+        flowContinuation.resume(returning: result)
     }
 }
