@@ -20,11 +20,12 @@ internal import DefaultValidationUseCasesImplementation
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultEmailConfirmationUseCaseImplementation
 internal import DefaultPushRegistrationUseCaseImplementation
+internal import DefaultSaveCredendialsUseCaseImplementation
 internal import PersistentStorageSQLite
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
     public func appCommon() -> AppCommon {
-        AppCommonDependencies(api: api, avatarsRepository: avatarsRepository)
+        appCommon
     }
 
     public func logout() async {
@@ -141,11 +142,18 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 public class DefaultDependenciesAssembly: DIContainer {    
     private lazy var anonymousApi = anonymousApiFactory().create()
     private lazy var avatarsRepository = DefaultAvatarsRepository(api: anonymousApi)
+    private let apiEndpoint = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
 
     public init() {}
 
     public func appCommon() -> any AppCommon {
-        AppCommonDependencies(api: anonymousApi, avatarsRepository: avatarsRepository)
+        AppCommonDependencies(
+            api: anonymousApi,
+            avatarsRepository: avatarsRepository,
+            saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
+                website: apiEndpoint
+            )
+        )
     }
 
     public func authUseCase() -> any AuthUseCaseReturningActiveSession {
@@ -154,7 +162,7 @@ public class DefaultDependenciesAssembly: DIContainer {
                 api: anonymousApi,
                 apiServiceFactory: apiServiceFactory(), 
                 persistencyFactory: persistencyFactory(), 
-                avatarsRepository: avatarsRepository,
+                appCommon: appCommon(),
                 apiFactoryProvider: self.autenticatedApiFactory
             )
         )
@@ -168,7 +176,7 @@ extension DefaultDependenciesAssembly {
                 prefix: "[net] "
             ),
             endpoint: Endpoint(
-                path: "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
+                path: apiEndpoint
             )
         )
     }

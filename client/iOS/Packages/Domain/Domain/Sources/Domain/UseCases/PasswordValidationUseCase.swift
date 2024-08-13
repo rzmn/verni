@@ -1,8 +1,9 @@
-public enum PasswordValidationError: Error {
-    case tooShort(minAllowedLength: Int)
-    case invalidFormat
+public enum PasswordValidationVerdict: Error {
+    case invalid(message: String)
+    case weak(message: String)
+    case strong
 }
 
 public protocol PasswordValidationUseCase {
-    func validatePassword(_ password: String) async -> Result<Void, PasswordValidationError>
+    func validatePassword(_ password: String) -> PasswordValidationVerdict
 }

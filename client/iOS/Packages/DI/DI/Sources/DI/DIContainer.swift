@@ -4,8 +4,9 @@ public protocol AuthUseCaseReturningActiveSession: AuthUseCase where Self.Author
 
 public protocol AppCommon {
     func localEmailValidationUseCase() -> EmailValidationUseCase
-    func passwordValidationUseCase() -> PasswordValidationUseCase
+    func localPasswordValidationUseCase() -> PasswordValidationUseCase
     func avatarsRepository() -> AvatarsRepository
+    func saveCredentials() -> SaveCredendialsUseCase
 }
 
 public protocol AppCommonCovertible {

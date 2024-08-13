@@ -4,26 +4,27 @@ import ApiService
 import AuthSession
 import DataTransferObjects
 import PersistentStorage
+import DI
 
 public class DefaultAuthUseCase {
     private let api: ApiProtocol
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory
-    private let avatarsRepository: AvatarsRepository
+    private let appCommon: AppCommon
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
 
     public init(
         api: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
-        avatarsRepository: AvatarsRepository,
+        appCommon: AppCommon,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) {
         self.api = api
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
         self.apiFactoryProvider = apiFactoryProvider
-        self.avatarsRepository = avatarsRepository
+        self.appCommon = appCommon
     }
 }
 
@@ -33,7 +34,7 @@ extension DefaultAuthUseCase: AuthUseCase {
             anonymousApi: api,
             apiServiceFactory: apiServiceFactory,
             persistencyFactory: persistencyFactory, 
-            avatarsRepository: avatarsRepository,
+            appCommon: appCommon,
             apiFactoryProvider: apiFactoryProvider
         ) else {
             return.failure(.hasNoSession)
@@ -60,7 +61,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
                         persistencyFactory: persistencyFactory, 
-                        avatarsRepository: avatarsRepository, 
+                        appCommon: appCommon,
                         apiFactoryProvider: apiFactoryProvider
                     )
                 )
@@ -108,7 +109,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
                         persistencyFactory: persistencyFactory, 
-                        avatarsRepository: avatarsRepository,
+                        appCommon: appCommon,
                         apiFactoryProvider: apiFactoryProvider
                     )
                 )

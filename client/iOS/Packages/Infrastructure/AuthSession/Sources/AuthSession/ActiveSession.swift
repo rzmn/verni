@@ -1,5 +1,6 @@
 import Foundation
 import Api
+import DI
 import PersistentStorage
 import ApiService
 import Domain
@@ -9,7 +10,7 @@ public class ActiveSession: TokenRefresher {
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
     private let anonymousApi: ApiProtocol
 
-    public let avatarsRepository: AvatarsRepository
+    public let appCommon: AppCommon
     public private(set) var persistency: Persistency
     public private(set) var accessToken: String?
 
@@ -20,14 +21,14 @@ public class ActiveSession: TokenRefresher {
         refreshToken: String,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
-        avatarsRepository: AvatarsRepository,
+        appCommon: AppCommon,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async throws -> ActiveSession {
         let persistency = try persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
         return ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
-            avatarsRepository: avatarsRepository,
+            appCommon: appCommon,
             accessToken: accessToken,
             apiFactoryProvider: apiFactoryProvider
         )
@@ -37,7 +38,7 @@ public class ActiveSession: TokenRefresher {
         anonymousApi: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
-        avatarsRepository: AvatarsRepository,
+        appCommon: AppCommon,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async -> ActiveSession? {
         guard let persistency = persistencyFactory.awake() else {
@@ -46,7 +47,7 @@ public class ActiveSession: TokenRefresher {
         return ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
-            avatarsRepository: avatarsRepository,
+            appCommon: appCommon,
             accessToken: nil,
             apiFactoryProvider: apiFactoryProvider
         )
@@ -55,7 +56,7 @@ public class ActiveSession: TokenRefresher {
     private init(
         anonymousApi: ApiProtocol,
         persistency: Persistency,
-        avatarsRepository: AvatarsRepository,
+        appCommon: AppCommon,
         accessToken: String?,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) {
@@ -63,7 +64,7 @@ public class ActiveSession: TokenRefresher {
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
         self.apiFactoryProvider = apiFactoryProvider
-        self.avatarsRepository = avatarsRepository
+        self.appCommon = appCommon
     }
 
     private var refreshTask: Task<Result<Void, RefreshTokenFailureReason>, Never>?

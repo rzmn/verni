@@ -11,9 +11,9 @@ extension EmailUpdateError {
         case .api(let errorCode, _):
             switch errorCode {
             case .loginAlreadyTaken:
-                self = .validationError(.alreadyTaken)
+                self = .alreadyTaken
             case .wrongCredentialsFormat:
-                self = .validationError(.invalidFormat)
+                self = .wrongFormat
             default:
                 self = .other(GeneralError(apiError: apiError))
             }

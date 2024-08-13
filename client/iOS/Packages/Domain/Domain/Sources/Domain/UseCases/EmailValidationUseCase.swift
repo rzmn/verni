@@ -1,9 +1,11 @@
-public enum EmailValidationError: Error {
-    case invalidFormat
-    case alreadyTaken
-    case other(GeneralError)
+public struct EmailValidationError: Error {
+    public let message: String
+
+    public init(message: String) {
+        self.message = message
+    }
 }
 
 public protocol EmailValidationUseCase {
-    func validateEmail(_ email: String) async -> Result<Void, EmailValidationError>
+    func validateEmail(_ email: String) -> Result<Void, EmailValidationError>
 }

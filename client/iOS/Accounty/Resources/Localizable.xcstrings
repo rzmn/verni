@@ -749,6 +749,17 @@
         }
       }
     },
+    "password_character_not_allowed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Character %s is not allowed"
+          }
+        }
+      }
+    },
     "password_invalid_format" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -778,6 +789,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Password length at least %d"
+          }
+        }
+      }
+    },
+    "password_weak_warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password is weak"
           }
         }
       }

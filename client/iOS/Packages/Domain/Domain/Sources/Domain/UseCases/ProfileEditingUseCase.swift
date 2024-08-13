@@ -1,12 +1,13 @@
 import Foundation
 
 public enum EmailUpdateError: Error {
-    case validationError(EmailValidationError)
+    case alreadyTaken
+    case wrongFormat
     case other(GeneralError)
 }
 
 public enum PasswordUpdateError: Error {
-    case validationError(PasswordValidationError)
+    case validationError
     case incorrectOldPassword
     case other(GeneralError)
 }

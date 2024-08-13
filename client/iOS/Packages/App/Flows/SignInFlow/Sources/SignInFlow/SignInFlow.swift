@@ -3,7 +3,6 @@ import Domain
 import DI
 import AppBase
 import Combine
-import Security
 internal import SignUpFlow
 internal import DesignSystem
 internal import ProgressHUD
@@ -21,6 +20,7 @@ public actor SignInFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let localEmailValidator: EmailValidationUseCase
     private let passwordValidator: PasswordValidationUseCase
+    private let saveCredentials: SaveCredendialsUseCase
     private let router: AppRouter
 
     private lazy var presenter = SignInFlowPresenter(router: router, flow: self)
@@ -32,7 +32,8 @@ public actor SignInFlow {
     ) async {
         authUseCase = di.authUseCase()
         localEmailValidator = di.appCommon().localEmailValidationUseCase()
-        passwordValidator = di.appCommon().passwordValidationUseCase()
+        passwordValidator = di.appCommon().localPasswordValidationUseCase()
+        saveCredentials = di.appCommon().saveCredentials()
         self.router = router
         self.signUpFlow = await SignUpFlow(di: di, router: router)
     }
@@ -53,29 +54,13 @@ extension SignInFlow: TabEmbedFlow {
         await presenter.submitHaptic()
         emailSubject
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
-            .flatMap { email in
-                Future<Result<Void, EmailValidationError>, Never>.init { promise in
-                    guard !email.isEmpty else {
-                        return promise(.success(.success(())))
-                    }
-                    Task {
-                        promise(.success(await self.localEmailValidator.validateEmail(email)))
-                    }
-                }
-            }.map { result -> String? in
+            .map(localEmailValidator.validateEmail)
+            .map { result -> String? in
                 switch result {
                 case .success:
                     return nil
                 case .failure(let error):
-                    switch error {
-                    case .invalidFormat:
-                        return "email_invalid_fmt".localized
-                    case .alreadyTaken:
-                        return "email_already_taken".localized
-                    case .other:
-                        assertionFailure("unexpected err during local validation")
-                        return nil
-                    }
+                    return error.message
                 }
             }
             .sink(receiveValue: emailHintSubject.send)
@@ -108,13 +93,7 @@ extension SignInFlow: TabEmbedFlow {
         await presenter.presentLoading()
         switch await authUseCase.login(credentials: credentials) {
         case .success(let session):
-            SecAddSharedWebCredential(
-                "d5d29sfljfs1v5kq0382.apigw.yandexcloud.net" as CFString,
-                credentials.email as CFString,
-                credentials.password as CFString, { error in
-                    print("\(error.debugDescription)")
-                }
-            )
+            await saveCredentials.save(email: credentials.email, password: credentials.password)
             await handle(session: session)
         case .failure(let failure):
             await presenter.errorHaptic()

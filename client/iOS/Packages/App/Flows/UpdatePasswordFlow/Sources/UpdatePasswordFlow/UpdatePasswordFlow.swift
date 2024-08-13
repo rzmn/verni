@@ -2,7 +2,6 @@ import AppBase
 import Combine
 import Domain
 import DI
-import Security
 
 public actor UpdatePasswordFlow {
     private let router: AppRouter
@@ -20,6 +19,7 @@ public actor UpdatePasswordFlow {
     private var subscriptions = Set<AnyCancellable>()
 
     private let passwordValidation: PasswordValidationUseCase
+    private let saveCredentials: SaveCredendialsUseCase
     private let profileRepository: UsersRepository
     private let profile: Profile
 
@@ -28,9 +28,10 @@ public actor UpdatePasswordFlow {
     public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) {
         self.router = router
         self.profile = profile
+        self.saveCredentials = di.appCommon().saveCredentials()
         self.profileEditing = di.profileEditingUseCase()
         self.profileRepository = di.usersRepository()
-        self.passwordValidation = di.appCommon().passwordValidationUseCase()
+        self.passwordValidation = di.appCommon().localPasswordValidationUseCase()
     }
 }
 
@@ -58,26 +59,13 @@ extension UpdatePasswordFlow: Flow {
             .store(in: &subscriptions)
 
         newPasswordSubject
-            .flatMap { password in
-                Future<Result<Void, PasswordValidationError>, Never>.init { promise in
-                    guard !password.isEmpty else {
-                        return promise(.success(.success(())))
-                    }
-                    Task {
-                        promise(.success(await self.passwordValidation.validatePassword(password)))
-                    }
-                }
-            }.map { result -> String? in
+            .map(passwordValidation.validatePassword)
+            .map { result -> String? in
                 switch result {
-                case .success:
+                case .strong:
                     return nil
-                case .failure(let error):
-                    switch error {
-                    case .tooShort(let minAllowedLength):
-                        return String(format: "password_too_short".localized, minAllowedLength)
-                    case .invalidFormat:
-                        return "password_invalid_format".localized
-                    }
+                case .weak(let message), .invalid(let message):
+                    return message
                 }
             }
             .sink(receiveValue: newPasswordHint.send)
@@ -120,13 +108,7 @@ extension UpdatePasswordFlow: Flow {
         let newPassword = repeatNewPasswordSubject.value
         switch await profileEditing.updatePassword(old: oldPasswordSubject.value, new: newPassword) {
         case .success:
-            SecAddSharedWebCredential(
-                "d5d29sfljfs1v5kq0382.apigw.yandexcloud.net" as CFString,
-                profile.email as CFString,
-                newPassword as CFString, { error in
-                    print("\(error.debugDescription)")
-                }
-            )
+            await saveCredentials.save(email: profile.email, password: newPassword)
             switch await profileRepository.getHostInfo() {
             case .success(let profile):
                 await presenter.successHaptic()

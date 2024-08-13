@@ -13,7 +13,7 @@ extension PasswordUpdateError {
             case .incorrectCredentials:
                 self = .incorrectOldPassword
             case .wrongCredentialsFormat:
-                self = .validationError(.invalidFormat)
+                self = .validationError
             default:
                 self = .other(GeneralError(apiError: apiError))
             }

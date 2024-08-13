@@ -29,7 +29,7 @@ public actor SignUpFlow {
     public init(di: DIContainer, router: AppRouter) async {
         self.router = router
         localEmailValidator = di.appCommon().localEmailValidationUseCase()
-        localPasswordValidator = di.appCommon().passwordValidationUseCase()
+        localPasswordValidator = di.appCommon().localPasswordValidationUseCase()
         authUseCase = di.authUseCase()
     }
 }
@@ -38,54 +38,25 @@ extension SignUpFlow: Flow {
     public func perform() async -> ActiveSessionDIContainer? {
         emailSubject
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
-            .flatMap { email in
-                Future<Result<Void, EmailValidationError>, Never>.init { promise in
-                    guard !email.isEmpty else {
-                        return promise(.success(.success(())))
-                    }
-                    Task {
-                        promise(.success(await self.localEmailValidator.validateEmail(email)))
-                    }
-                }
-            }.map { result -> String? in
+            .map(localEmailValidator.validateEmail)
+            .map { result -> String? in
                 switch result {
                 case .success:
                     return nil
                 case .failure(let error):
-                    switch error {
-                    case .invalidFormat:
-                        return "email_invalid_fmt".localized
-                    case .alreadyTaken:
-                        return "email_already_taken".localized
-                    case .other:
-                        assertionFailure("unexpected err during local validation")
-                        return nil
-                    }
+                    return error.message
                 }
             }
             .sink(receiveValue: emailHintSubject.send)
             .store(in: &subscriptions)
         passwordSubject
-            .flatMap { password in
-                Future<Result<Void, PasswordValidationError>, Never>.init { promise in
-                    guard !password.isEmpty else {
-                        return promise(.success(.success(())))
-                    }
-                    Task {
-                        promise(.success(await self.localPasswordValidator.validatePassword(password)))
-                    }
-                }
-            }.map { result -> String? in
+            .map(localPasswordValidator.validatePassword)
+            .map { result -> String? in
                 switch result {
-                case .success:
+                case .strong:
                     return nil
-                case .failure(let error):
-                    switch error {
-                    case .tooShort(let minAllowedLength):
-                        return String(format: "password_too_short".localized, minAllowedLength)
-                    case .invalidFormat:
-                        return "password_invalid_format".localized
-                    }
+                case .weak(let message), .invalid(let message):
+                    return message
                 }
             }
             .sink(receiveValue: passwordHintSubject.send)
