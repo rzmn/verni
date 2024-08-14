@@ -2,15 +2,32 @@ import Domain
 import AppBase
 
 struct FriendsState {
-    struct Content: Equatable {
-        let upcomingRequests: [User]
-        let pendingRequests: [User]
-        let friends: [User]
+    struct Item: Equatable, Identifiable {
+        let user: User
+        let balance: [Currency: Cost]
+
+        var id: User.ID {
+            user.id
+        }
     }
+    struct Section: Equatable {
+        let id: FriendshipKind
+        let items: [Item]
+
+        static var order: [FriendshipKind] {
+            [.incoming, .pending, .friends]
+        }
+    }
+
+    struct Content: Equatable {
+        let sections: [Section]
+    }
+
     struct Failure: Error, Equatable {
         let hint: String
         let iconName: String?
     }
+
     let content: Loadable<Content, Failure>
 
     init(content: Loadable<Content, Failure>) {

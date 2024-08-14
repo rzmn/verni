@@ -7,13 +7,14 @@ internal import DesignSystem
 internal import ProgressHUD
 
 public actor FriendsFlow {
-    let subject = CurrentValueSubject<FriendsState, Never>(.initial)
+    @MainActor let subject = CurrentValueSubject<FriendsState, Never>(.initial)
 
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
-    private let editingUseCase: ProfileEditingUseCase
     private let profileRepository: UsersRepository
-    private let profileOfflineRepository: UsersOfflineRepository
+    private let spendingsRepository: SpendingsRepository
+    private let spendingsOfflineRepository: SpendingsOfflineRepository
+    private let friendsOfflineRepository: FriendsOfflineRepository
     private let friendListRepository: FriendsRepository
     private lazy var presenter = FriendsFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
@@ -21,10 +22,11 @@ public actor FriendsFlow {
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         self.router = router
         self.di = di
-        editingUseCase = di.profileEditingUseCase()
+        spendingsRepository = di.spendingsRepository()
         profileRepository = di.usersRepository()
         friendListRepository = di.friendListRepository()
-        profileOfflineRepository = di.usersOfflineRepository()
+        friendsOfflineRepository = di.friendsOfflineRepository()
+        spendingsOfflineRepository = di.spendingsOfflineRepository()
     }
 
     func addViaQr() async {
@@ -42,7 +44,35 @@ public actor FriendsFlow {
         _ = await flow.perform()
     }
 
-    func refresh() async {
+    @MainActor
+    func refresh() {
+        let currentState = subject.value.content
+        subject.send(FriendsState(subject.value, content: .loading(previous: currentState)))
+        if case .initial = currentState {
+            Task.detached {
+                await self.loadFirstTime()
+            }
+        } else {
+            Task.detached {
+                await self.doRefresh()
+            }
+        }
+    }
+
+    private func loadFirstTime() async {
+        async let asyncFriends = friendsOfflineRepository.getFriends(set: Set(FriendshipKind.allCases))
+        async let asyncSpendings = spendingsOfflineRepository.getSpendingCounterparties()
+
+        let cached = await (friends: asyncFriends, spendings: asyncSpendings)
+
+        guard let friends = cached.friends, let spendings = cached.spendings else {
+            return await doRefresh()
+        }
+        subject.send(FriendsState(content: .loaded(build(friends: friends, spendings: spendings))))
+        await doRefresh()
+    }
+
+    private func doRefresh() async {
         let hudShown: Bool
         if case .initial = subject.value.content {
             hudShown = true
@@ -95,13 +125,40 @@ public actor FriendsFlow {
     }
 
     private func loadData() async -> Result<FriendsState.Content, GeneralError> {
-        await friendListRepository.getFriends(set: [.friends, .incoming, .pending]).map { data in
-            FriendsState.Content(
-                upcomingRequests: data[.incoming] ?? [],
-                pendingRequests: data[.pending] ?? [],
-                friends: data[.friends] ?? []
+        async let asyncFriends = friendListRepository.getFriends(set: Set(FriendshipKind.allCases))
+        async let asyncSpendings = spendingsRepository.getSpendingCounterparties()
+
+        let data = await (asyncFriends, asyncSpendings)
+
+        switch data {
+        case (.success(let friends), .success(let spendings)):
+            return .success(build(friends: friends, spendings: spendings))
+        case (_, .failure(let error)), (.failure(let error), _):
+            return .failure(error)
+        }
+    }
+
+    private func build(friends: [FriendshipKind: [User]], spendings: [SpendingsPreview]) -> FriendsState.Content {
+        let userToSpendings = spendings.reduce(into: [:]) { dict, preview in
+            dict[preview.counterparty] = preview.balance
+        }
+        let buildSection = { (sectionIdentifier: FriendshipKind) -> FriendsState.Section? in
+            guard let users = friends[sectionIdentifier] else {
+                return nil
+            }
+            return FriendsState.Section(
+                id: sectionIdentifier,
+                items: users.map { user in
+                    FriendsState.Item(
+                        user: user,
+                        balance: userToSpendings[user.id] ?? [:]
+                    )
+                }
             )
         }
+        return FriendsState.Content(
+            sections: FriendsState.Section.order.compactMap(buildSection)
+        )
     }
 }
 

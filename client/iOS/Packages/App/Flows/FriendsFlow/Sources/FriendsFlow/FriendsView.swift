@@ -2,6 +2,7 @@ import AppBase
 import UIKit
 import Domain
 import Combine
+internal import Base
 internal import DesignSystem
 
 private extension Placeholder.Config {
@@ -25,7 +26,8 @@ class FriendsView: View<FriendsFlow> {
     private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
         guard let self else { return UITableViewCell() }
         let cell = tableView.dequeueReusableCell(withIdentifier: "\(FriendCell.self)") as! FriendCell
-        cell.render(user: users(in: sections[indexPath.section])[indexPath.row])
+        let item = items(in: sections[indexPath.section].id)[indexPath.row]
+        cell.render(user: item.user, balance: item.balance)
         cell.contentView.backgroundColor = .p.backgroundContent
         return cell
     }
@@ -69,9 +71,7 @@ class FriendsView: View<FriendsFlow> {
             }.store(in: &subscriptions)
         table.refreshControl = {
             let ptr = UIRefreshControl()
-            ptr.addAction({ [weak self] in
-                await self?.model.refresh()
-            }, for: .valueChanged)
+            ptr.addAction(weak(model, type(of: model).refresh), for: .valueChanged)
             return ptr
         }()
         render(state: state)
@@ -95,7 +95,7 @@ class FriendsView: View<FriendsFlow> {
             let sections = self.sections
             s.appendSections(sections)
             for section in sections {
-                s.appendItems(users(in: section).map(\.id).map(Cell.init), toSection: section)
+                s.appendItems(items(in: section.id).map(\.user.id).map(Cell.init), toSection: section)
             }
             return s
         }()
@@ -130,11 +130,15 @@ class FriendsView: View<FriendsFlow> {
     }
 }
 
+extension FriendsView {
+
+}
+
 extension FriendsView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let user = users(in: sections[indexPath.section])[indexPath.row]
+        let item = items(in: sections[indexPath.section].id)[indexPath.row]
         Task.detached { @MainActor in
-            await self.model.openPreview(user: user)
+            await self.model.openPreview(user: item.user)
         }
     }
 
@@ -149,30 +153,25 @@ extension FriendsView: UITableViewDelegate {
 
 extension FriendsView {
     var sections: [Section] {
-        [.incoming, .outgoing, .friends].filter {
-            !users(in: $0).isEmpty
-        }
+        FriendsState.Section.order.filter {
+            items(in: $0).isEmpty
+        }.map(Section.init)
     }
 
-    private func users(in section: Section) -> [User] {
-        switch section {
-        case .incoming:
-            return state.content.value?.upcomingRequests ?? []
-        case .friends:
-            return state.content.value?.friends ?? []
-        case .outgoing:
-            return state.content.value?.pendingRequests ?? []
-        }
+    private func items(in section: FriendshipKind) -> [FriendsState.Item] {
+        state.content.value.flatMap { content in
+            content.sections.first {
+                $0.id == .incoming
+            }?.items
+        } ?? []
     }
 }
 
 // MARK: - DiffableDataSource Types
 
 extension FriendsView {
-    enum Section: CaseIterable {
-        case incoming
-        case friends
-        case outgoing
+    struct Section: Hashable {
+        let id: FriendshipKind
     }
     struct Cell: Hashable {
         let id: User.ID
@@ -184,12 +183,12 @@ extension FriendsView {
 private class DataSource: UITableViewDiffableDataSource<FriendsView.Section, FriendsView.Cell> {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         sectionIdentifier(for: section).flatMap {
-            switch $0 {
+            switch $0.id {
             case .friends:
                 return "friend_list_section_friends".localized
             case .incoming:
                 return "friend_list_section_incoming".localized
-            case .outgoing:
+            case .pending:
                 return "friend_list_section_outgoing".localized
             }
         }

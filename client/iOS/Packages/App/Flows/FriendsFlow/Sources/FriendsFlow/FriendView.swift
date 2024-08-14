@@ -43,19 +43,8 @@ class FriendView: UIView {
         subscriptions.removeAll()
         label.text = nil
     }
-
-    func render(contentUpdater: CurrentValueSubject<User, Never>) {
-        render(user: contentUpdater.value)
-        subscriptions.removeAll()
-        contentUpdater
-            .receive(on: DispatchQueue.main)
-            .sink { user in
-                self.render(user: user)
-            }
-            .store(in: &subscriptions)
-    }
-
-    func render(user: User) {
+    
+    func render(user: User, balance: [Currency: Cost]) {
         label.text = user.displayName
         avatar.avatarId = user.avatar?.id
     }

@@ -25,9 +25,7 @@ class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        Task.detached {
-            await self.model.refresh()
-        }
+        model.refresh()
     }
 }
 
