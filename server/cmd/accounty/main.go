@@ -41,7 +41,7 @@ func main() {
 	auth.RegisterRoutes(router, storage)
 	users.RegisterRoutes(router, storage)
 	friends.RegisterRoutes(router, storage, pushSender)
-	spendings.RegisterRoutes(router, storage)
+	spendings.RegisterRoutes(router, storage, pushSender)
 	profile.RegisterRoutes(router, storage)
 	aasa.RegisterRoutes(router, storage)
 	avatars.RegisterRoutes(router, storage)

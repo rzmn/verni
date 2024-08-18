@@ -152,7 +152,7 @@ func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptReque
 		} else if senderToken == nil {
 			log.Printf("%s: sender push token is nil", op)
 		} else {
-			h.pushSender.GotFriendRequest(*senderToken, profile.User.DisplayName)
+			h.pushSender.FriendRequestWasHasBeenAccepted(*senderToken, profile.User.DisplayName)
 		}
 	}
 	return nil

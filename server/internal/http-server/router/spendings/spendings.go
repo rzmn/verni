@@ -1,6 +1,7 @@
 package spendings
 
 import (
+	"accounty/internal/apns"
 	"accounty/internal/auth/jwt"
 	"accounty/internal/http-server/handlers/spendings/createDeal"
 	"accounty/internal/http-server/handlers/spendings/deleteDeal"
@@ -15,7 +16,8 @@ import (
 )
 
 type createDealRequestHandler struct {
-	storage storage.Storage
+	storage    storage.Storage
+	pushSender apns.PushNotificationSender
 }
 
 func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.Request) *createDeal.Error {
@@ -70,6 +72,20 @@ func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Req
 	if err != nil {
 		outError := createDeal.ErrInternal()
 		return []storage.SpendingsPreview{}, &outError
+	}
+	for i := 0; i < len(request.Deal.Spendings); i++ {
+		spending := request.Deal.Spendings[i]
+		if spending.UserId == storage.UserId(*subject) {
+			continue
+		}
+		receiverToken, err := h.storage.GetPushToken(spending.UserId)
+		if err != nil {
+			log.Printf("%s: cannot get receiver push token info %v", op, err)
+		} else if receiverToken == nil {
+			log.Printf("%s: receiver push token is nil", op)
+		} else {
+			h.pushSender.NewExpenseReceived(*receiverToken, request.Deal.Details, spending.Cost)
+		}
 	}
 	return preview, nil
 }
@@ -202,9 +218,9 @@ func (h *getDealsRequestHandler) Handle(c *gin.Context, request getDeals.Request
 	return deals, nil
 }
 
-func RegisterRoutes(e *gin.Engine, storage storage.Storage) {
+func RegisterRoutes(e *gin.Engine, storage storage.Storage, pushSender apns.PushNotificationSender) {
 	group := e.Group("/spendings", middleware.EnsureLoggedIn(storage))
-	group.POST("/createDeal", createDeal.New(&createDealRequestHandler{storage: storage}))
+	group.POST("/createDeal", createDeal.New(&createDealRequestHandler{storage: storage, pushSender: pushSender}))
 	group.POST("/deleteDeal", deleteDeal.New(&deleteDealRequestHandler{storage: storage}))
 	group.GET("/getCounterparties", getCounterparties.New(&getCounterpartiesRequestHandler{storage: storage}))
 	group.GET("/getDeals", getDeals.New(&getDealsRequestHandler{storage: storage}))

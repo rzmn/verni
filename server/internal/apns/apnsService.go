@@ -33,6 +33,20 @@ type Config struct {
 	Password string `json:"cert_pwd"`
 }
 
+func (s *PushNotificationSender) FriendRequestWasHasBeenAccepted(token string, sender string) {
+	body := fmt.Sprintf("From: %s", sender)
+	s.send(token, Push{
+		Aps: PushPayload{
+			MutableContent: nil,
+			Alert: PushPayloadAlert{
+				Title:    "Friend request has been accepted",
+				Subtitle: nil,
+				Body:     &body,
+			},
+		},
+	})
+}
+
 func (s *PushNotificationSender) GotFriendRequest(token string, sender string) {
 	body := fmt.Sprintf("From: %s", sender)
 	s.send(token, Push{
@@ -40,6 +54,20 @@ func (s *PushNotificationSender) GotFriendRequest(token string, sender string) {
 			MutableContent: nil,
 			Alert: PushPayloadAlert{
 				Title:    "Got Friend Request",
+				Subtitle: nil,
+				Body:     &body,
+			},
+		},
+	})
+}
+
+func (s *PushNotificationSender) NewExpenseReceived(token string, title string, amount int64) {
+	body := fmt.Sprintf("%s: %d", title, amount)
+	s.send(token, Push{
+		Aps: PushPayload{
+			MutableContent: nil,
+			Alert: PushPayloadAlert{
+				Title:    "New Expense Received",
 				Subtitle: nil,
 				Body:     &body,
 			},
