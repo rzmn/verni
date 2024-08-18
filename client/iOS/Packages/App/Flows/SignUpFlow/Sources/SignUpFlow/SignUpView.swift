@@ -54,10 +54,8 @@ class SignUpView: View<SignUpFlow> {
             await model?.signIn()
         }, for: .touchUpInside)
         model.subject
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
-        render(state: model.subject.value)
         KeyboardObserver.shared.notifier
             .sink { [weak self] event in
                 guard let self, !isInInteractiveTransition else { return }

@@ -17,14 +17,4 @@ struct UpdatePasswordState: Equatable {
         }
         return true
     }
-
-    static var initial: Self {
-        UpdatePasswordState(
-            oldPassword: "",
-            newPassword: "",
-            repeatNewPassword: "",
-            newPasswordHint: nil,
-            repeatNewPasswordHint: nil
-        )
-    }
 }

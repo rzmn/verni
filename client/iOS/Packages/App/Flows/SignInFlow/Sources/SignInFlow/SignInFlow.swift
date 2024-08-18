@@ -8,18 +8,16 @@ internal import DesignSystem
 internal import ProgressHUD
 
 public actor SignInFlow {
-    let subject = CurrentValueSubject<SignInState, Never>(.initial)
-
-    private let passwordSubject = CurrentValueSubject<String, Never>("")
-    private let emailSubject = CurrentValueSubject<String, Never>("")
-    private let emailHintSubject = CurrentValueSubject<String?, Never>(nil)
+    @MainActor var subject: Published<SignInState>.Publisher {
+        viewModel.$state
+    }
 
     private var subscriptions = Set<AnyCancellable>()
 
+    private let viewModel: SignInViewModel
+
     private let signUpFlow: SignUpFlow
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let localEmailValidator: EmailValidationUseCase
-    private let passwordValidator: PasswordValidationUseCase
     private let saveCredentials: SaveCredendialsUseCase
     private let router: AppRouter
 
@@ -31,8 +29,10 @@ public actor SignInFlow {
         router: AppRouter
     ) async {
         authUseCase = di.authUseCase()
-        localEmailValidator = di.appCommon().localEmailValidationUseCase()
-        passwordValidator = di.appCommon().localPasswordValidationUseCase()
+        viewModel = await SignInViewModel(
+            localEmailValidator: di.appCommon().localEmailValidationUseCase(),
+            passwordValidator: di.appCommon().localPasswordValidationUseCase()
+        )
         saveCredentials = di.appCommon().saveCredentials()
         self.router = router
         self.signUpFlow = await SignUpFlow(di: di, router: router)
@@ -52,28 +52,6 @@ extension SignInFlow: TabEmbedFlow {
 
     func openSignIn() async {
         await presenter.submitHaptic()
-        emailSubject
-            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
-            .map(localEmailValidator.validateEmail)
-            .map { result -> String? in
-                switch result {
-                case .success:
-                    return nil
-                case .failure(let error):
-                    return error.message
-                }
-            }
-            .sink(receiveValue: emailHintSubject.send)
-            .store(in: &subscriptions)
-
-        Publishers.CombineLatest3(emailSubject, passwordSubject, emailHintSubject)
-            .receive(on: RunLoop.main)
-            .map { value in
-                SignInState(email: value.0, password: value.1, emailHint: value.2)
-            }
-            .removeDuplicates()
-            .sink(receiveValue: subject.send)
-            .store(in: &subscriptions)
         await presenter.presentSignIn()
     }
 
@@ -83,12 +61,13 @@ extension SignInFlow: TabEmbedFlow {
     }
 
     func signIn() async {
-        guard subject.value.canConfirm else {
+        let state = await viewModel.state
+        guard state.canConfirm else {
             return await presenter.errorHaptic()
         }
         let credentials = Credentials(
-            email: subject.value.email,
-            password: subject.value.password
+            email: state.email,
+            password: state.password
         )
         await presenter.presentLoading()
         switch await authUseCase.login(credentials: credentials) {
@@ -119,11 +98,11 @@ extension SignInFlow: TabEmbedFlow {
     }
 
     @MainActor func update(email: String) {
-        emailSubject.send(email)
+        viewModel.email = email
     }
 
     @MainActor func update(password: String) {
-        passwordSubject.send(password)
+        viewModel.password = password
     }
 
     private func handle(session: ActiveSessionDIContainer) async {

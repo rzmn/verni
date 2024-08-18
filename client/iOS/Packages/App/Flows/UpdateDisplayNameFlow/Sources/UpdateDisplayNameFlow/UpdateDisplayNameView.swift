@@ -8,7 +8,7 @@ class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
     private let newDisplayName = TextField(
         config: TextField.Config(
             placeholder: "enter_new_display_name_placeholder".localized,
-            content: .unspecified
+            content: .displayName
         )
     )
     private let confirm = Button(
@@ -33,9 +33,7 @@ class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
             await self?.model.confirmDisplayName()
         }, for: .touchUpInside)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        render(state: model.subject.value)
         model.subject
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier
@@ -82,7 +80,7 @@ class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
         newDisplayName.render(
             TextField.Config(
                 placeholder: "enter_new_display_name_placeholder".localized,
-                content: .unspecified,
+                content: .displayName,
                 formatHint: state.displayNameHint
             )
         )

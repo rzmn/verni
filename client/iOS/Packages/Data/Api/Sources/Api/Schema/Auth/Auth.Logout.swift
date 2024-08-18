@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Auth {
     public struct Logout: ApiMethod, AuthScope {
-        public typealias Response = Void
+        public typealias Response = NoResponse
 
         public var path: String {
             scope + "/logout"

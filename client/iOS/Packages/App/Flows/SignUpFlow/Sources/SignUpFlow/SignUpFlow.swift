@@ -7,101 +7,30 @@ internal import DesignSystem
 internal import ProgressHUD
 
 public actor SignUpFlow {
-    let subject = CurrentValueSubject<SignUpState, Never>(.initial)
-
-    private let passwordSubject = CurrentValueSubject<String, Never>("")
-    private let passwordRepeatSubject = CurrentValueSubject<String, Never>("")
-    private let emailSubject = CurrentValueSubject<String, Never>("")
-
-    private let passwordHintSubject = CurrentValueSubject<String?, Never>(nil)
-    private let passwordsMatchSubject = CurrentValueSubject<Bool?, Never>(nil)
-    private let emailHintSubject = CurrentValueSubject<String?, Never>(nil)
+    @MainActor var subject: Published<SignUpState>.Publisher {
+        viewModel.$state
+    }
+    private let viewModel: SignUpViewModel
 
     private var subscriptions = Set<AnyCancellable>()
 
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let localEmailValidator: EmailValidationUseCase
-    private let localPasswordValidator: PasswordValidationUseCase
     private let router: AppRouter
     private lazy var presenter = SignUpFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
     public init(di: DIContainer, router: AppRouter) async {
         self.router = router
-        localEmailValidator = di.appCommon().localEmailValidationUseCase()
-        localPasswordValidator = di.appCommon().localPasswordValidationUseCase()
         authUseCase = di.authUseCase()
+        viewModel = await SignUpViewModel(
+            localEmailValidator: di.appCommon().localEmailValidationUseCase(),
+            localPasswordValidator: di.appCommon().localPasswordValidationUseCase()
+        )
     }
 }
 
 extension SignUpFlow: Flow {
     public func perform() async -> ActiveSessionDIContainer? {
-        emailSubject
-            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
-            .map(localEmailValidator.validateEmail)
-            .map { result -> String? in
-                switch result {
-                case .success:
-                    return nil
-                case .failure(let error):
-                    return error.message
-                }
-            }
-            .sink(receiveValue: emailHintSubject.send)
-            .store(in: &subscriptions)
-        passwordSubject
-            .map(localPasswordValidator.validatePassword)
-            .map { result -> String? in
-                switch result {
-                case .strong:
-                    return nil
-                case .weak(let message), .invalid(let message):
-                    return message
-                }
-            }
-            .sink(receiveValue: passwordHintSubject.send)
-            .store(in: &subscriptions)
-        Publishers.CombineLatest(passwordSubject, passwordRepeatSubject)
-            .map { value -> Bool? in
-                let (password, passwordRepeat) = value
-                guard !password.isEmpty && !passwordRepeat.isEmpty else {
-                    return nil
-                }
-                return password == passwordRepeat
-            }
-            .sink(receiveValue: passwordsMatchSubject.send)
-            .store(in: &subscriptions)
-
-        let credentials = Publishers.CombineLatest3(emailSubject, passwordSubject, passwordRepeatSubject)
-        let hints = Publishers.CombineLatest3(emailHintSubject, passwordHintSubject, passwordsMatchSubject)
-        Publishers.CombineLatest(credentials, hints)
-            .map { value in
-                let (credentials, hints) = value
-                let (email, password, passwordRepeat) = credentials
-                let (emailHint, passwordHint, passwordsMatchHint) = hints
-                return SignUpState(
-                    email: email,
-                    password: password,
-                    passwordConfirmation: passwordRepeat,
-                    emailHint: emailHint,
-                    passwordHint: passwordHint,
-                    passwordConfirmationHint: {
-                        guard let passwordsMatchHint else {
-                            return nil
-                        }
-                        if !passwordsMatchHint {
-                            return "login_pwd_didnt_match".localized
-                        } else {
-                            return nil
-                        }
-                    }()
-                )
-            }
-            .removeDuplicates()
-            .sink(receiveValue: subject.send)
-            .store(in: &subscriptions)
-
-
         await presenter.presentSignUp()
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
@@ -109,12 +38,13 @@ extension SignUpFlow: Flow {
     }
 
     func signIn() async {
-        guard subject.value.canConfirm else {
+        let state = await viewModel.state
+        guard state.canConfirm else {
             return await presenter.errorHaptic()
         }
         let credentials = Credentials(
-            email: subject.value.email,
-            password: subject.value.password
+            email: state.email,
+            password: state.password
         )
         await presenter.presentLoading()
         switch await authUseCase.signup(credentials: credentials) {
@@ -140,14 +70,14 @@ extension SignUpFlow: Flow {
     }
 
     @MainActor func update(email: String) {
-        emailSubject.send(email)
+        viewModel.email = email
     }
 
     @MainActor func update(password: String) {
-        passwordSubject.send(password)
+        viewModel.password = password
     }
 
     @MainActor func update(passwordRepeat: String) {
-        passwordRepeatSubject.send(passwordRepeat)
+        viewModel.passwordRepeat = passwordRepeat
     }
 }

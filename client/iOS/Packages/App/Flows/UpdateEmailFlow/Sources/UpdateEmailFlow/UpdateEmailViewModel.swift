@@ -4,35 +4,39 @@ import Domain
 
 @MainActor
 public class UpdateEmailViewModel {
-    let subject: CurrentValueSubject<UpdateEmailState, Never>
+    @Published var state: UpdateEmailState
 
-    private let confirmationCodeSubject = CurrentValueSubject<String, Never>("")
-    private let resendCountdownTimerSubject = CurrentValueSubject<Int?, Never>(nil)
-    private let confirmedSubject: CurrentValueSubject<Bool, Never>
-    private let confirmationInProgressSubject = CurrentValueSubject<Bool, Never>(false)
-    private let resendInProgressSubject = CurrentValueSubject<Bool, Never>(false)
+    @Published var confirmationCode: String
+    @Published var resendCountdownTimer: Int?
+    @Published var confirmed: Bool
+    @Published var confirmationInProgress: Bool
+    @Published var resendInProgress: Bool
+
     private var countdownTimer: AnyCancellable?
     private let confirmationCodeLength: Int
 
-    private var subscriptions = Set<AnyCancellable>()
-
     init(profile: Profile, confirmationCodeLength: Int) {
-        self.confirmedSubject = CurrentValueSubject(profile.isEmailVerified)
-        self.confirmationCodeLength = confirmationCodeLength
-        self.subject = CurrentValueSubject(
-            UpdateEmailState(
-                email: profile.email,
-                confirmation: profile.isEmailVerified ? .confirmed : .uncorfirmed(.initial),
-                confirmationCodeLength: confirmationCodeLength
-            )
+        let initial = UpdateEmailState(
+            email: profile.email,
+            confirmation: profile.isEmailVerified ? .confirmed : .uncorfirmed(.initial),
+            confirmationCodeLength: confirmationCodeLength
         )
+        state = initial
+        confirmationCode = ""
+        resendCountdownTimer = nil
+        confirmed = profile.isEmailVerified
+        confirmationInProgress = false
+        resendInProgress = false
+
+        self.confirmationCodeLength = confirmationCodeLength
+        setupStateBuilder()
     }
 
-    func setup() {
+    private func setupStateBuilder() {
         Publishers.CombineLatest3(
-            Publishers.CombineLatest(Just(subject.value.email), confirmedSubject),
-            Publishers.CombineLatest3(resendCountdownTimerSubject, confirmationCodeSubject, Just(confirmationCodeLength)),
-            Publishers.CombineLatest(resendInProgressSubject, confirmationInProgressSubject)
+            Publishers.CombineLatest(Just(state.email), $confirmed),
+            Publishers.CombineLatest3($resendCountdownTimer, $confirmationCode, Just(confirmationCodeLength)),
+            Publishers.CombineLatest($resendInProgress, $confirmationInProgress)
         ).map { value in
             let (email, isConfirmed) = value.0
             let (countdown, code, codeLenght) = value.1
@@ -50,48 +54,32 @@ public class UpdateEmailViewModel {
                 confirmationCodeLength: codeLenght
             )
         }
-        .sink(receiveValue: subject.send)
-        .store(in: &subscriptions)
-    }
-
-    func resendInProgress(_ inProgress: Bool) {
-        resendInProgressSubject.send(inProgress)
-    }
-
-    func confirmInProgress(_ inProgress: Bool) {
-        confirmationInProgressSubject.send(inProgress)
-    }
-
-    func codeConfirmed() {
-        confirmedSubject.send(true)
-    }
-
-    func codeUpdated(_ code: String) {
-        confirmationCodeSubject.send(code)
+        .removeDuplicates()
+        .assign(to: &$state)
     }
 }
 
 extension UpdateEmailViewModel {
     func cancelCountdownTimer() {
-        resendCountdownTimerSubject.send(nil)
+        resendCountdownTimer = nil
         countdownTimer = nil
     }
 
     func startCountdownTimer() {
-        resendCountdownTimerSubject.send(60)
+        resendCountdownTimer = 60
         countdownTimer = Timer.publish(every: 1, on: .main, in: .default)
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self else { return }
-                guard let countdown = resendCountdownTimerSubject.value else {
+                guard let resendCountdownTimer else {
                     return
                 }
-                if countdown <= 1 {
+                if resendCountdownTimer <= 1 {
                     Task.detached {
                         await self.cancelCountdownTimer()
                     }
                 } else {
-                    resendCountdownTimerSubject.send(countdown - 1)
+                    self.resendCountdownTimer = resendCountdownTimer - 1
                 }
             }
     }

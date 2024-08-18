@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Profile {
     public struct SetDisplayName: ApiMethod, ProfileScope {
-        public typealias Response = Void
+        public typealias Response = NoResponse
         public let parameters: Parameters
 
         public struct Parameters: Encodable {

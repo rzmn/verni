@@ -10,6 +10,7 @@ public protocol Presenter {
 
     @MainActor func presentNotAuthorized()
     @MainActor func presentNoConnection()
+    @MainActor func presentNoSuchUser()
     @MainActor func presentInternalError(_ error: Error)
 
     @MainActor func presentGeneralError(_ error: GeneralError)
@@ -43,6 +44,10 @@ public extension Presenter {
 
     @MainActor func presentNotAuthorized() {
         router.hudFailure(description: "alert_title_unauthorized".localized)
+    }
+
+    @MainActor func presentNoSuchUser() {
+        router.hudFailure(description: "alert_action_no_such_user".localized)
     }
 
     @MainActor func presentGeneralError(_ error: GeneralError) {

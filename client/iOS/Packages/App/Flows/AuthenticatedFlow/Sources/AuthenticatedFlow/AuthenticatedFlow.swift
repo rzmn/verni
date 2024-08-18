@@ -2,25 +2,28 @@ import UIKit
 import Domain
 import DI
 import AppBase
-internal import SignInFlow
 internal import DesignSystem
 internal import ProgressHUD
 internal import AccountFlow
 internal import FriendsFlow
+internal import AddExpenseFlow
 
 public actor AuthenticatedFlow {
-    private let presenter: AuthenticatedFlowPresenter
     private let accountFlow: AccountFlow
     private let friendsFlow: FriendsFlow
+    private let router: AppRouter
+    private let di: ActiveSessionDIContainer
+    private lazy var presenter = AuthenticatedFlowPresenter(router: router, flow: self)
 
     private var urlResolvers = UrlResolverContainer()
 
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
-        presenter = await AuthenticatedFlowPresenter(router: router)
         accountFlow = await AccountFlow(di: di, router: router)
         friendsFlow = await FriendsFlow(di: di, router: router)
+        self.di = di
+        self.router = router
         await urlResolvers.add(friendsFlow)
     }
 }
@@ -50,6 +53,19 @@ extension AuthenticatedFlow: Flow {
         }
         self.flowContinuation = nil
         flowContinuation.resume(returning: event)
+    }
+}
+
+extension AuthenticatedFlow {
+    @MainActor func addNewExpense() {
+        Task.detached {
+            await self.doAddExpense()
+        }
+    }
+
+    private func doAddExpense() async {
+        let flow = await AddExpenseFlow(di: di, router: router, counterparty: nil)
+        await flow.perform()
     }
 }
 

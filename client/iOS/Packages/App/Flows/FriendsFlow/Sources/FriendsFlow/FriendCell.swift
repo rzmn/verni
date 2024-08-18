@@ -27,8 +27,8 @@ class FriendCell: UITableViewCell {
         selectedBackgroundView = UIView()
     }
 
-    func render(user: User, balance: [Currency: Cost]) {
-        content.render(user: user, balance: balance)
+    func render(item: FriendsState.Item) {
+        content.render(item: item)
     }
 
     override func layoutSubviews() {

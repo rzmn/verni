@@ -1,3 +1,7 @@
+public struct NoParameters {}
+
+public struct NoResponse {}
+
 public protocol ApiMethod {
     associatedtype Response
     associatedtype Parameters
@@ -7,8 +11,8 @@ public protocol ApiMethod {
     var parameters: Parameters { get }
 }
 
-extension ApiMethod where Parameters == Void {
+extension ApiMethod where Parameters == NoParameters {
     public var parameters: Parameters {
-        ()
+        NoParameters()
     }
 }

@@ -28,6 +28,9 @@ func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.R
 		return &outError
 	}
 	for i := 0; i < len(request.Deal.Spendings); i++ {
+		if request.Deal.Spendings[i].UserId == storage.UserId(*subject) {
+			continue
+		}
 		exists, err := h.storage.IsUserExists(request.Deal.Spendings[i].UserId)
 		if err != nil {
 			outError := createDeal.ErrInternal()

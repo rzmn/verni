@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Friends {
     public struct RejectRequest: ApiMethod, FriendsScope {
-        public typealias Response = Void
+        public typealias Response = NoResponse
 
         public struct Parameters: Encodable {
             let sender: UserDto.ID

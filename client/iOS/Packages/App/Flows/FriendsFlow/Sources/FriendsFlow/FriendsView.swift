@@ -26,8 +26,8 @@ class FriendsView: View<FriendsFlow> {
     private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
         guard let self else { return UITableViewCell() }
         let cell = tableView.dequeueReusableCell(withIdentifier: "\(FriendCell.self)") as! FriendCell
-        let item = items(in: sections[indexPath.section].id)[indexPath.row]
-        cell.render(user: item.user, balance: item.balance)
+        let item = items(in: sections[indexPath.section])[indexPath.row]
+        cell.render(item: item)
         cell.contentView.backgroundColor = .p.backgroundContent
         return cell
     }
@@ -37,19 +37,11 @@ class FriendsView: View<FriendsFlow> {
     )
     private let emptyPlaceholder = Placeholder(config: .listIsEmpty)
     private var subscriptions = Set<AnyCancellable>()
-    private var state: FriendsState {
+    private var state: FriendsState? {
         didSet {
-            render(state: state)
+            guard let state else { return }
+            render(state: state, animated: oldValue != nil)
         }
-    }
-
-    required init(model: FriendsFlow) {
-        self.state = model.subject.value
-        super.init(model: model)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
     
     override func setupView() {
@@ -58,23 +50,14 @@ class FriendsView: View<FriendsFlow> {
         table.delegate = self
         [table, emptyPlaceholder].forEach(addSubview)
         model.subject
-            .receive(on: DispatchQueue.main)
-            .sink { state in
-                self.state = state
-                switch state.content {
-                case .initial, .loading:
-                    break
-                case .loaded, .failed:
-                    self.table.refreshControl?.endRefreshing()
-                }
-                self.render(state: state)
-            }.store(in: &subscriptions)
+            .map { $0 as FriendsState? }
+            .assign(to: \.state, on: self)
+            .store(in: &subscriptions)
         table.refreshControl = {
             let ptr = UIRefreshControl()
             ptr.addAction(weak(model, type(of: model).refresh), for: .valueChanged)
             return ptr
         }()
-        render(state: state)
     }
 
     override func layoutSubviews() {
@@ -89,13 +72,19 @@ class FriendsView: View<FriendsFlow> {
         )
     }
 
-    private func render(state: FriendsState) {
+    private func render(state: FriendsState, animated: Bool) {
+        switch state.content {
+        case .initial, .loading:
+            break
+        case .loaded, .failed:
+            table.refreshControl?.endRefreshing()
+        }
         let snapshot = {
             var s = DataSnapshot()
             let sections = self.sections
             s.appendSections(sections)
             for section in sections {
-                s.appendItems(items(in: section.id).map(\.user.id).map(Cell.init), toSection: section)
+                s.appendItems(items(in: section).map(\.id), toSection: section)
             }
             return s
         }()
@@ -130,15 +119,11 @@ class FriendsView: View<FriendsFlow> {
     }
 }
 
-extension FriendsView {
-
-}
-
 extension FriendsView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let item = items(in: sections[indexPath.section].id)[indexPath.row]
+        let item = items(in: sections[indexPath.section])[indexPath.row]
         Task.detached { @MainActor in
-            await self.model.openPreview(user: item.user)
+            await self.model.openPreview(user: item.data.user)
         }
     }
 
@@ -153,15 +138,13 @@ extension FriendsView: UITableViewDelegate {
 
 extension FriendsView {
     var sections: [Section] {
-        FriendsState.Section.order.filter {
-            items(in: $0).isEmpty
-        }.map(Section.init)
+        state?.content.value?.sections.map(\.id) ?? []
     }
 
     private func items(in section: FriendshipKind) -> [FriendsState.Item] {
-        state.content.value.flatMap { content in
+        state?.content.value.flatMap { content in
             content.sections.first {
-                $0.id == .incoming
+                $0.id == section
             }?.items
         } ?? []
     }
@@ -170,12 +153,8 @@ extension FriendsView {
 // MARK: - DiffableDataSource Types
 
 extension FriendsView {
-    struct Section: Hashable {
-        let id: FriendshipKind
-    }
-    struct Cell: Hashable {
-        let id: User.ID
-    }
+    typealias Section = FriendshipKind
+    typealias Cell = User.ID
 
     typealias DataSnapshot = NSDiffableDataSourceSnapshot<Section, Cell>
 }
@@ -183,7 +162,7 @@ extension FriendsView {
 private class DataSource: UITableViewDiffableDataSource<FriendsView.Section, FriendsView.Cell> {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         sectionIdentifier(for: section).flatMap {
-            switch $0.id {
+            switch $0 {
             case .friends:
                 return "friend_list_section_friends".localized
             case .incoming:

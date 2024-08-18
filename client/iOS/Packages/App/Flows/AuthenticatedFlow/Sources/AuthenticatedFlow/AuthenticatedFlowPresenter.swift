@@ -1,17 +1,19 @@
 import AppBase
 import UIKit
+internal import DesignSystem
 
 class AuthenticatedFlowPresenter: Presenter {
     let router: AppRouter
+    private unowned var flow: AuthenticatedFlow
 
-    @MainActor
-    init(router: AppRouter) {
+    init(router: AppRouter, flow: AuthenticatedFlow) {
         self.router = router
+        self.flow = flow
     }
 
     @MainActor
     func start(tabs: [any TabEmbedFlow]) async {
-        let tabBarController = AuthenticatedTabsController(nibName: nil, bundle: nil)
+        let tabBarController = AuthenticatedTabsController(model: flow)
 
         var viewControllers = [UIViewController]()
         for flow in tabs {

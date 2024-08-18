@@ -7,7 +7,7 @@ class UpdatePasswordView: View<UpdatePasswordFlow> {
     private let oldPassword = TextField(
         config: TextField.Config(
             placeholder: "enter_old_pwd_placeholder".localized,
-            content: .unspecifiedSecure
+            content: .password
         )
     )
     private let newPassword = TextField(
@@ -51,9 +51,7 @@ class UpdatePasswordView: View<UpdatePasswordFlow> {
             await self?.model.updatePassword()
         }, for: .touchUpInside)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        render(state: model.subject.value)
         model.subject
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier
@@ -113,7 +111,7 @@ class UpdatePasswordView: View<UpdatePasswordFlow> {
         oldPassword.render(
             TextField.Config(
                 placeholder: "enter_old_pwd_placeholder".localized,
-                content: .unspecifiedSecure
+                content: .password
             )
         )
         newPassword.render(

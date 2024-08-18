@@ -25,4 +25,17 @@ public indirect enum Loadable<T: Equatable, E: Equatable>: Equatable {
             return error
         }
     }
+
+    public func mapValue<V>(_ block: (T) -> V) -> Loadable<V, E> {
+        switch self {
+        case .initial:
+            return .initial
+        case .loading(let previous):
+            return .loading(previous: previous.mapValue(block))
+        case .loaded(let t):
+            return .loaded(block(t))
+        case .failed(let previous, let e):
+            return .failed(previous: previous.mapValue(block), e)
+        }
+    }
 }

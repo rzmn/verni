@@ -4,11 +4,12 @@ import DI
 import Combine
 
 public actor UpdateDisplayNameFlow {
-    let subject = CurrentValueSubject<UpdateDisplayNameState, Never>(.initial)
-
-    private let displayNameSubject = CurrentValueSubject<String, Never>("")
+    @MainActor var subject: Published<UpdateDisplayNameState>.Publisher {
+        viewModel.$state
+    }
 
     private let router: AppRouter
+    private let viewModel: UpdateDisplayNameViewModel
     private let profileEditing: ProfileEditingUseCase
     private let profileReposiroty: UsersRepository
     private lazy var presenter = UpdateDisplayNameFlowPresenter(router: router, flow: self)
@@ -17,10 +18,11 @@ public actor UpdateDisplayNameFlow {
     private var flowHandlers = [AnyHashable: AnyFlowEventHandler<FlowEvent>]()
     private var flowContinuation: Continuation?
 
-    public init(di: ActiveSessionDIContainer, router: AppRouter) {
+    public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         self.router = router
         self.profileReposiroty = di.usersRepository()
         self.profileEditing = di.profileEditingUseCase()
+        self.viewModel = await UpdateDisplayNameViewModel()
     }
 }
 
@@ -32,22 +34,6 @@ extension UpdateDisplayNameFlow: Flow {
     public func perform() async -> Result<Profile, TerminationEvent> {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
-            self.displayNameSubject
-                .map {
-                    let displayNameHint: String?
-                    if $0.isEmpty {
-                        displayNameHint = nil
-                    } else if $0.count < 4 {
-                        displayNameHint = "display_name_invalid_lehght".localized
-                    } else if !$0.allSatisfy({ $0.isNumber || $0.isLetter }) {
-                        displayNameHint = "display_name_invalid_format".localized
-                    } else {
-                        displayNameHint = nil
-                    }
-                    return UpdateDisplayNameState(displayName: $0, displayNameHint: displayNameHint)
-                }
-                .sink(receiveValue: self.subject.send)
-                .store(in: &self.subscriptions)
             Task.detached { @MainActor in
                 await self.presenter.presentDisplayNameEditing { [weak self] in
                     guard let self else { return }
@@ -58,11 +44,12 @@ extension UpdateDisplayNameFlow: Flow {
     }
 
     func confirmDisplayName() async {
-        guard subject.value.canConfirm else {
+        let state = await viewModel.state
+        guard state.canConfirm else {
             return await presenter.errorHaptic()
         }
         await presenter.presentLoading()
-        switch await profileEditing.setDisplayName(subject.value.displayName) {
+        switch await profileEditing.setDisplayName(state.displayName) {
         case .success:
             await presenter.successHaptic()
             await presenter.presentSuccess()
@@ -84,7 +71,7 @@ extension UpdateDisplayNameFlow: Flow {
 
     @MainActor
     func update(displayName: String) {
-        displayNameSubject.send(displayName)
+        viewModel.displayName = displayName
     }
 
     private func handle(result: Result<Profile, TerminationEvent>) async {

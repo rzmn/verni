@@ -80,6 +80,10 @@ private struct FriendshipKindSet: OptionSet {
         )
     }
 
+    func userId() async -> UserDto.ID {
+        hostId
+    }
+
     func getRefreshToken() async -> String {
         refreshToken
     }
@@ -247,7 +251,7 @@ private struct FriendshipKindSet: OptionSet {
                 onConflictOf: Schema.Friends.Keys.id
             ))
         } catch {
-            self.logE { "failed to update friends: \(error)" }
+            logE { "failed to update friends: \(error)" }
         }
     }
 

@@ -5,18 +5,24 @@ import PersistentStorage
 import ApiService
 import Domain
 
-public class ActiveSession: TokenRefresher {
-    public lazy var api = apiFactoryProvider(self).create()
+public class ActiveSession {
+    public lazy var api = apiFactoryProvider(tokenRefresher).create()
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
     private let anonymousApi: ApiProtocol
 
+    private lazy var tokenRefresher: TokenRefresher = RefreshTokenManager(
+        api: anonymousApi,
+        persistency: persistency, 
+        onSessionInvalidated: invalidate
+    )
     public let appCommon: AppCommon
+    public let userId: User.ID
     public private(set) var persistency: Persistency
     public private(set) var accessToken: String?
 
     public static func awake(
         anonymousApi: ApiProtocol,
-        hostId: String,
+        hostId: User.ID,
         accessToken: String?,
         refreshToken: String,
         apiServiceFactory: ApiServiceFactory,
@@ -25,7 +31,7 @@ public class ActiveSession: TokenRefresher {
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async throws -> ActiveSession {
         let persistency = try persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
-        return ActiveSession(
+        return await ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
             appCommon: appCommon,
@@ -44,7 +50,7 @@ public class ActiveSession: TokenRefresher {
         guard let persistency = persistencyFactory.awake() else {
             return nil
         }
-        return ActiveSession(
+        return await ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
             appCommon: appCommon,
@@ -59,57 +65,13 @@ public class ActiveSession: TokenRefresher {
         appCommon: AppCommon,
         accessToken: String?,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
-    ) {
+    ) async {
         self.persistency = persistency
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
         self.apiFactoryProvider = apiFactoryProvider
         self.appCommon = appCommon
-    }
-
-    private var refreshTask: Task<Result<Void, RefreshTokenFailureReason>, Never>?
-    public func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        if let refreshTask {
-            let result = await refreshTask.value
-            self.refreshTask = nil
-            return result
-        } else {
-            let task = Task {
-                await doRefreshTokens()
-            }
-            refreshTask = task
-            return await task.value
-        }
-    }
-
-    private func doRefreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        let response = await anonymousApi.run(
-            method: Auth.Refresh(
-                refreshToken: await persistency.getRefreshToken()
-            )
-        )
-        switch response {
-        case .success(let tokens):
-            accessToken = tokens.accessToken
-            await persistency.update(refreshToken: tokens.refreshToken)
-            return .success(())
-        case .failure(let reason):
-            switch reason {
-            case .api(let apiErrorCode, _):
-                invalidate()
-                switch apiErrorCode {
-                case .tokenExpired:
-                    return .failure(.expired(reason))
-                default:
-                    return .failure(.internalError(reason))
-                }
-            case .noConnection(let error):
-                return .failure(.noConnection(error))
-            case .internalError(let error):
-                invalidate()
-                return .failure(.internalError(error))
-            }
-        }
+        self.userId = await persistency.userId()
     }
 
     public func invalidate() {

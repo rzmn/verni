@@ -2,7 +2,7 @@ import Foundation
 
 public typealias Cost = Decimal
 
-public struct Spending {
+public struct Spending: Equatable {
     public let date: Date
     public let details: String
     public let cost: Cost
@@ -18,7 +18,7 @@ public struct Spending {
     }
 }
 
-public struct IdentifiableSpending {
+public struct IdentifiableSpending: Equatable {
     public let spending: Spending
     public let id: Spending.ID
 

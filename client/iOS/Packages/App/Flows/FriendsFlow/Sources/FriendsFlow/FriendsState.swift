@@ -1,22 +1,29 @@
 import Domain
 import AppBase
+import Combine
 
 struct FriendsState {
-    struct Item: Equatable, Identifiable {
-        let user: User
-        let balance: [Currency: Cost]
+    class Item: Equatable {
+        @Published var data: ItemData
+        let id: User.ID
 
-        var id: User.ID {
-            user.id
+        init(item: ItemData) {
+            data = item
+            id = item.user.id
+        }
+
+        static func == (lhs: FriendsState.Item, rhs: FriendsState.Item) -> Bool {
+            lhs.id == rhs.id
         }
     }
+    struct ItemData: Equatable {
+        let user: User
+        let balance: [Currency: Cost]
+    }
+    
     struct Section: Equatable {
         let id: FriendshipKind
         let items: [Item]
-
-        static var order: [FriendshipKind] {
-            [.incoming, .pending, .friends]
-        }
     }
 
     struct Content: Equatable {
@@ -39,9 +46,5 @@ struct FriendsState {
         content: Loadable<Content, Failure>? = nil
     ) {
         self.content = content ?? state.content
-    }
-
-    static var initial: Self {
-        FriendsState(content: .initial)
     }
 }

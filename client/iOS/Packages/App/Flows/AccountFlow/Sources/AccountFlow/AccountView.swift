@@ -55,8 +55,6 @@ class AccountView: View<AccountFlow> {
             await model?.updateDisplayName()
         }, for: .touchUpInside)
         model.subject
-            .removeDuplicates()
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
     }

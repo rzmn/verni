@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../AccountFlow"),
         .package(path: "../FriendsFlow"),
+        .package(path: "../AddExpenseFlow"),
         .package(path: "../../AppBase"),
         .package(path: "../../DesignSystem"),
         .package(path: "../../../DI/DI"),
@@ -38,6 +39,7 @@ let package = Package(
                 "AppBase",
                 "AccountFlow",
                 "FriendsFlow",
+                "AddExpenseFlow",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

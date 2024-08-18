@@ -1,6 +1,7 @@
 import Domain
 import Api
 import PersistentStorage
+import Combine
 internal import ApiDomainConvenience
 
 public class DefaultSpendingsRepository {
@@ -43,7 +44,25 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         }
     }
 
-    public var spendingsUpdated: AsyncStream<Void> {
-        api.spendingsUpdated
+    public var spendingCounterpartiesUpdated: AnyPublisher<Void, Never> {
+        api.eventQueue
+            .compactMap { event -> Void? in
+                guard case .spendingCounterpartiesUpdated = event else {
+                    return nil
+                }
+                return ()
+            }
+            .eraseToAnyPublisher()
+    }
+
+    public var spendingsHistoryUpdated: AnyPublisher<User.ID, Never> {
+        api.eventQueue
+            .compactMap { event -> User.ID? in
+                guard case .spendingsHistoryUpdated(let id) = event else {
+                    return nil
+                }
+                return id
+            }
+            .eraseToAnyPublisher()
     }
 }

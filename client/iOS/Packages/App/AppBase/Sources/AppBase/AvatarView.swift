@@ -1,6 +1,20 @@
 import UIKit
 import Domain
 
+private extension String {
+    func image(fitSize: CGSize?) -> UIImage? {
+        let size = fitSize ?? CGSize(width: 40, height: 40)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        UIColor.clear.set()
+        let rect = CGRect(origin: .zero, size: size)
+        UIRectFill(CGRect(origin: .zero, size: size))
+        (self as AnyObject).draw(in: rect, withAttributes: [.font: UIFont.systemFont(ofSize: size.width)])
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+}
+
 public class AvatarView: UIImageView {
     public static var repository: AvatarsRepository?
 
@@ -11,13 +25,13 @@ public class AvatarView: UIImageView {
             setNeedsLayout()
         }
     }
-
+    
     public var avatarId: Avatar.ID? {
         didSet {
             task?.cancel()
             guard let avatarId else {
                 Task.detached { @MainActor in
-                    self.image = nil
+                    self.image = "🥷".image(fitSize: self.fitSize)
                 }
                 return
             }
@@ -35,7 +49,7 @@ public class AvatarView: UIImageView {
                         let image = UIImage(data: data)
                         self.image = image
                     case .failure:
-                        self.image = nil
+                        self.image = "❌".image(fitSize: self.fitSize)
                     }
                 }
             }

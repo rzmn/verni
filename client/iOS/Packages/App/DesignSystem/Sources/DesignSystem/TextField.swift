@@ -1,14 +1,74 @@
 import UIKit
 
-public class TextField: UITextField {
-    public struct Config {
-        public enum ContentType {
-            case email
-            case password
-            case newPassword
-            case unspecified
-            case unspecifiedSecure
+fileprivate extension TextField.ContentType {
+    var autocorrectionType: UITextAutocorrectionType {
+        switch self {
+        case .email, .password, .newPassword, .numberPad, .displayName, .oneTimeCode:
+            return .no
+        case .someDescription:
+            return .yes
         }
+    }
+
+    var contentType: UITextContentType? {
+        switch self {
+        case .email:
+            return .username
+        case .password:
+            return .password
+        case .newPassword:
+            return .newPassword
+        case .oneTimeCode:
+            return .oneTimeCode
+        case .numberPad, .someDescription, .displayName:
+            return .none
+        }
+    }
+
+    var isSecure: Bool {
+        switch self {
+        case .password, .newPassword:
+            return true
+        case .email, .numberPad, .someDescription, .displayName, .oneTimeCode:
+            return false
+        }
+    }
+
+    var autocapitalization: UITextAutocapitalizationType {
+        switch self {
+        case .password, .newPassword, .email, .numberPad, .displayName, .oneTimeCode:
+            return .none
+        case .someDescription:
+            return .sentences
+        }
+    }
+
+    var keyboardType: UIKeyboardType {
+        switch self {
+        case .email:
+            return .emailAddress
+        case .numberPad:
+            return .decimalPad
+        case .oneTimeCode:
+            return .numberPad
+        case .someDescription, .password, .newPassword, .displayName:
+            return .default
+        }
+    }
+}
+
+public class TextField: UITextField {
+    public enum ContentType {
+        case email
+        case displayName
+        case password
+        case oneTimeCode
+        case newPassword
+        case someDescription
+        case numberPad
+    }
+
+    public struct Config {
         let content: ContentType
         let placeholder: String
         let formatHint: String?
@@ -65,33 +125,11 @@ public class TextField: UITextField {
             setNeedsLayout()
         }
         hintLabel.text = config.formatHint
-        switch config.content {
-        case .email:
-            textContentType = .username
-            keyboardType = .emailAddress
-            autocorrectionType = .no
-            isSecureTextEntry = false
-            autocapitalizationType = .none
-        case .password:
-            textContentType = .password
-            autocorrectionType = .no
-            isSecureTextEntry = true
-            autocapitalizationType = .none
-        case .newPassword:
-            textContentType = .newPassword
-            autocorrectionType = .no
-            isSecureTextEntry = true
-            autocapitalizationType = .none
-        case .unspecified:
-            textContentType = .none
-            autocorrectionType = .no
-            isSecureTextEntry = false
-            autocapitalizationType = .sentences
-        case .unspecifiedSecure:
-            textContentType = .none
-            autocorrectionType = .no
-            isSecureTextEntry = true
-            autocapitalizationType = .none
-        }
+
+        textContentType = config.content.contentType
+        autocorrectionType = config.content.autocorrectionType
+        isSecureTextEntry = config.content.isSecure
+        autocapitalizationType = config.content.autocapitalization
+        keyboardType = config.content.keyboardType
     }
 }

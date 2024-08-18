@@ -30,9 +30,7 @@ class AccountViewController: ViewController<AccountView, AccountFlow> {
                 }
             )
         )
-        render(state: model.subject.value)
         model.subject
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
     }

@@ -1,21 +1,5 @@
 import UIKit
 
-open class View<Model>: UIView {
-    public let model: Model
-
-    public required init(model: Model) {
-        self.model = model
-        super.init(frame: .zero)
-        setupView()
-    }
-    
-    required public init?(coder: NSCoder) {
-        fatalError()
-    }
-    
-    open func setupView() {}
-}
-
 open class ViewController<V: View<Model>, Model>: UIViewController {
     public var onClose: (@MainActor (UIViewController) async -> Void)?
     public var onPop: (@MainActor () async -> Void)?

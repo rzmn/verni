@@ -5,9 +5,10 @@ import UIKit
 import DI
 
 public actor UpdateEmailFlow {
-    @MainActor var subject: CurrentValueSubject<UpdateEmailState, Never> {
-        viewModel.subject
+    @MainActor var subject: Published<UpdateEmailState>.Publisher {
+        viewModel.$state
     }
+
     private let viewModel: UpdateEmailViewModel
 
     private let router: AppRouter
@@ -35,7 +36,6 @@ extension UpdateEmailFlow: Flow {
     }
 
     public func perform() async -> Result<Profile, TerminationEvent> {
-        await viewModel.setup()
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
             Task.detached { @MainActor in
@@ -57,13 +57,13 @@ extension UpdateEmailFlow: Flow {
 
     @MainActor
     func confirm() {
-        guard subject.value.canConfirm else {
+        guard viewModel.state.canConfirm else {
             Task.detached { @MainActor in
                 await self.presenter.errorHaptic()
             }
             return
         }
-        viewModel.confirmInProgress(true)
+        viewModel.confirmationInProgress = true
         Task.detached {
             await self.doConfirm()
         }
@@ -71,18 +71,18 @@ extension UpdateEmailFlow: Flow {
 
     @MainActor
     func update(code: String) {
-        viewModel.codeUpdated(code)
+        viewModel.confirmationCode = code
     }
 
     @MainActor
     func resendCode() {
-        guard subject.value.canResendCode else {
+        guard viewModel.state.canResendCode else {
             Task.detached { @MainActor in
                 await self.presenter.errorHaptic()
             }
             return
         }
-        viewModel.resendInProgress(true)
+        viewModel.resendInProgress = true
         Task.detached {
             await self.doResendCode()
         }
@@ -120,11 +120,13 @@ extension UpdateEmailFlow {
                 await presenter.presentGeneralError(error)
             }
         }
-        await viewModel.resendInProgress(false)
+        Task { @MainActor [unowned viewModel] in
+            viewModel.resendInProgress = false
+        }
     }
 
     private func doConfirm() async {
-        guard case .uncorfirmed(let uncorfirmed) = viewModel.subject.value.confirmation else {
+        guard case .uncorfirmed(let uncorfirmed) = await viewModel.state.confirmation else {
             return assertionFailure()
         }
         await self.presenter.submitHaptic()
@@ -134,18 +136,24 @@ extension UpdateEmailFlow {
         switch result {
         case .success:
             await viewModel.cancelCountdownTimer()
-            await viewModel.codeConfirmed()
+            Task { @MainActor [unowned viewModel] in
+                viewModel.confirmed = true
+            }
             await presenter.successHaptic()
             await presenter.presentSuccess()
         case .failure(let error):
             switch error {
             case .codeIsWrong:
-                await viewModel.codeUpdated("")
+                Task { @MainActor [unowned viewModel] in
+                    viewModel.confirmationCode = ""
+                }
                 await presenter.codeIsWrong()
             case .other(let error):
                 await presenter.presentGeneralError(error)
             }
         }
-        await viewModel.confirmInProgress(false)
+        Task { @MainActor [unowned viewModel] in
+            viewModel.confirmationInProgress = false
+        }
     }
 }

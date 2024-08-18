@@ -33,7 +33,7 @@ extension DefaultApiService: ApiService {
         logI { "\(requestDescription): fetching access token for setting to request" }
         switch await tokenRefresher.refreshTokens() {
         case .success:
-            if let token = tokenRefresher.accessToken {
+            if let token = await tokenRefresher.accessToken() {
                 logI { "\(requestDescription): getting access token for setting to request: success" }
                 return .success(token)
             } else {
@@ -62,7 +62,7 @@ extension DefaultApiService: ApiService {
         var tryToRefreshTokenIfNeeded = tryToRefreshTokenIfNeeded
         var request = request
         if let tokenRefresher, request.headers["Authorization"] == nil {
-            if let token = tokenRefresher.accessToken {
+            if let token = await tokenRefresher.accessToken() {
                 logI { "\(request): got access token for setting to request" }
                 request.setHeader(key: "Authorization", value: "Bearer \(token)")
             } else {

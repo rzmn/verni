@@ -1,5 +1,6 @@
 import Domain
 import Api
+import Combine
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
@@ -14,10 +15,17 @@ public class DefaultFriendsRepository {
 }
 
 extension DefaultFriendsRepository: FriendsRepository {
-    public var friendsUpdated: AsyncStream<Void> {
-        api.friendsUpdated
+    public var friendsUpdated: AnyPublisher<Void, Never> {
+        api.eventQueue
+            .compactMap { event -> Void? in
+                guard case .friendsUpdated = event else {
+                    return nil
+                }
+                return ()
+            }
+            .eraseToAnyPublisher()
     }
-    
+
     public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let uids: [UserDto.ID]
         switch await api.run(
@@ -39,7 +47,9 @@ extension DefaultFriendsRepository: FriendsRepository {
         case .failure(let error):
             return .failure(GeneralError(apiError: error))
         }
-        let friendsByKind = users.map(User.init).reduce(into: [:], { dict, user in
+        let friendsByKind = users.map(User.init).reduce(
+            into: set.reduce(into: [:], { dict, value in dict[value] = [User]() })
+        ) { dict, user in
             switch user.status {
             case .me, .no:
                 break
@@ -56,7 +66,7 @@ extension DefaultFriendsRepository: FriendsRepository {
                 array.append(user)
                 dict[.friends] = array
             }
-        }) as [FriendshipKind: [User]]
+        } as [FriendshipKind: [User]]
         Task.detached { [weak self] in
             guard let self else { return }
             await offline.storeFriends(friendsByKind)

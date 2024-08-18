@@ -17,8 +17,4 @@ struct SignUpState: Equatable {
         }
         return true
     }
-
-    static var initial: Self {
-        SignUpState(email: "", password: "", passwordConfirmation: "", emailHint: nil, passwordHint: nil, passwordConfirmationHint: nil)
-    }
 }

@@ -14,6 +14,10 @@ extension UIFont {
             UIFont(name: "SF Pro Display Semibold", size: 15) ?? .systemFont(ofSize: 18, weight: .bold)
         }
 
+        public static var subtitle: UIFont {
+            UIFont(name: "SF Pro Display Semibold", size: 12) ?? .systemFont(ofSize: 13, weight: .bold)
+        }
+
         public static var text: UIFont {
             UIFont(name: "SF Pro", size: 16) ?? .systemFont(ofSize: 16)
         }

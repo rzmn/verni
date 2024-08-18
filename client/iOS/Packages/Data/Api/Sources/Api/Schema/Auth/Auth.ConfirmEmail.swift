@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Auth {
     public struct ConfirmEmail: ApiMethod, AuthScope {
-        public typealias Response = Void
+        public typealias Response = NoResponse
 
         public struct Parameters: Encodable {
             let code: String

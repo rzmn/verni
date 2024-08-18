@@ -14,8 +14,4 @@ struct SignInState: Equatable {
         }
         return true
     }
-
-    static var initial: Self {
-        SignInState(email: "", password: "", emailHint: nil)
-    }
 }

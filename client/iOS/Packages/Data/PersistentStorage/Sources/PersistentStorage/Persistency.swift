@@ -1,6 +1,8 @@
 import DataTransferObjects
 
 public protocol Persistency {
+    func userId() async -> UserDto.ID
+
     func getRefreshToken() async -> String
     func update(refreshToken: String) async
 

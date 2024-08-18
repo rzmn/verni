@@ -12,6 +12,12 @@ class FriendView: UIView {
         l.textColor = .p.primary
         return l
     }()
+    private let balanceLabel = {
+        let l = UILabel()
+        l.font = .p.subtitle
+        l.textColor = .p.primary
+        return l
+    }()
     private let avatar = {
         let size: CGFloat = 44
         let frame = CGRect(origin: .zero, size: CGSize(width: size, height: size))
@@ -33,7 +39,7 @@ class FriendView: UIView {
     }
 
     private func setupView() {
-        [label, avatar].forEach(addSubview)
+        [label, avatar, balanceLabel].forEach(addSubview)
         layer.cornerRadius = 16
         layer.masksToBounds = true
         backgroundColor = .p.backgroundContent
@@ -44,9 +50,37 @@ class FriendView: UIView {
         label.text = nil
     }
     
-    func render(user: User, balance: [Currency: Cost]) {
+    func render(item: FriendsState.Item) {
+        subscriptions.removeAll()
+        item.$data
+            .sink(receiveValue: render)
+            .store(in: &subscriptions)
+    }
+
+    private func render(data: FriendsState.ItemData) {
+        let user = data.user
+        let balance = data.balance
         label.text = user.displayName
         avatar.avatarId = user.avatar?.id
+        if balance.isEmpty || balance.values.allSatisfy({ $0 == 0 }) {
+            balanceLabel.text = "expense_settled_up".localized
+            balanceLabel.textColor = .p.primary
+        } else {
+            let description = balance.map { "\($0.key.stringValue):\($0.value)" }.joined(separator: ", ")
+            let color: UIColor
+            if balance.values.allSatisfy({ $0 >= 0 }) {
+                color = .p.positive
+            } else if balance.values.allSatisfy({ $0 <= 0 }) {
+                color = .p.destructive
+            } else {
+                color = .p.primary
+            }
+            balanceLabel.text = String(
+                format: "expense_balance_fmt".localized,
+                description
+            )
+            balanceLabel.textColor = color
+        }
     }
 
     override func layoutSubviews() {
@@ -59,11 +93,19 @@ class FriendView: UIView {
             height: avatarSize.height
         )
         let labelSize = label.sizeThatFits(bounds.size)
+        let balanceSize = balanceLabel.sizeThatFits(bounds.size)
+        let minY = (bounds.height - labelSize.height - balanceSize.height) / 2
         label.frame = CGRect(
-            x: avatar.frame.maxX + 12,
-            y: bounds.midY - labelSize.height / 2,
+            x: avatar.frame.maxX + .p.defaultHorizontal,
+            y: minY,
             width: labelSize.width,
             height: labelSize.height
+        )
+        balanceLabel.frame = CGRect(
+            x: avatar.frame.maxX + .p.defaultHorizontal,
+            y: label.frame.maxY,
+            width: balanceSize.width,
+            height: balanceSize.height
         )
     }
 

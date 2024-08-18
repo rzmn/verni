@@ -13,8 +13,4 @@ struct UpdateDisplayNameState {
         }
         return true
     }
-
-    static var initial: Self {
-        UpdateDisplayNameState(displayName: "", displayNameHint: nil)
-    }
 }

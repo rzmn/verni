@@ -3,6 +3,7 @@ import DataTransferObjects
 extension Profile {
     public struct GetInfo: ApiMethod, ProfileScope {
         public typealias Response = ProfileDto
+        public typealias Parameters = NoParameters
 
         public init() {}
 

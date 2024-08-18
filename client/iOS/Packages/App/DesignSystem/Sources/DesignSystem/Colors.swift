@@ -71,6 +71,17 @@ extension UIColor {
             }
         }
 
+        public static var positive: UIColor {
+            UIColor { traits in
+                switch traits.userInterfaceStyle {
+                case .dark:
+                    return rgb(118, 171, 174)
+                default:
+                    return rgb(87, 166, 161)
+                }
+            }
+        }
+
         public static var destructiveBackground: UIColor {
             destructive.withAlphaComponent(0.16)
         }

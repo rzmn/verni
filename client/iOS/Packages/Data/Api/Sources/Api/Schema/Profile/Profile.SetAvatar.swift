@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Profile {
     public struct SetAvatar: ApiMethod, ProfileScope {
-        public typealias Response = Void
+        public typealias Response = NoResponse
         public var parameters: Parameters
 
         public struct Parameters: Encodable {

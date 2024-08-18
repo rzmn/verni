@@ -104,6 +104,7 @@
 		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
 		611CCD812C50AEA600289D9E /* AuthSession */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthSession; sourceTree = "<group>"; };
 		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
+		612250812C6DD54500553D23 /* AddExpenseFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AddExpenseFlow; sourceTree = "<group>"; };
 		6126313A2C5FC49400445300 /* AuthenticatedFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthenticatedFlow; sourceTree = "<group>"; };
 		6126313B2C5FC49400445300 /* UnauthenticatedFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UnauthenticatedFlow; sourceTree = "<group>"; };
 		612631412C5FC60700445300 /* SignInFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInFlow; sourceTree = "<group>"; };
@@ -125,6 +126,8 @@
 		618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro-Display-Semibold.otf"; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
 		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
+		61BA6ED62C70ABD9006F1140 /* PickCounterpartyFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PickCounterpartyFlow; sourceTree = "<group>"; };
+		61BA6ED82C71C0B6006F1140 /* UserPreviewFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UserPreviewFlow; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
 		61FD347B2C40242F002C1A5A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -264,6 +267,19 @@
 			path = Domain;
 			sourceTree = "<group>";
 		};
+		612250802C6DD4F500553D23 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				611CABE32C6B66D100D7DC5A /* UpdateAvatarFlow */,
+				611CABE22C6B663100D7DC5A /* QrPreviewFlow */,
+				611CABE12C6B638A00D7DC5A /* UpdatePasswordFlow */,
+				611CABE02C6B619D00D7DC5A /* UpdateDisplayNameFlow */,
+				611CABDF2C6B51E500D7DC5A /* UpdateEmailFlow */,
+				612A06FE2C6104BE00F79192 /* AccountFlow */,
+			);
+			name = Account;
+			sourceTree = "<group>";
+		};
 		6126313F2C5FC59F00445300 /* Unauthenticated */ = {
 			isa = PBXGroup;
 			children = (
@@ -277,13 +293,9 @@
 		612631402C5FC5AD00445300 /* Authenticated */ = {
 			isa = PBXGroup;
 			children = (
-				611CABE32C6B66D100D7DC5A /* UpdateAvatarFlow */,
-				611CABE22C6B663100D7DC5A /* QrPreviewFlow */,
-				611CABE12C6B638A00D7DC5A /* UpdatePasswordFlow */,
-				611CABE02C6B619D00D7DC5A /* UpdateDisplayNameFlow */,
-				611CABDF2C6B51E500D7DC5A /* UpdateEmailFlow */,
-				614AC1962C67E315005B2CD5 /* FriendsFlow */,
-				612A06FE2C6104BE00F79192 /* AccountFlow */,
+				61BA6ED72C71C08C006F1140 /* Friends */,
+				61BA6ED52C70AAEC006F1140 /* AddExpense */,
+				612250802C6DD4F500553D23 /* Account */,
 				6126313A2C5FC49400445300 /* AuthenticatedFlow */,
 			);
 			name = Authenticated;
@@ -354,6 +366,24 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		61BA6ED52C70AAEC006F1140 /* AddExpense */ = {
+			isa = PBXGroup;
+			children = (
+				61BA6ED62C70ABD9006F1140 /* PickCounterpartyFlow */,
+				612250812C6DD54500553D23 /* AddExpenseFlow */,
+			);
+			name = AddExpense;
+			sourceTree = "<group>";
+		};
+		61BA6ED72C71C08C006F1140 /* Friends */ = {
+			isa = PBXGroup;
+			children = (
+				61BA6ED82C71C0B6006F1140 /* UserPreviewFlow */,
+				614AC1962C67E315005B2CD5 /* FriendsFlow */,
+			);
+			name = Friends;
 			sourceTree = "<group>";
 		};
 		61FD347A2C402416002C1A5A /* Resources */ = {

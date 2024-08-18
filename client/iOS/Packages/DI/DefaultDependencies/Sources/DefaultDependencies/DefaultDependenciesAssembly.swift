@@ -199,7 +199,7 @@ extension DefaultDependenciesAssembly {
     }
 
     func persistencyFactory() -> PersistencyFactory {
-        SQLitePersistencyFactory(logger: .shared.with(prefix: "[db]"))
+        SQLitePersistencyFactory(logger: .shared.with(prefix: "[db] "))
     }
 }
 

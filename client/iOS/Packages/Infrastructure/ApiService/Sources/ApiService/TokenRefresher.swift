@@ -7,6 +7,6 @@ public enum RefreshTokenFailureReason: Error {
 }
 
 public protocol TokenRefresher {
-    var accessToken: String? { get }
+    func accessToken() async -> String?
     func refreshTokens() async -> Result<Void, RefreshTokenFailureReason>
 }

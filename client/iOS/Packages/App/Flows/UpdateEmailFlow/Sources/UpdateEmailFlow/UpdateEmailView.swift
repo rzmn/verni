@@ -27,7 +27,7 @@ class UpdateEmailView: View<UpdateEmailFlow> {
     private let enterCode = TextField(
         config: TextField.Config(
             placeholder: "enter_verification_email_code".localized,
-            content: .unspecified
+            content: .oneTimeCode
         )
     )
     private var keyboardBottomInset: CGFloat = 0
@@ -48,10 +48,8 @@ class UpdateEmailView: View<UpdateEmailFlow> {
             model?.update(code: enterCode?.text ?? "")
         }, for: .editingChanged)
         model.subject
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
-        render(state: model.subject.value)
         KeyboardObserver.shared.notifier
             .sink { [weak self] event in
                 guard let self, !isInInteractiveTransition else { return }

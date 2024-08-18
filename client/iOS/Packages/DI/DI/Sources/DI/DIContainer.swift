@@ -18,6 +18,8 @@ public protocol DIContainer: AppCommonCovertible {
 }
 
 public protocol ActiveSessionDIContainer: AppCommonCovertible {
+    var userId: User.ID { get }
+
     func logoutUseCase() -> LogoutUseCase
     func spendingsRepository() -> SpendingsRepository
     func spendingsOfflineRepository() -> SpendingsOfflineRepository

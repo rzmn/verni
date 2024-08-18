@@ -46,11 +46,12 @@ func New(storagePath string, keyPath string) (storage.Storage, error) {
 	return new(ctx, db)
 }
 
-func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
-	const op = "storage.ydb.new"
-	err := db.Table().Do(ctx,
+func (s *Storage) CreateTables() error {
+	const op = "storage.ydb.CreateTables"
+	dbName := s.db.Name()
+	err := s.db.Table().Do(s.ctx,
 		func(ctx context.Context, s table.Session) (err error) {
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "credentials"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "credentials"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("email", types.TypeText),
 				options.WithColumn("password", types.TypeText),
@@ -59,7 +60,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create credentials: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "userInfos"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "userInfos"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("displayName", types.TypeText),
 				options.WithColumn("avatarId", types.Optional(types.TypeText)),
@@ -68,7 +69,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create users: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "emails"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "emails"),
 				options.WithColumn("email", types.TypeText),
 				options.WithColumn("confirmed", types.TypeBool),
 				options.WithColumn("validationToken", types.Optional(types.TypeText)),
@@ -77,7 +78,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create emails: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "avatars"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "avatars"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("data", types.TypeText),
 				options.WithPrimaryKeyColumn("id"),
@@ -85,7 +86,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create avatars: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "pushTokens"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "pushTokens"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("token", types.TypeText),
 				options.WithPrimaryKeyColumn("id"),
@@ -93,7 +94,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create pushTokens: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "tokens"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "tokens"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("token", types.TypeText),
 				options.WithPrimaryKeyColumn("id"),
@@ -101,7 +102,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create tokens: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "friendRequests"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "friendRequests"),
 				options.WithColumn("sender", types.TypeText),
 				options.WithColumn("target", types.TypeText),
 				options.WithPrimaryKeyColumn("sender", "target"),
@@ -109,7 +110,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create friendRequests: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "friends"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "friends"),
 				options.WithColumn("friendA", types.TypeText),
 				options.WithColumn("friendB", types.TypeText),
 				options.WithPrimaryKeyColumn("friendA", "friendB"),
@@ -117,7 +118,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create friends: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "spendings"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "spendings"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("dealId", types.TypeText),
 				options.WithColumn("cost", types.TypeInt64),
@@ -127,7 +128,7 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 				log.Printf("%s: create spendings: unexpected err %v", op, err)
 				return err
 			}
-			if err := s.CreateTable(ctx, path.Join(db.Name(), "deals"),
+			if err := s.CreateTable(ctx, path.Join(dbName, "deals"),
 				options.WithColumn("id", types.TypeText),
 				options.WithColumn("timestamp", types.TypeInt64),
 				options.WithColumn("details", types.TypeText),
@@ -143,8 +144,13 @@ func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
 	)
 	if err != nil {
 		log.Printf("%s: unexpected err %v", op, err)
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return err
 	}
+	return nil
+}
+
+func new(ctx context.Context, db *ydb.Driver) (storage.Storage, error) {
+	const op = "storage.ydb.new"
 	return &Storage{db: db, ctx: ctx}, nil
 }
 

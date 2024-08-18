@@ -72,10 +72,8 @@ class SignInView: View<SignInFlow> {
         password.delegate = self
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         model.subject
-            .receive(on: RunLoop.main)
             .sink(receiveValue: render)
             .store(in: &subscriptions)
-        render(state: model.subject.value)
         KeyboardObserver.shared.notifier
             .sink { [weak self] event in
                 guard let self, !isInInteractiveTransition else { return }

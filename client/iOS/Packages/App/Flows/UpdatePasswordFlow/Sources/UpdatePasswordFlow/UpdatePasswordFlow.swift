@@ -4,34 +4,32 @@ import Domain
 import DI
 
 public actor UpdatePasswordFlow {
+    @MainActor var subject: Published<UpdatePasswordState>.Publisher {
+        viewModel.$state
+    }
+
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
     private lazy var presenter = UpdatePasswordFlowPresenter(router: router, flow: self)
 
-    let subject = CurrentValueSubject<UpdatePasswordState, Never>(.initial)
-
-    private let oldPasswordSubject = CurrentValueSubject<String, Never>(UpdatePasswordState.initial.oldPassword)
-    private let newPasswordSubject = CurrentValueSubject<String, Never>(UpdatePasswordState.initial.newPassword)
-    private let repeatNewPasswordSubject = CurrentValueSubject<String, Never>(UpdatePasswordState.initial.repeatNewPassword)
-    private let newPasswordHint = CurrentValueSubject<String?, Never>(UpdatePasswordState.initial.newPasswordHint)
-    private let repeatNewPasswordHint = CurrentValueSubject<String?, Never>(UpdatePasswordState.initial.repeatNewPasswordHint)
-
+    private let viewModel: UpdatePasswordViewModel
     private var subscriptions = Set<AnyCancellable>()
 
-    private let passwordValidation: PasswordValidationUseCase
     private let saveCredentials: SaveCredendialsUseCase
     private let profileRepository: UsersRepository
     private let profile: Profile
 
     private var flowContinuation: Continuation?
 
-    public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) {
+    public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) async {
         self.router = router
         self.profile = profile
         self.saveCredentials = di.appCommon().saveCredentials()
         self.profileEditing = di.profileEditingUseCase()
         self.profileRepository = di.usersRepository()
-        self.passwordValidation = di.appCommon().localPasswordValidationUseCase()
+        viewModel = await UpdatePasswordViewModel(
+            passwordValidation: di.appCommon().localPasswordValidationUseCase()
+        )
     }
 }
 
@@ -41,56 +39,7 @@ extension UpdatePasswordFlow: Flow {
     }
 
     public func perform() async -> Result<Profile, TerminationEvent> {
-        Publishers.CombineLatest(newPasswordSubject, repeatNewPasswordSubject)
-            .map { password, repeatPassword in
-                if repeatPassword.isEmpty {
-                    return true
-                }
-                return password == repeatPassword
-            }
-            .map { (matches: Bool) -> String? in
-                if matches {
-                    return nil
-                } else {
-                    return "password_repeat_did_not_match".localized
-                }
-            }
-            .sink(receiveValue: repeatNewPasswordHint.send)
-            .store(in: &subscriptions)
-
-        newPasswordSubject
-            .map(passwordValidation.validatePassword)
-            .map { result -> String? in
-                switch result {
-                case .strong:
-                    return nil
-                case .weak(let message), .invalid(let message):
-                    return message
-                }
-            }
-            .sink(receiveValue: newPasswordHint.send)
-            .store(in: &subscriptions)
-
-        let textFields = Publishers.CombineLatest3(oldPasswordSubject, newPasswordSubject, repeatNewPasswordSubject)
-        let hints = Publishers.CombineLatest(newPasswordHint, repeatNewPasswordHint)
-        Publishers.CombineLatest(textFields, hints)
-            .map { value in
-                let (textFields, hints) = value
-                let (oldPassword, newPassword, repeatNewPassword) = textFields
-                let (newPasswordHint, repeatNewPasswordHint) = hints
-                return UpdatePasswordState(
-                    oldPassword: oldPassword,
-                    newPassword: newPassword,
-                    repeatNewPassword: repeatNewPassword,
-                    newPasswordHint: newPasswordHint,
-                    repeatNewPasswordHint: repeatNewPasswordHint
-                )
-            }
-            .removeDuplicates()
-            .sink(receiveValue: subject.send)
-            .store(in: &subscriptions)
-
-        return await withCheckedContinuation { continuation in
+        await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
             Task.detached { @MainActor in
                 await self.presenter.presentPasswordEditing { [weak self] in
@@ -102,13 +51,13 @@ extension UpdatePasswordFlow: Flow {
     }
 
     func updatePassword() async {
-        guard subject.value.canConfirm else {
+        let state = await viewModel.state
+        guard state.canConfirm else {
             return await presenter.errorHaptic()
         }
-        let newPassword = repeatNewPasswordSubject.value
-        switch await profileEditing.updatePassword(old: oldPasswordSubject.value, new: newPassword) {
+        switch await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword) {
         case .success:
-            await saveCredentials.save(email: profile.email, password: newPassword)
+            await saveCredentials.save(email: profile.email, password: state.newPassword)
             switch await profileRepository.getHostInfo() {
             case .success(let profile):
                 await presenter.successHaptic()
@@ -131,17 +80,17 @@ extension UpdatePasswordFlow: Flow {
 
     @MainActor
     func update(oldPassword: String) {
-        oldPasswordSubject.send(oldPassword)
+        viewModel.oldPassword = oldPassword
     }
 
     @MainActor
     func update(newPassword: String) {
-        newPasswordSubject.send(newPassword)
+        viewModel.newPassword = newPassword
     }
 
     @MainActor
     func update(repeatNewPassword: String) {
-        repeatNewPasswordSubject.send(repeatNewPassword)
+        viewModel.repeatNewPassword = repeatNewPassword
     }
 
     private func handle(result: Result<Profile, TerminationEvent>) async {

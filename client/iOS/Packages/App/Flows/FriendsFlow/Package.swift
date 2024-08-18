@@ -15,6 +15,7 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(path: "../UserPreviewFlow"),
         .package(path: "../../AppBase"),
         .package(path: "../../DesignSystem"),
         .package(path: "../../../DI/DI"),
@@ -32,6 +33,7 @@ let package = Package(
                 "Logging",
                 "Base",
                 "AppBase",
+                "UserPreviewFlow"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
