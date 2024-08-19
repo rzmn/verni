@@ -40,8 +40,6 @@ class FriendView: UIView {
 
     private func setupView() {
         [label, avatar, balanceLabel].forEach(addSubview)
-        layer.cornerRadius = 16
-        layer.masksToBounds = true
         backgroundColor = .p.backgroundContent
     }
 
@@ -110,6 +108,6 @@ class FriendView: UIView {
     }
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-        CGSize(width: size.width, height: 56)
+        CGSize(width: size.width, height: 52)
     }
 }
