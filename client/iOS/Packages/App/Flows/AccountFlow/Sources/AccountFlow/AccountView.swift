@@ -54,9 +54,6 @@ class AccountView: View<AccountFlow> {
         updateDisplayName.addAction({ [weak model] in
             await model?.updateDisplayName()
         }, for: .touchUpInside)
-        model.subject
-            .sink(receiveValue: render)
-            .store(in: &subscriptions)
     }
 
     override func layoutSubviews() {
@@ -91,27 +88,5 @@ class AccountView: View<AccountFlow> {
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
-    }
-
-    private func render(state: AccountState) {
-        switch state.info {
-        case .initial:
-            break
-        case .loading:
-            break
-        case .loaded(let t):
-            sequence(first: self, next: \.next)
-                .first {
-                    $0 is UIViewController
-                }
-                .flatMap {
-                    guard let controller = $0 as? UIViewController else {
-                        return
-                    }
-                    controller.navigationItem.title = t.user.displayName
-                }
-        case .failed:
-            break
-        }
     }
 }

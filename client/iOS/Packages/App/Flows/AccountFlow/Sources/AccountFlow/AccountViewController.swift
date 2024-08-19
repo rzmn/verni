@@ -36,23 +36,12 @@ class AccountViewController: ViewController<AccountView, AccountFlow> {
     }
 
     private func render(state: AccountState) {
-        switch state.info {
-        case .initial:
+        if let value = state.info.value {
+            avatarView.avatarId = value.user.avatar?.id
+            navigationItem.title = value.user.displayName
+        } else {
             avatarView.avatarId = nil
-        case .loading(let previous):
-            if case .loaded(let t) = previous {
-                avatarView.avatarId = t.user.avatar?.id
-            } else {
-                avatarView.avatarId = nil
-            }
-        case .loaded(let t):
-            avatarView.avatarId = t.user.avatar?.id
-        case .failed(let previous, _):
-            if case .loaded(let t) = previous {
-                avatarView.avatarId = t.user.avatar?.id
-            } else {
-                avatarView.avatarId = nil
-            }
+            navigationItem.title = "account_nav_title".localized
         }
     }
 }

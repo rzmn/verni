@@ -10,7 +10,6 @@ class AccountFlowPresenter: Presenter {
         let navigationController = NavigationController(
             rootViewController: controller
         )
-        controller.navigationItem.title = "account_nav_title".localized
         navigationController.tabBarItem.title = "account_nav_title".localized
         navigationController.tabBarItem.image = UIImage(systemName: "person.crop.circle")
         navigationController.navigationBar.prefersLargeTitles = true

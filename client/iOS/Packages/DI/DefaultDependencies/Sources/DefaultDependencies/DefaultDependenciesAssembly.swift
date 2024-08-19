@@ -142,7 +142,8 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 public class DefaultDependenciesAssembly: DIContainer {    
     private lazy var anonymousApi = anonymousApiFactory().create()
     private lazy var avatarsRepository = DefaultAvatarsRepository(api: anonymousApi)
-    private let apiEndpoint = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
+    private let apiEndpoint = "http://193.124.113.41:8082"
+    private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
 
     public init() {}
 
@@ -151,7 +152,7 @@ public class DefaultDependenciesAssembly: DIContainer {
             api: anonymousApi,
             avatarsRepository: avatarsRepository,
             saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
-                website: apiEndpoint
+                website: webcredentials
             )
         )
     }

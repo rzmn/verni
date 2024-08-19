@@ -44,9 +44,11 @@ extension AccountFlow: TabEmbedFlow {
     }
     
     public func perform() async -> TerminationEvent {
-
-        return await withCheckedContinuation { continuation in
+        await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
+            Task.detached {
+                await self.refresh()
+            }
         }
     }
 
