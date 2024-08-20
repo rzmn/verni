@@ -7,6 +7,7 @@ import Domain
 
 public class ActiveSession {
     public lazy var api = apiFactoryProvider(tokenRefresher).create()
+    public lazy var longPoll = apiFactoryProvider(tokenRefresher).longPoll()
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
     private let anonymousApi: ApiProtocol
 

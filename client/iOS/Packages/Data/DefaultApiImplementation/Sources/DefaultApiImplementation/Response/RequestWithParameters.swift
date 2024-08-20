@@ -1,5 +1,5 @@
 import Networking
-import Base
+internal import Base
 
 struct RequestWithParameters<Parameters: Encodable>: NetworkRequestWithParameters, CompactDescription {
     private var request: Request

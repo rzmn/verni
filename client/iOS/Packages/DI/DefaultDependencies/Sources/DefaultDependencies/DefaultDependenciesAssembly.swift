@@ -38,7 +38,8 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
 
     public func friendListRepository() -> FriendsRepository {
         DefaultFriendsRepository(
-            api: api,
+            api: api, 
+            longPoll: longPoll,
             offline: DefaultFriendsOfflineRepository(
                 persistency: persistency
             )
@@ -80,7 +81,8 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
 
     public func spendingsRepository() -> SpendingsRepository {
         DefaultSpendingsRepository(
-            api: api,
+            api: api, 
+            longPoll: longPoll,
             offline: DefaultSpendingsOfflineRepository(
                 persistency: persistency
             )
@@ -192,11 +194,11 @@ extension DefaultDependenciesAssembly {
     }
 
     func anonymousApiFactory() -> ApiFactory {
-        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: nil), polling: nil)
+        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: nil))
     }
 
     func autenticatedApiFactory(refresher: TokenRefresher) -> ApiFactory {
-        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: refresher), polling: TimerBasedPolling())
+        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: refresher))
     }
 
     func persistencyFactory() -> PersistencyFactory {

@@ -1,9 +1,9 @@
 import ApiService
 import Networking
-import Base
 import DataTransferObjects
 import Api
 import Combine
+internal import Base
 
 class DefaultApi: ApiProtocol {
     private enum RefreshTokenError: Error {
@@ -11,7 +11,7 @@ class DefaultApi: ApiProtocol {
     }
     private let service: ApiService
 
-    public init(service: ApiService, polling: ApiPolling? = nil) {
+    public init(service: ApiService) {
         self.service = service
     }
 }
@@ -63,13 +63,6 @@ extension DefaultApi {
                 )
             ) as ApiServiceResultVoid
         )
-    }
-
-    func longPoll<Query>(
-        query: Query
-    ) async -> LongPollResult<Query.Update>
-    where Query: LongPollQuery {
-        return (() as Any) as! LongPollResult<Query.Update>
     }
 
     private func mapApiResponse<R: ApiResponse>(_ response: Result<R, ApiServiceError>) -> ApiResult<R.Success> {

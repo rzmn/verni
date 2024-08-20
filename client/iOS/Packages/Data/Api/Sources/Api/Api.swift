@@ -1,4 +1,5 @@
 import DataTransferObjects
+import Combine
 
 public protocol ApiProtocol {
     func run<Method>(method: Method) async -> ApiResult<Method.Response>
@@ -9,7 +10,8 @@ public protocol ApiProtocol {
 
     func run<Method>(method: Method) async -> ApiResult<Void>
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable
+}
 
-    func longPoll<Query>(query: Query) async -> LongPollResult<Query.Update>
-    where Query: LongPollQuery
+public protocol LongPoll {
+    func create<Query: LongPollQuery>(for query: Query) -> AnyPublisher<Query.Update, Never>
 }

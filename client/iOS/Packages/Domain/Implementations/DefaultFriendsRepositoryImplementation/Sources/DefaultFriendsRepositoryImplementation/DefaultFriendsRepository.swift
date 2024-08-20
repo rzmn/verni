@@ -8,37 +8,22 @@ internal import ApiDomainConvenience
 public class DefaultFriendsRepository {
     private let api: ApiProtocol
     private let offline: FriendsOfflineMutableRepository
+    private let longPoll: LongPoll
 
-    public lazy var friendsUpdated = createFriendsUpdatedSubject()
-    private var friendsSubscribersCount = 0
-
-    public init(api: ApiProtocol, offline: FriendsOfflineMutableRepository) {
+    public init(api: ApiProtocol, longPoll: LongPoll, offline: FriendsOfflineMutableRepository) {
         self.api = api
         self.offline = offline
-    }
-}
-
-extension DefaultFriendsRepository {
-    private func createFriendsUpdatedSubject() -> AnyPublisher<Void, Never> {
-        PassthroughSubject<Void, Never>()
-            .handleEvents(
-                receiveSubscription: weak(self, type(of: self).spendingCounterpartiesSubscribed) • nop,
-                receiveCompletion: weak(self, type(of: self).spendingCounterpartiesUnsubscribed) • nop,
-                receiveCancel: weak(self, type(of: self).spendingCounterpartiesUnsubscribed)
-            )
-            .eraseToAnyPublisher()
-    }
-
-    private func spendingCounterpartiesSubscribed() {
-        friendsSubscribersCount += 1
-    }
-
-    private func spendingCounterpartiesUnsubscribed() {
-        friendsSubscribersCount -= 1
+        self.longPoll = longPoll
     }
 }
 
 extension DefaultFriendsRepository: FriendsRepository {
+    public var friendsUpdated: AnyPublisher<Void, Never> {
+        longPoll.create(for: LongPollFriendsQuery())
+            .map { _ in () }
+            .eraseToAnyPublisher()
+    }
+    
     public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let uids: [UserDto.ID]
         switch await api.run(

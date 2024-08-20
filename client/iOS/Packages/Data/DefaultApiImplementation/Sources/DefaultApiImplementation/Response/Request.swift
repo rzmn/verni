@@ -1,6 +1,6 @@
 import Networking
-import Base
 import Api
+internal import Base
 
 struct Request: NetworkRequest, CustomStringConvertible {
     let path: String

@@ -7,64 +7,32 @@ internal import Base
 
 public class DefaultSpendingsRepository {
     private let api: ApiProtocol
+    private let longPoll: LongPoll
     private let offline: SpendingsOfflineMutableRepository
-
-    public lazy var spendingCounterpartiesUpdated = createSpendingCounterpartiesUpdatedSubject()
-    private var spendingCounterpartiesSubscribersCount = 0
 
     private var spendingsHistoryUpdatedById = [User.ID: AnyPublisher<Void, Never>]()
     private var spendingCounterpartiesSubscribersCountById = [User.ID: Int]()
 
-    public init(api: ApiProtocol, offline: SpendingsOfflineMutableRepository) {
+    public init(api: ApiProtocol, longPoll: LongPoll, offline: SpendingsOfflineMutableRepository) {
         self.api = api
+        self.longPoll = longPoll
         self.offline = offline
     }
 }
 
-extension DefaultSpendingsRepository {
-    private func createSpendingCounterpartiesUpdatedSubject() -> AnyPublisher<Void, Never> {
-        PassthroughSubject<Void, Never>()
-            .handleEvents(
-                receiveSubscription: weak(self, type(of: self).spendingCounterpartiesSubscribed) • nop,
-                receiveCompletion: weak(self, type(of: self).spendingCounterpartiesUnsubscribed) • nop,
-                receiveCancel: weak(self, type(of: self).spendingCounterpartiesUnsubscribed)
-            )
-            .eraseToAnyPublisher()
-    }
-
-    private func spendingCounterpartiesSubscribed() {
-        spendingCounterpartiesSubscribersCount += 1
-    }
-
-    private func spendingCounterpartiesUnsubscribed() {
-        spendingCounterpartiesSubscribersCount -= 1
-    }
-
-    public func spendingsHistoryUpdated(for id: User.ID) -> AnyPublisher<Void, Never> {
-        if let publisher = spendingsHistoryUpdatedById[id] {
-            return publisher
-        }
-        let publisher = PassthroughSubject<Void, Never>()
-            .handleEvents(
-                receiveSubscription: curry(weak(self, type(of: self).spendingsHistorySubscribed))(id) • nop,
-                receiveCompletion: curry(weak(self, type(of: self).spendingsHistoryUnsubscribed))(id) • nop,
-                receiveCancel: curry(weak(self, type(of: self).spendingsHistoryUnsubscribed))(id)
-            )
-            .eraseToAnyPublisher()
-        spendingsHistoryUpdatedById[id] = publisher
-        return publisher
-    }
-
-    private func spendingsHistorySubscribed(for id: User.ID) {
-
-    }
-
-    private func spendingsHistoryUnsubscribed(for id: User.ID) {
-
-    }
-}
-
 extension DefaultSpendingsRepository: SpendingsRepository {
+    public var spendingCounterpartiesUpdated: AnyPublisher<Void, Never> {
+        longPoll.create(for: LongPollCounterpartiesQuery())
+            .map { _ in () }
+            .eraseToAnyPublisher()
+    }
+    
+    public func spendingsHistoryUpdated(for id: User.ID) -> AnyPublisher<Void, Never> {
+        longPoll.create(for: SpendingsHistoryUpdate(uid: id))
+            .map { _ in () }
+            .eraseToAnyPublisher()
+    }
+    
     public func getSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError> {
         switch await api.run(method: Spendings.GetCounterparties()) {
         case .success(let previewsDto):
