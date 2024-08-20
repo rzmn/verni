@@ -69,6 +69,8 @@ type SpendingsPreview struct {
 	Balance      map[string]int64 `json:"balance"`
 }
 
+type LongPollUpdatePayload struct{}
+
 type Storage interface {
 	GetAccountInfo(uid UserId) (*ProfileInfo, error)
 
@@ -113,7 +115,7 @@ type Storage interface {
 	SearchUsers(sender UserId, query string) ([]User, error)
 
 	InsertDeal(deal Deal) error
-	HasDeal(did string) (bool, error)
+	GetDeal(did string) (*IdentifiableDeal, error)
 	RemoveDeal(did string) error
 
 	GetDeals(counterparty1 UserId, counterparty2 UserId) ([]IdentifiableDeal, error)

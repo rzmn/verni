@@ -78,6 +78,7 @@ const (
 	CodeIsNotYourDeal
 	CodeNotDelivered
 	CodeAlreadyConfirmed
+	CodeLongpollNoEvents
 )
 
 func (c Code) Message() string {

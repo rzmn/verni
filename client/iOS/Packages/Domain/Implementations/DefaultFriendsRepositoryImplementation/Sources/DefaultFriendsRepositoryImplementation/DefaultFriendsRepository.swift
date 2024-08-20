@@ -1,6 +1,7 @@
 import Domain
 import Api
 import Combine
+internal import Base
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
@@ -8,24 +9,36 @@ public class DefaultFriendsRepository {
     private let api: ApiProtocol
     private let offline: FriendsOfflineMutableRepository
 
+    public lazy var friendsUpdated = createFriendsUpdatedSubject()
+    private var friendsSubscribersCount = 0
+
     public init(api: ApiProtocol, offline: FriendsOfflineMutableRepository) {
         self.api = api
         self.offline = offline
     }
 }
 
-extension DefaultFriendsRepository: FriendsRepository {
-    public var friendsUpdated: AnyPublisher<Void, Never> {
-        api.eventQueue
-            .compactMap { event -> Void? in
-                guard case .friendsUpdated = event else {
-                    return nil
-                }
-                return ()
-            }
+extension DefaultFriendsRepository {
+    private func createFriendsUpdatedSubject() -> AnyPublisher<Void, Never> {
+        PassthroughSubject<Void, Never>()
+            .handleEvents(
+                receiveSubscription: weak(self, type(of: self).spendingCounterpartiesSubscribed) • nop,
+                receiveCompletion: weak(self, type(of: self).spendingCounterpartiesUnsubscribed) • nop,
+                receiveCancel: weak(self, type(of: self).spendingCounterpartiesUnsubscribed)
+            )
             .eraseToAnyPublisher()
     }
 
+    private func spendingCounterpartiesSubscribed() {
+        friendsSubscribersCount += 1
+    }
+
+    private func spendingCounterpartiesUnsubscribed() {
+        friendsSubscribersCount -= 1
+    }
+}
+
+extension DefaultFriendsRepository: FriendsRepository {
     public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let uids: [UserDto.ID]
         switch await api.run(

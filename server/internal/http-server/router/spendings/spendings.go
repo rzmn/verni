@@ -10,14 +10,18 @@ import (
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/middleware"
 	"accounty/internal/storage"
+	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jcuga/golongpoll"
 )
 
 type createDealRequestHandler struct {
 	storage    storage.Storage
 	pushSender apns.PushNotificationSender
+	longPoll   *golongpoll.LongpollManager
 }
 
 func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.Request) *createDeal.Error {
@@ -73,8 +77,10 @@ func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Req
 		outError := createDeal.ErrInternal()
 		return []storage.SpendingsPreview{}, &outError
 	}
+	h.longPoll.Publish(LongPollCounterpartiesUpdateKey(), storage.LongPollUpdatePayload{})
 	for i := 0; i < len(request.Deal.Spendings); i++ {
 		spending := request.Deal.Spendings[i]
+		h.longPoll.Publish(LongPollSpendingsHistoryUpdateKey(spending.UserId), storage.LongPollUpdatePayload{})
 		if spending.UserId == storage.UserId(*subject) {
 			continue
 		}
@@ -91,7 +97,8 @@ func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Req
 }
 
 type deleteDealRequestHandler struct {
-	storage storage.Storage
+	storage  storage.Storage
+	longPoll *golongpoll.LongpollManager
 }
 
 func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.Request) *deleteDeal.Error {
@@ -103,12 +110,12 @@ func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.R
 		outError := deleteDeal.ErrInternal()
 		return &outError
 	}
-	exists, err := h.storage.HasDeal(request.DealId)
+	dealFromDb, err := h.storage.GetDeal(request.DealId)
 	if err != nil {
 		outError := deleteDeal.ErrInternal()
 		return &outError
 	}
-	if !exists {
+	if dealFromDb == nil {
 		outError := deleteDeal.ErrDealNotFound()
 		return &outError
 	}
@@ -143,6 +150,7 @@ func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.R
 func (h *deleteDealRequestHandler) Handle(c *gin.Context, request deleteDeal.Request) ([]storage.SpendingsPreview, *deleteDeal.Error) {
 	const op = "router.friends.deleteDealRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
+	deal, getDealErr := h.storage.GetDeal(request.DealId)
 	if err := h.storage.RemoveDeal(request.DealId); err != nil {
 		outError := deleteDeal.ErrInternal()
 		return []storage.SpendingsPreview{}, &outError
@@ -152,6 +160,12 @@ func (h *deleteDealRequestHandler) Handle(c *gin.Context, request deleteDeal.Req
 	if err != nil || subject == nil {
 		outError := deleteDeal.ErrInternal()
 		return []storage.SpendingsPreview{}, &outError
+	}
+	h.longPoll.Publish(LongPollCounterpartiesUpdateKey(), storage.LongPollUpdatePayload{})
+	if getDealErr == nil && deal != nil {
+		for i := 0; i < len(deal.Spendings); i++ {
+			h.longPoll.Publish(LongPollSpendingsHistoryUpdateKey(deal.Spendings[i].UserId), storage.LongPollUpdatePayload{})
+		}
 	}
 	preview, err := h.storage.GetCounterparties(storage.UserId(*subject))
 	if err != nil {
@@ -187,7 +201,7 @@ type getDealsRequestHandler struct {
 }
 
 func (h *getDealsRequestHandler) Validate(c *gin.Context, request getDeals.Request) *getDeals.Error {
-	const op = "router.friends.getDealsRequestHandler.Validate"
+	const op = "router.spendings.getDealsRequestHandler.Validate"
 	log.Printf("%s: start with request %v", op, request)
 	exists, err := h.storage.IsUserExists(request.Counterparty)
 	if err != nil {
@@ -202,7 +216,7 @@ func (h *getDealsRequestHandler) Validate(c *gin.Context, request getDeals.Reque
 }
 
 func (h *getDealsRequestHandler) Handle(c *gin.Context, request getDeals.Request) ([]storage.IdentifiableDeal, *getDeals.Error) {
-	const op = "router.friends.getDealsRequestHandler.Handle"
+	const op = "router.spendings.getDealsRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
@@ -218,10 +232,31 @@ func (h *getDealsRequestHandler) Handle(c *gin.Context, request getDeals.Request
 	return deals, nil
 }
 
+func LongPollCounterpartiesUpdateKey() string {
+	return "counterparties"
+}
+
+func LongPollSpendingsHistoryUpdateKey(uid storage.UserId) string {
+	return fmt.Sprintf("spendings_%s", uid)
+}
+
 func RegisterRoutes(e *gin.Engine, storage storage.Storage, pushSender apns.PushNotificationSender) {
+	longpoll, err := golongpoll.StartLongpoll(golongpoll.Options{})
+	if err != nil {
+		panic(err)
+	}
+
 	group := e.Group("/spendings", middleware.EnsureLoggedIn(storage))
-	group.POST("/createDeal", createDeal.New(&createDealRequestHandler{storage: storage, pushSender: pushSender}))
-	group.POST("/deleteDeal", deleteDeal.New(&deleteDealRequestHandler{storage: storage}))
+	group.POST("/createDeal", createDeal.New(&createDealRequestHandler{storage: storage, pushSender: pushSender, longPoll: longpoll}))
+	group.POST("/deleteDeal", deleteDeal.New(&deleteDealRequestHandler{storage: storage, longPoll: longpoll}))
 	group.GET("/getCounterparties", getCounterparties.New(&getCounterpartiesRequestHandler{storage: storage}))
 	group.GET("/getDeals", getDeals.New(&getDealsRequestHandler{storage: storage}))
+
+	group.POST("/subscribe", wrapWithContext(longpoll.PublishHandler))
+}
+
+func wrapWithContext(lpHandler func(http.ResponseWriter, *http.Request)) func(*gin.Context) {
+	return func(c *gin.Context) {
+		lpHandler(c.Writer, c.Request)
+	}
 }

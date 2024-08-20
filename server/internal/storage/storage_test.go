@@ -775,21 +775,21 @@ func TestInsertAndRemoveDeal(t *testing.T) {
 	if len(deals) != 1 {
 		t.Fatalf("deals len should be 1, found: %v", deals)
 	}
-	exists, err := s.HasDeal(deals[0].Id)
+	dealFromDb, err := s.GetDeal(deals[0].Id)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if !exists {
+	if dealFromDb == nil {
 		t.Fatalf("deal should exists: %v", err)
 	}
 	if err := s.RemoveDeal(deals[0].Id); err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	exists, err = s.HasDeal(deals[0].Id)
+	dealFromDb, err = s.GetDeal(deals[0].Id)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if exists {
+	if dealFromDb != nil {
 		t.Fatalf("deal should not exists: %v", err)
 	}
 }

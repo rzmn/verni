@@ -9,11 +9,6 @@ class DefaultApi: ApiProtocol {
     private enum RefreshTokenError: Error {
         case internalError
     }
-    public let _eventQueue = PassthroughSubject<ApiEvent, Never>()
-    public var eventQueue: AnyPublisher<ApiEvent, Never> {
-        _eventQueue.eraseToAnyPublisher()
-    }
-
     private let service: ApiService
 
     public init(service: ApiService, polling: ApiPolling? = nil) {
@@ -68,6 +63,13 @@ extension DefaultApi {
                 )
             ) as ApiServiceResultVoid
         )
+    }
+
+    func longPoll<Query>(
+        query: Query
+    ) async -> LongPollResult<Query.Update>
+    where Query: LongPollQuery {
+        return (() as Any) as! LongPollResult<Query.Update>
     }
 
     private func mapApiResponse<R: ApiResponse>(_ response: Result<R, ApiServiceError>) -> ApiResult<R.Success> {

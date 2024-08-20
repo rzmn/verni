@@ -1670,22 +1670,29 @@ VALUES($id, $dealId, $cost, $counterparty);`,
 	return nil
 }
 
-func (s *Storage) HasDeal(did string) (bool, error) {
-	const op = "storage.ydb.HasDeal"
+func (s *Storage) GetDeal(did string) (*storage.IdentifiableDeal, error) {
+	const op = "storage.ydb.GetDeal"
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
-		exists bool
+		deal   = (*storage.IdentifiableDeal)(nil)
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, readTx, `
 DECLARE $id AS Text;
 SELECT 
-	True
+	d.id, 
+	d.timestamp,
+	d.details,
+	d.cost,
+	d.currency,
+	s.cost,
+	s.counterparty
 FROM 
-	deals 
+	deals d
+	JOIN spendings s ON s.dealId = d.id
 WHERE 
-	id = $id;`,
+	d.id = $id;`,
 			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(did))),
 		)
 		if err != nil {
@@ -1694,9 +1701,24 @@ WHERE
 		defer res.Close()
 		for res.NextResultSet(ctx) {
 			for res.NextRow() {
-				if err := res.Scan(&exists); err != nil {
-					return err
+				var _deal storage.IdentifiableDeal
+				if deal == nil {
+					_deal = storage.IdentifiableDeal{}
+				} else {
+					_deal = *deal
 				}
+				var cost int64
+				var counterparty string
+				err = res.Scan(
+					&deal.Id,
+					&deal.Timestamp,
+					&deal.Details,
+					&deal.Cost,
+					&deal.Currency,
+					&cost,
+					&counterparty)
+				_deal.Spendings = append(_deal.Spendings, storage.Spending{UserId: storage.UserId(counterparty), Cost: cost})
+				deal = &_deal
 			}
 		}
 		if err := res.Err(); err != nil {
@@ -1706,9 +1728,9 @@ WHERE
 	})
 	if err != nil {
 		log.Printf("%s: unexpected err %v", op, err)
-		return false, err
+		return nil, err
 	}
-	return exists, nil
+	return deal, nil
 }
 
 func (s *Storage) RemoveDeal(did string) error {

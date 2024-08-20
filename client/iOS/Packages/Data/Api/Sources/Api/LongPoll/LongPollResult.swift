@@ -1,10 +1,10 @@
 import Foundation
 
-public enum ApiResult<T> {
+public enum LongPollResult<T> {
     case success(T)
-    case failure(ApiError)
-
-    public func map<R>(_ block: (T) -> R) -> ApiResult<R> {
+    case failure(LongPollError)
+    
+    public func map<R>(_ block: (T) -> R) -> LongPollResult<R> {
         switch self {
         case .success(let t):
             return .success(block(t))
