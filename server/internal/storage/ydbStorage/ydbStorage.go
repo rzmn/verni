@@ -1675,7 +1675,7 @@ func (s *Storage) GetDeal(did string) (*storage.IdentifiableDeal, error) {
 	log.Printf("%s: start", op)
 	var (
 		readTx = table.TxControl(table.BeginTx(table.WithOnlineReadOnly()), table.CommitTx())
-		deal   = (*storage.IdentifiableDeal)(nil)
+		deal   *storage.IdentifiableDeal
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, readTx, `
@@ -1710,11 +1710,11 @@ WHERE
 				var cost int64
 				var counterparty string
 				err = res.Scan(
-					&deal.Id,
-					&deal.Timestamp,
-					&deal.Details,
-					&deal.Cost,
-					&deal.Currency,
+					&_deal.Id,
+					&_deal.Timestamp,
+					&_deal.Details,
+					&_deal.Cost,
+					&_deal.Currency,
 					&cost,
 					&counterparty)
 				_deal.Spendings = append(_deal.Spendings, storage.Spending{UserId: storage.UserId(counterparty), Cost: cost})
