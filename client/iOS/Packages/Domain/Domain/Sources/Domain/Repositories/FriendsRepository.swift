@@ -9,7 +9,7 @@ public enum FriendshipKind: Int, CaseIterable, Hashable {
 public protocol FriendsRepository {
     func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError>
 
-    var friendsUpdated: AnyPublisher<Void, Never> { get }
+    func friendsUpdated() async -> AnyPublisher<Void, Never>
 }
 
 public protocol FriendsOfflineRepository {
