@@ -13,5 +13,6 @@ public protocol ApiProtocol {
 }
 
 public protocol LongPoll {
-    func create<Query: LongPollQuery>(for query: Query) async -> AnyPublisher<Query.Update, Never>
+    func poll<Query>(for query: Query) async -> AnyPublisher<Query.Update, Never>
+    where Query: LongPollQuery, Query.Update: Decodable
 }

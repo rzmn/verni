@@ -24,6 +24,45 @@ extension DefaultApi {
 }
 
 extension DefaultApi {
+    private var longPollTimeout: Int { 29 }
+
+    func longPoll<Query>(
+        query: Query
+    ) async -> LongPollResult<[Query.Update]>
+    where Query: LongPollQuery, Query.Update: Decodable {
+        let result = await service.run(
+            request: Request(
+                path: "\(query.method)?timeout=\(longPollTimeout)&category=\(query.eventId)",
+                httpMethod: .get
+            )
+        ) as Result<LongPollResultDto<Query.Update>, ApiServiceError>
+        switch result {
+        case .success(let longPollResult):
+            switch longPollResult {
+            case .success(let update):
+                return .success(update)
+            case .failure(let longPollFailure):
+                switch longPollFailure {
+                case .noUpdates:
+                    return .failure(.noUpdates)
+                case .noConnection(let error):
+                    return .failure(.noConnection(error))
+                case .internalError(let error):
+                    return .failure(.internalError(error))
+                }
+            }
+        case .failure(let error):
+            switch error {
+            case .noConnection(let error):
+                return .failure(.noConnection(error))
+            case .decodingFailed(let error), .internalError(let error):
+                return .failure(.internalError(error))
+            case .unauthorized:
+                return .failure(.internalError(error))
+            }
+        }
+    }
+
     func run<Method>(
         method: Method
     ) async -> ApiResult<Method.Response>

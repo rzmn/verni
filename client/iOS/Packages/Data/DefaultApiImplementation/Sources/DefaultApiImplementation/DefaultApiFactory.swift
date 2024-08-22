@@ -3,6 +3,7 @@ import ApiService
 
 public class DefaultApiFactory {
     private let service: ApiService
+    private lazy var impl = DefaultApi(service: service)
 
     public init(service: ApiService) {
         self.service = service
@@ -11,10 +12,10 @@ public class DefaultApiFactory {
 
 extension DefaultApiFactory: ApiFactory {
     public func create() -> any ApiProtocol {
-        DefaultApi(service: service)
+        impl
     }
 
     public func longPoll() -> any LongPoll {
-        DefaultLongPoll()
+        DefaultLongPoll(api: impl)
     }
 }

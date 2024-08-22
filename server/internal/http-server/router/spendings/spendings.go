@@ -252,7 +252,7 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage, pushSender apns.Push
 	group.GET("/getCounterparties", getCounterparties.New(&getCounterpartiesRequestHandler{storage: storage}))
 	group.GET("/getDeals", getDeals.New(&getDealsRequestHandler{storage: storage}))
 
-	group.POST("/subscribe", wrapWithContext(longpoll.PublishHandler))
+	group.GET("/subscribe", wrapWithContext(longpoll.SubscriptionHandler))
 }
 
 func wrapWithContext(lpHandler func(http.ResponseWriter, *http.Request)) func(*gin.Context) {

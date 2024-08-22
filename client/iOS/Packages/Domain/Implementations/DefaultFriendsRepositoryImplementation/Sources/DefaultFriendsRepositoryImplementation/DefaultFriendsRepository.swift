@@ -19,7 +19,7 @@ public class DefaultFriendsRepository {
 
 extension DefaultFriendsRepository: FriendsRepository {
     public func friendsUpdated() async -> AnyPublisher<Void, Never> {
-        await longPoll.create(for: LongPollFriendsQuery())
+        await longPoll.poll(for: LongPollFriendsQuery())
             .map { _ in () }
             .eraseToAnyPublisher()
     }

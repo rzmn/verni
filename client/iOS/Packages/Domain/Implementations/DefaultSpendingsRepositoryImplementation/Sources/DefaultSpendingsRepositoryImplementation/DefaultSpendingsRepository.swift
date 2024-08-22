@@ -22,13 +22,13 @@ public class DefaultSpendingsRepository {
 
 extension DefaultSpendingsRepository: SpendingsRepository {
     public func spendingCounterpartiesUpdated() async -> AnyPublisher<Void, Never> {
-        await longPoll.create(for: LongPollCounterpartiesQuery())
+        await longPoll.poll(for: LongPollCounterpartiesQuery())
             .map { _ in () }
             .eraseToAnyPublisher()
     }
 
     public func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<Void, Never> {
-        await longPoll.create(for: SpendingsHistoryUpdate(uid: id))
+        await longPoll.poll(for: SpendingsHistoryUpdate(uid: id))
             .map { _ in () }
             .eraseToAnyPublisher()
     }
