@@ -2,9 +2,11 @@ package friends
 
 import (
 	"log"
+	"net/http"
 	"slices"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jcuga/golongpoll"
 
 	"accounty/internal/apns"
 	"accounty/internal/auth/jwt"
@@ -23,6 +25,7 @@ import (
 type sendRequestRequestHandler struct {
 	storage    storage.Storage
 	pushSender apns.PushNotificationSender
+	longPoll   *golongpoll.LongpollManager
 }
 
 func (h *sendRequestRequestHandler) Validate(c *gin.Context, request sendRequest.Request) *sendRequest.Error {
@@ -96,12 +99,14 @@ func (h *sendRequestRequestHandler) Handle(c *gin.Context, request sendRequest.R
 			h.pushSender.GotFriendRequest(*receiverToken, profile.User.DisplayName)
 		}
 	}
+	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})
 	return nil
 }
 
 type acceptRequestRequestHandler struct {
 	storage    storage.Storage
 	pushSender apns.PushNotificationSender
+	longPoll   *golongpoll.LongpollManager
 }
 
 func (h *acceptRequestRequestHandler) Validate(c *gin.Context, request acceptRequest.Request) *acceptRequest.Error {
@@ -155,6 +160,7 @@ func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptReque
 			h.pushSender.FriendRequestWasHasBeenAccepted(*senderToken, profile.User.DisplayName)
 		}
 	}
+	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})
 	return nil
 }
 
@@ -208,7 +214,8 @@ func (h *getRequestHandler) Handle(c *gin.Context, request get.Request) (map[get
 }
 
 type rejectRequestRequestHandler struct {
-	storage storage.Storage
+	storage  storage.Storage
+	longPoll *golongpoll.LongpollManager
 }
 
 func (h *rejectRequestRequestHandler) Validate(c *gin.Context, request rejectRequest.Request) *rejectRequest.Error {
@@ -246,11 +253,13 @@ func (h *rejectRequestRequestHandler) Handle(c *gin.Context, request rejectReque
 		outError := rejectRequest.ErrInternal()
 		return &outError
 	}
+	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})
 	return nil
 }
 
 type rollbackRequestRequestHandler struct {
-	storage storage.Storage
+	storage  storage.Storage
+	longPoll *golongpoll.LongpollManager
 }
 
 func (h *rollbackRequestRequestHandler) Validate(c *gin.Context, request rollbackRequest.Request) *rollbackRequest.Error {
@@ -287,11 +296,13 @@ func (h *rollbackRequestRequestHandler) Handle(c *gin.Context, request rollbackR
 		outError := rollbackRequest.ErrInternal()
 		return &outError
 	}
+	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})
 	return nil
 }
 
 type unfriendRequestHandler struct {
-	storage storage.Storage
+	storage  storage.Storage
+	longPoll *golongpoll.LongpollManager
 }
 
 func (h *unfriendRequestHandler) Validate(c *gin.Context, request unfriend.Request) *unfriend.Error {
@@ -339,15 +350,32 @@ func (h *unfriendRequestHandler) Handle(c *gin.Context, request unfriend.Request
 		outError := unfriend.ErrInternal()
 		return &outError
 	}
+	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})
 	return nil
 }
 
+func LongPollFriendsUpdateKey() string {
+	return "friends"
+}
+
 func RegisterRoutes(e *gin.Engine, storage storage.Storage, pushSender apns.PushNotificationSender) {
+	longpoll, err := golongpoll.StartLongpoll(golongpoll.Options{})
+	if err != nil {
+		panic(err)
+	}
 	group := e.Group("/friends", middleware.EnsureLoggedIn(storage))
-	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{storage: storage, pushSender: pushSender}))
+	group.POST("/acceptRequest", acceptRequest.New(&acceptRequestRequestHandler{storage: storage, pushSender: pushSender, longPoll: longpoll}))
 	group.GET("/get", get.New(&getRequestHandler{storage: storage}))
-	group.POST("/rejectRequest", rejectRequest.New(&rejectRequestRequestHandler{storage: storage}))
-	group.POST("/rollbackRequest", rollbackRequest.New(&rollbackRequestRequestHandler{storage: storage}))
-	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{storage: storage, pushSender: pushSender}))
-	group.POST("/unfriend", unfriend.New(&unfriendRequestHandler{storage: storage}))
+	group.POST("/rejectRequest", rejectRequest.New(&rejectRequestRequestHandler{storage: storage, longPoll: longpoll}))
+	group.POST("/rollbackRequest", rollbackRequest.New(&rollbackRequestRequestHandler{storage: storage, longPoll: longpoll}))
+	group.POST("/sendRequest", sendRequest.New(&sendRequestRequestHandler{storage: storage, pushSender: pushSender, longPoll: longpoll}))
+	group.POST("/unfriend", unfriend.New(&unfriendRequestHandler{storage: storage, longPoll: longpoll}))
+
+	group.GET("/subscribe", wrapWithContext(longpoll.SubscriptionHandler))
+}
+
+func wrapWithContext(lpHandler func(http.ResponseWriter, *http.Request)) func(*gin.Context) {
+	return func(c *gin.Context) {
+		lpHandler(c.Writer, c.Request)
+	}
 }
