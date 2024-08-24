@@ -2,5 +2,5 @@ env: "dev"
 storage_path: "./data/storage_dev.sqlite"
 http_server:
   timeout: 4s
-  idle_timeout: 30s
+  idle_timeout: 60s
   run_mode: release
