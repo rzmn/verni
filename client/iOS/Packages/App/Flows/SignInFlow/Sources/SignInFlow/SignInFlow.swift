@@ -30,10 +30,10 @@ public actor SignInFlow {
     ) async {
         authUseCase = di.authUseCase()
         viewModel = await SignInViewModel(
-            localEmailValidator: di.appCommon.localEmailValidationUseCase(),
-            passwordValidator: di.appCommon.localPasswordValidationUseCase()
+            localEmailValidator: di.appCommon.localEmailValidationUseCase,
+            passwordValidator: di.appCommon.localPasswordValidationUseCase
         )
-        saveCredentials = di.appCommon.saveCredentials()
+        saveCredentials = di.appCommon.saveCredentialsUseCase
         self.router = router
         self.signUpFlow = await SignUpFlow(di: di, router: router)
     }

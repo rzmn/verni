@@ -3,10 +3,11 @@ import Domain
 public protocol AuthUseCaseReturningActiveSession: AuthUseCase where Self.AuthorizedSession == ActiveSessionDIContainer {}
 
 public protocol AppCommon {
-    func localEmailValidationUseCase() -> EmailValidationUseCase
-    func localPasswordValidationUseCase() -> PasswordValidationUseCase
-    func avatarsRepository() -> AvatarsRepository
-    func saveCredentials() -> SaveCredendialsUseCase
+    var localEmailValidationUseCase: EmailValidationUseCase { get }
+    var localPasswordValidationUseCase: PasswordValidationUseCase { get }
+
+    var avatarsRepository: AvatarsRepository { get }
+    var saveCredentialsUseCase: SaveCredendialsUseCase { get }
 }
 
 public protocol AppCommonCovertible {

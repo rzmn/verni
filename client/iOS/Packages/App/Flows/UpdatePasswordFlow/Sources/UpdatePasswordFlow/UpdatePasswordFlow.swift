@@ -24,11 +24,11 @@ public actor UpdatePasswordFlow {
     public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) async {
         self.router = router
         self.profile = profile
-        self.saveCredentials = di.appCommon.saveCredentials()
+        self.saveCredentials = di.appCommon.saveCredentialsUseCase
         self.profileEditing = di.profileEditingUseCase()
         self.profileRepository = di.usersRepository
         viewModel = await UpdatePasswordViewModel(
-            passwordValidation: di.appCommon.localPasswordValidationUseCase()
+            passwordValidation: di.appCommon.localPasswordValidationUseCase
         )
     }
 }

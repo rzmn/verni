@@ -34,7 +34,7 @@ public actor App {
         logI { "launching app" }
         Task { @MainActor in
             SetupAppearance()
-            AvatarView.repository = di.appCommon.avatarsRepository()
+            AvatarView.repository = di.appCommon.avatarsRepository
         }
         Task.detached { @MainActor in
             await self.askPushMotificationsPermission()

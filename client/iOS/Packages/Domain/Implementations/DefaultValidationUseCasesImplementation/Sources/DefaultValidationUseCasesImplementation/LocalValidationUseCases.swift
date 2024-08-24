@@ -1,7 +1,7 @@
 import Domain
 import Foundation
 
-public class LocalValidationUseCases {
+public struct LocalValidationUseCases {
     public init() {}
 }
 

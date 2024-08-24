@@ -23,8 +23,8 @@ public actor SignUpFlow {
         self.router = router
         authUseCase = di.authUseCase()
         viewModel = await SignUpViewModel(
-            localEmailValidator: di.appCommon.localEmailValidationUseCase(),
-            localPasswordValidator: di.appCommon.localPasswordValidationUseCase()
+            localEmailValidator: di.appCommon.localEmailValidationUseCase,
+            localPasswordValidator: di.appCommon.localPasswordValidationUseCase
         )
     }
 }
