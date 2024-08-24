@@ -10,31 +10,31 @@ public class DefaultAuthUseCase {
     private let api: ApiProtocol
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory
-    private let appCommon: AppCommon
+    private let activeSessionDIContainerFactory: ActiveSessionDIContainerFactory
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
 
     public init(
         api: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
-        appCommon: AppCommon,
+        activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) {
         self.api = api
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
         self.apiFactoryProvider = apiFactoryProvider
-        self.appCommon = appCommon
+        self.activeSessionDIContainerFactory = activeSessionDIContainerFactory
     }
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
-    public func awake() async -> Result<ActiveSession, AwakeError> {
+    public func awake() async -> Result<ActiveSessionDIContainerConvertible, AwakeError> {
         guard let session = await ActiveSession.awake(
             anonymousApi: api,
             apiServiceFactory: apiServiceFactory,
             persistencyFactory: persistencyFactory, 
-            appCommon: appCommon,
+            activeSessionDIContainerFactory: activeSessionDIContainerFactory,
             apiFactoryProvider: apiFactoryProvider
         ) else {
             return.failure(.hasNoSession)
@@ -42,7 +42,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         return .success(session)
     }
     
-    public func login(credentials: Credentials) async -> Result<ActiveSession, LoginError> {
+    public func login(credentials: Credentials) async -> Result<ActiveSessionDIContainerConvertible, LoginError> {
         let method = Auth.Login(
             credentials: CredentialsDto(
                 email: credentials.email,
@@ -61,7 +61,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
                         persistencyFactory: persistencyFactory, 
-                        appCommon: appCommon,
+                        activeSessionDIContainerFactory: activeSessionDIContainerFactory,
                         apiFactoryProvider: apiFactoryProvider
                     )
                 )
@@ -90,7 +90,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
     }
     
-    public func signup(credentials: Credentials) async -> Result<ActiveSession, SignupError> {
+    public func signup(credentials: Credentials) async -> Result<ActiveSessionDIContainerConvertible, SignupError> {
         let method = Auth.Signup(
             credentials: CredentialsDto(
                 email: credentials.email,
@@ -109,7 +109,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                         refreshToken: token.refreshToken,
                         apiServiceFactory: apiServiceFactory,
                         persistencyFactory: persistencyFactory, 
-                        appCommon: appCommon,
+                        activeSessionDIContainerFactory: activeSessionDIContainerFactory,
                         apiFactoryProvider: apiFactoryProvider
                     )
                 )

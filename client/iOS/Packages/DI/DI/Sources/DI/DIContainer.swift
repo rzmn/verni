@@ -10,7 +10,7 @@ public protocol AppCommon {
 }
 
 public protocol AppCommonCovertible {
-    func appCommon() -> AppCommon
+    var appCommon: AppCommon { get }
 }
 
 public protocol DIContainer: AppCommonCovertible {
@@ -20,19 +20,25 @@ public protocol DIContainer: AppCommonCovertible {
 public protocol ActiveSessionDIContainer: AppCommonCovertible {
     var userId: User.ID { get }
 
-    func logoutUseCase() -> LogoutUseCase
-    func spendingsRepository() -> SpendingsRepository
+    var profileRepository: ProfileRepository { get }
+    var usersRepository:  UsersRepository { get }
+    var spendingsRepository: SpendingsRepository { get }
+    var friendListRepository: FriendsRepository { get }
+
+    var logoutUseCase: LogoutUseCase { get }
+
     func spendingsOfflineRepository() -> SpendingsOfflineRepository
     func spendingInteractionsUseCase() -> SpendingInteractionsUseCase
     func profileEditingUseCase() -> ProfileEditingUseCase
-    func friendListRepository() -> FriendsRepository
     func friendsOfflineRepository() -> FriendsOfflineRepository
-    func usersRepository() -> UsersRepository
-    func profileRepository() -> ProfileRepository
     func profileOfflineRepository() -> ProfileOfflineRepository
     func pushRegistrationUseCase() -> PushRegistrationUseCase
     func usersOfflineRepository() -> UsersOfflineRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
     func emailConfirmationUseCase() -> EmailConfirmationUseCase
     func qrInviteUseCase() -> QRInviteUseCase
+}
+
+public protocol ActiveSessionDIContainerConvertible {
+    var activeSessionDIContainer: ActiveSessionDIContainer { get }
 }

@@ -40,9 +40,9 @@ public actor FriendsFlow {
             viewModel = await FriendsViewModel()
         }
 
-        spendingsRepository = di.spendingsRepository()
-        profileRepository = di.usersRepository()
-        friendListRepository = di.friendListRepository()
+        spendingsRepository = di.spendingsRepository
+        profileRepository = di.usersRepository
+        friendListRepository = di.friendListRepository
     }
 
     @MainActor func subscribeForUpdates() {

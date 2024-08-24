@@ -25,7 +25,7 @@ public actor UserPreviewFlow {
             )
         )
         self.router = router
-        spendingsRepository = di.spendingsRepository()
+        spendingsRepository = di.spendingsRepository
         friendStatusInteractions = di.friendInterationsUseCase()
     }
 }

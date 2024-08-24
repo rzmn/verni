@@ -14,7 +14,7 @@ public actor UpdateAvatarFlow {
     public init(di: ActiveSessionDIContainer, router: AppRouter) {
         self.router = router
         self.profileEditing = di.profileEditingUseCase()
-        self.profileRepository = di.usersRepository()
+        self.profileRepository = di.usersRepository
         self.presenter = UpdateAvatarFlowPresenter(router: router)
     }
 

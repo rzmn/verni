@@ -30,10 +30,10 @@ public actor SignInFlow {
     ) async {
         authUseCase = di.authUseCase()
         viewModel = await SignInViewModel(
-            localEmailValidator: di.appCommon().localEmailValidationUseCase(),
-            passwordValidator: di.appCommon().localPasswordValidationUseCase()
+            localEmailValidator: di.appCommon.localEmailValidationUseCase(),
+            passwordValidator: di.appCommon.localPasswordValidationUseCase()
         )
-        saveCredentials = di.appCommon().saveCredentials()
+        saveCredentials = di.appCommon.saveCredentials()
         self.router = router
         self.signUpFlow = await SignUpFlow(di: di, router: router)
     }
@@ -56,7 +56,7 @@ extension SignInFlow: TabEmbedFlow {
         guard let flowContinuation else {
             return
         }
-        await session.profileRepository().refreshProfile()
+        await session.profileRepository.refreshProfile()
         self.flowContinuation = nil
         flowContinuation.resume(returning: session)
     }

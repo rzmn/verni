@@ -24,119 +24,27 @@ internal import DefaultSaveCredendialsUseCaseImplementation
 internal import DefaultProfileRepositoryImplementation
 internal import PersistentStorageSQLite
 
-extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
-    public func appCommon() -> AppCommon {
-        appCommon
-    }
-
-    public func logout() async {
-        invalidate()
-    }
-
-    public func logoutUseCase() -> any LogoutUseCase {
-        self
-    }
-
-    public func friendListRepository() -> FriendsRepository {
-        DefaultFriendsRepository(
-            api: api, 
-            longPoll: longPoll,
-            offline: DefaultFriendsOfflineRepository(
-                persistency: persistency
-            )
-        )
-    }
-
-    public func profileRepository() -> ProfileRepository {
-        DefaultProfileRepository(
-            api: api,
-            offline: DefaultProfileOfflineRepository(
-                persistency: persistency
-            )
-        )
-    }
-
-    public func profileOfflineRepository() -> ProfileOfflineRepository {
-        DefaultProfileOfflineRepository(persistency: persistency)
-    }
-
-    public func friendsOfflineRepository() -> FriendsOfflineRepository {
-        DefaultFriendsOfflineRepository(persistency: persistency)
-    }
-
-    public func usersRepository() -> UsersRepository {
-        DefaultUsersRepository(
-            api: api,
-            offline: DefaultUsersOfflineRepository(
-                persistency: persistency
-            )
-        )
-    }
-
-    public func profileEditingUseCase() -> any ProfileEditingUseCase {
-        DefaultProfileEditingUseCase(api: api, persistency: persistency)
-    }
-
-    public func pushRegistrationUseCase() -> PushRegistrationUseCase {
-        DefaultPushRegistrationUseCase(api: api)
-    }
-
-    public func emailConfirmationUseCase() -> EmailConfirmationUseCase {
-        DefaultEmailConfirmationUseCase(api: api, persistency: persistency)
-    }
-
-    public func friendInterationsUseCase() -> FriendInteractionsUseCase {
-        DefaultFriendInteractionsUseCase(api: api)
-    }
-
-    public func qrInviteUseCase() -> QRInviteUseCase {
-        DefaultQRInviteUseCase()
-    }
-
-    public func spendingsRepository() -> SpendingsRepository {
-        DefaultSpendingsRepository(
-            api: api, 
-            longPoll: longPoll,
-            offline: DefaultSpendingsOfflineRepository(
-                persistency: persistency
-            )
-        )
-    }
-
-    public func spendingsOfflineRepository() -> SpendingsOfflineRepository {
-        DefaultSpendingsOfflineRepository(persistency: persistency)
-    }
-
-    public func spendingInteractionsUseCase() -> SpendingInteractionsUseCase {
-        DefaultSpendingInteractionsUseCase(api: api)
-    }
-
-    public func usersOfflineRepository() -> UsersOfflineRepository {
-        DefaultUsersOfflineRepository(persistency: persistency)
-    }
-}
-
 fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let impl: any AuthUseCase
     private let awakeHook: () async -> Result<any DI.ActiveSessionDIContainer, AwakeError>
     private let loginHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, LoginError>
     private let signupHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, SignupError>
 
-    init<Impl: AuthUseCase>(impl: Impl) where Impl.AuthorizedSession == ActiveSession {
+    init<Impl: AuthUseCase>(impl: Impl) where Impl.AuthorizedSession == any ActiveSessionDIContainerConvertible {
         self.impl = impl
         awakeHook = {
             await impl.awake().map {
-                $0 as ActiveSessionDIContainer
+                $0.activeSessionDIContainer as ActiveSessionDIContainer
             }
         }
         loginHook = {
             await impl.login(credentials: $0).map {
-                $0 as ActiveSessionDIContainer
+                $0.activeSessionDIContainer as ActiveSessionDIContainer
             }
         }
         signupHook = {
             await impl.signup(credentials: $0).map {
-                $0 as ActiveSessionDIContainer
+                $0.activeSessionDIContainer as ActiveSessionDIContainer
             }
         }
     }
@@ -163,15 +71,13 @@ public class DefaultDependenciesAssembly: DIContainer {
 
     public init() {}
 
-    public func appCommon() -> any AppCommon {
-        AppCommonDependencies(
-            api: anonymousApi,
-            avatarsRepository: avatarsRepository,
-            saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
-                website: webcredentials
-            )
+    public lazy var appCommon: AppCommon = AppCommonDependencies(
+        api: anonymousApi,
+        avatarsRepository: avatarsRepository,
+        saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
+            website: webcredentials
         )
-    }
+    )
 
     public func authUseCase() -> any AuthUseCaseReturningActiveSession {
         AuthUseCaseAdapter(
@@ -179,7 +85,9 @@ public class DefaultDependenciesAssembly: DIContainer {
                 api: anonymousApi,
                 apiServiceFactory: apiServiceFactory(), 
                 persistencyFactory: persistencyFactory(), 
-                appCommon: appCommon(),
+                activeSessionDIContainerFactory: ActiveSessionDependenciesAssemblyFactory(
+                    appCommon: appCommon
+                ),
                 apiFactoryProvider: self.autenticatedApiFactory
             )
         )

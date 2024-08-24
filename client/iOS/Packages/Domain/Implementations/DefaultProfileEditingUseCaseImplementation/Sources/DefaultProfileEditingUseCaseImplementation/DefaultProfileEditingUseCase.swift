@@ -7,10 +7,12 @@ internal import ApiDomainConvenience
 public class DefaultProfileEditingUseCase {
     private let api: ApiProtocol
     private let persistency: Persistency
+    private let repository: ProfileRepository
 
-    public init(api: ApiProtocol, persistency: Persistency) {
+    public init(api: ApiProtocol, persistency: Persistency, repository: ProfileRepository) {
         self.api = api
         self.persistency = persistency
+        self.repository = repository
     }
 }
 
@@ -19,6 +21,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
         let method = Api.Profile.SetAvatar(dataBase64: imageData.base64EncodedString())
         switch await api.run(method: method) {
         case .success:
+            await repository.refreshProfile()
             return .success(())
         case .failure(let apiError):
             return .failure(SetAvatarError(apiError: apiError))
@@ -29,6 +32,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
         let method = Api.Profile.SetDisplayName(displayName: displayName)
         switch await api.run(method: method) {
         case .success:
+            await repository.refreshProfile()
             return .success(())
         case .failure(let apiError):
             return .failure(SetDisplayNameError(apiError: apiError))
@@ -39,6 +43,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
         let method = Auth.UpdateEmail(email: email)
         switch await api.run(method: method) {
         case .success:
+            await repository.refreshProfile()
             return .success(())
         case .failure(let apiError):
             return .failure(EmailUpdateError(apiError: apiError))

@@ -4,22 +4,41 @@ import DI
 import PersistentStorage
 import ApiService
 import Domain
+import Combine
+internal import Base
 
-public class ActiveSession {
-    public lazy var api = apiFactoryProvider(tokenRefresher).create()
-    public lazy var longPoll = apiFactoryProvider(tokenRefresher).longPoll()
+public protocol ActiveSessionDIContainerFactory {
+    func create(
+        api: ApiProtocol,
+        persistency: Persistency,
+        longPoll: LongPoll,
+        logoutSubject: PassthroughSubject<LogoutReason, Never>,
+        userId: User.ID
+    ) -> ActiveSessionDIContainer
+}
+
+public class ActiveSession: ActiveSessionDIContainerConvertible {
+    public lazy var activeSessionDIContainer = factory.create(
+        api: authenticatedApiFactory.create(),
+        persistency: persistency,
+        longPoll: authenticatedApiFactory.longPoll(), 
+        logoutSubject: logoutSubject,
+        userId: userId
+    )
+    private lazy var authenticatedApiFactory = apiFactoryProvider(tokenRefresher)
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
     private let anonymousApi: ApiProtocol
+    private let factory: ActiveSessionDIContainerFactory
+    private let logoutSubject = PassthroughSubject<LogoutReason, Never>()
 
     private lazy var tokenRefresher: TokenRefresher = RefreshTokenManager(
         api: anonymousApi,
         persistency: persistency, 
-        onSessionInvalidated: invalidate
+        onSessionInvalidated: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
     )
-    public let appCommon: AppCommon
-    public let userId: User.ID
-    public private(set) var persistency: Persistency
-    public private(set) var accessToken: String?
+    private let userId: User.ID
+    private let persistency: Persistency
+    private let accessToken: String?
 
     public static func awake(
         anonymousApi: ApiProtocol,
@@ -28,14 +47,14 @@ public class ActiveSession {
         refreshToken: String,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
-        appCommon: AppCommon,
+        activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async throws -> ActiveSession {
         let persistency = try persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
         return await ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
-            appCommon: appCommon,
+            activeSessionDIContainerFactory: activeSessionDIContainerFactory,
             accessToken: accessToken,
             apiFactoryProvider: apiFactoryProvider
         )
@@ -45,7 +64,7 @@ public class ActiveSession {
         anonymousApi: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
-        appCommon: AppCommon,
+        activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async -> ActiveSession? {
         guard let persistency = persistencyFactory.awake() else {
@@ -54,7 +73,7 @@ public class ActiveSession {
         return await ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
-            appCommon: appCommon,
+            activeSessionDIContainerFactory: activeSessionDIContainerFactory,
             accessToken: nil,
             apiFactoryProvider: apiFactoryProvider
         )
@@ -63,7 +82,7 @@ public class ActiveSession {
     private init(
         anonymousApi: ApiProtocol,
         persistency: Persistency,
-        appCommon: AppCommon,
+        activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         accessToken: String?,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async {
@@ -71,13 +90,7 @@ public class ActiveSession {
         self.accessToken = accessToken
         self.anonymousApi = anonymousApi
         self.apiFactoryProvider = apiFactoryProvider
-        self.appCommon = appCommon
+        self.factory = activeSessionDIContainerFactory
         self.userId = await persistency.userId()
-    }
-
-    public func invalidate() {
-        Task.detached {
-            await self.persistency.invalidate()
-        }
     }
 }

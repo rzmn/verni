@@ -19,7 +19,7 @@ public actor UpdateDisplayNameFlow {
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         self.router = router
-        self.profileReposiroty = di.usersRepository()
+        self.profileReposiroty = di.usersRepository
         self.profileEditing = di.profileEditingUseCase()
         self.viewModel = await UpdateDisplayNameViewModel()
     }

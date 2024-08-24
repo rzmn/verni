@@ -123,6 +123,7 @@
 		614AC19F2C6802EE005B2CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultPushRegistrationUseCaseImplementation; sourceTree = "<group>"; };
 		6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileRepositoryImplementation; sourceTree = "<group>"; };
+		6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultLogoutUseCaseImplementation; sourceTree = "<group>"; };
 		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
 		618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro-Display-Semibold.otf"; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
@@ -241,6 +242,7 @@
 		611CCD662C50AE3A00289D9E /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */,
 				6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */,
 				61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */,
 				614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */,

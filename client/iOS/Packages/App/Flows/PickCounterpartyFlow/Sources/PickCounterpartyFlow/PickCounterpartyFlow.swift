@@ -20,7 +20,7 @@ public actor PickCounterpartyFlow {
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         self.router = router
-        friendsRepository = di.friendListRepository()
+        friendsRepository = di.friendListRepository
         viewModel = await PickCounterpartyViewModel(
             friends: await di
                 .friendsOfflineRepository()

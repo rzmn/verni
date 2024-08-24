@@ -28,7 +28,7 @@ public actor AccountFlow {
         self.router = router
         self.di = di
         editingUseCase = di.profileEditingUseCase()
-        profileRepository = di.profileRepository()
+        profileRepository = di.profileRepository
         viewModel = await AccountViewModel(
             profile: await di.profileOfflineRepository().getProfile()
         )

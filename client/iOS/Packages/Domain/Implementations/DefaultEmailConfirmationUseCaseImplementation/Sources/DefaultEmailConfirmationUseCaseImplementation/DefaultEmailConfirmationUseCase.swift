@@ -6,13 +6,11 @@ internal import ApiDomainConvenience
 
 public class DefaultEmailConfirmationUseCase {
     private let api: ApiProtocol
-    private let persistency: Persistency
 
     public var confirmationCodeLength: Int = 6
 
-    public init(api: ApiProtocol, persistency: Persistency) {
+    public init(api: ApiProtocol) {
         self.api = api
-        self.persistency = persistency
     }
 }
 
