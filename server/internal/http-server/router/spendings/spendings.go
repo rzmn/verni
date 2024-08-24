@@ -142,19 +142,19 @@ func (h *deleteDealRequestHandler) Validate(c *gin.Context, request deleteDeal.R
 	return nil
 }
 
-func (h *deleteDealRequestHandler) Handle(c *gin.Context, request deleteDeal.Request) ([]storage.SpendingsPreview, *deleteDeal.Error) {
+func (h *deleteDealRequestHandler) Handle(c *gin.Context, request deleteDeal.Request) *deleteDeal.Error {
 	const op = "router.friends.deleteDealRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
 	deal, getDealErr := h.storage.GetDeal(request.DealId)
 	if err := h.storage.RemoveDeal(request.DealId); err != nil {
 		outError := deleteDeal.ErrInternal()
-		return []storage.SpendingsPreview{}, &outError
+		return &outError
 	}
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		outError := deleteDeal.ErrInternal()
-		return []storage.SpendingsPreview{}, &outError
+		return &outError
 	}
 	h.longPoll.Publish(LongPollCounterpartiesUpdateKey(), storage.LongPollUpdatePayload{})
 	if getDealErr == nil && deal != nil {
@@ -162,12 +162,7 @@ func (h *deleteDealRequestHandler) Handle(c *gin.Context, request deleteDeal.Req
 			h.longPoll.Publish(LongPollSpendingsHistoryUpdateKey(deal.Spendings[i].UserId), storage.LongPollUpdatePayload{})
 		}
 	}
-	preview, err := h.storage.GetCounterparties(storage.UserId(*subject))
-	if err != nil {
-		outError := deleteDeal.ErrInternal()
-		return []storage.SpendingsPreview{}, &outError
-	}
-	return preview, nil
+	return nil
 }
 
 type getCounterpartiesRequestHandler struct {

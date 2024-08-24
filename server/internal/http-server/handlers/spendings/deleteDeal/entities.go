@@ -2,7 +2,6 @@ package deleteDeal
 
 import (
 	"accounty/internal/http-server/responses"
-	"accounty/internal/storage"
 )
 
 type Request struct {
@@ -13,8 +12,8 @@ type Error struct {
 	responses.Error
 }
 
-func Success(previews []storage.SpendingsPreview) responses.Response[[]storage.SpendingsPreview] {
-	return responses.Success(previews)
+func Success() responses.VoidResponse {
+	return responses.OK()
 }
 
 func Failure(err Error) responses.Response[responses.Error] {
