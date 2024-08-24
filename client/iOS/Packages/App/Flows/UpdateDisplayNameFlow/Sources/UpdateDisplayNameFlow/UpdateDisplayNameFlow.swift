@@ -15,7 +15,6 @@ public actor UpdateDisplayNameFlow {
     private lazy var presenter = UpdateDisplayNameFlowPresenter(router: router, flow: self)
     private var subscriptions = Set<AnyCancellable>()
 
-    private var flowHandlers = [AnyHashable: AnyFlowEventHandler<FlowEvent>]()
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -26,24 +25,61 @@ public actor UpdateDisplayNameFlow {
     }
 }
 
+// MARK: - Flow
+
 extension UpdateDisplayNameFlow: Flow {
-    public enum TerminationEvent: Error {
-        case canceledManually
+    public enum TerminationEvent {
+        case canceled
+        case successfullySet
     }
 
-    public func perform() async -> Result<Profile, TerminationEvent> {
+    public func perform() async -> TerminationEvent {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
-            Task.detached { @MainActor in
-                await self.presenter.presentDisplayNameEditing { [weak self] in
-                    guard let self else { return }
-                    await handle(result: .failure(.canceledManually))
-                }
+            Task.detached {
+                await self.startFlow()
             }
         }
     }
 
-    func confirmDisplayName() async {
+    private func startFlow() async {
+        await self.presenter.presentDisplayNameEditing { [weak self] in
+            guard let self else { return }
+            await handle(event: .canceled)
+        }
+    }
+
+    private func handle(event: TerminationEvent) async {
+        guard let flowContinuation else {
+            return
+        }
+        self.flowContinuation = nil
+        if case .canceled = event {
+        } else {
+            await presenter.dismissDisplayNameEditing()
+        }
+        flowContinuation.resume(returning: event)
+    }
+}
+
+// MARK: - User Actions
+
+extension UpdateDisplayNameFlow {
+    @MainActor func update(displayName: String) {
+        viewModel.displayName = displayName
+    }
+
+    @MainActor func confirmDisplayName() {
+        Task.detached {
+            await self.doConfirmDisplayName()
+        }
+    }
+}
+
+// MARK: - Private
+
+extension UpdateDisplayNameFlow {
+    private func doConfirmDisplayName() async {
         let state = await viewModel.state
         guard state.canConfirm else {
             return await presenter.errorHaptic()
@@ -53,12 +89,7 @@ extension UpdateDisplayNameFlow: Flow {
         case .success:
             await presenter.successHaptic()
             await presenter.presentSuccess()
-            switch await profileReposiroty.getHostInfo() {
-            case .success(let profile):
-                await handle(result: .success(profile))
-            case .failure(let error):
-                await presenter.presentGeneralError(error)
-            }
+            await handle(event: .successfullySet)
         case .failure(let reason):
             switch reason {
             case .wrongFormat:
@@ -67,36 +98,5 @@ extension UpdateDisplayNameFlow: Flow {
                 await presenter.presentGeneralError(error)
             }
         }
-    }
-
-    @MainActor
-    func update(displayName: String) {
-        viewModel.displayName = displayName
-    }
-
-    private func handle(result: Result<Profile, TerminationEvent>) async {
-        guard let flowContinuation else {
-            return
-        }
-        self.flowContinuation = nil
-        if case .failure(let error) = result, case .canceledManually = error {
-        } else {
-            await presenter.dismissDisplayNameEditing()
-        }
-        flowContinuation.resume(returning: result)
-    }
-}
-
-extension UpdateDisplayNameFlow: FlowEvents {
-    public enum FlowEvent {
-        case profileUpdated(Profile)
-    }
-
-    public func addHandler<T>(handler: T) async where T : FlowEventHandler, FlowEvent == T.FlowEvent {
-        flowHandlers[handler.id] = AnyFlowEventHandler(handler)
-    }
-
-    public func removeHandler<T>(handler: T) async where T : FlowEventHandler, FlowEvent == T.FlowEvent {
-        flowHandlers[handler.id] = nil
     }
 }

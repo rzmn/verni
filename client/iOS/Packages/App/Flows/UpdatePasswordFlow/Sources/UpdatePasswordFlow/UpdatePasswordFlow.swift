@@ -33,24 +33,65 @@ public actor UpdatePasswordFlow {
     }
 }
 
+// MARK: - Flow
+
 extension UpdatePasswordFlow: Flow {
-    public enum TerminationEvent: Error {
-        case canceledManually
+    public enum TerminationEvent {
+        case canceled
+        case successfullySet
     }
 
-    public func perform() async -> Result<Profile, TerminationEvent> {
+    public func perform() async -> TerminationEvent {
         await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
-            Task.detached { @MainActor in
-                await self.presenter.presentPasswordEditing { [weak self] in
-                    guard let self else { return }
-                    await handle(result: .failure(.canceledManually))
-                }
+            Task.detached {
+                await self.startFlow()
             }
         }
     }
 
-    func updatePassword() async {
+    private func startFlow() async {
+        await self.presenter.presentPasswordEditing { [weak self] in
+            guard let self else { return }
+            await handle(event: .canceled)
+        }
+    }
+
+    private func handle(event: TerminationEvent) async {
+        guard let flowContinuation else {
+            return
+        }
+        self.flowContinuation = nil
+        flowContinuation.resume(returning: event)
+    }
+}
+
+// MARK: - User Actions
+
+extension UpdatePasswordFlow {
+    @MainActor func update(oldPassword: String) {
+        viewModel.oldPassword = oldPassword
+    }
+
+    @MainActor func update(newPassword: String) {
+        viewModel.newPassword = newPassword
+    }
+
+    @MainActor func update(repeatNewPassword: String) {
+        viewModel.repeatNewPassword = repeatNewPassword
+    }
+
+    @MainActor func updatePassword() {
+        Task.detached {
+            await self.doUpdatePassword()
+        }
+    }
+}
+
+// MARK: - Private
+
+extension UpdatePasswordFlow {
+    private func doUpdatePassword() async {
         let state = await viewModel.state
         guard state.canConfirm else {
             return await presenter.errorHaptic()
@@ -58,14 +99,7 @@ extension UpdatePasswordFlow: Flow {
         switch await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword) {
         case .success:
             await saveCredentials.save(email: profile.email, password: state.newPassword)
-            switch await profileRepository.getHostInfo() {
-            case .success(let profile):
-                await presenter.successHaptic()
-                await presenter.presentSuccess()
-                await handle(result: .success(profile))
-            case .failure(let error):
-                await presenter.presentGeneralError(error)
-            }
+            await handle(event: .successfullySet)
         case .failure(let error):
             switch error {
             case .validationError:
@@ -76,28 +110,5 @@ extension UpdatePasswordFlow: Flow {
                 await presenter.presentGeneralError(error)
             }
         }
-    }
-
-    @MainActor
-    func update(oldPassword: String) {
-        viewModel.oldPassword = oldPassword
-    }
-
-    @MainActor
-    func update(newPassword: String) {
-        viewModel.newPassword = newPassword
-    }
-
-    @MainActor
-    func update(repeatNewPassword: String) {
-        viewModel.repeatNewPassword = repeatNewPassword
-    }
-
-    private func handle(result: Result<Profile, TerminationEvent>) async {
-        guard let flowContinuation else {
-            return
-        }
-        self.flowContinuation = nil
-        flowContinuation.resume(returning: result)
     }
 }

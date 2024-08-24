@@ -40,7 +40,9 @@ class AlertContentView: UIView {
                 else {
                     return
                 }
-                await handler(controller)
+                Task.detached { @MainActor in
+                    await handler(controller)
+                }
             }, for: .touchUpInside)
         }
         return b

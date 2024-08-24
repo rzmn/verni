@@ -12,10 +12,8 @@ class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
                     UIAction(
                         title: "friends_add_by_qr".localized,
                         image: UIImage(systemName: "qrcode.viewfinder"),
-                        handler: { _ in
-                            Task.detached { [weak self] in
-                                await self?.model.addViaQr()
-                            }
+                        handler: { [unowned self] _ in
+                            model.addViaQr()
                         }
                     )
                 ]
@@ -26,6 +24,12 @@ class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         model.refresh()
+        model.subscribeForUpdates()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        model.unsubscribeFromUpdates()
     }
 }
 

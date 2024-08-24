@@ -12,9 +12,10 @@ class SignUpFlowPresenter: Presenter {
 
     weak var signUpController: SignUpViewController?
     @MainActor
-    func presentSignUp() async {
+    func presentSignUp(onPop: @escaping @MainActor () async -> Void) {
         let controller = SignUpViewController(model: flow)
         signUpController = controller
+        controller.onPop = onPop
         controller.modalPresentationStyle = .fullScreen
         router.push(controller)
     }

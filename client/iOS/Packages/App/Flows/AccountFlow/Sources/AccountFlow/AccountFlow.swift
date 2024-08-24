@@ -19,7 +19,8 @@ public actor AccountFlow {
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
     private let editingUseCase: ProfileEditingUseCase
-    private let profileRepository: UsersRepository
+    private let profileRepository: ProfileRepository
+    private var subscriptions = Set<AnyCancellable>()
     private lazy var presenter = AccountFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
@@ -27,12 +28,14 @@ public actor AccountFlow {
         self.router = router
         self.di = di
         editingUseCase = di.profileEditingUseCase()
-        profileRepository = di.usersRepository()
+        profileRepository = di.profileRepository()
         viewModel = await AccountViewModel(
-            profile: await di.usersOfflineRepository().getHostInfo()
+            profile: await di.profileOfflineRepository().getProfile()
         )
     }
 }
+
+// MARK: - Flow
 
 extension AccountFlow: TabEmbedFlow {
     @MainActor public func viewController() async -> Routable {
@@ -42,21 +45,21 @@ extension AccountFlow: TabEmbedFlow {
     public enum TerminationEvent {
         case logout
     }
-    
+
     public func perform() async -> TerminationEvent {
         await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
             Task.detached {
-                await self.refresh()
+                await self.startFlow()
             }
         }
     }
 
-    private func refresh() async {
+    private func startFlow() async {
         Task { @MainActor [unowned self] in
             viewModel.content = .loading(previous: viewModel.state.info)
         }
-        let result = await profileRepository.getHostInfo()
+        let result = await profileRepository.refreshProfile()
         Task { @MainActor [unowned self] in
             switch result {
             case .success(let profile):
@@ -67,90 +70,57 @@ extension AccountFlow: TabEmbedFlow {
         }
     }
 
-    func updateAvatar() async {
-        await presenter.submitHaptic()
-        let flow = UpdateAvatarFlow(di: di, router: router)
-        guard case .success(let profile) = await flow.perform() else {
-            return
-        }
-        Task { @MainActor [unowned self] in
-            viewModel.content = .loaded(profile)
-        }
-    }
-
-    func updateEmail() async {
-        await presenter.submitHaptic()
-        guard let profile = await getProfile() else {
-            return
-        }
-        let flow = await UpdateEmailFlow(di: di, router: router, profile: profile)
-        let handler = AnyFlowEventHandler(
-            id: unsafeBitCast(self, to: Int.self),
-            handle: { [unowned self] (event: UpdateEmailFlow.FlowEvent) in
-                switch event {
-                case .profileUpdated(let profile):
-                    Task { @MainActor in
-                        viewModel.content = .loaded(profile)
-                    }
-                }
-            }
-        )
-        await flow.addHandler(handler: handler)
-        _ = await flow.perform()
-        await flow.removeHandler(handler: handler)
-    }
-
-    func updatePassword() async {
-        await presenter.submitHaptic()
-        guard let profile = await getProfile() else {
-            return
-        }
-        let flow = await UpdatePasswordFlow(di: di, router: router, profile: profile)
-        _ = await flow.perform()
-    }
-
-    func updateDisplayName() async {
-        await presenter.submitHaptic()
-
-        let flow = await UpdateDisplayNameFlow(di: di, router: router)
-        let handler = AnyFlowEventHandler(
-            id: unsafeBitCast(self, to: Int.self),
-            handle: { [unowned self] (event: UpdateDisplayNameFlow.FlowEvent) in
-                switch event {
-                case .profileUpdated(let profile):
-                    Task { @MainActor in
-                        viewModel.content = .loaded(profile)
-                    }
-                }
-            }
-        )
-        await flow.addHandler(handler: handler)
-        _ = await flow.perform()
-        await flow.removeHandler(handler: handler)
-    }
-
-    func showQr() async {
-        await presenter.submitHaptic()
-        guard let profile = await getProfile() else {
-            return
-        }
-        let flow: QrPreviewFlow
-        do {
-            flow = try await QrPreviewFlow(di: di, router: router, profile: profile)
-        } catch {
-            return await presenter.presentInternalError(error)
-        }
-        await flow.perform()
-    }
-
-    func logout() async {
+    private func handle(event: TerminationEvent) async {
         guard let flowContinuation else {
             return
         }
+        subscriptions.removeAll()
         self.flowContinuation = nil
-        flowContinuation.resume(returning: .logout)
+        flowContinuation.resume(returning: event)
     }
 }
+
+// MARK: - User Action
+
+extension AccountFlow {
+    @MainActor func updateAvatar() {
+        Task.detached {
+            await self.doUpdateAvatar()
+        }
+    }
+
+    @MainActor func updateEmail() {
+        Task.detached {
+            await self.doUpdateEmail()
+        }
+    }
+
+    @MainActor func updatePassword() {
+        Task.detached {
+            await self.doUpdatePassword()
+        }
+    }
+
+    @MainActor func updateDisplayName() {
+        Task.detached {
+            await self.doUpdateDisplayName()
+        }
+    }
+
+    @MainActor func showQr() {
+        Task.detached {
+            await self.doShowQr()
+        }
+    }
+
+    @MainActor func logout() {
+        Task.detached {
+            await self.doLogout()
+        }
+    }
+}
+
+// MARK: - Private
 
 extension AccountFlow {
     private func getProfile() async -> Profile? {
@@ -158,7 +128,7 @@ extension AccountFlow {
             return profile
         }
         await presenter.presentLoading()
-        switch await profileRepository.getHostInfo() {
+        switch await profileRepository.refreshProfile() {
         case .success(let profile):
             await presenter.dismissLoading()
             return profile
@@ -173,5 +143,53 @@ extension AccountFlow {
             }
             return nil
         }
+    }
+
+    private func doUpdateAvatar() async {
+        await presenter.submitHaptic()
+        let flow = UpdateAvatarFlow(di: di, router: router)
+        _ = await flow.perform()
+    }
+
+    private func doUpdateEmail() async {
+        await presenter.submitHaptic()
+        guard let profile = await getProfile() else {
+            return
+        }
+        let flow = await UpdateEmailFlow(di: di, router: router, profile: profile)
+        _ = await flow.perform()
+    }
+
+    private func doUpdatePassword() async {
+        await presenter.submitHaptic()
+        guard let profile = await getProfile() else {
+            return
+        }
+        let flow = await UpdatePasswordFlow(di: di, router: router, profile: profile)
+        _ = await flow.perform()
+    }
+
+    private func doUpdateDisplayName() async {
+        await presenter.submitHaptic()
+        let flow = await UpdateDisplayNameFlow(di: di, router: router)
+        _ = await flow.perform()
+    }
+
+    private func doShowQr() async {
+        await presenter.submitHaptic()
+        guard let profile = await getProfile() else {
+            return
+        }
+        let flow: QrPreviewFlow
+        do {
+            flow = try await QrPreviewFlow(di: di, router: router, profile: profile)
+        } catch {
+            return await presenter.presentInternalError(error)
+        }
+        await flow.perform()
+    }
+
+    private func doLogout() async {
+        await handle(event: .logout)
     }
 }

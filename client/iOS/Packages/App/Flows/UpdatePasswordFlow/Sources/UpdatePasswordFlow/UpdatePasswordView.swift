@@ -48,7 +48,7 @@ class UpdatePasswordView: View<UpdatePasswordFlow> {
         }, for: .editingChanged)
         confirm.addAction({ [weak self] in
             self?.endEditing(true)
-            await self?.model.updatePassword()
+            self?.model.updatePassword()
         }, for: .touchUpInside)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         model.subject

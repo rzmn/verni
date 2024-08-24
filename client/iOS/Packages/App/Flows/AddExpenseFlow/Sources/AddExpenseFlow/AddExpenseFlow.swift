@@ -14,12 +14,12 @@ public actor AddExpenseFlow {
     }
     private let viewModel: AddExpenseViewModel
 
-    private var subscriptions = Set<AnyCancellable>()
-
     private lazy var presenter = AddExpenseFlowPresenter(router: router, flow: self)
     private let spendingInteractions: SpendingInteractionsUseCase
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
+    private var subscriptions = Set<AnyCancellable>()
+    private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter, counterparty: User?) async {
         self.di = di
@@ -29,18 +29,48 @@ public actor AddExpenseFlow {
     }
 }
 
+// MARK: - Flow
+
 extension AddExpenseFlow: Flow {
-    public func perform() async -> Void {
+    public enum TerminationEvent {
+        case canceledManually
+        case expenseAdded
+    }
+
+    public func perform() async -> TerminationEvent {
+        return await withCheckedContinuation { continuation in
+            self.flowContinuation = continuation
+            Task.detached {
+                await self.startFlow()
+            }
+        }
+    }
+
+    private func startFlow() async {
         await presenter.present()
     }
-    
-    public typealias FlowResult = Void
+
+    private func handle(event: TerminationEvent) async {
+        guard let flowContinuation else {
+            return
+        }
+        subscriptions.removeAll()
+        self.flowContinuation = nil
+        if case .canceledManually = event {
+        } else {
+            await presenter.dismiss()
+        }
+        flowContinuation.resume(returning: event)
+    }
 }
+
+// MARK: - User Actions
 
 extension AddExpenseFlow {
     @MainActor func cancel() {
         Task.detached {
             await self.presenter.dismiss()
+            await self.handle(event: .canceledManually)
         }
     }
 
@@ -50,6 +80,32 @@ extension AddExpenseFlow {
         }
     }
 
+    @MainActor func pickCounterparty() {
+        Task.detached {
+            await self.doPickCounterparty()
+        }
+    }
+
+    @MainActor func update(splitEqually: Bool) {
+        viewModel.splitEqually = splitEqually
+    }
+
+    @MainActor func update(iOwe: Bool) {
+        viewModel.expenseOwnership = iOwe ? .iOwe : .iAmOwned
+    }
+
+    @MainActor func update(description: String) {
+        viewModel.description = description
+    }
+
+    @MainActor func update(expenseAmount: String) {
+        viewModel.amount = expenseAmount
+    }
+}
+
+// MARK: - Private
+
+extension AddExpenseFlow {
     private func doAddExpense() async {
         let state = await viewModel.state
         guard let counterparty = state.counterparty else {
@@ -100,7 +156,7 @@ extension AddExpenseFlow {
         case .success:
             await presenter.dismissLoading()
             await presenter.successHaptic()
-            await presenter.dismiss()
+            await handle(event: .expenseAdded)
         case .failure(let error):
             switch error {
             case .noSuchUser:
@@ -111,28 +167,6 @@ extension AddExpenseFlow {
                 await presenter.presentGeneralError(error)
             }
         }
-    }
-
-    @MainActor func pickCounterparty() {
-        Task.detached {
-            await self.doPickCounterparty()
-        }
-    }
-
-    @MainActor func update(splitEqually: Bool) {
-        viewModel.splitEqually = splitEqually
-    }
-
-    @MainActor func update(iOwe: Bool) {
-        viewModel.expenseOwnership = iOwe ? .iOwe : .iAmOwned
-    }
-
-    @MainActor func update(description: String) {
-        viewModel.description = description
-    }
-
-    @MainActor func update(expenseAmount: String) {
-        viewModel.amount = expenseAmount
     }
 
     private func doPickCounterparty() async {

@@ -50,7 +50,7 @@ class SignInView: View<SignInFlow> {
         backgroundColor = .p.background
         [email, password, close, confirm, createAccount, appIcon].forEach(addSubview)
         close.addAction({ [weak model] in
-            await model?.closeSignIn()
+            model?.closeSignIn()
         }, for: .touchUpInside)
         email.addAction({ [weak model, weak email] in
             guard let model, let email else { return }
@@ -62,11 +62,11 @@ class SignInView: View<SignInFlow> {
         }, for: .editingChanged)
         confirm.addAction({ [weak self] in
             self?.endEditing(true)
-            await self?.model.signIn()
+            self?.model.signIn()
         }, for: .touchUpInside)
         createAccount.addAction({ [weak self] in
             self?.endEditing(true)
-            await self?.model.createAccount()
+            self?.model.createAccount()
         }, for: .touchUpInside)
         email.delegate = self
         password.delegate = self

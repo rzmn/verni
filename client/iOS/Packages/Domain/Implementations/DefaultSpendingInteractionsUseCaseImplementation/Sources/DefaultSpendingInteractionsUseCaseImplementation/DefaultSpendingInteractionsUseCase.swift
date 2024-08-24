@@ -13,7 +13,7 @@ public class DefaultSpendingInteractionsUseCase {
 }
 
 extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
-    public func create(spending: Spending) async -> Result<[SpendingsPreview], CreateSpendingError> {
+    public func create(spending: Spending) async -> Result<Void, CreateSpendingError> {
         let result = await api.run(
             method: Spendings.CreateDeal(
                 deal: DealDto(
@@ -28,18 +28,18 @@ extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
             )
         )
         switch result {
-        case .success(let previews):
-            return .success(previews.map(SpendingsPreview.init))
+        case .success:
+            return .success(())
         case .failure(let apiError):
             return .failure(CreateSpendingError(apiError: apiError))
         }
     }
     
-    public func delete(spending: Spending.ID) async -> Result<[SpendingsPreview], DeleteSpendingError> {
+    public func delete(spending: Spending.ID) async -> Result<Void, DeleteSpendingError> {
         let result = await api.run(method: Spendings.DeleteDeal(dealId: spending))
         switch result {
-        case .success(let previews):
-            return .success(previews.map(SpendingsPreview.init))
+        case .success:
+            return .success(())
         case .failure(let apiError):
             return .failure(DeleteSpendingError(apiError: apiError))
         }

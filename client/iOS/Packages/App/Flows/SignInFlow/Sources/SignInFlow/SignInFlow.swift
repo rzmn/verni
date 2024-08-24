@@ -39,6 +39,8 @@ public actor SignInFlow {
     }
 }
 
+// MARK: - Flow
+
 extension SignInFlow: TabEmbedFlow {
     @MainActor public func viewController() async -> any Routable {
         await presenter.tabViewController
@@ -50,17 +52,66 @@ extension SignInFlow: TabEmbedFlow {
         }
     }
 
-    func openSignIn() async {
+    private func handle(session: ActiveSessionDIContainer) async {
+        guard let flowContinuation else {
+            return
+        }
+        await session.profileRepository().refreshProfile()
+        self.flowContinuation = nil
+        flowContinuation.resume(returning: session)
+    }
+}
+
+// MARK: - User Actions
+
+extension SignInFlow {
+    @MainActor func update(email: String) {
+        viewModel.email = email
+    }
+
+    @MainActor func update(password: String) {
+        viewModel.password = password
+    }
+
+    @MainActor func createAccount() {
+        Task.detached {
+            await self.doCreateAccount()
+        }
+    }
+
+    @MainActor func signIn() {
+        Task.detached {
+            await self.doSignIn()
+        }
+    }
+
+    @MainActor func openSignIn() {
+        Task.detached {
+            await self.doOpenSignIn()
+        }
+    }
+
+    @MainActor func closeSignIn() {
+        Task.detached {
+            await self.doCloseSignIn()
+        }
+    }
+}
+
+// MARK: - Private
+
+extension SignInFlow {
+    private func doCreateAccount() async {
         await presenter.submitHaptic()
-        await presenter.presentSignIn()
+        switch await signUpFlow.perform() {
+        case .created(let session):
+            await handle(session: session)
+        case .canceled:
+            break
+        }
     }
 
-    func closeSignIn() async {
-        subscriptions.removeAll()
-        await presenter.dismissSignIn()
-    }
-
-    func signIn() async {
+    private func doSignIn() async {
         let state = await viewModel.state
         guard state.canConfirm else {
             return await presenter.errorHaptic()
@@ -89,28 +140,13 @@ extension SignInFlow: TabEmbedFlow {
         }
     }
 
-    func createAccount() async {
+    private func doOpenSignIn() async {
         await presenter.submitHaptic()
-        guard let session = await signUpFlow.perform() else {
-            return
-        }
-        await handle(session: session)
+        await presenter.presentSignIn()
     }
 
-    @MainActor func update(email: String) {
-        viewModel.email = email
-    }
-
-    @MainActor func update(password: String) {
-        viewModel.password = password
-    }
-
-    private func handle(session: ActiveSessionDIContainer) async {
-        guard let flowContinuation else {
-            return
-        }
-        _ = await session.usersRepository().getHostInfo()
-        self.flowContinuation = nil
-        flowContinuation.resume(returning: session)
+    private func doCloseSignIn() async {
+        subscriptions.removeAll()
+        await presenter.dismissSignIn()
     }
 }

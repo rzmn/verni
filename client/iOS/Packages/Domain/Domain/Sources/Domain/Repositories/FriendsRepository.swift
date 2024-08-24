@@ -6,14 +6,42 @@ public enum FriendshipKind: Int, CaseIterable, Hashable {
     case pending
 }
 
-public protocol FriendsRepository {
-    func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError>
+public struct FriendshipKindSet: OptionSet, Hashable {
+    public static let friends = FriendshipKindSet(rawValue: 1 << FriendshipKind.friends.rawValue)
+    public static let incoming = FriendshipKindSet(rawValue: 1 << FriendshipKind.incoming.rawValue)
+    public static let pending = FriendshipKindSet(rawValue: 1 << FriendshipKind.pending.rawValue)
 
-    func friendsUpdated() async -> AnyPublisher<Void, Never>
+    public static var all: FriendshipKindSet {
+        FriendshipKind.allCases.reduce(into: []) { set, value in
+            set.insert(FriendshipKindSet(rawValue: 1 << value.rawValue))
+        }
+    }
+
+    public var array: [FriendshipKind] {
+        FriendshipKind.allCases.filter {
+            contains(FriendshipKindSet(rawValue: 1 << $0.rawValue))
+        }
+    }
+
+    public var rawValue: Int
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+}
+
+public protocol FriendsRepository {
+    @discardableResult
+    func refreshFriends(
+        ofKind kind: FriendshipKindSet
+    ) async -> Result<[FriendshipKind: [User]], GeneralError>
+
+    func friendsUpdated(
+        ofKind kind: FriendshipKindSet
+    ) async -> AnyPublisher<[FriendshipKind: [User]], Never>
 }
 
 public protocol FriendsOfflineRepository {
-    func getFriends(set: Set<FriendshipKind>) async -> [FriendshipKind: [User]]?
+    func getFriends(set: FriendshipKindSet) async -> [FriendshipKind: [User]]?
 }
 
 public protocol FriendsOfflineMutableRepository: FriendsOfflineRepository {

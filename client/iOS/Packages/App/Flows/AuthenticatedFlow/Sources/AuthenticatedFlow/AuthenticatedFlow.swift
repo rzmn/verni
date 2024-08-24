@@ -9,6 +9,11 @@ internal import FriendsFlow
 internal import AddExpenseFlow
 
 public actor AuthenticatedFlow {
+    @MainActor var subject: Published<AuthenticatedState>.Publisher {
+        viewModel.$state
+    }
+    private let viewModel: AuthenticatedViewModel
+
     private let accountFlow: AccountFlow
     private let friendsFlow: FriendsFlow
     private let router: AppRouter
@@ -16,17 +21,19 @@ public actor AuthenticatedFlow {
     private lazy var presenter = AuthenticatedFlowPresenter(router: router, flow: self)
 
     private var urlResolvers = UrlResolverContainer()
-
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         accountFlow = await AccountFlow(di: di, router: router)
         friendsFlow = await FriendsFlow(di: di, router: router)
+        viewModel = await AuthenticatedViewModel()
         self.di = di
         self.router = router
         await urlResolvers.add(friendsFlow)
     }
 }
+
+// MARK: - Flow
 
 extension AuthenticatedFlow: Flow {
     public enum TerminationEvent {
@@ -34,7 +41,16 @@ extension AuthenticatedFlow: Flow {
     }
 
     public func perform() async -> TerminationEvent {
-        await presenter.start(tabs: [friendsFlow, accountFlow])
+        await presenter.start(
+            tabs: viewModel.state.tabs.map { tab in
+                switch tab {
+                case .friends:
+                    return friendsFlow
+                case .account:
+                    return accountFlow
+                }
+            }
+        )
         return await withCheckedContinuation { continuation in
             flowContinuation = continuation
             Task.detached { [weak self] in
@@ -56,6 +72,8 @@ extension AuthenticatedFlow: Flow {
     }
 }
 
+// MARK: - User Actions
+
 extension AuthenticatedFlow {
     @MainActor func addNewExpense() {
         Task.detached {
@@ -63,11 +81,16 @@ extension AuthenticatedFlow {
         }
     }
 
-    private func doAddExpense() async {
-        let flow = await AddExpenseFlow(di: di, router: router, counterparty: nil)
-        await flow.perform()
+    @MainActor func selected(index: Int) {
+        let state = viewModel.state
+        guard state.tabs.count > index else {
+            return
+        }
+        viewModel.activeTab = state.tabs[index]
     }
 }
+
+// MARK: - UrlResolver
 
 extension AuthenticatedFlow: UrlResolver {
     public func canResolve(url: AppUrl) async -> Bool {
@@ -76,5 +99,14 @@ extension AuthenticatedFlow: UrlResolver {
     
     public func resolve(url: AppUrl) async {
         await urlResolvers.resolve(url: url)
+    }
+}
+
+// MARK: - Private
+
+extension AuthenticatedFlow {
+    private func doAddExpense() async {
+        let flow = await AddExpenseFlow(di: di, router: router, counterparty: nil)
+        _ = await flow.perform()
     }
 }

@@ -1,12 +1,31 @@
 import UIKit
 import AppBase
+import Combine
 internal import Base
 internal import DesignSystem
 
 class AuthenticatedTabsController: TabBarController<AuthenticatedFlow, TabBar> {
+    private var subscriptions = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        tabBar.tintColor = .p.accent
+        tabBar.unselectedItemTintColor = .p.iconSecondary
+        tabBar.backgroundColor = .p.backgroundContent
+        model.subject
+            .sink(receiveValue: render)
+            .store(in: &subscriptions)
         contentTabTar.centerButton.addAction(weak(self, type(of: self).onCenterButtonTap), for: .touchUpInside)
+    }
+
+    private func render(state: AuthenticatedState) {
+        if let selectedIndex = state.tabs.firstIndex(of: state.activeTab), self.selectedIndex != selectedIndex {
+            self.selectedIndex = selectedIndex
+        }
+    }
+
+    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        model.selected(index: selectedIndex)
     }
 
     private func onCenterButtonTap() {

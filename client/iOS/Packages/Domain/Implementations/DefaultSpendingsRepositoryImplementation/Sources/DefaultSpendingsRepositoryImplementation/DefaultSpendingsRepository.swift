@@ -33,7 +33,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             .eraseToAnyPublisher()
     }
     
-    public func getSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError> {
+    public func refreshSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError> {
         switch await api.run(method: Spendings.GetCounterparties()) {
         case .success(let previewsDto):
             let previews = previewsDto.map(SpendingsPreview.init)
@@ -47,7 +47,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         }
     }
     
-    public func getSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError> {
+    public func refreshSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError> {
         let result = await api.run(method: Spendings.GetDeals(counterparty: counterparty))
         switch result {
         case .success(let spendingsDto):

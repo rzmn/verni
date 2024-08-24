@@ -7,8 +7,13 @@ public enum GetSpendingsHistoryError: Error {
 }
 
 public protocol SpendingsRepository {
-    func getSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError>
-    func getSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError>
+    @discardableResult
+    func refreshSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError>
+
+    @discardableResult
+    func refreshSpendingsHistory(
+        counterparty: User.ID
+    ) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError>
 
     func spendingCounterpartiesUpdated() async -> AnyPublisher<Void, Never>
     func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<Void, Never>

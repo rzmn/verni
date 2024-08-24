@@ -9,6 +9,7 @@ public class DefaultFriendsRepository {
     private let api: ApiProtocol
     private let offline: FriendsOfflineMutableRepository
     private let longPoll: LongPoll
+    private var subjects = [FriendshipKindSet: PassthroughSubject<[FriendshipKind: [User]], Never>]()
 
     public init(api: ApiProtocol, longPoll: LongPoll, offline: FriendsOfflineMutableRepository) {
         self.api = api
@@ -18,19 +19,43 @@ public class DefaultFriendsRepository {
 }
 
 extension DefaultFriendsRepository: FriendsRepository {
-    public func friendsUpdated() async -> AnyPublisher<Void, Never> {
+    private func subject(for kind: FriendshipKindSet) -> PassthroughSubject<[FriendshipKind: [User]], Never> {
+        guard let subject = subjects[kind] else {
+            let subject = PassthroughSubject<[FriendshipKind: [User]], Never>()
+            subjects[kind] = subject
+            return subject
+        }
+        return subject
+    }
+
+    public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
         await longPoll.poll(for: LongPollFriendsQuery())
-            .map { _ in () }
+            .flatMap { _ in
+                Future { [weak self] (promise: @escaping (Result<[FriendshipKind: [User]]?, Never>) -> Void) in
+                    guard let self else {
+                        return promise(.success(nil))
+                    }
+                    Task.detached {
+                        let result = await self.refreshFriends(ofKind: kind)
+                        switch result {
+                        case .success(let friends):
+                            promise(.success(friends))
+                        case .failure:
+                            promise(.success(nil))
+                        }
+                    }
+                }
+            }
+            .compactMap { $0 }
+            .merge(with: subject(for: kind))
             .eraseToAnyPublisher()
     }
     
-    public func getFriends(set: Set<FriendshipKind>) async -> Result<[FriendshipKind: [User]], GeneralError> {
+    public func refreshFriends(ofKind kind: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
         let uids: [UserDto.ID]
         switch await api.run(
             method: Friends.Get(
-                statuses: FriendshipKind.allCases
-                    .filter(set.contains)
-                    .map(FriendshipKindDto.init)
+                statuses: kind.array.map(FriendshipKindDto.init)
             )
         ) {
         case .success(let dict):
@@ -46,7 +71,7 @@ extension DefaultFriendsRepository: FriendsRepository {
             return .failure(GeneralError(apiError: error))
         }
         let friendsByKind = users.map(User.init).reduce(
-            into: set.reduce(into: [:], { dict, value in dict[value] = [User]() })
+            into: kind.array.reduce(into: [:], { dict, value in dict[value] = [User]() })
         ) { dict, user in
             switch user.status {
             case .me, .no:
@@ -69,6 +94,7 @@ extension DefaultFriendsRepository: FriendsRepository {
             guard let self else { return }
             await offline.storeFriends(friendsByKind)
         }
+        subject(for: kind).send(friendsByKind)
         return .success(friendsByKind)
     }
 }

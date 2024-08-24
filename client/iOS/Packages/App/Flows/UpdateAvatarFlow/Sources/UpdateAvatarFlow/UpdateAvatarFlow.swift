@@ -29,32 +29,33 @@ extension UpdateAvatarFlow: Flow {
         case internalError
     }
 
-    public enum TerminationEvent: Error {
+    public enum TerminationEvent {
         case canceled
+        case successfullySet
     }
 
-    public func perform() async -> Result<Profile, TerminationEvent> {
+    public func perform() async -> TerminationEvent {
         let result = await doPerform()
         return result
     }
 
-    private func doPerform() async -> Result<Profile, TerminationEvent> {
+    private func doPerform() async -> TerminationEvent {
         let photo: UIImage
         switch await pickPhoto() {
         case .failure(let error):
             switch error {
             case .canceledManually:
-                return .failure(.canceled)
+                return .canceled
             case .internalError:
                 await presenter.presentInternalError(error)
-                return .failure(.canceled)
+                return .canceled
             }
         case .success(let image):
             photo = image
         }
         guard let ciImage = CIImage(image: photo) else {
             await presenter.presentWrongFormat()
-            return .failure(.canceled)
+            return .canceled
         }
         let cropped = ciImage
             .cropped(to: AVMakeRect(aspectRatio: CGSize(width: 1, height: 1), insideRect: ciImage.extent))
@@ -68,19 +69,12 @@ extension UpdateAvatarFlow: Flow {
             )
         guard let data = UIImage(ciImage: scaled).jpegData(compressionQuality: 0.6) else {
             await presenter.presentWrongFormat()
-            return .failure(.canceled)
+            return .canceled
         }
         await presenter.presentLoading()
         switch await profileEditing.setAvatar(imageData: data) {
         case .success:
-            switch await profileRepository.getHostInfo() {
-            case .success(let profile):
-                await presenter.presentSuccess()
-                return .success(profile)
-            case .failure(let error):
-                await presenter.presentGeneralError(error)
-                return .failure(.canceled)
-            }
+            return .successfullySet
         case .failure(let error):
             switch error {
             case .wrongFormat:
@@ -88,7 +82,7 @@ extension UpdateAvatarFlow: Flow {
             case .other(let error):
                 await presenter.presentGeneralError(error)
             }
-            return .failure(.canceled)
+            return .canceled
         }
     }
 

@@ -122,9 +122,7 @@ class FriendsView: View<FriendsFlow> {
 extension FriendsView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = items(in: sections[indexPath.section])[indexPath.row]
-        Task.detached { @MainActor in
-            await self.model.openPreview(user: item.data.user)
-        }
+        model.openPreview(user: item.data.user)
     }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {

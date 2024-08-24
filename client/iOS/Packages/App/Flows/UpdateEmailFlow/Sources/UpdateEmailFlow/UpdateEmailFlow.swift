@@ -16,7 +16,6 @@ public actor UpdateEmailFlow {
     private let emailConfirmationUseCase: EmailConfirmationUseCase
     private lazy var presenter = UpdateEmailFlowPresenter(router: router, flow: self)
 
-    private var flowHandlers = [AnyHashable: AnyFlowEventHandler<FlowEvent>]()
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter, profile: Profile) async {
@@ -86,20 +85,6 @@ extension UpdateEmailFlow: Flow {
         Task.detached {
             await self.doResendCode()
         }
-    }
-}
-
-extension UpdateEmailFlow: FlowEvents {
-    public enum FlowEvent {
-        case profileUpdated(Profile)
-    }
-
-    public func addHandler<T>(handler: T) async where T : FlowEventHandler, FlowEvent == T.FlowEvent {
-        flowHandlers[handler.id] = AnyFlowEventHandler(handler)
-    }
-
-    public func removeHandler<T>(handler: T) async where T : FlowEventHandler, FlowEvent == T.FlowEvent {
-        flowHandlers[handler.id] = nil
     }
 }
 

@@ -12,8 +12,8 @@ public class DefaultFriendsOfflineRepository {
 }
 
 extension DefaultFriendsOfflineRepository: FriendsOfflineRepository {
-    public func getFriends(set: Set<FriendshipKind>) async -> [FriendshipKind : [User]]? {
-        await persistency.getFriends(set: Set(set.map(FriendshipKindDto.init))).flatMap {
+    public func getFriends(set: FriendshipKindSet) async -> [FriendshipKind : [User]]? {
+        await persistency.getFriends(set: Set(set.array.map(FriendshipKindDto.init))).flatMap {
             $0.reduce(into: [:]) { dict, item in
                 dict[FriendshipKind(dto: item.key)] = item.value.map(User.init)
             }

@@ -30,7 +30,7 @@ class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
         }, for: .editingChanged)
         confirm.addAction({ [weak self] in
             self?.endEditing(true)
-            await self?.model.confirmDisplayName()
+            self?.model.confirmDisplayName()
         }, for: .touchUpInside)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         model.subject

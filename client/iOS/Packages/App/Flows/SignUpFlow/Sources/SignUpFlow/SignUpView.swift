@@ -51,7 +51,7 @@ class SignUpView: View<SignUpFlow> {
             model.update(passwordRepeat: passwordRepeat.text ?? "")
         }, for: .editingChanged)
         confirm.addAction({ [weak model] in
-            await model?.signIn()
+            model?.signIn()
         }, for: .touchUpInside)
         model.subject
             .sink(receiveValue: render)

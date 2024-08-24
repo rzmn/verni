@@ -29,15 +29,65 @@ public actor SignUpFlow {
     }
 }
 
+// MARK: - Flow
+
 extension SignUpFlow: Flow {
-    public func perform() async -> ActiveSessionDIContainer? {
-        await presenter.presentSignUp()
+    public enum TerminationEvent {
+        case canceled
+        case created(ActiveSessionDIContainer)
+    }
+
+    public func perform() async -> TerminationEvent {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
+            Task.detached {
+                await self.startFlow()
+            }
         }
     }
 
-    func signIn() async {
+    private func startFlow() async {
+        await self.presenter.presentSignUp { [weak self] in
+            guard let self else { return }
+            await handle(event: .canceled)
+        }
+    }
+
+    private func handle(event: TerminationEvent) async {
+        guard let flowContinuation else {
+            return
+        }
+        self.flowContinuation = nil
+        flowContinuation.resume(returning: event)
+    }
+}
+
+// MARK: - User Actions
+
+extension SignUpFlow {
+    @MainActor func update(email: String) {
+        viewModel.email = email
+    }
+
+    @MainActor func update(password: String) {
+        viewModel.password = password
+    }
+
+    @MainActor func update(passwordRepeat: String) {
+        viewModel.passwordRepeat = passwordRepeat
+    }
+
+    @MainActor func signIn() {
+        Task.detached {
+            await self.doSignIn()
+        }
+    }
+}
+
+// MARK: - Private
+
+extension SignUpFlow {
+    private func doSignIn() async {
         let state = await viewModel.state
         guard state.canConfirm else {
             return await presenter.errorHaptic()
@@ -49,11 +99,7 @@ extension SignUpFlow: Flow {
         await presenter.presentLoading()
         switch await authUseCase.signup(credentials: credentials) {
         case .success(let session):
-            guard let flowContinuation else {
-                break
-            }
-            self.flowContinuation = nil
-            flowContinuation.resume(returning: session)
+            await handle(event: .created(session))
         case .failure(let failure):
             await presenter.errorHaptic()
             switch failure {
@@ -67,17 +113,5 @@ extension SignUpFlow: Flow {
                 await presenter.presentInternalError(error)
             }
         }
-    }
-
-    @MainActor func update(email: String) {
-        viewModel.email = email
-    }
-
-    @MainActor func update(password: String) {
-        viewModel.password = password
-    }
-
-    @MainActor func update(passwordRepeat: String) {
-        viewModel.passwordRepeat = passwordRepeat
     }
 }

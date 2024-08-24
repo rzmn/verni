@@ -78,7 +78,7 @@ extension UserPreviewFlow {
         if shouldShowHud {
             await presenter.presentLoading()
         }
-        let result = await spendingsRepository.getSpendingsHistory(counterparty: state.user.id)
+        let result = await spendingsRepository.refreshSpendingsHistory(counterparty: state.user.id)
         Task { @MainActor [unowned self] in
             if shouldShowHud {
                 await presenter.dismissLoading()

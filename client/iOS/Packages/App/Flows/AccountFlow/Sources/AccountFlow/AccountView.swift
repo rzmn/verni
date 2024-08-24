@@ -40,19 +40,19 @@ class AccountView: View<AccountFlow> {
         backgroundColor = .p.background
         [updateAvatar, updateEmail, updateDisplayName, updatePassword, logout].forEach(addSubview)
         logout.addAction({ [weak model] in
-            await model?.logout()
+            model?.logout()
         }, for: .touchUpInside)
         updateAvatar.addAction({ [weak model] in
-            await model?.updateAvatar()
+            model?.updateAvatar()
         }, for: .touchUpInside)
         updateEmail.addAction({ [weak model] in
-            await model?.updateEmail()
+            model?.updateEmail()
         }, for: .touchUpInside)
         updatePassword.addAction({ [weak model] in
-            await model?.updatePassword()
+            model?.updatePassword()
         }, for: .touchUpInside)
         updateDisplayName.addAction({ [weak model] in
-            await model?.updateDisplayName()
+            model?.updateDisplayName()
         }, for: .touchUpInside)
     }
 

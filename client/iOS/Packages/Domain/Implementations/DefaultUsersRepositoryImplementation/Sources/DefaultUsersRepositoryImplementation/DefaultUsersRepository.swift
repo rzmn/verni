@@ -14,20 +14,6 @@ public class DefaultUsersRepository {
 }
 
 extension DefaultUsersRepository: UsersRepository {
-    public func getHostInfo() async -> Result<Domain.Profile, GeneralError> {
-        switch await api.run(method: Profile.GetInfo()) {
-        case .success(let dto):
-            let profile = Profile(dto: dto)
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await offline.updateHostInfo(info: profile)
-            }
-            return .success(profile)
-        case .failure(let error):
-            return .failure(GeneralError(apiError: error))
-        }
-    }
-
     public func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
         let method = Users.Get(ids: ids)
         switch await api.run(method: method) {

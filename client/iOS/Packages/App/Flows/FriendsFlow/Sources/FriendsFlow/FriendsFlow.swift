@@ -18,6 +18,7 @@ public actor FriendsFlow {
     private let profileRepository: UsersRepository
     private let spendingsRepository: SpendingsRepository
     private let friendListRepository: FriendsRepository
+    private var subscriptions = Set<AnyCancellable>()
     private lazy var presenter = FriendsFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
@@ -28,7 +29,7 @@ public actor FriendsFlow {
         let offlineFriends = di.friendsOfflineRepository()
         let offlineSpendings = di.spendingsOfflineRepository()
 
-        async let asyncFriends = offlineFriends.getFriends(set: Set(FriendshipKind.allCases))
+        async let asyncFriends = offlineFriends.getFriends(set: .all)
         async let asyncSpendings = offlineSpendings.getSpendingCounterparties()
 
         let cached = await (friends: asyncFriends, spendings: asyncSpendings)
@@ -44,7 +45,32 @@ public actor FriendsFlow {
         friendListRepository = di.friendListRepository()
     }
 
-    func addViaQr() async {
+    @MainActor func subscribeForUpdates() {
+        Task.detached {
+            await self.doSubscribeForUpdates()
+        }
+    }
+
+    private func doSubscribeForUpdates() async {
+        let publisher = await self.friendListRepository.friendsUpdated(ofKind: .all)
+        publisher.sink(receiveValue: { friends in
+            Task.detached {
+                await self.viewModel.reload(friends: friends)
+            }
+        }).store(in: &subscriptions)
+    }
+
+    @MainActor func unsubscribeFromUpdates() {
+
+    }
+
+    @MainActor func addViaQr() {
+        Task.detached {
+            await self.doAddViaQr()
+        }
+    }
+
+    private func doAddViaQr() async {
         let flow = await AddFriendByQrFlow(router: router)
         switch await flow.perform() {
         case .success(let url):
@@ -54,7 +80,13 @@ public actor FriendsFlow {
         }
     }
 
-    func openPreview(user: User) async {
+    @MainActor func openPreview(user: User) {
+        Task.detached {
+            await self.doOpenPreview(user: user)
+        }
+    }
+
+    private func doOpenPreview(user: User) async {
         let flow = await UserPreviewFlow(di: di, router: router, user: user)
         _ = await flow.perform()
     }
@@ -79,8 +111,8 @@ public actor FriendsFlow {
             self.viewModel.content = .loading(previous: state.content)
         }
 
-        async let asyncFriends = friendListRepository.getFriends(set: Set(FriendshipKind.allCases))
-        async let asyncSpendings = spendingsRepository.getSpendingCounterparties()
+        async let asyncFriends = friendListRepository.refreshFriends(ofKind: .all)
+        async let asyncSpendings = spendingsRepository.refreshSpendingCounterparties()
 
         let result = await (asyncFriends, asyncSpendings)
 
@@ -92,32 +124,7 @@ public actor FriendsFlow {
             case (.success(let friends), .success(let spendings)):
                 viewModel.reload(friends: friends, spendings: spendings)
             case (_, .failure(let error)), (.failure(let error), _):
-                switch error {
-                case .noConnection:
-                    viewModel.content = .failed(
-                        previous: viewModel.content,
-                        FriendsState.Failure(
-                            hint: "no_connection_hint".localized,
-                            iconName: "network.slash"
-                        )
-                    )
-                case .notAuthorized:
-                    viewModel.content = .failed(
-                        previous: viewModel.content,
-                        FriendsState.Failure(
-                            hint: "alert_title_unauthorized".localized,
-                            iconName: "network.slash"
-                        )
-                    )
-                case .other:
-                    viewModel.content = .failed(
-                        previous: viewModel.content,
-                        FriendsState.Failure(
-                            hint: "unknown_error_hint".localized,
-                            iconName: "exclamationmark.triangle"
-                        )
-                    )
-                }
+                viewModel.reload(error: error)
             }
         }
     }

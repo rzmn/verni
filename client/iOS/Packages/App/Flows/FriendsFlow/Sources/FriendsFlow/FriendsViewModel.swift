@@ -50,20 +50,38 @@ fileprivate extension FriendsState.Content {
     @Published var content: Loadable<FriendsState.Content, FriendsState.Failure>
     private var items: [User.ID: FriendsState.Item]
 
+    private var currentFriends: [FriendshipKind: [User]]?
+    private var currentSpendings: [SpendingsPreview]?
+
     convenience init(friends: [FriendshipKind: [User]], spendings: [SpendingsPreview]) {
-        var items = [User.ID: FriendsState.Item]()
-        let content = FriendsState.Content(friends: friends, spendings: spendings, items: &items)
-        self.init(initial: FriendsState(content: .loaded(content)), items: items)
+        self.init(
+            currentFriends: friends,
+            currentSpendings: spendings
+        )
     }
 
     convenience init() {
-        self.init(initial: FriendsState(content: .initial), items: [:])
+        self.init(currentFriends: nil, currentSpendings: nil)
     }
 
-    private init(initial: FriendsState, items: [User.ID: FriendsState.Item]) {
-        self.items = items
-        state = initial
-        content = initial.content
+    private init(
+        currentFriends: [FriendshipKind: [User]]?,
+        currentSpendings: [SpendingsPreview]?
+    ) {
+        self.currentFriends = currentFriends
+        self.currentSpendings = currentSpendings
+        if let currentFriends, let currentSpendings {
+            var items = [User.ID: FriendsState.Item]()
+            let content = FriendsState.Content(friends: currentFriends, spendings: currentSpendings, items: &items)
+            self.items = items
+            self.content = .loaded(content)
+            self.state = FriendsState(content: .loaded(content))
+        } else {
+            self.items = [:]
+            let content: Loadable<FriendsState.Content, FriendsState.Failure> = .initial
+            self.content = content
+            self.state = FriendsState(content: content)
+        }
         setupStateBuilder()
     }
 
@@ -76,5 +94,50 @@ fileprivate extension FriendsState.Content {
 
     func reload(friends: [FriendshipKind: [User]], spendings: [SpendingsPreview]) {
         content = .loaded(FriendsState.Content(friends: friends, spendings: spendings, items: &items))
+    }
+
+    func reload(friends: [FriendshipKind: [User]]) {
+        self.currentFriends = friends
+        guard let currentSpendings else {
+            return
+        }
+        reload(friends: friends, spendings: currentSpendings)
+    }
+
+    func reload(spendings: [SpendingsPreview]) {
+        self.currentSpendings = spendings
+        guard let currentFriends else {
+            return
+        }
+        reload(friends: currentFriends, spendings: spendings)
+    }
+
+    func reload(error: GeneralError) {
+        switch error {
+        case .noConnection:
+            content = .failed(
+                previous: content,
+                FriendsState.Failure(
+                    hint: "no_connection_hint".localized,
+                    iconName: "network.slash"
+                )
+            )
+        case .notAuthorized:
+            content = .failed(
+                previous: content,
+                FriendsState.Failure(
+                    hint: "alert_title_unauthorized".localized,
+                    iconName: "network.slash"
+                )
+            )
+        case .other:
+            content = .failed(
+                previous: content,
+                FriendsState.Failure(
+                    hint: "unknown_error_hint".localized,
+                    iconName: "exclamationmark.triangle"
+                )
+            )
+        }
     }
 }

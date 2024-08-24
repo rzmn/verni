@@ -75,6 +75,7 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
                     logI { "startListening: got failure \(result), terminating" }
                     return
                 }
+                logI { "startListening: publishind update..." }
                 for update in updates where query.updateIsRelevant(update) {
                     self.subject.upstream.send(update)
                 }
@@ -107,10 +108,12 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
         }
         switch result {
         case .success(let result):
+
             return .success(result)
         case .failure(let error):
             switch error {
             case .noUpdates:
+                logE { "still working, reschedule..." }
                 return await listenForUpdates()
             case .noConnection:
                 logI { "listenForUpdates canceled: no network. waiting for network" }

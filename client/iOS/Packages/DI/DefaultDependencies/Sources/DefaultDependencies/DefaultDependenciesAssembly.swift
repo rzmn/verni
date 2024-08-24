@@ -21,6 +21,7 @@ internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultEmailConfirmationUseCaseImplementation
 internal import DefaultPushRegistrationUseCaseImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
+internal import DefaultProfileRepositoryImplementation
 internal import PersistentStorageSQLite
 
 extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
@@ -44,6 +45,19 @@ extension ActiveSession: ActiveSessionDIContainer, LogoutUseCase {
                 persistency: persistency
             )
         )
+    }
+
+    public func profileRepository() -> ProfileRepository {
+        DefaultProfileRepository(
+            api: api,
+            offline: DefaultProfileOfflineRepository(
+                persistency: persistency
+            )
+        )
+    }
+
+    public func profileOfflineRepository() -> ProfileOfflineRepository {
+        DefaultProfileOfflineRepository(persistency: persistency)
     }
 
     public func friendsOfflineRepository() -> FriendsOfflineRepository {

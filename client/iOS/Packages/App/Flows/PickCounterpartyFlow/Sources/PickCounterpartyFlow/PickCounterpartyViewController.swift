@@ -15,7 +15,7 @@ class PickCounterpartyViewController: ViewController<PickCounterpartyView, PickC
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        model.refresh()
+        model.appeared()
     }
 
     @objc private func cancel() {

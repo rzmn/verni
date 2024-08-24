@@ -50,4 +50,33 @@ fileprivate extension Array where Element == PickCounterpartyState.Section {
     func reload(friends: [FriendshipKind: [User]]) {
         content = .loaded([PickCounterpartyState.Section](friends: friends))
     }
+
+    func reload(error: GeneralError) {
+        switch error {
+        case .noConnection:
+            content = .failed(
+                previous: state.content,
+                PickCounterpartyState.Failure(
+                    hint: "no_connection_hint".localized,
+                    iconName: "network.slash"
+                )
+            )
+        case .notAuthorized:
+            content = .failed(
+                previous: state.content,
+                PickCounterpartyState.Failure(
+                    hint: "alert_title_unauthorized".localized,
+                    iconName: "network.slash"
+                )
+            )
+        case .other:
+            content = .failed(
+                previous: state.content,
+                PickCounterpartyState.Failure(
+                    hint: "unknown_error_hint".localized,
+                    iconName: "exclamationmark.triangle"
+                )
+            )
+        }
+    }
 }

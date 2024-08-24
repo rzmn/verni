@@ -30,6 +30,7 @@ let package = Package(
         .package(path: "../../Domain/Implementations/DefaultEmailConfirmationUseCaseImplementation"),
         .package(path: "../../Domain/Implementations/DefaultPushRegistrationUseCaseImplementation"),
         .package(path: "../../Domain/Implementations/DefaultSaveCredendialsUseCaseImplementation"),
+        .package(path: "../../Domain/Implementations/DefaultProfileRepositoryImplementation"),
 
         .package(path: "../../Infrastructure/Networking"),
         .package(path: "../../Infrastructure/Logging"),
@@ -72,6 +73,7 @@ let package = Package(
                 "DefaultEmailConfirmationUseCaseImplementation",
                 "DefaultPushRegistrationUseCaseImplementation",
                 "DefaultSaveCredendialsUseCaseImplementation",
+                "DefaultProfileRepositoryImplementation",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

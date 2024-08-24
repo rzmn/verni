@@ -15,7 +15,7 @@ class SignInHintView: View<SignInFlow> {
         backgroundColor = .p.background
         [button].forEach(addSubview)
         button.addAction({ [weak model] in
-            await model?.openSignIn()
+            model?.openSignIn()
         }, for: .touchUpInside)
     }
 
