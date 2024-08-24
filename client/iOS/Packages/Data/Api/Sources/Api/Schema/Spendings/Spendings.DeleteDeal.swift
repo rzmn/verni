@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Spendings {
     public struct DeleteDeal: ApiMethod, SpendingsScope {
-        public typealias Response = [SpendingsPreviewDto]
+        public typealias Response = NoResponse
 
         public struct Parameters: Encodable {
             let dealId: DealDto.ID
