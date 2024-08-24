@@ -59,23 +59,18 @@ func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.R
 	return nil
 }
 
-func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Request) ([]storage.SpendingsPreview, *createDeal.Error) {
+func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Request) *createDeal.Error {
 	const op = "router.friends.createDealRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
 	if err := h.storage.InsertDeal(request.Deal); err != nil {
 		outError := createDeal.ErrInternal()
-		return []storage.SpendingsPreview{}, &outError
+		return &outError
 	}
 	token := helpers.ExtractBearerToken(c)
 	subject, err := jwt.GetAccessTokenSubject(token)
 	if err != nil || subject == nil {
 		outError := createDeal.ErrInternal()
-		return []storage.SpendingsPreview{}, &outError
-	}
-	preview, err := h.storage.GetCounterparties(storage.UserId(*subject))
-	if err != nil {
-		outError := createDeal.ErrInternal()
-		return []storage.SpendingsPreview{}, &outError
+		return &outError
 	}
 	h.longPoll.Publish(LongPollCounterpartiesUpdateKey(), storage.LongPollUpdatePayload{})
 	for i := 0; i < len(request.Deal.Spendings); i++ {
@@ -93,7 +88,7 @@ func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Req
 			h.pushSender.NewExpenseReceived(*receiverToken, request.Deal.Details, spending.Cost)
 		}
 	}
-	return preview, nil
+	return nil
 }
 
 type deleteDealRequestHandler struct {

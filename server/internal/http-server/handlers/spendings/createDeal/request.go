@@ -8,12 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"accounty/internal/http-server/responses"
-	"accounty/internal/storage"
 )
 
 type RequestHandler interface {
 	Validate(c *gin.Context, request Request) *Error
-	Handle(c *gin.Context, request Request) ([]storage.SpendingsPreview, *Error)
+	Handle(c *gin.Context, request Request) *Error
 }
 
 func handleError(c *gin.Context, err Error) {
@@ -39,11 +38,10 @@ func New(requestHandler RequestHandler) func(c *gin.Context) {
 			handleError(c, *err)
 			return
 		}
-		preview, err := requestHandler.Handle(c, request)
-		if err != nil {
+		if err := requestHandler.Handle(c, request); err != nil {
 			handleError(c, *err)
 			return
 		}
-		c.JSON(http.StatusCreated, Success(preview))
+		c.JSON(http.StatusCreated, Success())
 	}
 }
