@@ -1,26 +1,31 @@
 import Domain
 import Api
 import Combine
+import Logging
 internal import Base
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 public class DefaultFriendsRepository {
+    public let logger: Logger
+
     private let api: ApiProtocol
     private let offline: FriendsOfflineMutableRepository
     private let longPoll: LongPoll
     private var subjects = [FriendshipKindSet: PassthroughSubject<[FriendshipKind: [User]], Never>]()
 
-    public init(api: ApiProtocol, longPoll: LongPoll, offline: FriendsOfflineMutableRepository) {
+    public init(api: ApiProtocol, longPoll: LongPoll, logger: Logger, offline: FriendsOfflineMutableRepository) {
         self.api = api
         self.offline = offline
         self.longPoll = longPoll
+        self.logger = logger
     }
 }
 
 extension DefaultFriendsRepository: FriendsRepository {
     private func subject(for kind: FriendshipKindSet) -> PassthroughSubject<[FriendshipKind: [User]], Never> {
         guard let subject = subjects[kind] else {
+            logI { "subject created for \(kind)" }
             let subject = PassthroughSubject<[FriendshipKind: [User]], Never>()
             subjects[kind] = subject
             return subject
@@ -35,12 +40,15 @@ extension DefaultFriendsRepository: FriendsRepository {
                     guard let self else {
                         return promise(.success(nil))
                     }
+                    logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
                     Task.detached {
                         let result = await self.refreshFriends(ofKind: kind)
                         switch result {
                         case .success(let friends):
+                            self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data OK" }
                             promise(.success(friends))
-                        case .failure:
+                        case .failure(let error):
+                            self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data error: \(error), skip" }
                             promise(.success(nil))
                         }
                     }
@@ -52,6 +60,7 @@ extension DefaultFriendsRepository: FriendsRepository {
     }
     
     public func refreshFriends(ofKind kind: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
+        logI { "refreshFriends[kind=\(kind)]" }
         let uids: [UserDto.ID]
         switch await api.run(
             method: Friends.Get(
@@ -59,8 +68,10 @@ extension DefaultFriendsRepository: FriendsRepository {
             )
         ) {
         case .success(let dict):
+            logI { "refreshFriends[kind=\(kind)] OK" }
             uids = dict.flatMap(\.value)
         case .failure(let apiError):
+            logI { "refreshFriends[kind=\(kind)] error: \(apiError)" }
             return .failure(GeneralError(apiError: apiError))
         }
         let users: [UserDto]
@@ -98,3 +109,5 @@ extension DefaultFriendsRepository: FriendsRepository {
         return .success(friendsByKind)
     }
 }
+
+extension DefaultFriendsRepository: Loggable {}

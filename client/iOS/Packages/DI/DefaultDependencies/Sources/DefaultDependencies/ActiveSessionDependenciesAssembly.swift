@@ -77,13 +77,15 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     }
 
     lazy var profileRepository: ProfileRepository = DefaultProfileRepository(
-        api: api,
+        api: api, 
+        logger: .shared.with(prefix: "[profile.repo] "),
         offline: DefaultProfileOfflineRepository(
             persistency: persistency
         )
     )
     lazy var usersRepository: UsersRepository = DefaultUsersRepository(
-        api: api,
+        api: api, 
+        logger: .shared.with(prefix: "[users.repo] "),
         offline: DefaultUsersOfflineRepository(
             persistency: persistency
         )
@@ -91,7 +93,8 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     lazy var spendingsRepository: SpendingsRepository = DefaultSpendingsRepository(
         api: api,
-        longPoll: longPoll,
+        longPoll: longPoll, 
+        logger: .shared.with(prefix: "[spendings.repo] "),
         offline: DefaultSpendingsOfflineRepository(
             persistency: persistency
         )
@@ -99,7 +102,8 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     lazy var friendListRepository: FriendsRepository = DefaultFriendsRepository(
         api: api,
-        longPoll: longPoll,
+        longPoll: longPoll, 
+        logger: .shared.with(prefix: "[friends.repo] "),
         offline: DefaultFriendsOfflineRepository(
             persistency: persistency
         )

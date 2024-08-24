@@ -15,7 +15,7 @@ public actor FriendsFlow {
     private let viewModel: FriendsViewModel
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
-    private let profileRepository: UsersRepository
+    private let usersRepository: UsersRepository
     private let spendingsRepository: SpendingsRepository
     private let friendListRepository: FriendsRepository
     private var subscriptions = Set<AnyCancellable>()
@@ -41,7 +41,7 @@ public actor FriendsFlow {
         }
 
         spendingsRepository = di.spendingsRepository
-        profileRepository = di.usersRepository
+        usersRepository = di.usersRepository
         friendListRepository = di.friendListRepository
     }
 
@@ -149,7 +149,7 @@ extension FriendsFlow: UrlResolver {
             return
         }
         await presenter.presentLoading()
-        switch await profileRepository.getUsers(ids: [uid]) {
+        switch await usersRepository.getUsers(ids: [uid]) {
         case .success(let users):
             await presenter.dismissLoading()
             guard let user = users.first else {

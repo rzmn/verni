@@ -127,4 +127,3 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
 }
 
 extension LongPollUpdateNotifier: Loggable {}
-

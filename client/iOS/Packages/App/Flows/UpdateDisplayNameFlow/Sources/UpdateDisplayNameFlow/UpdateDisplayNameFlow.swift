@@ -11,7 +11,6 @@ public actor UpdateDisplayNameFlow {
     private let router: AppRouter
     private let viewModel: UpdateDisplayNameViewModel
     private let profileEditing: ProfileEditingUseCase
-    private let profileReposiroty: UsersRepository
     private lazy var presenter = UpdateDisplayNameFlowPresenter(router: router, flow: self)
     private var subscriptions = Set<AnyCancellable>()
 
@@ -19,7 +18,6 @@ public actor UpdateDisplayNameFlow {
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         self.router = router
-        self.profileReposiroty = di.usersRepository
         self.profileEditing = di.profileEditingUseCase()
         self.viewModel = await UpdateDisplayNameViewModel()
     }

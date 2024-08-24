@@ -7,14 +7,12 @@ import AVKit
 public actor UpdateAvatarFlow {
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
-    private let profileRepository: UsersRepository
     private var pickPhotoDelegateAdapter: PickPhotoDelegateAdapter?
     private let presenter: UpdateAvatarFlowPresenter
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) {
         self.router = router
         self.profileEditing = di.profileEditingUseCase()
-        self.profileRepository = di.usersRepository
         self.presenter = UpdateAvatarFlowPresenter(router: router)
     }
 

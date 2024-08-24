@@ -16,7 +16,6 @@ public actor UpdatePasswordFlow {
     private var subscriptions = Set<AnyCancellable>()
 
     private let saveCredentials: SaveCredendialsUseCase
-    private let profileRepository: UsersRepository
     private let profile: Profile
 
     private var flowContinuation: Continuation?
@@ -26,7 +25,6 @@ public actor UpdatePasswordFlow {
         self.profile = profile
         self.saveCredentials = di.appCommon.saveCredentialsUseCase
         self.profileEditing = di.profileEditingUseCase()
-        self.profileRepository = di.usersRepository
         viewModel = await UpdatePasswordViewModel(
             passwordValidation: di.appCommon.localPasswordValidationUseCase
         )

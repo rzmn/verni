@@ -15,8 +15,8 @@ public protocol SpendingsRepository {
         counterparty: User.ID
     ) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError>
 
-    func spendingCounterpartiesUpdated() async -> AnyPublisher<Void, Never>
-    func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<Void, Never>
+    func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never>
+    func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never>
 }
 
 public protocol SpendingsOfflineRepository {
