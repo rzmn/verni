@@ -1,6 +1,7 @@
 package apns
 
 import (
+	"accounty/internal/storage"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,8 +15,22 @@ type PushNotificationSender struct {
 	client *apns2.Client
 }
 
-type Push struct {
-	Aps PushPayload `json:"aps"`
+type PushDataType int
+
+const (
+	PushDataTypeFriendRequestHasBeenAccepted = iota
+	PushDataTypeGotFriendRequest
+	PushDataTypeNewExpenseReceived
+)
+
+type PushData[T any] struct {
+	Type    PushDataType `json:"t"`
+	Payload *T           `json:"p,omitempty"`
+}
+
+type Push[T any] struct {
+	Aps  PushPayload `json:"aps"`
+	Data PushData[T] `json:"d"`
 }
 
 type PushPayload struct {
@@ -33,9 +48,16 @@ type Config struct {
 	Password string `json:"cert_pwd"`
 }
 
-func (s *PushNotificationSender) FriendRequestWasHasBeenAccepted(token string, sender string) {
-	body := fmt.Sprintf("From: %s", sender)
-	s.send(token, Push{
+func (s *PushNotificationSender) FriendRequestHasBeenAccepted(token string, target storage.UserId) {
+	const op = "apns.PushNotificationSender.FriendRequestHasBeenAccepted"
+	type Payload struct {
+		Target storage.UserId `json:"t"`
+	}
+	body := fmt.Sprintf("From: %s", target)
+	payload := Payload{
+		Target: target,
+	}
+	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{
 			MutableContent: nil,
 			Alert: PushPayloadAlert{
@@ -44,12 +66,31 @@ func (s *PushNotificationSender) FriendRequestWasHasBeenAccepted(token string, s
 				Body:     &body,
 			},
 		},
+		Data: PushData[Payload]{
+			Type:    PushDataTypeFriendRequestHasBeenAccepted,
+			Payload: &payload,
+		},
 	})
+	if err != nil {
+		log.Printf("%s: failed create payload string: %v", op, err)
+		return
+	}
+	if err := s.send(token, string(payloadString)); err != nil {
+		log.Printf("%s: failed to send push: %v", op, err)
+		return
+	}
 }
 
-func (s *PushNotificationSender) GotFriendRequest(token string, sender string) {
+func (s *PushNotificationSender) GotFriendRequest(token string, sender storage.UserId) {
+	const op = "apns.PushNotificationSender.GotFriendRequest"
+	type Payload struct {
+		Sender storage.UserId `json:"s"`
+	}
 	body := fmt.Sprintf("From: %s", sender)
-	s.send(token, Push{
+	payload := Payload{
+		Sender: sender,
+	}
+	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{
 			MutableContent: nil,
 			Alert: PushPayloadAlert{
@@ -58,12 +99,31 @@ func (s *PushNotificationSender) GotFriendRequest(token string, sender string) {
 				Body:     &body,
 			},
 		},
+		Data: PushData[Payload]{
+			Type:    PushDataTypeGotFriendRequest,
+			Payload: &payload,
+		},
 	})
+	if err != nil {
+		log.Printf("%s: failed create payload string: %v", op, err)
+		return
+	}
+	if err := s.send(token, string(payloadString)); err != nil {
+		log.Printf("%s: failed to send push: %v", op, err)
+		return
+	}
 }
 
-func (s *PushNotificationSender) NewExpenseReceived(token string, title string, amount int64) {
-	body := fmt.Sprintf("%s: %d", title, amount)
-	s.send(token, Push{
+func (s *PushNotificationSender) NewExpenseReceived(token string, deal storage.IdentifiableDeal) {
+	const op = "apns.PushNotificationSender.NewExpenseReceived"
+	type Payload struct {
+		DealId storage.DealId `json:"d"`
+	}
+	body := fmt.Sprintf("%s: %d", deal.Details, deal.Cost)
+	payload := Payload{
+		DealId: deal.Id,
+	}
+	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{
 			MutableContent: nil,
 			Alert: PushPayloadAlert{
@@ -72,20 +132,27 @@ func (s *PushNotificationSender) NewExpenseReceived(token string, title string, 
 				Body:     &body,
 			},
 		},
+		Data: PushData[Payload]{
+			Type:    PushDataTypeNewExpenseReceived,
+			Payload: &payload,
+		},
 	})
+	if err != nil {
+		log.Printf("%s: failed create payload string: %v", op, err)
+		return
+	}
+	if err := s.send(token, string(payloadString)); err != nil {
+		log.Printf("%s: failed to send push: %v", op, err)
+		return
+	}
 }
 
-func (s *PushNotificationSender) send(token string, payload Push) error {
+func (s *PushNotificationSender) send(token string, payloadString string) error {
 	const op = "apns.PushNotificationSender.Send"
 	notification := &apns2.Notification{}
 	notification.DeviceToken = token
 	notification.Topic = "com.rzmn.accountydev.app"
 
-	payloadString, err := json.Marshal(payload)
-	if err != nil {
-		log.Printf("%s: failed create payload string: %v", op, err)
-		return err
-	}
 	log.Printf("%s: sending push: %s", op, payloadString)
 	notification.Payload = payloadString
 

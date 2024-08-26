@@ -1605,7 +1605,7 @@ WHERE
 	return s.GetUsers(sender, targets)
 }
 
-func (s *Storage) InsertDeal(deal storage.Deal) error {
+func (s *Storage) InsertDeal(deal storage.Deal) (storage.DealId, error) {
 	const op = "storage.ydb.InsertDeal"
 	log.Printf("%s: start", op)
 	var (
@@ -1615,7 +1615,7 @@ func (s *Storage) InsertDeal(deal storage.Deal) error {
 			),
 			table.CommitTx(),
 		)
-		dealId = uuid.New().String()
+		dealId = storage.DealId(uuid.New().String())
 	)
 	err := s.db.Table().Do(s.ctx, func(ctx context.Context, s table.Session) (err error) {
 		_, res, err := s.Execute(ctx, writeTx, `
@@ -1628,7 +1628,7 @@ INSERT INTO
 	deals(id, timestamp, details, cost, currency) 
 VALUES($id, $timestamp, $details, $cost, $currency);`,
 			table.NewQueryParameters(
-				table.ValueParam("$id", types.TextValue(dealId)),
+				table.ValueParam("$id", types.TextValue(string(dealId))),
 				table.ValueParam("$timestamp", types.Int64Value(deal.Timestamp)),
 				table.ValueParam("$details", types.TextValue(deal.Details)),
 				table.ValueParam("$cost", types.Int64Value(int64(deal.Cost))),
@@ -1651,7 +1651,7 @@ INSERT INTO
 VALUES($id, $dealId, $cost, $counterparty);`,
 				table.NewQueryParameters(
 					table.ValueParam("$id", types.TextValue(uuid.New().String())),
-					table.ValueParam("$dealId", types.TextValue(dealId)),
+					table.ValueParam("$dealId", types.TextValue(string(dealId))),
 					table.ValueParam("$cost", types.Int64Value(int64(deal.Spendings[i].Cost))),
 					table.ValueParam("$counterparty", types.TextValue(string(deal.Spendings[i].UserId))),
 				),
@@ -1665,12 +1665,12 @@ VALUES($id, $dealId, $cost, $counterparty);`,
 	})
 	if err != nil {
 		log.Printf("%s: unexpected err %v", op, err)
-		return err
+		return dealId, err
 	}
-	return nil
+	return dealId, nil
 }
 
-func (s *Storage) GetDeal(did string) (*storage.IdentifiableDeal, error) {
+func (s *Storage) GetDeal(did storage.DealId) (*storage.IdentifiableDeal, error) {
 	const op = "storage.ydb.GetDeal"
 	log.Printf("%s: start", op)
 	var (
@@ -1693,7 +1693,7 @@ FROM
 	JOIN spendings s ON s.dealId = d.id
 WHERE 
 	d.id = $id;`,
-			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(did))),
+			table.NewQueryParameters(table.ValueParam("$id", types.TextValue(string(did)))),
 		)
 		if err != nil {
 			return err
@@ -1733,7 +1733,7 @@ WHERE
 	return deal, nil
 }
 
-func (s *Storage) RemoveDeal(did string) error {
+func (s *Storage) RemoveDeal(did storage.DealId) error {
 	const op = "storage.ydb.RemoveDeal"
 	log.Printf("%s: start", op)
 	var (
@@ -1752,7 +1752,7 @@ DELETE FROM
 WHERE 
 	id = $id;`,
 			table.NewQueryParameters(
-				table.ValueParam("$id", types.TextValue(did)),
+				table.ValueParam("$id", types.TextValue(string(did))),
 			),
 		)
 		if err != nil {
@@ -1766,7 +1766,7 @@ DELETE FROM
 WHERE 
 	dealId = $id;`,
 			table.NewQueryParameters(
-				table.ValueParam("$id", types.TextValue(did)),
+				table.ValueParam("$id", types.TextValue(string(did))),
 			),
 		)
 		if err != nil {
@@ -1862,7 +1862,7 @@ WHERE
 	return deals, nil
 }
 
-func (s *Storage) GetCounterpartiesForDeal(did string) ([]storage.UserId, error) {
+func (s *Storage) GetCounterpartiesForDeal(did storage.DealId) ([]storage.UserId, error) {
 	const op = "storage.ydb.GetCounterpartiesForDeal"
 	log.Printf("%s: start", op)
 	var (

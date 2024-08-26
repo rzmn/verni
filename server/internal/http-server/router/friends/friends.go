@@ -96,7 +96,7 @@ func (h *sendRequestRequestHandler) Handle(c *gin.Context, request sendRequest.R
 		} else if receiverToken == nil {
 			log.Printf("%s: receiver push token is nil", op)
 		} else {
-			h.pushSender.GotFriendRequest(*receiverToken, profile.User.DisplayName)
+			h.pushSender.GotFriendRequest(*receiverToken, profile.User.Id)
 		}
 	}
 	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})
@@ -157,7 +157,7 @@ func (h *acceptRequestRequestHandler) Handle(c *gin.Context, request acceptReque
 		} else if senderToken == nil {
 			log.Printf("%s: sender push token is nil", op)
 		} else {
-			h.pushSender.FriendRequestWasHasBeenAccepted(*senderToken, profile.User.DisplayName)
+			h.pushSender.FriendRequestHasBeenAccepted(*senderToken, profile.User.Id)
 		}
 	}
 	h.longPoll.Publish(LongPollFriendsUpdateKey(), storage.LongPollUpdatePayload{})

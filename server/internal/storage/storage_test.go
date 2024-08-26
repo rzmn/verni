@@ -694,7 +694,8 @@ func TestDealsAndCounterparties(t *testing.T) {
 			},
 		},
 	}
-	if err := s.InsertDeal(deal1); err != nil {
+	_, err := s.InsertDeal(deal1)
+	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	deal2 := storage.Deal{
@@ -713,7 +714,8 @@ func TestDealsAndCounterparties(t *testing.T) {
 			},
 		},
 	}
-	if err := s.InsertDeal(deal2); err != nil {
+	_, err = s.InsertDeal(deal2)
+	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	deals, err := s.GetDeals(counterparty1, counterparty2)
@@ -764,8 +766,8 @@ func TestInsertAndRemoveDeal(t *testing.T) {
 			},
 		},
 	}
-
-	if err := s.InsertDeal(deal); err != nil {
+	_, err := s.InsertDeal(deal)
+	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	deals, err := s.GetDeals(counterparty1, counterparty2)
@@ -817,8 +819,8 @@ func TestGetCounterpartiesForDeal(t *testing.T) {
 			},
 		},
 	}
-
-	if err := s.InsertDeal(deal); err != nil {
+	_, err := s.InsertDeal(deal)
+	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 	deals, err := s.GetDeals(counterparty1, counterparty2)

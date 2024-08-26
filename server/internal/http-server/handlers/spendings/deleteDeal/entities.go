@@ -2,10 +2,11 @@ package deleteDeal
 
 import (
 	"accounty/internal/http-server/responses"
+	"accounty/internal/storage"
 )
 
 type Request struct {
-	DealId string `json:"dealId"`
+	DealId storage.DealId `json:"dealId"`
 }
 
 type Error struct {

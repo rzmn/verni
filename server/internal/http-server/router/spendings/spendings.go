@@ -62,7 +62,8 @@ func (h *createDealRequestHandler) Validate(c *gin.Context, request createDeal.R
 func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Request) *createDeal.Error {
 	const op = "router.friends.createDealRequestHandler.Handle"
 	log.Printf("%s: start with request %v", op, request)
-	if err := h.storage.InsertDeal(request.Deal); err != nil {
+	dealId, err := h.storage.InsertDeal(request.Deal)
+	if err != nil {
 		outError := createDeal.ErrInternal()
 		return &outError
 	}
@@ -85,7 +86,10 @@ func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Req
 		} else if receiverToken == nil {
 			log.Printf("%s: receiver push token is nil", op)
 		} else {
-			h.pushSender.NewExpenseReceived(*receiverToken, request.Deal.Details, spending.Cost)
+			h.pushSender.NewExpenseReceived(*receiverToken, storage.IdentifiableDeal{
+				Id:   dealId,
+				Deal: request.Deal,
+			})
 		}
 	}
 	return nil

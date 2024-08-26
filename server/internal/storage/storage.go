@@ -11,6 +11,7 @@ const (
 )
 
 type UserId string
+type DealId string
 type AvatarId string
 
 type AvatarData struct {
@@ -56,7 +57,7 @@ type Deal struct {
 
 type IdentifiableDeal struct {
 	Deal
-	Id string `json:"id"`
+	Id DealId `json:"id"`
 }
 
 type Spending struct {
@@ -114,13 +115,13 @@ type Storage interface {
 	GetUsers(sender UserId, ids []UserId) ([]User, error)
 	SearchUsers(sender UserId, query string) ([]User, error)
 
-	InsertDeal(deal Deal) error
-	GetDeal(did string) (*IdentifiableDeal, error)
-	RemoveDeal(did string) error
+	InsertDeal(deal Deal) (DealId, error)
+	GetDeal(did DealId) (*IdentifiableDeal, error)
+	RemoveDeal(did DealId) error
 
 	GetDeals(counterparty1 UserId, counterparty2 UserId) ([]IdentifiableDeal, error)
 	GetCounterparties(uid UserId) ([]SpendingsPreview, error)
-	GetCounterpartiesForDeal(did string) ([]UserId, error)
+	GetCounterpartiesForDeal(did DealId) ([]UserId, error)
 
 	Close()
 }
