@@ -92,6 +92,7 @@ class AddExpenseViewModel {
             )
         }
         .removeDuplicates()
+        .receive(on: RunLoop.main)
         .assign(to: &$state)
     }
 }

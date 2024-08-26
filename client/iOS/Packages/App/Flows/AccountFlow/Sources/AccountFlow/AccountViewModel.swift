@@ -1,5 +1,6 @@
 import Combine
 import Domain
+import Foundation
 
 @MainActor class AccountViewModel {
     @Published var state: AccountState
@@ -25,6 +26,7 @@ import Domain
             .map {
                 AccountState(info: $0)
             }
+            .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
 }

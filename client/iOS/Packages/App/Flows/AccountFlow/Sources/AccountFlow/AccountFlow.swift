@@ -33,6 +33,21 @@ public actor AccountFlow {
             profile: await di.profileOfflineRepository().getProfile()
         )
     }
+
+    public func setActive(_ active: Bool) async {
+        let wasActive = !subscriptions.isEmpty
+        guard active != wasActive else {
+            return
+        }
+        if active {
+            await profileRepository.profileUpdated()
+                .map(Loadable.loaded)
+                .assign(to: \.content, on: viewModel)
+                .store(in: &subscriptions)
+        } else {
+            subscriptions.removeAll()
+        }
+    }
 }
 
 // MARK: - Flow
@@ -80,7 +95,7 @@ extension AccountFlow: TabEmbedFlow {
     }
 }
 
-// MARK: - User Action
+// MARK: - User Actions
 
 extension AccountFlow {
     @MainActor func updateAvatar() {

@@ -1,5 +1,6 @@
 import Domain
 import Combine
+import Foundation
 
 @MainActor class UpdateDisplayNameViewModel {
     @Published var state: UpdateDisplayNameState
@@ -28,6 +29,7 @@ import Combine
                 }
                 return UpdateDisplayNameState(displayName: $0, displayNameHint: displayNameHint)
             }
+            .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
 }

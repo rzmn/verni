@@ -60,6 +60,10 @@ extension UpdatePasswordFlow: Flow {
             return
         }
         self.flowContinuation = nil
+        if case .canceled = event {
+        } else {
+            await presenter.cancelPasswordEditing()
+        }
         flowContinuation.resume(returning: event)
     }
 }
@@ -94,9 +98,12 @@ extension UpdatePasswordFlow {
         guard state.canConfirm else {
             return await presenter.errorHaptic()
         }
+        await presenter.presentLoading()
         switch await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword) {
         case .success:
             await saveCredentials.save(email: profile.email, password: state.newPassword)
+            await presenter.successHaptic()
+            await presenter.presentSuccess()
             await handle(event: .successfullySet)
         case .failure(let error):
             switch error {

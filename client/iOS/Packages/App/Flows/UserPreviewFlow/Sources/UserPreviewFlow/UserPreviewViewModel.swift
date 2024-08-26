@@ -71,6 +71,7 @@ fileprivate extension IdentifiableSpending {
                     }
                 )
             }
+            .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
 }

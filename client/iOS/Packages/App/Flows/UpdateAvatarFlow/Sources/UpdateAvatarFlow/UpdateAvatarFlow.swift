@@ -72,6 +72,8 @@ extension UpdateAvatarFlow: Flow {
         await presenter.presentLoading()
         switch await profileEditing.setAvatar(imageData: data) {
         case .success:
+            await presenter.successHaptic()
+            await presenter.presentSuccess()
             return .successfullySet
         case .failure(let error):
             switch error {

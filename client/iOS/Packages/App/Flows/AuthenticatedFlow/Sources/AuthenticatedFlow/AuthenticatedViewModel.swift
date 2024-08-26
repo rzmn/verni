@@ -30,6 +30,7 @@ class AuthenticatedViewModel {
                     activeTab: activeTab
                 )
             }
+            .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
 }

@@ -37,6 +37,7 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
     func usersOfflineRepository() -> UsersOfflineRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
     func emailConfirmationUseCase() -> EmailConfirmationUseCase
+    func receivingPushUseCase() -> ReceivingPushUseCase
     func qrInviteUseCase() -> QRInviteUseCase
 }
 

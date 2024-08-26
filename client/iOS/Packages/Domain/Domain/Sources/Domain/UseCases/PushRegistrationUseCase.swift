@@ -1,5 +1,6 @@
 import Foundation
 
 public protocol PushRegistrationUseCase {
-    func registerForPush(token: String) async
+    func askForPushToken()
+    func registerForPush(token tokenData: Data) async
 }

@@ -1,5 +1,6 @@
 import Domain
 import Combine
+import Foundation
 
 fileprivate extension Array where Element == PickCounterpartyState.Section {
     init(friends: [FriendshipKind: [User]]) {
@@ -44,6 +45,7 @@ fileprivate extension Array where Element == PickCounterpartyState.Section {
             .map {
                 PickCounterpartyState(content: $0)
             }
+            .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
 

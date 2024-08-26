@@ -24,12 +24,6 @@ class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         model.refresh()
-        model.subscribeForUpdates()
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        model.unsubscribeFromUpdates()
     }
 }
 

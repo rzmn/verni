@@ -25,7 +25,10 @@ class AuthenticatedTabsController: TabBarController<AuthenticatedFlow, TabBar> {
     }
 
     override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
-        model.selected(index: selectedIndex)
+        guard let index = tabBar.items?.firstIndex(of: item) else {
+            return
+        }
+        model.selected(index: index)
     }
 
     private func onCenterButtonTap() {

@@ -39,37 +39,103 @@ public actor FriendsFlow {
         } else {
             viewModel = await FriendsViewModel()
         }
-
         spendingsRepository = di.spendingsRepository
         usersRepository = di.usersRepository
         friendListRepository = di.friendListRepository
     }
 
-    @MainActor func subscribeForUpdates() {
-        Task.detached {
-            await self.doSubscribeForUpdates()
+    public func setActive(_ active: Bool) async {
+        let wasActive = !subscriptions.isEmpty
+        guard active != wasActive else {
+            return
+        }
+        if active {
+            await friendListRepository
+                .friendsUpdated(ofKind: .all)
+                .sink(receiveValue: { friends in
+                    Task.detached {
+                        await self.viewModel.reload(friends: friends)
+                    }
+                })
+                .store(in: &subscriptions)
+        } else {
+            subscriptions.removeAll()
         }
     }
+}
 
-    private func doSubscribeForUpdates() async {
-        let publisher = await self.friendListRepository.friendsUpdated(ofKind: .all)
-        publisher.sink(receiveValue: { friends in
-            Task.detached {
-                await self.viewModel.reload(friends: friends)
-            }
-        }).store(in: &subscriptions)
+// MARK: - Flow
+
+extension FriendsFlow: TabEmbedFlow {
+    public typealias FlowResult = Void
+    public func perform() async -> FlowResult {}
+
+    @MainActor public func viewController() async -> Routable {
+        await presenter.tabViewController
     }
+}
 
-    @MainActor func unsubscribeFromUpdates() {
+// MARK: - User Actions
 
-    }
-
+extension FriendsFlow {
     @MainActor func addViaQr() {
         Task.detached {
             await self.doAddViaQr()
         }
     }
 
+    @MainActor func openPreview(user: User) {
+        Task.detached {
+            await self.doOpenPreview(user: user)
+        }
+    }
+
+    @MainActor
+    func refresh() {
+        Task.detached {
+            await self.doRefresh()
+        }
+    }
+}
+
+// MARK: - Url Resolver
+
+extension FriendsFlow: UrlResolver {
+    public func resolve(url: AppUrl) async {
+        guard case .users(let usersAction) = url else {
+            return
+        }
+        guard case .show(let uid) = usersAction else {
+            return
+        }
+        await presenter.presentLoading()
+        switch await usersRepository.getUsers(ids: [uid]) {
+        case .success(let users):
+            await presenter.dismissLoading()
+            guard let user = users.first else {
+                return
+            }
+            let flow = await UserPreviewFlow(di: di, router: router, user: user)
+            _ = await flow.perform()
+        case .failure(let error):
+            await presenter.presentGeneralError(error)
+        }
+    }
+
+    public func canResolve(url: AppUrl) async -> Bool {
+        guard case .users(let usersAction) = url else {
+            return false
+        }
+        guard case .show = usersAction else {
+            return false
+        }
+        return true
+    }
+}
+
+// MARK: - Private
+
+extension FriendsFlow {
     private func doAddViaQr() async {
         let flow = await AddFriendByQrFlow(router: router)
         switch await flow.perform() {
@@ -80,22 +146,9 @@ public actor FriendsFlow {
         }
     }
 
-    @MainActor func openPreview(user: User) {
-        Task.detached {
-            await self.doOpenPreview(user: user)
-        }
-    }
-
     private func doOpenPreview(user: User) async {
         let flow = await UserPreviewFlow(di: di, router: router, user: user)
         _ = await flow.perform()
-    }
-
-    @MainActor
-    func refresh() {
-        Task.detached {
-            await self.doRefresh()
-        }
     }
 
     private func doRefresh() async {
@@ -127,48 +180,5 @@ public actor FriendsFlow {
                 viewModel.reload(error: error)
             }
         }
-    }
-}
-
-extension FriendsFlow: TabEmbedFlow {
-    public typealias FlowResult = Void
-    public func perform() async -> FlowResult {}
-
-    @MainActor public func viewController() async -> Routable {
-        await presenter.tabViewController
-    }
-}
-
-extension FriendsFlow: UrlResolver {
-
-    public func resolve(url: AppUrl) async {
-        guard case .users(let usersAction) = url else {
-            return
-        }
-        guard case .show(let uid) = usersAction else {
-            return
-        }
-        await presenter.presentLoading()
-        switch await usersRepository.getUsers(ids: [uid]) {
-        case .success(let users):
-            await presenter.dismissLoading()
-            guard let user = users.first else {
-                return
-            }
-            let flow = await UserPreviewFlow(di: di, router: router, user: user)
-            _ = await flow.perform()
-        case .failure(let error):
-            await presenter.presentGeneralError(error)
-        }
-    }
-
-    public func canResolve(url: AppUrl) async -> Bool {
-        guard case .users(let usersAction) = url else {
-            return false
-        }
-        guard case .show = usersAction else {
-            return false
-        }
-        return true
     }
 }

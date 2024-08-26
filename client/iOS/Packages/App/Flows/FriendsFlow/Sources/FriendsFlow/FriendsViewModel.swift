@@ -89,6 +89,7 @@ fileprivate extension FriendsState.Content {
         $content.map { content in
             FriendsState(content: content)
         }
+        .receive(on: RunLoop.main)
         .assign(to: &$state)
     }
 

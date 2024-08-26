@@ -11,13 +11,15 @@ public actor App {
     public let logger = Logger.shared.with(prefix: "[model.app] ")
     private let di: DIContainer
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private var pendingPushToken: String?
+    private var pendingPushToken: Data?
     private var currentSession: ActiveSessionDIContainer? {
         didSet {
             if let currentSession, let pendingPushToken {
                 self.pendingPushToken = nil
                 Task.detached {
-                    await self.registerPushToken(session: currentSession, token: pendingPushToken)
+                    await currentSession
+                        .pushRegistrationUseCase()
+                        .registerForPush(token: pendingPushToken)
                 }
             }
         }
@@ -36,9 +38,6 @@ public actor App {
             SetupAppearance()
             AvatarView.repository = di.appCommon.avatarsRepository
         }
-        Task.detached { @MainActor in
-            await self.askPushMotificationsPermission()
-        }
         switch await authUseCase.awake() {
         case .success(let session):
             await startAuthorizedSession(session: session, router: router)
@@ -46,18 +45,6 @@ public actor App {
             switch reason {
             case .hasNoSession:
                 return await startAnonynousSession(router: router)
-            }
-        }
-    }
-
-    private func askPushMotificationsPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-            } else {
-                self.logI { "permission for push notifications denied" }
             }
         }
     }
@@ -82,16 +69,14 @@ public actor App {
 }
 
 extension App {
-    public func registerPushToken(token: String) async {
+    public func registerPushToken(token: Data) async {
         if let currentSession {
-            await registerPushToken(session: currentSession, token: token)
+            await currentSession
+                .pushRegistrationUseCase()
+                .registerForPush(token: token)
         } else {
             pendingPushToken = token
         }
-    }
-
-    private func registerPushToken(session: ActiveSessionDIContainer, token: String) async {
-        await session.pushRegistrationUseCase().registerForPush(token: token)
     }
 
     public func handle(url: String) async {

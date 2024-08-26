@@ -51,6 +51,7 @@ extension AuthenticatedFlow: Flow {
                 }
             }
         )
+        di.pushRegistrationUseCase().askForPushToken()
         return await withCheckedContinuation { continuation in
             flowContinuation = continuation
             Task.detached { [weak self] in
@@ -86,7 +87,27 @@ extension AuthenticatedFlow {
         guard state.tabs.count > index else {
             return
         }
-        viewModel.activeTab = state.tabs[index]
+        let oldTab = state.activeTab
+        let newTab = state.tabs[index]
+        guard oldTab != newTab else {
+            return
+        }
+        viewModel.activeTab = newTab
+        Task.detached { [weak self] in
+            guard let self else { return }
+            switch oldTab {
+            case .friends:
+                await friendsFlow.setActive(false)
+            case .account:
+                await accountFlow.setActive(false)
+            }
+            switch newTab {
+            case .friends:
+                await friendsFlow.setActive(true)
+            case .account:
+                await accountFlow.setActive(true)
+            }
+        }
     }
 }
 

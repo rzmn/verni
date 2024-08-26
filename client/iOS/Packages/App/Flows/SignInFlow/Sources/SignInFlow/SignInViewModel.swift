@@ -45,6 +45,7 @@ class SignInViewModel {
                 SignInState(email: value.0, password: value.1, emailHint: value.2)
             }
             .removeDuplicates()
+            .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
 }
