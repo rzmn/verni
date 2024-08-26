@@ -28,6 +28,18 @@ public class DefaultSpendingsRepository {
 }
 
 extension DefaultSpendingsRepository: SpendingsRepository {
+    public func getSpending(id: Spending.ID) async -> Result<Spending, GetSpendingError> {
+        logI { "getSpending[id=\(id)] start" }
+        let result = await api.run(method: Spendings.GetDeal(dealId: id))
+        switch result {
+        case .success(let spendingDto):
+            return .success(Spending(dto: spendingDto))
+        case .failure(let apiError):
+            logI { "getSpending[id=\(id)] failed error: \(apiError)" }
+            return .failure(GetSpendingError(apiError: apiError))
+        }
+    }
+    
     private func spendingsHistorySubject(with uid: User.ID) -> PassthroughSubject<[IdentifiableSpending], Never> {
         guard let subject = spendingsHistorySubjectById[uid] else {
             logI { "subject created for \(uid)" }

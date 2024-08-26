@@ -7,6 +7,7 @@ internal import ApiService
 internal import DefaultApiImplementation
 internal import Networking
 internal import PersistentStorage
+internal import PersistentStorageSQLite
 internal import DefaultAuthUseCaseImplementation
 internal import DefaultApiServiceImplementation
 internal import DefaultNetworkingImplementation
@@ -24,7 +25,7 @@ internal import DefaultPushRegistrationUseCaseImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
 internal import DefaultProfileRepositoryImplementation
 internal import DefaultLogoutUseCaseImplementation
-internal import PersistentStorageSQLite
+internal import DefaultReceivingPushUseCaseImplementation
 
 class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory {
     private let appCommon: AppCommon
@@ -173,5 +174,14 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     func qrInviteUseCase() -> QRInviteUseCase {
         DefaultQRInviteUseCase()
+    }
+
+    func receivingPushUseCase() -> ReceivingPushUseCase {
+        DefaultReceivingPushUseCase(
+            usersRepository: usersRepository,
+            friendsRepository: friendListRepository,
+            spendingsRepository: spendingsRepository,
+            logger: .shared.with(prefix: "[push.r] ")
+        )
     }
 }

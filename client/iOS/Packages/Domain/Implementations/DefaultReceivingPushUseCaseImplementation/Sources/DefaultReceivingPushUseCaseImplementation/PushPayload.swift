@@ -60,9 +60,13 @@ extension PushPayload {
 extension PushPayload {
     struct NewExpenseReceived: Decodable {
         let spendingId: Spending.ID
+        let authorId: User.ID
+        let cost: Int64
 
         enum CodingKeys: String, CodingKey {
             case spendingId = "d"
+            case authorId = "u"
+            case cost = "c"
         }
     }
 }

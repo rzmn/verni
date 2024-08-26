@@ -29,7 +29,7 @@ public extension DealDto {
 @dynamicMemberLookup
 public struct IdentifiableDealDto: Codable {
     public let id: DealDto.ID
-    private let deal: DealDto
+    public let deal: DealDto
 
     public init(id: DealDto.ID, deal: DealDto) {
         self.id = id

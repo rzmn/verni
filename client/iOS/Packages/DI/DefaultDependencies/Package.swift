@@ -32,6 +32,7 @@ let package = Package(
         .package(path: "../../Domain/Implementations/DefaultSaveCredendialsUseCaseImplementation"),
         .package(path: "../../Domain/Implementations/DefaultProfileRepositoryImplementation"),
         .package(path: "../../Domain/Implementations/DefaultLogoutUseCaseImplementation"),
+        .package(path: "../../Domain/Implementations/DefaultReceivingPushUseCaseImplementation"),
 
         .package(path: "../../Infrastructure/Networking"),
         .package(path: "../../Infrastructure/Logging"),
@@ -76,6 +77,7 @@ let package = Package(
                 "DefaultSaveCredendialsUseCaseImplementation",
                 "DefaultProfileRepositoryImplementation",
                 "DefaultLogoutUseCaseImplementation",
+                "DefaultReceivingPushUseCaseImplementation",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
