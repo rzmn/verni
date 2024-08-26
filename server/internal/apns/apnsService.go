@@ -114,14 +114,24 @@ func (s *PushNotificationSender) GotFriendRequest(token string, sender storage.U
 	}
 }
 
-func (s *PushNotificationSender) NewExpenseReceived(token string, deal storage.IdentifiableDeal) {
+func (s *PushNotificationSender) NewExpenseReceived(token string, deal storage.IdentifiableDeal, author storage.UserId, receiver storage.UserId) {
 	const op = "apns.PushNotificationSender.NewExpenseReceived"
 	type Payload struct {
-		DealId storage.DealId `json:"d"`
+		DealId   storage.DealId `json:"d"`
+		AuthorId storage.UserId `json:"u"`
+		Cost     int64          `json:"c"`
 	}
 	body := fmt.Sprintf("%s: %d", deal.Details, deal.Cost)
+	cost := deal.Cost
+	for i := 0; i < len(deal.Spendings); i++ {
+		if deal.Spendings[i].UserId == receiver {
+			cost = deal.Spendings[i].Cost
+		}
+	}
 	payload := Payload{
-		DealId: deal.Id,
+		DealId:   deal.Id,
+		AuthorId: author,
+		Cost:     cost,
 	}
 	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{

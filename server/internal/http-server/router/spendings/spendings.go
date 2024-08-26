@@ -89,7 +89,7 @@ func (h *createDealRequestHandler) Handle(c *gin.Context, request createDeal.Req
 			h.pushSender.NewExpenseReceived(*receiverToken, storage.IdentifiableDeal{
 				Id:   dealId,
 				Deal: request.Deal,
-			})
+			}, storage.UserId(*subject), spending.UserId)
 		}
 	}
 	return nil
