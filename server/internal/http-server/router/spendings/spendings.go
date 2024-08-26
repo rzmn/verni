@@ -6,6 +6,7 @@ import (
 	"accounty/internal/http-server/handlers/spendings/createDeal"
 	"accounty/internal/http-server/handlers/spendings/deleteDeal"
 	"accounty/internal/http-server/handlers/spendings/getCounterparties"
+	"accounty/internal/http-server/handlers/spendings/getDeal"
 	"accounty/internal/http-server/handlers/spendings/getDeals"
 	"accounty/internal/http-server/helpers"
 	"accounty/internal/http-server/middleware"
@@ -226,6 +227,31 @@ func (h *getDealsRequestHandler) Handle(c *gin.Context, request getDeals.Request
 	return deals, nil
 }
 
+type getDealRequestHandler struct {
+	storage storage.Storage
+}
+
+func (h *getDealRequestHandler) Handle(c *gin.Context, request getDeal.Request) (storage.Deal, *getDeal.Error) {
+	const op = "router.spendings.getDealRequestHandler.Handle"
+	log.Printf("%s: start with request %v", op, request)
+	token := helpers.ExtractBearerToken(c)
+	subject, err := jwt.GetAccessTokenSubject(token)
+	if err != nil || subject == nil {
+		outError := getDeal.ErrInternal()
+		return storage.Deal{}, &outError
+	}
+	deal, err := h.storage.GetDeal(request.Id)
+	if err != nil {
+		outError := getDeal.ErrInternal()
+		return storage.Deal{}, &outError
+	}
+	if deal == nil {
+		outError := getDeal.ErrDealNotFound()
+		return storage.Deal{}, &outError
+	}
+	return deal.Deal, nil
+}
+
 func LongPollCounterpartiesUpdateKey() string {
 	return "counterparties"
 }
@@ -245,6 +271,7 @@ func RegisterRoutes(e *gin.Engine, storage storage.Storage, pushSender apns.Push
 	group.POST("/deleteDeal", deleteDeal.New(&deleteDealRequestHandler{storage: storage, longPoll: longpoll}))
 	group.GET("/getCounterparties", getCounterparties.New(&getCounterpartiesRequestHandler{storage: storage}))
 	group.GET("/getDeals", getDeals.New(&getDealsRequestHandler{storage: storage}))
+	group.GET("/getDeal", getDeal.New(&getDealRequestHandler{storage: storage}))
 
 	group.GET("/subscribe", wrapWithContext(longpoll.SubscriptionHandler))
 }
