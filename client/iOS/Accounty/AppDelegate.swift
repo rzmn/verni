@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Task.detached { @MainActor [unowned self] in
             await app.registerPushToken(
-                token: deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+                token: deviceToken
             )
         }
     }
