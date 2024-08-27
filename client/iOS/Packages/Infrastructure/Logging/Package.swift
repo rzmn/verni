@@ -14,11 +14,9 @@ let package = Package(
             targets: ["Logging"]
         ),
     ],
-    dependencies: [],
     targets: [
         .target(
             name: "Logging",
-            dependencies: [],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
