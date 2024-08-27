@@ -1,7 +1,5 @@
-import Networking
-
 public protocol ApiService {
-    func run<Request: NetworkRequest, Response: Decodable>(
+    func run<Request: ApiServiceRequest, Response: Decodable>(
         request: Request
     ) async -> Result<Response, ApiServiceError>
 }

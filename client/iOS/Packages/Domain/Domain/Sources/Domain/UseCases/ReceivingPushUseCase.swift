@@ -1,6 +1,18 @@
 import Foundation
 import UserNotifications
 
+public struct PushContent {
+    public let title: String
+    public let subtitle: String
+    public let body: String
+
+    public init(title: String, subtitle: String, body: String) {
+        self.title = title
+        self.subtitle = subtitle
+        self.body = body
+    }
+}
+
 public protocol ReceivingPushUseCase {
-    func process(request: UNNotificationRequest) async -> UNNotificationContent
+    func process(rawPushPayload: [AnyHashable: Any]) async -> PushContent?
 }

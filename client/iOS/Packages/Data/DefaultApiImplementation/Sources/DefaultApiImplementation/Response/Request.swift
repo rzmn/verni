@@ -1,29 +1,41 @@
-import Networking
+import ApiService
 import Api
 internal import Base
 
-struct Request: NetworkRequest, CustomStringConvertible {
+struct AnyApiServiceRequest: ApiServiceRequest, CustomStringConvertible {
+    let parameters: [String: String]
     let path: String
     private(set) var headers: [String : String]
-    let httpMethod: Networking.HttpMethod
+    let httpMethod: String
 
-    init(method: any ApiMethod) {
-        self.init(path: method.path, httpMethod: method.method)
-    }
-
-    init(path: String, headers: [String: String] = [:], httpMethod: Api.HttpMethod) {
+    init(
+        path: String,
+        headers: [String: String] = [:],
+        parameters: [String: String],
+        httpMethod: HttpMethod
+    ) {
         self.path = path
         self.headers = headers
+        self.parameters = parameters
         switch httpMethod {
         case .put:
-            self.httpMethod = .put
+            self.httpMethod = "PUT"
         case .post:
-            self.httpMethod = .post
+            self.httpMethod = "POST"
         case .get:
-            self.httpMethod = .get
+            self.httpMethod =  "GET"
         case .delete:
-            self.httpMethod = .delete
+            self.httpMethod = "DELETE"
         }
+    }
+
+    init<T: ApiMethod>(method: T, parameters: [String: String] = [:]) {
+        self = Self(
+            path: method.path,
+            headers: [:],
+            parameters: parameters,
+            httpMethod: method.method
+        )
     }
 
     mutating func setHeader(key: String, value: String) {
@@ -31,6 +43,6 @@ struct Request: NetworkRequest, CustomStringConvertible {
     }
 
     var description: String {
-        "<m=\(httpMethod.rawValue) p=\(path) h=\(headers.mapValues { v in v.starts(with: "Bearer") ? "\(v.prefix("Bearer".count + 4)).."  : v })>"
+        "<m=\(httpMethod) p=\(path) h=\(headers.mapValues { v in v.starts(with: "Bearer") ? "\(v.prefix("Bearer".count + 4)).."  : v })>"
     }
 }

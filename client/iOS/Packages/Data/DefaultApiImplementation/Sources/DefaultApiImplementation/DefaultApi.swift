@@ -1,8 +1,8 @@
 import ApiService
-import Networking
 import DataTransferObjects
 import Api
 import Combine
+import Foundation
 internal import Base
 
 class DefaultApi: ApiProtocol {
@@ -10,9 +10,11 @@ class DefaultApi: ApiProtocol {
         case internalError
     }
     private let service: ApiService
+    private let encoder: JSONEncoder
 
     public init(service: ApiService) {
         self.service = service
+        encoder = JSONEncoder()
     }
 }
 
@@ -31,8 +33,12 @@ extension DefaultApi {
     ) async -> LongPollResult<[Query.Update]>
     where Query: LongPollQuery, Query.Update: Decodable {
         let result = await service.run(
-            request: Request(
-                path: "\(query.method)?timeout=\(longPollTimeout)&category=\(query.eventId)",
+            request: AnyApiServiceRequest(
+                path: query.method,
+                parameters: [
+                    "timeout": "\(longPollTimeout)",
+                    "category": query.eventId
+                ], 
                 httpMethod: .get
             )
         ) as Result<LongPollResultDto<Query.Update>, ApiServiceError>
@@ -67,16 +73,28 @@ extension DefaultApi {
         method: Method
     ) async -> ApiResult<Method.Response>
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters: Encodable {
-        mapApiResponse(
-            await service.run(
-                request: RequestWithParameters(
-                    request: Request(
-                        method: method
-                    ),
-                    parameters: method.parameters
-                )
-            ) as ApiServiceResponse<Method.Response>
-        )
+        if case .get = method.method {
+            let request: ApiServiceRequest
+            switch await createRequestFromGetMethod(method: method) {
+            case .success(let success):
+                request = success
+            case .failure(let failure):
+                return .failure(failure)
+            }
+            let response: ApiServiceResponse<Method.Response> = await service.run(request: request)
+            return mapApiResponse(response)
+        } else {
+            return mapApiResponse(
+                await service.run(
+                    request: AnyApiServiceRequestWithBody(
+                        request: AnyApiServiceRequest(
+                            method: method
+                        ),
+                        body: method.path
+                    )
+                ) as ApiServiceResponse<Method.Response>
+            )
+        }
     }
 
     func run<Method>(
@@ -85,7 +103,7 @@ extension DefaultApi {
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters == NoParameters {
         mapApiResponse(
             await service.run(
-                request: Request(method: method)
+                request: AnyApiServiceRequest(method: method)
             ) as ApiServiceResponse<Method.Response>
         )
     }
@@ -94,14 +112,28 @@ extension DefaultApi {
         method: Method
     ) async -> ApiResult<Void>
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable {
-        mapApiResponse(
-            await service.run(
-                request: RequestWithParameters(
-                    request: Request(method: method),
-                    parameters: method.parameters
-                )
-            ) as ApiServiceResultVoid
-        )
+        if case .get = method.method {
+            let request: ApiServiceRequest
+            switch await createRequestFromGetMethod(method: method) {
+            case .success(let success):
+                request = success
+            case .failure(let failure):
+                return .failure(failure)
+            }
+            let response: ApiServiceResultVoid = await service.run(request: request)
+            return mapApiResponse(response)
+        } else {
+            return mapApiResponse(
+                await service.run(
+                    request: AnyApiServiceRequestWithBody(
+                        request: AnyApiServiceRequest(
+                            method: method
+                        ),
+                        body: method.path
+                    )
+                ) as ApiServiceResultVoid
+            )
+        }
     }
 
     private func mapApiResponse<R: ApiResponse>(_ response: Result<R, ApiServiceError>) -> ApiResult<R.Success> {
@@ -125,5 +157,35 @@ extension DefaultApi {
                 return .failure(.api(.tokenExpired, description: nil))
             }
         }
+    }
+
+    private func createRequestFromGetMethod<Method>(
+        method: Method
+    ) async -> Result<ApiServiceRequest, ApiError>
+    where Method: ApiMethod, Method.Parameters: Encodable {
+        let encoded: Data
+        do {
+            encoded = try encoder.encode(method.parameters)
+        } catch {
+            return .failure(.internalError(error))
+        }
+        guard let data = String(
+            data: encoded,
+            encoding: .utf8
+        ) else {
+            return .failure(
+                .internalError(
+                    InternalError.error("cannot build utf8 string from \(encoded)", underlying: nil)
+                )
+            )
+        }
+        return .success(
+            AnyApiServiceRequest(
+                method: method,
+                parameters: [
+                    "data": data
+                ]
+            )
+        )
     }
 }

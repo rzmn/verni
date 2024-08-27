@@ -88,7 +88,8 @@ extension DefaultDependenciesAssembly {
         DefaultNetworkServiceFactory(
             logger: .shared.with(
                 prefix: "[net] "
-            ),
+            ), 
+            session: .shared,
             endpoint: Endpoint(
                 path: apiEndpoint
             )

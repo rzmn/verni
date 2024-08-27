@@ -35,14 +35,13 @@ public struct NetworkServiceResponse {
 public protocol NetworkRequest {
     var path: String { get }
     var headers: [String: String] { get }
-    var httpMethod: HttpMethod { get }
-
-    mutating func setHeader(key: String, value: String)
+    var parameters: [String: String] { get }
+    var httpMethod: String { get }
 }
 
-public protocol NetworkRequestWithParameters: NetworkRequest {
-    associatedtype Parameters: Encodable
-    var parameters: Parameters { get }
+public protocol NetworkRequestWithBody: NetworkRequest {
+    associatedtype Body: Encodable
+    var body: Body { get }
 }
 
 public protocol NetworkService {

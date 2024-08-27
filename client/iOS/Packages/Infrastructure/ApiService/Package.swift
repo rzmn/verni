@@ -14,13 +14,9 @@ let package = Package(
             targets: ["ApiService"]
         ),
     ],
-    dependencies: [
-        .package(path: "../Networking")
-    ],
     targets: [
         .target(
             name: "ApiService",
-            dependencies: ["Networking"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

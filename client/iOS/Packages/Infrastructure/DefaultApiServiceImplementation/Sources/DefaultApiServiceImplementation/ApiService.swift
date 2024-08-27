@@ -23,7 +23,7 @@ actor DefaultApiService {
 }
 
 extension DefaultApiService: ApiService {
-    public func run<Request: NetworkRequest, Response: Decodable>(
+    public func run<Request: ApiServiceRequest, Response: Decodable>(
         request: Request
     ) async -> Result<Response, ApiServiceError> {
         await run(request: request, tryToRefreshTokenIfNeeded: true)
@@ -54,7 +54,7 @@ extension DefaultApiService: ApiService {
         }
     }
 
-    public func run<Request: NetworkRequest, Response: Decodable>(
+    public func run<Request: ApiServiceRequest, Response: Decodable>(
         request: Request,
         tryToRefreshTokenIfNeeded: Bool
     ) async -> Result<Response, ApiServiceError> {
@@ -76,7 +76,7 @@ extension DefaultApiService: ApiService {
             }
         }
         logI { "\(request): running request" }
-        switch await networkService.run(request) {
+        switch await networkService.run(NetworkRequestAdapter(request)) {
         case .success(let networkServiceResponse):
             logI { "\(request): request succeeded with response \(networkServiceResponse)" }
             do {

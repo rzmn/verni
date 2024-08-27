@@ -26,23 +26,20 @@ public class DefaultReceivingPushUseCase {
 }
 
 extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
-    public func process(request: UNNotificationRequest) async -> UNNotificationContent {
-        guard let content = request.content.mutableCopy() as? UNMutableNotificationContent else {
-            return request.content
-        }
+    public func process(rawPushPayload: [AnyHashable: Any]) async -> PushContent? {
         let userData: Data
         do {
-            userData = try JSONSerialization.data(withJSONObject: request.content.userInfo)
+            userData = try JSONSerialization.data(withJSONObject: rawPushPayload)
         } catch {
-            logE { "failed to convert userData into data due error: \(error). userData=\(request.content.userInfo)" }
-            return content
+            logE { "failed to convert userData into data due error: \(error). userData=\(rawPushPayload)" }
+            return nil
         }
         let payload: PushPayload
         do {
             payload = try decoder.decode(PushPayload.self, from: userData)
         } catch {
-            logE { "failed to convert push data due error: \(error). userData=\(request.content.userInfo)" }
-            return content
+            logE { "failed to convert push data due error: \(error). userData=\(rawPushPayload)" }
+            return nil
         }
         switch payload {
         case .friendRequestHasBeenAccepted(let payload):
@@ -55,16 +52,17 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 users = result
             case .failure(let error):
                 logE { "failed to get info error: \(error)" }
-                return request.content
+                return nil
             }
             guard let user = users.first else {
                 logE { "user does not exists" }
-                return request.content
+                return nil
             }
-            content.title = "friendRequestHasBeenAccepted"
-            content.subtitle = "subtitle!!"
-            content.body = "from: \(user.displayName)"
-            return content
+            return PushContent(
+                title: "friendRequestHasBeenAccepted",
+                subtitle: "subtitle!!",
+                body: "from: \(user.displayName)"
+            )
         case .gotFriendRequest(let payload):
             Task.detached {
                 await self.friendsRepository.refreshFriends(ofKind: .all)
@@ -75,16 +73,17 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 users = result
             case .failure(let error):
                 logE { "failed to get info error: \(error)" }
-                return request.content
+                return nil
             }
             guard let user = users.first else {
                 logE { "user does not exists" }
-                return request.content
+                return nil
             }
-            content.title = "gotFriendRequest"
-            content.subtitle = "subtitle!!"
-            content.body = "from: \(user.displayName)"
-            return content
+            return PushContent(
+                title: "gotFriendRequest",
+                subtitle: "subtitle!!",
+                body: "from: \(user.displayName)"
+            )
         case .newExpenseReceived(let payload):
             Task.detached {
                 await [
@@ -98,12 +97,13 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 spending = result
             case .failure(let error):
                 logE { "failed to get info error: \(error)" }
-                return request.content
+                return nil
             }
-            content.title = "newExpenseReceived"
-            content.subtitle = "subtitle!!"
-            content.body = "\(spending.details)"
-            return content
+            return PushContent(
+                title: "newExpenseReceived",
+                subtitle: "subtitle!!",
+                body: "\(spending.details)"
+            )
         }
     }
 }
