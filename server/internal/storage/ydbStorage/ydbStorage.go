@@ -1834,8 +1834,9 @@ WHERE
 					deal.Spendings = make([]storage.Spending, 2)
 					var uid1 string
 					var uid2 string
+					var did string
 					err = res.Scan(
-						&deal.Id,
+						&did,
 						&uid1,
 						&deal.Spendings[0].Cost,
 						&uid2,
@@ -1847,6 +1848,7 @@ WHERE
 					if err != nil {
 						return err
 					}
+					deal.Id = storage.DealId(did)
 					deal.Spendings[0].UserId = storage.UserId(uid1)
 					deal.Spendings[1].UserId = storage.UserId(uid2)
 					deals = append(deals, deal)

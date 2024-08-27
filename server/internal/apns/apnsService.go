@@ -57,9 +57,10 @@ func (s *PushNotificationSender) FriendRequestHasBeenAccepted(token string, targ
 	payload := Payload{
 		Target: target,
 	}
+	mutable := 1
 	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{
-			MutableContent: nil,
+			MutableContent: &mutable,
 			Alert: PushPayloadAlert{
 				Title:    "Friend request has been accepted",
 				Subtitle: nil,
@@ -90,9 +91,10 @@ func (s *PushNotificationSender) GotFriendRequest(token string, sender storage.U
 	payload := Payload{
 		Sender: sender,
 	}
+	mutable := 1
 	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{
-			MutableContent: nil,
+			MutableContent: &mutable,
 			Alert: PushPayloadAlert{
 				Title:    "Got Friend Request",
 				Subtitle: nil,
@@ -133,9 +135,10 @@ func (s *PushNotificationSender) NewExpenseReceived(token string, deal storage.I
 		AuthorId: author,
 		Cost:     cost,
 	}
+	mutable := 1
 	payloadString, err := json.Marshal(Push[Payload]{
 		Aps: PushPayload{
-			MutableContent: nil,
+			MutableContent: &mutable,
 			Alert: PushPayloadAlert{
 				Title:    "New Expense Received",
 				Subtitle: nil,
