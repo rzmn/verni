@@ -90,7 +90,7 @@ extension DefaultApi {
                         request: AnyApiServiceRequest(
                             method: method
                         ),
-                        body: method.path
+                        body: method.parameters
                     )
                 ) as ApiServiceResponse<Method.Response>
             )
@@ -129,7 +129,7 @@ extension DefaultApi {
                         request: AnyApiServiceRequest(
                             method: method
                         ),
-                        body: method.path
+                        body: method.parameters
                     )
                 ) as ApiServiceResultVoid
             )
