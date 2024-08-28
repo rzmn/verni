@@ -20,11 +20,23 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
+        .package(path: "../../Infrastructure/Logging"),
+        .package(path: "../../Infrastructure/Base"),
     ],
     targets: [
         .target(
             name: "DefaultReceivingPushUseCaseImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
+            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage", "Logging", "Base"],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
+        ),
+        .testTarget(
+            name: "DefaultReceivingPushUseCaseImplementationTests",
+            dependencies: ["DefaultReceivingPushUseCaseImplementation", "Domain", "Api", "Logging", "Base"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

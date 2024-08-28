@@ -1,5 +1,12 @@
 import Domain
 
+struct Push: Decodable {
+    enum CodingKeys: String, CodingKey {
+        case payload = "d"
+    }
+    let payload: PushPayload
+}
+
 enum PushPayload {
     case friendRequestHasBeenAccepted(FriendRequestHasBeenAccepted)
     case gotFriendRequest(GotFriendRequest)
@@ -9,6 +16,7 @@ enum PushPayload {
 extension PushPayload: Decodable {
     enum CodingKeys: String, CodingKey {
         case type = "t"
+        case payload = "p"
     }
 
     enum NotificationType: Int, Codable {
@@ -23,15 +31,15 @@ extension PushPayload: Decodable {
         switch type {
         case .friendRequestHasBeenAccepted:
             self = .friendRequestHasBeenAccepted(
-                try FriendRequestHasBeenAccepted(from: decoder)
+                try container.decode(FriendRequestHasBeenAccepted.self, forKey: .payload)
             )
         case .gotFriendRequest:
             self = .gotFriendRequest(
-                try GotFriendRequest(from: decoder)
+                try container.decode(GotFriendRequest.self, forKey: .payload)
             )
         case .newExpenseReceived:
             self = .newExpenseReceived(
-                try NewExpenseReceived(from: decoder)
+                try container.decode(NewExpenseReceived.self, forKey: .payload)
             )
         }
     }

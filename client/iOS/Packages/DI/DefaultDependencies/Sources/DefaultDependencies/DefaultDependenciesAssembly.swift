@@ -1,5 +1,6 @@
 import DI
 import Domain
+import Foundation
 internal import AuthSession
 internal import Api
 internal import ApiService
@@ -114,7 +115,11 @@ extension DefaultDependenciesAssembly {
     }
 
     func persistencyFactory() -> PersistencyFactory {
-        SQLitePersistencyFactory(logger: .shared.with(prefix: "[db] "))
+        SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[db] "),
+            appFolder: FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: "group.com.rzmn.accountydev.app"
+            ).unsafelyUnwrapped
+        )
     }
 }
-

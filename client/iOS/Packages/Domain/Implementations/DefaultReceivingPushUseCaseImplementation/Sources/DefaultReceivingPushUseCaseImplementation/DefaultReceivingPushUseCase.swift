@@ -2,6 +2,7 @@ import Domain
 import Foundation
 import Logging
 import UserNotifications
+internal import Base
 
 public class DefaultReceivingPushUseCase {
     public let logger: Logger
@@ -26,20 +27,20 @@ public class DefaultReceivingPushUseCase {
 }
 
 extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
-    public func process(rawPushPayload: [AnyHashable: Any]) async -> PushContent? {
+    public func process(rawPushPayload: [AnyHashable: Any]) async -> Result<PushContent, ProcessPushError> {
         let userData: Data
         do {
             userData = try JSONSerialization.data(withJSONObject: rawPushPayload)
         } catch {
             logE { "failed to convert userData into data due error: \(error). userData=\(rawPushPayload)" }
-            return nil
+            return .failure(.internalError(InternalError.error("failed to convert userData into data", underlying: error)))
         }
         let payload: PushPayload
         do {
-            payload = try decoder.decode(PushPayload.self, from: userData)
+            payload = try decoder.decode(Push.self, from: userData).payload
         } catch {
             logE { "failed to convert push data due error: \(error). userData=\(rawPushPayload)" }
-            return nil
+            return .failure(.internalError(InternalError.error("failed to convert push data to typed data", underlying: error)))
         }
         switch payload {
         case .friendRequestHasBeenAccepted(let payload):
@@ -52,16 +53,18 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 users = result
             case .failure(let error):
                 logE { "failed to get info error: \(error)" }
-                return nil
+                return .failure(.internalError(InternalError.error("failed to get user info", underlying: error)))
             }
             guard let user = users.first else {
                 logE { "user does not exists" }
-                return nil
+                return .failure(.internalError(InternalError.error("user does not exists", underlying: nil)))
             }
-            return PushContent(
-                title: "friendRequestHasBeenAccepted",
-                subtitle: "subtitle!!",
-                body: "from: \(user.displayName)"
+            return .success(
+                PushContent(
+                    title: "friendRequestHasBeenAccepted",
+                    subtitle: "subtitle!!",
+                    body: "from: \(user.displayName)"
+                )
             )
         case .gotFriendRequest(let payload):
             Task.detached {
@@ -73,16 +76,18 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 users = result
             case .failure(let error):
                 logE { "failed to get info error: \(error)" }
-                return nil
+                return .failure(.internalError(InternalError.error("failed to get user info", underlying: error)))
             }
             guard let user = users.first else {
                 logE { "user does not exists" }
-                return nil
+                return .failure(.internalError(InternalError.error("user does not exists", underlying: nil)))
             }
-            return PushContent(
-                title: "gotFriendRequest",
-                subtitle: "subtitle!!",
-                body: "from: \(user.displayName)"
+            return .success(
+                PushContent(
+                    title: "gotFriendRequest",
+                    subtitle: "subtitle!!",
+                    body: "from: \(user.displayName)"
+                )
             )
         case .newExpenseReceived(let payload):
             Task.detached {
@@ -97,12 +102,14 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 spending = result
             case .failure(let error):
                 logE { "failed to get info error: \(error)" }
-                return nil
+                return .failure(.internalError(InternalError.error("failed to get spending info", underlying: error)))
             }
-            return PushContent(
-                title: "newExpenseReceived",
-                subtitle: "subtitle!!",
-                body: "\(spending.details)"
+            return .success(
+                PushContent(
+                    title: "newExpenseReceived",
+                    subtitle: "subtitle!!",
+                    body: "\(spending.details)"
+                )
             )
         }
     }

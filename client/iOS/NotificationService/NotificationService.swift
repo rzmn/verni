@@ -1,5 +1,6 @@
 import UserNotifications
 import DefaultDependencies
+import Domain
 
 class NotificationService: UNNotificationServiceExtension {
     override func didReceive(
@@ -27,8 +28,15 @@ class NotificationService: UNNotificationServiceExtension {
         guard case .success(let session) = awakeResult else {
             return
         }
-        let pushContent = await session.receivingPushUseCase().process(rawPushPayload: content.userInfo)
-        guard let pushContent else {
+        let pushProcessResult = await session
+            .receivingPushUseCase()
+            .process(rawPushPayload: content.userInfo)
+        let pushContent: PushContent
+        switch pushProcessResult {
+        case .success(let result):
+            pushContent = result
+        case .failure(let error):
+            content.body = error.description
             return
         }
         content.title = pushContent.title

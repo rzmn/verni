@@ -10,13 +10,15 @@ internal import SQLite
 
 open class SQLitePersistencyFactory {
     public let logger: Logger
+    private let appFolder: URL
 
-    public init(logger: Logger) {
+    public init(logger: Logger, appFolder: URL) {
         self.logger = logger
+        self.appFolder = appFolder
     }
 
     open var dbDirectory: URL {
-        URL.documentsDirectory.appending(component: "accounty_db")
+        appFolder.appending(component: "accounty_db")
     }
 }
 
