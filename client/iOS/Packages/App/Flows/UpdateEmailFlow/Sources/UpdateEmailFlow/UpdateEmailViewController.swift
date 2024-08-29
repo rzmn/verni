@@ -1,7 +1,7 @@
 import UIKit
 import AppBase
 
-class UpdateEmailViewController: ViewController<UpdateEmailView, UpdateEmailFlow> {
+class UpdateEmailViewController: ViewController<UpdateEmailView, UpdateEmailViewActions> {
 
 }
 

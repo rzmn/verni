@@ -1,7 +1,7 @@
 import UIKit
 import AppBase
 
-class SignInViewController: ViewController<SignInView, SignInFlow> {
+class SignInViewController: ViewController<SignInView, SignInViewActions> {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)

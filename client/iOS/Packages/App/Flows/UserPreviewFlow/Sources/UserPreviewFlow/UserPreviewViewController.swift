@@ -1,20 +1,21 @@
 import AppBase
 import UIKit
 import Combine
+internal import Base
 
-class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewFlow> {
+class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        model.refresh()
+        model.handle(.onViewAppeared)
     }
 
     private func render(state: UserPreviewState) {
@@ -25,41 +26,36 @@ class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewFlow
             case .outgoing:
                 return [
                     UIAction(
-                        title: "friend_req_rollback".localized
-                    ) { [unowned self] _ in
-                        model.rollbackRequest()
-                    }
+                        title: "friend_req_rollback".localized,
+                        handler: curry(model.handle)(.onRollbackFriendRequestTap) • nop
+                    ),
                 ]
             case .incoming:
                 return [
                     UIAction(
-                        title: "friend_req_accept".localized
-                    ) { [unowned self] _ in
-                        model.acceptRequest()
-                    },
+                        title: "friend_req_accept".localized,
+                        handler: curry(model.handle)(.onAcceptFriendRequestTap) • nop
+                    ),
                     UIAction(
                         title: "friend_req_reject".localized,
-                        attributes: [.destructive]
-                    ) { [unowned self] _ in
-                        model.rejectRequest()
-                    }
+                        attributes: [.destructive],
+                        handler: curry(model.handle)(.onRejectFriendRequestTap) • nop
+                    ),
                 ]
             case .friend:
                 return [
                     UIAction(
                         title: "friend_unfriend".localized,
-                        attributes: [.destructive]
-                    ) { [unowned self] _ in
-                        model.unfriend()
-                    }
+                        attributes: [.destructive],
+                        handler: curry(model.handle)(.onUnfriendTap) • nop
+                    ),
                 ]
             case .no:
                 return [
                     UIAction(
-                        title: "friend_req_send".localized
-                    ) { [unowned self] _ in
-                        model.sendRequest()
-                    }
+                        title: "friend_req_send".localized,
+                        handler: curry(model.handle)(.onSendFriendRequestTap) • nop
+                    ),
                 ]
             }
         }()

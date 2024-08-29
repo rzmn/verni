@@ -4,15 +4,19 @@ import DI
 import Domain
 
 public actor UserPreviewFlow {
-    @MainActor var subject: Published<UserPreviewState>.Publisher {
-        viewModel.$state
+    private var _presenter: UserPreviewPresenter?
+    private func presenter() async -> UserPreviewPresenter {
+        guard let _presenter else {
+            let presenter = await UserPreviewPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private let viewModel: UserPreviewViewModel
     private let router: AppRouter
     private let friendStatusInteractions: FriendInteractionsUseCase
     private let spendingsRepository: SpendingsRepository
-    private lazy var presenter = UserPreviewFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter, user: User) async {
@@ -30,6 +34,8 @@ public actor UserPreviewFlow {
     }
 }
 
+// MARK: - Flow
+
 extension UserPreviewFlow: Flow {
     public enum TerminationEvent: Error {
         case canceledManually
@@ -39,7 +45,7 @@ extension UserPreviewFlow: Flow {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
             Task.detached { @MainActor in
-                await self.presenter.openUserPreview { [weak self] in
+                await self.presenter().openUserPreview { [weak self] in
                     guard let self else { return }
                     await handle(result: .canceledManually)
                 }
@@ -54,20 +60,42 @@ extension UserPreviewFlow: Flow {
         self.flowContinuation = nil
         if case .canceledManually = result {
         } else {
-            await presenter.closeUserPreview()
+            await presenter().closeUserPreview()
         }
         flowContinuation.resume(returning: result)
     }
 }
 
+// MARK: - User Actions
+
 extension UserPreviewFlow {
-    @MainActor func refresh() {
-        Task.detached {
-            await self.doRefresh()
+    private func makeActions() async -> UserPreviewViewActions {
+        await UserPreviewViewActions(state: viewModel.$state) { action in
+            Task.detached { [weak self] in
+                guard let self else { return }
+                switch action {
+                case .onViewAppeared:
+                    await refresh()
+                case .onSendFriendRequestTap:
+                    await sendFriendRequest()
+                case .onAcceptFriendRequestTap:
+                    await acceptFriendRequest()
+                case .onRejectFriendRequestTap:
+                    await rejectFriendRequest()
+                case .onRollbackFriendRequestTap:
+                    await rollbackFriendRequest()
+                case .onUnfriendTap:
+                    await unfriend()
+                }
+            }
         }
     }
+}
 
-    private func doRefresh() async {
+// MARK: - Private
+
+extension UserPreviewFlow {
+    private func refresh() async {
         let state = await viewModel.state
         let shouldShowHud: Bool
         if case .initial = state.spenginds {
@@ -76,12 +104,12 @@ extension UserPreviewFlow {
             shouldShowHud = false
         }
         if shouldShowHud {
-            await presenter.presentLoading()
+            await presenter().presentLoading()
         }
         let result = await spendingsRepository.refreshSpendingsHistory(counterparty: state.user.id)
         Task { @MainActor [unowned self] in
             if shouldShowHud {
-                await presenter.dismissLoading()
+                await presenter().dismissLoading()
             }
             switch result {
             case .success(let spendings):
@@ -128,13 +156,7 @@ extension UserPreviewFlow {
         }
     }
 
-    @MainActor func sendRequest() {
-        Task.detached {
-            await self.doSendRequest()
-        }
-    }
-
-    private func doSendRequest() async {
+    private func sendFriendRequest() async {
         let state = await viewModel.state
         switch state.user.status {
         case .friend, .incoming, .me, .outgoing:
@@ -150,26 +172,20 @@ extension UserPreviewFlow {
         case .failure(let reason):
             switch reason {
             case .alreadySent:
-                await presenter.present(hint: "alert_action_already_sent".localized)
+                await presenter().present(hint: "alert_action_already_sent".localized)
             case .haveIncoming:
-                await presenter.present(hint: "alert_action_have_incoming".localized)
+                await presenter().present(hint: "alert_action_have_incoming".localized)
             case .alreadyFriends:
-                await presenter.present(hint: "alert_action_already_friends".localized)
+                await presenter().present(hint: "alert_action_already_friends".localized)
             case .noSuchUser:
-                await presenter.presentNoSuchUser()
+                await presenter().presentNoSuchUser()
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }
 
-    @MainActor func acceptRequest() {
-        Task.detached {
-            await self.doAcceptRequest()
-        }
-    }
-
-    private func doAcceptRequest() async {
+    private func acceptFriendRequest() async {
         let state = await viewModel.state
         switch state.user.status {
         case .friend, .no, .me, .outgoing:
@@ -185,20 +201,14 @@ extension UserPreviewFlow {
         case .failure(let error):
             switch error {
             case .noSuchRequest:
-                await presenter.present(hint: "alert_action_no_such_request".localized)
+                await presenter().present(hint: "alert_action_no_such_request".localized)
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }
 
-    @MainActor func rejectRequest() {
-        Task.detached {
-            await self.doRejectRequest()
-        }
-    }
-
-    private func doRejectRequest() async {
+    private func rejectFriendRequest() async {
         let state = await viewModel.state
         switch state.user.status {
         case .friend, .no, .me, .outgoing:
@@ -214,20 +224,14 @@ extension UserPreviewFlow {
         case .failure(let error):
             switch error {
             case .noSuchRequest:
-                await presenter.present(hint: "alert_action_no_such_request".localized)
+                await presenter().present(hint: "alert_action_no_such_request".localized)
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }
 
-    @MainActor func rollbackRequest() {
-        Task.detached {
-            await self.doRollbackRequest()
-        }
-    }
-
-    private func doRollbackRequest() async {
+    private func rollbackFriendRequest() async {
         let state = await viewModel.state
         switch state.user.status {
         case .friend, .no, .me, .incoming:
@@ -243,20 +247,14 @@ extension UserPreviewFlow {
         case .failure(let error):
             switch error {
             case .noSuchRequest:
-                await presenter.presentNoSuchUser()
+                await presenter().presentNoSuchUser()
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }
 
-    @MainActor func unfriend() {
-        Task.detached {
-            await self.doUnfriend()
-        }
-    }
-
-    private func doUnfriend() async {
+    private func unfriend() async {
         let state = await viewModel.state
         switch state.user.status {
         case .incoming, .no, .me, .outgoing:
@@ -272,11 +270,11 @@ extension UserPreviewFlow {
         case .failure(let error):
             switch error {
             case .notAFriend:
-                await presenter.present(hint: "alert_action_not_a_friend".localized)
+                await presenter().present(hint: "alert_action_not_a_friend".localized)
             case .noSuchUser:
-                await presenter.present(hint: "alert_action_no_such_user".localized)
+                await presenter().present(hint: "alert_action_no_such_user".localized)
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }

@@ -13,7 +13,7 @@ private extension Placeholder.Config {
     }
 }
 
-class PickCounterpartyView: View<PickCounterpartyFlow> {
+class PickCounterpartyView: View<PickCounterpartyViewActions> {
     private let table = {
         let t = UITableView(frame: .zero, style: .insetGrouped)
         t.backgroundColor = .p.background
@@ -48,7 +48,7 @@ class PickCounterpartyView: View<PickCounterpartyFlow> {
         table.dataSource = dataSource
         table.delegate = self
         [table, emptyPlaceholder].forEach(addSubview)
-        model.subject
+        model.state
             .map { $0 as PickCounterpartyState? }
             .assign(to: \.state, on: self)
             .store(in: &subscriptions)
@@ -116,7 +116,7 @@ class PickCounterpartyView: View<PickCounterpartyFlow> {
 extension PickCounterpartyView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = items(in: sections[indexPath.section])[indexPath.row]
-        model.pick(counterparty: item)
+        model.handle(.onPickounterpartyTap(item))
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

@@ -1,30 +1,27 @@
 import AppBase
 
-class UpdateDisplayNameFlowPresenter: Presenter {
+@MainActor class UpdateDisplayNamePresenter: Presenter {
     let router: AppRouter
-    private weak var flow: UpdateDisplayNameFlow!
+    private let viewActions: UpdateDisplayNameViewActions
 
-    init(router: AppRouter, flow: UpdateDisplayNameFlow) {
+    init(router: AppRouter, actions: UpdateDisplayNameViewActions) {
         self.router = router
-        self.flow = flow
+        self.viewActions = actions
     }
 
-    @MainActor
     func presentWrongFormat() {
         router.hudFailure(description: "wrong_format_hint".localized)
     }
 
     private weak var controller: UpdateDisplayNameViewController?
-    @MainActor
     func presentDisplayNameEditing(onPop: @escaping @MainActor () async -> Void) {
-        let controller = UpdateDisplayNameViewController(model: flow)
+        let controller = UpdateDisplayNameViewController(model: viewActions)
         self.controller = controller
         controller.navigationItem.largeTitleDisplayMode = .never
         controller.onPop = onPop
         router.push(controller)
     }
 
-    @MainActor
     func dismissDisplayNameEditing() async {
         await router.navigationPop(viewController: controller)
     }

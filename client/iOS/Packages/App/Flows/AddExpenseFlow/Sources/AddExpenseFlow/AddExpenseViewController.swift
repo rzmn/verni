@@ -1,7 +1,7 @@
 import AppBase
 import UIKit
 
-class AddExpenseViewController: ViewController<AddExpenseView, AddExpenseFlow> {
+class AddExpenseViewController: ViewController<AddExpenseView, AddExpenseViewActions> {
     override func viewDidLoad() {
         super.viewDidLoad()
         isModalInPresentation = true
@@ -21,11 +21,11 @@ class AddExpenseViewController: ViewController<AddExpenseView, AddExpenseFlow> {
     }
 
     @objc private func save() {
-        model.addExpense()
+        model.handle(.onDoneTap)
     }
 
     @objc private func cancel() {
-        model.cancel()
+        model.handle(.onCancelTap)
     }
 }
 

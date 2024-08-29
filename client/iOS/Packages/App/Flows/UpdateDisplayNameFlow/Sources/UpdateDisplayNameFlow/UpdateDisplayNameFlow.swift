@@ -4,14 +4,18 @@ import DI
 import Combine
 
 public actor UpdateDisplayNameFlow {
-    @MainActor var subject: Published<UpdateDisplayNameState>.Publisher {
-        viewModel.$state
+    private var _presenter: UpdateDisplayNamePresenter?
+    private func presenter() async -> UpdateDisplayNamePresenter {
+        guard let _presenter else {
+            let presenter = await UpdateDisplayNamePresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private let router: AppRouter
     private let viewModel: UpdateDisplayNameViewModel
     private let profileEditing: ProfileEditingUseCase
-    private lazy var presenter = UpdateDisplayNameFlowPresenter(router: router, flow: self)
     private var subscriptions = Set<AnyCancellable>()
 
     private var flowContinuation: Continuation?
@@ -41,7 +45,7 @@ extension UpdateDisplayNameFlow: Flow {
     }
 
     private func startFlow() async {
-        await self.presenter.presentDisplayNameEditing { [weak self] in
+        await presenter().presentDisplayNameEditing { [weak self] in
             guard let self else { return }
             await handle(event: .canceled)
         }
@@ -54,7 +58,7 @@ extension UpdateDisplayNameFlow: Flow {
         self.flowContinuation = nil
         if case .canceled = event {
         } else {
-            await presenter.dismissDisplayNameEditing()
+            await presenter().dismissDisplayNameEditing()
         }
         flowContinuation.resume(returning: event)
     }
@@ -63,13 +67,17 @@ extension UpdateDisplayNameFlow: Flow {
 // MARK: - User Actions
 
 extension UpdateDisplayNameFlow {
-    @MainActor func update(displayName: String) {
-        viewModel.displayName = displayName
-    }
-
-    @MainActor func confirmDisplayName() {
-        Task.detached {
-            await self.doConfirmDisplayName()
+    private func makeActions() async -> UpdateDisplayNameViewActions {
+        await UpdateDisplayNameViewActions(state: viewModel.$state) { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .onDisplayNameTextChanged(let text):
+                viewModel.displayName = text
+            case .onConfirmTap:
+                Task.detached {
+                    await self.confirmDisplayName()
+                }
+            }
         }
     }
 }
@@ -77,23 +85,23 @@ extension UpdateDisplayNameFlow {
 // MARK: - Private
 
 extension UpdateDisplayNameFlow {
-    private func doConfirmDisplayName() async {
+    private func confirmDisplayName() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter.errorHaptic()
+            return await presenter().errorHaptic()
         }
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         switch await profileEditing.setDisplayName(state.displayName) {
         case .success:
-            await presenter.successHaptic()
-            await presenter.presentSuccess()
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
             await handle(event: .successfullySet)
         case .failure(let reason):
             switch reason {
             case .wrongFormat:
-                await presenter.presentWrongFormat()
+                await presenter().presentWrongFormat()
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }

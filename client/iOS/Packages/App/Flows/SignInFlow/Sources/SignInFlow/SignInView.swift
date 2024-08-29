@@ -6,7 +6,7 @@ internal import DesignSystem
 
 private let appIconSize: CGFloat = 158
 private let appIconBottomPadding: CGFloat = 48
-class SignInView: View<SignInFlow> {
+class SignInView: View<SignInViewActions> {
     private let appIcon = {
         let view = UIImageView()
         view.image = UIImage(named: "logo")
@@ -49,29 +49,27 @@ class SignInView: View<SignInFlow> {
     override func setupView() {
         backgroundColor = .p.background
         [email, password, close, confirm, createAccount, appIcon].forEach(addSubview)
-        close.addAction({ [weak model] in
-            model?.closeSignIn()
-        }, for: .touchUpInside)
-        email.addAction({ [weak model, weak email] in
-            guard let model, let email else { return }
-            model.update(email: email.text ?? "")
-        }, for: .editingChanged)
-        password.addAction({ [weak model, weak password] in
-            guard let model, let password else { return }
-            model.update(password: password.text ?? "")
-        }, for: .editingChanged)
-        confirm.addAction({ [weak self] in
-            self?.endEditing(true)
-            self?.model.signIn()
-        }, for: .touchUpInside)
-        createAccount.addAction({ [weak self] in
-            self?.endEditing(true)
-            self?.model.createAccount()
-        }, for: .touchUpInside)
+        close.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onSignInCloseTap))
+            .store(in: &subscriptions)
+        email.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • SignInViewActionType.onEmailTextUpdated)
+            .store(in: &subscriptions)
+        password.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • SignInViewActionType.onPasswordTextUpdated)
+            .store(in: &subscriptions)
+        confirm.tapPublisher
+            .sink(receiveValue: weak(self, type(of: self).onConfirmTap))
+            .store(in: &subscriptions)
+        createAccount.tapPublisher
+            .sink(receiveValue: weak(self, type(of: self).onCreateAccountTap))
+            .store(in: &subscriptions)
         email.delegate = self
         password.delegate = self
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier
@@ -157,6 +155,16 @@ class SignInView: View<SignInFlow> {
                 enabled: state.canConfirm
             )
         )
+    }
+
+    private func onConfirmTap() {
+        endEditing(true)
+        model.handle(.onSignInTap)
+    }
+
+    private func onCreateAccountTap() {
+        endEditing(true)
+        model.handle(.onCreateAccountTap)
     }
 
     @objc private func onTap() {

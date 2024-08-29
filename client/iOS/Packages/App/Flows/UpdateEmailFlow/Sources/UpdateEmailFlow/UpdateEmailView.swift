@@ -2,8 +2,9 @@ import AppBase
 import UIKit
 import Combine
 internal import DesignSystem
+internal import Base
 
-class UpdateEmailView: View<UpdateEmailFlow> {
+class UpdateEmailView: View<UpdateEmailViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     private let email = {
@@ -37,17 +38,17 @@ class UpdateEmailView: View<UpdateEmailFlow> {
         backgroundColor = .p.background
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         enterCode.delegate = self
-        resendCode.addAction({ [weak model] in
-            model?.resendCode()
-        }, for: .touchUpInside)
-        confirmEmail.addAction({ [weak self] in
-            self?.endEditing(true)
-            self?.model.confirm()
-        }, for: .touchUpInside)
-        enterCode.addAction({ [weak model, weak enterCode] in
-            model?.update(code: enterCode?.text ?? "")
-        }, for: .editingChanged)
-        model.subject
+        resendCode.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onResendTap))
+            .store(in: &subscriptions)
+        confirmEmail.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onConfirmTap))
+            .store(in: &subscriptions)
+        enterCode.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • UpdateEmailViewActionType.onConfirmationCodeTextChanged)
+            .store(in: &subscriptions)
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier
@@ -67,6 +68,11 @@ class UpdateEmailView: View<UpdateEmailFlow> {
                     animations: layoutIfNeeded
                 )
             }.store(in: &subscriptions)
+    }
+
+    private func onConfirmTap() {
+        endEditing(true)
+        model.handle(.onConfirmTap)
     }
 
     @objc private func onTap() {

@@ -5,8 +5,7 @@ internal import QRCode
 public class DefaultQRInviteUseCase: QRInviteUseCase {
     public init() {}
 
-    @MainActor
-    public func createView(background: UIColor, tint: UIColor, url: String) async throws -> UIView {
+    @MainActor public func createView(background: UIColor, tint: UIColor, url: String) async throws -> UIView {
         let image = await Task {
             try QRCode.build
                 .text(url)

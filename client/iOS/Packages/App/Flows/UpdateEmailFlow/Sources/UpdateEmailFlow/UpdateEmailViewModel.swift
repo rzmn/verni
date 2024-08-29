@@ -2,8 +2,7 @@ import Combine
 import Foundation
 import Domain
 
-@MainActor
-public class UpdateEmailViewModel {
+@MainActor public class UpdateEmailViewModel {
     @Published var state: UpdateEmailState
 
     @Published var confirmationCode: String

@@ -1,7 +1,8 @@
 import AppBase
 import UIKit
+internal import Base
 
-class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
+class FriendsViewController: ViewController<FriendsView, FriendsViewActions> {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -12,9 +13,7 @@ class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
                     UIAction(
                         title: "friends_add_by_qr".localized,
                         image: UIImage(systemName: "qrcode.viewfinder"),
-                        handler: { [unowned self] _ in
-                            model.addViaQr()
-                        }
+                        handler: curry(model.handle)(.onAddViaQrTap) • nop
                     )
                 ]
             )
@@ -23,7 +22,7 @@ class FriendsViewController: ViewController<FriendsView, FriendsFlow> {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        model.refresh()
+        model.handle(.onViewAppeared)
     }
 }
 

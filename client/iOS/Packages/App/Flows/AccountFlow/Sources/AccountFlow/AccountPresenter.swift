@@ -1,12 +1,12 @@
 import AppBase
 import UIKit
 
-class AccountFlowPresenter: Presenter {
+@MainActor class AccountPresenter: Presenter {
     let router: AppRouter
-    private unowned var flow: AccountFlow
+    private let viewAcions: AccountViewActions
 
     lazy var tabViewController = {
-        let controller = AccountViewController(model: flow)
+        let controller = AccountViewController(model: viewAcions)
         let navigationController = NavigationController(
             rootViewController: controller
         )
@@ -16,8 +16,8 @@ class AccountFlowPresenter: Presenter {
         return navigationController
     }()
 
-    init(router: AppRouter, flow: AccountFlow) {
+    init(router: AppRouter, actions: AccountViewActions) {
         self.router = router
-        self.flow = flow
+        self.viewAcions = actions
     }
 }

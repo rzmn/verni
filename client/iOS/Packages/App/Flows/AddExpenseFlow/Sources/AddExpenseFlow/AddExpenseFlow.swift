@@ -9,12 +9,16 @@ internal import PickCounterpartyFlow
 internal import Logging
 
 public actor AddExpenseFlow {
-    @MainActor var subject: Published<AddExpenseState>.Publisher {
-        viewModel.$state
+    private var _presenter: AddExpensePresenter?
+    private func presenter() async -> AddExpensePresenter {
+        guard let _presenter else {
+            let presenter = await AddExpensePresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
     private let viewModel: AddExpenseViewModel
-
-    private lazy var presenter = AddExpenseFlowPresenter(router: router, flow: self)
     private let spendingInteractions: SpendingInteractionsUseCase
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
@@ -47,7 +51,7 @@ extension AddExpenseFlow: Flow {
     }
 
     private func startFlow() async {
-        await presenter.present()
+        await presenter().present()
     }
 
     private func handle(event: TerminationEvent) async {
@@ -58,7 +62,7 @@ extension AddExpenseFlow: Flow {
         self.flowContinuation = nil
         if case .canceledManually = event {
         } else {
-            await presenter.dismiss()
+            await presenter().dismiss()
         }
         flowContinuation.resume(returning: event)
     }
@@ -67,59 +71,53 @@ extension AddExpenseFlow: Flow {
 // MARK: - User Actions
 
 extension AddExpenseFlow {
-    @MainActor func cancel() {
-        Task.detached {
-            await self.presenter.dismiss()
-            await self.handle(event: .canceledManually)
+    private func makeActions() async -> AddExpenseViewActions {
+        await AddExpenseViewActions(state: viewModel.$state) { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .onCancelTap:
+                Task.detached {
+                    await self.presenter().dismiss()
+                    await self.handle(event: .canceledManually)
+                }
+            case .onDoneTap:
+                Task.detached {
+                    await self.addExpense()
+                }
+            case .onPickCounterpartyTap:
+                Task.detached {
+                    await self.pickCounterparty()
+                }
+            case .onSplitRuleTap(let equally):
+                viewModel.splitEqually = equally
+            case .onOwnershipTap(let iOwe):
+                viewModel.expenseOwnership = iOwe ? .iOwe : .iAmOwned
+            case .onDescriptionChanged(let expenseDescription):
+                viewModel.description = expenseDescription
+            case .onExpenseAmountChanged(let expenseAmount):
+                viewModel.amount = expenseAmount
+            }
         }
-    }
-
-    @MainActor func addExpense() {
-        Task.detached {
-            await self.doAddExpense()
-        }
-    }
-
-    @MainActor func pickCounterparty() {
-        Task.detached {
-            await self.doPickCounterparty()
-        }
-    }
-
-    @MainActor func update(splitEqually: Bool) {
-        viewModel.splitEqually = splitEqually
-    }
-
-    @MainActor func update(iOwe: Bool) {
-        viewModel.expenseOwnership = iOwe ? .iOwe : .iAmOwned
-    }
-
-    @MainActor func update(description: String) {
-        viewModel.description = description
-    }
-
-    @MainActor func update(expenseAmount: String) {
-        viewModel.amount = expenseAmount
     }
 }
 
 // MARK: - Private
 
 extension AddExpenseFlow {
-    private func doAddExpense() async {
+    private func addExpense() async {
         let state = await viewModel.state
         guard let counterparty = state.counterparty else {
-            return await presenter.needsPickCounterparty()
+            return await presenter().needsPickCounterparty()
         }
         guard state.canConfirm else {
-            return await presenter.errorHaptic()
+            return await presenter().errorHaptic()
         }
         let cost: Cost
         do {
             cost = try Cost(state.amount, format: .number)
         } catch {
             logE { "doAddExpense formatting failed: \(error)" }
-            return await presenter.errorHaptic()
+            return await presenter().errorHaptic()
         }
         let spending = Spending(
             date: .now,
@@ -150,26 +148,26 @@ extension AddExpenseFlow {
                 }
             }()
         )
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         let result = await spendingInteractions.create(spending: spending)
         switch result {
         case .success:
-            await presenter.dismissLoading()
-            await presenter.successHaptic()
+            await presenter().dismissLoading()
+            await presenter().successHaptic()
             await handle(event: .expenseAdded)
         case .failure(let error):
             switch error {
             case .noSuchUser:
-                await presenter.presentNoSuchUser()
+                await presenter().presentNoSuchUser()
             case .privacy:
-                await presenter.privacyViolated()
+                await presenter().privacyViolated()
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }
 
-    private func doPickCounterparty() async {
+    private func pickCounterparty() async {
         let flow = await PickCounterpartyFlow(di: self.di, router: self.router)
         let result = await flow.perform()
         switch result {

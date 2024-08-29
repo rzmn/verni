@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 fileprivate extension TextField.ContentType {
     var autocorrectionType: UITextAutocorrectionType {
@@ -79,6 +80,11 @@ public class TextField: UITextField {
             self.formatHint = formatHint
         }
     }
+    public var textPublisher: AnyPublisher<String?, Never> {
+        textSubject.eraseToAnyPublisher()
+    }
+    private let textSubject = PassthroughSubject<String?, Never>()
+
     private var config: Config
     private let hintLabel = {
         let l = UILabel()
@@ -102,6 +108,9 @@ public class TextField: UITextField {
         render(config)
         [hintLabel].forEach(addSubview)
         clipsToBounds = false
+        addAction({ [unowned self] in
+            textSubject.send(text)
+        }, for: .editingChanged)
     }
 
     public override func layoutSubviews() {

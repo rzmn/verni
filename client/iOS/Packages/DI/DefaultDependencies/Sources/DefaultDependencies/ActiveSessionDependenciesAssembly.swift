@@ -180,7 +180,7 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         DefaultReceivingPushUseCase(
             usersRepository: usersRepository,
             friendsRepository: friendListRepository,
-            spendingsRepository: spendingsRepository, 
+            spendingsRepository: spendingsRepository,
             logger: .shared.with(prefix: "[push.r] ")
         )
     }

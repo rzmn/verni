@@ -9,8 +9,14 @@ internal import FriendsFlow
 internal import AddExpenseFlow
 
 public actor AuthenticatedFlow {
-    @MainActor var subject: Published<AuthenticatedState>.Publisher {
-        viewModel.$state
+    private var _presenter: AuthenticatedPresenter?
+    private func presenter() async -> AuthenticatedPresenter {
+        guard let _presenter else {
+            let presenter = await AuthenticatedPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
     private let viewModel: AuthenticatedViewModel
 
@@ -18,7 +24,6 @@ public actor AuthenticatedFlow {
     private let friendsFlow: FriendsFlow
     private let router: AppRouter
     private let di: ActiveSessionDIContainer
-    private lazy var presenter = AuthenticatedFlowPresenter(router: router, flow: self)
 
     private var urlResolvers = UrlResolverContainer()
     private var flowContinuation: Continuation?
@@ -41,7 +46,7 @@ extension AuthenticatedFlow: Flow {
     }
 
     public func perform() async -> TerminationEvent {
-        await presenter.start(
+        await presenter().start(
             tabs: viewModel.state.tabs.map { tab in
                 switch tab {
                 case .friends:
@@ -76,36 +81,40 @@ extension AuthenticatedFlow: Flow {
 // MARK: - User Actions
 
 extension AuthenticatedFlow {
-    @MainActor func addNewExpense() {
-        Task.detached {
-            await self.doAddExpense()
-        }
-    }
-
-    @MainActor func selected(index: Int) {
-        let state = viewModel.state
-        guard state.tabs.count > index else {
-            return
-        }
-        let oldTab = state.activeTab
-        let newTab = state.tabs[index]
-        guard oldTab != newTab else {
-            return
-        }
-        viewModel.activeTab = newTab
-        Task.detached { [weak self] in
+    private func makeActions() async -> AuthenticatedViewActions {
+        await AuthenticatedViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
-            switch oldTab {
-            case .friends:
-                await friendsFlow.setActive(false)
-            case .account:
-                await accountFlow.setActive(false)
-            }
-            switch newTab {
-            case .friends:
-                await friendsFlow.setActive(true)
-            case .account:
-                await accountFlow.setActive(true)
+            switch action {
+            case .onAddExpenseTap:
+                Task.detached {
+                    await self.addExpense()
+                }
+            case .onTabSelected(let index):
+                let state = viewModel.state
+                guard state.tabs.count > index else {
+                    return
+                }
+                let oldTab = state.activeTab
+                let newTab = state.tabs[index]
+                guard oldTab != newTab else {
+                    return
+                }
+                viewModel.activeTab = newTab
+                Task.detached { [weak self] in
+                    guard let self else { return }
+                    switch oldTab {
+                    case .friends:
+                        await friendsFlow.setActive(false)
+                    case .account:
+                        await accountFlow.setActive(false)
+                    }
+                    switch newTab {
+                    case .friends:
+                        await friendsFlow.setActive(true)
+                    case .account:
+                        await accountFlow.setActive(true)
+                    }
+                }
             }
         }
     }
@@ -126,7 +135,7 @@ extension AuthenticatedFlow: UrlResolver {
 // MARK: - Private
 
 extension AuthenticatedFlow {
-    private func doAddExpense() async {
+    private func addExpense() async {
         let flow = await AddExpenseFlow(di: di, router: router, counterparty: nil)
         _ = await flow.perform()
     }

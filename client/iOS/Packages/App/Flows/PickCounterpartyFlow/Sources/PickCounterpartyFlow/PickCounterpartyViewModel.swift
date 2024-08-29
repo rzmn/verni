@@ -22,7 +22,7 @@ fileprivate extension Array where Element == PickCounterpartyState.Section {
 @MainActor class PickCounterpartyViewModel {
     @Published var state: PickCounterpartyState
 
-    @Published var content: Loadable<[PickCounterpartyState.Section], PickCounterpartyState.Failure>
+    @Published private var content: Loadable<[PickCounterpartyState.Section], PickCounterpartyState.Failure>
 
     init(friends: [FriendshipKind: [User]]?) {
         let initial: PickCounterpartyState
@@ -49,11 +49,15 @@ fileprivate extension Array where Element == PickCounterpartyState.Section {
             .assign(to: &$state)
     }
 
-    func reload(friends: [FriendshipKind: [User]]) {
+    func markLoading() {
+        content = .loading(previous: content)
+    }
+
+    func loaded(friends: [FriendshipKind: [User]]) {
         content = .loaded([PickCounterpartyState.Section](friends: friends))
     }
 
-    func reload(error: GeneralError) {
+    func failed(error: GeneralError) {
         switch error {
         case .noConnection:
             content = .failed(

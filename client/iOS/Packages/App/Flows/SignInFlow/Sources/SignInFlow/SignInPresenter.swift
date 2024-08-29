@@ -2,12 +2,12 @@ import AppBase
 import UIKit
 internal import Base
 
-class SignInFlowPresenter: Presenter {
-    private weak var flow: SignInFlow!
+@MainActor class SignInPresenter: Presenter {
     let router: AppRouter
+    private let viewActions: SignInViewActions
 
     lazy var tabViewController = {
-        let controller = SignInHintViewController(model: flow)
+        let controller = SignInHintViewController(model: viewActions)
         let navigationController = NavigationController(
             rootViewController: controller
         )
@@ -18,22 +18,20 @@ class SignInFlowPresenter: Presenter {
         return navigationController
     }()
 
-    init(router: AppRouter, flow: SignInFlow) {
-        self.flow = flow
+    init(router: AppRouter, actions: SignInViewActions) {
         self.router = router
+        self.viewActions = actions
     }
 
     weak var signInController: UINavigationController?
-    @MainActor
     func presentSignIn() async {
-        let controller = SignInViewController(model: flow)
+        let controller = SignInViewController(model: viewActions)
         let navigationController = NavigationController(rootViewController: controller)
         signInController = navigationController
         navigationController.modalPresentationStyle = .fullScreen
         await router.present(navigationController)
     }
 
-    @MainActor
     func dismissSignIn() async {
         guard let signInController else {
             return
@@ -41,12 +39,10 @@ class SignInFlowPresenter: Presenter {
         await router.pop(signInController)
     }
 
-    @MainActor
     func presentIncorrectCredentials() {
         router.hudFailure(description: "wrong_credentials_hint".localized)
     }
 
-    @MainActor
     func presentWrongFormat() {
         router.hudFailure(description: "wrong_credentials_format_hint".localized)
     }

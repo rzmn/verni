@@ -2,8 +2,7 @@ import Foundation
 import Combine
 import Domain
 
-@MainActor
-class UpdatePasswordViewModel {
+@MainActor class UpdatePasswordViewModel {
     @Published var state: UpdatePasswordState
 
     @Published var oldPassword: String

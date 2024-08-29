@@ -1,30 +1,27 @@
 import AppBase
 
-class UserPreviewFlowPresenter: Presenter {
+@MainActor class UserPreviewPresenter: Presenter {
     let router: AppRouter
-    private unowned var flow: UserPreviewFlow
+    private let viewActions: UserPreviewViewActions
 
-    init(router: AppRouter, flow: UserPreviewFlow) {
+    init(router: AppRouter, actions: UserPreviewViewActions) {
         self.router = router
-        self.flow = flow
+        self.viewActions = actions
     }
 
     private weak var controller: UserPreviewViewController?
-    @MainActor
     func openUserPreview(onPop: @escaping @MainActor () async -> Void) {
-        let controller = UserPreviewViewController(model: flow)
+        let controller = UserPreviewViewController(model: viewActions)
         self.controller = controller
         controller.navigationItem.largeTitleDisplayMode = .never
         controller.onPop = onPop
         router.push(controller)
     }
 
-    @MainActor
     func closeUserPreview() async {
         await router.navigationPop(viewController: controller)
     }
 
-    @MainActor
     func present(hint: String) {
         router.hudSuccess(description: hint)
     }

@@ -1,8 +1,7 @@
 import UIKit
 internal import ProgressHUD
 
-@MainActor
-public func SetupAppearance() {
+@MainActor public func SetupAppearance() {
     let appearance = UINavigationBarAppearance()
     appearance.backButtonAppearance.normal.titleTextAttributes = [
         .font: UIFont.p.title3,

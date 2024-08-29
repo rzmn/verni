@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 public class Switch: UISwitch {
     public struct Config {
@@ -8,11 +9,18 @@ public class Switch: UISwitch {
             self.on = on
         }
     }
+    public var isOnPublisher: AnyPublisher<Bool, Never> {
+        isOnSubject.eraseToAnyPublisher()
+    }
     let config: Config
+    let isOnSubject = PassthroughSubject<Bool, Never>()
 
     public init(config: Config) {
         self.config = config
         super.init(frame: .zero)
+        addAction({ [unowned self] in
+            isOnSubject.send(isOn)
+        }, for: .valueChanged)
     }
 
     required init?(coder: NSCoder) {

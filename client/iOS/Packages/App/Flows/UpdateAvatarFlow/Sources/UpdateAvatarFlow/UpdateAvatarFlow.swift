@@ -8,12 +8,12 @@ public actor UpdateAvatarFlow {
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
     private var pickPhotoDelegateAdapter: PickPhotoDelegateAdapter?
-    private let presenter: UpdateAvatarFlowPresenter
+    private let presenter: UpdateAvatarPresenter
 
-    public init(di: ActiveSessionDIContainer, router: AppRouter) {
+    public init(di: ActiveSessionDIContainer, router: AppRouter) async {
         self.router = router
         self.profileEditing = di.profileEditingUseCase()
-        self.presenter = UpdateAvatarFlowPresenter(router: router)
+        self.presenter = await UpdateAvatarPresenter(router: router)
     }
 
     private func retainPickPhotoDelegateAdapter(_ adapter: PickPhotoDelegateAdapter?) {
@@ -86,8 +86,7 @@ extension UpdateAvatarFlow: Flow {
         }
     }
 
-    @MainActor
-    func pickPhoto() async -> Result<UIImage, PickPhotoTerminationEvent> {
+    @MainActor func pickPhoto() async -> Result<UIImage, PickPhotoTerminationEvent> {
         let pickerViewController = UIImagePickerController()
         pickerViewController.allowsEditing = true
         let routable = AnyRoutable(controller: pickerViewController, name: "image picker")

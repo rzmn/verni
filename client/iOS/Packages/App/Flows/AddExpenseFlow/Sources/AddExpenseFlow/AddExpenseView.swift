@@ -3,8 +3,9 @@ import Combine
 import Domain
 import AppBase
 internal import DesignSystem
+internal import Base
 
-class AddExpenseView: View<AddExpenseFlow> {
+class AddExpenseView: View<AddExpenseViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     private let whoOws = SegmentedControl(
@@ -78,24 +79,27 @@ class AddExpenseView: View<AddExpenseFlow> {
             counterpartyAvatar,
             counterpartyName
         ].forEach(addSubview)
-        chooseCounterparty.addAction({ [unowned self] in
-            model.pickCounterparty()
-        }, for: .touchUpInside)
-        splitEqually.addAction({ [unowned self] in
-            model.update(splitEqually: splitEqually.isOn)
-        }, for: .valueChanged)
-        whoOws.addAction({ [unowned self] in
-            model.update(iOwe: whoOws.selectedSegmentIndex == 0)
-        }, for: .valueChanged)
-        expenseDescription.addAction({ [unowned self] in
-            model.update(description: expenseDescription.text ?? "")
-        }, for: .editingChanged)
-        expenseAmount.addAction({ [unowned self] in
-            model.update(expenseAmount: expenseAmount.text ?? "")
-        }, for: .editingChanged)
+        chooseCounterparty.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onPickCounterpartyTap))
+            .store(in: &subscriptions)
+        splitEqually.isOnPublisher
+            .sink(receiveValue: model.handle • AddExpenseViewActionType.onSplitRuleTap)
+            .store(in: &subscriptions)
+        whoOws.selectedIndexPublisher
+            .map { $0 == 0 }
+            .sink(receiveValue: model.handle • AddExpenseViewActionType.onOwnershipTap)
+            .store(in: &subscriptions)
+        expenseDescription.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • AddExpenseViewActionType.onDescriptionChanged)
+            .store(in: &subscriptions)
+        expenseAmount.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • AddExpenseViewActionType.onExpenseAmountChanged)
+            .store(in: &subscriptions)
         expenseAmount.delegate = self
         expenseDescription.delegate = self
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         setNeedsLayout()
@@ -208,7 +212,7 @@ extension AddExpenseView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         switch textField {
         case expenseAmount:
-            model.addExpense()
+            model.handle(.onDoneTap)
         case expenseDescription:
             expenseAmount.becomeFirstResponder()
         default:

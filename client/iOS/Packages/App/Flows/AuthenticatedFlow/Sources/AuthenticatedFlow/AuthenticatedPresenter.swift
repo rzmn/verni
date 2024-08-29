@@ -1,27 +1,23 @@
-import UIKit
 import AppBase
-internal import SignInFlow
+import UIKit
 internal import DesignSystem
 
-class UnauthenticatedFlowPresenter {
-    private let router: AppRouter
+@MainActor class AuthenticatedPresenter: Presenter {
+    let router: AppRouter
+    private let viewActions: AuthenticatedViewActions
 
-    @MainActor
-    init(router: AppRouter) {
+    init(router: AppRouter, actions: AuthenticatedViewActions) {
         self.router = router
+        self.viewActions = actions
     }
 
-    @MainActor
     func start(tabs: [any TabEmbedFlow]) async {
-        let tabBarController = UnauthenticatedTabsController(nibName: nil, bundle: nil)
+        let tabBarController = AuthenticatedTabsController(model: viewActions)
 
         var viewControllers = [UIViewController]()
         for flow in tabs {
             viewControllers.append(await flow.viewController().create(onClose: { _ in}))
         }
-        tabBarController.tabBar.tintColor = .p.accent
-        tabBarController.tabBar.unselectedItemTintColor = .p.iconSecondary
-        tabBarController.tabBar.backgroundColor = .p.backgroundContent
         tabBarController.setViewControllers(viewControllers, animated: false)
         tabBarController.modalTransitionStyle = .flipHorizontal
         tabBarController.modalPresentationStyle = .fullScreen

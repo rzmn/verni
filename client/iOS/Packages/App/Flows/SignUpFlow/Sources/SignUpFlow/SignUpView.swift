@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class SignUpView: View<SignUpFlow> {
+class SignUpView: View<SignUpViewActions> {
     private let email = TextField(
         config: TextField.Config(
             placeholder: "email_placeholder".localized,
@@ -38,22 +38,22 @@ class SignUpView: View<SignUpFlow> {
         email.delegate = self
         password.delegate = self
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        email.addAction({ [weak model, weak email] in
-            guard let model, let email else { return }
-            model.update(email: email.text ?? "")
-        }, for: .editingChanged)
-        password.addAction({ [weak model, weak password] in
-            guard let model, let password else { return }
-            model.update(password: password.text ?? "")
-        }, for: .editingChanged)
-        passwordRepeat.addAction({ [weak model, weak passwordRepeat] in
-            guard let model, let passwordRepeat else { return }
-            model.update(passwordRepeat: passwordRepeat.text ?? "")
-        }, for: .editingChanged)
-        confirm.addAction({ [weak model] in
-            model?.signIn()
-        }, for: .touchUpInside)
-        model.subject
+        email.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • SignUpViewActionType.onEmailTextUpdated)
+            .store(in: &subscriptions)
+        password.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • SignUpViewActionType.onPasswordTextUpdated)
+            .store(in: &subscriptions)
+        passwordRepeat.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • SignUpViewActionType.onRepeatPasswordTextUpdated)
+            .store(in: &subscriptions)
+        confirm.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onSignInTap))
+            .store(in: &subscriptions)
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier

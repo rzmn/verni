@@ -1,29 +1,27 @@
 import AppBase
 
-class UpdatePasswordFlowPresenter: Presenter {
+@MainActor class UpdatePasswordPresenter: Presenter {
     let router: AppRouter
-    private unowned var flow: UpdatePasswordFlow
+    private let viewActions: UpdatePasswordViewActions
 
-    init(router: AppRouter, flow: UpdatePasswordFlow) {
+    init(router: AppRouter, actions: UpdatePasswordViewActions) {
         self.router = router
-        self.flow = flow
+        self.viewActions = actions
     }
 
-    @MainActor func presentHint(message: String) {
+    func presentHint(message: String) {
         router.hudFailure(description: message)
     }
 
     private weak var controller: UpdatePasswordViewController?
-    @MainActor
     func presentPasswordEditing(onPop: @escaping @MainActor () async -> Void) {
-        let controller = UpdatePasswordViewController(model: flow)
+        let controller = UpdatePasswordViewController(model: viewActions)
         self.controller = controller
         controller.navigationItem.largeTitleDisplayMode = .never
         controller.onPop = onPop
         router.push(controller)
     }
 
-    @MainActor
     func cancelPasswordEditing() async {
         await router.navigationPop(viewController: controller)
     }

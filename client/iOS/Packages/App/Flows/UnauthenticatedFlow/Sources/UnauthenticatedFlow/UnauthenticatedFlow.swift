@@ -8,7 +8,7 @@ internal import ProgressHUD
 
 public actor UnauthenticatedFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let presenter: UnauthenticatedFlowPresenter
+    private let presenter: UnauthenticatedPresenter
 
     private let signInFlow: SignInFlow
 
@@ -16,7 +16,7 @@ public actor UnauthenticatedFlow {
 
     public init(di: DIContainer, router: AppRouter) async {
         authUseCase = di.authUseCase()
-        presenter = await UnauthenticatedFlowPresenter(router: router)
+        presenter = await UnauthenticatedPresenter(router: router)
         signInFlow = await SignInFlow(di: di, router: router)
     }
 }

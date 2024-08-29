@@ -2,8 +2,7 @@ import Foundation
 import Combine
 import Domain
 
-@MainActor
-class SignInViewModel {
+@MainActor class SignInViewModel {
     @Published var state: SignInState
 
     @Published var password: String

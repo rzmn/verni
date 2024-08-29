@@ -1,25 +1,25 @@
 import AppBase
 import UIKit
 
-class AddExpenseFlowPresenter: Presenter {
+@MainActor class AddExpensePresenter: Presenter {
     let router: AppRouter
-    private unowned var flow: AddExpenseFlow
+    private let viewActions: AddExpenseViewActions
 
-    init(router: AppRouter, flow: AddExpenseFlow) {
+    init(router: AppRouter, actions: AddExpenseViewActions) {
         self.router = router
-        self.flow = flow
+        self.viewActions = actions
     }
 
     private weak var controller: NavigationController?
-    @MainActor func present() async {
+    func present() async {
         let navigationController = NavigationController(
-            rootViewController: AddExpenseViewController(model: flow)
+            rootViewController: AddExpenseViewController(model: viewActions)
         )
         self.controller = navigationController
         await router.present(navigationController)
     }
 
-    @MainActor func dismiss() async {
+    func dismiss() async {
         guard let controller else {
             return
         }
@@ -27,11 +27,11 @@ class AddExpenseFlowPresenter: Presenter {
         await router.pop(controller)
     }
 
-    @MainActor func needsPickCounterparty()  {
+    func needsPickCounterparty()  {
         router.hudFailure(description: "expense_choose_counterparty".localized)
     }
 
-    @MainActor func privacyViolated() {
+    func privacyViolated() {
         router.hudFailure(description: "expense_add_privacy_violation".localized)
     }
 }

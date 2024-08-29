@@ -7,16 +7,19 @@ internal import DesignSystem
 internal import ProgressHUD
 
 public actor SignUpFlow {
-    @MainActor var subject: Published<SignUpState>.Publisher {
-        viewModel.$state
+    private var _presenter: SignUpPresenter?
+    private func presenter() async -> SignUpPresenter {
+        guard let _presenter else {
+            let presenter = await SignUpPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
     private let viewModel: SignUpViewModel
-
     private var subscriptions = Set<AnyCancellable>()
-
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let router: AppRouter
-    private lazy var presenter = SignUpFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
     public init(di: DIContainer, router: AppRouter) async {
@@ -47,7 +50,7 @@ extension SignUpFlow: Flow {
     }
 
     private func startFlow() async {
-        await self.presenter.presentSignUp { [weak self] in
+        await presenter().presentSignUp { [weak self] in
             guard let self else { return }
             await handle(event: .canceled)
         }
@@ -65,21 +68,21 @@ extension SignUpFlow: Flow {
 // MARK: - User Actions
 
 extension SignUpFlow {
-    @MainActor func update(email: String) {
-        viewModel.email = email
-    }
-
-    @MainActor func update(password: String) {
-        viewModel.password = password
-    }
-
-    @MainActor func update(passwordRepeat: String) {
-        viewModel.passwordRepeat = passwordRepeat
-    }
-
-    @MainActor func signIn() {
-        Task.detached {
-            await self.doSignIn()
+    private func makeActions() async -> SignUpViewActions {
+        await SignUpViewActions(state: viewModel.$state) { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .onEmailTextUpdated(let text):
+                viewModel.email = text
+            case .onPasswordTextUpdated(let text):
+                viewModel.password = text
+            case .onRepeatPasswordTextUpdated(let text):
+                viewModel.passwordRepeat = text
+            case .onSignInTap:
+                Task.detached {
+                    await self.signIn()
+                }
+            }
         }
     }
 }
@@ -87,30 +90,30 @@ extension SignUpFlow {
 // MARK: - Private
 
 extension SignUpFlow {
-    private func doSignIn() async {
+    private func signIn() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter.errorHaptic()
+            return await presenter().errorHaptic()
         }
         let credentials = Credentials(
             email: state.email,
             password: state.password
         )
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         switch await authUseCase.signup(credentials: credentials) {
         case .success(let session):
             await handle(event: .created(session))
         case .failure(let failure):
-            await presenter.errorHaptic()
+            await presenter().errorHaptic()
             switch failure {
             case .alreadyTaken:
-                await presenter.presentAlreadyTaken()
+                await presenter().presentAlreadyTaken()
             case .wrongFormat:
-                await presenter.presentWrongFormat()
+                await presenter().presentWrongFormat()
             case .noConnection:
-                await presenter.presentNoConnection()
+                await presenter().presentNoConnection()
             case .other(let error):
-                await presenter.presentInternalError(error)
+                await presenter().presentInternalError(error)
             }
         }
     }

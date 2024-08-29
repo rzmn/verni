@@ -1,9 +1,10 @@
 import AppBase
 import UIKit
 import Combine
+internal import Base
 internal import DesignSystem
 
-class AccountView: View<AccountFlow> {
+class AccountView: View<AccountViewActions> {
     private let updateAvatar = Button(
         config: Button.Config(
             style: .primary,
@@ -39,21 +40,21 @@ class AccountView: View<AccountFlow> {
     override func setupView() {
         backgroundColor = .p.background
         [updateAvatar, updateEmail, updateDisplayName, updatePassword, logout].forEach(addSubview)
-        logout.addAction({ [weak model] in
-            model?.logout()
-        }, for: .touchUpInside)
-        updateAvatar.addAction({ [weak model] in
-            model?.updateAvatar()
-        }, for: .touchUpInside)
-        updateEmail.addAction({ [weak model] in
-            model?.updateEmail()
-        }, for: .touchUpInside)
-        updatePassword.addAction({ [weak model] in
-            model?.updatePassword()
-        }, for: .touchUpInside)
-        updateDisplayName.addAction({ [weak model] in
-            model?.updateDisplayName()
-        }, for: .touchUpInside)
+        logout.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onLogoutTap))
+            .store(in: &subscriptions)
+        updateAvatar.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onUpdateAvatarTap))
+            .store(in: &subscriptions)
+        updateEmail.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onUpdateEmailTap))
+            .store(in: &subscriptions)
+        updatePassword.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onUpdatePasswordTap))
+            .store(in: &subscriptions)
+        updateDisplayName.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onUpdateDisplayNameTap))
+            .store(in: &subscriptions)
     }
 
     override func layoutSubviews() {

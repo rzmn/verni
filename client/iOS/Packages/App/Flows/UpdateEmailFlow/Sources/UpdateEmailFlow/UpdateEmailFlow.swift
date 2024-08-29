@@ -5,16 +5,19 @@ import UIKit
 import DI
 
 public actor UpdateEmailFlow {
-    @MainActor var subject: Published<UpdateEmailState>.Publisher {
-        viewModel.$state
+    private var _presenter: UpdateEmailPresenter?
+    private func presenter() async -> UpdateEmailPresenter {
+        guard let _presenter else {
+            let presenter = await UpdateEmailPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private let viewModel: UpdateEmailViewModel
-
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
     private let emailConfirmationUseCase: EmailConfirmationUseCase
-    private lazy var presenter = UpdateEmailFlowPresenter(router: router, flow: self)
 
     private var flowContinuation: Continuation?
 
@@ -29,6 +32,8 @@ public actor UpdateEmailFlow {
     }
 }
 
+// MARK: - Flow
+
 extension UpdateEmailFlow: Flow {
     public enum TerminationEvent: Error {
         case canceledManually
@@ -38,7 +43,7 @@ extension UpdateEmailFlow: Flow {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
             Task.detached { @MainActor in
-                await self.presenter.presentEmailEditing { [weak self] in
+                await self.presenter().presentEmailEditing { [weak self] in
                     guard let self else { return }
                     await handle(result: .failure(.canceledManually))
                 }
@@ -53,56 +58,61 @@ extension UpdateEmailFlow: Flow {
         self.flowContinuation = nil
         flowContinuation.resume(returning: result)
     }
+}
 
-    @MainActor
-    func confirm() {
-        guard viewModel.state.canConfirm else {
-            Task.detached { @MainActor in
-                await self.presenter.errorHaptic()
+// MARK: - User Actions
+
+extension UpdateEmailFlow {
+    private func makeActions() async -> UpdateEmailViewActions {
+        await UpdateEmailViewActions(state: viewModel.$state) { [weak self] actions in
+            guard let self else { return }
+            switch actions {
+            case .onConfirmTap:
+                guard viewModel.state.canConfirm else {
+                    Task.detached {
+                        await self.presenter().errorHaptic()
+                    }
+                    return
+                }
+                viewModel.confirmationInProgress = true
+                Task.detached {
+                    await self.confirm()
+                }
+            case .onConfirmationCodeTextChanged(let text):
+                viewModel.confirmationCode = text
+            case .onResendTap:
+                guard viewModel.state.canConfirm else {
+                    Task.detached {
+                        await self.presenter().errorHaptic()
+                    }
+                    return
+                }
+                viewModel.resendInProgress = true
+                Task.detached {
+                    await self.resendCode()
+                }
             }
-            return
-        }
-        viewModel.confirmationInProgress = true
-        Task.detached {
-            await self.doConfirm()
-        }
-    }
-
-    @MainActor
-    func update(code: String) {
-        viewModel.confirmationCode = code
-    }
-
-    @MainActor
-    func resendCode() {
-        guard viewModel.state.canResendCode else {
-            Task.detached { @MainActor in
-                await self.presenter.errorHaptic()
-            }
-            return
-        }
-        viewModel.resendInProgress = true
-        Task.detached {
-            await self.doResendCode()
         }
     }
 }
 
+// MARK: - Private
+
 extension UpdateEmailFlow {
-    func doResendCode() async {
+    func resendCode() async {
         let result = await emailConfirmationUseCase.sendConfirmationCode()
         switch result {
         case .success:
-            await presenter.codeSent()
+            await presenter().codeSent()
             await viewModel.startCountdownTimer()
         case .failure(let error):
             switch error {
             case .notDelivered:
-                await presenter.codeNotDelivered()
+                await presenter().codeNotDelivered()
             case .alreadyConfirmed:
-                await presenter.emailAlreadyConfirmed()
+                await presenter().emailAlreadyConfirmed()
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
         Task { @MainActor [unowned viewModel] in
@@ -110,11 +120,11 @@ extension UpdateEmailFlow {
         }
     }
 
-    private func doConfirm() async {
+    private func confirm() async {
         guard case .uncorfirmed(let uncorfirmed) = await viewModel.state.confirmation else {
             return assertionFailure()
         }
-        await self.presenter.submitHaptic()
+        await self.presenter().submitHaptic()
         let result = await emailConfirmationUseCase.confirm(
             code: uncorfirmed.currentCode.trimmingCharacters(in: CharacterSet.whitespaces)
         )
@@ -124,17 +134,17 @@ extension UpdateEmailFlow {
             Task { @MainActor [unowned viewModel] in
                 viewModel.confirmed = true
             }
-            await presenter.successHaptic()
-            await presenter.presentSuccess()
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
         case .failure(let error):
             switch error {
             case .codeIsWrong:
                 Task { @MainActor [unowned viewModel] in
                     viewModel.confirmationCode = ""
                 }
-                await presenter.codeIsWrong()
+                await presenter().codeIsWrong()
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
         Task { @MainActor [unowned viewModel] in

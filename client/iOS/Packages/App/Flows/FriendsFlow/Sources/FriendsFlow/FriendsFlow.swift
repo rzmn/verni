@@ -8,10 +8,15 @@ internal import ProgressHUD
 internal import UserPreviewFlow
 
 public actor FriendsFlow {
-    @MainActor var subject: Published<FriendsState>.Publisher {
-        viewModel.$state
+    private var _presenter: FriendsPresenter?
+    private func presenter() async -> FriendsPresenter {
+        guard let _presenter else {
+            let presenter = await FriendsPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private let viewModel: FriendsViewModel
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
@@ -19,7 +24,6 @@ public actor FriendsFlow {
     private let spendingsRepository: SpendingsRepository
     private let friendListRepository: FriendsRepository
     private var subscriptions = Set<AnyCancellable>()
-    private lazy var presenter = FriendsFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -71,29 +75,28 @@ extension FriendsFlow: TabEmbedFlow {
     public func perform() async -> FlowResult {}
 
     @MainActor public func viewController() async -> Routable {
-        await presenter.tabViewController
+        await presenter().tabViewController
     }
 }
 
 // MARK: - User Actions
 
 extension FriendsFlow {
-    @MainActor func addViaQr() {
-        Task.detached {
-            await self.doAddViaQr()
-        }
-    }
-
-    @MainActor func openPreview(user: User) {
-        Task.detached {
-            await self.doOpenPreview(user: user)
-        }
-    }
-
-    @MainActor
-    func refresh() {
-        Task.detached {
-            await self.doRefresh()
+    private func makeActions() async -> FriendsViewActions {
+        await FriendsViewActions(state: viewModel.$state) { action in
+            Task.detached { [weak self] in
+                guard let self else { return }
+                switch action {
+                case .onAddViaQrTap:
+                    await addViaQr()
+                case .onUserSelected(let user):
+                    await openPreview(user: user)
+                case .onViewAppeared:
+                    await refresh()
+                case .onPulledToRefresh:
+                    await refresh()
+                }
+            }
         }
     }
 }
@@ -108,17 +111,17 @@ extension FriendsFlow: UrlResolver {
         guard case .show(let uid) = usersAction else {
             return
         }
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         switch await usersRepository.getUsers(ids: [uid]) {
         case .success(let users):
-            await presenter.dismissLoading()
+            await presenter().dismissLoading()
             guard let user = users.first else {
                 return
             }
             let flow = await UserPreviewFlow(di: di, router: router, user: user)
             _ = await flow.perform()
         case .failure(let error):
-            await presenter.presentGeneralError(error)
+            await presenter().presentGeneralError(error)
         }
     }
 
@@ -136,7 +139,7 @@ extension FriendsFlow: UrlResolver {
 // MARK: - Private
 
 extension FriendsFlow {
-    private func doAddViaQr() async {
+    private func addViaQr() async {
         let flow = await AddFriendByQrFlow(router: router)
         switch await flow.perform() {
         case .success(let url):
@@ -146,17 +149,17 @@ extension FriendsFlow {
         }
     }
 
-    private func doOpenPreview(user: User) async {
+    private func openPreview(user: User) async {
         let flow = await UserPreviewFlow(di: di, router: router, user: user)
         _ = await flow.perform()
     }
 
-    private func doRefresh() async {
+    private func refresh() async {
         let state = await viewModel.state
         let hudShown: Bool
         if case .initial = state.content {
             hudShown = true
-            await presenter.presentLoading()
+            await presenter().presentLoading()
         } else {
             hudShown = false
         }
@@ -171,7 +174,7 @@ extension FriendsFlow {
 
         Task { @MainActor [unowned self] in
             if hudShown {
-                await presenter.dismissLoading()
+                await presenter().dismissLoading()
             }
             switch result {
             case (.success(let friends), .success(let spendings)):

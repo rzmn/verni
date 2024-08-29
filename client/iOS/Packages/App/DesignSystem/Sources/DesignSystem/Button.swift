@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 public class Button: UIButton {
     public struct Config {
@@ -17,6 +18,10 @@ public class Button: UIButton {
             self.enabled = enabled
         }
     }
+    public var tapPublisher: AnyPublisher<Void, Never> {
+        tapSubject.eraseToAnyPublisher()
+    }
+    let tapSubject = PassthroughSubject<Void, Never>()
 
     public init(config: Config) {
         super.init(frame: .zero)
@@ -24,6 +29,9 @@ public class Button: UIButton {
         titleLabel?.numberOfLines = 0
         layer.masksToBounds = true
         layer.cornerRadius = 10
+        addAction({ [unowned self] in
+            tapSubject.send(())
+        }, for: .touchUpInside)
         render(config: config)
     }
     

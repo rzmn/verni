@@ -8,26 +8,24 @@ internal import DesignSystem
 internal import ProgressHUD
 
 public actor SignInFlow {
-    @MainActor var subject: Published<SignInState>.Publisher {
-        viewModel.$state
+    private var _presenter: SignInPresenter?
+    private func presenter() async -> SignInPresenter {
+        guard let _presenter else {
+            let presenter = await SignInPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private var subscriptions = Set<AnyCancellable>()
-
     private let viewModel: SignInViewModel
-
     private let signUpFlow: SignUpFlow
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let saveCredentials: SaveCredendialsUseCase
     private let router: AppRouter
-
-    private lazy var presenter = SignInFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
-    public init(
-        di: DIContainer,
-        router: AppRouter
-    ) async {
+    public init(di: DIContainer, router: AppRouter) async {
         authUseCase = di.authUseCase()
         viewModel = await SignInViewModel(
             localEmailValidator: di.appCommon.localEmailValidationUseCase,
@@ -43,7 +41,7 @@ public actor SignInFlow {
 
 extension SignInFlow: TabEmbedFlow {
     @MainActor public func viewController() async -> any Routable {
-        await presenter.tabViewController
+        await presenter().tabViewController
     }
 
     public func perform() async -> ActiveSessionDIContainer {
@@ -65,35 +63,27 @@ extension SignInFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension SignInFlow {
-    @MainActor func update(email: String) {
-        viewModel.email = email
-    }
-
-    @MainActor func update(password: String) {
-        viewModel.password = password
-    }
-
-    @MainActor func createAccount() {
-        Task.detached {
-            await self.doCreateAccount()
-        }
-    }
-
-    @MainActor func signIn() {
-        Task.detached {
-            await self.doSignIn()
-        }
-    }
-
-    @MainActor func openSignIn() {
-        Task.detached {
-            await self.doOpenSignIn()
-        }
-    }
-
-    @MainActor func closeSignIn() {
-        Task.detached {
-            await self.doCloseSignIn()
+    private func makeActions() async -> SignInViewActions {
+        await SignInViewActions(state: viewModel.$state) { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .onEmailTextUpdated(let text):
+                viewModel.email = text
+            case .onPasswordTextUpdated(let text):
+                viewModel.password = text
+            case .onCreateAccountTap:
+                Task.detached {
+                    await self.createAccount()
+                }
+            case .onSignInTap:
+                Task.detached {
+                    await self.signIn()
+                }
+            case .onSignInCloseTap:
+                Task.detached {
+                    await self.closeSignIn()
+                }
+            }
         }
     }
 }
@@ -101,8 +91,8 @@ extension SignInFlow {
 // MARK: - Private
 
 extension SignInFlow {
-    private func doCreateAccount() async {
-        await presenter.submitHaptic()
+    private func createAccount() async {
+        await presenter().submitHaptic()
         switch await signUpFlow.perform() {
         case .created(let session):
             await handle(session: session)
@@ -111,42 +101,42 @@ extension SignInFlow {
         }
     }
 
-    private func doSignIn() async {
+    private func signIn() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter.errorHaptic()
+            return await presenter().errorHaptic()
         }
         let credentials = Credentials(
             email: state.email,
             password: state.password
         )
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         switch await authUseCase.login(credentials: credentials) {
         case .success(let session):
             await saveCredentials.save(email: credentials.email, password: credentials.password)
             await handle(session: session)
         case .failure(let failure):
-            await presenter.errorHaptic()
+            await presenter().errorHaptic()
             switch failure {
             case .incorrectCredentials:
-                await presenter.presentIncorrectCredentials()
+                await presenter().presentIncorrectCredentials()
             case .wrongFormat:
-                await presenter.presentWrongFormat()
+                await presenter().presentWrongFormat()
             case .noConnection:
-                await presenter.presentNoConnection()
+                await presenter().presentNoConnection()
             case .other(let error):
-                await presenter.presentInternalError(error)
+                await presenter().presentInternalError(error)
             }
         }
     }
 
-    private func doOpenSignIn() async {
-        await presenter.submitHaptic()
-        await presenter.presentSignIn()
+    private func openSignIn() async {
+        await presenter().submitHaptic()
+        await presenter().presentSignIn()
     }
 
-    private func doCloseSignIn() async {
+    private func closeSignIn() async {
         subscriptions.removeAll()
-        await presenter.dismissSignIn()
+        await presenter().dismissSignIn()
     }
 }

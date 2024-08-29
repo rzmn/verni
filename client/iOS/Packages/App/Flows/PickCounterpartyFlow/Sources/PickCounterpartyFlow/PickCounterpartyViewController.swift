@@ -1,7 +1,7 @@
 import AppBase
 import UIKit
 
-class PickCounterpartyViewController: ViewController<PickCounterpartyView, PickCounterpartyFlow> {
+class PickCounterpartyViewController: ViewController<PickCounterpartyView, PickCounterpartyViewActions> {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.largeTitleDisplayMode = .never
@@ -15,11 +15,11 @@ class PickCounterpartyViewController: ViewController<PickCounterpartyView, PickC
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        model.appeared()
+        model.handle(.onViewAppeared)
     }
 
     @objc private func cancel() {
-        model.cancel()
+        model.handle(.onCancelTap)
     }
 }
 

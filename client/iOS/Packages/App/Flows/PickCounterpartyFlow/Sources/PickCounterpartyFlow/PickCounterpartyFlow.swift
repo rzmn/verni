@@ -5,13 +5,18 @@ import AppBase
 import Combine
 internal import DesignSystem
 internal import ProgressHUD
+internal import Base
 
 public actor PickCounterpartyFlow {
-    @MainActor var subject: Published<PickCounterpartyState>.Publisher {
-        viewModel.$state
+    private var _presenter: PickCounterpartyPresenter?
+    private func presenter() async -> PickCounterpartyPresenter {
+        guard let _presenter else {
+            let presenter = await PickCounterpartyPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
-    private lazy var presenter = PickCounterpartyFlowPresenter(router: router, flow: self)
     private let viewModel: PickCounterpartyViewModel
     private let friendsRepository: FriendsRepository
     private let router: AppRouter
@@ -47,13 +52,11 @@ extension PickCounterpartyFlow: Flow {
     }
 
     private func startFlow() async {
-        await self.presenter.present()
+        await self.presenter().present()
         await friendsRepository
             .friendsUpdated(ofKind: .all)
             .sink { friends in
-                Task.detached {
-                    await self.reload(result: .success(friends))
-                }
+                await self.reload(result: .success(friends))
             }
             .store(in: &subscriptions)
     }
@@ -66,7 +69,7 @@ extension PickCounterpartyFlow: Flow {
         self.flowContinuation = nil
         if case .canceledManually = event {
         } else {
-            await presenter.dismiss()
+            await presenter().dismiss()
         }
         flowContinuation.resume(returning: event)
     }
@@ -75,21 +78,31 @@ extension PickCounterpartyFlow: Flow {
 // MARK: - User Actions
 
 extension PickCounterpartyFlow {
-    @MainActor func cancel() {
-        Task.detached {
-            await self.presenter.dismiss()
-        }
-    }
-
-    @MainActor func pick(counterparty: User) {
-        Task.detached {
-            await self.handle(event: .picked(counterparty))
-        }
-    }
-
-    @MainActor func appeared() {
-        Task.detached {
-            await self.refresh(manually: false)
+    private func makeActions() async -> PickCounterpartyViewActions {
+        await PickCounterpartyViewActions(state: viewModel.$state) { [weak self] userAction in
+            guard let self else { return }
+            switch userAction {
+            case .onCancelTap:
+                Task.detached {
+                    await self.presenter().dismiss()
+                }
+            case .onPickounterpartyTap(let user):
+                Task.detached {
+                    await self.handle(event: .picked(user))
+                }
+            case .onViewAppeared:
+                let state = self.viewModel.state
+                let firstCall: Bool
+                if case .initial = state.content {
+                    firstCall = true
+                } else {
+                    firstCall = false
+                }
+                self.viewModel.markLoading()
+                Task.detached {
+                    await self.refresh(firstCall: firstCall, manually: false)
+                }
+            }
         }
     }
 }
@@ -97,26 +110,20 @@ extension PickCounterpartyFlow {
 // MARK: - Private
 
 extension PickCounterpartyFlow {
-    private func refresh(manually: Bool) async {
-        let state = await viewModel.state
-        if case .initial = state.content {
-            await presenter.presentLoading()
+    private func refresh(firstCall: Bool, manually: Bool) async {
+        if firstCall {
+            await presenter().presentLoading()
         }
-        Task { @MainActor [unowned self] in
-            viewModel.content = .loading(previous: state.content)
-        }
-        reload(result: await friendsRepository.refreshFriends(ofKind: .all))
+        await reload(result: await friendsRepository.refreshFriends(ofKind: .all))
     }
 
-    private func reload(result: Result<[FriendshipKind: [User]], GeneralError>) {
-        Task { @MainActor [unowned self] in
-            await presenter.dismissLoading()
-            switch result {
-            case .success(let friends):
-                viewModel.reload(friends: friends)
-            case .failure(let error):
-                viewModel.reload(error: error)
-            }
+    private func reload(result: Result<[FriendshipKind: [User]], GeneralError>) async {
+        await presenter().dismissLoading()
+        switch result {
+        case .success(let friends):
+            await viewModel.loaded(friends: friends)
+        case .failure(let error):
+            await viewModel.failed(error: error)
         }
     }
 }

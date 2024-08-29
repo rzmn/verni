@@ -1,31 +1,28 @@
 import Foundation
 import AppBase
 
-class SignUpFlowPresenter: Presenter {
-    private weak var flow: SignUpFlow!
+@MainActor class SignUpPresenter: Presenter {
     let router: AppRouter
+    private let viewActions: SignUpViewActions
 
-    init(router: AppRouter, flow: SignUpFlow) {
-        self.flow = flow
+    init(router: AppRouter, actions: SignUpViewActions) {
         self.router = router
+        self.viewActions = actions
     }
 
     weak var signUpController: SignUpViewController?
-    @MainActor
     func presentSignUp(onPop: @escaping @MainActor () async -> Void) {
-        let controller = SignUpViewController(model: flow)
+        let controller = SignUpViewController(model: viewActions)
         signUpController = controller
         controller.onPop = onPop
         controller.modalPresentationStyle = .fullScreen
         router.push(controller)
     }
 
-    @MainActor
     func presentAlreadyTaken() {
         router.hudFailure(description: "email_already_taken".localized)
     }
 
-    @MainActor
     func presentWrongFormat() {
         router.hudFailure(description: "wrong_credentials_format_hint".localized)
     }

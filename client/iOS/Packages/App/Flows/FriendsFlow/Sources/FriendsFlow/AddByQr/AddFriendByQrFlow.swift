@@ -37,8 +37,7 @@ extension AddFriendByQrFlow: Flow {
         }
     }
 
-    @MainActor
-    private func presentDataScanner() async {
+    @MainActor private func presentDataScanner() async {
         let viewController = DataScannerViewController(
             recognizedDataTypes: [.barcode()],
             qualityLevel: .fast,

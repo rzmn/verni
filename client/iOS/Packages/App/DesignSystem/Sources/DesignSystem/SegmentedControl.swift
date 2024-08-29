@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 public class SegmentedControl: UISegmentedControl {
     public struct Config {
@@ -17,11 +18,18 @@ public class SegmentedControl: UISegmentedControl {
             self.items = items
         }
     }
+    public var selectedIndexPublisher: AnyPublisher<Int, Never> {
+        selectedIndexSubject.eraseToAnyPublisher()
+    }
+    private let selectedIndexSubject = PassthroughSubject<Int, Never>()
     let config: Config
 
     public init(config: Config) {
         self.config = config
         super.init(frame: .zero)
+        addAction({ [unowned self] in
+            selectedIndexSubject.send(selectedSegmentIndex)
+        }, for: .valueChanged)
         render(config: config)
     }
     

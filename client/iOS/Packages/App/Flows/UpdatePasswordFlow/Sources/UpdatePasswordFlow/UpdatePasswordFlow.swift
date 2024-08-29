@@ -4,14 +4,17 @@ import Domain
 import DI
 
 public actor UpdatePasswordFlow {
-    @MainActor var subject: Published<UpdatePasswordState>.Publisher {
-        viewModel.$state
+    private var _presenter: UpdatePasswordPresenter?
+    private func presenter() async -> UpdatePasswordPresenter {
+        guard let _presenter else {
+            let presenter = await UpdatePasswordPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
-    private lazy var presenter = UpdatePasswordFlowPresenter(router: router, flow: self)
-
     private let viewModel: UpdatePasswordViewModel
     private var subscriptions = Set<AnyCancellable>()
 
@@ -49,7 +52,7 @@ extension UpdatePasswordFlow: Flow {
     }
 
     private func startFlow() async {
-        await self.presenter.presentPasswordEditing { [weak self] in
+        await presenter().presentPasswordEditing { [weak self] in
             guard let self else { return }
             await handle(event: .canceled)
         }
@@ -62,7 +65,7 @@ extension UpdatePasswordFlow: Flow {
         self.flowContinuation = nil
         if case .canceled = event {
         } else {
-            await presenter.cancelPasswordEditing()
+            await presenter().cancelPasswordEditing()
         }
         flowContinuation.resume(returning: event)
     }
@@ -71,21 +74,21 @@ extension UpdatePasswordFlow: Flow {
 // MARK: - User Actions
 
 extension UpdatePasswordFlow {
-    @MainActor func update(oldPassword: String) {
-        viewModel.oldPassword = oldPassword
-    }
-
-    @MainActor func update(newPassword: String) {
-        viewModel.newPassword = newPassword
-    }
-
-    @MainActor func update(repeatNewPassword: String) {
-        viewModel.repeatNewPassword = repeatNewPassword
-    }
-
-    @MainActor func updatePassword() {
-        Task.detached {
-            await self.doUpdatePassword()
+    private func makeActions() async -> UpdatePasswordViewActions {
+        await UpdatePasswordViewActions(state: viewModel.$state) { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .onOldPasswordTextChanged(let text):
+                viewModel.oldPassword = text
+            case .onNewPasswordTextChanged(let text):
+                viewModel.newPassword = text
+            case .onRepeatNewPasswordTextChanged(let text):
+                viewModel.repeatNewPassword = text
+            case .onUpdateTap:
+                Task.detached {
+                    await self.updatePassword()
+                }
+            }
         }
     }
 }
@@ -93,26 +96,26 @@ extension UpdatePasswordFlow {
 // MARK: - Private
 
 extension UpdatePasswordFlow {
-    private func doUpdatePassword() async {
+    private func updatePassword() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter.errorHaptic()
+            return await presenter().errorHaptic()
         }
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         switch await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword) {
         case .success:
             await saveCredentials.save(email: profile.email, password: state.newPassword)
-            await presenter.successHaptic()
-            await presenter.presentSuccess()
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
             await handle(event: .successfullySet)
         case .failure(let error):
             switch error {
             case .validationError:
-                await presenter.presentHint(message: "change_password_format_error".localized)
+                await presenter().presentHint(message: "change_password_format_error".localized)
             case .incorrectOldPassword:
-                await presenter.presentHint(message: "change_password_old_wrong".localized)
+                await presenter().presentHint(message: "change_password_old_wrong".localized)
             case .other(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }

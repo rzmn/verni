@@ -1,37 +1,32 @@
 import AppBase
 
-class UpdateEmailFlowPresenter: Presenter {
+@MainActor class UpdateEmailPresenter: Presenter {
     let router: AppRouter
-    private weak var flow: UpdateEmailFlow!
+    private let viewActions: UpdateEmailViewActions
 
-    init(router: AppRouter, flow: UpdateEmailFlow) {
+    init(router: AppRouter, actions: UpdateEmailViewActions) {
         self.router = router
-        self.flow = flow
+        self.viewActions = actions
     }
 
-    @MainActor
     func codeSent() {
         router.hudSuccess(description: "email_code_send_success".localized)
     }
 
-    @MainActor
     func codeIsWrong() {
         router.hudFailure(description: "email_code_is_wrong".localized)
     }
 
-    @MainActor
     func codeNotDelivered() {
         router.hudFailure(description: "email_code_not_deliveded".localized)
     }
 
-    @MainActor
     func emailAlreadyConfirmed() {
         router.hudFailure(description: "email_code_already_confirmed".localized)
     }
 
-    @MainActor
     func presentEmailEditing(onPop: @escaping @MainActor () async -> Void) {
-        let controller = UpdateEmailViewController(model: flow)
+        let controller = UpdateEmailViewController(model: viewActions)
         controller.navigationItem.largeTitleDisplayMode = .never
         controller.onPop = onPop
         router.push(controller)

@@ -1,7 +1,7 @@
 import UIKit
 import AppBase
 
-class UpdatePasswordViewController: ViewController<UpdatePasswordView, UpdatePasswordFlow> {}
+class UpdatePasswordViewController: ViewController<UpdatePasswordView, UpdatePasswordViewActions> {}
 
 extension UpdatePasswordViewController: Routable {
     var name: String {

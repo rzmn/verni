@@ -2,8 +2,7 @@ import Foundation
 import Combine
 import Domain
 
-@MainActor
-class AddExpenseViewModel {
+@MainActor class AddExpenseViewModel {
     typealias ExpenseOwnership = AddExpenseState.ExpenseOwnership
 
     @Published var state: AddExpenseState

@@ -11,17 +11,21 @@ internal import QrPreviewFlow
 internal import UpdateAvatarFlow
 
 public actor AccountFlow {
-    @MainActor var subject: Published<AccountState>.Publisher {
-        viewModel.$state
+    private var _presenter: AccountPresenter?
+    private func presenter() async -> AccountPresenter {
+        guard let _presenter else {
+            let presenter = await AccountPresenter(router: router, actions: await makeActions())
+            _presenter = presenter
+            return presenter
+        }
+        return _presenter
     }
-
     private let viewModel: AccountViewModel
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
     private let editingUseCase: ProfileEditingUseCase
     private let profileRepository: ProfileRepository
     private var subscriptions = Set<AnyCancellable>()
-    private lazy var presenter = AccountFlowPresenter(router: router, flow: self)
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -54,7 +58,7 @@ public actor AccountFlow {
 
 extension AccountFlow: TabEmbedFlow {
     @MainActor public func viewController() async -> Routable {
-        await presenter.tabViewController
+        await presenter().tabViewController
     }
 
     public enum TerminationEvent {
@@ -80,7 +84,7 @@ extension AccountFlow: TabEmbedFlow {
             case .success(let profile):
                 viewModel.content = .loaded(profile)
             case .failure(let error):
-                await presenter.presentGeneralError(error)
+                await presenter().presentGeneralError(error)
             }
         }
     }
@@ -98,39 +102,25 @@ extension AccountFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension AccountFlow {
-    @MainActor func updateAvatar() {
-        Task.detached {
-            await self.doUpdateAvatar()
-        }
-    }
-
-    @MainActor func updateEmail() {
-        Task.detached {
-            await self.doUpdateEmail()
-        }
-    }
-
-    @MainActor func updatePassword() {
-        Task.detached {
-            await self.doUpdatePassword()
-        }
-    }
-
-    @MainActor func updateDisplayName() {
-        Task.detached {
-            await self.doUpdateDisplayName()
-        }
-    }
-
-    @MainActor func showQr() {
-        Task.detached {
-            await self.doShowQr()
-        }
-    }
-
-    @MainActor func logout() {
-        Task.detached {
-            await self.doLogout()
+    private func makeActions() async -> AccountViewActions {
+        await AccountViewActions(state: viewModel.$state) { action in
+            Task.detached { [weak self] in
+                guard let self else { return }
+                switch action {
+                case .onUpdateAvatarTap:
+                    await updateAvatar()
+                case .onUpdateEmailTap:
+                    await updateEmail()
+                case .onUpdatePasswordTap:
+                    await updatePassword()
+                case .onUpdateDisplayNameTap:
+                    await updateDisplayName()
+                case .onShowQrTap:
+                    await showQr()
+                case .onLogoutTap:
+                    await logout()
+                }
+            }
         }
     }
 }
@@ -142,32 +132,32 @@ extension AccountFlow {
         if let profile = await viewModel.state.info.value {
             return profile
         }
-        await presenter.presentLoading()
+        await presenter().presentLoading()
         switch await profileRepository.refreshProfile() {
         case .success(let profile):
-            await presenter.dismissLoading()
+            await presenter().dismissLoading()
             return profile
         case .failure(let error):
             switch error {
             case .noConnection:
-                await presenter.presentNoConnection()
+                await presenter().presentNoConnection()
             case .notAuthorized:
-                await presenter.presentNotAuthorized()
+                await presenter().presentNotAuthorized()
             case .other(let error):
-                await presenter.presentInternalError(error)
+                await presenter().presentInternalError(error)
             }
             return nil
         }
     }
 
-    private func doUpdateAvatar() async {
-        await presenter.submitHaptic()
-        let flow = UpdateAvatarFlow(di: di, router: router)
+    private func updateAvatar() async {
+        await presenter().submitHaptic()
+        let flow = await UpdateAvatarFlow(di: di, router: router)
         _ = await flow.perform()
     }
 
-    private func doUpdateEmail() async {
-        await presenter.submitHaptic()
+    private func updateEmail() async {
+        await presenter().submitHaptic()
         guard let profile = await getProfile() else {
             return
         }
@@ -175,8 +165,8 @@ extension AccountFlow {
         _ = await flow.perform()
     }
 
-    private func doUpdatePassword() async {
-        await presenter.submitHaptic()
+    private func updatePassword() async {
+        await presenter().submitHaptic()
         guard let profile = await getProfile() else {
             return
         }
@@ -184,14 +174,14 @@ extension AccountFlow {
         _ = await flow.perform()
     }
 
-    private func doUpdateDisplayName() async {
-        await presenter.submitHaptic()
+    private func updateDisplayName() async {
+        await presenter().submitHaptic()
         let flow = await UpdateDisplayNameFlow(di: di, router: router)
         _ = await flow.perform()
     }
 
-    private func doShowQr() async {
-        await presenter.submitHaptic()
+    private func showQr() async {
+        await presenter().submitHaptic()
         guard let profile = await getProfile() else {
             return
         }
@@ -199,12 +189,12 @@ extension AccountFlow {
         do {
             flow = try await QrPreviewFlow(di: di, router: router, profile: profile)
         } catch {
-            return await presenter.presentInternalError(error)
+            return await presenter().presentInternalError(error)
         }
         await flow.perform()
     }
 
-    private func doLogout() async {
+    private func logout() async {
         await handle(event: .logout)
     }
 }

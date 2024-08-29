@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class AuthenticatedTabsController: TabBarController<AuthenticatedFlow, TabBar> {
+class AuthenticatedTabsController: TabBarController<AuthenticatedViewActions, TabBar> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func viewDidLoad() {
@@ -12,10 +12,12 @@ class AuthenticatedTabsController: TabBarController<AuthenticatedFlow, TabBar> {
         tabBar.tintColor = .p.accent
         tabBar.unselectedItemTintColor = .p.iconSecondary
         tabBar.backgroundColor = .p.backgroundContent
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
-        contentTabTar.centerButton.addAction(weak(self, type(of: self).onCenterButtonTap), for: .touchUpInside)
+        contentTabTar.centerButton.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onAddExpenseTap))
+            .store(in: &subscriptions)
     }
 
     private func render(state: AuthenticatedState) {
@@ -28,11 +30,7 @@ class AuthenticatedTabsController: TabBarController<AuthenticatedFlow, TabBar> {
         guard let index = tabBar.items?.firstIndex(of: item) else {
             return
         }
-        model.selected(index: index)
-    }
-
-    private func onCenterButtonTap() {
-        model.addNewExpense()
+        model.handle(.onTabSelected(index: index))
     }
 }
 

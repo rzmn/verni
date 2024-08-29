@@ -1,8 +1,9 @@
 import AppBase
 import UIKit
 import Combine
+internal import Base
 
-class AccountViewController: ViewController<AccountView, AccountFlow> {
+class AccountViewController: ViewController<AccountView, AccountViewActions> {
     private lazy var avatarView = {
         let size: CGFloat = 44
         let frame = CGRect(origin: .zero, size: CGSize(width: size, height: size))
@@ -23,14 +24,10 @@ class AccountViewController: ViewController<AccountView, AccountFlow> {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "qrcode"),
             primaryAction: UIAction(
-                handler: { _ in
-                    Task.detached { [weak self] in
-                        await self?.model.showQr()
-                    }
-                }
+                handler: curry(model.handle)(.onShowQrTap) • nop
             )
         )
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
     }

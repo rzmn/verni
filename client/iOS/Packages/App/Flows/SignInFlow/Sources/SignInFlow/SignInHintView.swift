@@ -1,22 +1,24 @@
 import AppBase
 import UIKit
+import Combine
 internal import DesignSystem
 internal import Base
 
-class SignInHintView: View<SignInFlow> {
+class SignInHintView: View<SignInViewActions> {
     private let button = Button(
         config: Button.Config(
             style: .primary,
             title: "login_go_to_signin".localized
         )
     )
+    private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
         backgroundColor = .p.background
         [button].forEach(addSubview)
-        button.addAction({ [weak model] in
-            model?.openSignIn()
-        }, for: .touchUpInside)
+        button.tapPublisher
+            .sink(receiveValue: curry(model.handle)(.onSignInTap))
+            .store(in: &subscriptions)
     }
 
     override func layoutSubviews() {

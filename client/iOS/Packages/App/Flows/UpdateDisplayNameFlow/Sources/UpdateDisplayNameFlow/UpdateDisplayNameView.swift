@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
+class UpdateDisplayNameView: View<UpdateDisplayNameViewActions> {
     private let newDisplayName = TextField(
         config: TextField.Config(
             placeholder: "enter_new_display_name_placeholder".localized,
@@ -24,16 +24,15 @@ class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
         backgroundColor = .p.background
         [newDisplayName, confirm].forEach(addSubview)
         newDisplayName.delegate = self
-        newDisplayName.addAction({ [weak model, weak newDisplayName] in
-            guard let model, let newDisplayName else { return }
-            model.update(displayName: newDisplayName.text ?? "")
-        }, for: .editingChanged)
-        confirm.addAction({ [weak self] in
-            self?.endEditing(true)
-            self?.model.confirmDisplayName()
-        }, for: .touchUpInside)
+        newDisplayName.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • UpdateDisplayNameViewActionType.onDisplayNameTextChanged)
+            .store(in: &subscriptions)
+        confirm.tapPublisher
+            .sink(receiveValue: weak(self, type(of: self).onConfirmTap))
+            .store(in: &subscriptions)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier
@@ -70,6 +69,11 @@ class UpdateDisplayNameView: View<UpdateDisplayNameFlow> {
             width: bounds.width - .p.defaultHorizontal * 2,
             height: .p.buttonHeight
         )
+    }
+
+    private func onConfirmTap() {
+        endEditing(true)
+        model.handle(.onConfirmTap)
     }
 
     @objc private func onTap() {

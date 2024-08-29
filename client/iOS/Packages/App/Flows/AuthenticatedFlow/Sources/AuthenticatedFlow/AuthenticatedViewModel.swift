@@ -1,8 +1,7 @@
 import Foundation
 import Combine
 
-@MainActor
-class AuthenticatedViewModel {
+@MainActor class AuthenticatedViewModel {
     @Published var state: AuthenticatedState
 
     @Published var tabs: [AuthenticatedState.Tab]

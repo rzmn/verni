@@ -1,7 +1,7 @@
 import AppBase
 import UIKit
 
-class SignInHintViewController: ViewController<SignInHintView, SignInFlow> {}
+class SignInHintViewController: ViewController<SignInHintView, SignInViewActions> {}
 
 extension SignInHintViewController: Routable {
     func create(onClose: @escaping @MainActor (UIViewController) async -> Void) -> UIViewController {

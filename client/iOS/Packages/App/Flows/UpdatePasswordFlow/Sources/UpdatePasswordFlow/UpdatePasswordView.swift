@@ -1,9 +1,10 @@
 import AppBase
 import UIKit
 import Combine
+internal import Base
 internal import DesignSystem
 
-class UpdatePasswordView: View<UpdatePasswordFlow> {
+class UpdatePasswordView: View<UpdatePasswordViewActions> {
     private let oldPassword = TextField(
         config: TextField.Config(
             placeholder: "enter_old_pwd_placeholder".localized,
@@ -37,21 +38,23 @@ class UpdatePasswordView: View<UpdatePasswordFlow> {
         [oldPassword, newPassword, newPasswordRepeat].forEach {
             $0.delegate = self
         }
-        oldPassword.addAction({ [weak model, weak oldPassword] in
-            model?.update(oldPassword: oldPassword?.text ?? "")
-        }, for: .editingChanged)
-        newPassword.addAction({ [weak model, weak newPassword] in
-            model?.update(newPassword: newPassword?.text ?? "")
-        }, for: .editingChanged)
-        newPasswordRepeat.addAction({ [weak model, weak newPasswordRepeat] in
-            model?.update(repeatNewPassword: newPasswordRepeat?.text ?? "")
-        }, for: .editingChanged)
-        confirm.addAction({ [weak self] in
-            self?.endEditing(true)
-            self?.model.updatePassword()
-        }, for: .touchUpInside)
+        oldPassword.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • UpdatePasswordViewActionType.onOldPasswordTextChanged)
+            .store(in: &subscriptions)
+        newPassword.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • UpdatePasswordViewActionType.onNewPasswordTextChanged)
+            .store(in: &subscriptions)
+        newPasswordRepeat.textPublisher
+            .map { $0 ?? "" }
+            .sink(receiveValue: model.handle • UpdatePasswordViewActionType.onRepeatNewPasswordTextChanged)
+            .store(in: &subscriptions)
+        confirm.tapPublisher
+            .sink(receiveValue: weak(self, type(of: self).onConfirmTap))
+            .store(in: &subscriptions)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        model.subject
+        model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)
         KeyboardObserver.shared.notifier
@@ -103,6 +106,11 @@ class UpdatePasswordView: View<UpdatePasswordFlow> {
         )
     }
 
+    private func onConfirmTap() {
+        endEditing(true)
+        model.handle(.onUpdateTap)
+    }
+
     @objc private func onTap() {
         endEditing(true)
     }
@@ -142,9 +150,7 @@ extension UpdatePasswordView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         switch textField {
         case newPasswordRepeat:
-            Task.detached {
-                await self.model.updatePassword()
-            }
+            model.handle(.onUpdateTap)
         case oldPassword:
             newPassword.becomeFirstResponder()
         case newPassword:

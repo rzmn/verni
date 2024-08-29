@@ -14,7 +14,7 @@ private extension Placeholder.Config {
     }
 }
 
-class FriendsView: View<FriendsFlow> {
+class FriendsView: View<FriendsViewActions> {
     private let table = {
         let t = UITableView(frame: .zero, style: .insetGrouped)
         t.backgroundColor = .p.background
@@ -49,13 +49,13 @@ class FriendsView: View<FriendsFlow> {
         table.dataSource = dataSource
         table.delegate = self
         [table, emptyPlaceholder].forEach(addSubview)
-        model.subject
+        model.state
             .map { $0 as FriendsState? }
             .assign(to: \.state, on: self)
             .store(in: &subscriptions)
         table.refreshControl = {
             let ptr = UIRefreshControl()
-            ptr.addAction(weak(model, type(of: model).refresh), for: .valueChanged)
+            ptr.addAction(curry(model.handle)(.onPulledToRefresh), for: .valueChanged)
             return ptr
         }()
     }
@@ -122,7 +122,7 @@ class FriendsView: View<FriendsFlow> {
 extension FriendsView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = items(in: sections[indexPath.section])[indexPath.row]
-        model.openPreview(user: item.data.user)
+        model.handle(.onUserSelected(item.data.user))
     }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {

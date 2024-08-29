@@ -3,8 +3,7 @@ import Logging
 internal import Base
 internal import ProgressHUD
 
-@MainActor
-public class AppRouter: NSObject {
+@MainActor public class AppRouter: NSObject {
     public let logger = Logger.shared.with(prefix: "[router] ")
 
     private let scheduler: AsyncSerialScheduler
@@ -20,7 +19,6 @@ public class AppRouter: NSObject {
         self.scheduler = AsyncSerialScheduler()
     }
 
-    @MainActor
     public func open(url appUrl: AppUrl) {
         guard let url = appUrl.url else {
             return

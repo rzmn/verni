@@ -1,7 +1,7 @@
 import UIKit
 import AppBase
 
-class UpdateDisplayNameViewController: ViewController<UpdateDisplayNameView, UpdateDisplayNameFlow> {
+class UpdateDisplayNameViewController: ViewController<UpdateDisplayNameView, UpdateDisplayNameViewActions> {
 }
 
 extension UpdateDisplayNameViewController: Routable {

@@ -13,7 +13,7 @@ private extension Placeholder.Config {
     }
 }
 
-class UserPreviewView: View<UserPreviewFlow> {
+class UserPreviewView: View<UserPreviewViewActions> {
     private let avatar = {
         let size: CGFloat = 88
         let frame = CGRect(origin: .zero, size: CGSize(width: size, height: size))
@@ -63,7 +63,7 @@ class UserPreviewView: View<UserPreviewFlow> {
     override func setupView() {
         backgroundColor = .p.background
         [name, avatar, table, emptyPlaceholder].forEach(addSubview)
-        model.subject
+        model.state
             .map { $0 as UserPreviewState? }
             .assign(to: \.state, on: self)
             .store(in: &subscriptions)

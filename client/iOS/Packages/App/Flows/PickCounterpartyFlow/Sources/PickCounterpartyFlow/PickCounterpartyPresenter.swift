@@ -1,25 +1,25 @@
 import AppBase
 import UIKit
 
-class PickCounterpartyFlowPresenter: Presenter {
+@MainActor class PickCounterpartyPresenter: Presenter {
     let router: AppRouter
-    private unowned var flow: PickCounterpartyFlow
+    private let actions: PickCounterpartyViewActions
 
-    init(router: AppRouter, flow: PickCounterpartyFlow) {
+    init(router: AppRouter, actions: PickCounterpartyViewActions) {
         self.router = router
-        self.flow = flow
+        self.actions = actions
     }
 
     private weak var controller: NavigationController?
-    @MainActor func present() async {
+    func present() async {
         let navigationController = NavigationController(
-            rootViewController: PickCounterpartyViewController(model: flow)
+            rootViewController: PickCounterpartyViewController(model: actions)
         )
         self.controller = navigationController
         await router.present(navigationController)
     }
 
-    @MainActor func dismiss() async {
+    func dismiss() async {
         guard let controller else {
             return
         }

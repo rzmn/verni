@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 public class IconButton: UIButton {
     public struct Config {
@@ -8,9 +9,16 @@ public class IconButton: UIButton {
             self.icon = icon
         }
     }
+    public var tapPublisher: AnyPublisher<Void, Never> {
+        tapSubject.eraseToAnyPublisher()
+    }
+    let tapSubject = PassthroughSubject<Void, Never>()
 
     public init(config: Config) {
         super.init(frame: .zero)
+        addAction({ [unowned self] in
+            tapSubject.send(())
+        }, for: .touchUpInside)
         configuration = {
             var configuration = UIButton.Configuration.plain()
             configuration.contentInsets = .zero
