@@ -17,7 +17,9 @@ public actor UserPreviewFlow {
     private let router: AppRouter
     private let friendStatusInteractions: FriendInteractionsUseCase
     private let spendingsRepository: SpendingsRepository
+    private let friendsRepository: FriendsRepository
     private var flowContinuation: Continuation?
+    private var subscriptions = Set<AnyCancellable>()
 
     public init(di: ActiveSessionDIContainer, router: AppRouter, user: User) async {
         let spendingsOfflineRepository = di.spendingsOfflineRepository()
@@ -30,6 +32,7 @@ public actor UserPreviewFlow {
         )
         self.router = router
         spendingsRepository = di.spendingsRepository
+        friendsRepository = di.friendListRepository
         friendStatusInteractions = di.friendInterationsUseCase()
     }
 }
@@ -44,12 +47,22 @@ extension UserPreviewFlow: Flow {
     public func perform() async -> TerminationEvent {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
-            Task.detached { @MainActor in
-                await self.presenter().openUserPreview { [weak self] in
-                    guard let self else { return }
-                    await handle(result: .canceledManually)
-                }
+            Task.detached {
+                await self.startFlow()
             }
+        }
+    }
+
+    private func startFlow() async {
+        await self.friendsRepository
+            .friendsUpdated(ofKind: .all)
+            .sink { friends in
+                await self.friendsUpdated(friends: friends)
+            }
+            .store(in: &subscriptions)
+        await self.presenter().openUserPreview { [weak self] in
+            guard let self else { return }
+            await handle(result: .canceledManually)
         }
     }
 
@@ -156,6 +169,17 @@ extension UserPreviewFlow {
         }
     }
 
+    @MainActor private func friendsUpdated(friends: [FriendshipKind: [User]]) async {
+        let counterpartyId = viewModel.state.user.id
+        let updated = await Task {
+            friends.values.flatMap({ $0 }).first(where: { $0.id == counterpartyId })
+        }.value
+        guard let updated else {
+            return
+        }
+        viewModel.user = updated
+    }
+
     private func sendFriendRequest() async {
         let state = await viewModel.state
         switch state.user.status {
@@ -166,9 +190,8 @@ extension UserPreviewFlow {
         }
         switch await friendStatusInteractions.sendFriendRequest(to: state.user.id) {
         case .success:
-            Task { @MainActor in
-                self.viewModel.friendStatus = .outgoing
-            }
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
         case .failure(let reason):
             switch reason {
             case .alreadySent:
@@ -195,9 +218,8 @@ extension UserPreviewFlow {
         }
         switch await friendStatusInteractions.acceptFriendRequest(from: state.user.id) {
         case .success:
-            Task { @MainActor in
-                self.viewModel.friendStatus = .friend
-            }
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
         case .failure(let error):
             switch error {
             case .noSuchRequest:
@@ -218,9 +240,8 @@ extension UserPreviewFlow {
         }
         switch await friendStatusInteractions.rejectFriendRequest(from: state.user.id) {
         case .success:
-            Task { @MainActor in
-                self.viewModel.friendStatus = .no
-            }
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
         case .failure(let error):
             switch error {
             case .noSuchRequest:
@@ -241,9 +262,8 @@ extension UserPreviewFlow {
         }
         switch await friendStatusInteractions.rollbackFriendRequest(to: state.user.id) {
         case .success:
-            Task { @MainActor in
-                self.viewModel.friendStatus = .no
-            }
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
         case .failure(let error):
             switch error {
             case .noSuchRequest:
@@ -264,9 +284,8 @@ extension UserPreviewFlow {
         }
         switch await friendStatusInteractions.unfriend(user: state.user.id) {
         case .success:
-            Task { @MainActor in
-                self.viewModel.friendStatus = .no
-            }
+            await presenter().successHaptic()
+            await presenter().presentSuccess()
         case .failure(let error):
             switch error {
             case .notAFriend:

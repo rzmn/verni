@@ -22,7 +22,6 @@ fileprivate extension IdentifiableSpending {
     @Published var state: UserPreviewState
 
     @Published var user: User
-    @Published var friendStatus: User.FriendStatus
     @Published var spendings: Loadable<[IdentifiableSpending], UserPreviewState.Failure>
 
     private let hostId: User.ID
@@ -43,24 +42,17 @@ fileprivate extension IdentifiableSpending {
         )
         self.state = initial
         self.user = initial.user
-        self.friendStatus = counterparty.status
         self.spendings = spendings.flatMap { .loaded($0) } ?? .initial
 
         setupStateBuilder()
     }
 
     private func setupStateBuilder() {
-        Publishers.CombineLatest4($user, $friendStatus, $spendings, Just(hostId))
+        Publishers.CombineLatest3($user, $spendings, Just(hostId))
             .map { value in
-                let (user, status, spendings, hostId) = value
-                let userWithOverridenStatus = User(
-                    id: user.id,
-                    status: status,
-                    displayName: user.displayName,
-                    avatar: user.avatar
-                )
+                let (user, spendings, hostId) = value
                 return UserPreviewState(
-                    user: userWithOverridenStatus,
+                    user: user,
                     spenginds: spendings.mapValue { spendings in
                         spendings.compactMap {
                             $0.preview(assuming: hostId)
