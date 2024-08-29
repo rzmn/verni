@@ -15,6 +15,8 @@ Each part of domain or data layer has its own protocol and at least one implemen
 
 No implementation depends on another implementation, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
 
+Let's take a closer look at the presentation layer only.
+
 ### App (Presentation) Layer
 
 The App Layer is a set _Flows_. _Flow_ is a complete and reusable fragment of some user path.
