@@ -1,13 +1,27 @@
-# App
+# The App
 
 ## Architecture overview
 
-### Flow
+The Apps architecture can be considered as a set of _Layers_.
 
-_Flow_ is a complete fragment of some user path.
-_Flow_ is presenting and dismissing itself on its own. Flow should be able to start everywhere.
+Layers look like layered structure from "Clean Architecture"
+```mermaid
+graph LR
+    DataLayer(Data Layer) <-- storing and managing data --> DomainLayer(Domain Layer)
+    DomainLayer(Domain Layer) <-- business logic --> PresentationLayer(App Layer)
+```
 
-It is convenient to consider _Flow_ as a single async function:
+Each part of domain or data layer has its own protocol and at least one implementation, except domain entities.
+
+No implementation depends on another implementation, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
+
+### App (Presentation) Layer
+
+The App Layer is a set _Flows_. _Flow_ is a complete and reusable fragment of some user path.
+
+_Flow_ is presenting and dismissing itself on its own. _Flow_ should be able to start from anywhere.
+
+It's convenient to consider _Flow_ as a single async function:
 ```swift
 public protocol Flow {
     associatedtype FlowResult
@@ -32,12 +46,13 @@ actor AskForPushNotificationPermissionFlow: Flow {
 ```
 </details>
 
-Every _Flow_ is provided as a _Swift Package_.
+Each _Flow_ is provided as a _Swift Package_.
 
 ### Flow Components
 
 #### Flow
-- Entry point for some user path as described above.
+- Entry point for some user path as described above
+- The only public entity in a corresponding swift package
 - Interacts with domain layer. (Use Cases, Repositories, Entities)
 - _Presenter_ and _ViewModel_ are created by a _Flow_
 - Listening for _User Actions_
@@ -58,11 +73,11 @@ Every _Flow_ is provided as a _Swift Package_.
 
 ```mermaid
 graph LR
-    View(View) -- creating and publishing user actions --> ViewActions(ViewActions)
+    View(View) -- creating and publishing user actions --> ViewActions(View Actions)
     ViewActions(ViewActions) -- publishing user actions --> Flow(Flow)
-    ViewModel(ViewModel) -- creating and publishing view state --> ViewActions(ViewActions)
-    ViewActions(ViewActions) -- publishing view state --> View(View)
-    Flow(Flow) -- creating and mutating --> ViewModel(ViewModel)
+    ViewModel(View Model) -- creating and publishing view state --> ViewActions(View Actions)
+    ViewActions(View Actions) -- publishing view state --> View(View)
+    Flow(Flow) -- creating and mutating --> ViewModel(View Model)
     Flow(Flow) -- creating and configuring --> Presenter(Presenter)
     Presenter(Presenter) -- creating and presenting --> View(View)
 ```
