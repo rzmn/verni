@@ -30,14 +30,14 @@ public class DefaultSpendingsRepository {
 extension DefaultSpendingsRepository: SpendingsRepository {
     public func getSpending(id: Spending.ID) async -> Result<Spending, GetSpendingError> {
         logI { "getSpending[id=\(id)] start" }
-        let result = await api.run(method: Spendings.GetDeal(dealId: id))
-        switch result {
-        case .success(let spendingDto):
-            return .success(Spending(dto: spendingDto))
-        case .failure(let apiError):
-            logI { "getSpending[id=\(id)] failed error: \(apiError)" }
-            return .failure(GetSpendingError(apiError: apiError))
+        let result: Spending
+        do {
+            result = Spending(dto: try await api.run(method: Spendings.GetDeal(dealId: id)))
+        } catch {
+            logI { "getSpending[id=\(id)] failed error: \(error)" }
+            return .failure(GetSpendingError(apiError: error))
         }
+        return .success(result)
     }
     
     private func spendingsHistorySubject(with uid: User.ID) -> PassthroughSubject<[IdentifiableSpending], Never> {
@@ -104,39 +104,38 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     
     public func refreshSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError> {
         logI { "refreshSpendingCounterparties start" }
-        switch await api.run(method: Spendings.GetCounterparties()) {
-        case .success(let previewsDto):
-            let previews = previewsDto.map(SpendingsPreview.init)
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await offline.updateSpendingCounterparties(previews)
-            }
-            logI { "refreshSpendingCounterparties ok" }
-            counterpartiesSubject.send(previews)
-            return .success(previews)
-        case .failure(let apiError):
-            logI { "refreshSpendingCounterparties failed error: \(apiError)" }
-            return .failure(GeneralError(apiError: apiError))
+        let counterparties: [SpendingsPreview]
+        do {
+            counterparties = try await api.run(method: Spendings.GetCounterparties()).map(SpendingsPreview.init)
+        } catch {
+            logI { "refreshSpendingCounterparties failed error: \(error)" }
+            return .failure(GeneralError(apiError: error))
         }
+        Task.detached { [weak self] in
+            guard let self else { return }
+            await offline.updateSpendingCounterparties(counterparties)
+        }
+        logI { "refreshSpendingCounterparties ok" }
+        counterpartiesSubject.send(counterparties)
+        return .success(counterparties)
     }
     
     public func refreshSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError> {
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] start" }
-        let result = await api.run(method: Spendings.GetDeals(counterparty: counterparty))
-        switch result {
-        case .success(let spendingsDto):
-            let spendings = spendingsDto.map(IdentifiableSpending.init)
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
-            }
-            logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }
-            spendingsHistorySubject(with: counterparty).send(spendings)
-            return .success(spendings)
-        case .failure(let apiError):
-            logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(apiError)" }
-            return .failure(GetSpendingsHistoryError(apiError: apiError))
+        let spendings: [IdentifiableSpending]
+        do {
+            spendings = try await api.run(method: Spendings.GetDeals(counterparty: counterparty)).map(IdentifiableSpending.init)
+        } catch {
+            logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(error)" }
+            return .failure(GetSpendingsHistoryError(apiError: error))
         }
+        Task.detached { [weak self] in
+            guard let self else { return }
+            await offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
+        }
+        logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }
+        spendingsHistorySubject(with: counterparty).send(spendings)
+        return .success(spendings)
     }
 }
 

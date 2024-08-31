@@ -30,20 +30,20 @@ extension DefaultProfileRepository: ProfileRepository {
     
     public func refreshProfile() async -> Result<Domain.Profile, GeneralError> {
         logI { "refresh" }
-        switch await api.run(method: Profile.GetInfo()) {
-        case .success(let dto):
-            let profile = Profile(dto: dto)
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await offline.update(profile: profile)
-            }
-            subject.send(profile)
-            logI { "refresh ok" }
-            return .success(profile)
-        case .failure(let error):
+        let profile: Domain.Profile
+        do {
+            profile = Profile(dto: try await api.run(method: Profile.GetInfo()))
+        } catch {
             logI { "refresh failed error: \(error)" }
             return .failure(GeneralError(apiError: error))
         }
+        Task.detached { [weak self] in
+            guard let self else { return }
+            await offline.update(profile: profile)
+        }
+        subject.send(profile)
+        logI { "refresh ok" }
+        return .success(profile)
     }
 }
 

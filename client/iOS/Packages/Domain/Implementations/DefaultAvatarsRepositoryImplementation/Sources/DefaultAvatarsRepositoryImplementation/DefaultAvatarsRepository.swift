@@ -96,10 +96,8 @@ extension DefaultAvatarsRepository: AvatarsRepository {
                     )
             )
         }
-
-        let method = Avatars.Get(ids: idsToLoad)
-        switch await api.run(method: method) {
-        case .success(let values):
+        do {
+            let values = try await api.run(method: Avatars.Get(ids: idsToLoad))
             idsToLoad.forEach { id in
                 if let avatar = values[id] {
                     if let data = avatar.base64Data.flatMap({ Data(base64Encoded: $0) }) {
@@ -137,7 +135,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
                 return await self.offlineRepository.store(data: data, for: value.key)
             }
             return .success(dict)
-        case .failure(let error):
+        } catch {
             let error = GeneralError(apiError: error)
             idsToLoad.forEach { id in
                 self.loadingIdsContinuation[id]?.resume(returning: .failure(error))

@@ -19,18 +19,19 @@ public class DefaultUsersRepository {
 extension DefaultUsersRepository: UsersRepository {
     public func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
         logI { "getUsers [\(ids.count) ids]" }
+        let users: [User]
         do {
-            let users = try await api.run(method: Users.Get(ids: ids)).map(User.init)
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await offline.update(users: users)
-            }
-            logI { "getUsers OK" }
-            return .success(users)
+            users = try await api.run(method: Users.Get(ids: ids)).map(User.init)
         } catch {
             logI { "getUsers failed error: \(error)" }
             return .failure(GeneralError(apiError: error))
         }
+        Task.detached { [weak self] in
+            guard let self else { return }
+            await offline.update(users: users)
+        }
+        logI { "getUsers OK" }
+        return .success(users)
     }
 
     public func searchUsers(query: String) async -> Result<[User], GeneralError> {
@@ -39,18 +40,19 @@ extension DefaultUsersRepository: UsersRepository {
             logI { "search users query is empty, returning immediatly" }
             return .success([])
         }
+        let users: [User]
         do {
-            let users = try await api.run(method: Users.Search(query: query)).map(User.init)
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await offline.update(users: users)
-            }
-            logI { "search users [q=\(query)] OK" }
-            return .success(users)
+            users = try await api.run(method: Users.Search(query: query)).map(User.init)
         } catch {
             logI { "search users [q=\(query)] failed error: \(error)" }
             return .failure(GeneralError(apiError: error))
         }
+        Task.detached { [weak self] in
+            guard let self else { return }
+            await offline.update(users: users)
+        }
+        logI { "search users [q=\(query)] OK" }
+        return .success(users)
     }
 }
 

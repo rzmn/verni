@@ -28,50 +28,61 @@ extension DefaultApi {
 extension DefaultApi {
     private var longPollTimeout: Int { 29 }
 
+    func longPollNoTypedThrow<Query>(
+        query: Query
+    ) async -> Result<[Query.Update], LongPollError>
+    where Query: LongPollQuery, Query.Update: Decodable {
+        do {
+            return .success(try await longPoll(query: query))
+        } catch {
+            return .failure(error)
+        }
+    }
+
     func longPoll<Query>(
         query: Query
-    ) async -> LongPollResult<[Query.Update]>
+    ) async throws(LongPollError) -> [Query.Update]
     where Query: LongPollQuery, Query.Update: Decodable {
-        let result = await service.run(
-            request: AnyApiServiceRequest(
-                path: query.method,
-                parameters: [
-                    "timeout": "\(longPollTimeout)",
-                    "category": query.eventId
-                ], 
-                httpMethod: .get
+        let result: LongPollResultDto<Query.Update>
+        do {
+            result = try await service.run(
+                request: AnyApiServiceRequest(
+                    path: query.method,
+                    parameters: [
+                        "timeout": "\(longPollTimeout)",
+                        "category": query.eventId
+                    ],
+                    httpMethod: .get
+                )
             )
-        ) as Result<LongPollResultDto<Query.Update>, ApiServiceError>
-        switch result {
-        case .success(let longPollResult):
-            switch longPollResult {
-            case .success(let update):
-                return .success(update)
-            case .failure(let longPollFailure):
-                switch longPollFailure {
-                case .noUpdates:
-                    return .failure(.noUpdates)
-                case .noConnection(let error):
-                    return .failure(.noConnection(error))
-                case .internalError(let error):
-                    return .failure(.internalError(error))
-                }
-            }
-        case .failure(let error):
+        } catch {
             switch error {
             case .noConnection(let error):
-                return .failure(.noConnection(error))
+                throw .noConnection(error)
             case .decodingFailed(let error), .internalError(let error):
-                return .failure(.internalError(error))
+                throw .internalError(error)
             case .unauthorized:
-                return .failure(.internalError(error))
+                throw .internalError(error)
+            }
+        }
+        switch result {
+        case .success(let update):
+            return update
+        case .failure(let longPollFailure):
+            switch longPollFailure {
+            case .noUpdates:
+                throw .noUpdates
+            case .noConnection(let error):
+                throw .noConnection(error)
+            case .internalError(let error):
+                throw .internalError(error)
             }
         }
     }
 
     func run<Method>(
         method: Method
-    ) async -> ApiResult<Method.Response>
+    ) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters: Encodable {
         if case .get = method.method {
             let request: ApiServiceRequest
@@ -79,38 +90,42 @@ extension DefaultApi {
             case .success(let success):
                 request = success
             case .failure(let failure):
-                return .failure(failure)
+                throw failure
             }
-            let response: ApiServiceResponse<Method.Response> = await service.run(request: request)
-            return mapApiResponse(response)
+            let call: () async throws(ApiServiceError) -> ApiResponseDto<Method.Response> = {
+                try await self.service.run(request: request)
+            }
+            return try await mapApiResponse(call)
         } else {
-            return mapApiResponse(
-                await service.run(
+            let call: () async throws(ApiServiceError) -> ApiResponseDto<Method.Response> = {
+                try await self.service.run(
                     request: AnyApiServiceRequestWithBody(
                         request: AnyApiServiceRequest(
                             method: method
                         ),
                         body: method.parameters
                     )
-                ) as ApiServiceResponse<Method.Response>
-            )
+                )
+            }
+            return try await mapApiResponse(call)
         }
     }
 
     func run<Method>(
         method: Method
-    ) async -> ApiResult<Method.Response>
+    ) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters == NoParameters {
-        mapApiResponse(
-            await service.run(
+        let call: () async throws(ApiServiceError) -> ApiResponseDto<Method.Response> = {
+            try await self.service.run(
                 request: AnyApiServiceRequest(method: method)
-            ) as ApiServiceResponse<Method.Response>
-        )
+            )
+        }
+        return try await mapApiResponse(call)
     }
 
     func run<Method>(
         method: Method
-    ) async -> ApiResult<Void>
+    ) async throws(ApiError) -> Void
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable {
         if case .get = method.method {
             let request: ApiServiceRequest
@@ -118,44 +133,48 @@ extension DefaultApi {
             case .success(let success):
                 request = success
             case .failure(let failure):
-                return .failure(failure)
+                throw failure
             }
-            let response: ApiServiceResultVoid = await service.run(request: request)
-            return mapApiResponse(response)
+            let call: () async throws(ApiServiceError) -> VoidApiResponseDto = {
+                try await self.service.run(request: request)
+            }
+            return try await mapApiResponse(call)
         } else {
-            return mapApiResponse(
-                await service.run(
+            let call: () async throws(ApiServiceError) -> VoidApiResponseDto = {
+                try await self.service.run(
                     request: AnyApiServiceRequestWithBody(
                         request: AnyApiServiceRequest(
                             method: method
                         ),
                         body: method.parameters
                     )
-                ) as ApiServiceResultVoid
-            )
+                )
+            }
+            return try await mapApiResponse(call)
         }
     }
 
-    private func mapApiResponse<R: ApiResponse>(_ response: Result<R, ApiServiceError>) -> ApiResult<R.Success> {
-        switch response {
-        case .success(let response):
-            switch response.result {
-            case .success(let response):
-                return .success(response)
-            case .failure(let error):
-                return .failure(.api(error.code, description: error.description))
-            }
-        case .failure(let error):
+    private func mapApiResponse<R: ApiResponse>(_ call: () async throws(ApiServiceError) -> R) async throws(ApiError) -> R.Success {
+        let response: R
+        do {
+            response = try await call()
+        } catch {
             switch error {
             case .noConnection(let error):
-                return .failure(.noConnection(error))
+                throw .noConnection(error)
             case .decodingFailed(let error):
-                return .failure(.internalError(error))
+                throw .internalError(error)
             case .internalError(let error):
-                return .failure(.internalError(error))
+                throw .internalError(error)
             case .unauthorized:
-                return .failure(.api(.tokenExpired, description: nil))
+                throw .api(.tokenExpired, description: nil)
             }
+        }
+        switch response.result {
+        case .success(let response):
+            return response
+        case .failure(let error):
+            throw .api(error.code, description: error.description)
         }
     }
 

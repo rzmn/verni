@@ -16,20 +16,18 @@ public class DefaultEmailConfirmationUseCase {
 
 extension DefaultEmailConfirmationUseCase: EmailConfirmationUseCase {
     public func sendConfirmationCode() async -> Result<Void, SendEmailConfirmationCodeError> {
-        switch await api.run(method: Auth.SendEmailConfirmationCode()) {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(SendEmailConfirmationCodeError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Auth.SendEmailConfirmationCode()))
+        } catch {
+            return .failure(SendEmailConfirmationCodeError(apiError: error))
         }
     }
 
     public func confirm(code: String) async -> Result<Void, EmailConfirmationError> {
-        switch await api.run(method: Auth.ConfirmEmail(code: code)) {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(EmailConfirmationError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Auth.ConfirmEmail(code: code)))
+        } catch {
+            return .failure(EmailConfirmationError(apiError: error))
         }
     }
 }

@@ -11,52 +11,42 @@ public class DefaultFriendInteractionsUseCase {
 
 extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
     public func acceptFriendRequest(from user: User.ID) async -> Result<Void, AcceptFriendRequestError> {
-        let result = await api.run(method: Friends.AcceptRequest(sender: user))
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(AcceptFriendRequestError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Friends.AcceptRequest(sender: user)))
+        } catch {
+            return .failure(AcceptFriendRequestError(apiError: error))
         }
     }
     
     public func rejectFriendRequest(from user: User.ID) async -> Result<Void, RejectFriendRequestError> {
-        let result = await api.run(method: Friends.RejectRequest(sender: user))
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(RejectFriendRequestError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Friends.RejectRequest(sender: user)))
+        } catch {
+            return .failure(RejectFriendRequestError(apiError: error))
         }
     }
     
     public func sendFriendRequest(to user: User.ID) async -> Result<Void, SendFriendRequestError> {
-        let result = await api.run(method: Friends.SendRequest(target: user))
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(SendFriendRequestError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Friends.SendRequest(target: user)))
+        } catch {
+            return .failure(SendFriendRequestError(apiError: error))
         }
     }
     
     public func rollbackFriendRequest(to user: User.ID) async -> Result<Void, RollbackFriendRequestError> {
-        let result = await api.run(method: Friends.RollbackRequest(target: user))
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(RollbackFriendRequestError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Friends.RollbackRequest(target: user)))
+        } catch {
+            return .failure(RollbackFriendRequestError(apiError: error))
         }
     }
     
     public func unfriend(user: User.ID) async -> Result<Void, UnfriendError> {
-        let result = await api.run(method: Friends.Unfriend(target: user))
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let apiError):
-            return .failure(UnfriendError(apiError: apiError))
+        do {
+            return .success(try await api.run(method: Friends.Unfriend(target: user)))
+        } catch {
+            return .failure(UnfriendError(apiError: error))
         }
     }
 }

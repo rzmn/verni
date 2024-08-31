@@ -35,7 +35,7 @@ extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
     public func registerForPush(token tokenData: Data) async {
         let token = tokenData.map { String(format: "%02.2hhx", $0) }.joined()
         let method = Auth.RegisterForPushNotifications(token: token)
-        _ = await api.run(method: method)
+        try? await api.run(method: method)
     }
 }
 

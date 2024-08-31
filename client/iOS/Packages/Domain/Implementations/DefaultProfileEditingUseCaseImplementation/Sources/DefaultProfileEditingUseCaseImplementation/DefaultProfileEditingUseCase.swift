@@ -18,48 +18,55 @@ public class DefaultProfileEditingUseCase {
 
 extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
     public func setAvatar(imageData: Data) async -> Result<Void, Domain.SetAvatarError> {
-        let method = Api.Profile.SetAvatar(dataBase64: imageData.base64EncodedString())
-        switch await api.run(method: method) {
-        case .success:
+        do {
+            try await api.run(
+                method: Api.Profile.SetAvatar(dataBase64: imageData.base64EncodedString())
+            )
             await repository.refreshProfile()
             return .success(())
-        case .failure(let apiError):
-            return .failure(SetAvatarError(apiError: apiError))
+        } catch {
+            return .failure(SetAvatarError(apiError: error))
         }
     }
     
     public func setDisplayName(_ displayName: String) async -> Result<Void, Domain.SetDisplayNameError> {
-        let method = Api.Profile.SetDisplayName(displayName: displayName)
-        switch await api.run(method: method) {
-        case .success:
+        do {
+            try await api.run(
+                method: Api.Profile.SetDisplayName(displayName: displayName)
+            )
             await repository.refreshProfile()
             return .success(())
-        case .failure(let apiError):
-            return .failure(SetDisplayNameError(apiError: apiError))
+        } catch {
+            return .failure(SetDisplayNameError(apiError: error))
         }
     }
     
     public func updateEmail(_ email: String) async -> Result<Void, EmailUpdateError> {
-        let method = Auth.UpdateEmail(email: email)
-        switch await api.run(method: method) {
-        case .success:
+        do {
+            let tokens = try await api.run(
+                method: Auth.UpdateEmail(email: email)
+            )
+            Task.detached {
+                await self.persistency.update(refreshToken: tokens.refreshToken)
+            }
             await repository.refreshProfile()
             return .success(())
-        case .failure(let apiError):
-            return .failure(EmailUpdateError(apiError: apiError))
+        } catch {
+            return .failure(EmailUpdateError(apiError: error))
         }
     }
 
     public func updatePassword(old: String, new: String) async -> Result<Void, PasswordUpdateError> {
-        let method = Auth.UpdatePassword(old: old, new: new)
-        switch await api.run(method: method) {
-        case .success(let tokens):
+        do {
+            let tokens = try await api.run(
+                method: Auth.UpdatePassword(old: old, new: new)
+            )
             Task.detached {
                 await self.persistency.update(refreshToken: tokens.refreshToken)
             }
             return .success(())
-        case .failure(let apiError):
-            return .failure(PasswordUpdateError(apiError: apiError))
+        } catch {
+            return .failure(PasswordUpdateError(apiError: error))
         }
     }
 }

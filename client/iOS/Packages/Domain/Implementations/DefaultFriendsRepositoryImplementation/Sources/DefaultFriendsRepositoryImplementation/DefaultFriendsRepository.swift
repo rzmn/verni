@@ -62,23 +62,21 @@ extension DefaultFriendsRepository: FriendsRepository {
     public func refreshFriends(ofKind kind: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
         logI { "refreshFriends[kind=\(kind)]" }
         let uids: [UserDto.ID]
-        switch await api.run(
-            method: Friends.Get(
-                statuses: kind.array.map(FriendshipKindDto.init)
-            )
-        ) {
-        case .success(let dict):
-            logI { "refreshFriends[kind=\(kind)] OK" }
-            uids = dict.flatMap(\.value)
-        case .failure(let apiError):
-            logI { "refreshFriends[kind=\(kind)] error: \(apiError)" }
-            return .failure(GeneralError(apiError: apiError))
+        do {
+            uids = try await api.run(
+                method: Friends.Get(
+                    statuses: kind.array.map(FriendshipKindDto.init)
+                )
+            ).flatMap(\.value)
+        } catch {
+            logI { "refreshFriends[kind=\(kind)] error: \(error)" }
+            return .failure(GeneralError(apiError: error))
         }
         let users: [UserDto]
-        switch await api.run(method: Users.Get(ids: uids)) {
-        case .success(let success):
-            users = success
-        case .failure(let error):
+        do {
+            users = try await api.run(method: Users.Get(ids: uids))
+        } catch {
+            logI { "refreshFriends[kind=\(kind)] get users error: \(error)" }
             return .failure(GeneralError(apiError: error))
         }
         let friendsByKind = users.map(User.init).reduce(

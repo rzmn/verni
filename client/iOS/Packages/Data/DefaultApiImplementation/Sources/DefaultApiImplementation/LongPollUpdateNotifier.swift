@@ -40,14 +40,14 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
         self.api = api
     }
 
-    func subscribe() {
+    func subscribe() async {
         subscribersCount += 1
         if subscribersCount == 1 {
             startListening()
         }
     }
 
-    func unsubscribe() {
+    func unsubscribe() async {
         subscribersCount -= 1
         assert(subscribersCount >= 0)
         if subscribersCount == 0 {
@@ -101,14 +101,13 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
         case internalError
     }
     private func listenForUpdates() async -> Result<[Query.Update], ListenForUpdatesTerminationEvent> {
-        let result = await api.longPoll(query: self.query)
+        let result = await api.longPollNoTypedThrow(query: self.query)
         if Task.isCancelled {
             logI { "listenForUpdates canceled" }
             return .failure(.canceled)
         }
         switch result {
         case .success(let result):
-
             return .success(result)
         case .failure(let error):
             switch error {

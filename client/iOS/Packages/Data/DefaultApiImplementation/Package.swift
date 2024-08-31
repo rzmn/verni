@@ -19,6 +19,7 @@ let package = Package(
         .package(path: "../DataTransferObjects"),
         .package(path: "../../Infrastructure/ApiService"),
         .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
@@ -27,7 +28,8 @@ let package = Package(
                 "ApiService",
                 "Api",
                 "Base",
-                "DataTransferObjects"
+                "DataTransferObjects",
+                "Logging",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
