@@ -23,7 +23,11 @@ open class SQLitePersistencyFactory {
 }
 
 extension SQLitePersistencyFactory: PersistencyFactory {
-    @StorageActor public func awake() -> Persistency? {
+    public func awake() async -> Persistency? {
+        await doAwake()
+    }
+
+    @StorageActor private func doAwake() async -> Persistency? {
         logI { "awaking persistence..." }
         let dbUrl: URL
         do {
@@ -72,8 +76,12 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             return nil
         }
     }
-    
-    @StorageActor public func create(hostId: UserDto.ID, refreshToken: String) throws -> Persistency {
+
+    public func create(hostId: UserDto.ID, refreshToken: String) async throws -> Persistency {
+        try await doCreate(hostId: hostId, refreshToken: refreshToken)
+    }
+
+    @StorageActor private func doCreate(hostId: UserDto.ID, refreshToken: String) async throws -> Persistency {
         logI { "creating persistence..." }
         let dbUrl = dbDirectory
             .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
@@ -87,7 +95,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             throw error
         }
         return SQLitePersistency(
-            db: db, 
+            db: db,
             dbInvalidationHandler: {
                 try FileManager.default.removeItem(at: dbUrl)
             },

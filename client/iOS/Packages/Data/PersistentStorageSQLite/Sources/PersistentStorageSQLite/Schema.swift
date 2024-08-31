@@ -2,6 +2,8 @@ import Foundation
 import DataTransferObjects
 internal import SQLite
 
+typealias Expression = SQLite.Expression
+
 enum Schema {
     enum Tokens {
         static let table = Table("tokens")
