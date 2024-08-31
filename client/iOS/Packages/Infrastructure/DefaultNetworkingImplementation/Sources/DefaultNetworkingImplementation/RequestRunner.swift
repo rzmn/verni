@@ -44,11 +44,13 @@ struct RequestRunner: Loggable {
 }
 
 extension RequestRunner {
-    func run() async -> Result<NetworkServiceResponse, NetworkServiceError> {
-        await run(backoff: ExponentialBackoff(retryCount: 0))
+    func run() async throws(NetworkServiceError) -> NetworkServiceResponse {
+        try await run(backoff: ExponentialBackoff(retryCount: 0))
     }
 
-    private func run(backoff: ExponentialBackoff) async -> Result<NetworkServiceResponse, NetworkServiceError> {
+    private func run(
+        backoff: ExponentialBackoff
+    ) async throws(NetworkServiceError) -> NetworkServiceResponse {
         logI { "run request \(request) backoff \(backoff)" }
         let data: Data
         let response: URLResponse
@@ -62,19 +64,19 @@ extension RequestRunner {
                 logI { "backoff try \(backoff.retryCount)" }
                 do {
                     try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
-                    return await run(backoff: ExponentialBackoff(retryCount: backoff.retryCount + 1))
+                    return try await run(backoff: ExponentialBackoff(retryCount: backoff.retryCount + 1))
                 } catch {
                     logI { "backoff failed on try \(backoff.retryCount) error: \(error)" }
-                    return .failure(serviceError)
+                    throw serviceError
                 }
             } else {
                 logI { "stopping backoff error: \(error)" }
-                return .failure(serviceError)
+                throw serviceError
             }
         }
         guard let httpResponse = response as? HTTPURLResponse else {
             logE { "response is not an HTTPURLResponse. found: \(response)" }
-            return .failure(.badResponse(InternalError.error("bad respose type: \(response)", underlying: nil)))
+            throw .badResponse(InternalError.error("bad respose type: \(response)", underlying: nil))
         }
         let code = HttpCode(
             code: httpResponse.statusCode
@@ -83,23 +85,19 @@ extension RequestRunner {
             if backoff.shouldTryAgain {
                 do {
                     try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
-                    return await run(backoff: ExponentialBackoff(retryCount: backoff.retryCount + 1))
+                    return try await run(backoff: ExponentialBackoff(retryCount: backoff.retryCount + 1))
                 } catch {
-                    return .success(
-                        NetworkServiceResponse(
-                            code: code,
-                            data: data
-                        )
+                    return NetworkServiceResponse(
+                        code: code,
+                        data: data
                     )
                 }
             }
         }
         logI { "got http response" }
-        return .success(
-            NetworkServiceResponse(
-                code: code,
-                data: data
-            )
+        return NetworkServiceResponse(
+            code: code,
+            data: data
         )
     }
 }

@@ -1,5 +1,3 @@
-import Foundation
-
 public enum HttpCode {
     public enum Succcess {
         case ok

@@ -11,8 +11,6 @@ public struct Endpoint {
     }
 }
 
-extension Endpoint: CompactDescription {}
-
 class DefaultNetworkService {
     let logger: Logger
     private let endpoint: Endpoint
@@ -33,33 +31,23 @@ class DefaultNetworkService {
 }
 
 extension DefaultNetworkService: NetworkService {
-    func run<T>(_ request: T) async -> Result<NetworkServiceResponse, NetworkServiceError> where T: NetworkRequest {
+    func run<T: NetworkRequest>(
+        _ request: T
+    ) async throws(NetworkServiceError) -> NetworkServiceResponse {
         logI { "starting request \(request)" }
-        let url: URL
-        switch await UrlBuilder(
-            endpoint: endpoint, 
+        let url = try await UrlBuilder(
+            endpoint: endpoint,
             request: request,
             logger: logger.with(prefix: "[\(request.path)] ")
-        ).build() {
-        case .success(let result):
-            url = result
-        case .failure(let error):
-            return .failure(error)
-        }
-        let urlRequest: URLRequest
-        switch await UrlRequestBuilder(
+        ).build()
+        let urlRequest = try await UrlRequestBuilder(
             url: url,
             request: request,
             encoder: encoder,
             logger: logger.with(prefix: "[\(url)] ")
-        ).build() {
-        case .success(let request):
-            urlRequest = request
-        case .failure(let error):
-            return .failure(error)
-        }
+        ).build()
         logI { "\(request.path): built request: \(urlRequest)" }
-        return await RequestRunner(
+        return try await RequestRunner(
             session: session,
             request: urlRequest,
             logger: logger.with(prefix: "[\(url)] ")

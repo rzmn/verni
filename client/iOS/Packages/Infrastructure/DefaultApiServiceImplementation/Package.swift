@@ -18,11 +18,22 @@ let package = Package(
         .package(path: "../Networking"),
         .package(path: "../Logging"),
         .package(path: "../ApiService"),
+        .package(path: "../Base"),
     ],
     targets: [
         .target(
             name: "DefaultApiServiceImplementation",
-            dependencies: ["Logging", "Networking", "ApiService"],
+            dependencies: ["Logging", "Networking", "ApiService", "Base"],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
+        ),
+        .testTarget(
+            name: "DefaultApiServiceImplementationTests",
+            dependencies: ["DefaultApiServiceImplementation", "ApiService", "Logging"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

@@ -22,28 +22,24 @@ struct UrlBuilder<Request: NetworkRequest>: Loggable {
 }
 
 extension UrlBuilder {
-    func build() async -> Result<URL, NetworkServiceError> {
+    func build() async throws(NetworkServiceError) -> URL {
         let urlString = endpoint.pathWithoutTrailingSlash + request.path
         guard let url = URL(string: urlString) else {
             logE { "cannot build url with string \(urlString)" }
-            return .failure(
-                .cannotBuildRequest(
-                    InternalError.error(
-                        "cannot build url with string \(urlString)",
-                        underlying: nil
-                    )
+            throw .cannotBuildRequest(
+                InternalError.error(
+                    "cannot build url with string \(urlString)",
+                    underlying: nil
                 )
             )
         }
         guard !request.parameters.isEmpty else {
-            return .success(url)
+            return url
         }
-        return .success(
-            url.appending(
-                queryItems: request.parameters.map {
-                    URLQueryItem(name: $0.key, value: $0.value)
-                }
-            )
+        return url.appending(
+            queryItems: request.parameters.map {
+                URLQueryItem(name: $0.key, value: $0.value)
+            }
         )
     }
 }
