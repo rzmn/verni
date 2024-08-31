@@ -34,13 +34,13 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
     private lazy var tokenRefresher: TokenRefresher = RefreshTokenManager(
         api: anonymousApi,
         persistency: persistency, 
-        onSessionInvalidated: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
+        onRefreshTokenExpiredOnInvalid: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
     )
     private let userId: User.ID
     private let persistency: Persistency
     private let accessToken: String?
 
-    public static func awake(
+    public static func create(
         anonymousApi: ApiProtocol,
         hostId: User.ID,
         accessToken: String?,

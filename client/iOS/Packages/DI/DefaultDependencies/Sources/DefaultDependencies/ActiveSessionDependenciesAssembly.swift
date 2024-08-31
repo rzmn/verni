@@ -112,7 +112,7 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     lazy var logoutUseCase: LogoutUseCase = DefaultLogoutUseCase(
         persistency: persistency,
-        logoutIsRequired: logoutSubject
+        shouldLogout: logoutSubject.eraseToAnyPublisher()
     )
 
     func spendingsOfflineRepository() -> SpendingsOfflineRepository {

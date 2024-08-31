@@ -74,7 +74,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         do {
             return .success(
-                try await ActiveSession.awake(
+                try await ActiveSession.create(
                     anonymousApi: api,
                     hostId: token.id,
                     accessToken: token.accessToken,
@@ -122,7 +122,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         do {
             return .success(
-                try await ActiveSession.awake(
+                try await ActiveSession.create(
                     anonymousApi: api,
                     hostId: token.id,
                     accessToken: token.accessToken,

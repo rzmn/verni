@@ -7,5 +7,5 @@ public enum LogoutReason {
 public protocol LogoutUseCase {
     func logout() async
 
-    var logoutIsRequired: AnyPublisher<LogoutReason, Never> { get }
+    var didLogoutPublisher: AnyPublisher<LogoutReason, Never> { get async }
 }

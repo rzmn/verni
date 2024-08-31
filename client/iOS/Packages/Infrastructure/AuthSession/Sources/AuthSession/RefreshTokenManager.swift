@@ -8,12 +8,13 @@ actor RefreshTokenManager {
     private let api: ApiProtocol
     private let persistency: Persistency
     private var accessTokenValue: String?
-    private let onSessionInvalidated: () -> Void
 
-    init(api: ApiProtocol, persistency: Persistency, onSessionInvalidated: @escaping () -> Void) {
+    private let onRefreshTokenExpiredOnInvalid: () -> Void
+
+    init(api: ApiProtocol, persistency: Persistency, onRefreshTokenExpiredOnInvalid: @escaping () -> Void) {
         self.api = api
         self.persistency = persistency
-        self.onSessionInvalidated = onSessionInvalidated
+        self.onRefreshTokenExpiredOnInvalid = onRefreshTokenExpiredOnInvalid
     }
 }
 
@@ -33,7 +34,7 @@ extension RefreshTokenManager: TokenRefresher {
         } catch {
             switch error {
             case .api(let apiErrorCode, _):
-                onSessionInvalidated()
+                onRefreshTokenExpiredOnInvalid()
                 switch apiErrorCode {
                 case .tokenExpired:
                     throw .expired(error)
@@ -43,7 +44,7 @@ extension RefreshTokenManager: TokenRefresher {
             case .noConnection(let error):
                 throw .noConnection(error)
             case .internalError(let error):
-                onSessionInvalidated()
+                onRefreshTokenExpiredOnInvalid()
                 throw .internalError(error)
             }
         }
