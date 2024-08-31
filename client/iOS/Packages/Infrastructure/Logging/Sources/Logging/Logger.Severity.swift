@@ -1,5 +1,5 @@
 extension Logger {
-    public enum Severity: Int, Comparable, CustomStringConvertible {
+    public enum Severity: Int, Sendable, Comparable, CustomStringConvertible {
         case error = 0
         case info = 1
         case debug = 2
