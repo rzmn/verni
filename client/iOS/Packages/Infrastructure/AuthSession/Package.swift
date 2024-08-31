@@ -16,13 +16,14 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../ApiService"),
+        .package(path: "../../DI/DI"),
         .package(path: "../../Data/Api"),
         .package(path: "../../Data/PersistentStorage"),
     ],
     targets: [
         .target(
             name: "AuthSession",
-            dependencies: ["Api", "ApiService", "PersistentStorage"],
+            dependencies: ["Api", "ApiService", "PersistentStorage", "DI"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

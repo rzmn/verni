@@ -2,9 +2,9 @@ import Foundation
 import ApiService
 import PersistentStorage
 import Api
+private import DataTransferObjects
 
 actor RefreshTokenManager {
-    private var refreshTask: Task<Result<Void, RefreshTokenFailureReason>, Never>?
     private let api: ApiProtocol
     private let persistency: Persistency
     private var accessTokenValue: String?
@@ -22,47 +22,32 @@ extension RefreshTokenManager: TokenRefresher {
         accessTokenValue
     }
 
-    func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        if let refreshTask {
-            let result = await refreshTask.value
-            self.refreshTask = nil
-            return result
-        } else {
-            let task = Task {
-                await doRefreshTokens()
-            }
-            refreshTask = task
-            return await task.value
-        }
-    }
-
-    private func doRefreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
-        let response = await api.run(
-            method: Auth.Refresh(
-                refreshToken: await persistency.getRefreshToken()
+    func refreshTokens() async throws(RefreshTokenFailureReason) {
+        let response: AuthTokenDto
+        do {
+            response = try await api.run(
+                method: Auth.Refresh(
+                    refreshToken: await persistency.getRefreshToken()
+                )
             )
-        )
-        switch response {
-        case .success(let tokens):
-            accessTokenValue = tokens.accessToken
-            await persistency.update(refreshToken: tokens.refreshToken)
-            return .success(())
-        case .failure(let reason):
-            switch reason {
+        } catch {
+            switch error {
             case .api(let apiErrorCode, _):
                 onSessionInvalidated()
                 switch apiErrorCode {
                 case .tokenExpired:
-                    return .failure(.expired(reason))
+                    throw .expired(error)
                 default:
-                    return .failure(.internalError(reason))
+                    throw .internalError(error)
                 }
             case .noConnection(let error):
-                return .failure(.noConnection(error))
+                throw .noConnection(error)
             case .internalError(let error):
                 onSessionInvalidated()
-                return .failure(.internalError(error))
+                throw .internalError(error)
             }
         }
+        accessTokenValue = response.accessToken
+        await persistency.update(refreshToken: response.refreshToken)
     }
 }

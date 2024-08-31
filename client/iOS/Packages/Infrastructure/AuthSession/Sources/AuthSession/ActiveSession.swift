@@ -50,7 +50,7 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async throws -> ActiveSession {
-        let persistency = try persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
+        let persistency = try await persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
         return await ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
@@ -67,7 +67,7 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
     ) async -> ActiveSession? {
-        guard let persistency = persistencyFactory.awake() else {
+        guard let persistency = await persistencyFactory.awake() else {
             return nil
         }
         return await ActiveSession(

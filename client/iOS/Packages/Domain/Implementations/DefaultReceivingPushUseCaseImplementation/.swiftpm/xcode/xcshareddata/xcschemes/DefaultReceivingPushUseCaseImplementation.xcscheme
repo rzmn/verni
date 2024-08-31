@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DefaultNetworkingImplementation"
-               BuildableName = "DefaultNetworkingImplementation"
-               BlueprintName = "DefaultNetworkingImplementation"
+               BlueprintIdentifier = "DefaultReceivingPushUseCaseImplementation"
+               BuildableName = "DefaultReceivingPushUseCaseImplementation"
+               BlueprintName = "DefaultReceivingPushUseCaseImplementation"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -50,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DefaultNetworkingImplementation"
-            BuildableName = "DefaultNetworkingImplementation"
-            BlueprintName = "DefaultNetworkingImplementation"
+            BlueprintIdentifier = "DefaultReceivingPushUseCaseImplementation"
+            BuildableName = "DefaultReceivingPushUseCaseImplementation"
+            BlueprintName = "DefaultReceivingPushUseCaseImplementation"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
