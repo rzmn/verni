@@ -28,17 +28,6 @@ extension DefaultApi {
 extension DefaultApi {
     private var longPollTimeout: Int { 29 }
 
-    func longPollNoTypedThrow<Query>(
-        query: Query
-    ) async -> Result<[Query.Update], LongPollError>
-    where Query: LongPollQuery, Query.Update: Decodable {
-        do {
-            return .success(try await longPoll(query: query))
-        } catch {
-            return .failure(error)
-        }
-    }
-
     func longPoll<Query>(
         query: Query
     ) async throws(LongPollError) -> [Query.Update]

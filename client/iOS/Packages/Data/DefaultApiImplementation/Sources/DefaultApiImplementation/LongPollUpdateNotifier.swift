@@ -101,15 +101,10 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
         case internalError
     }
     private func listenForUpdates() async -> Result<[Query.Update], ListenForUpdatesTerminationEvent> {
-        let result = await api.longPollNoTypedThrow(query: self.query)
-        if Task.isCancelled {
-            logI { "listenForUpdates canceled" }
-            return .failure(.canceled)
-        }
-        switch result {
-        case .success(let result):
-            return .success(result)
-        case .failure(let error):
+        let updates: [Query.Update]
+        do {
+            updates = try await api.longPoll(query: query)
+        } catch {
             switch error {
             case .noUpdates:
                 logE { "still working, reschedule..." }
@@ -122,6 +117,11 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
                 return .failure(.canceled)
             }
         }
+        if Task.isCancelled {
+            logI { "listenForUpdates canceled" }
+            return .failure(.canceled)
+        }
+        return .success(updates)
     }
 }
 

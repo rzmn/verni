@@ -5,12 +5,16 @@ import Logging
 internal import Base
 
 private extension TokenRefresher {
-    func refreshTokensNoTypedThrow() async -> Result<Void, RefreshTokenFailureReason> {
-        do {
-            try await refreshTokens()
-            return .success(())
-        } catch {
-            return .failure(error)
+    func refreshTokensCallback(completion: @escaping (Result<Void, RefreshTokenFailureReason>) -> Void) {
+        func _refreshTokensCallback(completion: (Result<Void, RefreshTokenFailureReason>) -> Void) async {
+            do {
+                completion(.success(try await refreshTokens()))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        Task.detached {
+            await _refreshTokensCallback(completion: completion)
         }
     }
 }
@@ -142,8 +146,7 @@ class ApiServiceRequestRunnersManager: Loggable {
             self.runningRequests[key] = .waitingForRun
         }
         self.refreshTokenSemaphore.wait()
-        Task.detached {
-            let result = await refresher.refreshTokensNoTypedThrow()
+        refresher.refreshTokensCallback { result in
             self.notifyQueue.async {
                 switch result {
                 case .success:
