@@ -43,98 +43,98 @@ extension DefaultAuthUseCase: AuthUseCase {
     }
     
     public func login(credentials: Credentials) async -> Result<ActiveSessionDIContainerConvertible, LoginError> {
-        let method = Auth.Login(
-            credentials: CredentialsDto(
-                email: credentials.email,
-                password: credentials.password
-            )
-        )
-        let apiError: ApiError
-        switch await api.run(method: method) {
-        case .success(let token):
-            do {
-                return .success(
-                    try await ActiveSession.awake(
-                        anonymousApi: api,
-                        hostId: token.id,
-                        accessToken: token.accessToken,
-                        refreshToken: token.refreshToken,
-                        apiServiceFactory: apiServiceFactory,
-                        persistencyFactory: persistencyFactory, 
-                        activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-                        apiFactoryProvider: apiFactoryProvider
+        let token: AuthTokenDto
+        do {
+            token = try await api.run(
+                method: Auth.Login(
+                    credentials: CredentialsDto(
+                        email: credentials.email,
+                        password: credentials.password
                     )
                 )
-            } catch {
+            )
+        } catch {
+            let errorCode: ApiErrorCode
+            switch error {
+            case .api(let code, _):
+                errorCode = code
+            case .noConnection(let error):
+                return .failure(.noConnection(error))
+            case .internalError(let error):
                 return .failure(.other(error))
             }
-        case .failure(let error):
-            apiError = error
+            switch errorCode {
+            case .incorrectCredentials:
+                return .failure(.incorrectCredentials(error))
+            case .wrongCredentialsFormat:
+                return .failure(.wrongFormat(error))
+            default:
+                return .failure(.other(error))
+            }
         }
-        let errorCode: ApiErrorCode
-        switch apiError {
-        case .api(let code, _):
-            errorCode = code
-        case .noConnection(let error):
-            return .failure(.noConnection(error))
-        case .internalError(let error):
+        do {
+            return .success(
+                try await ActiveSession.awake(
+                    anonymousApi: api,
+                    hostId: token.id,
+                    accessToken: token.accessToken,
+                    refreshToken: token.refreshToken,
+                    apiServiceFactory: apiServiceFactory,
+                    persistencyFactory: persistencyFactory,
+                    activeSessionDIContainerFactory: activeSessionDIContainerFactory,
+                    apiFactoryProvider: apiFactoryProvider
+                )
+            )
+        } catch {
             return .failure(.other(error))
-        }
-        switch errorCode {
-        case .incorrectCredentials:
-            return .failure(.incorrectCredentials(apiError))
-        case .wrongCredentialsFormat:
-            return .failure(.wrongFormat(apiError))
-        default:
-            return .failure(.other(apiError))
         }
     }
     
     public func signup(credentials: Credentials) async -> Result<ActiveSessionDIContainerConvertible, SignupError> {
-        let method = Auth.Signup(
-            credentials: CredentialsDto(
-                email: credentials.email,
-                password: credentials.password
-            )
-        )
-        let apiError: ApiError
-        switch await api.run(method: method) {
-        case .success(let token):
-            do {
-                return .success(
-                    try await ActiveSession.awake(
-                        anonymousApi: api,
-                        hostId: token.id,
-                        accessToken: token.accessToken,
-                        refreshToken: token.refreshToken,
-                        apiServiceFactory: apiServiceFactory,
-                        persistencyFactory: persistencyFactory, 
-                        activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-                        apiFactoryProvider: apiFactoryProvider
+        let token: AuthTokenDto
+        do {
+            token = try await api.run(
+                method: Auth.Signup(
+                    credentials: CredentialsDto(
+                        email: credentials.email,
+                        password: credentials.password
                     )
                 )
-            } catch {
+            )
+        } catch {
+            let errorCode: ApiErrorCode
+            switch error {
+            case .api(let code, _):
+                errorCode = code
+            case .noConnection(let error):
+                return .failure(.noConnection(error))
+            case .internalError(let error):
                 return .failure(.other(error))
             }
-        case .failure(let error):
-            apiError = error
+            switch errorCode {
+            case .loginAlreadyTaken:
+                return .failure(.alreadyTaken(error))
+            case .wrongCredentialsFormat:
+                return .failure(.wrongFormat(error))
+            default:
+                return .failure(.other(error))
+            }
         }
-        let errorCode: ApiErrorCode
-        switch apiError {
-        case .api(let code, _):
-            errorCode = code
-        case .noConnection(let error):
-            return .failure(.noConnection(error))
-        case .internalError(let error):
+        do {
+            return .success(
+                try await ActiveSession.awake(
+                    anonymousApi: api,
+                    hostId: token.id,
+                    accessToken: token.accessToken,
+                    refreshToken: token.refreshToken,
+                    apiServiceFactory: apiServiceFactory,
+                    persistencyFactory: persistencyFactory,
+                    activeSessionDIContainerFactory: activeSessionDIContainerFactory,
+                    apiFactoryProvider: apiFactoryProvider
+                )
+            )
+        } catch {
             return .failure(.other(error))
-        }
-        switch errorCode {
-        case .loginAlreadyTaken:
-            return .failure(.alreadyTaken(apiError))
-        case .wrongCredentialsFormat:
-            return .failure(.wrongFormat(apiError))
-        default:
-            return .failure(.other(apiError))
         }
     }
 }

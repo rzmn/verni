@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DefaultApiServiceImplementation"
-               BuildableName = "DefaultApiServiceImplementation"
-               BlueprintName = "DefaultApiServiceImplementation"
+               BlueprintIdentifier = "DefaultUsersRepositoryImplementation"
+               BuildableName = "DefaultUsersRepositoryImplementation"
+               BlueprintName = "DefaultUsersRepositoryImplementation"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -50,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DefaultApiServiceImplementation"
-            BuildableName = "DefaultApiServiceImplementation"
-            BlueprintName = "DefaultApiServiceImplementation"
+            BlueprintIdentifier = "DefaultUsersRepositoryImplementation"
+            BuildableName = "DefaultUsersRepositoryImplementation"
+            BlueprintName = "DefaultUsersRepositoryImplementation"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

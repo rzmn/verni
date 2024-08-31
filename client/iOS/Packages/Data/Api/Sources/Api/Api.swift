@@ -2,13 +2,13 @@ import DataTransferObjects
 import Combine
 
 public protocol ApiProtocol {
-    func run<Method>(method: Method) async -> ApiResult<Method.Response>
+    func run<Method>(method: Method) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters: Encodable
 
-    func run<Method>(method: Method) async -> ApiResult<Method.Response>
+    func run<Method>(method: Method) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters == NoParameters
 
-    func run<Method>(method: Method) async -> ApiResult<Void>
+    func run<Method>(method: Method) async throws(ApiError)
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable
 }
 

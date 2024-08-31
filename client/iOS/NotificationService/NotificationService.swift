@@ -35,8 +35,7 @@ class NotificationService: UNNotificationServiceExtension {
         switch pushProcessResult {
         case .success(let result):
             pushContent = result
-        case .failure(let error):
-            content.body = error.description
+        case .failure:
             return
         }
         content.title = pushContent.title

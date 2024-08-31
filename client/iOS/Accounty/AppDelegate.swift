@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Task.detached { @MainActor [unowned self] in
+        Task.detached { [unowned self] in
             await app.registerPushToken(
                 token: deviceToken
             )
@@ -25,8 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) async -> UIBackgroundFetchResult {
-        print("[push] received: \(userInfo)")
-        return .noData
+        .noData
     }
 }
 

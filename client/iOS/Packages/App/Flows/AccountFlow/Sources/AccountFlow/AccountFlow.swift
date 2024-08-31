@@ -44,10 +44,9 @@ public actor AccountFlow {
             return
         }
         if active {
-            await profileRepository.profileUpdated()
-                .map(Loadable.loaded)
-                .assign(to: \.content, on: viewModel)
-                .store(in: &subscriptions)
+            await viewModel.subscribeTo(
+                profilePublisher: await profileRepository.profileUpdated()
+            )
         } else {
             subscriptions.removeAll()
         }

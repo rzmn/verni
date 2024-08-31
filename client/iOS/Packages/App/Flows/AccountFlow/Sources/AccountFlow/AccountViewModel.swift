@@ -29,4 +29,10 @@ import Foundation
             .receive(on: RunLoop.main)
             .assign(to: &$state)
     }
+
+    func subscribeTo(profilePublisher: AnyPublisher<Profile, Never>) {
+        profilePublisher
+            .map(Loadable.loaded)
+            .assign(to: &$content)
+    }
 }

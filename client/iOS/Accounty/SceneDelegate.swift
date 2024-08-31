@@ -14,8 +14,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
-            Task.detached { @MainActor in
-                await UIApplication.shared.delegate?._app?.start(on: window)
+            guard let app = UIApplication.shared.delegate?._app else {
+                return
+            }
+            Task.detached {
+                await app.start(on: window)
             }
         }
     }

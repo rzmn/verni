@@ -116,7 +116,6 @@ extension AddExpenseFlow {
         do {
             cost = try Cost(state.amount, format: .number)
         } catch {
-            logE { "doAddExpense formatting failed: \(error)" }
             return await presenter().errorHaptic()
         }
         let spending = Spending(
@@ -180,5 +179,3 @@ extension AddExpenseFlow {
         }
     }
 }
-
-extension AddExpenseFlow: Loggable {}

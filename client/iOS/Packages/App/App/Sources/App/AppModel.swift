@@ -34,9 +34,10 @@ public actor App {
     public func start(on window: UIWindow) async {
         let router = await AppRouter(window: window)
         logI { "launching app" }
+        let avatarsRepository = di.appCommon.avatarsRepository
         Task { @MainActor in
             SetupAppearance()
-            AvatarView.repository = di.appCommon.avatarsRepository
+            AvatarView.repository = avatarsRepository
         }
         switch await authUseCase.awake() {
         case .success(let session):
