@@ -1,6 +1,4 @@
-import UIKit
-
-public struct User: Equatable {
+public struct User: Equatable, Sendable {
     public let id: ID
     public let status: FriendStatus
     public let displayName: String

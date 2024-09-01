@@ -1,4 +1,4 @@
-public struct Credentials {
+public struct Credentials: Sendable {
     public let email: String
     public let password: String
 

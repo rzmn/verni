@@ -1,4 +1,4 @@
-public enum Currency: Hashable {
+public enum Currency: Hashable, Sendable {
     case russianRuble
     case usDollar
     case euro

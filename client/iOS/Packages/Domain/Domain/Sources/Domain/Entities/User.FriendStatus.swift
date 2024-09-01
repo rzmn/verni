@@ -1,5 +1,5 @@
 extension User {
-    public enum FriendStatus {
+    public enum FriendStatus: Sendable {
         case me
         case outgoing
         case incoming

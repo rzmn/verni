@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Avatar: Equatable {
+public struct Avatar: Equatable, Sendable {
     public let id: ID
 
     public init(id: Avatar.ID) {

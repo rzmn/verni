@@ -1,6 +1,6 @@
 import Foundation
 
-public enum GeneralError: Error, CustomStringConvertible {
+public enum GeneralError: Error, CustomStringConvertible, Sendable {
     case noConnection(Error)
     case notAuthorized(Error)
     case other(Error)
