@@ -29,20 +29,20 @@ public class DefaultAuthUseCase {
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
-    public func awake() async -> Result<ActiveSessionDIContainerConvertible, AwakeError> {
+    public func awake() async throws(AwakeError) -> any ActiveSessionDIContainerConvertible {
         guard let session = await ActiveSession.awake(
             anonymousApi: api,
             apiServiceFactory: apiServiceFactory,
-            persistencyFactory: persistencyFactory, 
+            persistencyFactory: persistencyFactory,
             activeSessionDIContainerFactory: activeSessionDIContainerFactory,
             apiFactoryProvider: apiFactoryProvider
         ) else {
-            return.failure(.hasNoSession)
+            throw .hasNoSession
         }
-        return .success(session)
+        return session
     }
-    
-    public func login(credentials: Credentials) async -> Result<ActiveSessionDIContainerConvertible, LoginError> {
+
+    public func login(credentials: Credentials) async throws(LoginError) -> any ActiveSessionDIContainerConvertible {
         let token: AuthTokenDto
         do {
             token = try await api.run(
@@ -59,38 +59,36 @@ extension DefaultAuthUseCase: AuthUseCase {
             case .api(let code, _):
                 errorCode = code
             case .noConnection(let error):
-                return .failure(.noConnection(error))
+                throw .noConnection(error)
             case .internalError(let error):
-                return .failure(.other(error))
+                throw .other(error)
             }
             switch errorCode {
             case .incorrectCredentials:
-                return .failure(.incorrectCredentials(error))
+                throw .incorrectCredentials(error)
             case .wrongCredentialsFormat:
-                return .failure(.wrongFormat(error))
+                throw .wrongFormat(error)
             default:
-                return .failure(.other(error))
+                throw .other(error)
             }
         }
         do {
-            return .success(
-                try await ActiveSession.create(
-                    anonymousApi: api,
-                    hostId: token.id,
-                    accessToken: token.accessToken,
-                    refreshToken: token.refreshToken,
-                    apiServiceFactory: apiServiceFactory,
-                    persistencyFactory: persistencyFactory,
-                    activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-                    apiFactoryProvider: apiFactoryProvider
-                )
+            return try await ActiveSession.create(
+                anonymousApi: api,
+                hostId: token.id,
+                accessToken: token.accessToken,
+                refreshToken: token.refreshToken,
+                apiServiceFactory: apiServiceFactory,
+                persistencyFactory: persistencyFactory,
+                activeSessionDIContainerFactory: activeSessionDIContainerFactory,
+                apiFactoryProvider: apiFactoryProvider
             )
         } catch {
-            return .failure(.other(error))
+            throw .other(error)
         }
     }
-    
-    public func signup(credentials: Credentials) async -> Result<ActiveSessionDIContainerConvertible, SignupError> {
+
+    public func signup(credentials: Credentials) async throws(SignupError) -> any ActiveSessionDIContainerConvertible {
         let token: AuthTokenDto
         do {
             token = try await api.run(
@@ -107,34 +105,32 @@ extension DefaultAuthUseCase: AuthUseCase {
             case .api(let code, _):
                 errorCode = code
             case .noConnection(let error):
-                return .failure(.noConnection(error))
+                throw .noConnection(error)
             case .internalError(let error):
-                return .failure(.other(error))
+                throw .other(error)
             }
             switch errorCode {
             case .loginAlreadyTaken:
-                return .failure(.alreadyTaken(error))
+                throw .alreadyTaken(error)
             case .wrongCredentialsFormat:
-                return .failure(.wrongFormat(error))
+                throw .wrongFormat(error)
             default:
-                return .failure(.other(error))
+                throw .other(error)
             }
         }
         do {
-            return .success(
-                try await ActiveSession.create(
-                    anonymousApi: api,
-                    hostId: token.id,
-                    accessToken: token.accessToken,
-                    refreshToken: token.refreshToken,
-                    apiServiceFactory: apiServiceFactory,
-                    persistencyFactory: persistencyFactory,
-                    activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-                    apiFactoryProvider: apiFactoryProvider
-                )
+            return try await ActiveSession.create(
+                anonymousApi: api,
+                hostId: token.id,
+                accessToken: token.accessToken,
+                refreshToken: token.refreshToken,
+                apiServiceFactory: apiServiceFactory,
+                persistencyFactory: persistencyFactory,
+                activeSessionDIContainerFactory: activeSessionDIContainerFactory,
+                apiFactoryProvider: apiFactoryProvider
             )
         } catch {
-            return .failure(.other(error))
+            throw .other(error)
         }
     }
 }

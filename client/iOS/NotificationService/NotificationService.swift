@@ -1,6 +1,7 @@
 import UserNotifications
 import DefaultDependencies
 import Domain
+import DI
 
 class NotificationService: UNNotificationServiceExtension {
     override func didReceive(
@@ -22,10 +23,10 @@ class NotificationService: UNNotificationServiceExtension {
         defer {
             handler(content)
         }
-        let awakeResult = await DefaultDependenciesAssembly()
-            .authUseCase()
-            .awake()
-        guard case .success(let session) = awakeResult else {
+        let session: ActiveSessionDIContainer
+        do {
+            session = try await DefaultDependenciesAssembly().authUseCase().awake()
+        } catch {
             return
         }
         let pushProcessResult = await session

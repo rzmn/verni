@@ -39,11 +39,13 @@ public actor App {
             SetupAppearance()
             AvatarView.repository = avatarsRepository
         }
-        switch await authUseCase.awake() {
-        case .success(let session):
-            await startAuthorizedSession(session: session, router: router)
-        case .failure(let reason):
-            switch reason {
+        do {
+            await startAuthorizedSession(
+                session: try await authUseCase.awake(),
+                router: router
+            )
+        } catch {
+            switch error {
             case .hasNoSession:
                 return await startAnonynousSession(router: router)
             }

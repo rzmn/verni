@@ -100,12 +100,15 @@ extension SignUpFlow {
             password: state.password
         )
         await presenter().presentLoading()
-        switch await authUseCase.signup(credentials: credentials) {
-        case .success(let session):
-            await handle(event: .created(session))
-        case .failure(let failure):
+        do {
+            await handle(
+                event: .created(
+                    try await authUseCase.signup(credentials: credentials)
+                )
+            )
+        } catch {
             await presenter().errorHaptic()
-            switch failure {
+            switch error {
             case .alreadyTaken:
                 await presenter().presentAlreadyTaken()
             case .wrongFormat:

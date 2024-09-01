@@ -16,39 +16,33 @@ internal import PersistentStorageSQLite
 
 fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let impl: any AuthUseCase
-    private let awakeHook: () async -> Result<any DI.ActiveSessionDIContainer, AwakeError>
-    private let loginHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, LoginError>
-    private let signupHook: (Domain.Credentials) async -> Result<any DI.ActiveSessionDIContainer, SignupError>
+    private let awakeHook: () async throws(AwakeError) -> any ActiveSessionDIContainer
+    private let loginHook: (Credentials) async throws(LoginError) -> any ActiveSessionDIContainer
+    private let signupHook: (Credentials) async throws(SignupError) -> any ActiveSessionDIContainer
 
     init<Impl: AuthUseCase>(impl: Impl) where Impl.AuthorizedSession == any ActiveSessionDIContainerConvertible {
         self.impl = impl
-        awakeHook = {
-            await impl.awake().map {
-                $0.activeSessionDIContainer as ActiveSessionDIContainer
-            }
+        awakeHook = { () async throws(AwakeError) -> any ActiveSessionDIContainer in
+            try await impl.awake().activeSessionDIContainer
         }
-        loginHook = {
-            await impl.login(credentials: $0).map {
-                $0.activeSessionDIContainer as ActiveSessionDIContainer
-            }
+        loginHook = { credentials async throws(LoginError) -> any ActiveSessionDIContainer in
+            try await impl.login(credentials: credentials).activeSessionDIContainer
         }
-        signupHook = {
-            await impl.signup(credentials: $0).map {
-                $0.activeSessionDIContainer as ActiveSessionDIContainer
-            }
+        signupHook = { credentials async throws(SignupError) -> any ActiveSessionDIContainer in
+            try await impl.signup(credentials: credentials).activeSessionDIContainer
         }
     }
 
-    func awake() async -> Result<any ActiveSessionDIContainer, AwakeError> {
-        await awakeHook()
+    func awake() async throws(AwakeError) -> any ActiveSessionDIContainer {
+        try await awakeHook()
     }
 
-    func login(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, LoginError> {
-        await loginHook(credentials)
+    func login(credentials: Credentials) async throws(LoginError) -> any ActiveSessionDIContainer {
+        try await loginHook(credentials)
     }
 
-    func signup(credentials: Credentials) async -> Result<any ActiveSessionDIContainer, SignupError> {
-        await signupHook(credentials)
+    func signup(credentials: Credentials) async throws(SignupError) -> any ActiveSessionDIContainer {
+        try await signupHook(credentials)
     }
 }
 

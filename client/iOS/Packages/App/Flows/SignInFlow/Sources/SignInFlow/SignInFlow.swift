@@ -111,13 +111,13 @@ extension SignInFlow {
             password: state.password
         )
         await presenter().presentLoading()
-        switch await authUseCase.login(credentials: credentials) {
-        case .success(let session):
+        do {
+            let session = try await authUseCase.login(credentials: credentials)
             await saveCredentials.save(email: credentials.email, password: credentials.password)
             await handle(session: session)
-        case .failure(let failure):
+        } catch {
             await presenter().errorHaptic()
-            switch failure {
+            switch error {
             case .incorrectCredentials:
                 await presenter().presentIncorrectCredentials()
             case .wrongFormat:
