@@ -56,9 +56,7 @@ extension UserPreviewFlow: Flow {
     private func startFlow() async {
         await self.friendsRepository
             .friendsUpdated(ofKind: .all)
-            .sink { friends in
-                await self.friendsUpdated(friends: friends)
-            }
+            .sink(receiveValue: friendsUpdated)
             .store(in: &subscriptions)
         await self.presenter().openUserPreview { [weak self] in
             guard let self else { return }
@@ -133,15 +131,21 @@ extension UserPreviewFlow {
         }
     }
 
-    @MainActor private func friendsUpdated(friends: [FriendshipKind: [User]]) async {
-        let counterpartyId = viewModel.state.user.id
-        let updated = await Task {
-            friends.values.flatMap({ $0 }).first(where: { $0.id == counterpartyId })
-        }.value
+    private nonisolated func friendsUpdated(friends: [FriendshipKind: [User]]) {
+        Task.detached {
+            await self.updateFriends(friends: friends)
+        }
+    }
+
+    private func updateFriends(friends: [FriendshipKind: [User]]) async {
+        let counterpartyId = await viewModel.state.user.id
+        let updated = friends.values
+            .flatMap { $0 }
+            .first { $0.id == counterpartyId }
         guard let updated else {
             return
         }
-        viewModel.user = updated
+        await viewModel.reload(user: updated)
     }
 
     private func sendFriendRequest() async {

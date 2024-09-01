@@ -21,7 +21,7 @@ fileprivate extension IdentifiableSpending {
 @MainActor class UserPreviewViewModel {
     @Published var state: UserPreviewState
 
-    @Published var user: User
+    @Published private var user: User
     @Published private var spendings: Loadable<[IdentifiableSpending], UserPreviewState.Failure>
 
     private let hostId: User.ID
@@ -69,6 +69,10 @@ fileprivate extension IdentifiableSpending {
 }
 
 extension UserPreviewViewModel {
+    func reload(user: User) {
+        self.user = user
+    }
+
     func reload(spendings: [IdentifiableSpending]) {
         self.spendings = .loaded(spendings)
     }
