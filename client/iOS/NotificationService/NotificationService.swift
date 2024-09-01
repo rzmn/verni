@@ -29,14 +29,12 @@ class NotificationService: UNNotificationServiceExtension {
         } catch {
             return
         }
-        let pushProcessResult = await session
-            .receivingPushUseCase()
-            .process(rawPushPayload: content.userInfo)
         let pushContent: PushContent
-        switch pushProcessResult {
-        case .success(let result):
-            pushContent = result
-        case .failure:
+        do {
+            pushContent = try await session
+                .receivingPushUseCase()
+                .process(rawPushPayload: content.userInfo)
+        } catch {
             return
         }
         content.title = pushContent.title
