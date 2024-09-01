@@ -56,7 +56,7 @@ extension PickCounterpartyFlow: Flow {
         await friendsRepository
             .friendsUpdated(ofKind: .all)
             .sink { friends in
-                await self.reload(result: .success(friends))
+                await self.reload(friends: friends)
             }
             .store(in: &subscriptions)
     }
@@ -114,16 +114,16 @@ extension PickCounterpartyFlow {
         if firstCall {
             await presenter().presentLoading()
         }
-        await reload(result: await friendsRepository.refreshFriends(ofKind: .all))
-    }
-
-    private func reload(result: Result<[FriendshipKind: [User]], GeneralError>) async {
-        await presenter().dismissLoading()
-        switch result {
-        case .success(let friends):
-            await viewModel.loaded(friends: friends)
-        case .failure(let error):
+        do {
+            await reload(friends: try await friendsRepository.refreshFriends(ofKind: .all))
+        } catch {
+            await presenter().dismissLoading()
             await viewModel.failed(error: error)
         }
+    }
+
+    private func reload(friends: [FriendshipKind: [User]]) async {
+        await presenter().dismissLoading()
+        await viewModel.loaded(friends: friends)
     }
 }

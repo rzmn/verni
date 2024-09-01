@@ -28,16 +28,16 @@ public class DefaultSpendingsRepository {
 }
 
 extension DefaultSpendingsRepository: SpendingsRepository {
-    public func getSpending(id: Spending.ID) async -> Result<Spending, GetSpendingError> {
+    public func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending {
         logI { "getSpending[id=\(id)] start" }
         let result: Spending
         do {
             result = Spending(dto: try await api.run(method: Spendings.GetDeal(dealId: id)))
         } catch {
             logI { "getSpending[id=\(id)] failed error: \(error)" }
-            return .failure(GetSpendingError(apiError: error))
+            throw GetSpendingError(apiError: error)
         }
-        return .success(result)
+        return result
     }
     
     private func spendingsHistorySubject(with uid: User.ID) -> PassthroughSubject<[IdentifiableSpending], Never> {
@@ -59,15 +59,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
                     }
                     logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
                     Task.detached {
-                        let result = await self.refreshSpendingCounterparties()
-                        switch result {
-                        case .success(let counterparties):
-                            self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data OK" }
-                            promise(.success(counterparties))
-                        case .failure(let error):
-                            self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data error: \(error), skip" }
-                            promise(.success(nil))
-                        }
+                        promise(.success(try? await self.refreshSpendingCounterparties()))
                     }
                 }
             }
@@ -85,15 +77,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
                     }
                     logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data" }
                     Task.detached {
-                        let result = await self.refreshSpendingsHistory(counterparty: id)
-                        switch result {
-                        case .success(let history):
-                            self.logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data OK" }
-                            promise(.success(history))
-                        case .failure(let error):
-                            self.logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data error: \(error), skip" }
-                            promise(.success(nil))
-                        }
+                        promise(.success(try? await self.refreshSpendingsHistory(counterparty: id)))
                     }
                 }
             }
@@ -101,15 +85,15 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             .merge(with: spendingsHistorySubject(with: id))
             .eraseToAnyPublisher()
     }
-    
-    public func refreshSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError> {
+
+    public func refreshSpendingCounterparties() async throws(GeneralError) -> [SpendingsPreview] {
         logI { "refreshSpendingCounterparties start" }
         let counterparties: [SpendingsPreview]
         do {
             counterparties = try await api.run(method: Spendings.GetCounterparties()).map(SpendingsPreview.init)
         } catch {
             logI { "refreshSpendingCounterparties failed error: \(error)" }
-            return .failure(GeneralError(apiError: error))
+            throw GeneralError(apiError: error)
         }
         Task.detached { [weak self] in
             guard let self else { return }
@@ -117,17 +101,17 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         }
         logI { "refreshSpendingCounterparties ok" }
         counterpartiesSubject.send(counterparties)
-        return .success(counterparties)
+        return counterparties
     }
-    
-    public func refreshSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError> {
+
+    public func refreshSpendingsHistory(counterparty: User.ID) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] start" }
         let spendings: [IdentifiableSpending]
         do {
             spendings = try await api.run(method: Spendings.GetDeals(counterparty: counterparty)).map(IdentifiableSpending.init)
         } catch {
             logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(error)" }
-            return .failure(GetSpendingsHistoryError(apiError: error))
+            throw GetSpendingsHistoryError(apiError: error)
         }
         Task.detached { [weak self] in
             guard let self else { return }
@@ -135,7 +119,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         }
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }
         spendingsHistorySubject(with: counterparty).send(spendings)
-        return .success(spendings)
+        return spendings
     }
 }
 

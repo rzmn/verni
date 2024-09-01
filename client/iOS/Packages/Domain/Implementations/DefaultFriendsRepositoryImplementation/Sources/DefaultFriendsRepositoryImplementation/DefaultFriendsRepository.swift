@@ -42,15 +42,7 @@ extension DefaultFriendsRepository: FriendsRepository {
                     }
                     logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
                     Task.detached {
-                        let result = await self.refreshFriends(ofKind: kind)
-                        switch result {
-                        case .success(let friends):
-                            self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data OK" }
-                            promise(.success(friends))
-                        case .failure(let error):
-                            self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data error: \(error), skip" }
-                            promise(.success(nil))
-                        }
+                        promise(.success(try? await self.refreshFriends(ofKind: kind)))
                     }
                 }
             }
@@ -58,8 +50,8 @@ extension DefaultFriendsRepository: FriendsRepository {
             .merge(with: subject(for: kind))
             .eraseToAnyPublisher()
     }
-    
-    public func refreshFriends(ofKind kind: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
+
+    public func refreshFriends(ofKind kind: FriendshipKindSet) async throws(GeneralError) -> [FriendshipKind: [User]] {
         logI { "refreshFriends[kind=\(kind)]" }
         let uids: [UserDto.ID]
         do {
@@ -70,14 +62,14 @@ extension DefaultFriendsRepository: FriendsRepository {
             ).flatMap(\.value)
         } catch {
             logI { "refreshFriends[kind=\(kind)] error: \(error)" }
-            return .failure(GeneralError(apiError: error))
+            throw GeneralError(apiError: error)
         }
         let users: [UserDto]
         do {
             users = try await api.run(method: Users.Get(ids: uids))
         } catch {
             logI { "refreshFriends[kind=\(kind)] get users error: \(error)" }
-            return .failure(GeneralError(apiError: error))
+            throw GeneralError(apiError: error)
         }
         let friendsByKind = users.map(User.init).reduce(
             into: kind.array.reduce(into: [:], { dict, value in dict[value] = [User]() })
@@ -104,7 +96,7 @@ extension DefaultFriendsRepository: FriendsRepository {
             await offline.storeFriends(friendsByKind)
         }
         subject(for: kind).send(friendsByKind)
-        return .success(friendsByKind)
+        return friendsByKind
     }
 }
 

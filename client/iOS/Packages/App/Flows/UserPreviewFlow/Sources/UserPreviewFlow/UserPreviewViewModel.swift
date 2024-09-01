@@ -22,7 +22,7 @@ fileprivate extension IdentifiableSpending {
     @Published var state: UserPreviewState
 
     @Published var user: User
-    @Published var spendings: Loadable<[IdentifiableSpending], UserPreviewState.Failure>
+    @Published private var spendings: Loadable<[IdentifiableSpending], UserPreviewState.Failure>
 
     private let hostId: User.ID
 
@@ -65,5 +65,51 @@ fileprivate extension IdentifiableSpending {
             }
             .receive(on: RunLoop.main)
             .assign(to: &$state)
+    }
+}
+
+extension UserPreviewViewModel {
+    func reload(spendings: [IdentifiableSpending]) {
+        self.spendings = .loaded(spendings)
+    }
+
+    func reload(error: GetSpendingsHistoryError) {
+        switch error {
+        case .noSuchCounterparty:
+            spendings = .failed(
+                previous: spendings,
+                UserPreviewState.Failure(
+                    hint: "alert_action_no_such_user".localized,
+                    iconName: "network.slash"
+                )
+            )
+        case .other(let error):
+            switch error {
+            case .noConnection:
+                spendings = .failed(
+                    previous: spendings,
+                    UserPreviewState.Failure(
+                        hint: "no_connection_hint".localized,
+                        iconName: "network.slash"
+                    )
+                )
+            case .notAuthorized:
+                spendings = .failed(
+                    previous: spendings,
+                    UserPreviewState.Failure(
+                        hint: "alert_title_unauthorized".localized,
+                        iconName: "network.slash"
+                    )
+                )
+            case .other:
+                spendings = .failed(
+                    previous: spendings,
+                    UserPreviewState.Failure(
+                        hint: "unknown_error_hint".localized,
+                        iconName: "exclamationmark.triangle"
+                    )
+                )
+            }
+        }
     }
 }

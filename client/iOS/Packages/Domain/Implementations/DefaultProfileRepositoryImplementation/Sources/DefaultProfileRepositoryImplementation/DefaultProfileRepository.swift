@@ -27,15 +27,15 @@ extension DefaultProfileRepository: ProfileRepository {
     public func profileUpdated() async -> AnyPublisher<Domain.Profile, Never> {
         subject.eraseToAnyPublisher()
     }
-    
-    public func refreshProfile() async -> Result<Domain.Profile, GeneralError> {
+
+    public func refreshProfile() async throws(GeneralError) -> Domain.Profile {
         logI { "refresh" }
         let profile: Domain.Profile
         do {
             profile = Profile(dto: try await api.run(method: Profile.GetInfo()))
         } catch {
             logI { "refresh failed error: \(error)" }
-            return .failure(GeneralError(apiError: error))
+            throw GeneralError(apiError: error)
         }
         Task.detached { [weak self] in
             guard let self else { return }
@@ -43,7 +43,7 @@ extension DefaultProfileRepository: ProfileRepository {
         }
         subject.send(profile)
         logI { "refresh ok" }
-        return .success(profile)
+        return profile
     }
 }
 

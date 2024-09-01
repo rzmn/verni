@@ -3,7 +3,7 @@ import Combine
 
 public protocol ProfileRepository {
     @discardableResult
-    func refreshProfile() async -> Result<Profile, GeneralError>
+    func refreshProfile() async throws(GeneralError) -> Profile
 
     func profileUpdated() async -> AnyPublisher<Profile, Never>
 }

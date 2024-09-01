@@ -45,19 +45,14 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
         switch payload {
         case .friendRequestHasBeenAccepted(let payload):
             Task.detached {
-                await self.friendsRepository.refreshFriends(ofKind: .all)
+                try? await self.friendsRepository.refreshFriends(ofKind: .all)
             }
-            let users: [User]
-            switch await usersRepository.getUsers(ids: [payload.target]) {
-            case .success(let result):
-                users = result
-            case .failure(let error):
+            let user: User
+            do {
+                user = try await usersRepository.getUser(id: payload.target)
+            } catch {
                 logE { "failed to get info error: \(error)" }
                 throw .internalError(InternalError.error("failed to get user info", underlying: error))
-            }
-            guard let user = users.first else {
-                logE { "user does not exists" }
-                throw .internalError(InternalError.error("user does not exists", underlying: nil))
             }
             return PushContent(
                 title: "friendRequestHasBeenAccepted",
@@ -66,19 +61,14 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
             )
         case .gotFriendRequest(let payload):
             Task.detached {
-                await self.friendsRepository.refreshFriends(ofKind: .all)
+                try? await self.friendsRepository.refreshFriends(ofKind: .all)
             }
-            let users: [User]
-            switch await usersRepository.getUsers(ids: [payload.sender]) {
-            case .success(let result):
-                users = result
-            case .failure(let error):
+            let user: User
+            do {
+                user = try await usersRepository.getUser(id: payload.sender)
+            } catch {
                 logE { "failed to get info error: \(error)" }
                 throw .internalError(InternalError.error("failed to get user info", underlying: error))
-            }
-            guard let user = users.first else {
-                logE { "user does not exists" }
-                throw .internalError(InternalError.error("user does not exists", underlying: nil))
             }
             return PushContent(
                 title: "gotFriendRequest",
@@ -87,16 +77,15 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
             )
         case .newExpenseReceived(let payload):
             Task.detached {
-                await [
+                try? await [
                     self.spendingsRepository.refreshSpendingCounterparties(),
                     self.spendingsRepository.refreshSpendingsHistory(counterparty: payload.authorId)
                 ]
             }
             let spending: Spending
-            switch await spendingsRepository.getSpending(id: payload.spendingId) {
-            case .success(let result):
-                spending = result
-            case .failure(let error):
+            do {
+                spending = try await spendingsRepository.getSpending(id: payload.spendingId)
+            } catch {
                 logE { "failed to get info error: \(error)" }
                 throw .internalError(InternalError.error("failed to get spending info", underlying: error))
             }

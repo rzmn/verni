@@ -5,7 +5,7 @@ import Foundation
 @MainActor class AccountViewModel {
     @Published var state: AccountState
 
-    @Published var content: Loadable<Profile, String>
+    @Published private var content: Loadable<Profile, String>
 
     init(profile: Profile?) {
         let initial: AccountState
@@ -28,6 +28,14 @@ import Foundation
             }
             .receive(on: RunLoop.main)
             .assign(to: &$state)
+    }
+
+    func setLoading() {
+        content = .loading(previous: content)
+    }
+
+    func reload(profile: Profile) {
+        content = .loaded(profile)
     }
 
     func subscribeTo(profilePublisher: AnyPublisher<Profile, Never>) {

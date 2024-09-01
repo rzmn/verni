@@ -22,7 +22,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             try await api.run(
                 method: Api.Profile.SetAvatar(dataBase64: imageData.base64EncodedString())
             )
-            await repository.refreshProfile()
+            _ = try? await repository.refreshProfile()
         } catch {
             throw SetAvatarError(apiError: error)
         }
@@ -33,7 +33,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             try await api.run(
                 method: Api.Profile.SetDisplayName(displayName: displayName)
             )
-            await repository.refreshProfile()
+            _ = try? await repository.refreshProfile()
         } catch {
             throw SetDisplayNameError(apiError: error)
         }
@@ -47,7 +47,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             Task.detached {
                 await self.persistency.update(refreshToken: tokens.refreshToken)
             }
-            await repository.refreshProfile()
+            _ = try? await repository.refreshProfile()
         } catch {
             throw EmailUpdateError(apiError: error)
         }

@@ -54,7 +54,7 @@ extension SignInFlow: TabEmbedFlow {
         guard let flowContinuation else {
             return
         }
-        await session.profileRepository.refreshProfile()
+        _ = try? await session.profileRepository.refreshProfile()
         self.flowContinuation = nil
         flowContinuation.resume(returning: session)
     }

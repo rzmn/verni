@@ -112,16 +112,19 @@ extension FriendsFlow: UrlResolver {
             return
         }
         await presenter().presentLoading()
-        switch await usersRepository.getUsers(ids: [uid]) {
-        case .success(let users):
+        do {
+            let user = try await usersRepository.getUser(id: uid)
             await presenter().dismissLoading()
-            guard let user = users.first else {
-                return
-            }
             let flow = await UserPreviewFlow(di: di, router: router, user: user)
             _ = await flow.perform()
-        case .failure(let error):
-            await presenter().presentGeneralError(error)
+        } catch {
+            await presenter().dismissLoading()
+            switch error {
+            case .noSuchUser:
+                await presenter().errorHaptic()
+            case .other(let error):
+                await presenter().presentGeneralError(error)
+            }
         }
     }
 
@@ -167,8 +170,8 @@ extension FriendsFlow {
             self.viewModel.content = .loading(previous: state.content)
         }
 
-        async let asyncFriends = friendListRepository.refreshFriends(ofKind: .all)
-        async let asyncSpendings = spendingsRepository.refreshSpendingCounterparties()
+        async let asyncFriends = friendListRepository.refreshFriendsNoTypedThrow(ofKind: .all)
+        async let asyncSpendings = spendingsRepository.refreshSpendingCounterpartiesNoTypedThrow()
 
         let result = await (asyncFriends, asyncSpendings)
 

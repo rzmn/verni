@@ -119,53 +119,17 @@ extension UserPreviewFlow {
         if shouldShowHud {
             await presenter().presentLoading()
         }
-        let result = await spendingsRepository.refreshSpendingsHistory(counterparty: state.user.id)
-        Task { @MainActor [unowned self] in
+        do {
+            let spendings = try await spendingsRepository.refreshSpendingsHistory(counterparty: state.user.id)
             if shouldShowHud {
                 await presenter().dismissLoading()
             }
-            switch result {
-            case .success(let spendings):
-                viewModel.spendings = .loaded(spendings)
-            case .failure(let error):
-                switch error {
-                case .noSuchCounterparty:
-                    viewModel.spendings = .failed(
-                        previous: viewModel.spendings,
-                        UserPreviewState.Failure(
-                            hint: "alert_action_no_such_user".localized,
-                            iconName: "network.slash"
-                        )
-                    )
-                case .other(let error):
-                    switch error {
-                    case .noConnection:
-                        viewModel.spendings = .failed(
-                            previous: viewModel.spendings,
-                            UserPreviewState.Failure(
-                                hint: "no_connection_hint".localized,
-                                iconName: "network.slash"
-                            )
-                        )
-                    case .notAuthorized:
-                        viewModel.spendings = .failed(
-                            previous: viewModel.spendings,
-                            UserPreviewState.Failure(
-                                hint: "alert_title_unauthorized".localized,
-                                iconName: "network.slash"
-                            )
-                        )
-                    case .other:
-                        viewModel.spendings = .failed(
-                            previous: viewModel.spendings,
-                            UserPreviewState.Failure(
-                                hint: "unknown_error_hint".localized,
-                                iconName: "exclamationmark.triangle"
-                            )
-                        )
-                    }
-                }
+            await viewModel.reload(spendings: spendings)
+        } catch {
+            if shouldShowHud {
+                await presenter().dismissLoading()
             }
+            await viewModel.reload(error: error)
         }
     }
 

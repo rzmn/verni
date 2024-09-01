@@ -13,17 +13,28 @@ public enum GetSpendingError: Error {
 
 public protocol SpendingsRepository {
     @discardableResult
-    func refreshSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError>
+    func refreshSpendingCounterparties() async throws(GeneralError) -> [SpendingsPreview]
 
     @discardableResult
     func refreshSpendingsHistory(
         counterparty: User.ID
-    ) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError>
+    ) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending]
 
-    func getSpending(id: Spending.ID) async -> Result<Spending, GetSpendingError>
+    func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending
 
     func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never>
     func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never>
+}
+
+public extension SpendingsRepository {
+    @discardableResult
+    func refreshSpendingCounterpartiesNoTypedThrow() async -> Result<[SpendingsPreview], GeneralError> {
+        do {
+            return .success(try await refreshSpendingCounterparties())
+        } catch {
+            return .failure(error)
+        }
+    }
 }
 
 public protocol SpendingsOfflineRepository {

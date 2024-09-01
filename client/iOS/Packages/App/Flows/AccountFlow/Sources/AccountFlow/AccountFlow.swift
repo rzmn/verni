@@ -74,17 +74,12 @@ extension AccountFlow: TabEmbedFlow {
     }
 
     private func startFlow() async {
-        Task { @MainActor [unowned self] in
-            viewModel.content = .loading(previous: viewModel.state.info)
-        }
-        let result = await profileRepository.refreshProfile()
-        Task { @MainActor [unowned self] in
-            switch result {
-            case .success(let profile):
-                viewModel.content = .loaded(profile)
-            case .failure(let error):
-                await presenter().presentGeneralError(error)
-            }
+        await viewModel.setLoading()
+        do {
+            let profile = try await profileRepository.refreshProfile()
+            await viewModel.reload(profile: profile)
+        } catch {
+            await presenter().presentGeneralError(error)
         }
     }
 
@@ -132,11 +127,11 @@ extension AccountFlow {
             return profile
         }
         await presenter().presentLoading()
-        switch await profileRepository.refreshProfile() {
-        case .success(let profile):
+        do {
+            let profile = try await profileRepository.refreshProfile()
             await presenter().dismissLoading()
             return profile
-        case .failure(let error):
+        } catch {
             switch error {
             case .noConnection:
                 await presenter().presentNoConnection()
