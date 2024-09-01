@@ -188,12 +188,12 @@ extension UserPreviewFlow {
         case .no:
             break
         }
-        switch await friendStatusInteractions.sendFriendRequest(to: state.user.id) {
-        case .success:
+        do {
+            try await friendStatusInteractions.sendFriendRequest(to: state.user.id)
             await presenter().successHaptic()
             await presenter().presentSuccess()
-        case .failure(let reason):
-            switch reason {
+        } catch {
+            switch error {
             case .alreadySent:
                 await presenter().present(hint: "alert_action_already_sent".localized)
             case .haveIncoming:
@@ -216,11 +216,11 @@ extension UserPreviewFlow {
         case .incoming:
             break
         }
-        switch await friendStatusInteractions.acceptFriendRequest(from: state.user.id) {
-        case .success:
+        do {
+            try await friendStatusInteractions.acceptFriendRequest(from: state.user.id)
             await presenter().successHaptic()
             await presenter().presentSuccess()
-        case .failure(let error):
+        } catch {
             switch error {
             case .noSuchRequest:
                 await presenter().present(hint: "alert_action_no_such_request".localized)
@@ -238,11 +238,11 @@ extension UserPreviewFlow {
         case .incoming:
             break
         }
-        switch await friendStatusInteractions.rejectFriendRequest(from: state.user.id) {
-        case .success:
+        do {
+            try await friendStatusInteractions.rejectFriendRequest(from: state.user.id)
             await presenter().successHaptic()
             await presenter().presentSuccess()
-        case .failure(let error):
+        } catch {
             switch error {
             case .noSuchRequest:
                 await presenter().present(hint: "alert_action_no_such_request".localized)
@@ -260,11 +260,11 @@ extension UserPreviewFlow {
         case .outgoing:
             break
         }
-        switch await friendStatusInteractions.rollbackFriendRequest(to: state.user.id) {
-        case .success:
+        do {
+            try await friendStatusInteractions.rollbackFriendRequest(to: state.user.id)
             await presenter().successHaptic()
             await presenter().presentSuccess()
-        case .failure(let error):
+        } catch {
             switch error {
             case .noSuchRequest:
                 await presenter().presentNoSuchUser()
@@ -282,11 +282,11 @@ extension UserPreviewFlow {
         case .friend:
             break
         }
-        switch await friendStatusInteractions.unfriend(user: state.user.id) {
-        case .success:
+        do {
+            try await friendStatusInteractions.unfriend(user: state.user.id)
             await presenter().successHaptic()
             await presenter().presentSuccess()
-        case .failure(let error):
+        } catch {
             switch error {
             case .notAFriend:
                 await presenter().present(hint: "alert_action_not_a_friend".localized)

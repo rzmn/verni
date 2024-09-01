@@ -7,5 +7,6 @@ public struct EmailValidationError: Error {
 }
 
 public protocol EmailValidationUseCase {
+    // TODO: Typed Throws
     func validateEmail(_ email: String) -> Result<Void, EmailValidationError>
 }

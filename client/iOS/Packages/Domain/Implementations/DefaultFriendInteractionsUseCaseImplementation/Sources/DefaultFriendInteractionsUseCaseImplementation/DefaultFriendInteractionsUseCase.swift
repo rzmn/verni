@@ -10,43 +10,43 @@ public class DefaultFriendInteractionsUseCase {
 }
 
 extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
-    public func acceptFriendRequest(from user: User.ID) async -> Result<Void, AcceptFriendRequestError> {
+    public func acceptFriendRequest(from user: User.ID) async throws(AcceptFriendRequestError) {
         do {
-            return .success(try await api.run(method: Friends.AcceptRequest(sender: user)))
+            try await api.run(method: Friends.AcceptRequest(sender: user))
         } catch {
-            return .failure(AcceptFriendRequestError(apiError: error))
+            throw AcceptFriendRequestError(apiError: error)
         }
     }
-    
-    public func rejectFriendRequest(from user: User.ID) async -> Result<Void, RejectFriendRequestError> {
+
+    public func rejectFriendRequest(from user: User.ID) async throws(RejectFriendRequestError) {
         do {
-            return .success(try await api.run(method: Friends.RejectRequest(sender: user)))
+            try await api.run(method: Friends.RejectRequest(sender: user))
         } catch {
-            return .failure(RejectFriendRequestError(apiError: error))
+            throw RejectFriendRequestError(apiError: error)
         }
     }
-    
-    public func sendFriendRequest(to user: User.ID) async -> Result<Void, SendFriendRequestError> {
+
+    public func sendFriendRequest(to user: User.ID) async throws(SendFriendRequestError) {
         do {
-            return .success(try await api.run(method: Friends.SendRequest(target: user)))
+            try await api.run(method: Friends.SendRequest(target: user))
         } catch {
-            return .failure(SendFriendRequestError(apiError: error))
+            throw SendFriendRequestError(apiError: error)
         }
     }
-    
-    public func rollbackFriendRequest(to user: User.ID) async -> Result<Void, RollbackFriendRequestError> {
+
+    public func rollbackFriendRequest(to user: User.ID) async throws(RollbackFriendRequestError) {
         do {
-            return .success(try await api.run(method: Friends.RollbackRequest(target: user)))
+            try await api.run(method: Friends.RollbackRequest(target: user))
         } catch {
-            return .failure(RollbackFriendRequestError(apiError: error))
+            throw RollbackFriendRequestError(apiError: error)
         }
     }
-    
-    public func unfriend(user: User.ID) async -> Result<Void, UnfriendError> {
+
+    public func unfriend(user: User.ID) async throws(UnfriendError) {
         do {
-            return .success(try await api.run(method: Friends.Unfriend(target: user)))
+            try await api.run(method: Friends.Unfriend(target: user))
         } catch {
-            return .failure(UnfriendError(apiError: error))
+            throw UnfriendError(apiError: error)
         }
     }
 }

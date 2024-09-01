@@ -30,11 +30,11 @@ public enum UnfriendError: Error {
 }
 
 public protocol FriendInteractionsUseCase {
-    func acceptFriendRequest(from user: User.ID) async -> Result<Void, AcceptFriendRequestError>
-    func rejectFriendRequest(from user: User.ID) async -> Result<Void, RejectFriendRequestError>
-    
-    func sendFriendRequest(to user: User.ID) async -> Result<Void, SendFriendRequestError>
-    func rollbackFriendRequest(to user: User.ID) async -> Result<Void, RollbackFriendRequestError>
+    func acceptFriendRequest(from user: User.ID) async throws(AcceptFriendRequestError)
+    func rejectFriendRequest(from user: User.ID) async throws(RejectFriendRequestError)
 
-    func unfriend(user: User.ID) async -> Result<Void, UnfriendError>
+    func sendFriendRequest(to user: User.ID) async throws(SendFriendRequestError)
+    func rollbackFriendRequest(to user: User.ID) async throws(RollbackFriendRequestError)
+
+    func unfriend(user: User.ID) async throws(UnfriendError)
 }
