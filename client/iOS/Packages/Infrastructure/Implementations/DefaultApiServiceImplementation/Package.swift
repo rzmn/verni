@@ -15,10 +15,10 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../Networking"),
-        .package(path: "../Logging"),
-        .package(path: "../ApiService"),
-        .package(path: "../Base"),
+        .package(path: "../../Networking"),
+        .package(path: "../../Logging"),
+        .package(path: "../../ApiService"),
+        .package(path: "../../Base"),
     ],
     targets: [
         .target(

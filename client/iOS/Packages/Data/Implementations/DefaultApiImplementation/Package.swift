@@ -4,30 +4,32 @@
 import PackageDescription
 
 let package = Package(
-    name: "PersistentStorageSQLite",
+    name: "DefaultApiImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "PersistentStorageSQLite",
-            targets: ["PersistentStorageSQLite"]
+            name: "DefaultApiImplementation",
+            targets: ["DefaultApiImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../PersistentStorage"),
-        .package(path: "../DataTransferObjects"),
-        .package(path: "../../Infrastructure/Logging"),
-        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3"),
+        .package(path: "../../Api"),
+        .package(path: "../../DataTransferObjects"),
+        .package(path: "../../../Infrastructure/ApiService"),
+        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
-            name: "PersistentStorageSQLite",
+            name: "DefaultApiImplementation",
             dependencies: [
+                "ApiService",
+                "Api",
+                "Base",
                 "DataTransferObjects",
-                "Logging", 
-                "PersistentStorage",
-                .product(name: "SQLite", package: "SQLite.swift"),
+                "Logging",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -37,12 +39,13 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "PersistentStorageSQLiteTests",
+            name: "DefaultApiImplementationTests",
             dependencies: [
-                "DataTransferObjects",
-                "Logging",
-                "PersistentStorage",
-                "PersistentStorageSQLite",
+                "DefaultApiImplementation",
+                "ApiService",
+                "Api",
+                "Base",
+                "DataTransferObjects"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

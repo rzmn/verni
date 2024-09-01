@@ -4,32 +4,30 @@
 import PackageDescription
 
 let package = Package(
-    name: "DefaultApiImplementation",
+    name: "PersistentStorageSQLite",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultApiImplementation",
-            targets: ["DefaultApiImplementation"]
+            name: "PersistentStorageSQLite",
+            targets: ["PersistentStorageSQLite"]
         ),
     ],
     dependencies: [
-        .package(path: "../Api"),
-        .package(path: "../DataTransferObjects"),
-        .package(path: "../../Infrastructure/ApiService"),
-        .package(path: "../../Infrastructure/Base"),
-        .package(path: "../../Infrastructure/Logging"),
+        .package(path: "../../PersistentStorage"),
+        .package(path: "../../DataTransferObjects"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3"),
     ],
     targets: [
         .target(
-            name: "DefaultApiImplementation",
+            name: "PersistentStorageSQLite",
             dependencies: [
-                "ApiService",
-                "Api",
-                "Base",
                 "DataTransferObjects",
-                "Logging",
+                "Logging", 
+                "PersistentStorage",
+                .product(name: "SQLite", package: "SQLite.swift"),
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -39,13 +37,12 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "DefaultApiImplementationTests",
+            name: "PersistentStorageSQLiteTests",
             dependencies: [
-                "DefaultApiImplementation",
-                "ApiService",
-                "Api",
-                "Base",
-                "DataTransferObjects"
+                "DataTransferObjects",
+                "Logging",
+                "PersistentStorage",
+                "PersistentStorageSQLite",
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

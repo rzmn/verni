@@ -144,7 +144,7 @@
 		611CCD4C2C50AE3A00289D9E /* DI */ = {
 			isa = PBXGroup;
 			children = (
-				611CCD4A2C50AE3A00289D9E /* DefaultDependencies */,
+				61C90BF62C84B28A006A44C0 /* Implementations */,
 				611CCD4B2C50AE3A00289D9E /* DI */,
 			);
 			path = DI;
@@ -153,11 +153,10 @@
 		611CCD532C50AE3A00289D9E /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				61C90BF52C84B0E6006A44C0 /* Implementations */,
 				61BBB1242C50D3CE00E3D4F3 /* Api */,
-				61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */,
 				611CCD502C50AE3A00289D9E /* DataTransferObjects */,
 				611CCD522C50AE3A00289D9E /* PersistentStorage */,
-				611CCD852C50B1D400289D9E /* PersistentStorageSQLite */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -176,11 +175,10 @@
 		611CCD5D2C50AE3A00289D9E /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
+				61C90BF42C84B02E006A44C0 /* Implementations */,
 				611CCD572C50AE3A00289D9E /* ApiService */,
 				611CCD812C50AEA600289D9E /* AuthSession */,
 				611CCD582C50AE3A00289D9E /* Base */,
-				611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */,
-				611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */,
 				611CCD5B2C50AE3A00289D9E /* Logging */,
 				611CCD5C2C50AE3A00289D9E /* Networking */,
 			);
@@ -338,6 +336,32 @@
 				614AC1962C67E315005B2CD5 /* FriendsFlow */,
 			);
 			name = Friends;
+			sourceTree = "<group>";
+		};
+		61C90BF42C84B02E006A44C0 /* Implementations */ = {
+			isa = PBXGroup;
+			children = (
+				611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */,
+				611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */,
+			);
+			path = Implementations;
+			sourceTree = "<group>";
+		};
+		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
+			isa = PBXGroup;
+			children = (
+				611CCD852C50B1D400289D9E /* PersistentStorageSQLite */,
+				61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */,
+			);
+			path = Implementations;
+			sourceTree = "<group>";
+		};
+		61C90BF62C84B28A006A44C0 /* Implementations */ = {
+			isa = PBXGroup;
+			children = (
+				611CCD4A2C50AE3A00289D9E /* DefaultDependencies */,
+			);
+			path = Implementations;
 			sourceTree = "<group>";
 		};
 		61FD347A2C402416002C1A5A /* Resources */ = {
