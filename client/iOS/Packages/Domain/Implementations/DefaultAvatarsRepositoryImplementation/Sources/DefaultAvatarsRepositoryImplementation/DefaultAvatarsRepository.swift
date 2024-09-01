@@ -46,7 +46,7 @@ public actor DefaultAvatarsRepository {
 }
 
 extension DefaultAvatarsRepository: AvatarsRepository {
-    public func get(ids: [Avatar.ID]) async -> Result<[Avatar.ID: Data], GeneralError> {
+    public func get(ids: [Avatar.ID]) async throws(GeneralError) -> [Avatar.ID : Data] {
         let cached = (await ids.concurrentMap { id in
             let data = await self.offlineRepository.getData(for: id)
             if let data {
@@ -86,15 +86,13 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         }
 
         guard idsToLoad.count > 0 else {
-            return .success(
-                [cached, successfullyLoaded]
-                    .flatMap { $0 }
-                    .reduce(
-                        into: [:], { dict, kv in
-                            dict[kv.0] = kv.1
-                        }
-                    )
-            )
+            return [cached, successfullyLoaded]
+                .flatMap { $0 }
+                .reduce(
+                    into: [:], { dict, kv in
+                        dict[kv.0] = kv.1
+                    }
+                )
         }
         do {
             let values = try await api.run(method: Avatars.Get(ids: idsToLoad))
@@ -134,14 +132,14 @@ extension DefaultAvatarsRepository: AvatarsRepository {
                 }
                 return await self.offlineRepository.store(data: data, for: value.key)
             }
-            return .success(dict)
+            return dict
         } catch {
             let error = GeneralError(apiError: error)
             idsToLoad.forEach { id in
                 self.loadingIdsContinuation[id]?.resume(returning: .failure(error))
                 self.loadingIdsContinuation[id] = nil
             }
-            return .failure(error)
+            throw error
         }
     }
 }

@@ -39,16 +39,20 @@ public class AvatarView: UIImageView {
                 guard let repository = await Self.repository else {
                     return
                 }
-                let result = await repository.get(id: avatarId)
-                if Task.isCancelled {
-                    return
-                }
-                Task { @MainActor in
-                    switch result {
-                    case .success(let data):
-                        let image = UIImage(data: data)
-                        self.image = image
-                    case .failure:
+
+                do {
+                    let data = try await repository.get(id: avatarId)
+                    if Task.isCancelled {
+                        return
+                    }
+                    Task { @MainActor in
+                        self.image = UIImage(data: data)
+                    }
+                } catch {
+                    if Task.isCancelled {
+                        return
+                    }
+                    Task { @MainActor in
                         self.image = "❌".image(fitSize: self.fitSize)
                     }
                 }

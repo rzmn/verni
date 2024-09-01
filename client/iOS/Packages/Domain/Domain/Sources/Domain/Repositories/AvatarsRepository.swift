@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol AvatarsRepository {
-    func get(ids: [Avatar.ID]) async -> Result<[Avatar.ID: Data], GeneralError>
+    func get(ids: [Avatar.ID]) async throws(GeneralError) -> [Avatar.ID: Data]
 }
 
 public enum AvatarsRepositoryError: Error {
@@ -10,15 +10,11 @@ public enum AvatarsRepositoryError: Error {
 }
 
 public extension AvatarsRepository {
-    func get(id: Avatar.ID) async -> Result<Data, GeneralError> {
-        switch await get(ids: [id]) {
-        case .success(let data):
-            guard let data = data.first?.value else {
-                return .failure(.other(AvatarsRepositoryError.idDoesNotExist))
-            }
-            return .success(data)
-        case .failure(let error):
-            return .failure(error)
+    func get(id: Avatar.ID) async throws(GeneralError) -> Data {
+        let data = try await get(ids: [id])
+        guard let data = data.first?.value else {
+            throw .other(AvatarsRepositoryError.idDoesNotExist)
         }
+        return data
     }
 }
