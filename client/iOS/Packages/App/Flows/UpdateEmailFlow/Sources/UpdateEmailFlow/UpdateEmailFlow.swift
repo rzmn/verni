@@ -100,12 +100,11 @@ extension UpdateEmailFlow {
 
 extension UpdateEmailFlow {
     func resendCode() async {
-        let result = await emailConfirmationUseCase.sendConfirmationCode()
-        switch result {
-        case .success:
+        do {
+            try await emailConfirmationUseCase.sendConfirmationCode()
             await presenter().codeSent()
             await viewModel.startCountdownTimer()
-        case .failure(let error):
+        } catch {
             switch error {
             case .notDelivered:
                 await presenter().codeNotDelivered()
@@ -125,18 +124,17 @@ extension UpdateEmailFlow {
             return assertionFailure()
         }
         await self.presenter().submitHaptic()
-        let result = await emailConfirmationUseCase.confirm(
-            code: uncorfirmed.currentCode.trimmingCharacters(in: CharacterSet.whitespaces)
-        )
-        switch result {
-        case .success:
+        do {
+            try await emailConfirmationUseCase.confirm(
+                code: uncorfirmed.currentCode.trimmingCharacters(in: CharacterSet.whitespaces)
+            )
             await viewModel.cancelCountdownTimer()
             Task { @MainActor [unowned viewModel] in
                 viewModel.confirmed = true
             }
             await presenter().successHaptic()
             await presenter().presentSuccess()
-        case .failure(let error):
+        } catch {
             switch error {
             case .codeIsWrong:
                 Task { @MainActor [unowned viewModel] in

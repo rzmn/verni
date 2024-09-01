@@ -14,6 +14,6 @@ public enum EmailConfirmationError: Error {
 public protocol EmailConfirmationUseCase {
     var confirmationCodeLength: Int { get }
 
-    func sendConfirmationCode() async -> Result<Void, SendEmailConfirmationCodeError>
-    func confirm(code: String) async -> Result<Void, EmailConfirmationError>
+    func sendConfirmationCode() async throws(SendEmailConfirmationCodeError)
+    func confirm(code: String) async throws(EmailConfirmationError)
 }
