@@ -13,6 +13,6 @@ public enum DeleteSpendingError: Error {
 }
 
 public protocol SpendingInteractionsUseCase {
-    func create(spending: Spending) async -> Result<Void, CreateSpendingError>
-    func delete(spending: Spending.ID) async -> Result<Void, DeleteSpendingError>
+    func create(spending: Spending) async throws(CreateSpendingError)
+    func delete(spending: Spending.ID) async throws(DeleteSpendingError)
 }

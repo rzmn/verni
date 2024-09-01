@@ -91,13 +91,13 @@ extension UpdateDisplayNameFlow {
             return await presenter().errorHaptic()
         }
         await presenter().presentLoading()
-        switch await profileEditing.setDisplayName(state.displayName) {
-        case .success:
+        do {
+            try await profileEditing.setDisplayName(state.displayName)
             await presenter().successHaptic()
             await presenter().presentSuccess()
             await handle(event: .successfullySet)
-        case .failure(let reason):
-            switch reason {
+        } catch {
+            switch error {
             case .wrongFormat:
                 await presenter().presentWrongFormat()
             case .other(let error):

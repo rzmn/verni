@@ -23,9 +23,9 @@ public enum SetDisplayNameError: Error {
 }
 
 public protocol ProfileEditingUseCase {
-    func updateEmail(_ email: String) async -> Result<Void, EmailUpdateError>
-    func updatePassword(old: String, new: String) async -> Result<Void, PasswordUpdateError>
+    func updateEmail(_ email: String) async throws(EmailUpdateError)
+    func updatePassword(old: String, new: String) async throws(PasswordUpdateError)
 
-    func setAvatar(imageData: Data) async -> Result<Void, SetAvatarError>
-    func setDisplayName(_ displayName: String) async -> Result<Void, SetDisplayNameError>
+    func setAvatar(imageData: Data) async throws(SetAvatarError)
+    func setDisplayName(_ displayName: String) async throws(SetDisplayNameError)
 }

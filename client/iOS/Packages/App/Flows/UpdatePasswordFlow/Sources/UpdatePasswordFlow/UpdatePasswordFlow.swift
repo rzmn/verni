@@ -102,13 +102,13 @@ extension UpdatePasswordFlow {
             return await presenter().errorHaptic()
         }
         await presenter().presentLoading()
-        switch await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword) {
-        case .success:
+        do {
+            try await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword)
             await saveCredentials.save(email: profile.email, password: state.newPassword)
             await presenter().successHaptic()
             await presenter().presentSuccess()
             await handle(event: .successfullySet)
-        case .failure(let error):
+        } catch {
             switch error {
             case .validationError:
                 await presenter().presentHint(message: "change_password_format_error".localized)

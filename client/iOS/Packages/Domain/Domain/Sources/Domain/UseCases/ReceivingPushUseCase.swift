@@ -18,5 +18,5 @@ public enum ProcessPushError: Error {
 }
 
 public protocol ReceivingPushUseCase {
-    func process(rawPushPayload: [AnyHashable: Any]) async -> Result<PushContent, ProcessPushError>
+    func process(rawPushPayload: [AnyHashable: Any]) async throws(ProcessPushError) -> PushContent
 }

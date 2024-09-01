@@ -70,12 +70,12 @@ extension UpdateAvatarFlow: Flow {
             return .canceled
         }
         await presenter.presentLoading()
-        switch await profileEditing.setAvatar(imageData: data) {
-        case .success:
+        do {
+            try await profileEditing.setAvatar(imageData: data)
             await presenter.successHaptic()
             await presenter.presentSuccess()
             return .successfullySet
-        case .failure(let error):
+        } catch {
             switch error {
             case .wrongFormat:
                 await presenter.presentWrongFormat()

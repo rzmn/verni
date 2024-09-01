@@ -17,31 +17,29 @@ public class DefaultProfileEditingUseCase {
 }
 
 extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
-    public func setAvatar(imageData: Data) async -> Result<Void, Domain.SetAvatarError> {
+    public func setAvatar(imageData: Data) async throws(SetAvatarError) {
         do {
             try await api.run(
                 method: Api.Profile.SetAvatar(dataBase64: imageData.base64EncodedString())
             )
             await repository.refreshProfile()
-            return .success(())
         } catch {
-            return .failure(SetAvatarError(apiError: error))
+            throw SetAvatarError(apiError: error)
         }
     }
-    
-    public func setDisplayName(_ displayName: String) async -> Result<Void, Domain.SetDisplayNameError> {
+
+    public func setDisplayName(_ displayName: String) async throws(SetDisplayNameError) {
         do {
             try await api.run(
                 method: Api.Profile.SetDisplayName(displayName: displayName)
             )
             await repository.refreshProfile()
-            return .success(())
         } catch {
-            return .failure(SetDisplayNameError(apiError: error))
+            throw SetDisplayNameError(apiError: error)
         }
     }
-    
-    public func updateEmail(_ email: String) async -> Result<Void, EmailUpdateError> {
+
+    public func updateEmail(_ email: String) async throws(EmailUpdateError) {
         do {
             let tokens = try await api.run(
                 method: Auth.UpdateEmail(email: email)
@@ -50,13 +48,12 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
                 await self.persistency.update(refreshToken: tokens.refreshToken)
             }
             await repository.refreshProfile()
-            return .success(())
         } catch {
-            return .failure(EmailUpdateError(apiError: error))
+            throw EmailUpdateError(apiError: error)
         }
     }
 
-    public func updatePassword(old: String, new: String) async -> Result<Void, PasswordUpdateError> {
+    public func updatePassword(old: String, new: String) async throws(PasswordUpdateError) {
         do {
             let tokens = try await api.run(
                 method: Auth.UpdatePassword(old: old, new: new)
@@ -64,9 +61,8 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             Task.detached {
                 await self.persistency.update(refreshToken: tokens.refreshToken)
             }
-            return .success(())
         } catch {
-            return .failure(PasswordUpdateError(apiError: error))
+            throw PasswordUpdateError(apiError: error)
         }
     }
 }

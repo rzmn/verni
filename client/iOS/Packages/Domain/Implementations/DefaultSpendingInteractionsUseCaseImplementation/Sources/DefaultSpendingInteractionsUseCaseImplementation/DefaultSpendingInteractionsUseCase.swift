@@ -13,35 +13,31 @@ public class DefaultSpendingInteractionsUseCase {
 }
 
 extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
-    public func create(spending: Spending) async -> Result<Void, CreateSpendingError> {
+    public func create(spending: Spending) async throws(CreateSpendingError) {
         do {
-            return .success(
-                try await api.run(
-                    method: Spendings.CreateDeal(
-                        deal: DealDto(
-                            timestamp: Int64(spending.date.timeIntervalSince1970),
-                            details: spending.details,
-                            cost: Int64((NSDecimalNumber(decimal: spending.cost).doubleValue * 100)),
-                            currency: spending.currency.stringValue,
-                            spendings: spending.participants.map {
-                                SpendingDto(userId: $0.key, cost: CostDto(cost: $0.value))
-                            }
-                        )
+            try await api.run(
+                method: Spendings.CreateDeal(
+                    deal: DealDto(
+                        timestamp: Int64(spending.date.timeIntervalSince1970),
+                        details: spending.details,
+                        cost: Int64((NSDecimalNumber(decimal: spending.cost).doubleValue * 100)),
+                        currency: spending.currency.stringValue,
+                        spendings: spending.participants.map {
+                            SpendingDto(userId: $0.key, cost: CostDto(cost: $0.value))
+                        }
                     )
                 )
             )
         } catch {
-            return .failure(CreateSpendingError(apiError: error))
+            throw CreateSpendingError(apiError: error)
         }
     }
-    
-    public func delete(spending: Spending.ID) async -> Result<Void, DeleteSpendingError> {
+
+    public func delete(spending: Spending.ID) async throws(DeleteSpendingError) {
         do {
-            return .success(
-                try await api.run(method: Spendings.DeleteDeal(dealId: spending))
-            )
+            try await api.run(method: Spendings.DeleteDeal(dealId: spending))
         } catch {
-            return .failure(DeleteSpendingError(apiError: error))
+            throw DeleteSpendingError(apiError: error)
         }
     }
 }

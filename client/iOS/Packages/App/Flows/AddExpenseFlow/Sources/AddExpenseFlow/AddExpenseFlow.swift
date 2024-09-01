@@ -148,13 +148,12 @@ extension AddExpenseFlow {
             }()
         )
         await presenter().presentLoading()
-        let result = await spendingInteractions.create(spending: spending)
-        switch result {
-        case .success:
+        do {
+            try await spendingInteractions.create(spending: spending)
             await presenter().dismissLoading()
             await presenter().successHaptic()
             await handle(event: .expenseAdded)
-        case .failure(let error):
+        } catch {
             switch error {
             case .noSuchUser:
                 await presenter().presentNoSuchUser()
