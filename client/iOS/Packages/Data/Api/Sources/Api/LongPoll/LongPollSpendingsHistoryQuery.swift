@@ -1,8 +1,8 @@
 import DataTransferObjects
 
 public struct SpendingsHistoryUpdate: LongPollQuery {
-    public struct Update: Decodable {
-        public enum Category: Decodable {
+    public struct Update: Decodable, Sendable {
+        public enum Category: Decodable, Sendable {
             case spendings(uid: UserDto.ID)
 
             public init(from decoder: any Decoder) throws {

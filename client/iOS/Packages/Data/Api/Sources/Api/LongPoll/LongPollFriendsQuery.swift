@@ -1,8 +1,8 @@
 import DataTransferObjects
 
 public struct LongPollFriendsQuery: LongPollQuery {
-    public struct Update: Decodable {
-        public enum Category: String, Decodable {
+    public struct Update: Decodable, Sendable {
+        public enum Category: String, Decodable, Sendable {
             case friends
         }
         let category: Category

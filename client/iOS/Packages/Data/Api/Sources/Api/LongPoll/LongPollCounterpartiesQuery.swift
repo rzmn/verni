@@ -1,8 +1,8 @@
 import DataTransferObjects
 
 public struct LongPollCounterpartiesQuery: LongPollQuery {
-    public struct Update: Decodable {
-        public enum Category: String, Decodable {
+    public struct Update: Decodable, Sendable {
+        public enum Category: String, Decodable, Sendable {
             case counterparties
         }
         let category: Category
