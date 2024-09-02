@@ -1,3 +1,3 @@
-public protocol NetworkServiceFactory {
+public protocol NetworkServiceFactory: Sendable {
     func create() -> NetworkService
 }

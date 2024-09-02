@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ApiServiceRequest {
+public protocol ApiServiceRequest: Sendable {
     var path: String { get }
     var headers: [String: String] { get }
     var parameters: [String: String] { get }

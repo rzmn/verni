@@ -4,7 +4,15 @@ import DefaultDependencies
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    public let app = App(di: DefaultDependenciesAssembly())
+    private var _app: App?
+    func app() async -> App {
+        guard let _app else {
+            let app = await App(di: await DefaultDependenciesAssembly())
+            _app = app
+            return app
+        }
+        return _app
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         return true
@@ -18,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Task.detached { [unowned self] in
-            await app.registerPushToken(
+            await app().registerPushToken(
                 token: deviceToken
             )
         }

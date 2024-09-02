@@ -4,7 +4,7 @@ extension Spendings {
     public struct GetDeals: ApiMethod, SpendingsScope {
         public typealias Response = [IdentifiableDealDto]
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let counterparty: UserDto.ID
         }
         public let parameters: Parameters

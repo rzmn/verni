@@ -2,7 +2,7 @@ import Foundation
 
 public typealias CurrencyDto = String
 
-public struct SpendingsPreviewDto: Codable {
+public struct SpendingsPreviewDto: Codable, Sendable {
     public let counterparty: UserDto.ID
     public let balance: [CurrencyDto: Int64]
 

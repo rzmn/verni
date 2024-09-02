@@ -2,7 +2,7 @@ import Domain
 
 public protocol AuthUseCaseReturningActiveSession: AuthUseCase where Self.AuthorizedSession == ActiveSessionDIContainer {}
 
-public protocol AppCommon {
+public protocol AppCommon: Sendable {
     var localEmailValidationUseCase: EmailValidationUseCase { get }
     var localPasswordValidationUseCase: PasswordValidationUseCase { get }
 
@@ -10,12 +10,12 @@ public protocol AppCommon {
     var saveCredentialsUseCase: SaveCredendialsUseCase { get }
 }
 
-public protocol AppCommonCovertible {
+public protocol AppCommonCovertible: Sendable {
     var appCommon: AppCommon { get }
 }
 
-public protocol DIContainer: AppCommonCovertible {
-    func authUseCase() -> any AuthUseCaseReturningActiveSession
+public protocol DIContainer: AppCommonCovertible, Sendable {
+    func authUseCase() async -> any AuthUseCaseReturningActiveSession
 }
 
 public protocol ActiveSessionDIContainer: AppCommonCovertible {
@@ -41,6 +41,6 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
     func qrInviteUseCase() -> QRInviteUseCase
 }
 
-public protocol ActiveSessionDIContainerConvertible {
+public protocol ActiveSessionDIContainerConvertible: Sendable {
     func activeSessionDIContainer() async -> ActiveSessionDIContainer
 }

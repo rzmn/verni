@@ -4,7 +4,7 @@ extension Users {
     public struct Get: ApiMethod, UsersScope {
         public typealias Response = [UserDto]
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let ids: [UserDto.ID]
         }
         public let parameters: Parameters

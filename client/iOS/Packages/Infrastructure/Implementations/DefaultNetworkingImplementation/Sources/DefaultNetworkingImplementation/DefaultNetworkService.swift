@@ -3,7 +3,7 @@ import Networking
 import Logging
 internal import Base
 
-public struct Endpoint {
+public struct Endpoint: Sendable {
     public let path: String
 
     public init(path: String) {
@@ -11,7 +11,7 @@ public struct Endpoint {
     }
 }
 
-class DefaultNetworkService {
+final class DefaultNetworkService: Sendable {
     let logger: Logger
     private let endpoint: Endpoint
     private let encoder = JSONEncoder()

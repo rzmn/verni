@@ -26,9 +26,9 @@ public actor App {
     }
     private var urlResolvers = UrlResolverContainer()
 
-    public init(di: DIContainer) {
+    public init(di: DIContainer) async {
         self.di = di
-        authUseCase = di.authUseCase()
+        authUseCase = await di.authUseCase()
     }
 
     public func start(on window: UIWindow) async {

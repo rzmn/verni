@@ -27,7 +27,7 @@ internal import DefaultProfileRepositoryImplementation
 internal import DefaultLogoutUseCaseImplementation
 internal import DefaultReceivingPushUseCaseImplementation
 
-class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory {
+final class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory {
     private let appCommon: AppCommon
 
     init(appCommon: AppCommon) {
@@ -52,11 +52,11 @@ class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory 
     }
 }
 
-class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
+final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     private let api: ApiProtocol
     private let persistency: Persistency
     private let longPoll: LongPoll
-    private let logoutSubject: PassthroughSubject<LogoutReason, Never>
+    nonisolated(unsafe) private let logoutSubject: PassthroughSubject<LogoutReason, Never>
 
     let appCommon: AppCommon
     let profileRepository: ProfileRepository

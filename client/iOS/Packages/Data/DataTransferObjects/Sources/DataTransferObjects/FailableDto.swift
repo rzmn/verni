@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Failable<T: Decodable>: Decodable {
+public struct Failable<T: Decodable & Sendable>: Decodable, Sendable {
     public let wrappedValue: T?
 
     public init(from decoder: Decoder) throws {

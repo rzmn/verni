@@ -1,6 +1,6 @@
 import Foundation
 
-public struct DealDto: Codable {
+public struct DealDto: Codable, Sendable {
     public let timestamp: Int64
     public let details: String
     public let cost: CostDto

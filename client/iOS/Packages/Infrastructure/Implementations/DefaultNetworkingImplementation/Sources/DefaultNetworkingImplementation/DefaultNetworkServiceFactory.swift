@@ -2,7 +2,7 @@ import Networking
 import Logging
 import Foundation
 
-public class DefaultNetworkServiceFactory {
+final public class DefaultNetworkServiceFactory: Sendable {
     private let logger: Logger
     private let session: URLSession
     private let endpoint: Endpoint

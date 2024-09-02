@@ -1,7 +1,7 @@
 import DataTransferObjects
 import Combine
 
-public protocol ApiProtocol {
+public protocol ApiProtocol: Sendable {
     func run<Method>(method: Method) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable, Method.Parameters: Encodable
 
@@ -12,7 +12,7 @@ public protocol ApiProtocol {
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable
 }
 
-public protocol LongPoll {
+public protocol LongPoll: Sendable {
     func poll<Query>(for query: Query) async -> AnyPublisher<Query.Update, Never>
     where Query: LongPollQuery, Query.Update: Decodable
 }

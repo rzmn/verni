@@ -2,7 +2,7 @@ public struct NoParameters {}
 
 public struct NoResponse {}
 
-public protocol ApiMethod {
+public protocol ApiMethod: Sendable {
     associatedtype Response
     associatedtype Parameters
 

@@ -47,67 +47,62 @@ fileprivate actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 }
 
 
-public class DefaultDependenciesAssembly: DIContainer {    
-    private lazy var anonymousApi = anonymousApiFactory().create()
-    private lazy var avatarsRepository = DefaultAvatarsRepository(api: anonymousApi)
+public final class DefaultDependenciesAssembly: DIContainer, Sendable {
+    private let anonymousApi: ApiProtocol
+    private let apiServiceFactory: ApiServiceFactory
+    private let networkServiceFactory: NetworkServiceFactory
+    private let avatarsRepository: AvatarsRepository
     private let apiEndpoint = "http://193.124.113.41:8082"
     private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
 
-    public init() {}
+    public let appCommon: AppCommon
 
-    public lazy var appCommon: AppCommon = AppCommonDependencies(
-        api: anonymousApi,
-        avatarsRepository: avatarsRepository,
-        saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
-            website: webcredentials
+    public init() async {
+        networkServiceFactory = DefaultNetworkServiceFactory(
+            logger: .shared.with(
+                prefix: "[net] "
+            ),
+            session: .shared,
+            endpoint: Endpoint(
+                path: apiEndpoint
+            )
         )
-    )
+        apiServiceFactory = DefaultApiServiceFactory(
+            logger: .shared.with(
+                prefix: "[api.s] "
+            ),
+            networkServiceFactory: networkServiceFactory
+        )
+        let apiFactory = await DefaultApiFactory(service: apiServiceFactory.create(tokenRefresher: nil))
+        anonymousApi = apiFactory.create()
+        avatarsRepository =  DefaultAvatarsRepository(api: anonymousApi)
+        appCommon = AppCommonDependencies(
+            api: anonymousApi,
+            avatarsRepository: avatarsRepository,
+            saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
+                website: webcredentials
+            )
+        )
+    }
 
-    public func authUseCase() -> any AuthUseCaseReturningActiveSession {
+    public func authUseCase() async -> any AuthUseCaseReturningActiveSession {
         AuthUseCaseAdapter(
-            impl: DefaultAuthUseCase(
+            impl: await DefaultAuthUseCase(
                 api: anonymousApi,
-                apiServiceFactory: apiServiceFactory(), 
-                persistencyFactory: persistencyFactory(), 
+                apiServiceFactory: apiServiceFactory,
+                persistencyFactory: persistencyFactory(),
                 activeSessionDIContainerFactory: ActiveSessionDependenciesAssemblyFactory(
                     appCommon: appCommon
                 ),
-                apiFactoryProvider: self.autenticatedApiFactory
+                apiFactoryProvider: { refresher in
+                    await DefaultApiFactory(service: self.apiServiceFactory.create(tokenRefresher: refresher))
+                }
             )
         )
     }
 }
 
 extension DefaultDependenciesAssembly {
-    func networkServiceFactory() -> NetworkServiceFactory {
-        DefaultNetworkServiceFactory(
-            logger: .shared.with(
-                prefix: "[net] "
-            ), 
-            session: .shared,
-            endpoint: Endpoint(
-                path: apiEndpoint
-            )
-        )
-    }
-
-    func apiServiceFactory() -> ApiServiceFactory {
-        DefaultApiServiceFactory(
-            logger: .shared.with(
-                prefix: "[api.s] "
-            ),
-            networkServiceFactory: networkServiceFactory()
-        )
-    }
-
-    func anonymousApiFactory() -> ApiFactory {
-        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: nil))
-    }
-
-    func autenticatedApiFactory(refresher: TokenRefresher) -> ApiFactory {
-        DefaultApiFactory(service: apiServiceFactory().create(tokenRefresher: refresher))
-    }
-
     func persistencyFactory() -> PersistencyFactory {
         SQLitePersistencyFactory(
             logger: .shared.with(prefix: "[db] "),

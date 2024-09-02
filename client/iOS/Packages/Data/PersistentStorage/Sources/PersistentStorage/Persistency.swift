@@ -1,6 +1,6 @@
 import DataTransferObjects
 
-public protocol Persistency {
+public protocol Persistency: Sendable {
     func userId() async -> UserDto.ID
 
     func getRefreshToken() async -> String

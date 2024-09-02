@@ -4,7 +4,7 @@ extension Friends {
     public struct Get: ApiMethod, FriendsScope {
         public typealias Response = [Int: [UserDto.ID]]
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let statuses: [Int]
         }
         public let parameters: Parameters

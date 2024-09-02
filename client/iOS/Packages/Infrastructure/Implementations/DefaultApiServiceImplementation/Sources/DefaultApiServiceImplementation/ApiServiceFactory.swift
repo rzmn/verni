@@ -2,7 +2,7 @@ import ApiService
 import Networking
 import Logging
 
-public class DefaultApiServiceFactory {
+public actor DefaultApiServiceFactory {
     private let logger: Logger
     private let networkServiceFactory: NetworkServiceFactory
 
@@ -16,7 +16,7 @@ public class DefaultApiServiceFactory {
 }
 
 extension DefaultApiServiceFactory: ApiServiceFactory {
-    public func create(tokenRefresher: (any TokenRefresher)?) -> any ApiService {
+    public func create(tokenRefresher: (any TokenRefresher)?) async -> any ApiService {
         DefaultApiService(
             logger: logger,
             networkServiceFactory: networkServiceFactory,

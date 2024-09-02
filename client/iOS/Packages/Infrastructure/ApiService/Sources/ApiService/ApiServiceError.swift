@@ -1,4 +1,4 @@
-public enum ApiServiceError: Error {
+public enum ApiServiceError: Error, Sendable {
     case noConnection(Error)
     case decodingFailed(Error)
     case internalError(Error)

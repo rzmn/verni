@@ -4,7 +4,7 @@ extension Users {
     public struct Search: ApiMethod, UsersScope {
         public typealias Response = [UserDto]
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let query: String
         }
         public let parameters: Parameters

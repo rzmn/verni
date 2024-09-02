@@ -4,10 +4,10 @@ import DI
 import PersistentStorage
 import ApiService
 import Domain
-import Combine
+@preconcurrency import Combine
 internal import Base
 
-public protocol ActiveSessionDIContainerFactory {
+public protocol ActiveSessionDIContainerFactory: Sendable {
     func create(
         api: ApiProtocol,
         persistency: Persistency,
@@ -17,7 +17,7 @@ public protocol ActiveSessionDIContainerFactory {
     ) async -> ActiveSessionDIContainer
 }
 
-public class ActiveSession: ActiveSessionDIContainerConvertible {
+public actor ActiveSession: ActiveSessionDIContainerConvertible {
     private var _activeSessionDIContainer: (any ActiveSessionDIContainer)?
     public func activeSessionDIContainer() async -> any ActiveSessionDIContainer {
         guard let _activeSessionDIContainer else {
@@ -33,17 +33,13 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         }
         return _activeSessionDIContainer
     }
-    private lazy var authenticatedApiFactory = apiFactoryProvider(tokenRefresher)
-    private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
+    private let authenticatedApiFactory: ApiFactory
+    private let apiFactoryProvider: @Sendable (TokenRefresher) async -> ApiFactory
     private let anonymousApi: ApiProtocol
     private let factory: ActiveSessionDIContainerFactory
     private let logoutSubject = PassthroughSubject<LogoutReason, Never>()
 
-    private lazy var tokenRefresher: TokenRefresher = RefreshTokenManager(
-        api: anonymousApi,
-        persistency: persistency, 
-        onRefreshTokenExpiredOnInvalid: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
-    )
+    private let tokenRefresher: TokenRefresher
     private let userId: User.ID
     private let persistency: Persistency
     private let accessToken: String?
@@ -56,7 +52,7 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
-        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
+        apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
     ) async throws -> ActiveSession {
         let persistency = try await persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
         return await ActiveSession(
@@ -73,7 +69,7 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
-        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
+        apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
     ) async -> ActiveSession? {
         guard let persistency = await persistencyFactory.awake() else {
             return nil
@@ -92,7 +88,7 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         persistency: Persistency,
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         accessToken: String?,
-        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
+        apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
     ) async {
         self.persistency = persistency
         self.accessToken = accessToken
@@ -100,5 +96,11 @@ public class ActiveSession: ActiveSessionDIContainerConvertible {
         self.apiFactoryProvider = apiFactoryProvider
         self.factory = activeSessionDIContainerFactory
         self.userId = await persistency.userId()
+        tokenRefresher = RefreshTokenManager(
+            api: anonymousApi,
+            persistency: persistency,
+            onRefreshTokenExpiredOnInvalid: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
+        )
+        self.authenticatedApiFactory = await apiFactoryProvider(tokenRefresher)
     }
 }

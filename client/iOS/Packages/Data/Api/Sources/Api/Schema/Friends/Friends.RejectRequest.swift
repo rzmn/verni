@@ -4,7 +4,7 @@ extension Friends {
     public struct RejectRequest: ApiMethod, FriendsScope {
         public typealias Response = NoResponse
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let sender: UserDto.ID
         }
         public let parameters: Parameters

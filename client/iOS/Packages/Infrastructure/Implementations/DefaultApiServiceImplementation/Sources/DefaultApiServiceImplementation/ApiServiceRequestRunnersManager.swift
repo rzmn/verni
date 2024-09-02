@@ -5,7 +5,7 @@ import Logging
 internal import Base
 
 private extension TokenRefresher {
-    func refreshTokensCallback(completion: @escaping (Result<Void, RefreshTokenFailureReason>) -> Void) {
+    func refreshTokensCallback(completion: @escaping @Sendable (Result<Void, RefreshTokenFailureReason>) -> Void) {
         func _refreshTokensCallback(completion: (Result<Void, RefreshTokenFailureReason>) -> Void) async {
             do {
                 completion(.success(try await refreshTokens()))
@@ -19,7 +19,7 @@ private extension TokenRefresher {
     }
 }
 
-class ApiServiceRequestRunnersManager: Loggable {
+final class ApiServiceRequestRunnersManager: Loggable, Sendable {
     let logger: Logger = .shared
     private let tokenRefresher: TokenRefresher?
 
@@ -29,31 +29,32 @@ class ApiServiceRequestRunnersManager: Loggable {
 
     private let refreshTokenSemaphore = DispatchSemaphore(value: 1)
     private let runnerFactory: ApiServiceRequestRunnerFactory
-    private enum RequestState {
+    enum RequestState: Sendable {
         case notInitialized
         case running
         case waitingForRun
     }
-    private var runningRequests = [UUID: RequestState]()
+    /// on state queue
+    nonisolated(unsafe) private var runningRequests = [UUID: RequestState]()
 
     init(runnerFactory: ApiServiceRequestRunnerFactory, tokenRefresher: TokenRefresher?) {
         self.tokenRefresher = tokenRefresher
         self.runnerFactory = runnerFactory
     }
 
-    func run<Request: ApiServiceRequest, Response: Decodable>(
+    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
-        completion: @escaping (Result<Response, ApiServiceError>) -> Void
+        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
     ) {
         schedulerQueue.async {
             self.runUnchecked(request: request, id: UUID(), completion: completion)
         }
     }
 
-    private func runUnchecked<Request: ApiServiceRequest, Response: Decodable>(
+    private func runUnchecked<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
         id: UUID,
-        completion: @escaping (Result<Response, ApiServiceError>) -> Void
+        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
     ) {
         dispatchPrecondition(condition: .onQueue(schedulerQueue))
         waitUntilTokenIsRefreshed()
@@ -65,10 +66,10 @@ class ApiServiceRequestRunnersManager: Loggable {
         }
     }
 
-    private func runImpl<Request: ApiServiceRequest, Response: Decodable>(
+    private func runImpl<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
         id: UUID,
-        completion: @escaping (Result<Response, ApiServiceError>) -> Void
+        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
     ) async {
         [stateQueue, notifyQueue, schedulerQueue].forEach {
             dispatchPrecondition(condition: .notOnQueue($0))
@@ -81,12 +82,16 @@ class ApiServiceRequestRunnersManager: Loggable {
             let result: Result<Response, ApiServiceError> = await runner.run(request: request)
             switch result {
             case .success(let response):
-                completeTask(id: id, completion: curry(completion)(.success(response)))
+                completeTask(id: id) {
+                    completion(.success(response))
+                }
             case .failure(let error):
                 if case .unauthorized = error {
                     handleUnauthorized(request: request, id: id, tokenRefresher: tokenRefresher, completion: completion)
                 } else {
-                    completeTask(id: id, completion: curry(completion)(.failure(error)))
+                    completeTask(id: id) {
+                        completion(.failure(error))
+                    }
                 }
             }
         } else {
@@ -94,11 +99,11 @@ class ApiServiceRequestRunnersManager: Loggable {
         }
     }
 
-    private func handleUnauthorized<Request: ApiServiceRequest, Response: Decodable>(
+    private func handleUnauthorized<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
         id: UUID,
         tokenRefresher: TokenRefresher,
-        completion: @escaping (Result<Response, ApiServiceError>) -> Void
+        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
     ) {
         [stateQueue, notifyQueue, schedulerQueue].forEach {
             dispatchPrecondition(condition: .notOnQueue($0))
@@ -113,7 +118,9 @@ class ApiServiceRequestRunnersManager: Loggable {
             case .notInitialized:
                 assertionFailure()
                 let error = InternalError.error("internal inconsistency: task finished but it is not initialized", underlying: nil)
-                self.completeTask(id: id, completion: curry(completion)(.failure(.internalError(error))))
+                self.completeTask(id: id) {
+                    completion(.failure(.internalError(error)))
+                }
             case .running:
                 self.refreshToken(refresher: tokenRefresher) {
                     self.stateQueue.async {
@@ -125,11 +132,17 @@ class ApiServiceRequestRunnersManager: Loggable {
                 } onFailure: { error in
                     switch error {
                     case .noConnection(let error):
-                        self.completeTask(id: id, completion: curry(completion)(.failure(.noConnection(error))))
+                        self.completeTask(id: id) {
+                            completion(.failure(.noConnection(error)))
+                        }
                     case .internalError(let error):
-                        self.completeTask(id: id, completion: curry(completion)(.failure(.internalError(error))))
+                        self.completeTask(id: id) {
+                            completion(.failure(.internalError(error)))
+                        }
                     case .expired:
-                        self.completeTask(id: id, completion: curry(completion)(.failure(.unauthorized)))
+                        self.completeTask(id: id) {
+                            completion(.failure(.unauthorized))
+                        }
                     }
                 }
             }
@@ -138,8 +151,8 @@ class ApiServiceRequestRunnersManager: Loggable {
 
     private func refreshToken(
         refresher: TokenRefresher,
-        onSuccess: @escaping () -> Void,
-        onFailure: @escaping (RefreshTokenFailureReason) -> Void
+        onSuccess: @escaping @Sendable () -> Void,
+        onFailure: @escaping @Sendable (RefreshTokenFailureReason) -> Void
     ) {
         dispatchPrecondition(condition: .onQueue(stateQueue))
         for key in self.runningRequests.keys {
@@ -159,10 +172,10 @@ class ApiServiceRequestRunnersManager: Loggable {
         }
     }
 
-    private func runImplNoAuth<Request: ApiServiceRequest, Response: Decodable>(
+    private func runImplNoAuth<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
         id: UUID,
-        completion: @escaping (Result<Response, ApiServiceError>) -> Void
+        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
     ) async {
         [stateQueue, notifyQueue, schedulerQueue].forEach {
             dispatchPrecondition(condition: .notOnQueue($0))
@@ -179,7 +192,7 @@ class ApiServiceRequestRunnersManager: Loggable {
         }
     }
 
-    private func completeTask(id: UUID, completion: @escaping () -> Void) {
+    private func completeTask(id: UUID, completion: @escaping @Sendable () -> Void) {
         [stateQueue, notifyQueue, schedulerQueue].forEach {
             dispatchPrecondition(condition: .notOnQueue($0))
         }

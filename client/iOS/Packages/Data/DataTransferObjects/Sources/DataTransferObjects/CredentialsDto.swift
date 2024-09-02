@@ -1,6 +1,6 @@
 import Base
 
-public struct CredentialsDto: Codable {
+public struct CredentialsDto: Codable, Sendable {
     public let email: String
     public let password: String
 

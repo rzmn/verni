@@ -4,7 +4,7 @@ extension Auth {
     public struct Refresh: ApiMethod, AuthScope {
         public typealias Response = AuthTokenDto
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let refreshToken: String
         }
         public let parameters: Parameters

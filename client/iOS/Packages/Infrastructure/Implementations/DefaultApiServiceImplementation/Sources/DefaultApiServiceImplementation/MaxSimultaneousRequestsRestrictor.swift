@@ -2,7 +2,7 @@ import Foundation
 import ApiService
 internal import Base
 
-class MaxSimultaneousRequestsRestrictor {
+final class MaxSimultaneousRequestsRestrictor: Sendable {
     private let manager: ApiServiceRequestRunnersManager
     private let queue = DispatchQueue(label: "\(MaxSimultaneousRequestsRestrictor.self)")
     private let semaphore: DispatchSemaphore
@@ -12,7 +12,7 @@ class MaxSimultaneousRequestsRestrictor {
         self.manager = manager
     }
 
-    func run<Request: ApiServiceRequest, Response: Decodable>(
+    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request
     ) async throws(ApiServiceError) -> Response {
         let result: Result<Response, ApiServiceError> = await withCheckedContinuation { continuation in
@@ -25,14 +25,16 @@ class MaxSimultaneousRequestsRestrictor {
         return try result.get()
     }
 
-    func runImpl<Request: ApiServiceRequest, Response: Decodable>(
+    func runImpl<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
-        completion: @escaping (Result<Response, ApiServiceError>) -> Void
+        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
     ) {
         semaphore.wait()
         manager.run(request: request) { [weak self] result in
             guard let self else { return }
-            DispatchQueue.main.async(execute: curry(completion)(result))
+            DispatchQueue.main.async {
+                completion(result)
+            }
             semaphore.signal()
         }
     }

@@ -5,7 +5,7 @@ import Combine
 import Foundation
 internal import Base
 
-class DefaultApi: ApiProtocol {
+final class DefaultApi: ApiProtocol {
     private enum RefreshTokenError: Error {
         case internalError
     }

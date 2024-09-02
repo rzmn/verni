@@ -15,7 +15,7 @@ public actor UnauthenticatedFlow {
     private var flowContinuation: Continuation?
 
     public init(di: DIContainer, router: AppRouter) async {
-        authUseCase = di.authUseCase()
+        authUseCase = await di.authUseCase()
         presenter = await UnauthenticatedPresenter(router: router)
         signInFlow = await SignInFlow(di: di, router: router)
     }

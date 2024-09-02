@@ -5,7 +5,7 @@ extension Profile {
         public typealias Response = NoResponse
         public let parameters: Parameters
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let displayName: String
         }
 

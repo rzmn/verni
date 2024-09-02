@@ -3,7 +3,7 @@ import Networking
 import Foundation
 import Logging
 
-protocol ApiServiceRequestRunnerFactory {
+protocol ApiServiceRequestRunnerFactory: Sendable {
     func create(accessToken: String?) -> ApiServiceRequestRunner
 }
 
@@ -13,7 +13,7 @@ protocol ApiServiceRequestRunner {
     ) async -> Result<Response, ApiServiceError>
 }
 
-class DefaultApiServiceRequestRunnerFactory: ApiServiceRequestRunnerFactory {
+final class DefaultApiServiceRequestRunnerFactory: ApiServiceRequestRunnerFactory {
     private let service: NetworkService
 
     init(service: NetworkService) {
@@ -35,7 +35,7 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
         self.networkService = networkService
     }
 
-    func run<Request: ApiServiceRequest, Response: Decodable>(
+    nonisolated func run<Request: ApiServiceRequest, Response: Decodable>(
         request: Request
     ) async -> Result<Response, ApiServiceError> {
         logI { "\(request): starting request" }

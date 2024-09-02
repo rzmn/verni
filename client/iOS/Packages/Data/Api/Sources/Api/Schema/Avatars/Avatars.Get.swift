@@ -4,7 +4,7 @@ extension Avatars {
     public struct Get: ApiMethod, AvatarsScope {
         public typealias Response = [UserDto.Avatar.ID: AvatarDataDto]
 
-        public struct Parameters: Encodable {
+        public struct Parameters: Encodable, Sendable {
             let ids: [UserDto.Avatar.ID]
         }
         public let parameters: Parameters

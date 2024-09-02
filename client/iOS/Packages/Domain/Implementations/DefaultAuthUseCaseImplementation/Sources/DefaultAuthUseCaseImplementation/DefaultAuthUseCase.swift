@@ -11,15 +11,15 @@ public actor DefaultAuthUseCase {
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory
     private let activeSessionDIContainerFactory: ActiveSessionDIContainerFactory
-    private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
+    private let apiFactoryProvider: @Sendable (TokenRefresher) async -> ApiFactory
 
     public init(
         api: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
-        apiFactoryProvider: @escaping (TokenRefresher) -> ApiFactory
-    ) {
+        apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
+    ) async {
         self.api = api
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory

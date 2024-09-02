@@ -1,12 +1,13 @@
 import Api
 import ApiService
 
-public class DefaultApiFactory {
+public final class DefaultApiFactory: Sendable {
     private let service: ApiService
-    private lazy var impl = DefaultApi(service: service)
+    private let impl: DefaultApi
 
     public init(service: ApiService) {
         self.service = service
+        self.impl = DefaultApi(service: service)
     }
 }
 

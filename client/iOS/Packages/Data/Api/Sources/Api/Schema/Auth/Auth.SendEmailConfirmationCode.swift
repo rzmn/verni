@@ -4,7 +4,7 @@ extension Auth {
     public struct SendEmailConfirmationCode: ApiMethod, AuthScope {
         public typealias Response = NoResponse
 
-        public struct Parameters: Encodable {}
+        public struct Parameters: Encodable, Sendable {}
         public let parameters: Parameters
 
         public var path: String {

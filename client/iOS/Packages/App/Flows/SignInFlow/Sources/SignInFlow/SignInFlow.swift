@@ -26,7 +26,7 @@ public actor SignInFlow {
     private var flowContinuation: Continuation?
 
     public init(di: DIContainer, router: AppRouter) async {
-        authUseCase = di.authUseCase()
+        authUseCase = await di.authUseCase()
         viewModel = await SignInViewModel(
             localEmailValidator: di.appCommon.localEmailValidationUseCase,
             passwordValidator: di.appCommon.localPasswordValidationUseCase

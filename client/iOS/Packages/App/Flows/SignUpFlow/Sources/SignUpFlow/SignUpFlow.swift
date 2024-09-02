@@ -24,7 +24,7 @@ public actor SignUpFlow {
 
     public init(di: DIContainer, router: AppRouter) async {
         self.router = router
-        authUseCase = di.authUseCase()
+        authUseCase = await di.authUseCase()
         viewModel = await SignUpViewModel(
             localEmailValidator: di.appCommon.localEmailValidationUseCase,
             localPasswordValidator: di.appCommon.localPasswordValidationUseCase

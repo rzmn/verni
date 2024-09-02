@@ -1,24 +1,19 @@
 import UIKit
 import App
 
-private extension UIApplicationDelegate {
-    var _app: App? {
-        (self as? AppDelegate)?.app
-    }
-}
-
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+
+    private func app() async -> App? {
+        await (UIApplication.shared.delegate as? AppDelegate)?.app()
+    }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
-            guard let app = UIApplication.shared.delegate?._app else {
-                return
-            }
             Task.detached {
-                await app.start(on: window)
+                await self.app()?.start(on: window)
             }
         }
     }
@@ -28,11 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let context = URLContexts.first else {
             return
         }
-        guard let app = UIApplication.shared.delegate?._app else {
-            return
-        }
         Task {
-            await app.handle(url: context.url.absoluteString)
+            await self.app()?.handle(url: context.url.absoluteString)
         }
     }
 }

@@ -2,7 +2,7 @@ import Api
 import ApiService
 import Foundation
 
-struct AnyApiServiceRequestWithBody<Body: Encodable>: ApiServiceRequestWithBody {
+struct AnyApiServiceRequestWithBody<Body: Encodable & Sendable>: ApiServiceRequestWithBody {
     private var request: AnyApiServiceRequest
 
     let body: Body
