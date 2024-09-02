@@ -2,7 +2,7 @@ import Domain
 import Foundation
 import Security
 
-public class DefaultSaveCredendialsUseCase {
+public struct DefaultSaveCredendialsUseCase {
     private let website: String
 
     public init(website: String) {

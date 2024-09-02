@@ -1,10 +1,10 @@
 import Combine
 
-public enum LogoutReason {
+public enum LogoutReason: Sendable {
     case refreshTokenFailed
 }
 
-public protocol LogoutUseCase {
+public protocol LogoutUseCase: Sendable {
     func logout() async
 
     var didLogoutPublisher: AnyPublisher<LogoutReason, Never> { get async }

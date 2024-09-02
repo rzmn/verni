@@ -1,28 +1,28 @@
 import Foundation
 
-public enum EmailUpdateError: Error {
+public enum EmailUpdateError: Error, Sendable {
     case alreadyTaken
     case wrongFormat
     case other(GeneralError)
 }
 
-public enum PasswordUpdateError: Error {
+public enum PasswordUpdateError: Error, Sendable {
     case validationError
     case incorrectOldPassword
     case other(GeneralError)
 }
 
-public enum SetAvatarError: Error {
+public enum SetAvatarError: Error, Sendable {
     case wrongFormat
     case other(GeneralError)
 }
 
-public enum SetDisplayNameError: Error {
+public enum SetDisplayNameError: Error, Sendable {
     case wrongFormat
     case other(GeneralError)
 }
 
-public protocol ProfileEditingUseCase {
+public protocol ProfileEditingUseCase: Sendable {
     func updateEmail(_ email: String) async throws(EmailUpdateError)
     func updatePassword(old: String, new: String) async throws(PasswordUpdateError)
 

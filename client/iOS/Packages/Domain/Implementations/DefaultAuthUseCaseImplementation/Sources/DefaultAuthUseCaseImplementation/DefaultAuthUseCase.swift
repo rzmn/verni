@@ -6,7 +6,7 @@ import DataTransferObjects
 import PersistentStorage
 import DI
 
-public class DefaultAuthUseCase {
+public actor DefaultAuthUseCase {
     private let api: ApiProtocol
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory

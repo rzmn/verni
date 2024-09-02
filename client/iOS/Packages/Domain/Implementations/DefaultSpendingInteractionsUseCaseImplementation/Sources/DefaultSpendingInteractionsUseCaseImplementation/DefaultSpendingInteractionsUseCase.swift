@@ -4,7 +4,7 @@ import Foundation
 import DataTransferObjects
 internal import ApiDomainConvenience
 
-public class DefaultSpendingInteractionsUseCase {
+public actor DefaultSpendingInteractionsUseCase {
     private let api: ApiProtocol
 
     public init(api: ApiProtocol) {

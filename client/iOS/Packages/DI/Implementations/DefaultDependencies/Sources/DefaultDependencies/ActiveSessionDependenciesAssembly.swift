@@ -64,6 +64,8 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     let spendingsRepository: SpendingsRepository
     let friendListRepository: FriendsRepository
 
+    let logoutUseCase: LogoutUseCase
+
     let userId: User.ID
 
     init(
@@ -111,12 +113,12 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
                 persistency: persistency
             )
         )
-    }
 
-    lazy var logoutUseCase: LogoutUseCase = DefaultLogoutUseCase(
-        persistency: persistency,
-        shouldLogout: logoutSubject.eraseToAnyPublisher()
-    )
+        logoutUseCase = await DefaultLogoutUseCase(
+            persistency: persistency,
+            shouldLogout: logoutSubject.eraseToAnyPublisher()
+        )
+    }
 
     func spendingsOfflineRepository() -> SpendingsOfflineRepository {
         DefaultSpendingsOfflineRepository(

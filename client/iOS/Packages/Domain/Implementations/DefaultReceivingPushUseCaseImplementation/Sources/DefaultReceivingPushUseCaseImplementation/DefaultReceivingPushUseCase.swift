@@ -4,14 +4,14 @@ import Logging
 import UserNotifications
 internal import Base
 
-public class DefaultReceivingPushUseCase {
+public actor DefaultReceivingPushUseCase {
     public let logger: Logger
 
     private let usersRepository: UsersRepository
     private let friendsRepository: FriendsRepository
     private let spendingsRepository: SpendingsRepository
 
-    private lazy var decoder = JSONDecoder()
+    private let decoder = JSONDecoder()
 
     public init(
         usersRepository: UsersRepository,
@@ -27,7 +27,7 @@ public class DefaultReceivingPushUseCase {
 }
 
 extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
-    public func process(rawPushPayload: [AnyHashable : Any]) async throws(ProcessPushError) -> PushContent {
+    public nonisolated func process(rawPushPayload: [AnyHashable: Any]) async throws(ProcessPushError) -> PushContent {
         let userData: Data
         do {
             userData = try JSONSerialization.data(withJSONObject: rawPushPayload)

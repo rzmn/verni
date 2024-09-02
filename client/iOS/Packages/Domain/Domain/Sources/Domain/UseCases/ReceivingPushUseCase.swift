@@ -1,7 +1,7 @@
 import Foundation
 import UserNotifications
 
-public struct PushContent {
+public struct PushContent: Sendable {
     public let title: String
     public let subtitle: String
     public let body: String
@@ -13,10 +13,10 @@ public struct PushContent {
     }
 }
 
-public enum ProcessPushError: Error {
+public enum ProcessPushError: Error, Sendable {
     case internalError(Error)
 }
 
-public protocol ReceivingPushUseCase {
+public protocol ReceivingPushUseCase: Sendable {
     func process(rawPushPayload: [AnyHashable: Any]) async throws(ProcessPushError) -> PushContent
 }

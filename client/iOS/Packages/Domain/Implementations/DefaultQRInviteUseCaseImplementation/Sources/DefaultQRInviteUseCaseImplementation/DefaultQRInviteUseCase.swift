@@ -2,7 +2,7 @@ import UIKit
 import Domain
 internal import QRCode
 
-public class DefaultQRInviteUseCase: QRInviteUseCase {
+public actor DefaultQRInviteUseCase: QRInviteUseCase {
     public init() {}
 
     @MainActor public func createView(background: UIColor, tint: UIColor, url: String) async throws -> UIView {

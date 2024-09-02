@@ -1,7 +1,7 @@
 import Domain
 import Api
 
-public class DefaultFriendInteractionsUseCase {
+public actor DefaultFriendInteractionsUseCase {
     private let api: ApiProtocol
 
     public init(api: ApiProtocol) {

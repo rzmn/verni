@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol PushRegistrationUseCase {
-    func askForPushToken()
+public protocol PushRegistrationUseCase: Sendable {
+    func askForPushToken() async
     func registerForPush(token tokenData: Data) async
 }

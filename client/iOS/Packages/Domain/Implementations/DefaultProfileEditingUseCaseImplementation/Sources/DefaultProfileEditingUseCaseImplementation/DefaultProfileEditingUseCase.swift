@@ -4,7 +4,7 @@ import Foundation
 import PersistentStorage
 internal import ApiDomainConvenience
 
-public class DefaultProfileEditingUseCase {
+public actor DefaultProfileEditingUseCase {
     private let api: ApiProtocol
     private let persistency: Persistency
     private let repository: ProfileRepository

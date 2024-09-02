@@ -3,7 +3,7 @@ import Api
 import UIKit
 import Logging
 
-public class DefaultPushRegistrationUseCase {
+public actor DefaultPushRegistrationUseCase {
     private let api: ApiProtocol
     public let logger: Logger
 
@@ -14,21 +14,18 @@ public class DefaultPushRegistrationUseCase {
 }
 
 extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
-    public func askForPushToken() {
-        Task.detached { @MainActor in
-            self.doAskForPushToken()
-        }
-    }
-
-    @MainActor func doAskForPushToken() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+    public func askForPushToken() async {
+        do {
+            let granted = try await UNUserNotificationCenter.current().requestAuthorization()
             if granted {
-                Task.detached { @MainActor in
+                Task { @MainActor in
                     UIApplication.shared.registerForRemoteNotifications()
                 }
             } else {
-                self.logI { "permission for push notifications denied" }
+                logI { "permission for push notifications denied" }
             }
+        } catch {
+            logI { "permission for push notifications failed error: \(error)" }
         }
     }
 

@@ -14,7 +14,7 @@ internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
 internal import PersistentStorageSQLite
 
-fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
+fileprivate actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let impl: any AuthUseCase
     private let awakeHook: () async throws(AwakeError) -> any ActiveSessionDIContainer
     private let loginHook: (Credentials) async throws(LoginError) -> any ActiveSessionDIContainer

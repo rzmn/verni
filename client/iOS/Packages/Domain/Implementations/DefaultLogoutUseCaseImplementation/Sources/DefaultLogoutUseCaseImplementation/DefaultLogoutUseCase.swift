@@ -14,7 +14,7 @@ private actor LoggedOutHandler {
     }
 }
 
-public class DefaultLogoutUseCase {
+public actor DefaultLogoutUseCase {
     private let didLogoutSubject = PassthroughSubject<LogoutReason, Never>()
     private let persistency: Persistency
     private var subscriptions = Set<AnyCancellable>()
@@ -23,7 +23,7 @@ public class DefaultLogoutUseCase {
     public init(
         persistency: Persistency,
         shouldLogout: AnyPublisher<LogoutReason, Never>
-    ) {
+    ) async {
         self.persistency = persistency
         shouldLogout
             .flatMap { reason -> Future<LogoutReason?, Never> in

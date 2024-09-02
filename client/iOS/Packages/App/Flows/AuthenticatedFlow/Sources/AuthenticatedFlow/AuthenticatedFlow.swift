@@ -56,7 +56,7 @@ extension AuthenticatedFlow: Flow {
                 }
             }
         )
-        di.pushRegistrationUseCase().askForPushToken()
+        await di.pushRegistrationUseCase().askForPushToken()
         return await withCheckedContinuation { continuation in
             flowContinuation = continuation
             Task.detached { [weak self] in

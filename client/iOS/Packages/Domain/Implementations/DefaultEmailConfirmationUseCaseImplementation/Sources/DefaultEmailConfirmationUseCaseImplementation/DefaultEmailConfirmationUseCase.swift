@@ -4,10 +4,10 @@ import Foundation
 import PersistentStorage
 internal import ApiDomainConvenience
 
-public class DefaultEmailConfirmationUseCase {
+public actor DefaultEmailConfirmationUseCase {
     private let api: ApiProtocol
 
-    public var confirmationCodeLength: Int = 6
+    public let confirmationCodeLength: Int = 6
 
     public init(api: ApiProtocol) {
         self.api = api
