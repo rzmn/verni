@@ -1,6 +1,6 @@
 import Foundation
 
-public struct NetworkServiceResponse {
+public struct NetworkServiceResponse: Sendable {
     public let code: HttpCode
     public let data: Data
 

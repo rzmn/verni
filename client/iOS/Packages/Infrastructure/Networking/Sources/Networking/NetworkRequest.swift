@@ -1,4 +1,4 @@
-public protocol NetworkRequest {
+public protocol NetworkRequest: Sendable {
     var path: String { get }
     var headers: [String: String] { get }
     var parameters: [String: String] { get }

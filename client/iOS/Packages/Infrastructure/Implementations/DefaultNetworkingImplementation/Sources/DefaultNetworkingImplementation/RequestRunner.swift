@@ -3,34 +3,6 @@ import Networking
 import Logging
 internal import Base
 
-fileprivate extension Error {
-    var networkServiceError: NetworkServiceError {
-        let error = self as NSError
-        guard error.domain == NSURLErrorDomain else {
-            return .cannotSend(error)
-        }
-        let noConnectionCodes: [URLError.Code] = [
-            .networkConnectionLost,
-            .timedOut,
-            .notConnectedToInternet
-        ]
-        guard noConnectionCodes.map(\.rawValue).contains(error.code) else {
-            return .cannotSend(error)
-        }
-        return .noConnection(error)
-    }
-}
-
-fileprivate struct ExponentialBackoff: CompactDescription {
-    let base: TimeInterval = 0.5
-    let retryCount: Int
-    let maxRetryCount: Int = 3
-
-    var shouldTryAgain: Bool {
-        retryCount < maxRetryCount
-    }
-}
-
 struct RequestRunner: Loggable {
     private let session: URLSession
     private let request: URLRequest
@@ -45,7 +17,13 @@ struct RequestRunner: Loggable {
 
 extension RequestRunner {
     func run() async throws(NetworkServiceError) -> NetworkServiceResponse {
-        try await run(backoff: ExponentialBackoff(retryCount: 0))
+        try await run(
+            backoff: ExponentialBackoff(
+                base: 0.5,
+                retryCount: 3,
+                maxRetryCount: 0
+            )
+        )
     }
 
     private func run(
@@ -63,8 +41,8 @@ extension RequestRunner {
             if backoff.shouldTryAgain {
                 logI { "backoff try \(backoff.retryCount)" }
                 do {
-                    try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
-                    return try await run(backoff: ExponentialBackoff(retryCount: backoff.retryCount + 1))
+                    try await Task.wait(basedOn: backoff)
+                    return try await run(backoff: backoff.nextRetry())
                 } catch {
                     logI { "backoff failed on try \(backoff.retryCount) error: \(error)" }
                     throw serviceError
@@ -84,8 +62,8 @@ extension RequestRunner {
         if case .serverError = code {
             if backoff.shouldTryAgain {
                 do {
-                    try await Task.sleep(for: .milliseconds(Int(backoff.base * pow(2, Double(backoff.retryCount)) * 1000)))
-                    return try await run(backoff: ExponentialBackoff(retryCount: backoff.retryCount + 1))
+                    try await Task.wait(basedOn: backoff)
+                    return try await run(backoff: backoff.nextRetry())
                 } catch {
                     return NetworkServiceResponse(
                         code: code,

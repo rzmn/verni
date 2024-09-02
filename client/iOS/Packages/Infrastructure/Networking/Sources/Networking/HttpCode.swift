@@ -1,5 +1,5 @@
-public enum HttpCode {
-    public enum Succcess {
+public enum HttpCode: Sendable {
+    public enum Succcess: Sendable {
         case ok
         case created
         case other(Int)
@@ -15,7 +15,7 @@ public enum HttpCode {
             }
         }
     }
-    public enum ClientError {
+    public enum ClientError: Sendable {
         case badRequest
         case conflict
         case unauthorized
@@ -34,7 +34,7 @@ public enum HttpCode {
             }
         }
     }
-    public enum ServerError {
+    public enum ServerError: Sendable {
         case internalServerError
         case other(Int)
 

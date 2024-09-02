@@ -4,7 +4,7 @@ import Logging
 internal import Base
 
 fileprivate extension NetworkRequestWithBody {
-    func encodedBody(encoder: JSONEncoder) async throws -> Data {
+    func encodedBody(encoder: JSONEncoder) throws -> Data {
         try encoder.encode(body)
     }
 }
@@ -24,14 +24,14 @@ struct UrlRequestBuilder<Request: NetworkRequest>: Loggable {
 }
 
 extension UrlRequestBuilder {
-    func build() async throws(NetworkServiceError) -> URLRequest {
+    func build() throws(NetworkServiceError) -> URLRequest {
         var urlRequest = URLRequest(url: url)
         request.headers.forEach { key, value in
             urlRequest.setValue(value, forHTTPHeaderField: key)
             logD { "\(request.path): http header: (\(key): \(value))" }
         }
         urlRequest.httpMethod = request.httpMethod
-        let httpBody = try await encodeBody(from: request)
+        let httpBody = try encodeBody(from: request)
         if let httpBody {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
             urlRequest.httpBody = httpBody
@@ -41,13 +41,13 @@ extension UrlRequestBuilder {
 
     private func encodeBody<T: NetworkRequest>(
         from request: T
-    ) async throws(NetworkServiceError) -> Data? {
+    ) throws(NetworkServiceError) -> Data? {
         guard let request = request as? (any NetworkRequestWithBody) else {
             return nil
         }
         let data: Data
         do {
-            data = try await request.encodedBody(encoder: encoder)
+            data = try request.encodedBody(encoder: encoder)
         } catch {
             throw .cannotBuildRequest(
                 InternalError.error(

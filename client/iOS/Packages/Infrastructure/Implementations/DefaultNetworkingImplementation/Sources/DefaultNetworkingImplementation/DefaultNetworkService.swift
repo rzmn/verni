@@ -3,14 +3,6 @@ import Networking
 import Logging
 internal import Base
 
-public struct Endpoint: Sendable {
-    public let path: String
-
-    public init(path: String) {
-        self.path = path
-    }
-}
-
 final class DefaultNetworkService: Sendable {
     let logger: Logger
     private let endpoint: Endpoint
@@ -35,12 +27,12 @@ extension DefaultNetworkService: NetworkService {
         _ request: T
     ) async throws(NetworkServiceError) -> NetworkServiceResponse {
         logI { "starting request \(request)" }
-        let url = try await UrlBuilder(
+        let url = try UrlBuilder(
             endpoint: endpoint,
             request: request,
             logger: logger.with(prefix: "[\(request.path)] ")
         ).build()
-        let urlRequest = try await UrlRequestBuilder(
+        let urlRequest = try UrlRequestBuilder(
             url: url,
             request: request,
             encoder: encoder,

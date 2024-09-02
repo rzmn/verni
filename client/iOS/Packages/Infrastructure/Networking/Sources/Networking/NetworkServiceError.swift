@@ -1,4 +1,4 @@
-public enum NetworkServiceError: Error {
+public enum NetworkServiceError: Error, Sendable {
     case cannotBuildRequest(Error)
     case cannotSend(Error)
     case badResponse(Error)

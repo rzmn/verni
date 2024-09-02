@@ -2,40 +2,54 @@ import Foundation
 import ApiService
 internal import Base
 
-final class MaxSimultaneousRequestsRestrictor: Sendable {
+actor MaxSimultaneousRequestsRestrictor {
     private let manager: ApiServiceRequestRunnersManager
-    private let queue = DispatchQueue(label: "\(MaxSimultaneousRequestsRestrictor.self)")
-    private let semaphore: DispatchSemaphore
+
+    private let simultaneouslyRunningTasksLimit: Int
+    private var currentRunningTasksCount: Int
+    private var hasFreeSlotContinuation: CheckedContinuation<Void, Never>?
+    private var hasFreeSlotTask: Task<Void, Never>?
 
     init(limit: Int, manager: ApiServiceRequestRunnersManager) {
-        semaphore = DispatchSemaphore(value: limit)
+        simultaneouslyRunningTasksLimit = limit
+        currentRunningTasksCount = 0
         self.manager = manager
     }
 
     func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request
     ) async throws(ApiServiceError) -> Response {
-        let result: Result<Response, ApiServiceError> = await withCheckedContinuation { continuation in
-            self.queue.async {
-                self.runImpl(request: request) { result in
-                    continuation.resume(returning: result)
+        await ensureLimit()
+        let result: Result<Response, ApiServiceError> = await manager.run(request: request)
+        taskFinished()
+        return try result.get()
+    }
+}
+
+// MARK: - Private
+
+extension MaxSimultaneousRequestsRestrictor {
+    func ensureLimit() async {
+        if let hasFreeSlotTask {
+            await hasFreeSlotTask.value
+            self.hasFreeSlotTask = nil
+            self.hasFreeSlotContinuation = nil
+        }
+        currentRunningTasksCount += 1
+        if currentRunningTasksCount == simultaneouslyRunningTasksLimit {
+            hasFreeSlotTask = Task {
+                await withCheckedContinuation { continuation in
+                    self.hasFreeSlotContinuation = continuation
                 }
             }
         }
-        return try result.get()
     }
 
-    func runImpl<Request: ApiServiceRequest, Response: Decodable & Sendable>(
-        request: Request,
-        completion: @escaping @Sendable (Result<Response, ApiServiceError>) -> Void
-    ) {
-        semaphore.wait()
-        manager.run(request: request) { [weak self] result in
-            guard let self else { return }
-            DispatchQueue.main.async {
-                completion(result)
-            }
-            semaphore.signal()
+    func taskFinished() {
+        let shouldResumeContinuation = currentRunningTasksCount == simultaneouslyRunningTasksLimit
+        currentRunningTasksCount -= 1
+        if let hasFreeSlotContinuation, shouldResumeContinuation {
+            hasFreeSlotContinuation.resume()
         }
     }
 }

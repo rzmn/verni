@@ -22,7 +22,7 @@ struct UrlBuilder<Request: NetworkRequest>: Loggable {
 }
 
 extension UrlBuilder {
-    func build() async throws(NetworkServiceError) -> URL {
+    func build() throws(NetworkServiceError) -> URL {
         let urlString = endpoint.pathWithoutTrailingSlash + request.path
         guard let url = URL(string: urlString) else {
             logE { "cannot build url with string \(urlString)" }

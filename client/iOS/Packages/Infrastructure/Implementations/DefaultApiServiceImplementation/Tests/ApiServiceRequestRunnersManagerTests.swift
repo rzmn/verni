@@ -3,7 +3,7 @@ import ApiService
 import Logging
 @testable import DefaultApiServiceImplementation
 
-class TokenRefresherMock: TokenRefresher, Loggable {
+actor TokenRefresherMock: TokenRefresher, Loggable {
     let logger: Logger = .shared
     private var accessTokenValue: String?
     let refreshTokensValue: Result<String, RefreshTokenFailureReason>
@@ -19,17 +19,16 @@ class TokenRefresherMock: TokenRefresher, Loggable {
         accessTokenValue
     }
     
-    func refreshTokens() async -> Result<Void, RefreshTokenFailureReason> {
+    func refreshTokens() async throws(RefreshTokenFailureReason) {
         logI { "run refreshTokens" }
         try! await Task.sleep(nanoseconds: refreshTokensResponseTimeSec * NSEC_PER_SEC)
         logI { "finished refreshTokens" }
         switch refreshTokensValue {
         case .success(let success):
             accessTokenValue = success
-        case .failure:
-            break
+        case .failure(let error):
+            throw error
         }
-        return refreshTokensValue.map { _ in () }
     }
 }
 
@@ -54,11 +53,14 @@ struct MockRequest: ApiServiceRequest, Loggable {
     }
 }
 
-class WasFailedBasedOnLabelHandler {
+actor WasFailedBasedOnLabelHandler {
     var wasFailedBasedOnLabel = false
+    func markFailed() {
+        wasFailedBasedOnLabel = true
+    }
 }
 
-struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable {
+struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable, Sendable {
     let logger: Logger = .shared
     let runResult: Result<MockResponse, ApiServiceError>
     let runResponseTimeSec: UInt64
@@ -89,8 +91,9 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
         logI { "\(label) run req[\((request as! MockRequest).label)]" }
         try! await Task.sleep(nanoseconds: runResponseTimeSec * NSEC_PER_SEC)
         logI { "\(label) finished req[\((request as! MockRequest).label)]" }
-        if (request as! MockRequest).label == MockRequest.accessTokenShouldFailLabel && !handler.wasFailedBasedOnLabel {
-            handler.wasFailedBasedOnLabel = true
+        let wasFailedBasedOnLabel = await handler.wasFailedBasedOnLabel
+        if (request as! MockRequest).label == MockRequest.accessTokenShouldFailLabel && !wasFailedBasedOnLabel {
+            await handler.markFailed()
             return .failure(.unauthorized)
         } else {
             switch runResult {
