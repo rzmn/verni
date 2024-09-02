@@ -25,8 +25,12 @@ actor ApiServiceRequestRunnersManager: Loggable {
     ) async throws(ApiServiceError) -> Response {
         try await run(request: request, status: .regular)
     }
+}
 
-    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
+// MARK: - Private
+
+extension ApiServiceRequestRunnersManager {
+    private func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
         status: RequestStatus
     ) async throws(ApiServiceError) -> Response {
