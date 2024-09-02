@@ -8,9 +8,9 @@ protocol ApiServiceRequestRunnerFactory: Sendable {
 }
 
 protocol ApiServiceRequestRunner {
-    func run<Request: ApiServiceRequest, Response: Decodable>(
+    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request
-    ) async -> Result<Response, ApiServiceError>
+    ) async throws(ApiServiceError) -> Response
 }
 
 final class DefaultApiServiceRequestRunnerFactory: ApiServiceRequestRunnerFactory {
@@ -35,9 +35,9 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
         self.networkService = networkService
     }
 
-    nonisolated func run<Request: ApiServiceRequest, Response: Decodable>(
+    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request
-    ) async -> Result<Response, ApiServiceError> {
+    ) async throws(ApiServiceError) -> Response {
         logI { "\(request): starting request" }
         var request = request
         if let accessToken, request.headers["Authorization"] == nil {
@@ -52,15 +52,15 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
             logE { "\(request): request failed with reason error: \(error)" }
             switch error {
             case .cannotSend, .badResponse, .cannotBuildRequest:
-                return .failure(.internalError(error))
+                throw .internalError(error)
             case .noConnection:
-                return .failure(.noConnection(error))
+                throw .noConnection(error)
             }
         }
         logI { "\(request): request succeeded with response \(networkServiceResponse)" }
         if case .clientError(let error) = networkServiceResponse.code, case .unauthorized = error {
             logI { "\(request): got unauthorized, try to refresh token" }
-            return .failure(.unauthorized)
+            throw .unauthorized
         }
         let apiServiceResponse: Response
         do {
@@ -69,13 +69,13 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
             logE { "\(request): request succeeded but decoding failed due error: \(error)" }
             if networkServiceResponse.code.success {
                 logE { "\(request): recognized decoding failure as a decoding error" }
-                return .failure(.decodingFailed(error))
+                throw .decodingFailed(error)
             } else {
                 logE { "\(request): recognized decoding failure as a unknown output" }
-                return .failure(.internalError(error))
+                throw .internalError(error)
             }
         }
-        return .success(apiServiceResponse)
+        return apiServiceResponse
     }
 }
 

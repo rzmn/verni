@@ -20,7 +20,12 @@ actor MaxSimultaneousRequestsRestrictor {
         request: Request
     ) async throws(ApiServiceError) -> Response {
         await ensureLimit()
-        let result: Result<Response, ApiServiceError> = await manager.run(request: request)
+        let result: Result<Response, ApiServiceError>
+        do {
+            result = .success(try await manager.run(request: request))
+        } catch {
+            result = .failure(error)
+        }
         taskFinished()
         return try result.get()
     }

@@ -22,16 +22,16 @@ actor ApiServiceRequestRunnersManager: Loggable {
 
     func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request
-    ) async -> Result<Response, ApiServiceError> {
-        await run(request: request, status: .regular)
+    ) async throws(ApiServiceError) -> Response {
+        try await run(request: request, status: .regular)
     }
 
     func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request,
         status: RequestStatus
-    ) async -> Result<Response, ApiServiceError> {
+    ) async throws(ApiServiceError) -> Response {
         guard let tokenRefresher else {
-            return await runnerFactory
+            return try await runnerFactory
                 .create(accessToken: nil)
                 .run(request: request)
         }
@@ -50,7 +50,7 @@ actor ApiServiceRequestRunnersManager: Loggable {
                 case .noConnection:
                     break
                 case .expired, .internalError:
-                    return .failure(.unauthorized)
+                    throw .unauthorized
                 }
             }
             self.refreshTokenTask = nil
@@ -58,25 +58,32 @@ actor ApiServiceRequestRunnersManager: Loggable {
         if let accessToken = await tokenRefresher.accessToken() {
             switch status {
             case .regular:
-                let result: Result<Response, ApiServiceError> = await runnerFactory
-                    .create(accessToken: accessToken)
-                    .run(request: request)
+                let result: Result<Response, ApiServiceError>
+                do {
+                    result = .success(
+                        try await runnerFactory
+                            .create(accessToken: accessToken)
+                            .run(request: request)
+                    )
+                } catch {
+                    result = .failure(error)
+                }
                 switch result {
-                case .success:
+                case .success(let result):
                     return result
                 case .failure(let error):
                     switch error {
                     case .decodingFailed, .internalError, .noConnection:
-                        return result
+                        throw error
                     case .unauthorized:
                         refreshTokenTask = Task {
                             try await tokenRefresher.refreshTokens()
                         }
-                        return await run(request: request, status: .freshRefreshTokenConsumer)
+                        return try await run(request: request, status: .freshRefreshTokenConsumer)
                     }
                 }
             case .freshRefreshTokenConsumer:
-                return await runnerFactory
+                return try await runnerFactory
                     .create(accessToken: accessToken)
                     .run(request: request)
             }
@@ -86,23 +93,21 @@ actor ApiServiceRequestRunnersManager: Loggable {
                 refreshTokenTask = Task {
                     try await tokenRefresher.refreshTokens()
                 }
-                return await run(request: request, status: .freshRefreshTokenConsumer)
+                return try await run(request: request, status: .freshRefreshTokenConsumer)
             case .freshRefreshTokenConsumer:
                 if let refreshTokenFailureReason {
                     switch refreshTokenFailureReason {
                     case .noConnection(let error):
-                        return .failure(.noConnection(error))
+                        throw .noConnection(error)
                     case .expired:
-                        return .failure(.unauthorized)
+                        throw .unauthorized
                     case .internalError(let error):
-                        return .failure(.internalError(error))
+                        throw .internalError(error)
                     }
                 } else {
                     assertionFailure()
-                    return .failure(
-                        .internalError(
-                            InternalError.error("no refresh token after successfull refresh", underlying: nil)
-                        )
+                    throw .internalError(
+                        InternalError.error("no refresh token after successfull refresh", underlying: nil)
                     )
                 }
             }
