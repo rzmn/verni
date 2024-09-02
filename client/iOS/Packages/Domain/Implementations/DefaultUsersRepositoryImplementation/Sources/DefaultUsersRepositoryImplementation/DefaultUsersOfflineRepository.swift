@@ -4,7 +4,7 @@ import Domain
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
-public class DefaultUsersOfflineRepository {
+public actor DefaultUsersOfflineRepository {
     private let persistency: Persistency
 
     public init(persistency: Persistency) {

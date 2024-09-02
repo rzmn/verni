@@ -23,13 +23,13 @@ fileprivate class AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     init<Impl: AuthUseCase>(impl: Impl) where Impl.AuthorizedSession == any ActiveSessionDIContainerConvertible {
         self.impl = impl
         awakeHook = { () async throws(AwakeError) -> any ActiveSessionDIContainer in
-            try await impl.awake().activeSessionDIContainer
+            try await impl.awake().activeSessionDIContainer()
         }
         loginHook = { credentials async throws(LoginError) -> any ActiveSessionDIContainer in
-            try await impl.login(credentials: credentials).activeSessionDIContainer
+            try await impl.login(credentials: credentials).activeSessionDIContainer()
         }
         signupHook = { credentials async throws(SignupError) -> any ActiveSessionDIContainer in
-            try await impl.signup(credentials: credentials).activeSessionDIContainer
+            try await impl.signup(credentials: credentials).activeSessionDIContainer()
         }
     }
 

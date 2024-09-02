@@ -42,5 +42,5 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
 }
 
 public protocol ActiveSessionDIContainerConvertible {
-    var activeSessionDIContainer: ActiveSessionDIContainer { get }
+    func activeSessionDIContainer() async -> ActiveSessionDIContainer
 }

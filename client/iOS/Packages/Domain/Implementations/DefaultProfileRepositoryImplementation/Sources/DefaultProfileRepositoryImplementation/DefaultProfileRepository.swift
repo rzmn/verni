@@ -5,14 +5,14 @@ import Logging
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
-public class DefaultProfileRepository {
+public actor DefaultProfileRepository {
     public let logger: Logger
     private let api: ApiProtocol
     private let offline: ProfileOfflineMutableRepository
     private let subject = PassthroughSubject<Domain.Profile, Never>()
     private var subscriptions = Set<AnyCancellable>()
 
-    public init(api: ApiProtocol, logger: Logger, offline: ProfileOfflineMutableRepository) {
+    public init(api: ApiProtocol, logger: Logger, offline: ProfileOfflineMutableRepository) async {
         self.api = api
         self.offline = offline
         self.logger = logger

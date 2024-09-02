@@ -1,11 +1,11 @@
 import Foundation
 
-public protocol UsersRepository {
+public protocol UsersRepository: Sendable {
     func getUsers(ids: [User.ID]) async throws(GeneralError) -> [User]
     func searchUsers(query: String) async throws(GeneralError) -> [User]
 }
 
-public enum GetUserError: Error {
+public enum GetUserError: Error, Sendable {
     case noSuchUser
     case other(GeneralError)
 }
@@ -23,12 +23,4 @@ public extension UsersRepository {
         }
         return user
     }
-}
-
-public protocol UsersOfflineRepository {
-    func getUser(id: User.ID) async -> User?
-}
-
-public protocol UsersOfflineMutableRepository: UsersOfflineRepository {
-    func update(users: [User]) async
 }

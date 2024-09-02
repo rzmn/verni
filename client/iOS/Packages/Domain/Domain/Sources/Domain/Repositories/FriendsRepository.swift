@@ -1,6 +1,6 @@
 import Combine
 
-public protocol FriendsRepository {
+public protocol FriendsRepository: Sendable {
     @discardableResult
     func refreshFriends(
         ofKind kind: FriendshipKindSet
@@ -20,12 +20,4 @@ public extension FriendsRepository {
             return .failure(error)
         }
     }
-}
-
-public protocol FriendsOfflineRepository {
-    func getFriends(set: FriendshipKindSet) async -> [FriendshipKind: [User]]?
-}
-
-public protocol FriendsOfflineMutableRepository: FriendsOfflineRepository {
-    func storeFriends(_ friends: [FriendshipKind: [User]]) async
 }

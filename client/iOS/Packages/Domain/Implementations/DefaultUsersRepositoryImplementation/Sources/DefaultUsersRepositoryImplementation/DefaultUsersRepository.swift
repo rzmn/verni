@@ -4,7 +4,7 @@ import Logging
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
-public class DefaultUsersRepository {
+public actor DefaultUsersRepository {
     public let logger: Logger
     private let api: ApiProtocol
     private let offline: UsersOfflineMutableRepository

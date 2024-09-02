@@ -6,7 +6,7 @@ internal import Base
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
-public class DefaultFriendsRepository {
+public actor DefaultFriendsRepository {
     public let logger: Logger
 
     private let api: ApiProtocol

@@ -14,17 +14,25 @@ public protocol ActiveSessionDIContainerFactory {
         longPoll: LongPoll,
         logoutSubject: PassthroughSubject<LogoutReason, Never>,
         userId: User.ID
-    ) -> ActiveSessionDIContainer
+    ) async -> ActiveSessionDIContainer
 }
 
 public class ActiveSession: ActiveSessionDIContainerConvertible {
-    public lazy var activeSessionDIContainer = factory.create(
-        api: authenticatedApiFactory.create(),
-        persistency: persistency,
-        longPoll: authenticatedApiFactory.longPoll(), 
-        logoutSubject: logoutSubject,
-        userId: userId
-    )
+    private var _activeSessionDIContainer: (any ActiveSessionDIContainer)?
+    public func activeSessionDIContainer() async -> any ActiveSessionDIContainer {
+        guard let _activeSessionDIContainer else {
+            let container = await factory.create(
+                api: authenticatedApiFactory.create(),
+                persistency: persistency,
+                longPoll: authenticatedApiFactory.longPoll(),
+                logoutSubject: logoutSubject,
+                userId: userId
+            )
+            _activeSessionDIContainer = container
+            return container
+        }
+        return _activeSessionDIContainer
+    }
     private lazy var authenticatedApiFactory = apiFactoryProvider(tokenRefresher)
     private let apiFactoryProvider: (TokenRefresher) -> ApiFactory
     private let anonymousApi: ApiProtocol

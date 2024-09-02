@@ -1,17 +1,17 @@
 import Foundation
 import Combine
 
-public enum GetSpendingsHistoryError: Error {
+public enum GetSpendingsHistoryError: Error, Sendable {
     case noSuchCounterparty(Error)
     case other(GeneralError)
 }
 
-public enum GetSpendingError: Error {
+public enum GetSpendingError: Error, Sendable {
     case noSuchSpending(Error)
     case other(GeneralError)
 }
 
-public protocol SpendingsRepository {
+public protocol SpendingsRepository: Sendable {
     @discardableResult
     func refreshSpendingCounterparties() async throws(GeneralError) -> [SpendingsPreview]
 
@@ -35,14 +35,4 @@ public extension SpendingsRepository {
             return .failure(error)
         }
     }
-}
-
-public protocol SpendingsOfflineRepository {
-    func getSpendingCounterparties() async -> [SpendingsPreview]?
-    func getSpendingsHistory(counterparty: User.ID) async -> [IdentifiableSpending]?
-}
-
-public protocol SpendingsOfflineMutableRepository: SpendingsOfflineRepository {
-    func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async
-    func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async
 }

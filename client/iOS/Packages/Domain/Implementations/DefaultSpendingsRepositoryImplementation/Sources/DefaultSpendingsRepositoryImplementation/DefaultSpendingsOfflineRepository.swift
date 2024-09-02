@@ -3,7 +3,7 @@ import PersistentStorage
 internal import ApiDomainConvenience
 internal import DataTransferObjects
 
-public class DefaultSpendingsOfflineRepository {
+public actor DefaultSpendingsOfflineRepository {
     private let persistency: Persistency
 
     public init(persistency: Persistency) {

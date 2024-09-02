@@ -1,10 +1,10 @@
 import Foundation
 
-public protocol AvatarsRepository {
+public protocol AvatarsRepository: Sendable {
     func get(ids: [Avatar.ID]) async throws(GeneralError) -> [Avatar.ID: Data]
 }
 
-public enum AvatarsRepositoryError: Error {
+public enum AvatarsRepositoryError: Error, Sendable {
     case idDoesNotExist
     case hasNoData
 }

@@ -40,8 +40,8 @@ class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory 
         longPoll: LongPoll,
         logoutSubject: PassthroughSubject<LogoutReason, Never>,
         userId: User.ID
-    ) -> ActiveSessionDIContainer {
-        ActiveSessionDependenciesAssembly(
+    ) async -> ActiveSessionDIContainer {
+        await ActiveSessionDependenciesAssembly(
             api: api,
             persistency: persistency,
             longPoll: longPoll,
@@ -59,6 +59,11 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     private let logoutSubject: PassthroughSubject<LogoutReason, Never>
 
     let appCommon: AppCommon
+    let profileRepository: ProfileRepository
+    let usersRepository: UsersRepository
+    let spendingsRepository: SpendingsRepository
+    let friendListRepository: FriendsRepository
+
     let userId: User.ID
 
     init(
@@ -68,47 +73,45 @@ class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         appCommon: AppCommon,
         logoutSubject: PassthroughSubject<LogoutReason, Never>,
         userId: User.ID
-    ) {
+    ) async {
         self.api = api
         self.persistency = persistency
         self.longPoll = longPoll
         self.appCommon = appCommon
         self.logoutSubject = logoutSubject
         self.userId = userId
+
+        profileRepository = await DefaultProfileRepository(
+            api: api,
+            logger: .shared.with(prefix: "[profile.repo] "),
+            offline: DefaultProfileOfflineRepository(
+                persistency: persistency
+            )
+        )
+        usersRepository = DefaultUsersRepository(
+            api: api,
+            logger: .shared.with(prefix: "[users.repo] "),
+            offline: DefaultUsersOfflineRepository(
+                persistency: persistency
+            )
+        )
+        spendingsRepository = DefaultSpendingsRepository(
+            api: api,
+            longPoll: longPoll,
+            logger: .shared.with(prefix: "[spendings.repo] "),
+            offline: DefaultSpendingsOfflineRepository(
+                persistency: persistency
+            )
+        )
+        friendListRepository = DefaultFriendsRepository(
+            api: api,
+            longPoll: longPoll,
+            logger: .shared.with(prefix: "[friends.repo] "),
+            offline: DefaultFriendsOfflineRepository(
+                persistency: persistency
+            )
+        )
     }
-
-    lazy var profileRepository: ProfileRepository = DefaultProfileRepository(
-        api: api, 
-        logger: .shared.with(prefix: "[profile.repo] "),
-        offline: DefaultProfileOfflineRepository(
-            persistency: persistency
-        )
-    )
-    lazy var usersRepository: UsersRepository = DefaultUsersRepository(
-        api: api, 
-        logger: .shared.with(prefix: "[users.repo] "),
-        offline: DefaultUsersOfflineRepository(
-            persistency: persistency
-        )
-    )
-
-    lazy var spendingsRepository: SpendingsRepository = DefaultSpendingsRepository(
-        api: api,
-        longPoll: longPoll, 
-        logger: .shared.with(prefix: "[spendings.repo] "),
-        offline: DefaultSpendingsOfflineRepository(
-            persistency: persistency
-        )
-    )
-
-    lazy var friendListRepository: FriendsRepository = DefaultFriendsRepository(
-        api: api,
-        longPoll: longPoll, 
-        logger: .shared.with(prefix: "[friends.repo] "),
-        offline: DefaultFriendsOfflineRepository(
-            persistency: persistency
-        )
-    )
 
     lazy var logoutUseCase: LogoutUseCase = DefaultLogoutUseCase(
         persistency: persistency,
