@@ -3,6 +3,8 @@ import DataTransferObjects
 internal import SQLite
 
 typealias Expression = SQLite.Expression
+extension Table: @retroactive @unchecked Sendable {}
+extension Expression: @retroactive @unchecked Sendable {}
 
 enum Schema {
     enum Tokens {

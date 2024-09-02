@@ -1,4 +1,4 @@
-public enum ApiErrorCode: Int, Decodable {
+public enum ApiErrorCode: Int, Decodable, Sendable {
     case incorrectCredentials = 1
     case wrongCredentialsFormat = 2
     case loginAlreadyTaken = 3

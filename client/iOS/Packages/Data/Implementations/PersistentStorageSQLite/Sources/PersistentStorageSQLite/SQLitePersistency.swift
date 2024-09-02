@@ -42,7 +42,6 @@ private struct FriendshipKindSet: OptionSet {
     private let db: Connection
     private let dbInvalidationHandler: () throws -> Void
     private let hostId: UserDto.ID
-    private let queue = DispatchQueue(label: "\(SQLitePersistency.self)")
     private var refreshToken: String
     private var serialScheduler: AsyncSerialScheduler
     private var detachedTasks = [Task<Void, Never>]()
@@ -91,7 +90,7 @@ private struct FriendshipKindSet: OptionSet {
     func update(refreshToken: String) async {
         self.refreshToken = refreshToken
         detachedTasks.append(
-            Task.detached { @StorageActor in
+            Task { @StorageActor in
                 await self.serialScheduler.run { @StorageActor in
                     do {
                         try self.db.run(

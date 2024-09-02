@@ -1,5 +1,5 @@
-public protocol LongPollQuery {
-    associatedtype Update
+public protocol LongPollQuery: Sendable {
+    associatedtype Update: Sendable
 
     func updateIsRelevant(_ update: Update) -> Bool
 

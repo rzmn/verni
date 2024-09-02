@@ -8,7 +8,7 @@ internal import SQLite
     public static let shared = StorageActor()
 }
 
-open class SQLitePersistencyFactory {
+public actor SQLitePersistencyFactory {
     public let logger: Logger
     private let appFolder: URL
 
@@ -17,7 +17,7 @@ open class SQLitePersistencyFactory {
         self.appFolder = appFolder
     }
 
-    open var dbDirectory: URL {
+    public var dbDirectory: URL {
         appFolder.appending(component: "accounty_db")
     }
 }
@@ -31,8 +31,8 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         logI { "awaking persistence..." }
         let dbUrl: URL
         do {
-            try FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
-            let dbDirectoryContent = try FileManager.default
+            try await FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
+            let dbDirectoryContent = try await FileManager.default
                 .contentsOfDirectory(at: dbDirectory, includingPropertiesForKeys: nil)
             logD { "searching in \(dbDirectoryContent)" }
             let contents = dbDirectoryContent
@@ -83,10 +83,10 @@ extension SQLitePersistencyFactory: PersistencyFactory {
 
     @StorageActor private func doCreate(hostId: UserDto.ID, refreshToken: String) async throws -> Persistency {
         logI { "creating persistence..." }
-        let dbUrl = dbDirectory
+        let dbUrl = await dbDirectory
             .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
         try? FileManager.default.removeItem(at: dbUrl)
-        try? FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
+        try? await FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
         let db = try Connection(dbUrl.absoluteString)
         do {
             try createTables(for: db)

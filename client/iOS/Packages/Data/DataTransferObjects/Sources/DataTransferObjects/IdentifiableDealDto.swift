@@ -27,7 +27,7 @@ public extension DealDto {
 }
 
 @dynamicMemberLookup
-public struct IdentifiableDealDto: Codable {
+public struct IdentifiableDealDto: Codable, Sendable {
     public let id: DealDto.ID
     public let deal: DealDto
 
