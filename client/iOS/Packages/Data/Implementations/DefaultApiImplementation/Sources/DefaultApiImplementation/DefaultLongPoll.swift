@@ -2,6 +2,8 @@ import Combine
 import Api
 internal import Base
 
+extension AnyPublisher: @retroactive @unchecked Sendable {}
+
 public actor DefaultLongPoll: LongPoll {
     private var notifiers = [String: Any]()
     private let api: DefaultApi
@@ -13,7 +15,7 @@ public actor DefaultLongPoll: LongPoll {
     public func poll<Query>(
         for query: Query
     ) async -> AnyPublisher<Query.Update, Never>
-    where Query: LongPollQuery, Query.Update: Decodable {
+    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         let existed: LongPollUpdateNotifier<Query>?
         if let anyExisted = notifiers[query.eventId] {
             if let existedCasted = anyExisted as? LongPollUpdateNotifier<Query> {

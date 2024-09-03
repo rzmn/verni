@@ -35,7 +35,9 @@ extension DefaultNetworkService: NetworkService {
         let urlRequest = try UrlRequestBuilder(
             url: url,
             request: request,
-            encoder: encoder,
+            encoder: UrlRequestBuilderBodyEncoder(
+                encoder: encoder
+            ),
             logger: logger.with(prefix: "[\(url)] ")
         ).build()
         logI { "\(request.path): built request: \(urlRequest)" }

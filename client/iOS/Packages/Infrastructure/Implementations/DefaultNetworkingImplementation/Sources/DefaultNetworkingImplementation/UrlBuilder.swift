@@ -3,12 +3,6 @@ import Networking
 import Logging
 internal import Base
 
-fileprivate extension Endpoint {
-    var pathWithoutTrailingSlash: String {
-        path.hasSuffix("/") ? String(path.prefix(path.count - 1)) : path
-    }
-}
-
 struct UrlBuilder<Request: NetworkRequest>: Loggable {
     private let endpoint: Endpoint
     private let request: Request
@@ -23,7 +17,7 @@ struct UrlBuilder<Request: NetworkRequest>: Loggable {
 
 extension UrlBuilder {
     func build() throws(NetworkServiceError) -> URL {
-        let urlString = endpoint.pathWithoutTrailingSlash + request.path
+        let urlString = endpoint.path + request.path
         guard let url = URL(string: urlString) else {
             logE { "cannot build url with string \(urlString)" }
             throw .cannotBuildRequest(

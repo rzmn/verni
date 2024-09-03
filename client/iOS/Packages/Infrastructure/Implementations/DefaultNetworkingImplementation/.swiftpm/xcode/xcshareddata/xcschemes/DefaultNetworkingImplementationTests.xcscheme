@@ -18,9 +18,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DefaultApiServiceImplementationTests"
-               BuildableName = "DefaultApiServiceImplementationTests"
-               BlueprintName = "DefaultApiServiceImplementationTests"
+               BlueprintIdentifier = "DefaultNetworkingImplementationTests"
+               BuildableName = "DefaultNetworkingImplementationTests"
+               BlueprintName = "DefaultNetworkingImplementationTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

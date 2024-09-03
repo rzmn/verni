@@ -29,6 +29,16 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
+        ),
+        .testTarget(
+            name: "DefaultNetworkingImplementationTests",
+            dependencies: ["Logging", "Networking", "Base", "DefaultNetworkingImplementation"],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
         )
     ]
 )
