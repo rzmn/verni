@@ -1,9 +1,10 @@
-import XCTest
+import Testing
+import Foundation
 @testable import DefaultApiImplementation
 
-class ResponseTests: XCTestCase {
+@Suite struct ResponseTests {
 
-    func testError() {
+    @Test func testError() {
         struct S: Codable {
             let status: String
             let response: [String: Int]
@@ -11,24 +12,26 @@ class ResponseTests: XCTestCase {
         let data = try! JSONEncoder().encode(S(status: "failed", response: ["code": 2]))
         let response  = try! JSONDecoder().decode(VoidApiResponseDto.self, from: data)
         guard case .failure(let apiError) = response else {
-            return XCTFail()
+            Issue.record()
+            return
         }
-        XCTAssertEqual(apiError.code.rawValue, 2)
-        XCTAssertEqual(apiError.description, nil)
+        #expect(apiError.code.rawValue == 2)
+        #expect(apiError.description == nil)
     }
 
-    func testEmpty() {
+    @Test func testEmpty() {
         struct S: Codable {
             let status: String
         }
         let data = try! JSONEncoder().encode(S(status: "ok"))
         let response  = try! JSONDecoder().decode(VoidApiResponseDto.self, from: data)
         guard case .success = response else {
-            return XCTFail()
+            Issue.record()
+            return
         }
     }
 
-    func testSuccess() {
+    @Test func testSuccess() {
         struct Payload: Codable, Equatable {
             let data: String
         }
@@ -40,8 +43,9 @@ class ResponseTests: XCTestCase {
         let data = try! JSONEncoder().encode(S(status: "ok", response: payload))
         let response  = try! JSONDecoder().decode(ApiResponseDto<Payload>.self, from: data)
         guard case .success(let response) = response else {
-            return XCTFail()
+            Issue.record()
+            return
         }
-        XCTAssertEqual(payload, response)
+        #expect(payload == response)
     }
 }

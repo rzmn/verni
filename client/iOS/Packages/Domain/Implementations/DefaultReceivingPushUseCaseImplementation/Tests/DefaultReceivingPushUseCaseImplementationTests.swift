@@ -1,4 +1,5 @@
-import XCTest
+import Testing
+import Foundation
 import Domain
 import Combine
 @testable import DefaultReceivingPushUseCaseImplementation
@@ -100,8 +101,8 @@ class MockSpendingsRepository: SpendingsRepository {
 
 }
 
-class DefaultReceivingPushUseCaseTests: XCTestCase {
-    func testReceivePush() async {
+@Suite struct DefaultReceivingPushUseCaseTests {
+    @Test func testReceivePush() async {
         let useCase = DefaultReceivingPushUseCase(
             usersRepository: MockUsersRepository(),
             friendsRepository: MockFriendsRepository(),

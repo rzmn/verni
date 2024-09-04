@@ -1,5 +1,6 @@
 import Testing
 import ApiService
+import Foundation
 import Logging
 @testable import DefaultApiServiceImplementation
 
@@ -79,35 +80,36 @@ struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable, Senda
 }
 
 struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
+    
     let logger: Logger = .shared
     let runResult: Result<MockResponse, ApiServiceError>
     let runResponseTimeSec: UInt64
     let label: String
     let handler: WasFailedBasedOnLabelHandler
 
-    func run<Request: ApiServiceRequest, Response: Decodable>(
+    func run<Request, Response>(
         request: Request
-    ) async -> Result<Response, ApiServiceError> {
+    ) async throws(ApiServiceError) -> Response where Request: ApiServiceRequest, Response : Decodable & Sendable {
         logI { "\(label) run req[\((request as! MockRequest).label)]" }
         try! await Task.sleep(nanoseconds: runResponseTimeSec * NSEC_PER_SEC)
         logI { "\(label) finished req[\((request as! MockRequest).label)]" }
         let wasFailedBasedOnLabel = await handler.wasFailedBasedOnLabel
         if (request as! MockRequest).label == MockRequest.accessTokenShouldFailLabel && !wasFailedBasedOnLabel {
             await handler.markFailed()
-            return .failure(.unauthorized)
+            throw .unauthorized
         } else {
             switch runResult {
             case .success(let response):
-                return .success(response as! Response)
+                return response as! Response
             case .failure(let error):
-                return .failure(error)
+                throw error
             }
         }
     }
 }
 
-class ApiServiceRequestRunnersManagerTests: XCTestCase {
-    func testRequestsLimitNoRefresh() async throws {
+@Suite struct ApiServiceRequestRunnersManagerTests {
+    @Test func testRequestsLimitNoRefresh() async throws {
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
@@ -133,5 +135,6 @@ class ApiServiceRequestRunnersManagerTests: XCTestCase {
         let _: [MockResponse] = try await [
             a, b, c, d, e, f
         ]
+
     }
 }

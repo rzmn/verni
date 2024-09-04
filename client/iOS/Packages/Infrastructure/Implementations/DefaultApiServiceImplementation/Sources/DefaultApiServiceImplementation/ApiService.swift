@@ -27,7 +27,7 @@ actor DefaultApiService {
 }
 
 extension DefaultApiService: ApiService {
-    public nonisolated func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
+    public func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
         request: Request
     ) async throws(ApiServiceError) -> Response {
         try await runner.run(request: request)

@@ -1,23 +1,22 @@
 import Foundation
-import XCTest
+import Testing
 import PersistentStorage
 import DataTransferObjects
 @testable import PersistentStorageSQLite
 
-private class TestPersistencyFactory: SQLitePersistencyFactory {
-    convenience init() {
-        self.init(logger: .shared.with(prefix: "[test] "))
-    }
-
-    override var dbDirectory: URL {
-        FileManager.default.temporaryDirectory
+extension SQLitePersistencyFactory {
+    static func test() -> SQLitePersistencyFactory {
+        SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[test] "),
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: "db")
+        )
     }
 }
 
-class PersistentStorageSQLiteTests: XCTestCase {
+@Suite struct PersistentStorageSQLiteTests {
 
-    override func setUp() {
-        let dbDirectory = TestPersistencyFactory().dbDirectory
+    init() async {
+        let dbDirectory = await SQLitePersistencyFactory.test().dbDirectory
         try? FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
         guard let content = try? FileManager.default.contentsOfDirectory(at: dbDirectory, includingPropertiesForKeys: nil) else {
             return
@@ -27,40 +26,40 @@ class PersistentStorageSQLiteTests: XCTestCase {
         }
     }
 
-    func testInitialToken() async throws {
+    @Test func testInitialToken() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
 
-        let persistency = try await TestPersistencyFactory()
+        let persistency = try await SQLitePersistencyFactory.test()
             .create(hostId: hostId, refreshToken: initialRefreshToken)
 
         let token = await persistency.getRefreshToken()
-        XCTAssertTrue(initialRefreshToken == token)
+        #expect(initialRefreshToken == token)
         await persistency.invalidate()
     }
 
-    func testUpdateToken() async throws {
+    @Test func testUpdateToken() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
 
-        let persistency = try await TestPersistencyFactory()
+        let persistency = try await SQLitePersistencyFactory.test()
             .create(hostId: hostId, refreshToken: initialRefreshToken)
 
         let newToken = UUID().uuidString
         await persistency.update(refreshToken: newToken)
         let newTokenFromDb = await persistency.getRefreshToken()
-        XCTAssertTrue(newToken == newTokenFromDb)
+        #expect(newToken == newTokenFromDb)
         await persistency.invalidate()
     }
 
-    func testUpdatedTokenFromAwake() async throws {
+    @Test func testUpdatedTokenFromAwake() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
         let newToken = UUID().uuidString
         autoreleasepool {
             let semaphore = DispatchSemaphore(value: 0)
             Task {
-                let persistency = try await TestPersistencyFactory()
+                let persistency = try await SQLitePersistencyFactory.test()
                     .create(hostId: hostId, refreshToken: initialRefreshToken)
                 await persistency.update(refreshToken: newToken)
                 await persistency.close()
@@ -69,40 +68,40 @@ class PersistentStorageSQLiteTests: XCTestCase {
             semaphore.wait()
         }
 
-        let awaken = await TestPersistencyFactory().awake()
+        let awaken = await SQLitePersistencyFactory.test().awake()
         let newTokenFromAwake = await awaken?.getRefreshToken()
         print("\(initialRefreshToken)")
         print("\(newToken)")
         print("\(newTokenFromAwake ?? "nil")")
-        XCTAssertTrue(newToken == newTokenFromAwake)
+        #expect(newToken == newTokenFromAwake)
 
         await awaken?.invalidate()
     }
 
-    func testHostInfo() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me)
+    @Test func testHostInfo() async throws {
+        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await TestPersistencyFactory()
+        let persistency = try await SQLitePersistencyFactory.test()
             .create(hostId: host.id, refreshToken: initialRefreshToken)
         await persistency.update(users: [host])
         let hostFromDb = await persistency.getHostInfo()
 
-        XCTAssertTrue(host.id == hostFromDb?.id)
-        XCTAssertTrue(host.friendStatus == hostFromDb?.friendStatus)
+        #expect(host.id == hostFromDb?.user.id)
+        #expect(host.friendStatus == hostFromDb?.user.friendStatus)
     }
 
-    func testUsers() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me)
-        let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest)
+    @Test func testUsers() async throws {
+        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
+        let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await TestPersistencyFactory()
+        let persistency = try await SQLitePersistencyFactory.test()
             .create(hostId: host.id, refreshToken: initialRefreshToken)
         await persistency.update(users: [host, other])
 
         for user in [host, other] {
             let userFromDb = await persistency.user(id: user.id)
-            XCTAssertTrue(user.id == userFromDb?.id)
-            XCTAssertTrue(user.friendStatus == userFromDb?.friendStatus)
+            #expect(user.id == userFromDb?.id)
+            #expect(user.friendStatus == userFromDb?.friendStatus)
         }
     }
 }
