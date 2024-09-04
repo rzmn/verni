@@ -1,9 +1,9 @@
-import XCTest
+import Testing
 import Networking
 @testable import DefaultNetworkingImplementation
 
-class ExponentialBackoffTests: XCTestCase {
-    func testRetryCount() {
+@Suite struct ExponentialBackoffTests {
+    @Test func testRetryCount() {
 
         // given
 
@@ -24,10 +24,10 @@ class ExponentialBackoffTests: XCTestCase {
 
         // then
 
-        XCTAssertEqual(Array(retries).count, expectedRetries)
+        #expect(Array(retries).count == expectedRetries)
     }
 
-    func testRetryWaitTimeIsGrowing() {
+    @Test func testRetryWaitTimeIsGrowing() {
 
         // given
 
@@ -47,7 +47,7 @@ class ExponentialBackoffTests: XCTestCase {
 
         // then
 
-        XCTAssertTrue(
+        #expect(
             zip(retries, retries.dropFirst()).allSatisfy { current, next in
                 current.waitTimeInterval < next.waitTimeInterval
             }

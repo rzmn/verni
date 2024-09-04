@@ -1,4 +1,5 @@
-import XCTest
+import Testing
+import Foundation
 import Networking
 @testable import DefaultNetworkingImplementation
 
@@ -10,8 +11,8 @@ struct FailableEncodable: Encodable {
     }
 }
 
-class UrlRequestBuilderBodyEncoderTests: XCTestCase {
-    func testEncodeBody() throws {
+@Suite struct UrlRequestBuilderBodyEncoderTests {
+    @Test func testEncodeBody() throws {
 
         // given
 
@@ -34,10 +35,10 @@ class UrlRequestBuilderBodyEncoderTests: XCTestCase {
 
         let encoded = try encoder.encodeBody(from: request)!
 
-        XCTAssertEqual(try JSONDecoder().decode(MockNetworkRequestBody.self, from: encoded), body)
+        #expect(try JSONDecoder().decode(MockNetworkRequestBody.self, from: encoded) == body)
     }
 
-    func testEncodeBodyFail() throws {
+    @Test func testEncodeBodyFail() throws {
 
         // given
 
@@ -60,15 +61,16 @@ class UrlRequestBuilderBodyEncoderTests: XCTestCase {
 
         do {
             let _ = try encoder.encodeBody(from: request)!
-            XCTAssert(false)
+            Issue.record()
         } catch {
             guard case .cannotBuildRequest = error else {
-                return XCTAssert(false)
+                Issue.record()
+                return
             }
         }
     }
 
-    func testEncodeRequestWithoutBody() throws {
+    @Test func testEncodeRequestWithoutBody() throws {
 
         // given
 
@@ -85,6 +87,6 @@ class UrlRequestBuilderBodyEncoderTests: XCTestCase {
 
         // when
 
-        XCTAssertNil(try encoder.encodeBody(from: request))
+        #expect(try encoder.encodeBody(from: request) == nil)
     }
 }

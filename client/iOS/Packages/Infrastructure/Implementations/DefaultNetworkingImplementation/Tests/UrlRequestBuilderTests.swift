@@ -1,10 +1,11 @@
-import XCTest
+import Testing
+import Foundation
 import Networking
 @testable import DefaultNetworkingImplementation
 
-class UrlRequestBuilderTests: XCTestCase {
+@Suite struct UrlRequestBuilderTests {
 
-    func testUrlRequestBuilderWithBody() throws {
+    @Test func testUrlRequestBuilderWithBody() throws {
 
         // given
 
@@ -37,14 +38,11 @@ class UrlRequestBuilderTests: XCTestCase {
 
         // then
 
-        XCTAssertEqual(
-            try JSONDecoder().decode(MockNetworkRequestBody.self, from: request.httpBody!),
-            body
-        )
-        XCTAssertEqual(request.httpMethod, httpMethod)
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+        #expect(try JSONDecoder().decode(MockNetworkRequestBody.self, from: request.httpBody!) == body)
+        #expect(request.httpMethod == httpMethod)
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
         for (key, value) in headers {
-            XCTAssertEqual(value, request.value(forHTTPHeaderField: key))
+            #expect(value == request.value(forHTTPHeaderField: key))
         }
     }
 }

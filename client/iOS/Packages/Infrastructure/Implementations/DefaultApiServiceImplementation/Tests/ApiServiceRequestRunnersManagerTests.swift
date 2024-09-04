@@ -1,4 +1,4 @@
-import XCTest
+import Testing
 import ApiService
 import Logging
 @testable import DefaultApiServiceImplementation

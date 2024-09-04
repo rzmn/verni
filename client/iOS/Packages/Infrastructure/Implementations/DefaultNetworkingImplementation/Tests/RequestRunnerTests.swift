@@ -3,7 +3,7 @@ import Testing
 import Foundation
 @testable import DefaultNetworkingImplementation
 
-@Suite("Request Runner Tests", .serialized) struct RequestRunnerTests {
+@Suite(.serialized) struct RequestRunnerTests {
     static let maxRetryCount = 1
     let backoff = ExponentialBackoff(base: 1, retryCount: 0, maxRetryCount: maxRetryCount)
 

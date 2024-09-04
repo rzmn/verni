@@ -1,20 +1,20 @@
-import XCTest
+import Testing
 import Networking
 @testable import DefaultNetworkingImplementation
 
-class EndpointTests: XCTestCase {
+@Suite struct EndpointTests {
 
-    func testEndpointPath() {
+    @Test func testEndpointPath() {
         let path = "https://url.com"
         let endpoint = Endpoint(path: path)
 
-        XCTAssertEqual(endpoint.path, path)
+        #expect(endpoint.path == path)
     }
 
-    func testEndpointPathLeadingSlash() {
+    @Test func testEndpointPathLeadingSlash() {
         let path = "https://url.com"
         let endpoint = Endpoint(path: path + "/")
 
-        XCTAssertEqual(endpoint.path, path)
+        #expect(endpoint.path == path)
     }
 }

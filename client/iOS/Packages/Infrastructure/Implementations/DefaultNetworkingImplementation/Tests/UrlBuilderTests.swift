@@ -1,9 +1,10 @@
-import XCTest
+import Testing
+import Foundation
 import Networking
 @testable import DefaultNetworkingImplementation
 
-class UrlBuilderTests: XCTestCase {
-    func testUrlBuilderNoParameters() throws {
+@Suite struct UrlBuilderTests {
+    @Test func testUrlBuilderNoParameters() throws {
 
         // given
 
@@ -23,10 +24,10 @@ class UrlBuilderTests: XCTestCase {
 
         // then
 
-        XCTAssert(url.absoluteString == endpoint.path + requestPath)
+        #expect(url.absoluteString == endpoint.path + requestPath)
     }
 
-    func testUrlBuilderWithParameters() throws {
+    @Test func testUrlBuilderWithParameters() throws {
 
         // given
 
@@ -56,7 +57,7 @@ class UrlBuilderTests: XCTestCase {
             dict[item.name] = item.value
         }
 
-        XCTAssertEqual(parametersFromComponents, parameters)
+        #expect(parametersFromComponents == parameters)
     }
 
     func testUrlBuilderFailed() {
@@ -79,6 +80,13 @@ class UrlBuilderTests: XCTestCase {
 
         // then
 
-        XCTAssertThrowsError(try builder.build())
+        #expect {
+            try builder.build()
+        } throws: { error in
+            guard let error = error as? NetworkServiceError, case .cannotBuildRequest = error else {
+                return false
+            }
+            return true
+        }
     }
 }
