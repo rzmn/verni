@@ -44,7 +44,12 @@ extension DefaultNetworkService: NetworkService {
         return try await RequestRunner(
             session: session,
             request: urlRequest,
-            logger: logger.with(prefix: "[\(url)] ")
+            logger: logger.with(prefix: "[\(url)] "),
+            backoff: ExponentialBackoff(
+                base: 0.5,
+                retryCount: 3,
+                maxRetryCount: 0
+            )
         ).run()
     }
 }
