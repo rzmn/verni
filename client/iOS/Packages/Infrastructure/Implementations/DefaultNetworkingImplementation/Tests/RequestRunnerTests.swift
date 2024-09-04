@@ -1,12 +1,13 @@
-import XCTest
 import Networking
+import Testing
+import Foundation
 @testable import DefaultNetworkingImplementation
 
-class RequestRunnerTests: XCTestCase {
-    let maxRetryCount = 1
-    lazy var backoff = ExponentialBackoff(base: 1, retryCount: 0, maxRetryCount: maxRetryCount)
+@Suite("Request Runner Tests", .serialized) struct RequestRunnerTests {
+    static let maxRetryCount = 1
+    let backoff = ExponentialBackoff(base: 1, retryCount: 0, maxRetryCount: maxRetryCount)
 
-    @MainActor func testSuccess() async throws {
+    @Test @MainActor func testSuccess() async throws {
         let url = URL(string: "url.com")!
         let data = "{\"k\": \"v\"}".data(using: .utf8)!
         let expectedResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
@@ -26,12 +27,12 @@ class RequestRunnerTests: XCTestCase {
         )
         let response = try await runner.run()
 
-        XCTAssertEqual(response.data, data)
-        XCTAssertEqual(response.code, HttpCode.success(.ok))
-        XCTAssertEqual(URLProtocolMock.loadsCount, 1)
+        #expect(response.data == data)
+        #expect(response.code == HttpCode.success(.ok))
+        #expect(URLProtocolMock.loadsCount == 1)
     }
 
-    @MainActor func testWrongResponseType() async throws {
+    @Test @MainActor func testWrongResponseType() async throws {
         let url = URL(string: "url.com")!
         let data = "{\"k\": \"v\"}".data(using: .utf8)!
         let expectedResponse = URLResponse(url: url, mimeType: "", expectedContentLength: 0, textEncodingName: nil)
@@ -51,16 +52,17 @@ class RequestRunnerTests: XCTestCase {
         )
         do {
             let _ = try await runner.run()
-            return XCTAssert(false)
+            Issue.record()
         } catch {
             guard case .badResponse = error else {
-                return XCTAssert(false)
+                Issue.record()
+                return
             }
-            XCTAssertEqual(URLProtocolMock.loadsCount, 1)
+            #expect(URLProtocolMock.loadsCount == 1)
         }
     }
 
-    @MainActor func testNoConnectionBackoff() async throws {
+    @Test @MainActor func testNoConnectionBackoff() async throws {
         let url = URL(string: "url.com")!
         let error = NSError(domain: NSURLErrorDomain, code: URLError.Code.networkConnectionLost.rawValue)
 
@@ -79,16 +81,17 @@ class RequestRunnerTests: XCTestCase {
         )
         do {
             let _ = try await runner.run()
-            return XCTAssert(false)
+            Issue.record()
         } catch {
             guard case .noConnection = error else {
-                return XCTAssert(false)
+                Issue.record()
+                return
             }
-            XCTAssertEqual(URLProtocolMock.loadsCount, maxRetryCount + 1)
+            #expect(URLProtocolMock.loadsCount == Self.maxRetryCount + 1)
         }
     }
 
-    @MainActor func testNoBackoffErrorUnknownDomain() async throws {
+    @Test @MainActor func testNoBackoffErrorUnknownDomain() async throws {
         let url = URL(string: "url.com")!
         let error = NSError(domain: "fake domain", code: -2222)
 
@@ -107,16 +110,17 @@ class RequestRunnerTests: XCTestCase {
         )
         do {
             let _ = try await runner.run()
-            return XCTAssert(false)
+            Issue.record()
         } catch {
             guard case .cannotSend = error else {
-                return XCTAssert(false)
+                Issue.record()
+                return
             }
-            XCTAssertEqual(URLProtocolMock.loadsCount, 1)
+            #expect(URLProtocolMock.loadsCount == 1)
         }
     }
 
-    @MainActor func testNoBackoffErrorKnownDomain() async throws {
+    @Test @MainActor func testNoBackoffErrorKnownDomain() async throws {
         let url = URL(string: "url.com")!
         let error = NSError(domain: NSURLErrorDomain, code: -2222)
 
@@ -135,16 +139,17 @@ class RequestRunnerTests: XCTestCase {
         )
         do {
             let _ = try await runner.run()
-            return XCTAssert(false)
+            Issue.record()
         } catch {
             guard case .cannotSend = error else {
-                return XCTAssert(false)
+                Issue.record()
+                return
             }
-            XCTAssertEqual(URLProtocolMock.loadsCount, 1)
+            #expect(URLProtocolMock.loadsCount == 1)
         }
     }
 
-    @MainActor func testServerErrorBackoff() async throws {
+    @Test @MainActor func testServerErrorBackoff() async throws {
         let url = URL(string: "url.com")!
         let data = "{\"k\": \"v\"}".data(using: .utf8)!
         let expectedResponse = HTTPURLResponse(url: url, statusCode: 500, httpVersion: nil, headerFields: nil)
@@ -164,8 +169,8 @@ class RequestRunnerTests: XCTestCase {
         )
         let response = try await runner.run()
 
-        XCTAssertEqual(response.data, data)
-        XCTAssertEqual(response.code, HttpCode.serverError(.internalServerError))
-        XCTAssertEqual(URLProtocolMock.loadsCount, maxRetryCount + 1)
+        #expect(response.data == data)
+        #expect(response.code == HttpCode.serverError(.internalServerError))
+        #expect(URLProtocolMock.loadsCount == Self.maxRetryCount + 1)
     }
 }
