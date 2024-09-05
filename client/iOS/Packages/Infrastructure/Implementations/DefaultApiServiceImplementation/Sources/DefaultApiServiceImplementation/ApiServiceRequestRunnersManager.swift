@@ -50,6 +50,7 @@ extension ApiServiceRequestRunnersManager {
                 } else {
                     failureReason = .internalError(error)
                 }
+                refreshTokenFailureReason = failureReason
                 switch failureReason {
                 case .noConnection:
                     break

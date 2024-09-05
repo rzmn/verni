@@ -7,10 +7,10 @@ import Logging
 actor TokenRefresherMock: TokenRefresher, Loggable {
     let logger: Logger = .shared
     private var accessTokenValue: String?
-    let refreshTokensValue: Result<String, RefreshTokenFailureReason>
+    let refreshTokensValue: Result<String?, RefreshTokenFailureReason>
     let refreshTokensResponseTimeSec: UInt64
 
-    init(accessTokenValue: String?, refreshTokensValue: Result<String, RefreshTokenFailureReason>, refreshTokensResponseTimeSec: UInt64) {
+    init(accessTokenValue: String?, refreshTokensValue: Result<String?, RefreshTokenFailureReason>, refreshTokensResponseTimeSec: UInt64) {
         self.accessTokenValue = accessTokenValue
         self.refreshTokensValue = refreshTokensValue
         self.refreshTokensResponseTimeSec = refreshTokensResponseTimeSec
@@ -30,27 +30,6 @@ actor TokenRefresherMock: TokenRefresher, Loggable {
         case .failure(let error):
             throw error
         }
-    }
-}
-
-struct MockResponse: Decodable {}
-
-struct MockRequest: ApiServiceRequest, Loggable {
-    static var accessTokenShouldFailLabel: String {
-        "accessTokenShouldFailLabel"
-    }
-
-    let logger: Logger = .shared
-    let label: String
-
-    let path: String = ""
-    let parameters: [String: String] = [:]
-    let httpMethod: String = ""
-
-    var headers: [String: String] = [:]
-    mutating func setHeader(key: String, value: String) {
-        logI { "req[\(label)] \(key)=\(value)" }
-        headers[key] = value
     }
 }
 
@@ -119,15 +98,27 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 tokenRefresher: TokenRefresherMock(
-                    accessTokenValue: nil,
+                    accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
-                    refreshTokensResponseTimeSec: 2
+                    refreshTokensResponseTimeSec: 4
                 )
             )
         )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 1.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 2.5)
+            upperTimeLimitReached = true
+        }
+
         async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
         async let b: MockResponse = try runner.run(request: MockRequest(label: "2"))
-        async let c: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+        async let c: MockResponse = try runner.run(request: MockRequest(label: "3"))
         async let d: MockResponse = try runner.run(request: MockRequest(label: "4"))
         async let e: MockResponse = try runner.run(request: MockRequest(label: "5"))
         async let f: MockResponse = try runner.run(request: MockRequest(label: "6"))
@@ -136,5 +127,256 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
             a, b, c, d, e, f
         ]
 
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
+    }
+
+    @Test func testRequestsLimitRefreshOnStart() async throws {
+        let runner = MaxSimultaneousRequestsRestrictor(
+            limit: 5,
+            manager: ApiServiceRequestRunnersManager(
+                runnerFactory: MockRequestRunnerFactory(
+                    runResult: .success(MockResponse()),
+                    runResponseTimeSec: 1,
+                    label: "runner"
+                ),
+                tokenRefresher: TokenRefresherMock(
+                    accessTokenValue: nil,
+                    refreshTokensValue: .success("123"),
+                    refreshTokensResponseTimeSec: 2
+                )
+            )
+        )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 2.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 3.5)
+            upperTimeLimitReached = true
+        }
+
+        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(label: "2"))
+
+        let _: [MockResponse] = try await [
+            a, b
+        ]
+
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
+    }
+
+    @Test func testNoRefresherNoToken() async throws {
+        let runner = MaxSimultaneousRequestsRestrictor(
+            limit: 5,
+            manager: ApiServiceRequestRunnersManager(
+                runnerFactory: MockRequestRunnerFactory(
+                    runResult: .success(MockResponse()),
+                    runResponseTimeSec: 1,
+                    label: "runner"
+                ),
+                tokenRefresher: nil
+            )
+        )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 0.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 1.5)
+            upperTimeLimitReached = true
+        }
+
+        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(label: "2"))
+
+        let _: [MockResponse] = try await [
+            a, b
+        ]
+
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
+    }
+
+    @Test func testRequestsReRunOnTokenFailed() async throws {
+        let runner = MaxSimultaneousRequestsRestrictor(
+            limit: 5,
+            manager: ApiServiceRequestRunnersManager(
+                runnerFactory: MockRequestRunnerFactory(
+                    runResult: .success(MockResponse()),
+                    runResponseTimeSec: 1,
+                    label: "runner"
+                ),
+                tokenRefresher: TokenRefresherMock(
+                    accessTokenValue: "123",
+                    refreshTokensValue: .success("123"),
+                    refreshTokensResponseTimeSec: 2
+                )
+            )
+        )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 3.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 4.5)
+            upperTimeLimitReached = true
+        }
+
+        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+
+        let _: [MockResponse] = try await [
+            a, b
+        ]
+
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
+    }
+
+    @Test func testRequestsRefreshFailed() async throws {
+        let runner = MaxSimultaneousRequestsRestrictor(
+            limit: 5,
+            manager: ApiServiceRequestRunnersManager(
+                runnerFactory: MockRequestRunnerFactory(
+                    runResult: .success(MockResponse()),
+                    runResponseTimeSec: 1,
+                    label: "runner"
+                ),
+                tokenRefresher: TokenRefresherMock(
+                    accessTokenValue: nil,
+                    refreshTokensValue: .failure(.expired(NSError(domain: "", code: -1))),
+                    refreshTokensResponseTimeSec: 2
+                )
+            )
+        )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 1.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 2.5)
+            upperTimeLimitReached = true
+        }
+
+        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+
+        do {
+            let _: [MockResponse] = try await [
+                a, b
+            ]
+            Issue.record()
+        } catch {
+            guard let error = error as? ApiServiceError, case .unauthorized = error else {
+                Issue.record()
+                return
+            }
+        }
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
+    }
+
+    @Test func testRequestsRefreshFailedOnReRun() async throws {
+        let runner = MaxSimultaneousRequestsRestrictor(
+            limit: 5,
+            manager: ApiServiceRequestRunnersManager(
+                runnerFactory: MockRequestRunnerFactory(
+                    runResult: .failure(.noConnection(NSError(domain: "", code: -1))),
+                    runResponseTimeSec: 1,
+                    label: "runner"
+                ),
+                tokenRefresher: TokenRefresherMock(
+                    accessTokenValue: nil,
+                    refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
+                    refreshTokensResponseTimeSec: 2
+                )
+            )
+        )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 1.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 2.5)
+            upperTimeLimitReached = true
+        }
+
+        async let a: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+
+        do {
+            let _: [MockResponse] = try await [
+                a
+            ]
+            Issue.record()
+        } catch {
+            guard let error = error as? ApiServiceError, case .noConnection = error else {
+                Issue.record()
+                return
+            }
+        }
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
+    }
+
+    @Test func testRequestsFailedWithSuccessToken() async throws {
+        let runner = MaxSimultaneousRequestsRestrictor(
+            limit: 5,
+            manager: ApiServiceRequestRunnersManager(
+                runnerFactory: MockRequestRunnerFactory(
+                    runResult: .failure(.noConnection(NSError(domain: "", code: -1))),
+                    runResponseTimeSec: 1,
+                    label: "runner"
+                ),
+                tokenRefresher: TokenRefresherMock(
+                    accessTokenValue: "123",
+                    refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
+                    refreshTokensResponseTimeSec: 2
+                )
+            )
+        )
+
+        var lowerTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 0.5)
+            lowerTimeLimitReached = true
+        }
+        var upperTimeLimitReached = false
+        Task.detached {
+            try? await Task.sleep(timeInterval: 1.5)
+            upperTimeLimitReached = true
+        }
+
+        async let a: MockResponse = try runner.run(request: MockRequest(label: "a"))
+
+        do {
+            let _: [MockResponse] = try await [
+                a
+            ]
+            Issue.record()
+        } catch {
+            guard let error = error as? ApiServiceError, case .noConnection = error else {
+                Issue.record()
+                return
+            }
+        }
+        #expect(lowerTimeLimitReached)
+        #expect(!upperTimeLimitReached)
     }
 }

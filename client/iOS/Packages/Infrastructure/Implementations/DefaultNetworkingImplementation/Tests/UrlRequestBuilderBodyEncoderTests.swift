@@ -7,7 +7,7 @@ struct FailableEncodable: Encodable {
     let data: String
 
     func encode(to encoder: any Encoder) throws {
-        throw NSError()
+        throw NSError(domain: "", code: -1)
     }
 }
 
