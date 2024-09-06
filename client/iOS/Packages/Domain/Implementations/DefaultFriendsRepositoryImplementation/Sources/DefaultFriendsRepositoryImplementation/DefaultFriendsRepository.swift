@@ -93,7 +93,7 @@ extension DefaultFriendsRepository: FriendsRepository {
         } as [FriendshipKind: [User]]
         Task.detached { [weak self] in
             guard let self else { return }
-            await offline.storeFriends(friendsByKind)
+            await offline.storeFriends(friendsByKind, for: kind)
         }
         subject(for: kind).send(friendsByKind)
         return friendsByKind

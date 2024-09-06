@@ -106,7 +106,7 @@ extension DefaultDependenciesAssembly {
     func persistencyFactory() -> PersistencyFactory {
         SQLitePersistencyFactory(
             logger: .shared.with(prefix: "[db] "),
-            appFolder: FileManager.default.containerURL(
+            dbDirectory: FileManager.default.containerURL(
                 forSecurityApplicationGroupIdentifier: "group.com.rzmn.accountydev.app"
             ).unsafelyUnwrapped
         )
