@@ -1,6 +1,57 @@
 import Testing
 import Foundation
+import ApiService
+@testable import Api
 @testable import DefaultApiImplementation
+
+struct MockMethodWithParametersAndResponse: ApiMethod {
+    typealias Response = MockResponse
+    typealias Parameters = MockParameters
+    var path: String { "" }
+    let method: HttpMethod
+    let parameters: MockParameters
+}
+
+struct MockMethodWithNoParametersAndResponse: ApiMethod {
+    typealias Response = MockResponse
+    typealias Parameters = NoParameters
+    var path: String { "" }
+    let method: HttpMethod
+    let parameters: NoParameters
+}
+
+struct MockMethodWithParametersAndNoResponse: ApiMethod {
+    typealias Response = NoResponse
+    typealias Parameters = MockParameters
+    var path: String { "" }
+    let method: HttpMethod
+    let parameters: MockParameters
+}
+
+struct MockResponse: Decodable, Sendable {
+
+}
+
+struct MockParameters: Encodable, Sendable {
+
+}
+
+struct MockApiService: ApiService {
+    let result: Result<ApiResponseDto<MockResponse>, ApiServiceError>
+
+    func run<Request, Response>(
+        request: Request
+    ) async throws(ApiServiceError) -> Response where Request: ApiServiceRequest, Response: Decodable, Response: Sendable {
+        try result.map {
+            print("[debug] \(type(of: $0)) \(Response.self)")
+            if Response.self == VoidApiResponseDto.self {
+                return VoidApiResponseDto.success as! Response
+            } else {
+                return $0 as! Response
+            }
+        }.get()
+    }
+}
 
 @Suite struct ResponseTests {
 
@@ -47,5 +98,33 @@ import Foundation
             return
         }
         #expect(payload == response)
+    }
+
+    @Test func testGetRequestWithResponseAndParameters() async throws {
+        let api = DefaultApi(service: MockApiService(result: .success(.success(MockResponse()))))
+        let result = try await api.run(method: MockMethodWithParametersAndResponse(method: .get, parameters: MockParameters()))
+
+        #expect(type(of: result) == MockResponse.self)
+    }
+
+    @Test func testPostRequestWithResponseAndParameters() async throws {
+        let api = DefaultApi(service: MockApiService(result: .success(.success(MockResponse()))))
+        let result = try await api.run(method: MockMethodWithParametersAndResponse(method: .post, parameters: MockParameters()))
+
+        #expect(type(of: result) == MockResponse.self)
+    }
+
+    @Test func testRequestWithResponseAndNoParameters() async throws {
+        let api = DefaultApi(service: MockApiService(result: .success(.success(MockResponse()))))
+        let result = try await api.run(method: MockMethodWithNoParametersAndResponse(method: .get, parameters: NoParameters()))
+
+        #expect(type(of: result) == MockResponse.self)
+    }
+
+    @Test func testRequestWithNoResponseAndParameters() async throws {
+        let api = DefaultApi(service: MockApiService(result: .success(.success(MockResponse()))))
+        let result: Void = try await api.run(method: MockMethodWithParametersAndNoResponse(method: .get, parameters: MockParameters()))
+
+        #expect(type(of: result) == Void.self)
     }
 }

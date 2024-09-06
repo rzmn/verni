@@ -18,9 +18,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PersistentStorageSQLiteTests"
-               BuildableName = "PersistentStorageSQLiteTests"
-               BlueprintName = "PersistentStorageSQLiteTests"
+               BlueprintIdentifier = "DefaultApiImplementationTests"
+               BuildableName = "DefaultApiImplementationTests"
+               BlueprintName = "DefaultApiImplementationTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
