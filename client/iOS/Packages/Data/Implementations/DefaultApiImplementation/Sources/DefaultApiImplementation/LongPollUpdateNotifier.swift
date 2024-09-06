@@ -4,27 +4,35 @@ internal import Logging
 
 actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable {
     var publisher: AnyPublisher<Query.Update, Never> {
-        subject.eraseToAnyPublisher()
+        subject().eraseToAnyPublisher()
     }
 
-    private lazy var subject = PassthroughSubject<Query.Update, Never>()
-        .handleEvents(
-            receiveSubscription: { _ in
-                Task.detached { [weak self] in
-                    await self?.subscribe()
-                }
-            },
-            receiveCompletion: { [weak self] _ in
-                Task.detached { [weak self] in
-                    await self?.unsubscribe()
-                }
-            },
-            receiveCancel: { [weak self] in
-                Task.detached { [weak self] in
-                    await self?.unsubscribe()
-                }
-            }
-        )
+    private var _subject: PassthroughSubject<Query.Update, Never>?
+    private func subject() -> PassthroughSubject<Query.Update, Never> {
+        guard let _subject else {
+            let subject = PassthroughSubject<Query.Update, Never>()
+                .handleEvents(
+                    receiveSubscription: { _ in
+                        Task.detached { [weak self] in
+                            await self?.subscribe()
+                        }
+                    },
+                    receiveCompletion: { [weak self] _ in
+                        Task.detached { [weak self] in
+                            await self?.unsubscribe()
+                        }
+                    },
+                    receiveCancel: { [weak self] in
+                        Task.detached { [weak self] in
+                            await self?.unsubscribe()
+                        }
+                    }
+                ).upstream
+            _subject = subject
+            return subject
+        }
+        return _subject
+    }
 
     let logger: Logger = .shared.with(prefix: "[lp] ")
     private let query: Query
@@ -77,7 +85,7 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
                 }
                 logI { "startListening: publishind update..." }
                 for update in updates where query.updateIsRelevant(update) {
-                    self.subject.upstream.send(update)
+                    self.subject().send(update)
                 }
             } while true
         }

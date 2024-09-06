@@ -72,7 +72,7 @@ extension DefaultApi {
     func run<Method>(
         method: Method
     ) async throws(ApiError) -> Method.Response
-    where Method: ApiMethod, Method.Response: Decodable, Method.Parameters: Encodable {
+    where Method: ApiMethod, Method.Response: Decodable & Sendable, Method.Parameters: Encodable & Sendable {
         if case .get = method.method {
             let request: ApiServiceRequest
             switch await createRequestFromGetMethod(method: method) {
@@ -115,7 +115,7 @@ extension DefaultApi {
     func run<Method>(
         method: Method
     ) async throws(ApiError) -> Void
-    where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable {
+    where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable & Sendable {
         if case .get = method.method {
             let request: ApiServiceRequest
             switch await createRequestFromGetMethod(method: method) {

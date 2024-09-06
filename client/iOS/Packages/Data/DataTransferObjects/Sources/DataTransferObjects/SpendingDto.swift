@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SpendingDto: Codable, Sendable {
+public struct SpendingDto: Codable, Sendable, Equatable {
     public let userId: UserDto.ID
     public let cost: CostDto
 

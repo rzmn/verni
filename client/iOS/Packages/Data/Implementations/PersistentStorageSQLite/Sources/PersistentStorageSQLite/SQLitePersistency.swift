@@ -64,7 +64,7 @@ private struct FriendshipKindSet: OptionSet {
             return
         }
         detachedTasks.append(
-            Task.detached {
+            Task { @StorageActor in
                 await self.serialScheduler.run { @StorageActor in
                     do {
                         try self.db.run(Schema.Tokens.table.insert(
@@ -242,10 +242,10 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func storeFriends(_ friends: [FriendshipKindDto: [UserDto]]) async {
+    func updateFriends(_ friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async {
         do {
             try self.db.run(Schema.Friends.table.upsert(
-                Schema.Friends.Keys.id <- FriendshipKindSet(set: Set(friends.keys)).rawValue,
+                Schema.Friends.Keys.id <- FriendshipKindSet(set: set).rawValue,
                 Schema.Friends.Keys.payload <- CodableBlob(value: friends),
                 onConflictOf: Schema.Friends.Keys.id
             ))

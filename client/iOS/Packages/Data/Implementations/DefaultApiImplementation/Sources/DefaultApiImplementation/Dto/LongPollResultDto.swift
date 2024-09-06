@@ -2,7 +2,7 @@ import Api
 import Foundation
 import DataTransferObjects
 
-enum LongPollResultDto<Update: Decodable>: Decodable {
+enum LongPollResultDto<Update: Decodable & Sendable>: Decodable, Sendable {
     case success([Update])
     case failure(LongPollError)
 

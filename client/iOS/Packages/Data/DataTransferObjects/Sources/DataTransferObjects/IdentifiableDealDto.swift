@@ -1,6 +1,6 @@
 import Foundation
 
-public struct DealDto: Codable, Sendable {
+public struct DealDto: Codable, Sendable, Equatable {
     public let timestamp: Int64
     public let details: String
     public let cost: CostDto
@@ -27,7 +27,7 @@ public extension DealDto {
 }
 
 @dynamicMemberLookup
-public struct IdentifiableDealDto: Codable, Sendable {
+public struct IdentifiableDealDto: Codable, Sendable, Equatable {
     public let id: DealDto.ID
     public let deal: DealDto
 

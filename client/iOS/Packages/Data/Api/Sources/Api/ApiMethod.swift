@@ -1,10 +1,10 @@
-public struct NoParameters {}
+public struct NoParameters: Sendable {}
 
-public struct NoResponse {}
+public struct NoResponse: Sendable {}
 
 public protocol ApiMethod: Sendable {
-    associatedtype Response
-    associatedtype Parameters
+    associatedtype Response: Sendable
+    associatedtype Parameters: Sendable
 
     var path: String { get }
     var method: HttpMethod { get }

@@ -1,12 +1,12 @@
 import Api
 
-protocol ApiResponse: Decodable {
+protocol ApiResponse: Decodable & Sendable {
     associatedtype Success
 
     var result: Result<Success, ApiErrorDto> { get }
 }
 
-enum VoidApiResponseDto: Decodable {
+enum VoidApiResponseDto: Decodable & Sendable {
     case success
     case failure(ApiErrorDto)
 
@@ -40,7 +40,7 @@ extension VoidApiResponseDto: ApiResponse {
     }
 }
 
-enum ApiResponseDto<Response: Decodable> {
+enum ApiResponseDto<Response: Decodable & Sendable>: Sendable {
     case success(Response)
     case failure(ApiErrorDto)
 

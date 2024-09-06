@@ -22,11 +22,12 @@ extension DefaultFriendsOfflineRepository: FriendsOfflineRepository {
 }
 
 extension DefaultFriendsOfflineRepository: FriendsOfflineMutableRepository {
-    public func storeFriends(_ friends: [FriendshipKind : [User]]) async {
-        await persistency.storeFriends(
+    public func storeFriends(_ friends: [FriendshipKind : [User]], for set: FriendshipKindSet) async {
+        await persistency.updateFriends(
             friends.reduce(into: [:], { dict, item in
                 dict[FriendshipKindDto(domain: item.key)] = item.value.map(UserDto.init)
-            })
+            }),
+            for: Set(set.array.map(FriendshipKindDto.init))
         )
     }
 }

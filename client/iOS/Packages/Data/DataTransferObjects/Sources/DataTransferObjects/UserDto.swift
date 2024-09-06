@@ -1,14 +1,14 @@
 import Base
 
-public struct UserDto: Codable, Sendable {
-    public enum FriendStatus: Int, Codable, Sendable {
+public struct UserDto: Codable, Sendable, Equatable {
+    public enum FriendStatus: Int, Codable, Sendable, Equatable {
         case no = 0
         case incomingRequest = 1
         case outgoingRequest = 2
         case friends = 3
         case me = 4
     }
-    public struct Avatar: Codable, Sendable {
+    public struct Avatar: Codable, Sendable, Equatable {
         public typealias ID = String
 
         public let id: ID?
