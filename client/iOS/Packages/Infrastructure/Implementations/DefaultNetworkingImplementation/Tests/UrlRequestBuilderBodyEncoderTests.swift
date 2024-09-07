@@ -35,6 +35,8 @@ struct FailableEncodable: Encodable {
 
         let encoded = try encoder.encodeBody(from: request)!
 
+        // then
+
         #expect(try JSONDecoder().decode(MockNetworkRequestBody.self, from: encoded) == body)
     }
 
@@ -59,14 +61,20 @@ struct FailableEncodable: Encodable {
 
         // when
 
+        let serviceError: NetworkServiceError
         do {
             let _ = try encoder.encodeBody(from: request)!
             Issue.record()
+            return
         } catch {
-            guard case .cannotBuildRequest = error else {
-                Issue.record()
-                return
-            }
+            serviceError = error
+        }
+
+        // then
+
+        guard case .cannotBuildRequest = serviceError else {
+            Issue.record()
+            return
         }
     }
 

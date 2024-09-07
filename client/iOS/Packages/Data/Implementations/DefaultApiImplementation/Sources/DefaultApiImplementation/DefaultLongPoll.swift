@@ -2,8 +2,6 @@ import Combine
 import Api
 internal import Base
 
-extension AnyPublisher: @retroactive @unchecked Sendable {}
-
 public actor DefaultLongPoll: LongPoll {
     private var notifiers = [String: Any]()
     private let api: DefaultApi
@@ -15,6 +13,13 @@ public actor DefaultLongPoll: LongPoll {
     public func poll<Query>(
         for query: Query
     ) async -> AnyPublisher<Query.Update, Never>
+    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
+        await updateNotifier(for: query).publisher
+    }
+
+    func updateNotifier<Query>(
+        for query: Query
+    ) async -> LongPollUpdateNotifier<Query>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         let existed: LongPollUpdateNotifier<Query>?
         if let anyExisted = notifiers[query.eventId] {
@@ -28,10 +33,10 @@ public actor DefaultLongPoll: LongPoll {
             existed = nil
         }
         if let existed {
-            return await existed.publisher
+            return existed
         }
-        let notifier = LongPollUpdateNotifier(query: query, api: api)
+        let notifier = await LongPollUpdateNotifier(query: query, api: api)
         notifiers[query.eventId] = notifier
-        return await notifier.publisher
+        return notifier
     }
 }

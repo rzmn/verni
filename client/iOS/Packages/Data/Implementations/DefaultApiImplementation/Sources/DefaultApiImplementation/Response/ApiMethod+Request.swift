@@ -7,18 +7,10 @@ struct AnyApiServiceRequestWithBody<Body: Encodable & Sendable>: ApiServiceReque
 
     let body: Body
 
-    var path: String {
-        request.path
-    }
-    var headers: [String: String] {
-        request.headers
-    }
-    var parameters: [String: String] {
-        request.parameters
-    }
-    var httpMethod: String {
-        request.httpMethod
-    }
+    var path: String { request.path }
+    var headers: [String: String] { request.headers }
+    var parameters: [String: String] { request.parameters }
+    var httpMethod: String { request.httpMethod }
 
     mutating func setHeader(key: String, value: String) {
         request.setHeader(key: key, value: value)

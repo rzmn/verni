@@ -4,8 +4,6 @@ import Combine
 internal import ApiDomainConvenience
 internal import DataTransferObjects
 
-extension AnyPublisher: @unchecked @retroactive Sendable {}
-
 private actor LoggedOutHandler {
     private var loggedOut = false
 

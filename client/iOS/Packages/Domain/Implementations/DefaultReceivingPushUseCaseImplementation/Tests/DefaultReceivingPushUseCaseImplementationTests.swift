@@ -4,35 +4,37 @@ import Domain
 import Combine
 @testable import DefaultReceivingPushUseCaseImplementation
 
-class MockUsersRepository: UsersRepository {
+actor MockUsersRepository: UsersRepository {
     var getUsersCalls = [[User.ID]]()
     var searchUsersCalls = [String]()
 
-    func getUsers(ids: [User.ID]) async -> Result<[User], GeneralError> {
+    func getUsers(ids: [User.ID]) async throws(GeneralError) -> [User] {
         getUsersCalls.append(ids)
 
-        return .success(ids.map {
+        return ids.map {
             User(
                 id: $0,
                 status: .friend,
                 displayName: "display name of \($0)",
                 avatar: nil
             )
-        })
+        }
     }
     
-    func searchUsers(query: String) async -> Result<[User], GeneralError> {
+    func searchUsers(query: String) async throws(GeneralError) -> [User] {
         searchUsersCalls.append(query)
-        return .success([])
+        return []
     }
 }
 
-class MockFriendsRepository: FriendsRepository {
+actor MockFriendsRepository: FriendsRepository {
     var refreshFriendsCalls = [FriendshipKindSet]()
 
-    func refreshFriends(ofKind kind: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
+    func refreshFriends(
+        ofKind kind: FriendshipKindSet
+    ) async throws(GeneralError) -> [FriendshipKind: [User]] {
         refreshFriendsCalls.append(kind)
-        return .success([
+        return [
             .friends: [
                 User(
                     id: UUID().uuidString,
@@ -41,7 +43,7 @@ class MockFriendsRepository: FriendsRepository {
                     avatar: nil
                 )
             ]
-        ])
+        ]
     }
     
     func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
@@ -49,19 +51,19 @@ class MockFriendsRepository: FriendsRepository {
     }
 }
 
-class MockSpendingsRepository: SpendingsRepository {
+actor MockSpendingsRepository: SpendingsRepository {
     var refreshSpendingCounterpartiesCalls: [Void] = [Void]()
     var refreshSpendingsHistoryCalls = [User.ID]()
     var getSpendingCalls = [Spending.ID]()
 
-    func refreshSpendingCounterparties() async -> Result<[SpendingsPreview], GeneralError> {
+    func refreshSpendingCounterparties() async throws(GeneralError) -> [SpendingsPreview] {
         refreshSpendingCounterpartiesCalls.append(())
-        return .success([SpendingsPreview(counterparty: UUID().uuidString, balance: [.russianRuble: 123])])
+        return [SpendingsPreview(counterparty: UUID().uuidString, balance: [.russianRuble: 123])]
     }
     
-    func refreshSpendingsHistory(counterparty: User.ID) async -> Result<[IdentifiableSpending], GetSpendingsHistoryError> {
+    func refreshSpendingsHistory(counterparty: User.ID) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
         refreshSpendingsHistoryCalls.append(counterparty)
-        return .success([
+        return [
             IdentifiableSpending(
                 spending: Spending(
                     date: Date(),
@@ -74,12 +76,12 @@ class MockSpendingsRepository: SpendingsRepository {
                 ),
                 id: UUID().uuidString
             )
-        ])
+        ]
     }
     
-    func getSpending(id: Spending.ID) async -> Result<Spending, GetSpendingError> {
+    func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending {
         getSpendingCalls.append(id)
-        return .success(Spending(
+        return Spending(
             date: Date(),
             details: "spending details",
             cost: 123,
@@ -87,7 +89,7 @@ class MockSpendingsRepository: SpendingsRepository {
             participants: [
                 UUID().uuidString: 123
             ]
-        ))
+        )
     }
     
     func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never> {
@@ -102,7 +104,7 @@ class MockSpendingsRepository: SpendingsRepository {
 }
 
 @Suite struct DefaultReceivingPushUseCaseTests {
-    @Test func testReceivePush() async {
+    @Test func testReceivePush() async throws {
         let useCase = DefaultReceivingPushUseCase(
             usersRepository: MockUsersRepository(),
             friendsRepository: MockFriendsRepository(),
@@ -128,8 +130,8 @@ class MockSpendingsRepository: SpendingsRepository {
 }
 """
         let jsonData = jsonString.data(using: .utf8)!
-        let jsonDict = try! JSONSerialization.jsonObject(with: jsonData) as! [AnyHashable: Any]
-        let content = await useCase.process(rawPushPayload: jsonDict)!
+        let jsonDict = try JSONSerialization.jsonObject(with: jsonData) as! [AnyHashable: Any]
+        let content = try await useCase.process(rawPushPayload: jsonDict)
         print("\(content)")
     }
 }

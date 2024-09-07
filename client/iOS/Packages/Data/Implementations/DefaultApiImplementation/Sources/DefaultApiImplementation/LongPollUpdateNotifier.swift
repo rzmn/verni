@@ -1,135 +1,71 @@
 import Api
 import Combine
+internal import Base
 internal import Logging
 
-actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable {
+actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable & Sendable {
     var publisher: AnyPublisher<Query.Update, Never> {
-        subject().eraseToAnyPublisher()
+        subject.upstream.eraseToAnyPublisher()
     }
-
-    private var _subject: PassthroughSubject<Query.Update, Never>?
-    private func subject() -> PassthroughSubject<Query.Update, Never> {
-        guard let _subject else {
-            let subject = PassthroughSubject<Query.Update, Never>()
-                .handleEvents(
-                    receiveSubscription: { _ in
-                        Task.detached { [weak self] in
-                            await self?.subscribe()
-                        }
-                    },
-                    receiveCompletion: { [weak self] _ in
-                        Task.detached { [weak self] in
-                            await self?.unsubscribe()
-                        }
-                    },
-                    receiveCancel: { [weak self] in
-                        Task.detached { [weak self] in
-                            await self?.unsubscribe()
-                        }
-                    }
-                ).upstream
-            _subject = subject
-            return subject
-        }
-        return _subject
-    }
+    private let subject = OnDemandPublisher<Query.Update>()
 
     let logger: Logger = .shared.with(prefix: "[lp] ")
-    private let query: Query
-    private let api: DefaultApi
-    private var subscribersCount = 0 {
-        didSet {
-            logI { "subscribersCount=\(subscribersCount)" }
-        }
+    private var subscriptions = Set<AnyCancellable>()
+    private let poller: Poller<Query>
+    private var isListening = false
+
+    init(query: Query, api: DefaultApi) async where Query.Update: Decodable & Sendable {
+        self.poller = await Poller(query: query, api: api)
+        subject.hasSubscribers
+            .sink { hasSubscribers in
+                Task {
+                    if hasSubscribers {
+                        self.startListening()
+                    } else {
+                        self.cancelListening()
+                    }
+                }
+            }.store(in: &subscriptions)
     }
 
-    init(query: Query, api: DefaultApi) where Query.Update: Decodable {
-        self.query = query
-        self.api = api
-    }
-
-    func subscribe() async {
-        subscribersCount += 1
-        if subscribersCount == 1 {
-            startListening()
-        }
-    }
-
-    func unsubscribe() async {
-        subscribersCount -= 1
-        assert(subscribersCount >= 0)
-        if subscribersCount == 0 {
-            cancelListening()
-        }
-    }
-
-    private var routine: Task<Void, Never>?
     private func startListening() {
         logI { "startListening: starting" }
-        if let routine, !routine.isCancelled {
+        guard !isListening else {
             logI { "startListening: already running" }
             return
         }
+        isListening = true
         logI { "startListening: started" }
-        routine = Task {
-            repeat {
-                logI { "startListening: listenForUpdates..." }
-                let result = await listenForUpdates()
-                if Task.isCancelled {
-                    logI { "startListening: was canceled, terminating" }
-                    return
-                }
-                guard case .success(let updates) = result else {
-                    logI { "startListening: got failure \(result), terminating" }
-                    return
-                }
-                logI { "startListening: publishind update..." }
-                for update in updates where query.updateIsRelevant(update) {
-                    self.subject().send(update)
-                }
-            } while true
+        Task.detached {
+            await self.pollLoop()
         }
     }
 
     private func cancelListening() {
-        guard let routine else {
-            logI { "cancelListening: no routine, skip" }
+        guard isListening else {
+            logI { "cancelListening: isListening, skip" }
             return
         }
-        if !routine.isCancelled {
-            logI { "cancelListening: canceled" }
-            routine.cancel()
-        }
-        self.routine = nil
+        isListening = false
     }
 
-    enum ListenForUpdatesTerminationEvent: Error {
-        case offline
-        case canceled
-        case internalError
-    }
-    private func listenForUpdates() async -> Result<[Query.Update], ListenForUpdatesTerminationEvent> {
-        let updates: [Query.Update]
-        do {
-            updates = try await api.longPoll(query: query)
-        } catch {
-            switch error {
-            case .noUpdates:
-                logE { "still working, reschedule..." }
-                return await listenForUpdates()
-            case .noConnection:
-                logI { "listenForUpdates canceled: no network. waiting for network" }
-                return .failure(.offline)
-            case .internalError(let error):
-                logI { "listenForUpdates canceled: internal error \(error)." }
-                return .failure(.canceled)
+    func pollLoop() async {
+        repeat {
+            logI { "startListening: listenForUpdates..." }
+            let updates: [Query.Update]
+            do {
+                updates = try await poller.poll().get()
+            } catch {
+                logI { "startListening: got failure \(error), terminating" }
+                return
             }
-        }
-        if Task.isCancelled {
-            logI { "listenForUpdates canceled" }
-            return .failure(.canceled)
-        }
-        return .success(updates)
+            guard isListening else {
+                logI { "startListening: was canceled, terminating" }
+                return
+            }
+            logI { "startListening: publishind update..." }
+            updates.forEach(subject.upstream.send)
+        } while true
     }
 }
 

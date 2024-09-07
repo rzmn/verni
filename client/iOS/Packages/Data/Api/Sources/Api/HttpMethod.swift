@@ -1,4 +1,4 @@
-public enum HttpMethod: Sendable {
+public enum HttpMethod: Sendable, Equatable {
     case put
     case post
     case get
