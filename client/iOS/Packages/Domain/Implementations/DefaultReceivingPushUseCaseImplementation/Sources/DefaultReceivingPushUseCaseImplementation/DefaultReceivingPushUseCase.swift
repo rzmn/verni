@@ -77,10 +77,9 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
             )
         case .newExpenseReceived(let payload):
             Task.detached {
-                try? await [
-                    self.spendingsRepository.refreshSpendingCounterparties(),
-                    self.spendingsRepository.refreshSpendingsHistory(counterparty: payload.authorId)
-                ]
+                async let a = try? self.spendingsRepository.refreshSpendingCounterparties()
+                async let b = try? self.spendingsRepository.refreshSpendingsHistory(counterparty: payload.authorId)
+                _ = await [a, b] as [any Sendable]
             }
             let spending: Spending
             do {
