@@ -29,7 +29,7 @@ class QrCodeView: UIView {
     init(image: CGImage) {
         super.init(frame: .zero)
         imageView.image = UIImage(cgImage: image)
-        [imageView].forEach(addSubview)
+        addSubview(imageView)
     }
     
     required init?(coder: NSCoder) {
