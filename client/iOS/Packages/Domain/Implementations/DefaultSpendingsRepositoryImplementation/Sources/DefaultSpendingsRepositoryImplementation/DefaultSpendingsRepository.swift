@@ -55,13 +55,11 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     public func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never> {
         await longPoll.poll(for: LongPollCounterpartiesQuery())
             .flatMap { _ in
-                Future { [weak self] (promise: @escaping (Result<[SpendingsPreview]?, Never>) -> Void) in
-                    guard let self else {
-                        return promise(.success(nil))
-                    }
-                    logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
-                    Task.detached {
-                        promise(.success(try? await self.refreshSpendingCounterparties()))
+                Future { (promise: @escaping (Result<[SpendingsPreview]?, Never>) -> Void) in
+                    self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
+                    Task {
+                        let result = try? await self.refreshSpendingCounterparties()
+                        promise(.success(result))
                     }
                 }
             }
@@ -73,13 +71,11 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     public func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never> {
         await longPoll.poll(for: SpendingsHistoryUpdate(uid: id))
             .flatMap { _ in
-                Future { [weak self] (promise: @escaping (Result<[IdentifiableSpending]?, Never>) -> Void) in
-                    guard let self else {
-                        return promise(.success(nil))
-                    }
-                    logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data" }
-                    Task.detached {
-                        promise(.success(try? await self.refreshSpendingsHistory(counterparty: id)))
+                Future { (promise: @escaping (Result<[IdentifiableSpending]?, Never>) -> Void) in
+                    self.logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data" }
+                    Task {
+                        let result = try? await self.refreshSpendingsHistory(counterparty: id)
+                        promise(.success(result))
                     }
                 }
             }

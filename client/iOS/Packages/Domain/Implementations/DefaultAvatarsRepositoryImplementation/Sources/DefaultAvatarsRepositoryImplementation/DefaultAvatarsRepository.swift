@@ -4,8 +4,8 @@ import Foundation
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
-extension Sequence {
-    func asyncMap<T>(
+extension Sequence where Element: Sendable {
+    func asyncMap<T: Sendable>(
         _ transform: (Element) async throws -> T
     ) async rethrows -> [T] {
         var values = [T]()
@@ -17,8 +17,8 @@ extension Sequence {
         return values
     }
 
-    func concurrentMap<T>(
-        _ transform: @escaping (Element) async -> T
+    func concurrentMap<T: Sendable>(
+        _ transform: @escaping @Sendable (Element) async -> T
     ) async -> [T] {
         let tasks = map { element in
             Task {

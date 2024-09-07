@@ -36,13 +36,11 @@ extension DefaultFriendsRepository: FriendsRepository {
     public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
         await longPoll.poll(for: LongPollFriendsQuery())
             .flatMap { _ in
-                Future { [weak self] (promise: @escaping (Result<[FriendshipKind: [User]]?, Never>) -> Void) in
-                    guard let self else {
-                        return promise(.success(nil))
-                    }
-                    logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
-                    Task.detached {
-                        promise(.success(try? await self.refreshFriends(ofKind: kind)))
+                Future { (promise: @escaping (Result<[FriendshipKind: [User]]?, Never>) -> Void) in
+                    self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
+                    Task {
+                        let result = try? await self.refreshFriends(ofKind: kind)
+                        promise(.success(result))
                     }
                 }
             }

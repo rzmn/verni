@@ -28,7 +28,7 @@ public actor DefaultLogoutUseCase {
         shouldLogout
             .flatMap { reason -> Future<LogoutReason?, Never> in
                 Future { promise in
-                    Task.detached {
+                    Task {
                         if await self.doLogout() {
                             promise(.success(reason))
                         } else {
