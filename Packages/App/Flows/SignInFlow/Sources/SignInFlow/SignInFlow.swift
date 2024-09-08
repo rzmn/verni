@@ -71,16 +71,20 @@ extension SignInFlow {
                 viewModel.email = text
             case .onPasswordTextUpdated(let text):
                 viewModel.password = text
+            case .onOpenSignInTap:
+                Task {
+                    await self.openSignIn()
+                }
             case .onCreateAccountTap:
-                Task.detached {
+                Task {
                     await self.createAccount()
                 }
             case .onSignInTap:
-                Task.detached {
+                Task {
                     await self.signIn()
                 }
             case .onSignInCloseTap:
-                Task.detached {
+                Task {
                     await self.closeSignIn()
                 }
             }

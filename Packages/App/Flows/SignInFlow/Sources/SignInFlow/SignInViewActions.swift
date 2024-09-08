@@ -5,6 +5,7 @@ enum SignInViewActionType {
     case onEmailTextUpdated(String)
     case onPasswordTextUpdated(String)
     case onCreateAccountTap
+    case onOpenSignInTap
     case onSignInTap
     case onSignInCloseTap
 }
