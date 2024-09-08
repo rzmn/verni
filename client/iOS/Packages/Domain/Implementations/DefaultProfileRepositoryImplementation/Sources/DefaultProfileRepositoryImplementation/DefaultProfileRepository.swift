@@ -37,8 +37,7 @@ extension DefaultProfileRepository: ProfileRepository {
             logI { "refresh failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        Task.detached { [weak self] in
-            guard let self else { return }
+        Task {
             await offline.update(profile: profile)
         }
         subject.send(profile)

@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Task.detached { [unowned self] in
+        Task {
             await app().registerPushToken(
                 token: deviceToken
             )

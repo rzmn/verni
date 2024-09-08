@@ -2,12 +2,13 @@ import ApiService
 import Networking
 import Foundation
 import Logging
-internal import Base
+import Base
 
 actor ApiServiceRequestRunnersManager: Loggable {
     let logger: Logger = .shared
     private let tokenRefresher: TokenRefresher?
     private let runnerFactory: ApiServiceRequestRunnerFactory
+    private let taskFactory: TaskFactory
     enum RequestStatus: Sendable {
         case regular
         case freshRefreshTokenConsumer
@@ -15,8 +16,13 @@ actor ApiServiceRequestRunnersManager: Loggable {
     private var refreshTokenTask: Task<Void, any Error>?
     private var refreshTokenFailureReason: RefreshTokenFailureReason?
 
-    init(runnerFactory: ApiServiceRequestRunnerFactory, tokenRefresher: TokenRefresher?) {
+    init(
+        runnerFactory: ApiServiceRequestRunnerFactory,
+        taskFactory: TaskFactory,
+        tokenRefresher: TokenRefresher?
+    ) {
         self.tokenRefresher = tokenRefresher
+        self.taskFactory = taskFactory
         self.runnerFactory = runnerFactory
     }
 
@@ -81,7 +87,7 @@ extension ApiServiceRequestRunnersManager {
                     case .decodingFailed, .internalError, .noConnection:
                         throw error
                     case .unauthorized:
-                        refreshTokenTask = Task {
+                        refreshTokenTask = taskFactory.task {
                             try await tokenRefresher.refreshTokens()
                         }
                         return try await run(request: request, status: .freshRefreshTokenConsumer)
@@ -95,7 +101,7 @@ extension ApiServiceRequestRunnersManager {
         } else {
             switch status {
             case .regular:
-                refreshTokenTask = Task {
+                refreshTokenTask = taskFactory.task {
                     try await tokenRefresher.refreshTokens()
                 }
                 return try await run(request: request, status: .freshRefreshTokenConsumer)

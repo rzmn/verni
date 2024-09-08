@@ -8,8 +8,8 @@ class NotificationService: UNNotificationServiceExtension {
         _ request: UNNotificationRequest,
         withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
     ) {
-        Task.detached {
-            await self.process(request: request, handler: contentHandler)
+        Task {
+            await process(request: request, handler: contentHandler)
         }
     }
 

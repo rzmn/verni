@@ -93,8 +93,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             logI { "refreshSpendingCounterparties failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        Task.detached { [weak self] in
-            guard let self else { return }
+        Task {
             await offline.updateSpendingCounterparties(counterparties)
         }
         logI { "refreshSpendingCounterparties ok" }
@@ -111,8 +110,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(error)" }
             throw GetSpendingsHistoryError(apiError: error)
         }
-        Task.detached { [weak self] in
-            guard let self else { return }
+        Task {
             await offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
         }
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }

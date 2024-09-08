@@ -12,8 +12,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
-            Task.detached {
-                await self.app()?.start(on: window)
+            Task {
+                await app()?.start(on: window)
             }
         }
     }
@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         }
         Task {
-            await self.app()?.handle(url: context.url.absoluteString)
+            await app()?.handle(url: context.url.absoluteString)
         }
     }
 }

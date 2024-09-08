@@ -38,6 +38,7 @@ public actor ActiveSession: ActiveSessionDIContainerConvertible {
     private let anonymousApi: ApiProtocol
     private let factory: ActiveSessionDIContainerFactory
     private let logoutSubject = PassthroughSubject<LogoutReason, Never>()
+    private var subscriptions = Set<AnyCancellable>()
 
     private let tokenRefresher: TokenRefresher
     private let userId: User.ID
@@ -54,7 +55,7 @@ public actor ActiveSession: ActiveSessionDIContainerConvertible {
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
     ) async throws -> ActiveSession {
-        let persistency = try await persistencyFactory.create(hostId: hostId, refreshToken: refreshToken)
+        let persistency = try await persistencyFactory.create(host: hostId, refreshToken: refreshToken)
         return await ActiveSession(
             anonymousApi: anonymousApi,
             persistency: persistency, 
@@ -71,7 +72,10 @@ public actor ActiveSession: ActiveSessionDIContainerConvertible {
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
     ) async -> ActiveSession? {
-        guard let persistency = await persistencyFactory.awake() else {
+        guard let host = await SessionHost().active else {
+            return nil
+        }
+        guard let persistency = await persistencyFactory.awake(host: host) else {
             return nil
         }
         return await ActiveSession(
@@ -102,5 +106,12 @@ public actor ActiveSession: ActiveSessionDIContainerConvertible {
             onRefreshTokenExpiredOnInvalid: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
         )
         self.authenticatedApiFactory = await apiFactoryProvider(tokenRefresher)
+        let sessionHost = SessionHost()
+        await sessionHost.sessionStarted(host: self.userId)
+        logoutSubject.sink { reason in
+            Task {
+                await sessionHost.sessionFinished()
+            }
+        }.store(in: &subscriptions)
     }
 }

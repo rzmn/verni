@@ -2,48 +2,40 @@ import Foundation
 import Logging
 import PersistentStorage
 import DataTransferObjects
+import Base
 internal import SQLite
-
-@globalActor public actor StorageActor: GlobalActor {
-    public static let shared = StorageActor()
-}
 
 public actor SQLitePersistencyFactory {
     public let logger: Logger
     let dbDirectory: URL
+    private let pathManager: DBPathManager
+    private let taskFactory: TaskFactory
 
-    public init(logger: Logger, dbDirectory: URL) {
+    public init(logger: Logger, dbDirectory: URL, taskFactory: TaskFactory) throws {
         self.logger = logger
         self.dbDirectory = dbDirectory
+        self.taskFactory = taskFactory
+        self.pathManager = try DBPathManager(container: dbDirectory)
     }
 }
 
 extension SQLitePersistencyFactory: PersistencyFactory {
-    public func awake() async -> Persistency? {
-        await doAwake()
+    public func awake(host: UserDto.ID) async -> Persistency? {
+        await doAwake(host: host)
     }
 
-    @StorageActor private func doAwake() async -> Persistency? {
+    @StorageActor private func doAwake(host: UserDto.ID) async -> Persistency? {
         logI { "awaking persistence..." }
         let dbUrl: URL
         do {
-            try FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
-            let dbDirectoryContent = try FileManager.default
-                .contentsOfDirectory(at: dbDirectory, includingPropertiesForKeys: nil)
-            logD { "searching in \(dbDirectoryContent)" }
-            let contents = dbDirectoryContent
-                .filter { $0.isFileURL && DbNameBuilder.shared.isDbName($0.lastPathComponent) }
-            if contents.isEmpty {
-                logI { "has no persistence" }
+            let dbs = try pathManager.dbs
+            guard let descriptor = dbs.first(where: { $0.owner == host }) else {
+                logI { "has no persistence for host \(host)" }
                 return nil
             }
-            dbUrl = contents[0]
+            dbUrl = descriptor.dbUrl
         } catch {
             logE { "got error searching for db path error: \(error)" }
-            return nil
-        }
-        guard let hostId = DbNameBuilder.shared.dbOwnerId(dbUrl.lastPathComponent) else {
-            logI { "url is not recognized as valid db url \(dbUrl)" }
             return nil
         }
         logI { "found db url: \(dbUrl)" }
@@ -51,7 +43,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             let db = try Connection(dbUrl.absoluteString)
             let token = try db.prepare(Schema.Tokens.table)
                 .first { row in
-                    try row.get(Schema.Tokens.Keys.id) == hostId
+                    try row.get(Schema.Tokens.Keys.id) == host
                 }?
                 .get(Schema.Tokens.Keys.token)
             guard let token else {
@@ -60,12 +52,13 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             }
             return SQLitePersistency(
                 db: db,
-                dbInvalidationHandler: {
-                    try FileManager.default.removeItem(at: dbUrl)
+                dbInvalidationHandler: { [pathManager] in
+                    try pathManager.invalidate(owner: host)
                 },
-                hostId: hostId,
+                hostId: host,
                 refreshToken: token,
-                logger: logger
+                logger: logger,
+                taskFactory: taskFactory
             )
         } catch {
             logE { "failed to create db from url due error: \(error)" }
@@ -73,17 +66,14 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
     }
 
-    public func create(hostId: UserDto.ID, refreshToken: String) async throws -> Persistency {
-        try await doCreate(hostId: hostId, refreshToken: refreshToken)
+    public func create(host: UserDto.ID, refreshToken: String) async throws -> Persistency {
+        try await doCreate(host: host, refreshToken: refreshToken)
     }
 
-    @StorageActor private func doCreate(hostId: UserDto.ID, refreshToken: String) async throws -> Persistency {
+    @StorageActor private func doCreate(host: UserDto.ID, refreshToken: String) async throws -> Persistency {
         logI { "creating persistence..." }
-        let dbUrl = dbDirectory
-            .appending(component: DbNameBuilder.shared.dbName(owner: hostId))
-        try? FileManager.default.removeItem(at: dbUrl)
-        try? FileManager.default.createDirectory(at: dbDirectory, withIntermediateDirectories: true)
-        let db = try Connection(dbUrl.absoluteString)
+        let dbUrl = try pathManager.create(owner: host).dbUrl
+        let db = try Connection(dbUrl.path)
         do {
             try createTables(for: db)
         } catch {
@@ -95,9 +85,10 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             dbInvalidationHandler: {
                 try FileManager.default.removeItem(at: dbUrl)
             },
-            hostId: hostId,
+            hostId: host,
             refreshToken: refreshToken,
             logger: logger,
+            taskFactory: taskFactory,
             storeInitialToken: true
         )
     }
@@ -127,29 +118,6 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             t.column(Schema.Profiles.Keys.id, primaryKey: true)
             t.column(Schema.Profiles.Keys.payload)
         })
-    }
-}
-
-private extension SQLitePersistencyFactory {
-    struct DbNameBuilder {
-        public static let shared = DbNameBuilder()
-        private var prefix: String { "s_v1_" }
-        private var suffix: String { ".sqlite" }
-
-        func isDbName(_ filename: String) -> Bool {
-            filename.hasPrefix(prefix) && filename.hasSuffix(suffix) && filename != prefix
-        }
-
-        func dbOwnerId(_ filename: String) -> String? {
-            guard isDbName(filename) else {
-                return nil
-            }
-            return String(filename.suffix(filename.count - prefix.count).prefix(filename.count - prefix.count - suffix.count))
-        }
-
-        func dbName(owner: String) -> String {
-            "\(prefix)\(owner)\(suffix)"
-        }
     }
 }
 

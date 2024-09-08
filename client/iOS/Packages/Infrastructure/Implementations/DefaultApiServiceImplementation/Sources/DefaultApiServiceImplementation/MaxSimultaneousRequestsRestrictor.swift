@@ -1,18 +1,24 @@
 import Foundation
 import ApiService
-internal import Base
+import Base
 
 actor MaxSimultaneousRequestsRestrictor {
     private let manager: ApiServiceRequestRunnersManager
 
     private let simultaneouslyRunningTasksLimit: Int
+    private let taskFactory: TaskFactory
     private var currentRunningTasksCount: Int
     private var hasFreeSlotContinuation: CheckedContinuation<Void, Never>?
     private var hasFreeSlotTask: Task<Void, Never>?
 
-    init(limit: Int, manager: ApiServiceRequestRunnersManager) {
+    init(
+        limit: Int,
+        manager: ApiServiceRequestRunnersManager,
+        taskFactory: TaskFactory
+    ) {
         simultaneouslyRunningTasksLimit = limit
         currentRunningTasksCount = 0
+        self.taskFactory = taskFactory
         self.manager = manager
     }
 
@@ -42,7 +48,7 @@ extension MaxSimultaneousRequestsRestrictor {
         }
         currentRunningTasksCount += 1
         if currentRunningTasksCount == simultaneouslyRunningTasksLimit {
-            hasFreeSlotTask = Task {
+            hasFreeSlotTask = taskFactory.task {
                 await withCheckedContinuation { continuation in
                     self.hasFreeSlotContinuation = continuation
                 }

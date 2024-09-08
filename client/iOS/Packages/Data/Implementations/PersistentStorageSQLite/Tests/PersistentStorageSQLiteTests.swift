@@ -2,49 +2,38 @@ import Foundation
 import Testing
 import PersistentStorage
 import DataTransferObjects
+@testable import Base
 @testable import PersistentStorageSQLite
 
-extension SQLitePersistencyFactory {
-    static var directory: URL {
-        FileManager.default.temporaryDirectory.appending(component: "db")
-    }
-
-    static func test() -> SQLitePersistencyFactory {
-        SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[test] "),
-            dbDirectory: directory
-        )
-    }
-}
-
 @Suite(.serialized) struct PersistentStorageSQLiteTests {
+    private let taskFactory = TestTaskFactory()
+    private let persistencyFactory: SQLitePersistencyFactory
 
     init() throws {
-        let directory = SQLitePersistencyFactory.directory
-        if FileManager.default.fileExists(atPath: directory.path, isDirectory: nil) {
-            try FileManager.default.removeItem(at: directory)
-        }
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        persistencyFactory = try SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[test] "),
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: taskFactory
+        )
     }
 
     @Test func testInitialToken() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
 
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: hostId, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: hostId, refreshToken: initialRefreshToken)
 
         let token = await persistency.getRefreshToken()
         #expect(initialRefreshToken == token)
-        await persistency.invalidate()
     }
 
     @Test func testUpdateToken() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
 
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: hostId, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: hostId, refreshToken: initialRefreshToken)
 
         let newToken = UUID().uuidString
         await persistency.update(refreshToken: newToken)
@@ -53,16 +42,18 @@ extension SQLitePersistencyFactory {
         await persistency.invalidate()
     }
 
+    // FLACKY
     @Test func testUpdatedTokenFromAwake() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
         let newToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: hostId, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: hostId, refreshToken: initialRefreshToken)
         await persistency.update(refreshToken: newToken)
         await persistency.close()
 
-        let awaken = await SQLitePersistencyFactory.test().awake()
+        let awaken = await persistencyFactory
+            .awake(host: hostId)
         let newTokenFromAwake = await awaken?.getRefreshToken()
         print("\(initialRefreshToken)")
         print("\(newToken)")
@@ -75,8 +66,8 @@ extension SQLitePersistencyFactory {
     @Test func testHostInfo() async throws {
         let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: host.id, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: initialRefreshToken)
         await persistency.update(hostInfo: ProfileDto(user: host, email: "", emailVerified: false))
         let hostFromDb = await persistency.getHostInfo()
 
@@ -87,8 +78,8 @@ extension SQLitePersistencyFactory {
     @Test func testNoHostInfo() async throws {
         let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: host.id, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: initialRefreshToken)
         let hostFromDb = await persistency.getHostInfo()
 
         #expect(hostFromDb == nil)
@@ -98,8 +89,8 @@ extension SQLitePersistencyFactory {
     @Test func testUserId() async throws {
         let hostId = UUID().uuidString
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: hostId, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: hostId, refreshToken: initialRefreshToken)
         #expect(await persistency.userId() == hostId)
     }
 
@@ -107,8 +98,8 @@ extension SQLitePersistencyFactory {
         let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
         let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: host.id, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: initialRefreshToken)
         await persistency.update(users: [host, other])
 
         for user in [host, other] {
@@ -123,8 +114,8 @@ extension SQLitePersistencyFactory {
         let outgoing = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
         let friend = UserDto(login: UUID().uuidString, friendStatus: .friends, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: host.id, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: initialRefreshToken)
 
         let friends: [FriendshipKindDto: [UserDto]] = [.friends: [friend], .subscriber: [outgoing]]
         let query = Set(FriendshipKindDto.allCases)
@@ -138,8 +129,8 @@ extension SQLitePersistencyFactory {
     }
 
     @Test func testNoFriends() async throws {
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: UUID().uuidString, refreshToken: UUID().uuidString)
+        let persistency = try await persistencyFactory
+            .create(host: UUID().uuidString, refreshToken: UUID().uuidString)
 
         #expect(await persistency.getFriends(set: Set([FriendshipKindDto.friends])) == nil)
         #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscriber])) == nil)
@@ -147,8 +138,8 @@ extension SQLitePersistencyFactory {
     }
 
     @Test func testNoSpendingCounterparties() async throws {
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: UUID().uuidString, refreshToken: UUID().uuidString)
+        let persistency = try await persistencyFactory
+            .create(host: UUID().uuidString, refreshToken: UUID().uuidString)
         #expect(await persistency.getSpendingCounterparties() == nil)
     }
 
@@ -156,8 +147,8 @@ extension SQLitePersistencyFactory {
         let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
         let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: host.id, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: initialRefreshToken)
         let counterparties = [
             SpendingsPreviewDto(counterparty: other.id, balance: ["USD": 16])
         ]
@@ -168,8 +159,8 @@ extension SQLitePersistencyFactory {
     }
 
     @Test func testNoSpendingsHistory() async throws {
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: UUID().uuidString, refreshToken: UUID().uuidString)
+        let persistency = try await persistencyFactory
+            .create(host: UUID().uuidString, refreshToken: UUID().uuidString)
         #expect(await persistency.getSpendingsHistory(counterparty: UUID().uuidString) == nil)
     }
 
@@ -177,8 +168,8 @@ extension SQLitePersistencyFactory {
         let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
         let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
         let initialRefreshToken = UUID().uuidString
-        let persistency = try await SQLitePersistencyFactory.test()
-            .create(hostId: host.id, refreshToken: initialRefreshToken)
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: initialRefreshToken)
         let history: [IdentifiableDealDto] = [
             IdentifiableDealDto(id: UUID().uuidString, deal: DealDto(timestamp: 123, details: "456", cost: 789, currency: "RUB", spendings: [
                 SpendingDto(userId: UUID().uuidString, cost: 234)
@@ -190,5 +181,16 @@ extension SQLitePersistencyFactory {
         await persistency.updateSpendingsHistory(counterparty: other.id, history: history)
         let historyFromDb = await persistency.getSpendingsHistory(counterparty: other.id)
         #expect(history == historyFromDb)
+    }
+
+    @Test func testInvalidate() async throws {
+        let host = UUID().uuidString
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: UUID().uuidString)
+        await persistency.invalidate()
+        try await taskFactory.runUntilIdle()
+        let awaken = await persistencyFactory
+            .awake(host: host)
+        #expect(awaken == nil)
     }
 }

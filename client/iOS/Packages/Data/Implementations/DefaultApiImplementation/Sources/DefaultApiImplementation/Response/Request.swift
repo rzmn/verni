@@ -1,6 +1,6 @@
 import ApiService
 import Api
-internal import Base
+import Base
 
 struct AnyApiServiceRequest: ApiServiceRequest, CustomStringConvertible {
     let parameters: [String: String]

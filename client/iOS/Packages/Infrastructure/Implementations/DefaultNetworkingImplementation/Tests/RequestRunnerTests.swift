@@ -1,11 +1,18 @@
 import Networking
 import Testing
 import Foundation
+@testable import Base
 @testable import DefaultNetworkingImplementation
 
 @Suite(.serialized) struct RequestRunnerTests {
     static let maxRetryCount = 1
     let backoff = ExponentialBackoff(base: 1, retryCount: 0, maxRetryCount: maxRetryCount)
+    let taskFactory: TestTaskFactory
+
+    init() async {
+        taskFactory = TestTaskFactory()
+        await URLProtocolMock.setTaskFactory(taskFactory)
+    }
 
     @Test @MainActor func testSuccess() async throws {
 

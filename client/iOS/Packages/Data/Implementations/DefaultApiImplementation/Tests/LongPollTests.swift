@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import ApiService
-import Base
+@testable import Base
 @testable import Api
 @testable import DefaultApiImplementation
 
@@ -43,6 +43,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 }
 
 @Suite struct LongPollTests {
+    private let taskFactory = TestTaskFactory()
 
     @Test func testLongPollSucceeded() async throws {
 
@@ -353,7 +354,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
             eventId: "eventId",
             method: "method"
         )
-        let longPoll = DefaultLongPoll(api: api)
+        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory)
 
         // when
 
@@ -385,7 +386,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
             eventId: "eventIdB",
             method: "method"
         )
-        let longPoll = DefaultLongPoll(api: api)
+        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory)
 
         // when
 

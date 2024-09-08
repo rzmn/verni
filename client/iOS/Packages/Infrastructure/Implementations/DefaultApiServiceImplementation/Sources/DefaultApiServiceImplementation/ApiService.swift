@@ -2,6 +2,7 @@ import Networking
 import Logging
 import ApiService
 import Foundation
+import Base
 
 actor DefaultApiService {
     let logger: Logger
@@ -10,7 +11,8 @@ actor DefaultApiService {
     public init(
         logger: Logger,
         networkServiceFactory: NetworkServiceFactory,
-        tokenRefresher: TokenRefresher? = nil
+        taskFactory: TaskFactory,
+        tokenRefresher: TokenRefresher?
     ) {
         self.logger = logger
         runner = MaxSimultaneousRequestsRestrictor(
@@ -19,8 +21,10 @@ actor DefaultApiService {
                 runnerFactory: DefaultApiServiceRequestRunnerFactory(
                     service: networkServiceFactory.create()
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: tokenRefresher
-            )
+            ),
+            taskFactory: taskFactory
         )
         logI { "initialized network service. has token refresher: \(tokenRefresher != nil)" }
     }

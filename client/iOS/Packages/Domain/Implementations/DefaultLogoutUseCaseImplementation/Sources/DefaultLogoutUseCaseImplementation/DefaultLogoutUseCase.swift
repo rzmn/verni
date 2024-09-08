@@ -59,8 +59,8 @@ extension DefaultLogoutUseCase {
         guard await loggedOutHandler.allowLogout() else {
             return false
         }
-        Task.detached {
-            await self.persistency.invalidate()
+        Task {
+            await persistency.invalidate()
         }
         return true
     }

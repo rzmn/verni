@@ -1,13 +1,15 @@
 import Combine
 import Api
-internal import Base
+import Base
 
 public actor DefaultLongPoll: LongPoll {
     private var notifiers = [String: Any]()
     private let api: DefaultApi
+    private let taskFactory: TaskFactory
 
-    init(api: DefaultApi) {
+    init(api: DefaultApi, taskFactory: TaskFactory) {
         self.api = api
+        self.taskFactory = taskFactory
     }
 
     public func poll<Query>(
@@ -35,7 +37,7 @@ public actor DefaultLongPoll: LongPoll {
         if let existed {
             return existed
         }
-        let notifier = await LongPollUpdateNotifier(query: query, api: api)
+        let notifier = await LongPollUpdateNotifier(query: query, api: api, taskFactory: taskFactory)
         notifiers[query.eventId] = notifier
         return notifier
     }

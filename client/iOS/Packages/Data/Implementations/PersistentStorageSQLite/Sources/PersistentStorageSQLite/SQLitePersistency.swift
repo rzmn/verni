@@ -39,6 +39,7 @@ private struct FriendshipKindSet: OptionSet {
 @StorageActor class SQLitePersistency: Persistency {
     let logger: Logger
 
+    private let taskFactory: TaskFactory
     private let db: Connection
     private let dbInvalidationHandler: () throws -> Void
     private let hostId: UserDto.ID
@@ -52,6 +53,7 @@ private struct FriendshipKindSet: OptionSet {
         hostId: UserDto.ID,
         refreshToken: String,
         logger: Logger,
+        taskFactory: TaskFactory,
         storeInitialToken: Bool = false
     ) {
         self.db = db
@@ -59,12 +61,13 @@ private struct FriendshipKindSet: OptionSet {
         self.refreshToken = refreshToken
         self.logger = logger
         self.dbInvalidationHandler = dbInvalidationHandler
+        self.taskFactory = taskFactory
         serialScheduler = AsyncSerialScheduler()
         guard storeInitialToken else {
             return
         }
         detachedTasks.append(
-            Task { @StorageActor in
+            taskFactory.task { @StorageActor in
                 await self.serialScheduler.run { @StorageActor in
                     do {
                         try self.db.run(Schema.Tokens.table.insert(
@@ -90,7 +93,7 @@ private struct FriendshipKindSet: OptionSet {
     func update(refreshToken: String) async {
         self.refreshToken = refreshToken
         detachedTasks.append(
-            Task { @StorageActor in
+            taskFactory.task { @StorageActor in
                 await self.serialScheduler.run { @StorageActor in
                     do {
                         try self.db.run(
@@ -265,7 +268,7 @@ private struct FriendshipKindSet: OptionSet {
         logI { "invalidating db..." }
         await close()
         let handler = dbInvalidationHandler
-        Task.detached { @StorageActor in
+        taskFactory.task {
             do {
                 try handler()
             } catch {

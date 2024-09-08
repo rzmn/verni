@@ -3,7 +3,7 @@ import DataTransferObjects
 import Api
 import Combine
 import Foundation
-internal import Base
+import Base
 
 final class DefaultApi: ApiProtocol {
     private enum RefreshTokenError: Error {

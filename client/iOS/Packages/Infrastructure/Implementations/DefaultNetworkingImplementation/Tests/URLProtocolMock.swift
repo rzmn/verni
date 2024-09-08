@@ -1,12 +1,18 @@
 import Foundation
+@testable import Base
 
 @MainActor class URLProtocolMock: URLProtocol, @unchecked Sendable {
-    @MainActor private(set) static var mockURLs = [URL?: (error: Error?, data: Data?, response: URLResponse?)]()
-    @MainActor private(set) static var loadsCount: Int = 0
+    nonisolated(unsafe) private(set) static var mockURLs = [URL?: (error: Error?, data: Data?, response: URLResponse?)]()
+    nonisolated(unsafe) private(set) static var loadsCount: Int = 0
+    nonisolated(unsafe) private(set) static var taskFactory: TaskFactory?
 
     static func setMockUrls(_ urls: [URL?: (error: Error?, data: Data?, response: URLResponse?)]) async {
         loadsCount = 0
         mockURLs = urls
+    }
+
+    static func setTaskFactory(_ taskFactory: TaskFactory) async {
+        self.taskFactory = taskFactory
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -18,7 +24,10 @@ import Foundation
     }
 
     override func startLoading() {
-        Task.detached { @Sendable in
+        guard let taskFactory = Self.taskFactory else {
+            return assertionFailure()
+        }
+        taskFactory.task {
             await self.loading()
         }
     }

@@ -44,8 +44,8 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             let tokens = try await api.run(
                 method: Auth.UpdateEmail(email: email)
             )
-            Task.detached {
-                await self.persistency.update(refreshToken: tokens.refreshToken)
+            Task {
+                await persistency.update(refreshToken: tokens.refreshToken)
             }
             _ = try? await repository.refreshProfile()
         } catch {
@@ -58,8 +58,8 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             let tokens = try await api.run(
                 method: Auth.UpdatePassword(old: old, new: new)
             )
-            Task.detached {
-                await self.persistency.update(refreshToken: tokens.refreshToken)
+            Task {
+                await persistency.update(refreshToken: tokens.refreshToken)
             }
         } catch {
             throw PasswordUpdateError(apiError: error)

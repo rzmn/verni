@@ -1,6 +1,6 @@
 import Api
 import Combine
-internal import Base
+import Base
 internal import Logging
 
 actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable & Sendable {
@@ -12,13 +12,15 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
     let logger: Logger = .shared.with(prefix: "[lp] ")
     private var subscriptions = Set<AnyCancellable>()
     private let poller: Poller<Query>
+    private let taskFactory: TaskFactory
     private var isListening = false
 
-    init(query: Query, api: DefaultApi) async where Query.Update: Decodable & Sendable {
+    init(query: Query, api: DefaultApi, taskFactory: TaskFactory) async where Query.Update: Decodable & Sendable {
         self.poller = await Poller(query: query, api: api)
+        self.taskFactory = taskFactory
         subject.hasSubscribers
             .sink { hasSubscribers in
-                Task {
+                self.taskFactory.task {
                     if hasSubscribers {
                         self.startListening()
                     } else {
@@ -36,7 +38,7 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
         }
         isListening = true
         logI { "startListening: started" }
-        Task.detached {
+        taskFactory.task {
             await self.pollLoop()
         }
     }

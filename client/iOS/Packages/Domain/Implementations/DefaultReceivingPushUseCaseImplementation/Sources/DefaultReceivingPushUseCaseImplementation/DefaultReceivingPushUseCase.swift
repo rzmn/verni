@@ -44,8 +44,8 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
         }
         switch payload {
         case .friendRequestHasBeenAccepted(let payload):
-            Task.detached {
-                try? await self.friendsRepository.refreshFriends(ofKind: .all)
+            Task {
+                try? await friendsRepository.refreshFriends(ofKind: .all)
             }
             let user: User
             do {
@@ -60,8 +60,8 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 body: "from: \(user.displayName)"
             )
         case .gotFriendRequest(let payload):
-            Task.detached {
-                try? await self.friendsRepository.refreshFriends(ofKind: .all)
+            Task {
+                try? await friendsRepository.refreshFriends(ofKind: .all)
             }
             let user: User
             do {
@@ -76,9 +76,11 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                 body: "from: \(user.displayName)"
             )
         case .newExpenseReceived(let payload):
-            Task.detached {
-                async let a = try? self.spendingsRepository.refreshSpendingCounterparties()
-                async let b = try? self.spendingsRepository.refreshSpendingsHistory(counterparty: payload.authorId)
+            Task {
+                async let a = try? spendingsRepository.refreshSpendingCounterparties()
+                async let b = try? spendingsRepository.refreshSpendingsHistory(
+                    counterparty: payload.authorId
+                )
                 _ = await [a, b] as [any Sendable]
             }
             let spending: Spending

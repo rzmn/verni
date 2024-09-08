@@ -26,8 +26,7 @@ extension DefaultUsersRepository: UsersRepository {
             logI { "getUsers failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        Task.detached { [weak self] in
-            guard let self else { return }
+        Task {
             await offline.update(users: users)
         }
         logI { "getUsers OK" }
@@ -47,8 +46,7 @@ extension DefaultUsersRepository: UsersRepository {
             logI { "search users [q=\(query)] failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        Task.detached { [weak self] in
-            guard let self else { return }
+        Task {
             await offline.update(users: users)
         }
         logI { "search users [q=\(query)] OK" }

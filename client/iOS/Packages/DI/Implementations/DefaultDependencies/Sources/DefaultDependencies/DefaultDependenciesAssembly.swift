@@ -1,6 +1,7 @@
 import DI
 import Domain
 import Foundation
+internal import Base
 internal import AuthSession
 internal import Api
 internal import ApiService
@@ -54,6 +55,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     private let avatarsRepository: AvatarsRepository
     private let apiEndpoint = "http://193.124.113.41:8082"
     private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
+    private let taskFactory = DefaultTaskFactory()
 
     public let appCommon: AppCommon
 
@@ -71,9 +73,13 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
             logger: .shared.with(
                 prefix: "[api.s] "
             ),
-            networkServiceFactory: networkServiceFactory
+            networkServiceFactory: networkServiceFactory,
+            taskFactory: taskFactory
         )
-        let apiFactory = await DefaultApiFactory(service: apiServiceFactory.create(tokenRefresher: nil))
+        let apiFactory = await DefaultApiFactory(
+            service: apiServiceFactory.create(tokenRefresher: nil),
+            taskFactory: taskFactory
+        )
         anonymousApi = apiFactory.create()
         avatarsRepository =  DefaultAvatarsRepository(api: anonymousApi)
         appCommon = AppCommonDependencies(
@@ -95,7 +101,12 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
                     appCommon: appCommon
                 ),
                 apiFactoryProvider: { refresher in
-                    await DefaultApiFactory(service: self.apiServiceFactory.create(tokenRefresher: refresher))
+                    await DefaultApiFactory(
+                        service: self.apiServiceFactory.create(
+                            tokenRefresher: refresher
+                        ),
+                        taskFactory: self.taskFactory
+                    )
                 }
             )
         )
@@ -104,11 +115,13 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
 
 extension DefaultDependenciesAssembly {
     func persistencyFactory() -> PersistencyFactory {
-        SQLitePersistencyFactory(
+        // FIXME: how to deal with that optionality/throws? 
+        try! SQLitePersistencyFactory(
             logger: .shared.with(prefix: "[db] "),
             dbDirectory: FileManager.default.containerURL(
                 forSecurityApplicationGroupIdentifier: "group.com.rzmn.accountydev.app"
-            ).unsafelyUnwrapped
+            )!,
+            taskFactory: taskFactory
         )
     }
 }
