@@ -74,13 +74,7 @@ extension DefaultApi {
     ) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable & Sendable, Method.Parameters: Encodable & Sendable {
         if case .get = method.method {
-            let request: ApiServiceRequest
-            switch await createRequestFromGetMethod(method: method) {
-            case .success(let success):
-                request = success
-            case .failure(let failure):
-                throw failure
-            }
+            let request = try await createRequestFromGetMethod(method: method)
             let call: () async throws(ApiServiceError) -> ApiResponseDto<Method.Response> = {
                 try await self.service.run(request: request)
             }
@@ -117,13 +111,7 @@ extension DefaultApi {
     ) async throws(ApiError) -> Void
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable & Sendable {
         if case .get = method.method {
-            let request: ApiServiceRequest
-            switch await createRequestFromGetMethod(method: method) {
-            case .success(let success):
-                request = success
-            case .failure(let failure):
-                throw failure
-            }
+            let request = try await createRequestFromGetMethod(method: method)
             let call: () async throws(ApiServiceError) -> VoidApiResponseDto = {
                 try await self.service.run(request: request)
             }
@@ -169,31 +157,27 @@ extension DefaultApi {
 
     private func createRequestFromGetMethod<Method>(
         method: Method
-    ) async -> Result<ApiServiceRequest, ApiError>
+    ) async throws(ApiError) -> ApiServiceRequest
     where Method: ApiMethod, Method.Parameters: Encodable {
         let encoded: Data
         do {
             encoded = try encoder.encode(method.parameters)
         } catch {
-            return .failure(.internalError(error))
+            throw .internalError(error)
         }
         guard let data = String(
             data: encoded,
             encoding: .utf8
         ) else {
-            return .failure(
-                .internalError(
-                    InternalError.error("cannot build utf8 string from \(encoded)", underlying: nil)
-                )
+            throw .internalError(
+                InternalError.error("cannot build utf8 string from \(encoded)", underlying: nil)
             )
         }
-        return .success(
-            AnyApiServiceRequest(
-                method: method,
-                parameters: [
-                    "data": data
-                ]
-            )
+        return AnyApiServiceRequest(
+            method: method,
+            parameters: [
+                "data": data
+            ]
         )
     }
 }
