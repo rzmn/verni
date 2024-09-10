@@ -1,6 +1,7 @@
 import DI
 import Domain
 import Combine
+internal import Base
 internal import AuthSession
 internal import Api
 internal import ApiService
@@ -95,7 +96,8 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
             logger: .shared.with(prefix: "[users.repo] "),
             offline: DefaultUsersOfflineRepository(
                 persistency: persistency
-            )
+            ),
+            taskFactory: DefaultTaskFactory()
         )
         spendingsRepository = DefaultSpendingsRepository(
             api: api,

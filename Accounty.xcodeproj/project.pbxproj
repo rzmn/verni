@@ -93,6 +93,7 @@
 		61414F8F2C2F02A200B2C027 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6143A7D52C9076930030AAF1 /* MockPersistentStorage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockPersistentStorage; sourceTree = "<group>"; };
 		6143A7D72C908D4E0030AAF1 /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
+		6143A7F32C90CBF90030AAF1 /* MockApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockApiImplementation; sourceTree = "<group>"; };
 		614AC1962C67E315005B2CD5 /* FriendsFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FriendsFlow; sourceTree = "<group>"; };
 		614AC19B2C6802EE005B2CD5 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		614AC19D2C6802EE005B2CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -361,6 +362,7 @@
 		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				6143A7F32C90CBF90030AAF1 /* MockApiImplementation */,
 				6143A7D52C9076930030AAF1 /* MockPersistentStorage */,
 				611CCD852C50B1D400289D9E /* PersistentStorageSQLite */,
 				61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */,
