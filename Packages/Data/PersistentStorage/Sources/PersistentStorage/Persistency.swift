@@ -6,8 +6,8 @@ public protocol Persistency: Sendable {
     func getRefreshToken() async -> String
     func update(refreshToken: String) async
 
-    func getHostInfo() async -> ProfileDto?
-    func update(hostInfo: ProfileDto) async
+    func getProfile() async -> ProfileDto?
+    func update(profile: ProfileDto) async
     func user(id: UserDto.ID) async -> UserDto?
     func update(users: [UserDto]) async
 
@@ -17,7 +17,7 @@ public protocol Persistency: Sendable {
     func updateSpendingsHistory(counterparty: UserDto.ID, history: [IdentifiableDealDto]) async
 
     func getFriends(set: Set<FriendshipKindDto>) async -> [FriendshipKindDto : [UserDto]]?
-    func updateFriends(_ friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async
+    func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async
 
     func close() async
     func invalidate() async

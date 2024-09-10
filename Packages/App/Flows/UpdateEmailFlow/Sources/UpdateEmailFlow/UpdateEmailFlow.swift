@@ -81,7 +81,7 @@ extension UpdateEmailFlow {
             case .onConfirmationCodeTextChanged(let text):
                 viewModel.confirmationCode = text
             case .onResendTap:
-                guard viewModel.state.canConfirm else {
+                guard viewModel.state.canResendCode else {
                     Task.detached {
                         await self.presenter().errorHaptic()
                     }

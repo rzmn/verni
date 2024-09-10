@@ -44,8 +44,6 @@ private struct FriendshipKindSet: OptionSet {
     private let dbInvalidationHandler: () throws -> Void
     private let hostId: UserDto.ID
     private var refreshToken: String
-    private var serialScheduler: AsyncSerialScheduler
-    private var detachedTasks = [Task<Void, Never>]()
 
     init(
         db: Connection,
@@ -62,54 +60,40 @@ private struct FriendshipKindSet: OptionSet {
         self.logger = logger
         self.dbInvalidationHandler = dbInvalidationHandler
         self.taskFactory = taskFactory
-        serialScheduler = AsyncSerialScheduler()
-        guard storeInitialToken else {
-            return
-        }
-        detachedTasks.append(
-            taskFactory.task { @StorageActor in
-                await self.serialScheduler.run { @StorageActor in
-                    do {
-                        try self.db.run(Schema.Tokens.table.insert(
-                            Schema.Tokens.Keys.id <- self.hostId,
-                            Schema.Tokens.Keys.token <- refreshToken
-                        ))
-                    } catch {
-                        self.logE { "failed to insert token error: \(error)" }
-                    }
-                }
+        if storeInitialToken {
+            do {
+                try db.run(Schema.Tokens.table.insert(
+                    Schema.Tokens.Keys.id <- self.hostId,
+                    Schema.Tokens.Keys.token <- refreshToken
+                ))
+            } catch {
+                logE { "failed to insert token error: \(error)" }
             }
-        )
+        }
     }
 
-    func userId() async -> UserDto.ID {
+    func userId() -> UserDto.ID {
         hostId
     }
 
-    func getRefreshToken() async -> String {
+    func getRefreshToken() -> String {
         refreshToken
     }
 
-    func update(refreshToken: String) async {
+    func update(refreshToken: String) {
         self.refreshToken = refreshToken
-        detachedTasks.append(
-            taskFactory.task { @StorageActor in
-                await self.serialScheduler.run { @StorageActor in
-                    do {
-                        try self.db.run(
-                            Schema.Tokens.table
-                                .filter(Schema.Tokens.Keys.id == self.hostId)
-                                .update(Schema.Tokens.Keys.token <- refreshToken)
-                        )
-                    } catch {
-                        self.logE { "failed to update token error: \(error)" }
-                    }
-                }
-            }
-        )
+        do {
+            try db.run(
+                Schema.Tokens.table
+                    .filter(Schema.Tokens.Keys.id == self.hostId)
+                    .update(Schema.Tokens.Keys.token <- refreshToken)
+            )
+        } catch {
+            logE { "failed to update token error: \(error)" }
+        }
     }
 
-    public func getHostInfo() async -> ProfileDto? {
+    public func getProfile() -> ProfileDto? {
         do {
             guard let row = try db.prepare(Schema.Profiles.table).first(where: { row in
                 guard try row.get(Schema.Profiles.Keys.id) == hostId else {
@@ -121,25 +105,25 @@ private struct FriendshipKindSet: OptionSet {
             }
             return try row.get(Schema.Profiles.Keys.payload).value
         } catch {
-            self.logE { "fetch profile failed error: \(error)" }
+            logE { "fetch profile failed error: \(error)" }
             return nil
         }
     }
 
-    func update(hostInfo: ProfileDto) async {
-        assert(hostInfo.user.id == hostId)
+    func update(profile: ProfileDto) {
+        assert(profile.user.id == hostId)
         do {
-            try self.db.run(Schema.Profiles.table.upsert(
-                Schema.Profiles.Keys.id <- hostInfo.user.id,
-                Schema.Profiles.Keys.payload <- CodableBlob(value: hostInfo),
+            try db.run(Schema.Profiles.table.upsert(
+                Schema.Profiles.Keys.id <- profile.user.id,
+                Schema.Profiles.Keys.payload <- CodableBlob(value: profile),
                 onConflictOf: Schema.Profiles.Keys.id
             ))
         } catch {
-            self.logE { "failed to update profile error: \(error)" }
+            logE { "failed to update profile error: \(error)" }
         }
     }
 
-    public func user(id: UserDto.ID) async -> UserDto? {
+    public func user(id: UserDto.ID) -> UserDto? {
         do {
             guard let row = try db.prepare(Schema.Users.table).first(where: { row in
                 guard try row.get(Schema.Users.Keys.id) == id else {
@@ -151,12 +135,12 @@ private struct FriendshipKindSet: OptionSet {
             }
             return try row.get(Schema.Users.Keys.payload).value
         } catch {
-            self.logE { "fetch user failed error: \(error)" }
+            logE { "fetch user failed error: \(error)" }
             return nil
         }
     }
 
-    public func update(users: [UserDto]) async {
+    public func update(users: [UserDto]) {
         do {
             try users.forEach {
                 try db.run(Schema.Users.table.upsert(
@@ -166,11 +150,11 @@ private struct FriendshipKindSet: OptionSet {
                 ))
             }
         } catch {
-            self.logE { "failed to update users error: \(error)" }
+            logE { "failed to update users error: \(error)" }
         }
     }
 
-    func getSpendingCounterparties() async -> [SpendingsPreviewDto]? {
+    func getSpendingCounterparties() -> [SpendingsPreviewDto]? {
         do {
             guard let row = try db.prepare(Schema.SpendingCounterparties.table).first(where: { row in
                 guard try row.get(Schema.SpendingCounterparties.Keys.id) == hostId else {
@@ -182,24 +166,24 @@ private struct FriendshipKindSet: OptionSet {
             }
             return try row.get(Schema.SpendingCounterparties.Keys.payload).value
         } catch {
-            self.logE { "fetch spending counterparties failed error: \(error)" }
+            logE { "fetch spending counterparties failed error: \(error)" }
             return nil
         }
     }
 
-    func updateSpendingCounterparties(_ counterparties: [SpendingsPreviewDto]) async {
+    func updateSpendingCounterparties(_ counterparties: [SpendingsPreviewDto]) {
         do {
-            try self.db.run(Schema.SpendingCounterparties.table.upsert(
+            try db.run(Schema.SpendingCounterparties.table.upsert(
                 Schema.SpendingCounterparties.Keys.id <- hostId,
                 Schema.SpendingCounterparties.Keys.payload <- CodableBlob(value: counterparties),
                 onConflictOf: Schema.SpendingCounterparties.Keys.id
             ))
         } catch {
-            self.logE { "failed to update spending counterparties: \(error)" }
+            logE { "failed to update spending counterparties: \(error)" }
         }
     }
 
-    func getSpendingsHistory(counterparty: UserDto.ID) async -> [IdentifiableDealDto]? {
+    func getSpendingsHistory(counterparty: UserDto.ID) -> [IdentifiableDealDto]? {
         do {
             guard let row = try db.prepare(Schema.SpendingsHistory.table).first(where: { row in
                 guard try row.get(Schema.SpendingsHistory.Keys.id) == counterparty else {
@@ -211,24 +195,24 @@ private struct FriendshipKindSet: OptionSet {
             }
             return try row.get(Schema.SpendingsHistory.Keys.payload).value
         } catch {
-            self.logE { "fetch spending counterparties failed error: \(error)" }
+            logE { "fetch spending counterparties failed error: \(error)" }
             return nil
         }
     }
 
-    func updateSpendingsHistory(counterparty: UserDto.ID, history: [IdentifiableDealDto]) async {
+    func updateSpendingsHistory(counterparty: UserDto.ID, history: [IdentifiableDealDto]) {
         do {
-            try self.db.run(Schema.SpendingsHistory.table.upsert(
+            try db.run(Schema.SpendingsHistory.table.upsert(
                 Schema.SpendingsHistory.Keys.id <- counterparty,
                 Schema.SpendingsHistory.Keys.payload <- CodableBlob(value: history),
                 onConflictOf: Schema.SpendingsHistory.Keys.id
             ))
         } catch {
-            self.logE { "failed to update spending history: \(error)" }
+            logE { "failed to update spending history: \(error)" }
         }
     }
 
-    func getFriends(set: Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]? {
+    func getFriends(set: Set<FriendshipKindDto>) -> [FriendshipKindDto: [UserDto]]? {
         do {
             guard let row = try db.prepare(Schema.Friends.table).first(where: { row in
                 guard try row.get(Schema.Friends.Keys.id) == FriendshipKindSet(set: set).rawValue else {
@@ -240,14 +224,14 @@ private struct FriendshipKindSet: OptionSet {
             }
             return try row.get(Schema.Friends.Keys.payload).value
         } catch {
-            self.logE { "fetch spending counterparties failed error: \(error)" }
+            logE { "fetch spending counterparties failed error: \(error)" }
             return nil
         }
     }
 
-    func updateFriends(_ friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async {
+    func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) {
         do {
-            try self.db.run(Schema.Friends.table.upsert(
+            try db.run(Schema.Friends.table.upsert(
                 Schema.Friends.Keys.id <- FriendshipKindSet(set: set).rawValue,
                 Schema.Friends.Keys.payload <- CodableBlob(value: friends),
                 onConflictOf: Schema.Friends.Keys.id
@@ -257,23 +241,17 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func close() async {
-        for task in detachedTasks {
-            await task.value
-        }
-        detachedTasks.removeAll()
+    func close() {
+        // empty
     }
 
-    func invalidate() async {
+    func invalidate() {
         logI { "invalidating db..." }
-        await close()
-        let handler = dbInvalidationHandler
-        taskFactory.task {
-            do {
-                try handler()
-            } catch {
-                self.logE { "failed to invalidate db: \(error)" }
-            }
+        close()
+        do {
+            try dbInvalidationHandler()
+        } catch {
+            self.logE { "failed to invalidate db: \(error)" }
         }
     }
 }

@@ -17,180 +17,391 @@ import DataTransferObjects
         )
     }
 
-    @Test func testInitialToken() async throws {
-        let hostId = UUID().uuidString
-        let initialRefreshToken = UUID().uuidString
+    @Test func testGetRefreshToken() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
 
         let persistency = try await persistencyFactory
-            .create(host: hostId, refreshToken: initialRefreshToken)
+            .create(host: host, refreshToken: refreshToken)
 
-        let token = await persistency.getRefreshToken()
-        #expect(initialRefreshToken == token)
+        // then
+
+        #expect(await persistency.getRefreshToken() == refreshToken)
     }
 
-    @Test func testUpdateToken() async throws {
-        let hostId = UUID().uuidString
-        let initialRefreshToken = UUID().uuidString
+    @Test func testUpdateRefreshToken() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let newRefreshToken = UUID().uuidString
+
+        // when
 
         let persistency = try await persistencyFactory
-            .create(host: hostId, refreshToken: initialRefreshToken)
+            .create(host: host, refreshToken: refreshToken)
+        await persistency.update(refreshToken: newRefreshToken)
 
-        let newToken = UUID().uuidString
-        await persistency.update(refreshToken: newToken)
-        let newTokenFromDb = await persistency.getRefreshToken()
-        #expect(newToken == newTokenFromDb)
-        await persistency.invalidate()
+        // then
+
+        #expect(await persistency.getRefreshToken() == newRefreshToken)
     }
 
-    // FLACKY
-    @Test func testUpdatedTokenFromAwake() async throws {
-        let hostId = UUID().uuidString
-        let initialRefreshToken = UUID().uuidString
-        let newToken = UUID().uuidString
+    @Test func testGetRefreshTokenFromAwake() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
         let persistency = try await persistencyFactory
-            .create(host: hostId, refreshToken: initialRefreshToken)
-        await persistency.update(refreshToken: newToken)
+            .create(host: host, refreshToken: refreshToken)
         await persistency.close()
+        let awaken = await persistencyFactory.awake(host: host)
 
-        let awaken = await persistencyFactory
-            .awake(host: hostId)
-        let newTokenFromAwake = await awaken?.getRefreshToken()
-        print("\(initialRefreshToken)")
-        print("\(newToken)")
-        print("\(newTokenFromAwake ?? "nil")")
-        #expect(newToken == newTokenFromAwake)
+        // then
 
-        await awaken?.invalidate()
+        #expect(await awaken?.getRefreshToken() == refreshToken)
     }
 
-    @Test func testHostInfo() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let initialRefreshToken = UUID().uuidString
-        let persistency = try await persistencyFactory
-            .create(host: host.id, refreshToken: initialRefreshToken)
-        await persistency.update(hostInfo: ProfileDto(user: host, email: "", emailVerified: false))
-        let hostFromDb = await persistency.getHostInfo()
+    @Test func testUpdatedTokenFromAwake() async throws {
 
-        #expect(host.id == hostFromDb?.user.id)
-        #expect(host.friendStatus == hostFromDb?.user.friendStatus)
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let newRefreshToken = UUID().uuidString
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+        await persistency.update(refreshToken: newRefreshToken)
+        await persistency.close()
+        let awaken = await persistencyFactory.awake(host: host)
+
+        // then
+
+        #expect(await awaken?.getRefreshToken() == newRefreshToken)
     }
 
-    @Test func testNoHostInfo() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let initialRefreshToken = UUID().uuidString
-        let persistency = try await persistencyFactory
-            .create(host: host.id, refreshToken: initialRefreshToken)
-        let hostFromDb = await persistency.getHostInfo()
+    @Test func testProfile() async throws {
 
-        #expect(hostFromDb == nil)
-        #expect(await persistency.userId() == host.id)
+        // given
+
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .me,
+            displayName: "some name",
+            avatar: UserDto.Avatar(
+                id: nil
+            )
+        )
+        let profile = ProfileDto(
+            user: host,
+            email: "a@b.com",
+            emailVerified: true
+        )
+        let refreshToken = UUID().uuidString
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: refreshToken)
+        await persistency.update(profile: profile)
+
+        // then
+
+        #expect(await persistency.getProfile() == profile)
+    }
+
+    @Test func testNoProfile() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+
+        // then
+
+        #expect(await persistency.getProfile() == nil)
     }
 
     @Test func testUserId() async throws {
-        let hostId = UUID().uuidString
-        let initialRefreshToken = UUID().uuidString
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
         let persistency = try await persistencyFactory
-            .create(host: hostId, refreshToken: initialRefreshToken)
-        #expect(await persistency.userId() == hostId)
+            .create(host: host, refreshToken: refreshToken)
+
+        // then
+
+        #expect(await persistency.userId() == host)
     }
 
     @Test func testUsers() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let initialRefreshToken = UUID().uuidString
-        let persistency = try await persistencyFactory
-            .create(host: host.id, refreshToken: initialRefreshToken)
-        await persistency.update(users: [host, other])
 
-        for user in [host, other] {
-            let userFromDb = await persistency.user(id: user.id)
-            #expect(user.id == userFromDb?.id)
-            #expect(user.friendStatus == userFromDb?.friendStatus)
+        // given
+
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .me,
+            displayName: "some name",
+            avatar: UserDto.Avatar(
+                id: nil
+            )
+        )
+        let friend = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .friends,
+            displayName: "some name",
+            avatar: UserDto.Avatar(
+                id: nil
+            )
+        )
+        let refreshToken = UUID().uuidString
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: refreshToken)
+        await persistency.update(users: [host, friend])
+
+        // then
+
+        for user in [host, friend] {
+            #expect(await persistency.user(id: user.id) == user)
         }
     }
 
-    @Test func testFriends() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let outgoing = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let friend = UserDto(login: UUID().uuidString, friendStatus: .friends, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let initialRefreshToken = UUID().uuidString
-        let persistency = try await persistencyFactory
-            .create(host: host.id, refreshToken: initialRefreshToken)
+    @Test func testNoUsers() async throws {
 
-        let friends: [FriendshipKindDto: [UserDto]] = [.friends: [friend], .subscriber: [outgoing]]
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+
+        // then
+
+        #expect(await persistency.user(id: UUID().uuidString) == nil)
+    }
+
+    @Test func testFriends() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let subscription = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .outgoingRequest,
+            displayName: "sub name",
+            avatar: UserDto.Avatar(
+                id: nil
+            )
+        )
+        let friend = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .friends,
+            displayName: "some name",
+            avatar: UserDto.Avatar(
+                id: nil
+            )
+        )
+        let friends: [FriendshipKindDto: [UserDto]] = [
+            .friends: [friend],
+            .subscription: [subscription]
+        ]
         let query = Set(FriendshipKindDto.allCases)
-        await persistency.updateFriends(friends, for: query)
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+        await persistency.update(friends: friends, for: query)
+
+        // then
 
         let friendsFromDb = await persistency.getFriends(set: query)
         #expect(friendsFromDb?.keys == friends.keys)
         for (key, value) in friends {
             #expect(value == friendsFromDb?[key])
         }
+        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.friends])) == nil)
+        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscriber])) == nil)
+        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscription])) == nil)
+        #expect(await persistency.getFriends(set: Set([.subscriber, .friends])) == nil)
+        #expect(await persistency.getFriends(set: Set([.subscription, .friends])) == nil)
     }
 
     @Test func testNoFriends() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
         let persistency = try await persistencyFactory
-            .create(host: UUID().uuidString, refreshToken: UUID().uuidString)
+            .create(host: host, refreshToken: refreshToken)
+
+        // then
 
         #expect(await persistency.getFriends(set: Set([FriendshipKindDto.friends])) == nil)
         #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscriber])) == nil)
+        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscription])) == nil)
+        #expect(await persistency.getFriends(set: Set([.subscriber, .friends])) == nil)
+        #expect(await persistency.getFriends(set: Set([.subscription, .friends])) == nil)
         #expect(await persistency.getFriends(set: Set(FriendshipKindDto.allCases)) == nil)
     }
 
     @Test func testNoSpendingCounterparties() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
         let persistency = try await persistencyFactory
-            .create(host: UUID().uuidString, refreshToken: UUID().uuidString)
+            .create(host: host, refreshToken: refreshToken)
+
+        // then
+
         #expect(await persistency.getSpendingCounterparties() == nil)
     }
 
     @Test func testSpendingCounterparties() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let initialRefreshToken = UUID().uuidString
-        let persistency = try await persistencyFactory
-            .create(host: host.id, refreshToken: initialRefreshToken)
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
         let counterparties = [
-            SpendingsPreviewDto(counterparty: other.id, balance: ["USD": 16])
+            SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["USD": 16]),
+            SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["RUB": -13]),
         ]
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
         await persistency.updateSpendingCounterparties(counterparties)
 
-        let counterpartiesFromDb = await persistency.getSpendingCounterparties()
-        #expect(counterparties == counterpartiesFromDb)
+        // then
+
+        #expect(await persistency.getSpendingCounterparties() == counterparties)
     }
 
     @Test func testNoSpendingsHistory() async throws {
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
         let persistency = try await persistencyFactory
-            .create(host: UUID().uuidString, refreshToken: UUID().uuidString)
+            .create(host: host, refreshToken: refreshToken)
+
+        // then
+
         #expect(await persistency.getSpendingsHistory(counterparty: UUID().uuidString) == nil)
     }
 
     @Test func testSpendingsHistory() async throws {
-        let host = UserDto(login: UUID().uuidString, friendStatus: .me, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let other = UserDto(login: UUID().uuidString, friendStatus: .outgoingRequest, displayName: "", avatar: UserDto.Avatar(id: nil))
-        let initialRefreshToken = UUID().uuidString
-        let persistency = try await persistencyFactory
-            .create(host: host.id, refreshToken: initialRefreshToken)
+
+        // given
+
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let counterparty = UUID().uuidString
         let history: [IdentifiableDealDto] = [
-            IdentifiableDealDto(id: UUID().uuidString, deal: DealDto(timestamp: 123, details: "456", cost: 789, currency: "RUB", spendings: [
-                SpendingDto(userId: UUID().uuidString, cost: 234)
-            ])),
-            IdentifiableDealDto(id: UUID().uuidString, deal: DealDto(timestamp: 123, details: "456", cost: 789, currency: "RUB", spendings: [
-                SpendingDto(userId: UUID().uuidString, cost: 234)
-            ])),
+            IdentifiableDealDto(
+                id: UUID().uuidString,
+                deal: DealDto(
+                    timestamp: 123,
+                    details: "456",
+                    cost: 789,
+                    currency: "RUB",
+                    spendings: [
+                        SpendingDto(
+                            userId: UUID().uuidString,
+                            cost: 234
+                        )
+                    ]
+                )
+            ),
+            IdentifiableDealDto(
+                id: UUID().uuidString,
+                deal: DealDto(
+                    timestamp: 123,
+                    details: "456",
+                    cost: 789,
+                    currency: "RUB",
+                    spendings: [
+                        SpendingDto(
+                            userId: UUID().uuidString,
+                            cost: 234
+                        )
+                    ]
+                )
+            ),
         ]
-        await persistency.updateSpendingsHistory(counterparty: other.id, history: history)
-        let historyFromDb = await persistency.getSpendingsHistory(counterparty: other.id)
-        #expect(history == historyFromDb)
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+        await persistency.updateSpendingsHistory(counterparty: counterparty, history: history)
+
+        // then
+
+        #expect(await persistency.getSpendingsHistory(counterparty: counterparty) == history)
     }
 
     @Test func testInvalidate() async throws {
+
+        // given
+
         let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+
+        // when
+
         let persistency = try await persistencyFactory
-            .create(host: host, refreshToken: UUID().uuidString)
+            .create(host: host, refreshToken: refreshToken)
         await persistency.invalidate()
         try await taskFactory.runUntilIdle()
-        let awaken = await persistencyFactory
-            .awake(host: host)
-        #expect(awaken == nil)
+
+        // then
+
+        #expect(await persistencyFactory.awake(host: host) == nil)
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ProfileDto: Codable, Sendable {
+public struct ProfileDto: Codable, Sendable, Equatable {
     public let user: UserDto
     public let email: String
     public let emailVerified: Bool

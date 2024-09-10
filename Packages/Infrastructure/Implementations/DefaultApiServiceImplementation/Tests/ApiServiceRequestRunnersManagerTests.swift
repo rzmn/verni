@@ -2,6 +2,7 @@ import Testing
 import ApiService
 import Foundation
 import Logging
+@testable import Base
 @testable import DefaultApiServiceImplementation
 
 actor TokenRefresherMock: TokenRefresher, Loggable {
@@ -19,7 +20,7 @@ actor TokenRefresherMock: TokenRefresher, Loggable {
     func accessToken() async -> String? {
         accessTokenValue
     }
-    
+
     func refreshTokens() async throws(RefreshTokenFailureReason) {
         logI { "run refreshTokens" }
         do {
@@ -63,7 +64,7 @@ struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable, Senda
 }
 
 struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
-    
+
     let logger: Logger = .shared
     let runResult: Result<MockResponse, ApiServiceError>
     let runResponseTimeSec: UInt64
@@ -96,6 +97,8 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 }
 
 @Suite struct ApiServiceRequestRunnersManagerTests {
+    let taskFactory = TestTaskFactory()
+
     @Test func testRequestsLimitNoRefresh() async throws {
 
         // given
@@ -108,12 +111,14 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
                     refreshTokensResponseTimeSec: 4
                 )
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -158,12 +163,14 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: nil,
                     refreshTokensValue: .success("123"),
                     refreshTokensResponseTimeSec: 2
                 )
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -204,8 +211,10 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: nil
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -246,12 +255,14 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
                     refreshTokensResponseTimeSec: 2
                 )
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -292,12 +303,14 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: nil,
                     refreshTokensValue: .failure(.expired(NSError(domain: "", code: -1))),
                     refreshTokensResponseTimeSec: 2
                 )
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -346,12 +359,14 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: nil,
                     refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
                     refreshTokensResponseTimeSec: 2
                 )
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -399,12 +414,14 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
+                taskFactory: taskFactory,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: "123",
                     refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
                     refreshTokensResponseTimeSec: 2
                 )
-            )
+            ),
+            taskFactory: taskFactory
         )
 
         var lowerTimeLimitReached = false
