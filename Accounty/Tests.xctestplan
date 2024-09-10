@@ -1,0 +1,52 @@
+{
+  "configurations" : [
+    {
+      "id" : "FDEC9786-7EB3-4CB3-89F1-99DA720ECD5F",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
+        "identifier" : "DefaultUsersRepositoryImplementationTests",
+        "name" : "DefaultUsersRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultNetworkingImplementation",
+        "identifier" : "DefaultNetworkingImplementationTests",
+        "name" : "DefaultNetworkingImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultApiServiceImplementation",
+        "identifier" : "DefaultApiServiceImplementationTests",
+        "name" : "DefaultApiServiceImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/PersistentStorageSQLite",
+        "identifier" : "PersistentStorageSQLiteTests",
+        "name" : "PersistentStorageSQLiteTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
+        "identifier" : "DefaultApiImplementationTests",
+        "name" : "DefaultApiImplementationTests"
+      }
+    }
+  ],
+  "version" : 1
+}

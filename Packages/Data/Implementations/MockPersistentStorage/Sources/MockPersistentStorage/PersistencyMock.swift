@@ -66,7 +66,7 @@ actor PersistencyMock: Persistency {
         await _getFriendsWithKind!(set)
     }
 
-    func updateFriends(_ friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async {
+    func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async {
         await _updateFriendsForKind!(friends, set)
     }
 

@@ -14,13 +14,13 @@ public actor DefaultProfileOfflineRepository {
 
 extension DefaultProfileOfflineRepository: ProfileOfflineRepository {
     public func getProfile() async -> Profile? {
-        await persistency.getHostInfo().flatMap(Profile.init)
+        await persistency.getProfile().flatMap(Profile.init)
     }
 }
 
 extension DefaultProfileOfflineRepository: ProfileOfflineMutableRepository {
     public func update(profile: Domain.Profile) async {
-        await persistency.update(hostInfo: ProfileDto(domain: profile))
+        await persistency.update(profile: ProfileDto(domain: profile))
         await persistency.update(users: [UserDto(domain: profile.user)])
     }
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		61414F842C2F02A100B2C027 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61414F832C2F02A100B2C027 /* SceneDelegate.swift */; };
 		61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8A2C2F02A200B2C027 /* Assets.xcassets */; };
 		61414F8E2C2F02A200B2C027 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 61414F8D2C2F02A200B2C027 /* Base */; };
+		6143A7D82C908D4E0030AAF1 /* Tests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 6143A7D72C908D4E0030AAF1 /* Tests.xctestplan */; };
 		614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614AC19D2C6802EE005B2CD5 /* NotificationService.swift */; };
 		614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */; };
@@ -91,6 +92,7 @@
 		61414F8D2C2F02A200B2C027 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		61414F8F2C2F02A200B2C027 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6143A7D52C9076930030AAF1 /* MockPersistentStorage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockPersistentStorage; sourceTree = "<group>"; };
+		6143A7D72C908D4E0030AAF1 /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
 		614AC1962C67E315005B2CD5 /* FriendsFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FriendsFlow; sourceTree = "<group>"; };
 		614AC19B2C6802EE005B2CD5 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		614AC19D2C6802EE005B2CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -111,6 +113,11 @@
 		61FD347B2C40242F002C1A5A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		61FD347D2C4069F8002C1A5A /* Accounty.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accounty.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6143A7DE2C908DEF0030AAF1 /* AccountyTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AccountyTests; sourceTree = "<group>"; };
+		6143A7E92C908ED00030AAF1 /* AccountyTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AccountyTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		61414F7B2C2F02A100B2C027 /* Frameworks */ = {
@@ -268,6 +275,8 @@
 				61B74FDF2C305ECA001182A2 /* Packages */,
 				61414F802C2F02A100B2C027 /* Accounty */,
 				614AC19C2C6802EE005B2CD5 /* NotificationService */,
+				6143A7DE2C908DEF0030AAF1 /* AccountyTests */,
+				6143A7E92C908ED00030AAF1 /* AccountyTests */,
 				61414F7F2C2F02A100B2C027 /* Products */,
 				61B74FF22C3080D6001182A2 /* Frameworks */,
 			);
@@ -288,6 +297,7 @@
 				61FD347A2C402416002C1A5A /* Resources */,
 				61414F812C2F02A100B2C027 /* AppDelegate.swift */,
 				61414F832C2F02A100B2C027 /* SceneDelegate.swift */,
+				6143A7D72C908D4E0030AAF1 /* Tests.xctestplan */,
 			);
 			path = Accounty;
 			sourceTree = "<group>";
@@ -432,7 +442,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1540;
+				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					61414F7D2C2F02A100B2C027 = {
@@ -472,6 +482,7 @@
 				618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */,
 				61414F8B2C2F02A200B2C027 /* Assets.xcassets in Resources */,
 				612631472C60AAFF00445300 /* SF-Pro.ttf in Resources */,
+				6143A7D82C908D4E0030AAF1 /* Tests.xctestplan in Resources */,
 				61414F8E2C2F02A200B2C027 /* Base in Resources */,
 				61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */,
 			);
