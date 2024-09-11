@@ -14,6 +14,13 @@
   "testTargets" : [
     {
       "target" : {
+        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultApiServiceImplementation",
+        "identifier" : "DefaultApiServiceImplementationTests",
+        "name" : "DefaultApiServiceImplementationTests"
+      }
+    },
+    {
+      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
         "identifier" : "DefaultUsersRepositoryImplementationTests",
         "name" : "DefaultUsersRepositoryImplementationTests"
@@ -28,13 +35,6 @@
     },
     {
       "target" : {
-        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultApiServiceImplementation",
-        "identifier" : "DefaultApiServiceImplementationTests",
-        "name" : "DefaultApiServiceImplementationTests"
-      }
-    },
-    {
-      "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/PersistentStorageSQLite",
         "identifier" : "PersistentStorageSQLiteTests",
         "name" : "PersistentStorageSQLiteTests"
@@ -45,6 +45,13 @@
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
         "identifier" : "DefaultApiImplementationTests",
         "name" : "DefaultApiImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultSpendingsRepositoryImplementation",
+        "identifier" : "DefaultSpendingsRepositoryImplementationTests",
+        "name" : "DefaultSpendingsRepositoryImplementationTests"
       }
     }
   ],
