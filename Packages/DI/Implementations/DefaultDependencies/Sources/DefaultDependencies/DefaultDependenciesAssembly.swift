@@ -81,7 +81,10 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
             taskFactory: taskFactory
         )
         anonymousApi = apiFactory.create()
-        avatarsRepository =  DefaultAvatarsRepository(api: anonymousApi)
+        avatarsRepository =  DefaultAvatarsRepository(
+            api: anonymousApi,
+            taskFactory: DefaultTaskFactory()
+        )
         appCommon = AppCommonDependencies(
             api: anonymousApi,
             avatarsRepository: avatarsRepository,

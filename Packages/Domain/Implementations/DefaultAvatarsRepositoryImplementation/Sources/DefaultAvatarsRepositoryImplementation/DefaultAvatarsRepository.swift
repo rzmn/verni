@@ -1,53 +1,28 @@
 import Domain
 import Api
 import Foundation
+import Base
 internal import DataTransferObjects
 internal import ApiDomainConvenience
-
-extension Sequence where Element: Sendable {
-    func asyncMap<T: Sendable>(
-        _ transform: (Element) async throws -> T
-    ) async rethrows -> [T] {
-        var values = [T]()
-
-        for element in self {
-            try await values.append(transform(element))
-        }
-
-        return values
-    }
-
-    func concurrentMap<T: Sendable>(
-        _ transform: @escaping @Sendable (Element) async -> T
-    ) async -> [T] {
-        let tasks = map { element in
-            Task {
-                await transform(element)
-            }
-        }
-
-        return await tasks.asyncMap { task in
-            await task.value
-        }
-    }
-}
 
 public actor DefaultAvatarsRepository {
     private let api: ApiProtocol
     private let offlineRepository: AvatarsOfflineRepository
+    private let taskFactory: TaskFactory
 
     private var loadingIds = [Avatar.ID: Task<Result<Data, GeneralError>, Never>]()
     private var loadingIdsContinuation = [Avatar.ID: CheckedContinuation<Result<Data, GeneralError>, Never>]()
 
-    public init(api: ApiProtocol) {
+    public init(api: ApiProtocol, taskFactory: TaskFactory) {
         self.api = api
+        self.taskFactory = taskFactory
         offlineRepository = AvatarsOfflineRepository()
     }
 }
 
 extension DefaultAvatarsRepository: AvatarsRepository {
     public func get(ids: [Avatar.ID]) async throws(GeneralError) -> [Avatar.ID : Data] {
-        let cached = (await ids.concurrentMap { id in
+        let cached = (await ids.concurrentMap(taskFactory: taskFactory) { id in
             let data = await self.offlineRepository.getData(for: id)
             if let data {
                 return (id, data)
@@ -62,7 +37,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
             }
             return (id, task)
         }
-        let successfullyLoaded = (await currentlyLoading.concurrentMap { (id, task) in
+        let successfullyLoaded = (await currentlyLoading.concurrentMap(taskFactory: taskFactory) { (id, task) in
             let result = await task.result
             guard case .success(let taskResult) = result, case .success(let data) = taskResult else {
                 return nil
@@ -78,7 +53,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         let idsToLoad = ids.filter { !cachedSet.contains($0) }
 
         for id in idsToLoad {
-            loadingIds[id] = Task {
+            loadingIds[id] = taskFactory.task {
                 await withCheckedContinuation {
                     self.loadingIdsContinuation[id] = $0
                 }
@@ -123,7 +98,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
             }.forEach {
                 dict[$0.key] = $0.value
             }
-            _ = await values.concurrentMap { value in
+            _ = await values.concurrentMap(taskFactory: taskFactory) { value in
                 guard let base64 = value.value.base64Data else {
                     return
                 }
