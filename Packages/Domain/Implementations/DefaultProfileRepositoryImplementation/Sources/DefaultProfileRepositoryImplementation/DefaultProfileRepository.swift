@@ -2,6 +2,7 @@ import Domain
 import Api
 import Combine
 import Logging
+import Base
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
@@ -10,16 +11,18 @@ public actor DefaultProfileRepository {
     private let api: ApiProtocol
     private let offline: ProfileOfflineMutableRepository
     private let subject = PassthroughSubject<Domain.Profile, Never>()
-    private var subscriptions = Set<AnyCancellable>()
+    private let taskFactory: TaskFactory
 
-    public init(api: ApiProtocol, logger: Logger, offline: ProfileOfflineMutableRepository) async {
+    public init(
+        api: ApiProtocol,
+        logger: Logger,
+        offline: ProfileOfflineMutableRepository,
+        taskFactory: TaskFactory
+    ) async {
         self.api = api
         self.offline = offline
         self.logger = logger
-
-        subject.sink { [weak self] profile in
-            self?.logI { "profile updated \(profile)" }
-        }.store(in: &subscriptions)
+        self.taskFactory = taskFactory
     }
 }
 
@@ -37,8 +40,8 @@ extension DefaultProfileRepository: ProfileRepository {
             logI { "refresh failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        Task {
-            await offline.update(profile: profile)
+        taskFactory.detached {
+            await self.offline.update(profile: profile)
         }
         subject.send(profile)
         logI { "refresh ok" }

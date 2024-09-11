@@ -70,11 +70,11 @@ private actor PersistencyProvider {
         // when
 
         await repository.update(users: [user])
-        let userFromDb = await repository.getUser(id: user.id)
+        let userFromRepository = await repository.getUser(id: user.id)
 
         // then
 
-        #expect(userFromDb == user)
+        #expect(userFromRepository == user)
         #expect(await provider.updateUsersCalls == [[user].map(UserDto.init)])
         #expect(await provider.getUserCalledCount[user.id, default: 0] == 1)
     }

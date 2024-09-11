@@ -70,11 +70,11 @@ private actor PersistencyProvider {
         // when
 
         await repository.updateSpendingCounterparties(couterparties)
-        let couterpartiesFromDb = await repository.getSpendingCounterparties()
+        let couterpartiesFromRepository = await repository.getSpendingCounterparties()
 
         // then
 
-        #expect(couterpartiesFromDb == couterparties)
+        #expect(couterpartiesFromRepository == couterparties)
         #expect(await provider.getSpendingCounterpartiesCalledCount == 1)
         #expect(await provider.updateSpendingCounterpartiesCalls == [couterparties.map(SpendingsPreviewDto.init)])
     }
@@ -125,11 +125,11 @@ private actor PersistencyProvider {
         // when
 
         await repository.updateSpendingsHistory(counterparty: counterparty, history: history)
-        let historyFromDb = await repository.getSpendingsHistory(counterparty: counterparty)
+        let historyFromRepository = await repository.getSpendingsHistory(counterparty: counterparty)
 
         // then
 
-        #expect(historyFromDb == history)
+        #expect(historyFromRepository == history)
         #expect(await provider.updateSpendingHistoryCalls.map(\.0) == [counterparty])
         #expect(await provider.updateSpendingHistoryCalls.map(\.1) == [history.map(IdentifiableDealDto.init)])
         #expect(await provider.getSpendingHistoryCalledCount[counterparty, default: 0] == 1)
@@ -147,11 +147,11 @@ private actor PersistencyProvider {
 
         // when
 
-        let historyFromDb = await repository.getSpendingsHistory(counterparty: counterparty)
+        let historyFromRepository = await repository.getSpendingsHistory(counterparty: counterparty)
 
         // then
 
-        #expect(historyFromDb == nil)
+        #expect(historyFromRepository == nil)
         #expect(await provider.getSpendingHistoryCalledCount[counterparty, default: 0] == 1)
     }
 }

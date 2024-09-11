@@ -89,7 +89,8 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
             logger: .shared.with(prefix: "[profile.repo] "),
             offline: DefaultProfileOfflineRepository(
                 persistency: persistency
-            )
+            ),
+            taskFactory: DefaultTaskFactory()
         )
         usersRepository = DefaultUsersRepository(
             api: api,

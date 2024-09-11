@@ -125,6 +125,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             .spendingCounterpartiesUpdated()
             .values
             .makeAsyncIterator()
+        async let spendingCounterpartiesFromPublisher = spendingCounterpartiesIterator.next()
 
         // when
 
@@ -143,7 +144,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         #expect(counterpartiesFromRepository == counterparties)
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
-        #expect(await spendingCounterpartiesIterator.next() == counterparties)
+        #expect(await spendingCounterpartiesFromPublisher == counterparties)
 
         timeout.cancel()
     }
@@ -176,6 +177,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             .spendingCounterpartiesUpdated()
             .values
             .makeAsyncIterator()
+        async let spendingCounterpartiesFromPublisher = spendingCounterpartiesIterator.next()
 
         // when
 
@@ -195,7 +197,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
-        #expect(await spendingCounterpartiesIterator.next() == counterparties)
+        #expect(await spendingCounterpartiesFromPublisher == counterparties)
 
         timeout.cancel()
     }
@@ -231,10 +233,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        var getSpendingsHistoryIterator = await repository
+        var spendingsHistoryIterator = await repository
             .spendingsHistoryUpdated(for: counterparty)
             .values
             .makeAsyncIterator()
+        async let spendingsHistoryFromPublisher = spendingsHistoryIterator.next()
 
         // when
 
@@ -253,7 +256,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         #expect(historyFromRepository == history)
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
-        #expect(await getSpendingsHistoryIterator.next() == history)
+        #expect(await spendingsHistoryFromPublisher == history)
 
         timeout.cancel()
     }
@@ -289,10 +292,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        var getSpendingsHistoryIterator = await repository
+        var spendingsHistoryIterator = await repository
             .spendingsHistoryUpdated(for: counterparty)
             .values
             .makeAsyncIterator()
+        async let spendingsHistoryFromPublisher = spendingsHistoryIterator.next()
 
         // when
 
@@ -314,7 +318,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
-        #expect(await getSpendingsHistoryIterator.next() == history)
+        #expect(await spendingsHistoryFromPublisher == history)
 
         timeout.cancel()
     }
