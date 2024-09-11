@@ -5,7 +5,7 @@ extension Spendings {
         public typealias Response = [IdentifiableDealDto]
 
         public struct Parameters: Encodable, Sendable {
-            let counterparty: UserDto.ID
+            public let counterparty: UserDto.ID
         }
         public let parameters: Parameters
 

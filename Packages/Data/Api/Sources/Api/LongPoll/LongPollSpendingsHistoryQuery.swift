@@ -1,6 +1,6 @@
 import DataTransferObjects
 
-public struct SpendingsHistoryUpdate: LongPollQuery {
+public struct LongPollSpendingsHistoryQuery: LongPollQuery {
     public struct Update: Decodable, Sendable {
         public enum Category: Decodable, Sendable {
             case spendings(uid: UserDto.ID)

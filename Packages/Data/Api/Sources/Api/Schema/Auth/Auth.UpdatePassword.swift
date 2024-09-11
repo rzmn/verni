@@ -5,8 +5,8 @@ extension Auth {
         public typealias Response = AuthTokenDto
 
         public struct Parameters: Encodable, Sendable {
-            let old: String
-            let new: String
+            public let old: String
+            public let new: String
         }
         public let parameters: Parameters
 

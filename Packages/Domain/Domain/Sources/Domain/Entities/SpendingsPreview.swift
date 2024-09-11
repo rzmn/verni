@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SpendingsPreview: Sendable {
+public struct SpendingsPreview: Sendable, Equatable {
     public let counterparty: User.ID
     public let balance: [Currency: Cost]
 

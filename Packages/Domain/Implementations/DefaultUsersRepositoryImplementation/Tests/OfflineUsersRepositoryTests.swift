@@ -10,7 +10,8 @@ import ApiDomainConvenience
 
 private actor PersistencyProvider {
     let persistency: PersistencyMock
-    var getUserCalled = false
+    var getUserCalledCount: [UserDto.ID: Int] = [:]
+    var updateUsersCalls: [ [UserDto] ] = []
     var users = [UserDto.ID: UserDto]()
 
     init() async {
@@ -18,12 +19,13 @@ private actor PersistencyProvider {
         await persistency.mutate { persistency in
             persistency._userWithID = { id in
                 await self.mutate { s in
-                    s.getUserCalled = true
+                    s.getUserCalledCount[id] = s.getUserCalledCount[id, default: 0] + 1
                 }
                 return await self.users[id]
             }
             persistency._updateUsers = { users in
                 await self.mutate { s in
+                    s.updateUsersCalls.append(users)
                     for user in users {
                         s.users[user.id] = user
                     }
@@ -35,7 +37,7 @@ private actor PersistencyProvider {
 
 @Suite struct OfflineUsersRepositoryTests {
 
-    @Test func testOfflineRepositoryGetNoUsers() async throws {
+    @Test func testGetNoUsers() async throws {
 
         // given
 
@@ -50,10 +52,10 @@ private actor PersistencyProvider {
         // then
 
         #expect(user == nil)
-        #expect(await provider.getUserCalled)
+        #expect(await provider.getUserCalledCount[uid, default: 0] == 1)
     }
 
-    @Test func testOfflineRepositorySetUser() async throws {
+    @Test func testSetUser() async throws {
 
         // given
 
@@ -68,10 +70,12 @@ private actor PersistencyProvider {
         // when
 
         await repository.update(users: [user])
+        let userFromDb = await repository.getUser(id: user.id)
 
         // then
 
-        #expect(await repository.getUser(id: user.id) == user)
-        #expect(await provider.getUserCalled)
+        #expect(userFromDb == user)
+        #expect(await provider.updateUsersCalls == [[user].map(UserDto.init)])
+        #expect(await provider.getUserCalledCount[user.id, default: 0] == 1)
     }
 }

@@ -20,10 +20,10 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
         .package(path: "../../../Infrastructure/Logging"),
         .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
     ],
     targets: [
         .target(

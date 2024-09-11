@@ -5,7 +5,7 @@ extension Spendings {
         public typealias Response = NoResponse
 
         public struct Parameters: Encodable, Sendable {
-            let deal: DealDto
+            public let deal: DealDto
         }
         public let parameters: Parameters
 

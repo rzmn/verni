@@ -20,6 +20,8 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
+        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
     ],
     targets: [
         .target(
@@ -31,6 +33,25 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        )
+        ),
+        .testTarget(
+            name: "DefaultSpendingsRepositoryImplementationTests",
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage",
+                "DefaultSpendingsRepositoryImplementation",
+                "MockPersistentStorage",
+                "MockApiImplementation",
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
+        ),
     ]
 )

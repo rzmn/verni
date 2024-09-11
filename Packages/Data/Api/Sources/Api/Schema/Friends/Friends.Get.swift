@@ -5,7 +5,7 @@ extension Friends {
         public typealias Response = [Int: [UserDto.ID]]
 
         public struct Parameters: Encodable, Sendable {
-            let statuses: [Int]
+            public let statuses: [Int]
         }
         public let parameters: Parameters
 

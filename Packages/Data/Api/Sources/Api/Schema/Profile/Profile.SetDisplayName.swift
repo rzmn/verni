@@ -6,7 +6,7 @@ extension Profile {
         public let parameters: Parameters
 
         public struct Parameters: Encodable, Sendable {
-            let displayName: String
+            public let displayName: String
         }
 
         public var path: String {

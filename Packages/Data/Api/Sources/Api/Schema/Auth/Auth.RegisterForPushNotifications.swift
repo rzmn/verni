@@ -5,7 +5,7 @@ extension Auth {
         public typealias Response = NoResponse
 
         public struct Parameters: Encodable, Sendable {
-            let token: String
+            public let token: String
         }
         public let parameters: Parameters
 

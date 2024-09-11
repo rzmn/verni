@@ -5,7 +5,7 @@ extension Users {
         public typealias Response = [UserDto]
 
         public struct Parameters: Encodable, Sendable {
-            let ids: [UserDto.ID]
+            public let ids: [UserDto.ID]
         }
         public let parameters: Parameters
 

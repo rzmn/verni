@@ -5,7 +5,7 @@ extension Friends {
         public typealias Response = NoResponse
 
         public struct Parameters: Encodable, Sendable {
-            let sender: UserDto.ID
+            public let sender: UserDto.ID
         }
         public let parameters: Parameters
 

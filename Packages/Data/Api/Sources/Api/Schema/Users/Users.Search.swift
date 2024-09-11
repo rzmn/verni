@@ -5,7 +5,7 @@ extension Users {
         public typealias Response = [UserDto]
 
         public struct Parameters: Encodable, Sendable {
-            let query: String
+            public let query: String
         }
         public let parameters: Parameters
 

@@ -3,8 +3,8 @@ import Api
 import PersistentStorage
 import Combine
 import Logging
+import Base
 internal import ApiDomainConvenience
-internal import Base
 
 public actor DefaultSpendingsRepository {
     public let logger: Logger
@@ -12,18 +12,21 @@ public actor DefaultSpendingsRepository {
     private let longPoll: LongPoll
     private let offline: SpendingsOfflineMutableRepository
     private let counterpartiesSubject = PassthroughSubject<[SpendingsPreview], Never>()
+    private let taskFactory: TaskFactory
     private var spendingsHistorySubjectById = [User.ID: PassthroughSubject<[IdentifiableSpending], Never>]()
 
     public init(
         api: ApiProtocol,
         longPoll: LongPoll,
         logger: Logger,
-        offline: SpendingsOfflineMutableRepository
+        offline: SpendingsOfflineMutableRepository,
+        taskFactory: TaskFactory
     ) {
         self.api = api
         self.longPoll = longPoll
         self.offline = offline
         self.logger = logger
+        self.taskFactory = taskFactory
     }
 }
 
@@ -55,7 +58,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             .flatMap { _ in
                 Future { (promise: @escaping (Result<[SpendingsPreview]?, Never>) -> Void) in
                     self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
-                    Task {
+                    self.taskFactory.task {
                         let result = try? await self.refreshSpendingCounterparties()
                         promise(.success(result))
                     }
@@ -67,11 +70,11 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     }
 
     public func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never> {
-        await longPoll.poll(for: SpendingsHistoryUpdate(uid: id))
+        await longPoll.poll(for: LongPollSpendingsHistoryQuery(uid: id))
             .flatMap { _ in
                 Future { (promise: @escaping (Result<[IdentifiableSpending]?, Never>) -> Void) in
                     self.logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data" }
-                    Task {
+                    self.taskFactory.task {
                         let result = try? await self.refreshSpendingsHistory(counterparty: id)
                         promise(.success(result))
                     }
@@ -91,8 +94,8 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             logI { "refreshSpendingCounterparties failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        Task {
-            await offline.updateSpendingCounterparties(counterparties)
+        taskFactory.task {
+            await self.offline.updateSpendingCounterparties(counterparties)
         }
         logI { "refreshSpendingCounterparties ok" }
         counterpartiesSubject.send(counterparties)
@@ -108,8 +111,8 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(error)" }
             throw GetSpendingsHistoryError(apiError: error)
         }
-        Task {
-            await offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
+        taskFactory.task {
+            await self.offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
         }
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }
         spendingsHistorySubject(with: counterparty).send(spendings)

@@ -2,6 +2,12 @@ import Foundation
 
 public typealias Cost = Decimal
 
+fileprivate extension Date {
+    var byRoudingSeconds: Date {
+        Date(timeIntervalSince1970: TimeInterval(Int64(timeIntervalSince1970)))
+    }
+}
+
 public struct Spending: Equatable, Sendable {
     public let date: Date
     public let details: String
@@ -10,7 +16,7 @@ public struct Spending: Equatable, Sendable {
     public let participants: [User.ID: Cost]
 
     public init(date: Date, details: String, cost: Cost, currency: Currency, participants: [User.ID: Cost]) {
-        self.date = date
+        self.date = date.byRoudingSeconds
         self.details = details
         self.cost = cost
         self.currency = currency

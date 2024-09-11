@@ -5,7 +5,7 @@ extension Avatars {
         public typealias Response = [UserDto.Avatar.ID: AvatarDataDto]
 
         public struct Parameters: Encodable, Sendable {
-            let ids: [UserDto.Avatar.ID]
+            public let ids: [UserDto.Avatar.ID]
         }
         public let parameters: Parameters
 

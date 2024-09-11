@@ -23,6 +23,18 @@ public protocol TaskFactory: Sendable {
         priority: TaskPriority?,
         @_inheritActorContext operation: @Sendable @escaping () async -> Success
     ) -> Task<Success, Never>
+
+    @discardableResult
+    func detached<Success>(
+        priority: TaskPriority?,
+        operation: @Sendable @escaping () async throws -> Success
+    ) -> Task<Success, Error>
+
+    @discardableResult
+    func detached<Success>(
+        priority: TaskPriority?,
+        operation: @Sendable @escaping () async -> Success
+    ) -> Task<Success, Never>
 }
 
 public extension TaskFactory {
@@ -38,6 +50,20 @@ public extension TaskFactory {
         @_inheritActorContext operation: @Sendable @escaping () async -> Success
     ) -> Task<Success, Never> {
         task(priority: nil, operation: operation)
+    }
+
+    @discardableResult
+    func detached<Success>(
+        operation: @Sendable @escaping () async throws -> Success
+    ) -> Task<Success, Error> {
+        detached(priority: nil, operation: operation)
+    }
+
+    @discardableResult
+    func detached<Success>(
+        operation: @Sendable @escaping () async -> Success
+    ) -> Task<Success, Never> {
+        detached(priority: nil, operation: operation)
     }
 }
 
@@ -58,6 +84,26 @@ public struct DefaultTaskFactory: TaskFactory {
         @_inheritActorContext operation: @Sendable @escaping () async -> Success
     ) -> Task<Success, Never> {
         Task(priority: priority) {
+            await operation()
+        }
+    }
+
+    @discardableResult
+    public func detached<Success>(
+        priority: TaskPriority?,
+        operation: @Sendable @escaping () async throws -> Success
+    ) -> Task<Success, Error> {
+        Task.detached(priority: priority) {
+            try await operation()
+        }
+    }
+
+    @discardableResult
+    public func detached<Success>(
+        priority: TaskPriority?,
+        operation: @Sendable @escaping () async -> Success
+    ) -> Task<Success, Never> {
+        Task.detached(priority: priority) {
             await operation()
         }
     }
@@ -91,6 +137,36 @@ final class TestTaskFactory: TaskFactory, @unchecked Sendable {
             lock.unlock()
         }
         let task = Task(priority: priority) {
+            await operation()
+        }
+        tasks.append(task)
+        return task
+    }
+
+    func detached<Success>(
+        priority: TaskPriority?,
+        operation: @Sendable @escaping () async throws -> Success
+    ) -> Task<Success, Error> {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        let task = Task.detached(priority: priority) {
+            try await operation()
+        }
+        tasks.append(task)
+        return task
+    }
+
+    public func detached<Success>(
+        priority: TaskPriority?,
+        operation: @Sendable @escaping () async -> Success
+    ) -> Task<Success, Never> {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        let task = Task.detached(priority: priority) {
             await operation()
         }
         tasks.append(task)

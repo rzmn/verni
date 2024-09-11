@@ -9,8 +9,8 @@ import DefaultUsersRepositoryImplementation
 
 private actor ApiProvider {
     let api: MockApi
-    var searchCalledCount = 0
-    var getCalledCount = 0
+    var searchCalls: [String] = []
+    var getCalls: [[UserDto.ID]] = []
     private let getResponse: [UserDto]
     private let searchResponse: [UserDto]
 
@@ -21,10 +21,10 @@ private actor ApiProvider {
         await api.mutate { api in
             api._runMethodWithParams = { method in
                 await self.mutate { s in
-                    if let _ = method as? Users.Get {
-                        s.getCalledCount += 1
-                    } else if let _ = method as? Users.Search {
-                        s.searchCalledCount += 1
+                    if let method = method as? Users.Get {
+                        s.getCalls.append(method.parameters.ids)
+                    } else if let method = method as? Users.Search {
+                        s.searchCalls.append(method.parameters.query)
                     }
                 }
                 if let _ = method as? Users.Get {
@@ -40,8 +40,7 @@ private actor ApiProvider {
 }
 
 private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
-    typealias Update = [User]
-    var updates: [Update] = []
+    var updates: [ [User] ] = []
 
     func update(users: [User]) async {
         updates.append(users)
@@ -81,7 +80,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // then
 
-        #expect(await provider.getCalledCount == 1)
+        #expect(await provider.getCalls == [[user.id]])
         #expect(await offlineRepository.updates == [response])
         #expect(response == [user].map(User.init))
     }
@@ -109,15 +108,16 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
+        let searchQuery = "query"
 
         // when
 
-        let response = try await repository.searchUsers(query: "query")
+        let response = try await repository.searchUsers(query: searchQuery)
         try await taskFactory.runUntilIdle()
 
         // then
 
-        #expect(await provider.searchCalledCount == 1)
+        #expect(await provider.searchCalls == [searchQuery])
         #expect(await offlineRepository.updates == [response])
         #expect(response == [user].map(User.init))
     }
@@ -143,7 +143,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // then
 
-        #expect(await provider.getCalledCount == 0)
+        #expect(await provider.getCalls == [])
         #expect(await offlineRepository.updates == [])
         #expect(response == [])
     }
@@ -169,7 +169,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // then
 
-        #expect(await provider.searchCalledCount == 0)
+        #expect(await provider.searchCalls == [])
         #expect(await offlineRepository.updates == [])
         #expect(response == [])
     }
