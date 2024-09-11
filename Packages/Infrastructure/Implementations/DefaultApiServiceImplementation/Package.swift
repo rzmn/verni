@@ -19,6 +19,7 @@ let package = Package(
         .package(path: "../../Logging"),
         .package(path: "../../ApiService"),
         .package(path: "../../Base"),
+        .package(path: "../MockNetworkingImplementation"),
     ],
     targets: [
         .target(
@@ -33,7 +34,7 @@ let package = Package(
         ),
         .testTarget(
             name: "DefaultApiServiceImplementationTests",
-            dependencies: ["DefaultApiServiceImplementation", "ApiService", "Logging"],
+            dependencies: ["DefaultApiServiceImplementation", "ApiService", "Logging", "MockNetworkingImplementation"],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

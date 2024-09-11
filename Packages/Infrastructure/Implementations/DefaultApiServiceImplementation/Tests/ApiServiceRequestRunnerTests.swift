@@ -3,32 +3,16 @@ import ApiService
 import Foundation
 import Logging
 import Networking
+@testable import MockNetworkingImplementation
 @testable import DefaultApiServiceImplementation
-
-struct MockNetworkRequest: NetworkRequest {
-    let path: String
-    let headers: [String: String]
-    let parameters: [String: String]
-    let httpMethod: String
-}
-
-actor MockRequestService: NetworkService {
-    let result: Result<NetworkServiceResponse, NetworkServiceError>
-
-    init(result: Result<NetworkServiceResponse, NetworkServiceError>) {
-        self.result = result
-    }
-
-    func run<T>(_ request: T) async throws(NetworkServiceError) -> NetworkServiceResponse where T: NetworkRequest {
-        try result.get()
-    }
-}
 
 @Suite struct ApiServiceRequestRunnerTests {
 
     @Test func testSetAuthHeader() async throws {
-        let request = MockRequest(label: "r", headers: [:])
 
+        // given
+
+        let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
             networkService: MockRequestService(
@@ -36,14 +20,21 @@ actor MockRequestService: NetworkService {
             ),
             accessToken: token
         )
+
+        // when
+
         let _: MockResponse = try await runner.run(request: request)
+
+        // then
 
         #expect(request.headers["Authorization"] == "Bearer \(token)")
     }
 
     @Test func testFailedOnDecode() async throws {
-        let request = MockRequest(label: "r", headers: [:])
 
+        // given
+
+        let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
             networkService: MockRequestService(
@@ -51,20 +42,31 @@ actor MockRequestService: NetworkService {
             ),
             accessToken: token
         )
+
+        // when
+
+        let serviceError: ApiServiceError
         do {
             let _: MockResponse = try await runner.run(request: request)
             Issue.record()
+            return
         } catch {
-            guard case .decodingFailed = error else {
-                Issue.record()
-                return
-            }
+            serviceError = error
+        }
+
+        // then
+
+        guard case .decodingFailed = serviceError else {
+            Issue.record()
+            return
         }
     }
 
     @Test func testFailedNoConnection() async throws {
-        let request = MockRequest(label: "r", headers: [:])
 
+        // given
+
+        let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
             networkService: MockRequestService(
@@ -72,20 +74,31 @@ actor MockRequestService: NetworkService {
             ),
             accessToken: token
         )
+
+        // when
+
+        let serviceError: ApiServiceError
         do {
             let _: MockResponse = try await runner.run(request: request)
             Issue.record()
+            return
         } catch {
-            guard case .noConnection = error else {
-                Issue.record()
-                return
-            }
+            serviceError = error
+        }
+
+        // then
+
+        guard case .noConnection = serviceError else {
+            Issue.record()
+            return
         }
     }
 
     @Test func testUnauthorized() async throws {
-        let request = MockRequest(label: "r", headers: [:])
 
+        // given
+
+        let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
             networkService: MockRequestService(
@@ -93,20 +106,31 @@ actor MockRequestService: NetworkService {
             ),
             accessToken: token
         )
+
+        // when
+
+        let serviceError: ApiServiceError
         do {
             let _: MockResponse = try await runner.run(request: request)
             Issue.record()
+            return
         } catch {
-            guard case .unauthorized = error else {
-                Issue.record()
-                return
-            }
+            serviceError = error
+        }
+
+        // then
+
+        guard case .unauthorized = serviceError else {
+            Issue.record()
+            return
         }
     }
 
     @Test func testFailedInternal() async throws {
-        let request = MockRequest(label: "r", headers: [:])
 
+        // given
+
+        let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
             networkService: MockRequestService(
@@ -114,20 +138,31 @@ actor MockRequestService: NetworkService {
             ),
             accessToken: token
         )
+
+        // when
+
+        let serviceError: ApiServiceError
         do {
             let _: MockResponse = try await runner.run(request: request)
             Issue.record()
+            return
         } catch {
-            guard case .internalError = error else {
-                Issue.record()
-                return
-            }
+            serviceError = error
+        }
+
+        // then
+
+        guard case .internalError = serviceError else {
+            Issue.record()
+            return
         }
     }
 
     @Test func testUnknownError() async throws {
-        let request = MockRequest(label: "r", headers: [:])
 
+        // given
+
+        let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
             networkService: MockRequestService(
@@ -135,14 +170,23 @@ actor MockRequestService: NetworkService {
             ),
             accessToken: token
         )
+
+        // when
+
+        let serviceError: ApiServiceError
         do {
             let _: MockResponse = try await runner.run(request: request)
             Issue.record()
+            return
         } catch {
-            guard case .internalError = error else {
-                Issue.record()
-                return
-            }
+            serviceError = error
+        }
+
+        // then
+
+        guard case .internalError = serviceError else {
+            Issue.record()
+            return
         }
     }
 }
