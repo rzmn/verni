@@ -112,30 +112,18 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        let spendingCounterpartiesPublisher = await repository.spendingCounterpartiesUpdated()
-        actor SubscriptionsBox {
-            var subscriptions = Set<AnyCancellable>()
-        }
+        var spendingCounterpartiesIterator = await repository
+            .spendingCounterpartiesUpdated()
+            .values
+            .makeAsyncIterator()
 
         // when
 
-        let spendingCounterpartiesNotification = taskFactory.detached {
-            let box = SubscriptionsBox()
-            return await box.mutate { box in
-                return await withCheckedContinuation(isolation: box) { continuation in
-                    spendingCounterpartiesPublisher
-                        .sink { preview in
-                            continuation.resume(returning: preview)
-                        }
-                        .store(in: &box.subscriptions)
-                }
-            }
-        }
         let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
 
         // then
 
-        let timeout = Task.detached {
+        let timeout = Task {
             try await Task.sleep(timeInterval: 5)
             if !Task.isCancelled {
                 Issue.record("\(#function): timeout failed")
@@ -146,7 +134,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         #expect(counterpartiesFromRepository == counterparties)
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
-        #expect(await spendingCounterpartiesNotification.value == counterparties)
+        #expect(await spendingCounterpartiesIterator.next() == counterparties)
 
         timeout.cancel()
     }
@@ -182,30 +170,18 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        let getSpendingsHistoryPublisher = await repository.spendingsHistoryUpdated(for: counterparty)
-        actor SubscriptionsBox {
-            var subscriptions = Set<AnyCancellable>()
-        }
+        var getSpendingsHistoryIterator = await repository
+            .spendingsHistoryUpdated(for: counterparty)
+            .values
+            .makeAsyncIterator()
 
         // when
 
-        let spendingCounterpartiesNotification = taskFactory.detached {
-            let box = SubscriptionsBox()
-            return await box.mutate { box in
-                return await withCheckedContinuation(isolation: box) { continuation in
-                    getSpendingsHistoryPublisher
-                        .sink { history in
-                            continuation.resume(returning: history)
-                        }
-                        .store(in: &box.subscriptions)
-                }
-            }
-        }
         let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
 
         // then
 
-        let timeout = Task.detached {
+        let timeout = Task {
             try await Task.sleep(timeInterval: 5)
             if !Task.isCancelled {
                 Issue.record("\(#function): timeout failed")
@@ -216,7 +192,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         #expect(historyFromRepository == history)
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
-        #expect(await spendingCounterpartiesNotification.value == history)
+        #expect(await getSpendingsHistoryIterator.next() == history)
 
         timeout.cancel()
     }
