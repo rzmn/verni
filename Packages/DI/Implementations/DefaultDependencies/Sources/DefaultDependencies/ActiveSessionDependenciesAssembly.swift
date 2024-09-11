@@ -57,7 +57,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     private let api: ApiProtocol
     private let persistency: Persistency
     private let longPoll: LongPoll
-    nonisolated(unsafe) private let logoutSubject: PassthroughSubject<LogoutReason, Never>
+    private let logoutSubject: PassthroughSubject<LogoutReason, Never>
 
     let appCommon: AppCommon
     let profileRepository: ProfileRepository
@@ -105,7 +105,8 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
             logger: .shared.with(prefix: "[spendings.repo] "),
             offline: DefaultSpendingsOfflineRepository(
                 persistency: persistency
-            )
+            ),
+            taskFactory: DefaultTaskFactory()
         )
         friendListRepository = DefaultFriendsRepository(
             api: api,

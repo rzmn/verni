@@ -54,13 +54,20 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     }
 
     public func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never> {
-        await longPoll.poll(for: LongPollCounterpartiesQuery())
+        let sendablePromise: @Sendable (@Sendable @escaping (Result<[SpendingsPreview]?, Never>) -> Void) -> Void = { promise in
+            self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
+            self.taskFactory.task {
+                let result = try? await self.refreshSpendingCounterparties()
+                promise(.success(result))
+            }
+        }
+        return await longPoll.poll(for: LongPollCounterpartiesQuery())
             .flatMap { _ in
-                Future { (promise: @escaping (Result<[SpendingsPreview]?, Never>) -> Void) in
-                    self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
-                    self.taskFactory.task {
-                        let result = try? await self.refreshSpendingCounterparties()
-                        promise(.success(result))
+                Future { [sendablePromise] promise in
+                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
+                    nonisolated(unsafe) let promise = promise
+                    sendablePromise {
+                        promise($0)
                     }
                 }
             }
@@ -70,13 +77,20 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     }
 
     public func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never> {
-        await longPoll.poll(for: LongPollSpendingsHistoryQuery(uid: id))
+        let sendablePromise: @Sendable (@Sendable @escaping (Result<[IdentifiableSpending]?, Never>) -> Void) -> Void = { promise in
+            self.logI { "got lp spendingsHistoryUpdated[counterparty=\(id)], refreshing data" }
+            self.taskFactory.task {
+                let result = try? await self.refreshSpendingsHistory(counterparty: id)
+                promise(.success(result))
+            }
+        }
+        return await longPoll.poll(for: LongPollSpendingsHistoryQuery(uid: id))
             .flatMap { _ in
-                Future { (promise: @escaping (Result<[IdentifiableSpending]?, Never>) -> Void) in
-                    self.logI { "got lp [spendingsHistoryUpdated, id=\(id)], refreshing data" }
-                    self.taskFactory.task {
-                        let result = try? await self.refreshSpendingsHistory(counterparty: id)
-                        promise(.success(result))
+                Future { [sendablePromise] promise in
+                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
+                    nonisolated(unsafe) let promise = promise
+                    sendablePromise {
+                        promise($0)
                     }
                 }
             }

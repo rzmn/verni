@@ -3,6 +3,10 @@ public extension Actor {
         block(self)
     }
 
+    func mutate<T: Sendable>(_ block: @Sendable (isolated Self) -> T) -> T {
+        block(self)
+    }
+
     func mutate(_ block: @Sendable (isolated Self) async -> Void) async {
         await block(self)
     }
