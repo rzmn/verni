@@ -20,17 +20,44 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
+        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
     ],
     targets: [
         .target(
             name: "DefaultFriendsRepositoryImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        )
+        ),
+        .testTarget(
+            name: "DefaultFriendsRepositoryImplementationTests",
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage",
+                "DefaultFriendsRepositoryImplementation",
+                "MockPersistentStorage",
+                "MockApiImplementation",
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
+        ),
     ]
 )

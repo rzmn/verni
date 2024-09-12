@@ -21,9 +21,30 @@
     },
     {
       "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultAvatarsRepositoryImplementation",
+        "identifier" : "DefaultAvatarsRepositoryImplementationTests",
+        "name" : "DefaultAvatarsRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
         "identifier" : "DefaultProfileRepositoryImplementationTests",
         "name" : "DefaultProfileRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
+        "identifier" : "DefaultUsersRepositoryImplementationTests",
+        "name" : "DefaultUsersRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultNetworkingImplementation",
+        "identifier" : "DefaultNetworkingImplementationTests",
+        "name" : "DefaultNetworkingImplementationTests"
       }
     },
     {
@@ -42,16 +63,9 @@
     },
     {
       "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
-        "identifier" : "DefaultUsersRepositoryImplementationTests",
-        "name" : "DefaultUsersRepositoryImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:",
-        "identifier" : "DefaultAvatarsRepositoryImplementationTests",
-        "name" : "DefaultAvatarsRepositoryImplementationTests"
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultFriendsRepositoryImplementation",
+        "identifier" : "DefaultFriendsRepositoryImplementationTests",
+        "name" : "DefaultFriendsRepositoryImplementationTests"
       }
     },
     {
@@ -59,13 +73,6 @@
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
         "identifier" : "DefaultApiImplementationTests",
         "name" : "DefaultApiImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultNetworkingImplementation",
-        "identifier" : "DefaultNetworkingImplementationTests",
-        "name" : "DefaultNetworkingImplementationTests"
       }
     }
   ],

@@ -16,7 +16,7 @@ fileprivate extension FriendsState.Content {
                 balance: balance
             )
         }
-        let sectionsOrder: [FriendshipKind] = [.incoming, .pending, .friends]
+        let sectionsOrder: [FriendshipKind] = [.subscriber, .subscription, .friends]
         self = FriendsState.Content(
             sections: sectionsOrder.compactMap { friendshipKind -> FriendsState.Section? in
                 guard let users = friends[friendshipKind], !users.isEmpty else {

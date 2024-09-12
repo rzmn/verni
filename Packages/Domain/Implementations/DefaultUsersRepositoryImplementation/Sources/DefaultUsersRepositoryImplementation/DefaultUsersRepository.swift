@@ -38,7 +38,7 @@ extension DefaultUsersRepository: UsersRepository {
             logI { "getUsers failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        taskFactory.task {
+        taskFactory.detached {
             await self.offline.update(users: users)
         }
         logI { "getUsers OK" }
@@ -58,7 +58,7 @@ extension DefaultUsersRepository: UsersRepository {
             logI { "search users [q=\(query)] failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        taskFactory.task {
+        taskFactory.detached {
             await self.offline.update(users: users)
         }
         logI { "search users [q=\(query)] OK" }

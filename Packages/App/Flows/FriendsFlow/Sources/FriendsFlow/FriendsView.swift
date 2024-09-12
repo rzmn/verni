@@ -159,9 +159,9 @@ private class DataSource: UITableViewDiffableDataSource<FriendsView.Section, Fri
             switch $0 {
             case .friends:
                 return "friend_list_section_friends".localized
-            case .incoming:
+            case .subscriber:
                 return "friend_list_section_incoming".localized
-            case .pending:
+            case .subscription:
                 return "friend_list_section_outgoing".localized
             }
         }

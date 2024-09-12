@@ -108,7 +108,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             logI { "refreshSpendingCounterparties failed error: \(error)" }
             throw GeneralError(apiError: error)
         }
-        taskFactory.task {
+        taskFactory.detached {
             await self.offline.updateSpendingCounterparties(counterparties)
         }
         logI { "refreshSpendingCounterparties ok" }
@@ -125,7 +125,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(error)" }
             throw GetSpendingsHistoryError(apiError: error)
         }
-        taskFactory.task {
+        taskFactory.detached {
             await self.offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
         }
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }

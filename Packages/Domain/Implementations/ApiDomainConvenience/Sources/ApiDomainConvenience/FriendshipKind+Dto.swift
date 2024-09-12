@@ -6,9 +6,9 @@ extension FriendshipKindDto {
         switch domain {
         case .friends:
             self = .friends
-        case .incoming:
+        case .subscriber:
             self = .subscriber
-        case .pending:
+        case .subscription:
             self = .subscription
         }
     }
@@ -20,9 +20,9 @@ extension FriendshipKind {
         case .friends:
             self = .friends
         case .subscription:
-            self = .pending
+            self = .subscription
         case .subscriber:
-            self = .incoming
+            self = .subscriber
         }
     }
 }

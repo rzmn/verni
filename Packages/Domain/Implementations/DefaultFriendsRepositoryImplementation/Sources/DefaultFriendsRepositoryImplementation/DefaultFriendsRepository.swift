@@ -2,7 +2,7 @@ import Domain
 import Api
 import Combine
 import Logging
-internal import Base
+import Base
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
@@ -12,13 +12,21 @@ public actor DefaultFriendsRepository {
     private let api: ApiProtocol
     private let offline: FriendsOfflineMutableRepository
     private let longPoll: LongPoll
+    private let taskFactory: TaskFactory
     private var subjects = [FriendshipKindSet: PassthroughSubject<[FriendshipKind: [User]], Never>]()
 
-    public init(api: ApiProtocol, longPoll: LongPoll, logger: Logger, offline: FriendsOfflineMutableRepository) {
+    public init(
+        api: ApiProtocol,
+        longPoll: LongPoll,
+        logger: Logger,
+        offline: FriendsOfflineMutableRepository,
+        taskFactory: TaskFactory
+    ) {
         self.api = api
         self.offline = offline
         self.longPoll = longPoll
         self.logger = logger
+        self.taskFactory = taskFactory
     }
 }
 
@@ -76,21 +84,21 @@ extension DefaultFriendsRepository: FriendsRepository {
             case .me, .no:
                 break
             case .outgoing:
-                var array = dict[.pending] ?? []
+                var array = dict[.subscription] ?? []
                 array.append(user)
-                dict[.pending] = array
+                dict[.subscription] = array
             case .incoming:
-                var array = dict[.incoming] ?? []
+                var array = dict[.subscriber] ?? []
                 array.append(user)
-                dict[.incoming] = array
+                dict[.subscriber] = array
             case .friend:
                 var array = dict[.friends] ?? []
                 array.append(user)
                 dict[.friends] = array
             }
         } as [FriendshipKind: [User]]
-        Task {
-            await offline.storeFriends(friendsByKind, for: kind)
+        taskFactory.detached {
+            await self.offline.storeFriends(friendsByKind, for: kind)
         }
         subject(for: kind).send(friendsByKind)
         return friendsByKind

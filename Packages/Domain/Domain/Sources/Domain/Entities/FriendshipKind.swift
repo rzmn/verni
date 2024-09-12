@@ -1,13 +1,13 @@
 public enum FriendshipKind: Int, CaseIterable, Hashable, Sendable {
     case friends
-    case incoming
-    case pending
+    case subscriber
+    case subscription
 }
 
 public struct FriendshipKindSet: OptionSet, Hashable, Sendable {
     public static let friends = FriendshipKindSet(rawValue: 1 << FriendshipKind.friends.rawValue)
-    public static let incoming = FriendshipKindSet(rawValue: 1 << FriendshipKind.incoming.rawValue)
-    public static let pending = FriendshipKindSet(rawValue: 1 << FriendshipKind.pending.rawValue)
+    public static let subscriber = FriendshipKindSet(rawValue: 1 << FriendshipKind.subscriber.rawValue)
+    public static let subscription = FriendshipKindSet(rawValue: 1 << FriendshipKind.subscription.rawValue)
 
     public static var all: FriendshipKindSet {
         FriendshipKind.allCases.reduce(into: []) { set, value in
