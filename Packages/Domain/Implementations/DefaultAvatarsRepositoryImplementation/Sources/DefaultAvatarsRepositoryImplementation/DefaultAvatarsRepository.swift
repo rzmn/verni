@@ -2,119 +2,119 @@ import Domain
 import Api
 import Foundation
 import Base
+import Logging
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 public actor DefaultAvatarsRepository {
     private let api: ApiProtocol
     private let offlineRepository: AvatarsOfflineRepository
+    private let offlineMutableRepository: AvatarsOfflineMutableRepository
     private let taskFactory: TaskFactory
 
     private var loadingIds = [Avatar.ID: Task<Result<Data, GeneralError>, Never>]()
-    private var loadingIdsContinuation = [Avatar.ID: CheckedContinuation<Result<Data, GeneralError>, Never>]()
 
-    public init(api: ApiProtocol, taskFactory: TaskFactory) {
+    public init(
+        api: ApiProtocol,
+        taskFactory: TaskFactory,
+        offlineRepository: AvatarsOfflineRepository,
+        offlineMutableRepository: AvatarsOfflineMutableRepository,
+        logger: Logger
+    ) {
         self.api = api
+        self.offlineRepository = offlineRepository
+        self.offlineMutableRepository = offlineMutableRepository
         self.taskFactory = taskFactory
-        offlineRepository = AvatarsOfflineRepository()
     }
 }
 
 extension DefaultAvatarsRepository: AvatarsRepository {
-    public func get(ids: [Avatar.ID]) async throws(GeneralError) -> [Avatar.ID : Data] {
-        let cached = (await ids.concurrentMap(taskFactory: taskFactory) { id in
-            let data = await self.offlineRepository.getData(for: id)
-            if let data {
-                return (id, data)
-            } else {
-                return nil
-            }
-        } as [(Avatar.ID, Data)?]).compactMap { $0 }
-
-        let currentlyLoading = ids.compactMap { id -> (Avatar.ID, Task<Result<Data, GeneralError>, Never>)? in
-            guard let task = loadingIds[id] else {
-                return nil
-            }
-            return (id, task)
-        }
-        let successfullyLoaded = (await currentlyLoading.concurrentMap(taskFactory: taskFactory) { (id, task) in
-            let result = await task.result
-            guard case .success(let taskResult) = result, case .success(let data) = taskResult else {
-                return nil
-            }
-            return (id, data)
-        } as [(Avatar.ID, Data)?]).compactMap { $0 }
-
-        currentlyLoading.map(\.0).forEach {
-            loadingIds.removeValue(forKey: $0)
-        }
-
-        let cachedSet = Set([cached.map(\.0), successfullyLoaded.map(\.0)].flatMap { $0 })
-        let idsToLoad = ids.filter { !cachedSet.contains($0) }
-
-        for id in idsToLoad {
-            loadingIds[id] = taskFactory.task {
-                await withCheckedContinuation {
-                    self.loadingIdsContinuation[id] = $0
+    func waitForScheduled(
+        ids: [Avatar.ID],
+        from loadingIds: [Avatar.ID: Task<Result<Data, GeneralError>, Never>]
+    ) async -> [Avatar.ID: Data] {
+        await withTaskGroup(of: Optional<(id: Avatar.ID, data: Data)>.self) { group in
+            for id in ids {
+                guard let task = loadingIds[id] else {
+                    continue
+                }
+                group.addTask {
+                    let result = await task.value
+                    switch result {
+                    case .success(let data):
+                        return (id: id, data: data)
+                    case .failure:
+                        return nil
+                    }
                 }
             }
+            var loaded = [Avatar.ID: Data]()
+            for await value in group {
+                guard let value else {
+                    continue
+                }
+                loaded[value.id] = value.data
+            }
+            return loaded
         }
+    }
 
-        guard idsToLoad.count > 0 else {
-            return [cached, successfullyLoaded]
-                .flatMap { $0 }
-                .reduce(
-                    into: [:], { dict, kv in
-                        dict[kv.0] = kv.1
-                    }
-                )
+    func schedule(ids: [Avatar.ID]) {
+        let fetchTask = taskFactory.task { [api] in
+            try await api.run(method: Avatars.Get(ids: ids))
         }
-        do {
-            let values = try await api.run(method: Avatars.Get(ids: idsToLoad))
-            idsToLoad.forEach { id in
-                if let avatar = values[id] {
-                    if let data = avatar.base64Data.flatMap({ Data(base64Encoded: $0) }) {
-                        self.loadingIdsContinuation[id]?.resume(returning: .success(data))
+        ids.forEach { [offlineMutableRepository] id in
+            loadingIds[id] = taskFactory.task {
+                let fetchResult: Avatars.Get.Response
+                do {
+                    fetchResult = try await fetchTask.value
+                } catch {
+                    if let error = error as? GeneralError {
+                        return .failure(error)
                     } else {
-                        self.loadingIdsContinuation[id]?.resume(returning: .failure(.other(AvatarsRepositoryError.hasNoData)))
+                        assertionFailure()
+                        return .failure(.other(error))
+                    }
+                }
+                if let avatar = fetchResult[id] {
+                    if let data = avatar.base64Data.flatMap({ Data(base64Encoded: $0) }) {
+                        await offlineMutableRepository.store(data: data, for: id)
+                        return .success(data)
+                    } else {
+                        return .failure(.other(AvatarsRepositoryError.hasNoData))
                     }
                 } else {
-                    self.loadingIdsContinuation[id]?.resume(returning: .failure(.other(AvatarsRepositoryError.idDoesNotExist)))
+                    return .failure(.other(AvatarsRepositoryError.idDoesNotExist))
                 }
-                self.loadingIdsContinuation[id] = nil
             }
-            var dict = [Avatar.ID: Data]()
-            cached.forEach {
-                dict[$0.0] = $0.1
+        }
+    }
+
+    public func get(ids: [Avatar.ID]) async -> [Avatar.ID : Data] {
+        let cached = await offlineRepository.getConcurrent(taskFactory: taskFactory, ids: ids)
+        let alreadyRequested = await waitForScheduled(
+            ids: ids.filter { cached[$0] == nil },
+            from: loadingIds
+        )
+        let idsToLoad = ids.filter {
+            cached[$0] == nil && alreadyRequested[$0] == nil
+        }
+        guard idsToLoad.count > 0 else {
+            return alreadyRequested.reduce(into: cached) { dict, kv in
+                dict[kv.key] = kv.value
             }
-            successfullyLoaded.forEach {
-                dict[$0.0] = $0.1
+        }
+        schedule(ids: idsToLoad)
+        let loaded = await waitForScheduled(
+            ids: idsToLoad,
+            from: loadingIds
+        )
+        return loaded.reduce(
+            into: alreadyRequested.reduce(into: cached) { dict, kv in
+                dict[kv.key] = kv.value
             }
-            values.compactMapValues { value in
-                guard let base64 = value.base64Data else {
-                    return nil
-                }
-                return Data(base64Encoded: base64)
-            }.forEach {
-                dict[$0.key] = $0.value
-            }
-            _ = await values.concurrentMap(taskFactory: taskFactory) { value in
-                guard let base64 = value.value.base64Data else {
-                    return
-                }
-                guard let data = Data(base64Encoded: base64) else {
-                    return
-                }
-                return await self.offlineRepository.store(data: data, for: value.key)
-            }
-            return dict
-        } catch {
-            let error = GeneralError(apiError: error)
-            idsToLoad.forEach { id in
-                self.loadingIdsContinuation[id]?.resume(returning: .failure(error))
-                self.loadingIdsContinuation[id] = nil
-            }
-            throw error
+        ) { dict, kv in
+            dict[kv.key] = kv.value
         }
     }
 }

@@ -7,7 +7,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     private var _app: App?
     func app() async -> App {
         guard let _app else {
-            let app = await App(di: await DefaultDependenciesAssembly())
+            let app = await App(di: try! await DefaultDependenciesAssembly())
             _app = app
             return app
         }

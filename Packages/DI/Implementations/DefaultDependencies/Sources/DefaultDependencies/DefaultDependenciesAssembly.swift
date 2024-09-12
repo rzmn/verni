@@ -56,10 +56,16 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     private let apiEndpoint = "http://193.124.113.41:8082"
     private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
     private let taskFactory = DefaultTaskFactory()
+    private let persistencyFactory: PersistencyFactory
 
     public let appCommon: AppCommon
 
-    public init() async {
+    public init() async throws {
+        guard let permanentCacheDirectory = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.rzmn.accountydev.app"
+        ), let temporaryCacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            throw InternalError.error("cannot get required directories for data storage", underlying: nil)
+        }
         networkServiceFactory = DefaultNetworkServiceFactory(
             logger: .shared.with(
                 prefix: "[net] "
@@ -80,10 +86,22 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
             service: apiServiceFactory.create(tokenRefresher: nil),
             taskFactory: taskFactory
         )
+        persistencyFactory = try SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[db] "),
+            dbDirectory: permanentCacheDirectory,
+            taskFactory: taskFactory
+        )
         anonymousApi = apiFactory.create()
-        avatarsRepository =  DefaultAvatarsRepository(
+        let avatarsOfflineRepository = try DefaultAvatarsOfflineRepository(
+            container: temporaryCacheDirectory,
+            logger: .shared.with(prefix: "[avatars.offline] ")
+        )
+        avatarsRepository = DefaultAvatarsRepository(
             api: anonymousApi,
-            taskFactory: DefaultTaskFactory()
+            taskFactory: DefaultTaskFactory(),
+            offlineRepository: avatarsOfflineRepository,
+            offlineMutableRepository: avatarsOfflineRepository,
+            logger: .shared.with(prefix: "avatars")
         )
         appCommon = AppCommonDependencies(
             api: anonymousApi,
@@ -99,7 +117,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
             impl: await DefaultAuthUseCase(
                 api: anonymousApi,
                 apiServiceFactory: apiServiceFactory,
-                persistencyFactory: persistencyFactory(),
+                persistencyFactory: persistencyFactory,
                 activeSessionDIContainerFactory: ActiveSessionDependenciesAssemblyFactory(
                     appCommon: appCommon
                 ),
@@ -112,19 +130,6 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
                     )
                 }
             )
-        )
-    }
-}
-
-extension DefaultDependenciesAssembly {
-    func persistencyFactory() -> PersistencyFactory {
-        // FIXME: how to deal with that optionality/throws? 
-        try! SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[db] "),
-            dbDirectory: FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: "group.com.rzmn.accountydev.app"
-            )!,
-            taskFactory: taskFactory
         )
     }
 }

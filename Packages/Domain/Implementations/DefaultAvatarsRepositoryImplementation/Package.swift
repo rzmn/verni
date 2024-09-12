@@ -20,17 +20,48 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
+        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
     ],
     targets: [
         .target(
             name: "DefaultAvatarsRepositoryImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage",
+                "Base",
+                "Logging",
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        )
+        ),
+        .testTarget(
+            name: "DefaultAvatarsRepositoryImplementationTests",
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage",
+                "DefaultAvatarsRepositoryImplementation",
+                "Base",
+                "Logging",
+                "MockApiImplementation",
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
+        ),
     ]
 )

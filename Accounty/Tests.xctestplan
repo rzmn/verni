@@ -14,6 +14,20 @@
   "testTargets" : [
     {
       "target" : {
+        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultApiServiceImplementation",
+        "identifier" : "DefaultApiServiceImplementationTests",
+        "name" : "DefaultApiServiceImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
+        "identifier" : "DefaultProfileRepositoryImplementationTests",
+        "name" : "DefaultProfileRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultSpendingsRepositoryImplementation",
         "identifier" : "DefaultSpendingsRepositoryImplementationTests",
         "name" : "DefaultSpendingsRepositoryImplementationTests"
@@ -35,23 +49,16 @@
     },
     {
       "target" : {
+        "containerPath" : "container:",
+        "identifier" : "DefaultAvatarsRepositoryImplementationTests",
+        "name" : "DefaultAvatarsRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
         "identifier" : "DefaultApiImplementationTests",
         "name" : "DefaultApiImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultApiServiceImplementation",
-        "identifier" : "DefaultApiServiceImplementationTests",
-        "name" : "DefaultApiServiceImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
-        "identifier" : "DefaultProfileRepositoryImplementationTests",
-        "name" : "DefaultProfileRepositoryImplementationTests"
       }
     },
     {
