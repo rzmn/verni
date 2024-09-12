@@ -1,39 +1,41 @@
 import Domain
 import PersistentStorage
 import Combine
+import Base
 internal import ApiDomainConvenience
 internal import DataTransferObjects
-
-private actor LoggedOutHandler {
-    private var loggedOut = false
-
-    func allowLogout() -> Bool {
-        let allow = !loggedOut
-        loggedOut = true
-        return allow
-    }
-}
 
 public actor DefaultLogoutUseCase {
     private let didLogoutSubject = PassthroughSubject<LogoutReason, Never>()
     private let persistency: Persistency
+    private let taskFactory: TaskFactory
     private var subscriptions = Set<AnyCancellable>()
     private var loggedOutHandler = LoggedOutHandler()
 
     public init(
         persistency: Persistency,
-        shouldLogout: AnyPublisher<LogoutReason, Never>
+        shouldLogout: AnyPublisher<LogoutReason, Never>,
+        taskFactory: TaskFactory
     ) async {
         self.persistency = persistency
+        self.taskFactory = taskFactory
+        typealias Promise = @Sendable (Result<LogoutReason?, Never>) -> Void
+        let sendablePromise: @Sendable (LogoutReason, @escaping Promise) -> Void = { reason, promise in
+            self.taskFactory.task {
+                if await self.doLogout() {
+                    promise(.success(reason))
+                } else {
+                    promise(.success(nil))
+                }
+            }
+        }
         shouldLogout
             .flatMap { reason -> Future<LogoutReason?, Never> in
-                Future { promise in
-                    Task {
-                        if await self.doLogout() {
-                            promise(.success(reason))
-                        } else {
-                            promise(.success(nil))
-                        }
+                Future { [sendablePromise] promise in
+                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
+                    nonisolated(unsafe) let promise = promise
+                    sendablePromise(reason) {
+                        promise($0)
                     }
                 }
             }
@@ -59,8 +61,8 @@ extension DefaultLogoutUseCase {
         guard await loggedOutHandler.allowLogout() else {
             return false
         }
-        Task {
-            await persistency.invalidate()
+        taskFactory.task {
+            await self.persistency.invalidate()
         }
         return true
     }

@@ -115,12 +115,14 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
             logger: .shared.with(prefix: "[friends.repo] "),
             offline: DefaultFriendsOfflineRepository(
                 persistency: persistency
-            )
+            ),
+            taskFactory: DefaultTaskFactory()
         )
 
         logoutUseCase = await DefaultLogoutUseCase(
             persistency: persistency,
-            shouldLogout: logoutSubject.eraseToAnyPublisher()
+            shouldLogout: logoutSubject.eraseToAnyPublisher(),
+            taskFactory: DefaultTaskFactory()
         )
     }
 

@@ -42,13 +42,20 @@ extension DefaultFriendsRepository: FriendsRepository {
     }
 
     public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
-        await longPoll.poll(for: LongPollFriendsQuery())
+        let sendablePromise: @Sendable (@Sendable @escaping (Result<[FriendshipKind: [User]]?, Never>) -> Void) -> Void = { promise in
+            self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
+            self.taskFactory.task {
+                let result = try? await self.refreshFriends(ofKind: kind)
+                promise(.success(result))
+            }
+        }
+        return await longPoll.poll(for: LongPollFriendsQuery())
             .flatMap { _ in
-                Future { (promise: @escaping (Result<[FriendshipKind: [User]]?, Never>) -> Void) in
-                    self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
-                    Task {
-                        let result = try? await self.refreshFriends(ofKind: kind)
-                        promise(.success(result))
+                Future { [sendablePromise] promise in
+                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
+                    nonisolated(unsafe) let promise = promise
+                    sendablePromise {
+                        promise($0)
                     }
                 }
             }

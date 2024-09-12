@@ -18,13 +18,7 @@ extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
             try await api.run(
                 method: Spendings.CreateDeal(
                     deal: DealDto(
-                        timestamp: Int64(spending.date.timeIntervalSince1970),
-                        details: spending.details,
-                        cost: Int64((NSDecimalNumber(decimal: spending.cost).doubleValue * 100)),
-                        currency: spending.currency.stringValue,
-                        spendings: spending.participants.map {
-                            SpendingDto(userId: $0.key, cost: CostDto(cost: $0.value))
-                        }
+                        domain: spending
                     )
                 )
             )
