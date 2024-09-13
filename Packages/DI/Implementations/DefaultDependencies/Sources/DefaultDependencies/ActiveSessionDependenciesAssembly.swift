@@ -69,6 +69,10 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     let usersRepository: UsersRepository
     let spendingsRepository: SpendingsRepository
     let friendListRepository: FriendsRepository
+    let spendingsOfflineRepository: SpendingsOfflineRepository
+    let friendsOfflineRepository: FriendsOfflineRepository
+    let profileOfflineRepository: ProfileOfflineRepository
+    let usersOfflineRepository: UsersOfflineRepository
 
     let logoutUseCase: LogoutUseCase
 
@@ -89,55 +93,56 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         self.logoutSubject = logoutSubject
         self.userId = userId
 
+        let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(
+            persistency: persistency
+        )
+        self.spendingsOfflineRepository = spendingsOfflineRepository
+        let friendsOfflineRepository = DefaultFriendsOfflineRepository(
+            persistency: persistency
+        )
+        self.friendsOfflineRepository = friendsOfflineRepository
+        let profileOfflineRepository = DefaultProfileOfflineRepository(
+            persistency: persistency
+        )
+        self.profileOfflineRepository = profileOfflineRepository
+        let usersOfflineRepository = DefaultUsersOfflineRepository(
+            persistency: persistency
+        )
+        self.usersOfflineRepository = usersOfflineRepository
 
         updatableProfile = ExternallyUpdatable()
 
         profileRepository = await DefaultProfileRepository(
             api: api,
             logger: .shared.with(prefix: "[profile.repo] "),
-            offline: DefaultProfileOfflineRepository(
-                persistency: persistency
-            ),
+            offline: profileOfflineRepository,
             profile: updatableProfile,
             taskFactory: DefaultTaskFactory()
         )
         usersRepository = DefaultUsersRepository(
             api: api,
             logger: .shared.with(prefix: "[users.repo] "),
-            offline: DefaultUsersOfflineRepository(
-                persistency: persistency
-            ),
+            offline: usersOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         spendingsRepository = DefaultSpendingsRepository(
             api: api,
             longPoll: longPoll,
             logger: .shared.with(prefix: "[spendings.repo] "),
-            offline: DefaultSpendingsOfflineRepository(
-                persistency: persistency
-            ),
+            offline: spendingsOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         friendListRepository = DefaultFriendsRepository(
             api: api,
             longPoll: longPoll,
             logger: .shared.with(prefix: "[friends.repo] "),
-            offline: DefaultFriendsOfflineRepository(
-                persistency: persistency
-            ),
+            offline: friendsOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
-
         logoutUseCase = await DefaultLogoutUseCase(
             persistency: persistency,
             shouldLogout: logoutSubject.eraseToAnyPublisher(),
             taskFactory: DefaultTaskFactory()
-        )
-    }
-
-    func spendingsOfflineRepository() -> SpendingsOfflineRepository {
-        DefaultSpendingsOfflineRepository(
-            persistency: persistency
         )
     }
 
@@ -157,28 +162,10 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         )
     }
 
-    func friendsOfflineRepository() -> FriendsOfflineRepository {
-        DefaultFriendsOfflineRepository(
-            persistency: persistency
-        )
-    }
-
-    func profileOfflineRepository() -> ProfileOfflineRepository {
-        DefaultProfileOfflineRepository(
-            persistency: persistency
-        )
-    }
-
     func pushRegistrationUseCase() -> PushRegistrationUseCase {
         DefaultPushRegistrationUseCase(
             api: api, 
             logger: .shared.with(prefix: "[push] ")
-        )
-    }
-
-    func usersOfflineRepository() -> UsersOfflineRepository {
-        DefaultUsersOfflineRepository(
-            persistency: persistency
         )
     }
 

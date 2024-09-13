@@ -22,7 +22,7 @@ public actor UserPreviewFlow {
     private var subscriptions = Set<AnyCancellable>()
 
     public init(di: ActiveSessionDIContainer, router: AppRouter, user: User) async {
-        let spendingsOfflineRepository = di.spendingsOfflineRepository()
+        let spendingsOfflineRepository = di.spendingsOfflineRepository
         viewModel = await UserPreviewViewModel(
             hostId: di.userId,
             counterparty: user,

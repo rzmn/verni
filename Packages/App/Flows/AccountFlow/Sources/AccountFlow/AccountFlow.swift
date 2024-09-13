@@ -34,7 +34,7 @@ public actor AccountFlow {
         editingUseCase = di.profileEditingUseCase()
         profileRepository = di.profileRepository
         viewModel = await AccountViewModel(
-            profile: await di.profileOfflineRepository().getProfile()
+            profile: await di.profileOfflineRepository.getProfile()
         )
     }
 

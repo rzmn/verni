@@ -30,8 +30,8 @@ public actor FriendsFlow {
         self.router = router
         self.di = di
 
-        let offlineFriends = di.friendsOfflineRepository()
-        let offlineSpendings = di.spendingsOfflineRepository()
+        let offlineFriends = di.friendsOfflineRepository
+        let offlineSpendings = di.spendingsOfflineRepository
 
         async let asyncFriends = offlineFriends.getFriends(set: .all)
         async let asyncSpendings = offlineSpendings.getSpendingCounterparties()

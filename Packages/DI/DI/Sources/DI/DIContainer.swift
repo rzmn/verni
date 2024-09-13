@@ -26,15 +26,16 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
     var spendingsRepository: SpendingsRepository { get }
     var friendListRepository: FriendsRepository { get }
 
+    var spendingsOfflineRepository: SpendingsOfflineRepository { get }
+    var friendsOfflineRepository: FriendsOfflineRepository { get }
+    var profileOfflineRepository: ProfileOfflineRepository { get }
+    var usersOfflineRepository: UsersOfflineRepository { get }
+
     var logoutUseCase: LogoutUseCase { get }
 
-    func spendingsOfflineRepository() -> SpendingsOfflineRepository
     func spendingInteractionsUseCase() -> SpendingInteractionsUseCase
     func profileEditingUseCase() -> ProfileEditingUseCase
-    func friendsOfflineRepository() -> FriendsOfflineRepository
-    func profileOfflineRepository() -> ProfileOfflineRepository
     func pushRegistrationUseCase() -> PushRegistrationUseCase
-    func usersOfflineRepository() -> UsersOfflineRepository
     func friendInterationsUseCase() -> FriendInteractionsUseCase
     func emailConfirmationUseCase() -> EmailConfirmationUseCase
     func receivingPushUseCase() -> ReceivingPushUseCase

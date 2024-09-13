@@ -28,7 +28,7 @@ public actor PickCounterpartyFlow {
         friendsRepository = di.friendListRepository
         viewModel = await PickCounterpartyViewModel(
             friends: await di
-                .friendsOfflineRepository()
+                .friendsOfflineRepository
                 .getFriends(set: .all)
         )
     }
