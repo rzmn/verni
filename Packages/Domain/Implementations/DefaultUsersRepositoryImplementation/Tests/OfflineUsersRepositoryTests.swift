@@ -63,6 +63,7 @@ private actor PersistencyProvider {
         let repository = DefaultUsersOfflineRepository(persistency: provider.persistency)
         let user = User(
             id: UUID().uuidString,
+            status: .no,
             displayName: "some name",
             avatar: nil
         )

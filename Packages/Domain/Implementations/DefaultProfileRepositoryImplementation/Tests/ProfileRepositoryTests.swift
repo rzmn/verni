@@ -50,6 +50,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
         let profile = Profile(
             user: User(
                 id: UUID().uuidString,
+                status: .no,
                 displayName: "some name",
                 avatar: nil
             ),
@@ -64,6 +65,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
             api: provider.api,
             logger: .shared,
             offline: offlineRepository,
+            profile: ExternallyUpdatable(),
             taskFactory: taskFactory
         )
 

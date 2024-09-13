@@ -58,6 +58,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     private let taskFactory = DefaultTaskFactory()
     private let persistencyFactory: PersistencyFactory
 
+    let avatarsOfflineMutableRepository: AvatarsOfflineMutableRepository
     public let appCommon: AppCommon
 
     public init() async throws {
@@ -96,6 +97,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
             container: temporaryCacheDirectory,
             logger: .shared.with(prefix: "[avatars.offline] ")
         )
+        avatarsOfflineMutableRepository = avatarsOfflineRepository
         avatarsRepository = DefaultAvatarsRepository(
             api: anonymousApi,
             taskFactory: DefaultTaskFactory(),
@@ -119,7 +121,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
                 apiServiceFactory: apiServiceFactory,
                 persistencyFactory: persistencyFactory,
                 activeSessionDIContainerFactory: ActiveSessionDependenciesAssemblyFactory(
-                    appCommon: appCommon
+                    defaultDependencies: self
                 ),
                 apiFactoryProvider: { refresher in
                     await DefaultApiFactory(

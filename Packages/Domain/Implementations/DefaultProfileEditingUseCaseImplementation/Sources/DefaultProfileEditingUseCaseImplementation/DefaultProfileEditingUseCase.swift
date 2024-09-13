@@ -2,27 +2,41 @@ import Domain
 import Api
 import Foundation
 import PersistentStorage
+import Base
 internal import ApiDomainConvenience
 
 public actor DefaultProfileEditingUseCase {
     private let api: ApiProtocol
     private let persistency: Persistency
-    private let repository: ProfileRepository
+    private let profile: ExternallyUpdatable<Domain.Profile>
+    private let taskFactory: TaskFactory
+    private let avatarsRepository: AvatarsOfflineMutableRepository
 
-    public init(api: ApiProtocol, persistency: Persistency, repository: ProfileRepository) {
+    public init(
+        api: ApiProtocol,
+        persistency: Persistency,
+        taskFactory: TaskFactory,
+        avatarsRepository: AvatarsOfflineMutableRepository,
+        profile: ExternallyUpdatable<Domain.Profile>
+    ) {
         self.api = api
         self.persistency = persistency
-        self.repository = repository
+        self.taskFactory = taskFactory
+        self.avatarsRepository = avatarsRepository
+        self.profile = profile
     }
 }
 
 extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
     public func setAvatar(imageData: Data) async throws(SetAvatarError) {
         do {
-            try await api.run(
+            let id = try await api.run(
                 method: Api.Profile.SetAvatar(dataBase64: imageData.base64EncodedString())
             )
-            _ = try? await repository.refreshProfile()
+            await avatarsRepository.store(data: imageData, for: id)
+            await profile.add { profile in
+                Profile(profile, user: User(profile.user, avatar: Avatar(id: id)))
+            }
         } catch {
             throw SetAvatarError(apiError: error)
         }
@@ -33,7 +47,9 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             try await api.run(
                 method: Api.Profile.SetDisplayName(displayName: displayName)
             )
-            _ = try? await repository.refreshProfile()
+            await profile.add { profile in
+                Profile(profile, user: User(profile.user, displayName: displayName))
+            }
         } catch {
             throw SetDisplayNameError(apiError: error)
         }
@@ -44,10 +60,10 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             let tokens = try await api.run(
                 method: Auth.UpdateEmail(email: email)
             )
-            Task {
-                await persistency.update(refreshToken: tokens.refreshToken)
+            await persistency.update(refreshToken: tokens.refreshToken)
+            await profile.add { profile in
+                Profile(profile, email: email, isEmailVerified: false)
             }
-            _ = try? await repository.refreshProfile()
         } catch {
             throw EmailUpdateError(apiError: error)
         }
@@ -58,9 +74,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             let tokens = try await api.run(
                 method: Auth.UpdatePassword(old: old, new: new)
             )
-            Task {
-                await persistency.update(refreshToken: tokens.refreshToken)
-            }
+            await persistency.update(refreshToken: tokens.refreshToken)
         } catch {
             throw PasswordUpdateError(apiError: error)
         }

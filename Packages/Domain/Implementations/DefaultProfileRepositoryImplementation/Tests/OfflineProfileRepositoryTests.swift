@@ -67,6 +67,7 @@ private actor PersistencyProvider {
         let profile = Profile(
             user: User(
                 id: UUID().uuidString,
+                status: .no,
                 displayName: "some name",
                 avatar: nil
             ),

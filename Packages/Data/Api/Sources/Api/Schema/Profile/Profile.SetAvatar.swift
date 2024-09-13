@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Profile {
     public struct SetAvatar: ApiMethod, ProfileScope {
-        public typealias Response = NoResponse
+        public typealias Response = UserDto.Avatar.ID
         public var parameters: Parameters
 
         public struct Parameters: Encodable, Sendable {

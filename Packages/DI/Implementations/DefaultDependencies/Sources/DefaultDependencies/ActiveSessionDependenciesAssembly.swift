@@ -29,10 +29,10 @@ internal import DefaultLogoutUseCaseImplementation
 internal import DefaultReceivingPushUseCaseImplementation
 
 final class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory {
-    private let appCommon: AppCommon
+    let defaultDependencies: DefaultDependenciesAssembly
 
-    init(appCommon: AppCommon) {
-        self.appCommon = appCommon
+    init(defaultDependencies: DefaultDependenciesAssembly) {
+        self.defaultDependencies = defaultDependencies
     }
 
     func create(
@@ -46,7 +46,7 @@ final class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFa
             api: api,
             persistency: persistency,
             longPoll: longPoll,
-            appCommon: appCommon,
+            defaultDependencies: defaultDependencies,
             logoutSubject: logoutSubject,
             userId: userId
         )
@@ -57,9 +57,15 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     private let api: ApiProtocol
     private let persistency: Persistency
     private let longPoll: LongPoll
-    private let logoutSubject: PassthroughSubject<LogoutReason, Never>
 
-    let appCommon: AppCommon
+    private let logoutSubject: PassthroughSubject<LogoutReason, Never>
+    private let updatableProfile: ExternallyUpdatable<Domain.Profile>
+
+    var appCommon: AppCommon {
+        defaultDependencies.appCommon
+    }
+
+    let defaultDependencies: DefaultDependenciesAssembly
     let profileRepository: ProfileRepository
     let usersRepository: UsersRepository
     let spendingsRepository: SpendingsRepository
@@ -73,16 +79,19 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         api: ApiProtocol,
         persistency: Persistency,
         longPoll: LongPoll,
-        appCommon: AppCommon,
+        defaultDependencies: DefaultDependenciesAssembly,
         logoutSubject: PassthroughSubject<LogoutReason, Never>,
         userId: User.ID
     ) async {
         self.api = api
         self.persistency = persistency
         self.longPoll = longPoll
-        self.appCommon = appCommon
+        self.defaultDependencies = defaultDependencies
         self.logoutSubject = logoutSubject
         self.userId = userId
+
+
+        updatableProfile = ExternallyUpdatable()
 
         profileRepository = await DefaultProfileRepository(
             api: api,
@@ -90,6 +99,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
             offline: DefaultProfileOfflineRepository(
                 persistency: persistency
             ),
+            profile: updatableProfile,
             taskFactory: DefaultTaskFactory()
         )
         usersRepository = DefaultUsersRepository(
@@ -142,7 +152,9 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         DefaultProfileEditingUseCase(
             api: api,
             persistency: persistency,
-            repository: profileRepository
+            taskFactory: DefaultTaskFactory(),
+            avatarsRepository: defaultDependencies.avatarsOfflineMutableRepository,
+            profile: updatableProfile
         )
     }
 
