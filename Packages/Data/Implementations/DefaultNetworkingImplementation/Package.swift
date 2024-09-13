@@ -4,32 +4,28 @@
 import PackageDescription
 
 let package = Package(
-    name: "DefaultApiImplementation",
+    name: "DefaultNetworkingImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultApiImplementation",
-            targets: ["DefaultApiImplementation"]
+            name: "DefaultNetworkingImplementation",
+            targets: ["DefaultNetworkingImplementation"]
         ),
     ],
     dependencies: [
-        .package(path: "../../Api"),
-        .package(path: "../../DataTransferObjects"),
-        .package(path: "../../ApiService"),
-        .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../Networking"),
+        .package(path: "../../Logging"),
+        .package(path: "../../Base"),
     ],
     targets: [
         .target(
-            name: "DefaultApiImplementation",
+            name: "DefaultNetworkingImplementation",
             dependencies: [
-                "ApiService",
-                "Api",
-                "Base",
-                "DataTransferObjects",
                 "Logging",
+                "Networking",
+                "Base"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -39,13 +35,12 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "DefaultApiImplementationTests",
+            name: "DefaultNetworkingImplementationTests",
             dependencies: [
-                "DefaultApiImplementation",
-                "ApiService",
-                "Api",
+                "Logging",
+                "Networking",
                 "Base",
-                "DataTransferObjects"
+                "DefaultNetworkingImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

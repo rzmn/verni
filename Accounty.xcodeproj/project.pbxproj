@@ -76,7 +76,6 @@
 		611CCD642C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSpendingsRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultUsersRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
-		611CCD812C50AEA600289D9E /* AuthSession */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthSession; sourceTree = "<group>"; };
 		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
 		612250812C6DD54500553D23 /* AddExpenseFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AddExpenseFlow; sourceTree = "<group>"; };
 		6126313A2C5FC49400445300 /* AuthenticatedFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthenticatedFlow; sourceTree = "<group>"; };
@@ -159,6 +158,8 @@
 			isa = PBXGroup;
 			children = (
 				61C90BF52C84B0E6006A44C0 /* Implementations */,
+				611CCD572C50AE3A00289D9E /* ApiService */,
+				611CCD5C2C50AE3A00289D9E /* Networking */,
 				61BBB1242C50D3CE00E3D4F3 /* Api */,
 				611CCD502C50AE3A00289D9E /* DataTransferObjects */,
 				611CCD522C50AE3A00289D9E /* PersistentStorage */,
@@ -180,12 +181,8 @@
 		611CCD5D2C50AE3A00289D9E /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
-				61C90BF42C84B02E006A44C0 /* Implementations */,
-				611CCD572C50AE3A00289D9E /* ApiService */,
-				611CCD812C50AEA600289D9E /* AuthSession */,
 				611CCD582C50AE3A00289D9E /* Base */,
 				611CCD5B2C50AE3A00289D9E /* Logging */,
-				611CCD5C2C50AE3A00289D9E /* Networking */,
 			);
 			path = Infrastructure;
 			sourceTree = "<group>";
@@ -344,19 +341,12 @@
 			name = Friends;
 			sourceTree = "<group>";
 		};
-		61C90BF42C84B02E006A44C0 /* Implementations */ = {
+		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
 				6143A7F42C9162800030AAF1 /* MockNetworkingImplementation */,
 				611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */,
 				611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */,
-			);
-			path = Implementations;
-			sourceTree = "<group>";
-		};
-		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
-			isa = PBXGroup;
-			children = (
 				6143A7F32C90CBF90030AAF1 /* MockApiImplementation */,
 				6143A7D52C9076930030AAF1 /* MockPersistentStorage */,
 				611CCD852C50B1D400289D9E /* PersistentStorageSQLite */,

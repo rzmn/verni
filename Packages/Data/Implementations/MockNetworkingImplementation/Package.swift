@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "DefaultNetworkingImplementation",
+    name: "MockNetworkingImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultNetworkingImplementation",
-            targets: ["DefaultNetworkingImplementation"]
+            name: "MockNetworkingImplementation",
+            targets: ["MockNetworkingImplementation"]
         ),
     ],
     dependencies: [
@@ -21,8 +21,12 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "DefaultNetworkingImplementation",
-            dependencies: ["Logging", "Networking", "Base"],
+            name: "MockNetworkingImplementation",
+            dependencies: [
+                "Logging",
+                "Networking",
+                "Base"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
@@ -30,15 +34,5 @@ let package = Package(
                 ], .when(configuration: .debug))
             ]
         ),
-        .testTarget(
-            name: "DefaultNetworkingImplementationTests",
-            dependencies: ["Logging", "Networking", "Base", "DefaultNetworkingImplementation"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
-            ]
-        )
     ]
 )

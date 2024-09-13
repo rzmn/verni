@@ -21,48 +21,6 @@
     },
     {
       "target" : {
-        "containerPath" : "container:Packages\/Data\/Implementations\/PersistentStorageSQLite",
-        "identifier" : "PersistentStorageSQLiteTests",
-        "name" : "PersistentStorageSQLiteTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
-        "identifier" : "DefaultProfileRepositoryImplementationTests",
-        "name" : "DefaultProfileRepositoryImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultNetworkingImplementation",
-        "identifier" : "DefaultNetworkingImplementationTests",
-        "name" : "DefaultNetworkingImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultFriendsRepositoryImplementation",
-        "identifier" : "DefaultFriendsRepositoryImplementationTests",
-        "name" : "DefaultFriendsRepositoryImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
-        "identifier" : "DefaultApiImplementationTests",
-        "name" : "DefaultApiImplementationTests"
-      }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:Packages\/Infrastructure\/Implementations\/DefaultApiServiceImplementation",
-        "identifier" : "DefaultApiServiceImplementationTests",
-        "name" : "DefaultApiServiceImplementationTests"
-      }
-    },
-    {
-      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
         "identifier" : "DefaultUsersRepositoryImplementationTests",
         "name" : "DefaultUsersRepositoryImplementationTests"
@@ -77,9 +35,51 @@
     },
     {
       "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultNetworkingImplementation",
+        "identifier" : "DefaultNetworkingImplementationTests",
+        "name" : "DefaultNetworkingImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
+        "identifier" : "DefaultProfileRepositoryImplementationTests",
+        "name" : "DefaultProfileRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultAvatarsRepositoryImplementation",
         "identifier" : "DefaultAvatarsRepositoryImplementationTests",
         "name" : "DefaultAvatarsRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiServiceImplementation",
+        "identifier" : "DefaultApiServiceImplementationTests",
+        "name" : "DefaultApiServiceImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/PersistentStorageSQLite",
+        "identifier" : "PersistentStorageSQLiteTests",
+        "name" : "PersistentStorageSQLiteTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultFriendsRepositoryImplementation",
+        "identifier" : "DefaultFriendsRepositoryImplementationTests",
+        "name" : "DefaultFriendsRepositoryImplementationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
+        "identifier" : "DefaultApiImplementationTests",
+        "name" : "DefaultApiImplementationTests"
       }
     }
   ],

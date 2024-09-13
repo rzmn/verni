@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../../Api"),
         .package(path: "../../DataTransferObjects"),
-        .package(path: "../../../Infrastructure/ApiService"),
+        .package(path: "../../ApiService"),
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Infrastructure/Logging"),
     ],

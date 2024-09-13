@@ -4,22 +4,12 @@ import DI
 import PersistentStorage
 import ApiService
 import Domain
-@preconcurrency import Combine
+import Combine
 internal import Base
 
-public protocol ActiveSessionDIContainerFactory: Sendable {
-    func create(
-        api: ApiProtocol,
-        persistency: Persistency,
-        longPoll: LongPoll,
-        logoutSubject: PassthroughSubject<LogoutReason, Never>,
-        userId: User.ID
-    ) async -> ActiveSessionDIContainer
-}
-
-public actor ActiveSession: ActiveSessionDIContainerConvertible {
+actor ActiveSession: ActiveSessionDIContainerConvertible {
     private var _activeSessionDIContainer: (any ActiveSessionDIContainer)?
-    public func activeSessionDIContainer() async -> any ActiveSessionDIContainer {
+    func activeSessionDIContainer() async -> any ActiveSessionDIContainer {
         guard let _activeSessionDIContainer else {
             let container = await factory.create(
                 api: authenticatedApiFactory.create(),
@@ -45,7 +35,7 @@ public actor ActiveSession: ActiveSessionDIContainerConvertible {
     private let persistency: Persistency
     private let accessToken: String?
 
-    public static func create(
+    static func create(
         anonymousApi: ApiProtocol,
         hostId: User.ID,
         accessToken: String?,
@@ -65,7 +55,7 @@ public actor ActiveSession: ActiveSessionDIContainerConvertible {
         )
     }
 
-    public static func awake(
+    static func awake(
         anonymousApi: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,

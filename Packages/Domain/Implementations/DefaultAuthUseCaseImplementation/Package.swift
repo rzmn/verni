@@ -18,12 +18,15 @@ let package = Package(
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
-        .package(path: "../../../Infrastructure/AuthSession"),
     ],
     targets: [
         .target(
             name: "DefaultAuthUseCaseImplementation",
-            dependencies: ["Domain", "Api", "AuthSession", "DataTransferObjects"],
+            dependencies: [
+                "Domain",
+                "Api",
+                "DataTransferObjects"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

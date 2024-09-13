@@ -34,17 +34,17 @@ let package = Package(
         .package(path: "../../../Domain/Implementations/DefaultLogoutUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultReceivingPushUseCaseImplementation"),
 
-        .package(path: "../../../Infrastructure/Networking"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/ApiService"),
-        .package(path: "../../../Infrastructure/AuthSession"),
-        .package(path: "../../../Infrastructure/Implementations/DefaultNetworkingImplementation"),
-        .package(path: "../../../Infrastructure/Implementations/DefaultApiServiceImplementation"),
+        .package(path: "../../../Infrastructure/Base"),
 
         .package(path: "../../../Data/PersistentStorage"),
+        .package(path: "../../../Data/Networking"),
         .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/ApiService"),
         .package(path: "../../../Data/Implementations/PersistentStorageSQLite"),
         .package(path: "../../../Data/Implementations/DefaultApiImplementation"),
+        .package(path: "../../../Data/Implementations/DefaultNetworkingImplementation"),
+        .package(path: "../../../Data/Implementations/DefaultApiServiceImplementation"),
     ],
     targets: [
         .target(
@@ -56,7 +56,7 @@ let package = Package(
                 "Logging",
                 "ApiService",
                 "Api",
-                "AuthSession",
+                "Base",
                 "PersistentStorage",
                 "DefaultNetworkingImplementation",
                 "DefaultApiServiceImplementation",

@@ -2,7 +2,6 @@ import DI
 import Domain
 import Foundation
 internal import Base
-internal import AuthSession
 internal import Api
 internal import ApiService
 internal import DefaultApiImplementation

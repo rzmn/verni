@@ -1,10 +1,9 @@
 import Domain
 import Api
 import ApiService
-import AuthSession
-import DataTransferObjects
 import PersistentStorage
 import DI
+internal import DataTransferObjects
 
 public actor DefaultAuthUseCase {
     private let api: ApiProtocol
