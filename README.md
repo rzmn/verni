@@ -12,7 +12,15 @@ graph LR
     PresentationLayer(App Layer)-. knows about .-> DomainLayer(Domain Layer)
 ```
 
-Each part of domain or data layer has its own *abstract* module containing a set of protocols/entities and at least one *implementation* module. 
+Each part of domain or data layer has its own *abstract* module containing a set of protocols/entities and at least one *implementation* module. If necessary, implementation modules can be dependent on the infrastructure layer.
+
+```mermaid
+graph LR
+    Infrastructure(Infrastructure Layer) -- utility/analytics/logging --> DataLayer(Data Layer Implementations)
+    Infrastructure(Infrastructure Layer) -- utility/analytics/logging --> DomainLayer(Domain Layer Implementations)
+    Infrastructure(Infrastructure Layer) -- utility/analytics/logging --> PresentationLayer(App Layer Implementations)
+
+```
 
 No *abstract* module depends on any *implementation* module, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
 
@@ -20,17 +28,7 @@ It is highly recommended to keep *abstract* modules without any dependencies to 
 
 Each *module* is provided as a *Swift Package*.
 
-```mermaid
-graph LR
-    DomainLayer(Domain Layer)-. knows about .-> Infrastructure(Infrastructure Layer)
-    PresentationLayer(App Layer)-. knows about .-> Infrastructure(Infrastructure Layer)
-```
-
-fdsfsd
-
 ### Data Layer
-
-
 
 ### App (Presentation) Layer
 
@@ -72,27 +70,41 @@ Each _Flow_ is provided as a _Swift Package_.
 #### Flow
 
 - Entry point for some user path as described above
+
 - The only public entity in a corresponding swift package
+
 - Interacts with domain layer. (Use Cases, Repositories, Entities)
+
 - _Presenter_ and _ViewModel_ are created by a _Flow_
+
 - Listening for _User Actions_
+
 - Sending updates to _ViewModel_
   
   #### Presenter
+
 - Responsible for UI presentation (view controllers, HUDs, popups etc)
+
 - Interacts with _AppRouter_. _AppRouter_ provides an information about current navigation state.
+
 - _View_ is created by a _Presenter_
   
   #### ViewModel
+
 - Responsible for creating and publishing a _ViewState_ to _ViewActions_
+
 - _ViewModel_ is istening for updates from _Flow_. _ViewState_ is being created based on that updates
   
   #### ViewActions
+
 - Publishing _ViewState_ to _View_
+
 - Listening for user actions from _View_
   
   #### View
+
 - Passive
+
 - Listening for _ViewState_ from _ViewActions_ and renders it
 
 ```mermaid
