@@ -14,13 +14,17 @@ graph LR
 
 Each part of domain or data layer has its own *abstract* module containing a set of protocols/entities and at least one *implementation* module. If necessary, implementation modules can be dependent on the infrastructure layer.
 
+<details>
+  <summary>Dependency graph</summary>
+
 ```mermaid
 graph LR
     Infrastructure(Infrastructure Layer) -- utility/analytics/logging --> DataLayer(Data Layer Implementations)
     Infrastructure(Infrastructure Layer) -- utility/analytics/logging --> DomainLayer(Domain Layer Implementations)
     Infrastructure(Infrastructure Layer) -- utility/analytics/logging --> PresentationLayer(App Layer Implementations)
-
 ```
+
+</details>
 
 No *abstract* module depends on any *implementation* module, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
 
@@ -118,9 +122,10 @@ graph LR
     Presenter(Presenter) -- creating and presenting --> View(View)
 ```
 
-### Flow hierarchy
-
 Each flow knows about its direct children only
+
+<details>
+  <summary>Flow hierarchy</summary>
 
 ```mermaid
 graph LR
@@ -139,3 +144,5 @@ graph LR
     UnauthenticatedFlow(UnauthenticatedFlow) -- as tab --> SignInFlow(SignInFlow)
     SignInFlow(SignInFlow) -- starts --> SignUpFlow(SignUpFlow)
 ```
+
+</details>
