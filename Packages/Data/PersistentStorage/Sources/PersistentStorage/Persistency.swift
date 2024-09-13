@@ -16,7 +16,7 @@ public protocol Persistency: Sendable {
     func getSpendingsHistory(counterparty: UserDto.ID) async -> [IdentifiableDealDto]?
     func updateSpendingsHistory(counterparty: UserDto.ID, history: [IdentifiableDealDto]) async
 
-    func getFriends(set: Set<FriendshipKindDto>) async -> [FriendshipKindDto : [UserDto]]?
+    func getFriends(set: Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]?
     func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async
 
     func close() async
