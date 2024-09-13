@@ -1,5 +1,29 @@
 # The App
 
+Shared Expenses Tracker App iOS Client.
+
+---
+
+I dreamed of working on a product that wouldn't have boring commercial stuff like supporting 4yr old iOS deployment target or demands to test some random idea ASAP just to measure its impact on user's timestamp or reabstracting awful api designed by incapable of negotiation backend team or whatever. So I made one. 
+
+Let's try to realize the desire to implement the application the way I'd like it to be, keeping focus on scalability, testability and maintainability.
+
+## Tech stack
+
+- swift 6
+
+- strict concurrency
+
+- combine
+
+- UIKit
+
+- SPM
+
+## Features
+
+- tbd
+
 ## Architecture/Implementation overview
 
 The App's architecture can be considered as a set of _Layers_. Each layer knows only about the "previous" one. 
