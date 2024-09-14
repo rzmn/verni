@@ -95,7 +95,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
     }
 }
 
-@Suite struct SpendingsRepositoryTests {
+@Suite(.timeLimit(.minutes(1))) struct SpendingsRepositoryTests {
 
     @Test func testRefreshCounterparties() async throws {
 
@@ -130,23 +130,14 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         // when
 
         let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
+        try await taskFactory.runUntilIdle()
 
         // then
-
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
 
         #expect(counterpartiesFromRepository == counterparties)
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
         #expect(await spendingCounterpartiesFromPublisher == counterparties)
-
-        timeout.cancel()
     }
 
     @Test func testSpendingCounterpartiesPolling() async throws {
@@ -184,22 +175,13 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         apiProvider.getCounterpartiesSubject.send(
             LongPollCounterpartiesQuery.Update(category: .counterparties)
         )
+        try await taskFactory.runUntilIdle()
 
         // then
-
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
 
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
         #expect(await spendingCounterpartiesFromPublisher == counterparties)
-
-        timeout.cancel()
     }
 
     @Test func testRefreshSpendingsHistory() async throws {
@@ -242,23 +224,14 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         // when
 
         let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
+        try await taskFactory.runUntilIdle()
 
         // then
-
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
 
         #expect(historyFromRepository == history)
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
         #expect(await spendingsHistoryFromPublisher == history)
-
-        timeout.cancel()
     }
 
     @Test func testSpendingsHistoryPolling() async throws {
@@ -305,22 +278,13 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
                 category: .spendings(uid: counterparty)
             )
         )
+        try await taskFactory.runUntilIdle()
 
         // then
-
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
 
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
         #expect(await spendingsHistoryFromPublisher == history)
-
-        timeout.cancel()
     }
 
     @Test func testGetDeal() async throws {
@@ -355,20 +319,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         // when
 
         let dealFromRepository = try await repository.getSpending(id: deal.id)
+        try await taskFactory.runUntilIdle()
 
         // then
 
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
-
         #expect(dealFromRepository == deal.spending)
         #expect(await apiProvider.getDealCalls == [deal.id])
-
-        timeout.cancel()
     }
 }

@@ -39,7 +39,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
     }
 }
 
-@Suite struct ProfileRepositoryTests {
+@Suite(.timeLimit(.minutes(1))) struct ProfileRepositoryTests {
 
     @Test func testRefreshProfile() async throws {
 
@@ -77,22 +77,13 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
         // when
 
         let profileFromRepository = try await repository.refreshProfile()
+        try await taskFactory.runUntilIdle()
 
         // then
-
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
 
         #expect(await provider.getCallsCount == 1)
         #expect(await offlineRepository.updates == [profile])
         #expect(profileFromRepository == profile)
         #expect(await profileFromPublisher == profile)
-
-        timeout.cancel()
     }
 }

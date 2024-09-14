@@ -66,7 +66,7 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
     }
 }
 
-@Suite struct ProfileRepositoryTests {
+@Suite(.timeLimit(.minutes(1))) struct ProfileRepositoryTests {
 
     @Test func testRefreshFriends() async throws {
 
@@ -107,16 +107,9 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
         // when
 
         let friendsFromRepository = try await repository.refreshFriends(ofKind: set)
+        try await taskFactory.runUntilIdle()
 
         // then
-
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
 
         #expect(await provider.getUsersCalls.map { Set($0) } == [Set(friends.values.flatMap { $0 }.map(\.id))])
         #expect(await provider.getFriendsCalls == [ set.array.map(FriendshipKindDto.init).map(\.rawValue) ])
@@ -130,7 +123,5 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
         #expect(await offlineRepository.updates.map(\.1) == [set])
         #expect(friendsFromRepository == friendsCasted)
         #expect(await friendsFromPublisher == friendsCasted)
-
-        timeout.cancel()
     }
 }

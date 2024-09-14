@@ -1,7 +1,7 @@
 {
   "configurations" : [
     {
-      "id" : "FDEC9786-7EB3-4CB3-89F1-99DA720ECD5F",
+      "id" : "E813544F-86D0-4D44-8DD0-63C2D9924964",
       "name" : "Configuration 1",
       "options" : {
 
@@ -13,6 +13,7 @@
   },
   "testTargets" : [
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultSpendingsRepositoryImplementation",
         "identifier" : "DefaultSpendingsRepositoryImplementationTests",
@@ -20,6 +21,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
         "identifier" : "DefaultUsersRepositoryImplementationTests",
@@ -27,6 +29,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultLogoutUseCaseImplementation",
         "identifier" : "DefaultLogoutUseCaseImplementationTests",
@@ -34,6 +37,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultNetworkingImplementation",
         "identifier" : "DefaultNetworkingImplementationTests",
@@ -41,6 +45,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
         "identifier" : "DefaultProfileRepositoryImplementationTests",
@@ -48,6 +53,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultAvatarsRepositoryImplementation",
         "identifier" : "DefaultAvatarsRepositoryImplementationTests",
@@ -55,6 +61,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiServiceImplementation",
         "identifier" : "DefaultApiServiceImplementationTests",
@@ -62,6 +69,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/PersistentStorageSQLite",
         "identifier" : "PersistentStorageSQLiteTests",
@@ -69,6 +77,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultFriendsRepositoryImplementation",
         "identifier" : "DefaultFriendsRepositoryImplementationTests",
@@ -76,6 +85,7 @@
       }
     },
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
         "identifier" : "DefaultApiImplementationTests",

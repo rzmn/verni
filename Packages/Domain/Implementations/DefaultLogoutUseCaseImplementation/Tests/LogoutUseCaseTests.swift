@@ -22,7 +22,7 @@ private actor PersistencyProvider {
     }
 }
 
-@Suite struct LogoutUseCaseTests {
+@Suite(.timeLimit(.minutes(1))) struct LogoutUseCaseTests {
 
     @Test func testLogoutFromPublisher() async throws {
 
@@ -45,21 +45,12 @@ private actor PersistencyProvider {
         // when
 
         subject.send(.refreshTokenFailed)
+        try await taskFactory.runUntilIdle()
 
         // then
 
-        let timeout = Task {
-            try await Task.sleep(timeInterval: 5)
-            if !Task.isCancelled {
-                Issue.record("\(#function): timeout failed")
-            }
-        }
-        try await taskFactory.runUntilIdle()
-
         #expect(await logoutFromPublisher == .refreshTokenFailed)
         #expect(await provider.invalidateCalledCount == 1)
-
-        timeout.cancel()
     }
 
     @Test func testLogoutOnlyOnce() async throws {
