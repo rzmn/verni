@@ -1,6 +1,5 @@
 # The App
 [![Xcode - Build and Analyze](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml)
-[![Xcode - Test](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml)
 
 Shared Expenses Tracker App iOS Client.
 
