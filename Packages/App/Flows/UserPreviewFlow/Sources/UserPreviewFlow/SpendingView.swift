@@ -83,7 +83,12 @@ class SpendingView: UIView {
             width: amountSize.width,
             height: amountSize.height
         )
-        let paddedBounds = CGSize(width: min(ownership.frame.minX, amount.frame.minX) - .p.defaultHorizontal - category.frame.maxX, height: bounds.height)
+        let paddedBounds = CGSize(
+            width: min(
+                ownership.frame.minX,
+                amount.frame.minX
+            ) - .p.defaultHorizontal - category.frame.maxX,
+            height: bounds.height)
         let titleSize = title.sizeThatFits(paddedBounds)
         let dateSize = date.sizeThatFits(paddedBounds)
         let leftContentHeight = titleSize.height + dateSize.height

@@ -384,7 +384,6 @@
 			buildConfigurationList = 61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Accounty" */;
 			buildPhases = (
 				61414F7A2C2F02A100B2C027 /* Sources */,
-				61348DA22C95564D00200111 /* Run Script */,
 				61414F7B2C2F02A100B2C027 /* Frameworks */,
 				61414F7C2C2F02A100B2C027 /* Resources */,
 				614AC1A62C6802EE005B2CD5 /* Embed Foundation Extensions */,
@@ -484,28 +483,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		61348DA22C95564D00200111 /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		61414F7A2C2F02A100B2C027 /* Sources */ = {

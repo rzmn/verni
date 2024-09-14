@@ -2,11 +2,11 @@ import Testing
 import PersistentStorage
 import DataTransferObjects
 import Foundation
-import Base
 import Domain
 import Api
 import Combine
 import ApiDomainConvenience
+@testable import Base
 @testable import DefaultFriendsRepositoryImplementation
 @testable import MockApiImplementation
 

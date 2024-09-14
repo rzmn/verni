@@ -2,7 +2,11 @@ import Foundation
 import Domain
 
 fileprivate extension FriendsState.Content {
-    init(friends: [FriendshipKind: [User]], spendings: [SpendingsPreview], items: inout [User.ID: FriendsState.Item]) {
+    init(
+        friends: [FriendshipKind: [User]],
+        spendings: [SpendingsPreview],
+        items: inout [User.ID: FriendsState.Item]
+    ) {
         let users = friends.values.flatMap { $0 }
         let ids = Set(users.map(\.id))
         let idToBalance = spendings.reduce(into: [:]) { dict, preview in

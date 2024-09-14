@@ -57,7 +57,10 @@ extension AddFriendByQrFlow: Flow {
         }
     }
 
-    private func handle(result: Result<AppUrl, TerminationEvent>, dataScannerToDismiss: DataScannerViewController? = nil) async {
+    private func handle(
+        result: Result<AppUrl, TerminationEvent>,
+        dataScannerToDismiss: DataScannerViewController? = nil
+    ) async {
         guard let continuation else { return }
         self.continuation = nil
         if let dataScannerToDismiss {

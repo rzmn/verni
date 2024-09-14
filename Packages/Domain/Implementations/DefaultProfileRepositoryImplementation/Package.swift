@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
+        .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
@@ -45,6 +46,7 @@ let package = Package(
             dependencies: [
                 "Domain",
                 "Api",
+                "Base",
                 "ApiDomainConvenience",
                 "DataTransferObjects",
                 "PersistentStorage",
