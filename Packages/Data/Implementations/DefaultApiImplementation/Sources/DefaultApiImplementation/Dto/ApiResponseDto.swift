@@ -54,7 +54,6 @@ enum ApiResponseDto<Response: Decodable & Sendable>: Sendable {
         let status = try container.decode(ResponseStatus.self, forKey: .status)
         switch status {
         case .ok:
-            print("[debug] decoding \(Self.self)")
             self = .success(try container.decode(Response.self, forKey: .response))
         case .failed:
             self = .failure(try container.decode(ApiErrorDto.self, forKey: .response))

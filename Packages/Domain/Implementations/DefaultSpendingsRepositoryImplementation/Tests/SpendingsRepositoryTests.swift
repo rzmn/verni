@@ -121,23 +121,27 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        var spendingCounterpartiesIterator = await repository
-            .spendingCounterpartiesUpdated()
-            .values
-            .makeAsyncIterator()
-        async let spendingCounterpartiesFromPublisher = spendingCounterpartiesIterator.next()
 
         // when
 
-        let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
-        try await taskFactory.runUntilIdle()
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+               .spendingCounterpartiesUpdated()
+                .sink { spendingCounterpartiesFromPublisher in
+                    #expect(spendingCounterpartiesFromPublisher == counterparties)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
+            #expect(counterpartiesFromRepository == counterparties)
+            try await taskFactory.runUntilIdle()
+        }
 
         // then
 
-        #expect(counterpartiesFromRepository == counterparties)
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
-        #expect(await spendingCounterpartiesFromPublisher == counterparties)
     }
 
     @Test func testSpendingCounterpartiesPolling() async throws {
@@ -164,24 +168,29 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        var spendingCounterpartiesIterator = await repository
-            .spendingCounterpartiesUpdated()
-            .values
-            .makeAsyncIterator()
-        async let spendingCounterpartiesFromPublisher = spendingCounterpartiesIterator.next()
 
         // when
 
-        apiProvider.getCounterpartiesSubject.send(
-            LongPollCounterpartiesQuery.Update(category: .counterparties)
-        )
-        try await taskFactory.runUntilIdle()
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+               .spendingCounterpartiesUpdated()
+               .dropFirst()
+               .sink { spendingCounterpartiesFromPublisher in
+                    #expect(spendingCounterpartiesFromPublisher == counterparties)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            apiProvider.getCounterpartiesSubject.send(
+                LongPollCounterpartiesQuery.Update(category: .counterparties)
+            )
+            try await taskFactory.runUntilIdle()
+        }
 
         // then
 
         #expect(await apiProvider.getCounterpartiesCalledCount == 1)
         #expect(await offlineRepository.spendingCounterpariesUpdates == [counterparties])
-        #expect(await spendingCounterpartiesFromPublisher == counterparties)
     }
 
     @Test func testRefreshSpendingsHistory() async throws {
@@ -215,23 +224,27 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        var spendingsHistoryIterator = await repository
-            .spendingsHistoryUpdated(for: counterparty)
-            .values
-            .makeAsyncIterator()
-        async let spendingsHistoryFromPublisher = spendingsHistoryIterator.next()
 
         // when
 
-        let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
-        try await taskFactory.runUntilIdle()
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+                .spendingsHistoryUpdated(for: counterparty)
+                .sink { spendingsHistoryFromPublisher in
+                    #expect(spendingsHistoryFromPublisher == history)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
+            #expect(historyFromRepository == history)
+            try await taskFactory.runUntilIdle()
+        }
 
         // then
 
-        #expect(historyFromRepository == history)
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
-        #expect(await spendingsHistoryFromPublisher == history)
     }
 
     @Test func testSpendingsHistoryPolling() async throws {
@@ -265,26 +278,31 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-        var spendingsHistoryIterator = await repository
-            .spendingsHistoryUpdated(for: counterparty)
-            .values
-            .makeAsyncIterator()
-        async let spendingsHistoryFromPublisher = spendingsHistoryIterator.next()
 
         // when
 
-        apiProvider.getSpendingsHistorySubject.send(
-            LongPollSpendingsHistoryQuery.Update(
-                category: .spendings(uid: counterparty)
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+                .spendingsHistoryUpdated(for: counterparty)
+                .dropFirst()
+                .sink { spendingsHistoryFromPublisher in
+                    #expect(spendingsHistoryFromPublisher == history)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            apiProvider.getSpendingsHistorySubject.send(
+                LongPollSpendingsHistoryQuery.Update(
+                    category: .spendings(uid: counterparty)
+                )
             )
-        )
-        try await taskFactory.runUntilIdle()
+            try await taskFactory.runUntilIdle()
+        }
 
         // then
 
         #expect(await apiProvider.getSpendingsHistoryCalls == [counterparty])
         #expect(await offlineRepository.spendingHisoryUpdatesById[counterparty] == [history])
-        #expect(await spendingsHistoryFromPublisher == history)
     }
 
     @Test func testGetDeal() async throws {

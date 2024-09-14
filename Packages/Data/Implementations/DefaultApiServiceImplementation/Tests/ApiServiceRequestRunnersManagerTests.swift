@@ -123,12 +123,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 1.5)
+            try? await Task.sleep(timeInterval: 1.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 2.5)
+            try? await Task.sleep(timeInterval: 2.9)
             upperTimeLimitReached = true
         }
 
@@ -175,12 +175,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 2.5)
+            try? await Task.sleep(timeInterval: 2.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 3.5)
+            try? await Task.sleep(timeInterval: 3.9)
             upperTimeLimitReached = true
         }
 
@@ -219,12 +219,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 0.5)
+            try? await Task.sleep(timeInterval: 0.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 1.5)
+            try? await Task.sleep(timeInterval: 1.9)
             upperTimeLimitReached = true
         }
 
@@ -267,12 +267,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 3.5)
+            try? await Task.sleep(timeInterval: 3.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 4.5)
+            try? await Task.sleep(timeInterval: 4.9)
             upperTimeLimitReached = true
         }
 
@@ -315,12 +315,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 1.5)
+            try? await Task.sleep(timeInterval: 1.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 2.5)
+            try? await Task.sleep(timeInterval: 2.9)
             upperTimeLimitReached = true
         }
 
@@ -371,12 +371,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 1.5)
+            try? await Task.sleep(timeInterval: 1.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 2.5)
+            try? await Task.sleep(timeInterval: 2.9)
             upperTimeLimitReached = true
         }
 
@@ -426,12 +426,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         var lowerTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 0.5)
+            try? await Task.sleep(timeInterval: 0.1)
             lowerTimeLimitReached = true
         }
         var upperTimeLimitReached = false
         Task.detached {
-            try? await Task.sleep(timeInterval: 1.5)
+            try? await Task.sleep(timeInterval: 1.9)
             upperTimeLimitReached = true
         }
 

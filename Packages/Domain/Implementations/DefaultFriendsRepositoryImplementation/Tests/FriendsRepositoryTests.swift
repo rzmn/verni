@@ -66,7 +66,7 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
     }
 }
 
-@Suite(.timeLimit(.minutes(1))) struct ProfileRepositoryTests {
+@Suite(.timeLimit(.minutes(1))) struct FriendsRepositoryTests {
 
     @Test func testRefreshFriends() async throws {
 
@@ -97,31 +97,96 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
             offline: offlineRepository,
             taskFactory: taskFactory
         )
-
-        var friendsUpdatedIterator = await repository
-            .friendsUpdated(ofKind: set)
-            .values
-            .makeAsyncIterator()
-        async let friendsFromPublisher = friendsUpdatedIterator.next()
-
-        // when
-
-        let friendsFromRepository = try await repository.refreshFriends(ofKind: set)
-        try await taskFactory.runUntilIdle()
-
-        // then
-
-        #expect(await provider.getUsersCalls.map { Set($0) } == [Set(friends.values.flatMap { $0 }.map(\.id))])
-        #expect(await provider.getFriendsCalls == [ set.array.map(FriendshipKindDto.init).map(\.rawValue) ])
         let friendsCasted: [FriendshipKind: [User]] = friends.reduce(into: [:]) { dict, kv in
             guard let key = FriendshipKindDto(rawValue: kv.key) else {
                 return
             }
             dict[FriendshipKind(dto: key)] = kv.value
         }
+
+        // when
+
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+                .friendsUpdated(ofKind: set)
+                .sink { friendsFromPublisher in
+                    #expect(friendsFromPublisher == friendsCasted)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            let friendsFromRepository = try await repository.refreshFriends(ofKind: set)
+            #expect(friendsFromRepository == friendsCasted)
+            try await taskFactory.runUntilIdle()
+        }
+
+        // then
+
+        #expect(await provider.getUsersCalls.map { Set($0) } == [Set(friends.values.flatMap { $0 }.map(\.id))])
+        #expect(await provider.getFriendsCalls == [ set.array.map(FriendshipKindDto.init).map(\.rawValue) ])
         #expect(await offlineRepository.updates.map(\.0) == [friendsCasted])
         #expect(await offlineRepository.updates.map(\.1) == [set])
-        #expect(friendsFromRepository == friendsCasted)
-        #expect(await friendsFromPublisher == friendsCasted)
+    }
+
+    @Test func testFriendsPolling() async throws {
+
+        // given
+
+        let taskFactory = TestTaskFactory()
+        let set: FriendshipKindSet = [.friends, .subscription]
+        let friends: [Int: [User]] = [
+            FriendshipKindDto.friends.rawValue: [],
+            FriendshipKindDto.subscription.rawValue: [
+                User(
+                    id: UUID().uuidString,
+                    status: .outgoing,
+                    displayName: "some name",
+                    avatar: nil
+                )
+            ]
+        ]
+        let provider = await ApiProvider(
+            getFriendsResponse: friends.mapValues { $0.map(\.id) },
+            getUsersResponse: friends.values.flatMap { $0.map(UserDto.init) }
+        )
+        let offlineRepository = MockOfflineMutableRepository()
+        let repository = DefaultFriendsRepository(
+            api: provider.api,
+            longPoll: provider.mockLongPoll,
+            logger: .shared,
+            offline: offlineRepository,
+            taskFactory: taskFactory
+        )
+        let friendsCasted: [FriendshipKind: [User]] = friends.reduce(into: [:]) { dict, kv in
+            guard let key = FriendshipKindDto(rawValue: kv.key) else {
+                return
+            }
+            dict[FriendshipKind(dto: key)] = kv.value
+        }
+
+        // when
+
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+                .friendsUpdated(ofKind: set)
+                .dropFirst()
+                .sink { friendsFromPublisher in
+                    #expect(friendsFromPublisher == friendsCasted)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            provider.getFriendsSubject.send(
+                LongPollFriendsQuery.Update(category: .friends)
+            )
+            try await taskFactory.runUntilIdle()
+        }
+
+        // then
+
+        #expect(await provider.getUsersCalls.map { Set($0) } == [Set(friends.values.flatMap { $0 }.map(\.id))])
+        #expect(await provider.getFriendsCalls == [ set.array.map(FriendshipKindDto.init).map(\.rawValue) ])
+        #expect(await offlineRepository.updates.map(\.0) == [friendsCasted])
+        #expect(await offlineRepository.updates.map(\.1) == [set])
     }
 }

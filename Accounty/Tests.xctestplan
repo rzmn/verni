@@ -15,41 +15,17 @@
     {
       "parallelizable" : false,
       "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultSpendingsRepositoryImplementation",
-        "identifier" : "DefaultSpendingsRepositoryImplementationTests",
-        "name" : "DefaultSpendingsRepositoryImplementationTests"
-      }
-    },
-    {
-      "parallelizable" : false,
-      "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
-        "identifier" : "DefaultUsersRepositoryImplementationTests",
-        "name" : "DefaultUsersRepositoryImplementationTests"
-      }
-    },
-    {
-      "parallelizable" : false,
-      "target" : {
-        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultNetworkingImplementation",
-        "identifier" : "DefaultNetworkingImplementationTests",
-        "name" : "DefaultNetworkingImplementationTests"
-      }
-    },
-    {
-      "parallelizable" : false,
-      "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
-        "identifier" : "DefaultProfileRepositoryImplementationTests",
-        "name" : "DefaultProfileRepositoryImplementationTests"
-      }
-    },
-    {
-      "parallelizable" : false,
-      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultAvatarsRepositoryImplementation",
         "identifier" : "DefaultAvatarsRepositoryImplementationTests",
         "name" : "DefaultAvatarsRepositoryImplementationTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultLogoutUseCaseImplementation",
+        "identifier" : "DefaultLogoutUseCaseImplementationTests",
+        "name" : "DefaultLogoutUseCaseImplementationTests"
       }
     },
     {
@@ -71,6 +47,14 @@
     {
       "parallelizable" : false,
       "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultSpendingsRepositoryImplementation",
+        "identifier" : "DefaultSpendingsRepositoryImplementationTests",
+        "name" : "DefaultSpendingsRepositoryImplementationTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
         "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultFriendsRepositoryImplementation",
         "identifier" : "DefaultFriendsRepositoryImplementationTests",
         "name" : "DefaultFriendsRepositoryImplementationTests"
@@ -79,9 +63,33 @@
     {
       "parallelizable" : false,
       "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultProfileRepositoryImplementation",
+        "identifier" : "DefaultProfileRepositoryImplementationTests",
+        "name" : "DefaultProfileRepositoryImplementationTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages\/Data\/Implementations\/DefaultNetworkingImplementation",
+        "identifier" : "DefaultNetworkingImplementationTests",
+        "name" : "DefaultNetworkingImplementationTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultApiImplementation",
         "identifier" : "DefaultApiImplementationTests",
         "name" : "DefaultApiImplementationTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultUsersRepositoryImplementation",
+        "identifier" : "DefaultUsersRepositoryImplementationTests",
+        "name" : "DefaultUsersRepositoryImplementationTests"
       }
     }
   ],

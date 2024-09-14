@@ -6,6 +6,10 @@ public struct LongPollFriendsQuery: LongPollQuery {
             case friends
         }
         let category: Category
+
+        public init(category: Category) {
+            self.category = category
+        }
     }
 
     public init() {}

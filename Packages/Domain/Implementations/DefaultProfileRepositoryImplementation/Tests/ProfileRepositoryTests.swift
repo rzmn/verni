@@ -68,22 +68,25 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
             taskFactory: taskFactory
         )
 
-        var profileUpdatedIterator = await repository
-            .profileUpdated()
-            .values
-            .makeAsyncIterator()
-        async let profileFromPublisher = profileUpdatedIterator.next()
-
         // when
 
-        let profileFromRepository = try await repository.refreshProfile()
-        try await taskFactory.runUntilIdle()
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await repository
+                .profileUpdated()
+                .sink { profileFromPublisher in
+                    #expect(profile == profileFromPublisher)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            let profileFromRepository = try await repository.refreshProfile()
+            #expect(profileFromRepository == profile)
+            try await taskFactory.runUntilIdle()
+        }
 
         // then
 
         #expect(await provider.getCallsCount == 1)
         #expect(await offlineRepository.updates == [profile])
-        #expect(profileFromRepository == profile)
-        #expect(await profileFromPublisher == profile)
     }
 }

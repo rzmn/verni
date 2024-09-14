@@ -36,20 +36,25 @@ private actor PersistencyProvider {
             shouldLogout: subject.eraseToAnyPublisher(),
             taskFactory: taskFactory
         )
-        var logoutSubjectIterator = await useCase
-            .didLogoutPublisher
-            .values
-            .makeAsyncIterator()
-        async let logoutFromPublisher = logoutSubjectIterator.next()
+        let reason = LogoutReason.refreshTokenFailed
 
         // when
 
-        subject.send(.refreshTokenFailed)
-        try await taskFactory.runUntilIdle()
+        var subscriptions = Set<AnyCancellable>()
+        try await confirmation { confirmation in
+            await useCase
+                .didLogoutPublisher
+                .sink { reasonFromPublisher in
+                    #expect(reason == reasonFromPublisher)
+                    confirmation()
+                }
+                .store(in: &subscriptions)
+            subject.send(reason)
+            try await taskFactory.runUntilIdle()
+        }
 
         // then
 
-        #expect(await logoutFromPublisher == .refreshTokenFailed)
         #expect(await provider.invalidateCalledCount == 1)
     }
 

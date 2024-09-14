@@ -29,7 +29,6 @@ struct MockApiService: ApiService {
     ) async throws(ApiServiceError) -> Response
     where Request: ApiServiceRequest, Response: Decodable, Response: Sendable {
         try result.map {
-            print("[debug] \(type(of: $0)) \(Response.self)")
             if Response.self == VoidApiResponseDto.self {
                 return VoidApiResponseDto.success as! Response
             } else {

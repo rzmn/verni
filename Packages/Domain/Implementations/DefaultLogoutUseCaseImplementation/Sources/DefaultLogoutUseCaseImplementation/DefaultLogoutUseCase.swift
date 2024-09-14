@@ -21,6 +21,7 @@ public actor DefaultLogoutUseCase {
         self.taskFactory = taskFactory
         typealias Promise = @Sendable (Result<LogoutReason?, Never>) -> Void
         let sendablePromise: @Sendable (LogoutReason, @escaping Promise) -> Void = { reason, promise in
+            print("[debug] receive \(reason)")
             self.taskFactory.task {
                 if await self.doLogout() {
                     promise(.success(reason))
@@ -33,9 +34,11 @@ public actor DefaultLogoutUseCase {
             .flatMap { reason -> Future<LogoutReason?, Never> in
                 Future { [sendablePromise] promise in
                     // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
+                    print("[debug] future \(reason) start")
                     nonisolated(unsafe) let promise = promise
                     sendablePromise(reason) {
                         promise($0)
+                        print("[debug] future \(reason) finished")
                     }
                 }
             }
@@ -59,10 +62,13 @@ extension DefaultLogoutUseCase {
     @discardableResult
     private func doLogout() async -> Bool {
         guard await loggedOutHandler.allowLogout() else {
+            print("[debug] doLogout: skip")
             return false
         }
+        print("[debug] doLogout: ok")
         taskFactory.task {
             await self.persistency.invalidate()
+            print("[debug] doLogout: invalidated")
         }
         return true
     }
