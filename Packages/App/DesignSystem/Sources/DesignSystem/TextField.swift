@@ -87,10 +87,10 @@ public class TextField: UITextField {
 
     private var config: Config
     private let hintLabel = {
-        let l = UILabel()
-        l.font = .p.secondaryText
-        l.textColor = .p.destructive
-        return l
+        let label = UILabel()
+        label.font = .p.secondaryText
+        label.textColor = .p.destructive
+        return label
     }()
 
     public init(config: Config) {

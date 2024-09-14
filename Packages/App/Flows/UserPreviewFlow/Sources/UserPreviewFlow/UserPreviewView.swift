@@ -32,12 +32,12 @@ class UserPreviewView: View<UserPreviewViewActions> {
         return label
     }()
     private let table = {
-        let t = UITableView(frame: .zero, style: .insetGrouped)
-        t.backgroundColor = .p.background
-        t.backgroundView = UIView()
-        t.separatorColor = .clear
-        t.register(SpendingCell.self, forCellReuseIdentifier: "\(SpendingCell.self)")
-        return t
+        let table = UITableView(frame: .zero, style: .insetGrouped)
+        table.backgroundColor = .p.background
+        table.backgroundView = UIView()
+        table.separatorColor = .clear
+        table.register(SpendingCell.self, forCellReuseIdentifier: "\(SpendingCell.self)")
+        return table
     }()
     private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
         guard let self else { return UITableViewCell() }

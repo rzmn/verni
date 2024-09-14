@@ -15,12 +15,12 @@ private extension Placeholder.Config {
 
 class PickCounterpartyView: View<PickCounterpartyViewActions> {
     private let table = {
-        let t = UITableView(frame: .zero, style: .insetGrouped)
-        t.backgroundColor = .p.background
-        t.backgroundView = UIView()
-        t.separatorColor = .clear
-        t.register(UserCell.self, forCellReuseIdentifier: "\(UserCell.self)")
-        return t
+        let table = UITableView(frame: .zero, style: .insetGrouped)
+        table.backgroundColor = .p.background
+        table.backgroundView = UIView()
+        table.separatorColor = .clear
+        table.register(UserCell.self, forCellReuseIdentifier: "\(UserCell.self)")
+        return table
     }()
     private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
         guard let self else { return UITableViewCell() }

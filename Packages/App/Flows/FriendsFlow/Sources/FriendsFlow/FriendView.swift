@@ -7,16 +7,16 @@ internal import DesignSystem
 class FriendView: UIView {
     private var subscriptions = Set<AnyCancellable>()
     private let label = {
-        let l = UILabel()
-        l.font = .p.text
-        l.textColor = .p.primary
-        return l
+        let label = UILabel()
+        label.font = .p.text
+        label.textColor = .p.primary
+        return label
     }()
     private let balanceLabel = {
-        let l = UILabel()
-        l.font = .p.subtitle
-        l.textColor = .p.primary
-        return l
+        let label = UILabel()
+        label.font = .p.subtitle
+        label.textColor = .p.primary
+        return label
     }()
     private let avatar = {
         let size: CGFloat = 44

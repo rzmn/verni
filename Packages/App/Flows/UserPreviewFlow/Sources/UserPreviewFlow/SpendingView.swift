@@ -16,28 +16,28 @@ class SpendingView: UIView {
         return view
     }()
     private let title = {
-        let l = UILabel()
-        l.font = .p.text
-        l.textColor = .p.primary
-        return l
+        let label = UILabel()
+        label.font = .p.text
+        label.textColor = .p.primary
+        return label
     }()
     private let date = {
-        let l = UILabel()
-        l.font = .p.subtitle
-        l.textColor = .p.primary
-        return l
+        let label = UILabel()
+        label.font = .p.subtitle
+        label.textColor = .p.primary
+        return label
     }()
     private let ownership = {
-        let l = UILabel()
-        l.font = .p.title3
-        l.textColor = .p.primary
-        return l
+        let label = UILabel()
+        label.font = .p.title3
+        label.textColor = .p.primary
+        return label
     }()
     private let amount = {
-        let l = UILabel()
-        l.font = .p.text
-        l.textColor = .p.primary
-        return l
+        let label = UILabel()
+        label.font = .p.text
+        label.textColor = .p.primary
+        return label
     }()
 
     init() {
@@ -55,7 +55,7 @@ class SpendingView: UIView {
     }
 
     func reuse() {
-        
+        // empty
     }
 
     override func layoutSubviews() {

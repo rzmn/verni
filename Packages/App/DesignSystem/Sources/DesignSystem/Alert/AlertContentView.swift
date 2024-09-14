@@ -9,19 +9,19 @@ class AlertContentView: UIView {
     private let config: Alert.Config
 
     private lazy var title = {
-        let l = UILabel()
-        l.font = .p.title2
-        l.textColor = .p.primary
-        l.text = config.title
-        return l
+        let label = UILabel()
+        label.font = .p.title2
+        label.textColor = .p.primary
+        label.text = config.title
+        return label
     }()
     private lazy var subtitle = {
-        let l = UILabel()
-        l.font = .p.text
-        l.textColor = .p.iconSecondary
-        l.text = config.message
-        l.numberOfLines = 0
-        return l
+        let label = UILabel()
+        label.font = .p.text
+        label.textColor = .p.iconSecondary
+        label.text = config.message
+        label.numberOfLines = 0
+        return label
     }()
     private lazy var buttons = config.actions.map { action in
         let b = Button(
