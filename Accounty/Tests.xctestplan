@@ -31,14 +31,6 @@
     {
       "parallelizable" : false,
       "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultLogoutUseCaseImplementation",
-        "identifier" : "DefaultLogoutUseCaseImplementationTests",
-        "name" : "DefaultLogoutUseCaseImplementationTests"
-      }
-    },
-    {
-      "parallelizable" : false,
-      "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/DefaultNetworkingImplementation",
         "identifier" : "DefaultNetworkingImplementationTests",
         "name" : "DefaultNetworkingImplementationTests"
