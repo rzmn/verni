@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "AccountFlow",
             targets: ["AccountFlow"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../UpdateAvatarFlow"),
@@ -25,7 +25,7 @@ let package = Package(
         .package(path: "../../../DI/DI"),
         .package(path: "../../../Domain/Domain"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Base")
     ],
     targets: [
         .target(
@@ -41,7 +41,7 @@ let package = Package(
                 "UpdateDisplayNameFlow",
                 "UpdatePasswordFlow",
                 "QrPreviewFlow",
-                "UpdateAvatarFlow",
+                "UpdateAvatarFlow"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

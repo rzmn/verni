@@ -12,12 +12,12 @@ let package = Package(
         .library(
             name: "DefaultAuthUseCaseImplementation",
             targets: ["DefaultAuthUseCaseImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/DataTransferObjects"),
+        .package(path: "../../../Data/DataTransferObjects")
     ],
     targets: [
         .target(

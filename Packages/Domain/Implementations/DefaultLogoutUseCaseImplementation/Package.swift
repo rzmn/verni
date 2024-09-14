@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "DefaultLogoutUseCaseImplementation",
             targets: ["DefaultLogoutUseCaseImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
@@ -20,7 +20,7 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
+        .package(path: "../../../Data/Implementations/MockPersistentStorage")
     ],
     targets: [
         .target(
@@ -56,6 +56,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

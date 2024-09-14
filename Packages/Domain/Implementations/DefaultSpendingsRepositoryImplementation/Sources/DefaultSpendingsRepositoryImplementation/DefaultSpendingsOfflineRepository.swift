@@ -17,7 +17,7 @@ extension DefaultSpendingsOfflineRepository: SpendingsOfflineRepository {
             $0.map(SpendingsPreview.init)
         }
     }
-    
+
     public func getSpendingsHistory(counterparty: User.ID) async -> [IdentifiableSpending]? {
         await persistency.getSpendingsHistory(counterparty: counterparty).flatMap {
             $0.map(IdentifiableSpending.init)

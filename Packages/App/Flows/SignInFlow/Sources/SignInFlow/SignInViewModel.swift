@@ -18,7 +18,7 @@ import Domain
         email = initial.email
         emailHint = initial.emailHint
         password = initial.password
-        
+
         self.localEmailValidator = localEmailValidator
         self.passwordValidator = passwordValidator
 

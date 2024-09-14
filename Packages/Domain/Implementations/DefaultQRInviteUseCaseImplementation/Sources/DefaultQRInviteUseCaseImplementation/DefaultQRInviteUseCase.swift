@@ -31,7 +31,7 @@ class QrCodeView: UIView {
         imageView.image = UIImage(cgImage: image)
         addSubview(imageView)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }

@@ -34,7 +34,7 @@ public class Placeholder: UIControl {
         super.init(frame: .zero)
         setupView()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }

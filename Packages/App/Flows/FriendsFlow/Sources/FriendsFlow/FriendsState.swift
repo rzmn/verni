@@ -20,7 +20,7 @@ struct FriendsState {
         let user: User
         let balance: [Currency: Cost]
     }
-    
+
     struct Section: Equatable {
         let id: FriendshipKind
         let items: [Item]

@@ -12,18 +12,18 @@ let package = Package(
         .library(
             name: "DesignSystem",
             targets: ["DesignSystem"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Infrastructure/Base"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest"),
+        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
     ],
     targets: [
         .target(
             name: "DesignSystem",
             dependencies: [
                 "Base",
-                "ProgressHUD",
+                "ProgressHUD"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

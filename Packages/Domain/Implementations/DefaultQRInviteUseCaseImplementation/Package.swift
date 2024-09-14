@@ -12,11 +12,11 @@ let package = Package(
         .library(
             name: "DefaultQRInviteUseCaseImplementation",
             targets: ["DefaultQRInviteUseCaseImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
-        .package(path: "../../Domain"),
+        .package(path: "../../Domain")
     ],
     targets: [
         .target(

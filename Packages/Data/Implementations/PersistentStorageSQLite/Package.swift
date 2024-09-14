@@ -12,22 +12,22 @@ let package = Package(
         .library(
             name: "PersistentStorageSQLite",
             targets: ["PersistentStorageSQLite"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../PersistentStorage"),
         .package(path: "../../DataTransferObjects"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3")
     ],
     targets: [
         .target(
             name: "PersistentStorageSQLite",
             dependencies: [
                 "DataTransferObjects",
-                "Logging", 
+                "Logging",
                 "PersistentStorage",
-                .product(name: "SQLite", package: "SQLite.swift"),
+                .product(name: "SQLite", package: "SQLite.swift")
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -42,7 +42,7 @@ let package = Package(
                 "DataTransferObjects",
                 "Logging",
                 "PersistentStorage",
-                "PersistentStorageSQLite",
+                "PersistentStorageSQLite"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

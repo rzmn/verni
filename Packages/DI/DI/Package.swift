@@ -12,10 +12,10 @@ let package = Package(
         .library(
             name: "DI",
             targets: ["DI"]
-        ),
+        )
     ],
     dependencies: [
-        .package(path: "../../Domain/Domain"),
+        .package(path: "../../Domain/Domain")
     ],
     targets: [
         .target(

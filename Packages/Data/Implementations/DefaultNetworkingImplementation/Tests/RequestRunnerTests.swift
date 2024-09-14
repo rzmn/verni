@@ -23,7 +23,7 @@ import Foundation
         let expectedResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         await URLProtocolMock.setMockUrls([
-            url: (nil, data, expectedResponse),
+            url: (nil, data, expectedResponse)
         ])
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [URLProtocolMock.self]
@@ -55,7 +55,7 @@ import Foundation
         let expectedResponse = URLResponse(url: url, mimeType: "", expectedContentLength: 0, textEncodingName: nil)
 
         await URLProtocolMock.setMockUrls([
-            url: (nil, data, expectedResponse),
+            url: (nil, data, expectedResponse)
         ])
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [URLProtocolMock.self]
@@ -71,7 +71,7 @@ import Foundation
         )
         let apiError: NetworkServiceError
         do {
-            let _ = try await runner.run()
+            _ = try await runner.run()
             Issue.record()
             return
         } catch {
@@ -95,7 +95,7 @@ import Foundation
         let error = NSError(domain: NSURLErrorDomain, code: URLError.Code.networkConnectionLost.rawValue)
 
         await URLProtocolMock.setMockUrls([
-            url: (error, nil, nil),
+            url: (error, nil, nil)
         ])
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [URLProtocolMock.self]
@@ -111,7 +111,7 @@ import Foundation
         )
         let apiError: NetworkServiceError
         do {
-            let _ = try await runner.run()
+            _ = try await runner.run()
             Issue.record()
             return
         } catch {
@@ -135,7 +135,7 @@ import Foundation
         let error = NSError(domain: "fake domain", code: -2222)
 
         await URLProtocolMock.setMockUrls([
-            url: (error, nil, nil),
+            url: (error, nil, nil)
         ])
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [URLProtocolMock.self]
@@ -151,7 +151,7 @@ import Foundation
         )
         let apiError: NetworkServiceError
         do {
-            let _ = try await runner.run()
+            _ = try await runner.run()
             Issue.record()
             return
         } catch {
@@ -175,7 +175,7 @@ import Foundation
         let error = NSError(domain: NSURLErrorDomain, code: -2222)
 
         await URLProtocolMock.setMockUrls([
-            url: (error, nil, nil),
+            url: (error, nil, nil)
         ])
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [URLProtocolMock.self]
@@ -191,7 +191,7 @@ import Foundation
         )
         let apiError: NetworkServiceError
         do {
-            let _ = try await runner.run()
+            _ = try await runner.run()
             Issue.record()
             return
         } catch {
@@ -216,7 +216,7 @@ import Foundation
         let expectedResponse = HTTPURLResponse(url: url, statusCode: 500, httpVersion: nil, headerFields: nil)
 
         await URLProtocolMock.setMockUrls([
-            url: (nil, data, expectedResponse),
+            url: (nil, data, expectedResponse)
         ])
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [URLProtocolMock.self]

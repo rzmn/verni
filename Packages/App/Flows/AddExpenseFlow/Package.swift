@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "AddExpenseFlow",
             targets: ["AddExpenseFlow"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../PickCounterpartyFlow"),
@@ -21,7 +21,7 @@ let package = Package(
         .package(path: "../../../DI/DI"),
         .package(path: "../../../Domain/Domain"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Base")
     ],
     targets: [
         .target(
@@ -33,7 +33,7 @@ let package = Package(
                 "Logging",
                 "Base",
                 "AppBase",
-                "PickCounterpartyFlow",
+                "PickCounterpartyFlow"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

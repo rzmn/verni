@@ -42,7 +42,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         }
         return result
     }
-    
+
     private func spendingsHistorySubject(with uid: User.ID) -> PassthroughSubject<[IdentifiableSpending], Never> {
         guard let subject = spendingsHistorySubjectById[uid] else {
             logI { "subject created for \(uid)" }

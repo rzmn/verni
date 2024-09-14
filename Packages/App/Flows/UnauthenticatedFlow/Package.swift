@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "UnauthenticatedFlow",
             targets: ["UnauthenticatedFlow"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../SignInFlow"),
@@ -35,7 +35,7 @@ let package = Package(
                 "Base",
                 "ProgressHUD",
                 "AppBase",
-                "SignInFlow",
+                "SignInFlow"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

@@ -43,7 +43,7 @@ class FriendsView: View<FriendsViewActions> {
             render(state: state, animated: oldValue != nil)
         }
     }
-    
+
     override func setupView() {
         backgroundColor = .p.background
         table.dataSource = dataSource

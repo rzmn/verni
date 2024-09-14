@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "App",
             targets: ["App"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../DesignSystem"),
@@ -37,7 +37,7 @@ let package = Package(
                 "ProgressHUD",
                 "AppBase",
                 "AuthenticatedFlow",
-                "UnauthenticatedFlow",
+                "UnauthenticatedFlow"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

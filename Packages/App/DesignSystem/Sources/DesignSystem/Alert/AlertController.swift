@@ -26,11 +26,11 @@ public class AlertController: UIViewController {
             super.init(frame: .zero)
             setupView()
         }
-        
+
         required init?(coder: NSCoder) {
             fatalError()
         }
-        
+
         private func setupView() {
             backgroundColor = .black.withAlphaComponent(0.26)
             [content].forEach(addSubview)
@@ -65,11 +65,11 @@ public class AlertController: UIViewController {
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }
-    
+
     public override func loadView() {
         view = {
             let v = View(config: config) { [weak self] in
@@ -80,10 +80,5 @@ public class AlertController: UIViewController {
             }
             return v
         }()
-    }
-
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
     }
 }

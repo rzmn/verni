@@ -108,7 +108,7 @@ extension DefaultApi {
 
     func run<Method>(
         method: Method
-    ) async throws(ApiError) -> Void
+    ) async throws(ApiError)
     where Method: ApiMethod, Method.Response == NoResponse, Method.Parameters: Encodable & Sendable {
         if case .get = method.method {
             let request = try await createRequestFromGetMethod(method: method)

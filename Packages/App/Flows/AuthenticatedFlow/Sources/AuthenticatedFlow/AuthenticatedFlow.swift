@@ -126,7 +126,7 @@ extension AuthenticatedFlow: UrlResolver {
     public func canResolve(url: AppUrl) async -> Bool {
         await urlResolvers.canResolve(url: url)
     }
-    
+
     public func resolve(url: AppUrl) async {
         await urlResolvers.resolve(url: url)
     }

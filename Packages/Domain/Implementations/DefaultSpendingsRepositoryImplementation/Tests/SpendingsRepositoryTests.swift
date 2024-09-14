@@ -88,7 +88,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
     func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async {
         spendingCounterpariesUpdates.append(counterparties)
     }
-    
+
     func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async {
         let updates = spendingHisoryUpdatesById[counterparty, default: []] + [history]
         spendingHisoryUpdatesById[counterparty] = updates

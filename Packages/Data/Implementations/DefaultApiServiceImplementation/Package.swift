@@ -12,14 +12,14 @@ let package = Package(
         .library(
             name: "DefaultApiServiceImplementation",
             targets: ["DefaultApiServiceImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Networking"),
         .package(path: "../../Logging"),
         .package(path: "../../ApiService"),
         .package(path: "../../Base"),
-        .package(path: "../MockNetworkingImplementation"),
+        .package(path: "../MockNetworkingImplementation")
     ],
     targets: [
         .target(

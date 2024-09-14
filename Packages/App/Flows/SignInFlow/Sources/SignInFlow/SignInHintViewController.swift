@@ -13,4 +13,3 @@ extension SignInHintViewController: Routable {
         "sign in"
     }
 }
-

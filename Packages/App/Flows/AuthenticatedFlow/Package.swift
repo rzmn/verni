@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "AuthenticatedFlow",
             targets: ["AuthenticatedFlow"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../AccountFlow"),
@@ -39,7 +39,7 @@ let package = Package(
                 "AppBase",
                 "AccountFlow",
                 "FriendsFlow",
-                "AddExpenseFlow",
+                "AddExpenseFlow"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

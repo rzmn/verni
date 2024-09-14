@@ -49,7 +49,6 @@ import Networking
 
         let url = try UrlBuilder(endpoint: endpoint, request: request, logger: .shared).build()
 
-
         // then
 
         let urlComponents = URLComponents(string: url.absoluteString)!

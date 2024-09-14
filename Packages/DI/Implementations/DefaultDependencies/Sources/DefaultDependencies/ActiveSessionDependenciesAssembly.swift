@@ -164,7 +164,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     func pushRegistrationUseCase() -> PushRegistrationUseCase {
         DefaultPushRegistrationUseCase(
-            api: api, 
+            api: api,
             logger: .shared.with(prefix: "[push] ")
         )
     }

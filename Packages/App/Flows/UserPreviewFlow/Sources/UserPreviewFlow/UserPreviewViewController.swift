@@ -28,7 +28,7 @@ class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewView
                     UIAction(
                         title: "friend_req_rollback".localized,
                         handler: curry(model.handle)(.onRollbackFriendRequestTap) • nop
-                    ),
+                    )
                 ]
             case .incoming:
                 return [
@@ -40,7 +40,7 @@ class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewView
                         title: "friend_req_reject".localized,
                         attributes: [.destructive],
                         handler: curry(model.handle)(.onRejectFriendRequestTap) • nop
-                    ),
+                    )
                 ]
             case .friend:
                 return [
@@ -48,14 +48,14 @@ class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewView
                         title: "friend_unfriend".localized,
                         attributes: [.destructive],
                         handler: curry(model.handle)(.onUnfriendTap) • nop
-                    ),
+                    )
                 ]
             case .no:
                 return [
                     UIAction(
                         title: "friend_req_send".localized,
                         handler: curry(model.handle)(.onSendFriendRequestTap) • nop
-                    ),
+                    )
                 ]
             }
         }()

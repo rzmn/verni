@@ -25,7 +25,7 @@ public class AvatarView: UIImageView {
             setNeedsLayout()
         }
     }
-    
+
     public var avatarId: Avatar.ID? {
         didSet {
             task?.cancel()

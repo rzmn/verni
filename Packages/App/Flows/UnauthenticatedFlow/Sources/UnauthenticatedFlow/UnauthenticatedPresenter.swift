@@ -9,7 +9,7 @@ internal import DesignSystem
     init(router: AppRouter) {
         self.router = router
     }
-    
+
     func start(tabs: [any TabEmbedFlow]) async {
         let tabBarController = UnauthenticatedTabsController(nibName: nil, bundle: nil)
 

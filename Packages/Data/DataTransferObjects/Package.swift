@@ -12,10 +12,10 @@ let package = Package(
         .library(
             name: "DataTransferObjects",
             targets: ["DataTransferObjects"]
-        ),
+        )
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../Infrastructure/Base")
     ],
     targets: [
         .target(

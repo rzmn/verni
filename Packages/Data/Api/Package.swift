@@ -12,10 +12,10 @@ let package = Package(
         .library(
             name: "Api",
             targets: ["Api"]
-        ),
+        )
     ],
     dependencies: [
-        .package(path: "../DataTransferObjects"),
+        .package(path: "../DataTransferObjects")
     ],
     targets: [
         .target(

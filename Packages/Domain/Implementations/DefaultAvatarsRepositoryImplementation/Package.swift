@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "DefaultAvatarsRepositoryImplementation",
             targets: ["DefaultAvatarsRepositoryImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
@@ -22,7 +22,7 @@ let package = Package(
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation")
     ],
     targets: [
         .target(
@@ -34,7 +34,7 @@ let package = Package(
                 "DataTransferObjects",
                 "PersistentStorage",
                 "Base",
-                "Logging",
+                "Logging"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -54,7 +54,7 @@ let package = Package(
                 "DefaultAvatarsRepositoryImplementation",
                 "Base",
                 "Logging",
-                "MockApiImplementation",
+                "MockApiImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -62,6 +62,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

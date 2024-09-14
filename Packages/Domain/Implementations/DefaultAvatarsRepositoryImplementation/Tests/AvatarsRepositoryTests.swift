@@ -17,7 +17,7 @@ private actor MockOfflineRepository: AvatarsOfflineRepository, AvatarsOfflineMut
         getCalls.append(id)
         return storage[id]
     }
-    
+
     func store(data: Data, for id: Avatar.ID) async {
         storeCalls.append((data, id))
         storage[id] = data

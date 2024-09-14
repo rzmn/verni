@@ -5,7 +5,7 @@ public actor AsyncSerialScheduler {
 
     public func run(_ block: @Sendable @escaping () async throws -> Void) {
         previousTask = Task { [previousTask] in
-            let _ = await previousTask?.result
+            _ = await previousTask?.result
             return try await block()
         }
     }

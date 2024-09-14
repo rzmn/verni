@@ -47,7 +47,7 @@ class FriendView: UIView {
         subscriptions.removeAll()
         label.text = nil
     }
-    
+
     func render(item: FriendsState.Item) {
         subscriptions.removeAll()
         item.$data

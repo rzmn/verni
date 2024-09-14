@@ -304,7 +304,7 @@ import DataTransferObjects
         let refreshToken = UUID().uuidString
         let counterparties = [
             SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["USD": 16]),
-            SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["RUB": -13]),
+            SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["RUB": -13])
         ]
 
         // when
@@ -372,7 +372,7 @@ import DataTransferObjects
                         )
                     ]
                 )
-            ),
+            )
         ]
 
         // when

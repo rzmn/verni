@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "Base",
             targets: ["Base"]
-        ),
+        )
     ],
     targets: [
         .target(

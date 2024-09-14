@@ -11,7 +11,7 @@ fileprivate extension IdentifiableSpending {
             id: id,
             date: spending.date,
             title: spending.details,
-            iOwe: personalAmount > 0, 
+            iOwe: personalAmount > 0,
             currency: spending.currency,
             personalAmount: personalAmount
         )

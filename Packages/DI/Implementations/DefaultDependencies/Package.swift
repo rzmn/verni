@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "DefaultDependencies",
             targets: ["DefaultDependencies"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../DI"),
@@ -44,7 +44,7 @@ let package = Package(
         .package(path: "../../../Data/Implementations/PersistentStorageSQLite"),
         .package(path: "../../../Data/Implementations/DefaultApiImplementation"),
         .package(path: "../../../Data/Implementations/DefaultNetworkingImplementation"),
-        .package(path: "../../../Data/Implementations/DefaultApiServiceImplementation"),
+        .package(path: "../../../Data/Implementations/DefaultApiServiceImplementation")
     ],
     targets: [
         .target(
@@ -77,7 +77,7 @@ let package = Package(
                 "DefaultSaveCredendialsUseCaseImplementation",
                 "DefaultProfileRepositoryImplementation",
                 "DefaultLogoutUseCaseImplementation",
-                "DefaultReceivingPushUseCaseImplementation",
+                "DefaultReceivingPushUseCaseImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

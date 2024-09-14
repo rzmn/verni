@@ -99,7 +99,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         let idsToLoad = ids.filter {
             cached[$0] == nil && alreadyRequested[$0] == nil
         }
-        guard idsToLoad.count > 0 else {
+        guard !idsToLoad.isEmpty else {
             return alreadyRequested.reduce(into: cached) { dict, kv in
                 dict[kv.key] = kv.value
             }

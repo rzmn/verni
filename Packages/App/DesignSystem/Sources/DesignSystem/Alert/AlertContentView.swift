@@ -58,11 +58,11 @@ class AlertContentView: UIView {
         super.init(frame: .zero)
         setupView()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }
-    
+
     private func setupView() {
         backgroundColor = .p.backgroundContent
         layer.masksToBounds = true

@@ -7,7 +7,7 @@ import DataTransferObjects
 
 private actor PersistencyProvider {
     let persistency: PersistencyMock
-    
+
     var getSpendingCounterpartiesCalledCount = 0
     var updateSpendingCounterpartiesCalls: [ [SpendingsPreviewDto] ] = []
 

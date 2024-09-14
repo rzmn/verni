@@ -32,11 +32,11 @@ public class SegmentedControl: UISegmentedControl {
         }, for: .valueChanged)
         render(config: config)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }
-    
+
     func render(config: Config) {
         config.items.enumerated().forEach { (index, item) in
             insertSegment(withTitle: item.title, at: index, animated: false)

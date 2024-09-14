@@ -12,10 +12,10 @@ let package = Package(
         .library(
             name: "PersistentStorage",
             targets: ["PersistentStorage"]
-        ),
+        )
     ],
     dependencies: [
-        .package(path: "../DataTransferObjects"),
+        .package(path: "../DataTransferObjects")
     ],
     targets: [
         .target(

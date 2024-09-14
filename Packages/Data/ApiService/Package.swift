@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "ApiService",
             targets: ["ApiService"]
-        ),
+        )
     ],
     targets: [
         .target(
@@ -23,6 +23,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

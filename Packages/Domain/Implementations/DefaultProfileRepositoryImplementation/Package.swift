@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "DefaultProfileRepositoryImplementation",
             targets: ["DefaultProfileRepositoryImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
@@ -21,7 +21,7 @@ let package = Package(
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation")
     ],
     targets: [
         .target(
@@ -31,7 +31,7 @@ let package = Package(
                 "Api",
                 "ApiDomainConvenience",
                 "DataTransferObjects",
-                "PersistentStorage",
+                "PersistentStorage"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -50,7 +50,7 @@ let package = Package(
                 "PersistentStorage",
                 "DefaultProfileRepositoryImplementation",
                 "MockPersistentStorage",
-                "MockApiImplementation",
+                "MockApiImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

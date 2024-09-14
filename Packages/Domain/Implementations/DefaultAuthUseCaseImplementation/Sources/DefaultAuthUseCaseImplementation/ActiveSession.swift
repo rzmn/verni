@@ -48,7 +48,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
         let persistency = try await persistencyFactory.create(host: hostId, refreshToken: refreshToken)
         return await ActiveSession(
             anonymousApi: anonymousApi,
-            persistency: persistency, 
+            persistency: persistency,
             activeSessionDIContainerFactory: activeSessionDIContainerFactory,
             accessToken: accessToken,
             apiFactoryProvider: apiFactoryProvider
@@ -70,7 +70,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
         }
         return await ActiveSession(
             anonymousApi: anonymousApi,
-            persistency: persistency, 
+            persistency: persistency,
             activeSessionDIContainerFactory: activeSessionDIContainerFactory,
             accessToken: nil,
             apiFactoryProvider: apiFactoryProvider
@@ -98,7 +98,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
         self.authenticatedApiFactory = await apiFactoryProvider(tokenRefresher)
         let sessionHost = SessionHost()
         await sessionHost.sessionStarted(host: self.userId)
-        logoutSubject.sink { reason in
+        logoutSubject.sink { _ in
             Task {
                 await sessionHost.sessionFinished()
             }

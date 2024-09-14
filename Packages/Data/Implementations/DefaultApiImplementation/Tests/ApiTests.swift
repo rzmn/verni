@@ -169,7 +169,7 @@ struct MockApiService: ApiService {
             )
             Issue.record()
             return
-        } catch  {
+        } catch {
             apiError = error
         }
 
@@ -199,7 +199,7 @@ struct MockApiService: ApiService {
             )
             Issue.record()
             return
-        } catch  {
+        } catch {
             apiError = error
         }
 
@@ -229,7 +229,7 @@ struct MockApiService: ApiService {
             )
             Issue.record()
             return
-        } catch  {
+        } catch {
             apiError = error
         }
 
@@ -259,7 +259,7 @@ struct MockApiService: ApiService {
             )
             Issue.record()
             return
-        } catch  {
+        } catch {
             apiError = error
         }
 

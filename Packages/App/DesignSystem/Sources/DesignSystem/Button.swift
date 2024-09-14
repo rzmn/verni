@@ -34,7 +34,7 @@ public class Button: UIButton {
         }, for: .touchUpInside)
         render(config: config)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }

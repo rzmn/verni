@@ -95,7 +95,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()
@@ -132,7 +132,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()
@@ -169,7 +169,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()
@@ -206,7 +206,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()
@@ -243,7 +243,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()
@@ -280,7 +280,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()
@@ -317,7 +317,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.U
 
         let longPollError: LongPollError
         do {
-            let _ = try await api.longPoll(
+            _ = try await api.longPoll(
                 query: query
             )
             Issue.record()

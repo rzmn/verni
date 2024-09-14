@@ -20,7 +20,7 @@ actor MockUsersRepository: UsersRepository {
             )
         }
     }
-    
+
     func searchUsers(query: String) async throws(GeneralError) -> [User] {
         searchUsersCalls.append(query)
         return []
@@ -45,7 +45,7 @@ actor MockFriendsRepository: FriendsRepository {
             ]
         ]
     }
-    
+
     func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
         PassthroughSubject().eraseToAnyPublisher()
     }
@@ -60,7 +60,7 @@ actor MockSpendingsRepository: SpendingsRepository {
         refreshSpendingCounterpartiesCalls.append(())
         return [SpendingsPreview(counterparty: UUID().uuidString, balance: [.russianRuble: 123])]
     }
-    
+
     func refreshSpendingsHistory(counterparty: User.ID) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
         refreshSpendingsHistoryCalls.append(counterparty)
         return [
@@ -78,7 +78,7 @@ actor MockSpendingsRepository: SpendingsRepository {
             )
         ]
     }
-    
+
     func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending {
         getSpendingCalls.append(id)
         return Spending(
@@ -91,15 +91,14 @@ actor MockSpendingsRepository: SpendingsRepository {
             ]
         )
     }
-    
+
     func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never> {
         PassthroughSubject().eraseToAnyPublisher()
     }
-    
+
     func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never> {
         PassthroughSubject().eraseToAnyPublisher()
     }
-    
 
 }
 

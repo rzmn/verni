@@ -12,12 +12,12 @@ let package = Package(
         .library(
             name: "MockNetworkingImplementation",
             targets: ["MockNetworkingImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Networking"),
         .package(path: "../../Logging"),
-        .package(path: "../../Base"),
+        .package(path: "../../Base")
     ],
     targets: [
         .target(
@@ -33,6 +33,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

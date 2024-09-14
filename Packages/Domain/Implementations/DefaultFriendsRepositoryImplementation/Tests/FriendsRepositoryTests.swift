@@ -7,7 +7,6 @@ import Domain
 import Api
 import Combine
 import ApiDomainConvenience
-@testable import Base
 @testable import DefaultFriendsRepositoryImplementation
 @testable import MockApiImplementation
 

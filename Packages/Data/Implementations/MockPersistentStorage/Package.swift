@@ -12,20 +12,20 @@ let package = Package(
         .library(
             name: "MockPersistentStorage",
             targets: ["MockPersistentStorage"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../PersistentStorage"),
         .package(path: "../../DataTransferObjects"),
-        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Logging")
     ],
     targets: [
         .target(
             name: "MockPersistentStorage",
             dependencies: [
                 "DataTransferObjects",
-                "Logging", 
-                "PersistentStorage",
+                "Logging",
+                "PersistentStorage"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -33,6 +33,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

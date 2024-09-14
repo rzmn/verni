@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "FriendsFlow",
             targets: ["FriendsFlow"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../UserPreviewFlow"),
@@ -21,7 +21,7 @@ let package = Package(
         .package(path: "../../../DI/DI"),
         .package(path: "../../../Domain/Domain"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Base")
     ],
     targets: [
         .target(

@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "SignUpFlow",
             targets: ["SignUpFlow"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../AppBase"),
@@ -33,7 +33,7 @@ let package = Package(
                 "Logging",
                 "Base",
                 "ProgressHUD",
-                "AppBase",
+                "AppBase"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

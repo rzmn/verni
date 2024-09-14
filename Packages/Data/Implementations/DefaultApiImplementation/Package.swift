@@ -12,14 +12,14 @@ let package = Package(
         .library(
             name: "DefaultApiImplementation",
             targets: ["DefaultApiImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Api"),
         .package(path: "../../DataTransferObjects"),
         .package(path: "../../ApiService"),
         .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Logging")
     ],
     targets: [
         .target(
@@ -29,7 +29,7 @@ let package = Package(
                 "Api",
                 "Base",
                 "DataTransferObjects",
-                "Logging",
+                "Logging"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

@@ -66,7 +66,6 @@ public enum HttpCode: Sendable, Equatable {
         }
     }
 
-
     public var success: Bool {
         guard case .success = self else {
             return false

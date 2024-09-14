@@ -12,13 +12,13 @@ let package = Package(
         .library(
             name: "DefaultSpendingInteractionsUseCaseImplementation",
             targets: ["DefaultSpendingInteractionsUseCaseImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/DataTransferObjects"),
+        .package(path: "../../../Data/DataTransferObjects")
     ],
     targets: [
         .target(

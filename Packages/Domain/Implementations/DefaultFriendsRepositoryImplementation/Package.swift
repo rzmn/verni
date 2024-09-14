@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "DefaultFriendsRepositoryImplementation",
             targets: ["DefaultFriendsRepositoryImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
@@ -21,7 +21,7 @@ let package = Package(
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation")
     ],
     targets: [
         .target(
@@ -50,7 +50,7 @@ let package = Package(
                 "PersistentStorage",
                 "DefaultFriendsRepositoryImplementation",
                 "MockPersistentStorage",
-                "MockApiImplementation",
+                "MockApiImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
@@ -58,6 +58,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

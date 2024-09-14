@@ -98,7 +98,7 @@ public class TextField: UITextField {
         super.init(frame: .zero)
         setupView()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }

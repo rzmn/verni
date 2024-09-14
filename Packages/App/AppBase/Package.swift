@@ -12,14 +12,14 @@ let package = Package(
         .library(
             name: "AppBase",
             targets: ["AppBase"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Infrastructure/Base"),
         .package(path: "../../Infrastructure/Logging"),
         .package(path: "../../Domain/Domain"),
         .package(path: "../../DesignSystem"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest"),
+        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
     ],
     targets: [
         .target(
@@ -29,7 +29,7 @@ let package = Package(
                 "Logging",
                 "ProgressHUD",
                 "Domain",
-                "DesignSystem",
+                "DesignSystem"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

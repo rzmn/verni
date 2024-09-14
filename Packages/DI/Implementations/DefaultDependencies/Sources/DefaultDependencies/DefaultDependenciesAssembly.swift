@@ -14,7 +14,7 @@ internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
 internal import PersistentStorageSQLite
 
-fileprivate actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
+private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let impl: any AuthUseCase
     private let awakeHook: () async throws(AwakeError) -> any ActiveSessionDIContainer
     private let loginHook: (Credentials) async throws(LoginError) -> any ActiveSessionDIContainer
@@ -45,7 +45,6 @@ fileprivate actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
         try await signupHook(credentials)
     }
 }
-
 
 public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     private let anonymousApi: ApiProtocol

@@ -31,7 +31,7 @@ public class IconButton: UIButton {
             return configuration
         }()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError()
     }

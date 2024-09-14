@@ -63,7 +63,7 @@ struct FailableEncodable: Encodable {
 
         let serviceError: NetworkServiceError
         do {
-            let _ = try encoder.encodeBody(from: request)!
+            _ = try encoder.encodeBody(from: request)!
             Issue.record()
             return
         } catch {

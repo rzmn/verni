@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "DefaultUsersRepositoryImplementation",
             targets: ["DefaultUsersRepositoryImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
@@ -23,7 +23,7 @@ let package = Package(
         .package(path: "../../../Infrastructure/Logging"),
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation")
     ],
     targets: [
         .target(
@@ -56,7 +56,7 @@ let package = Package(
                 "Logging",
                 "Base",
                 "MockPersistentStorage",
-                "MockApiImplementation",
+                "MockApiImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

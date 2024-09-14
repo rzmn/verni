@@ -27,7 +27,7 @@ import UIKit
         await router.pop(controller)
     }
 
-    func needsPickCounterparty()  {
+    func needsPickCounterparty() {
         router.hudFailure(description: "expense_choose_counterparty".localized)
     }
 

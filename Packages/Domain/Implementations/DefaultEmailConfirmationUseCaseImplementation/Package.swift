@@ -12,12 +12,12 @@ let package = Package(
         .library(
             name: "DefaultEmailConfirmationUseCaseImplementation",
             targets: ["DefaultEmailConfirmationUseCaseImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/Api")
     ],
     targets: [
         .target(

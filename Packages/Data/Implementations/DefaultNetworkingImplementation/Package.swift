@@ -12,12 +12,12 @@ let package = Package(
         .library(
             name: "DefaultNetworkingImplementation",
             targets: ["DefaultNetworkingImplementation"]
-        ),
+        )
     ],
     dependencies: [
         .package(path: "../../Networking"),
         .package(path: "../../Logging"),
-        .package(path: "../../Base"),
+        .package(path: "../../Base")
     ],
     targets: [
         .target(

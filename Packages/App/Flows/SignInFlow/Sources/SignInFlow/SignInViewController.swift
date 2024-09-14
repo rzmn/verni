@@ -17,7 +17,7 @@ extension SignInViewController: Routable {
     var name: String {
         "sign in"
     }
-    
+
     func create(onClose: @escaping @MainActor (UIViewController) async -> Void) -> UIViewController {
         self.onClose = onClose
         return self
