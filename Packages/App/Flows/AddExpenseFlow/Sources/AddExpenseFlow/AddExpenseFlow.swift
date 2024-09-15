@@ -36,7 +36,7 @@ public actor AddExpenseFlow {
 // MARK: - Flow
 
 extension AddExpenseFlow: Flow {
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case canceledManually
         case expenseAdded
     }

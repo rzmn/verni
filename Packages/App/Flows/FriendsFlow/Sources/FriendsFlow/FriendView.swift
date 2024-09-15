@@ -39,7 +39,9 @@ class FriendView: UIView {
     }
 
     private func setupView() {
-        [label, avatar, balanceLabel].forEach(addSubview)
+        for view in [label, avatar, balanceLabel] {
+            addSubview(view)
+        }
         backgroundColor = .p.backgroundContent
     }
 

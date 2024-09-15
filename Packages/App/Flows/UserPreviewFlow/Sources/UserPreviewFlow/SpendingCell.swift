@@ -20,7 +20,9 @@ class SpendingCell: UITableViewCell {
     }
 
     private func setupView() {
-        [content].forEach(contentView.addSubview)
+        for view in [content] {
+            contentView.addSubview(view)
+        }
         backgroundColor = .clear
         contentView.backgroundColor = .clear
         backgroundView = UIView()

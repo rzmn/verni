@@ -47,7 +47,9 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
         backgroundColor = .p.background
         table.dataSource = dataSource
         table.delegate = self
-        [table, emptyPlaceholder].forEach(addSubview)
+        for view in [table, emptyPlaceholder] {
+            addSubview(view)
+        }
         model.state
             .map { $0 as PickCounterpartyState? }
             .assign(to: \.state, on: self)

@@ -37,7 +37,7 @@ public actor PickCounterpartyFlow {
 // MARK: - Flow
 
 extension PickCounterpartyFlow: Flow {
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case picked(User)
         case canceledManually
     }

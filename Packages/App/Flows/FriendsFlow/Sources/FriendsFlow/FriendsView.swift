@@ -48,14 +48,18 @@ class FriendsView: View<FriendsViewActions> {
         backgroundColor = .p.background
         table.dataSource = dataSource
         table.delegate = self
-        [table, emptyPlaceholder].forEach(addSubview)
+        for view in [table, emptyPlaceholder] {
+            addSubview(view)
+        }
         model.state
             .map { $0 as FriendsState? }
             .assign(to: \.state, on: self)
             .store(in: &subscriptions)
         table.refreshControl = {
             let ptr = UIRefreshControl()
-            ptr.addAction(curry(model.handle)(.onPulledToRefresh), for: .valueChanged)
+            ptr.addAction({ [model] in
+                model.handle(.onPulledToRefresh)
+            }, for: .valueChanged)
             return ptr
         }()
     }

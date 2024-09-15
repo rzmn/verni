@@ -30,7 +30,7 @@ public actor UpdateDisplayNameFlow {
 // MARK: - Flow
 
 extension UpdateDisplayNameFlow: Flow {
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case canceled
         case successfullySet
     }

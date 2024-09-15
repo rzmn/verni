@@ -69,7 +69,7 @@ class AddExpenseView: View<AddExpenseViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [
+        for view in [
             whoOws,
             splitEqually,
             chooseCounterparty,
@@ -78,7 +78,9 @@ class AddExpenseView: View<AddExpenseViewActions> {
             splitEquallyDescription,
             counterpartyAvatar,
             counterpartyName
-        ].forEach(addSubview)
+        ] {
+            addSubview(view)
+        }
         chooseCounterparty.tapPublisher
             .sink(receiveValue: curry(model.handle)(.onPickCounterpartyTap))
             .store(in: &subscriptions)

@@ -41,7 +41,7 @@ public actor AuthenticatedFlow {
 // MARK: - Flow
 
 extension AuthenticatedFlow: Flow {
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case logout
     }
 

@@ -51,7 +51,9 @@ class SpendingView: UIView {
 
     private func setupView() {
         backgroundColor = .p.backgroundContent
-        [category, title, date, ownership, amount].forEach(addSubview)
+        for view in [category, title, date, ownership, amount] {
+            addSubview(view)
+        }
     }
 
     func reuse() {

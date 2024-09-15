@@ -42,7 +42,7 @@ extension UpdateEmailFlow: Flow {
     public func perform() async -> Result<Profile, TerminationEvent> {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
-            Task.detached { @MainActor in
+            Task {
                 await self.presenter().presentEmailEditing { [weak self] in
                     guard let self else { return }
                     await handle(result: .failure(.canceledManually))

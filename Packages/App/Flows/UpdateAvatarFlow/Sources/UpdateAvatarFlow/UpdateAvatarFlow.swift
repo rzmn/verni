@@ -22,12 +22,12 @@ public actor UpdateAvatarFlow {
 }
 
 extension UpdateAvatarFlow: Flow {
-    enum PickPhotoTerminationEvent: Error {
+    enum PickPhotoTerminationEvent: Error, Sendable {
         case canceledManually
         case internalError
     }
 
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case canceled
         case successfullySet
     }

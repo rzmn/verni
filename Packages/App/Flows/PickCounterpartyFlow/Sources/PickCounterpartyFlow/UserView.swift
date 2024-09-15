@@ -32,7 +32,9 @@ class UserView: UIView {
     }
 
     private func setupView() {
-        [label, avatar].forEach(addSubview)
+        for view in [label, avatar] {
+            addSubview(view)
+        }
         layer.cornerRadius = 16
         layer.masksToBounds = true
         backgroundColor = .p.backgroundContent

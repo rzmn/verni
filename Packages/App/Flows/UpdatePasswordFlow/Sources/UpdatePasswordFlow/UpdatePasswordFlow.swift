@@ -37,7 +37,7 @@ public actor UpdatePasswordFlow {
 // MARK: - Flow
 
 extension UpdatePasswordFlow: Flow {
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case canceled
         case successfullySet
     }

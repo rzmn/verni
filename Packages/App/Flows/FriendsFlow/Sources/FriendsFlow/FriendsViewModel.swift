@@ -2,7 +2,7 @@ import Foundation
 import Domain
 
 fileprivate extension FriendsState.Content {
-    init(
+    @MainActor init(
         friends: [FriendshipKind: [User]],
         spendings: [SpendingsPreview],
         items: inout [User.ID: FriendsState.Item]

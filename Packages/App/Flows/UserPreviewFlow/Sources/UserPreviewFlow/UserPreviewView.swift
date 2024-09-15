@@ -62,7 +62,9 @@ class UserPreviewView: View<UserPreviewViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [name, avatar, table, emptyPlaceholder].forEach(addSubview)
+        for view in [name, avatar, table, emptyPlaceholder] {
+            addSubview(view)
+        }
         model.state
             .map { $0 as UserPreviewState? }
             .assign(to: \.state, on: self)

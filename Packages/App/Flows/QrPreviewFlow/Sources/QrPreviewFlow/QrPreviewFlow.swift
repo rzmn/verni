@@ -42,9 +42,8 @@ extension QrPreviewFlow: Flow {
     public func perform() async -> FlowResult {
         await withCheckedContinuation { continuation in
             self.continuation = continuation
-            Task.detached { @MainActor [weak self] in
-                guard let self else { return }
-                let controller = QrPreviewViewController(model: self)
+            Task {
+                let controller = await QrPreviewViewController(model: self)
                 await router.present(controller) { [weak self] in
                     guard let self else { return }
                     await handleContinuation()

@@ -39,7 +39,9 @@ class AccountView: View<AccountViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [updateAvatar, updateEmail, updateDisplayName, updatePassword, logout].forEach(addSubview)
+        for view in [updateAvatar, updateEmail, updateDisplayName, updatePassword, logout] {
+            addSubview(view)
+        }
         logout.tapPublisher
             .sink(receiveValue: curry(model.handle)(.onLogoutTap))
             .store(in: &subscriptions)

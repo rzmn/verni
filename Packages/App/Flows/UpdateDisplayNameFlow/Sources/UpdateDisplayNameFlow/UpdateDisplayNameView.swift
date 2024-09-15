@@ -22,14 +22,18 @@ class UpdateDisplayNameView: View<UpdateDisplayNameViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [newDisplayName, confirm].forEach(addSubview)
+        for view in [newDisplayName, confirm] {
+            addSubview(view)
+        }
         newDisplayName.delegate = self
         newDisplayName.textPublisher
             .map { $0 ?? "" }
             .sink(receiveValue: model.handle • UpdateDisplayNameViewActionType.onDisplayNameTextChanged)
             .store(in: &subscriptions)
         confirm.tapPublisher
-            .sink(receiveValue: weak(self, type(of: self).onConfirmTap))
+            .weakSinkAssumingMainActor(object: self) { o, _ in
+                o.onConfirmTap()
+            }
             .store(in: &subscriptions)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         model.state

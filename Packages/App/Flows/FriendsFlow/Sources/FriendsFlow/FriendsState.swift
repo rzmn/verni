@@ -1,9 +1,10 @@
 import Domain
 import AppBase
 import Combine
+internal import Base
 
 struct FriendsState {
-    class Item: Equatable {
+    @MainActor class Item: Equatable, Sendable {
         @Published var data: ItemData
         let id: User.ID
 
@@ -12,21 +13,21 @@ struct FriendsState {
             id = item.user.id
         }
 
-        static func == (lhs: FriendsState.Item, rhs: FriendsState.Item) -> Bool {
+        nonisolated static func == (lhs: FriendsState.Item, rhs: FriendsState.Item) -> Bool {
             lhs.id == rhs.id
         }
     }
-    struct ItemData: Equatable {
+    struct ItemData: Equatable, Sendable {
         let user: User
         let balance: [Currency: Cost]
     }
 
-    struct Section: Equatable {
+    struct Section: Equatable, Sendable {
         let id: FriendshipKind
         let items: [Item]
     }
 
-    struct Content: Equatable {
+    struct Content: Equatable, Sendable {
         let sections: [Section]
     }
 

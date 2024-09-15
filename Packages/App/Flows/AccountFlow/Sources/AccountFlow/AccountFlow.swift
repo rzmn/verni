@@ -60,7 +60,7 @@ extension AccountFlow: TabEmbedFlow {
         await presenter().tabViewController
     }
 
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case logout
     }
 

@@ -17,7 +17,9 @@ actor AddFriendByQrFlow {
         self.router = router
         dataScannerDelegateAdapter = await DataScannerDelegateAdapter { [weak self] url, scanner in
             guard let self else { return }
-            await handle(result: .success(url), dataScannerToDismiss: scanner)
+            await handle(result: .success(url), dismissAction: {
+                await router.pop(scanner)
+            })
         }
     }
 }
@@ -31,8 +33,8 @@ extension AddFriendByQrFlow: Flow {
     func perform() async -> Result<AppUrl, TerminationEvent> {
         await withCheckedContinuation { continuation in
             self.continuation = continuation
-            Task.detached { @MainActor [weak self] in
-                await self?.presentDataScanner()
+            Task {
+                await presentDataScanner()
             }
         }
     }
@@ -59,13 +61,11 @@ extension AddFriendByQrFlow: Flow {
 
     private func handle(
         result: Result<AppUrl, TerminationEvent>,
-        dataScannerToDismiss: DataScannerViewController? = nil
+        dismissAction: (@MainActor () async -> Void)? = nil
     ) async {
         guard let continuation else { return }
         self.continuation = nil
-        if let dataScannerToDismiss {
-            await router.pop(dataScannerToDismiss)
-        }
+        await dismissAction?()
         continuation.resume(returning: result)
     }
 }

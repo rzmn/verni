@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-public protocol Flow {
+public protocol Flow: Sendable {
     associatedtype FlowResult
     func perform() async -> FlowResult
 }

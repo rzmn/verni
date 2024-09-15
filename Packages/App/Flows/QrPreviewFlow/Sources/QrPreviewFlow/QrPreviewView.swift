@@ -19,7 +19,9 @@ class QrPreviewView: View<QrPreviewFlow> {
     }
 
     override func setupView() {
-        [qrView, avatar].forEach(addSubview)
+        for view in [qrView, avatar] {
+            addSubview(view)
+        }
         avatar.avatarId = model.state.user.avatar?.id
         backgroundColor = .p.background
     }

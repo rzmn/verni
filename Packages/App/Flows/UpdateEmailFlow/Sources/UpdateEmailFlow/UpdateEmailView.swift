@@ -34,7 +34,9 @@ class UpdateEmailView: View<UpdateEmailViewActions> {
     private var keyboardBottomInset: CGFloat = 0
 
     override func setupView() {
-        [email, resendCode, enterCode, confirmEmail].forEach(addSubview)
+        for view in [email, resendCode, enterCode, confirmEmail] {
+            addSubview(view)
+        }
         backgroundColor = .p.background
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         enterCode.delegate = self

@@ -34,9 +34,11 @@ class UpdatePasswordView: View<UpdatePasswordViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [oldPassword, newPassword, newPasswordRepeat, confirm].forEach(addSubview)
-        [oldPassword, newPassword, newPasswordRepeat].forEach {
-            $0.delegate = self
+        for view in [oldPassword, newPassword, newPasswordRepeat, confirm] {
+            addSubview(view)
+        }
+        for textField in [oldPassword, newPassword, newPasswordRepeat] {
+            textField.delegate = self
         }
         oldPassword.textPublisher
             .map { $0 ?? "" }
@@ -51,7 +53,9 @@ class UpdatePasswordView: View<UpdatePasswordViewActions> {
             .sink(receiveValue: model.handle • UpdatePasswordViewActionType.onRepeatNewPasswordTextChanged)
             .store(in: &subscriptions)
         confirm.tapPublisher
-            .sink(receiveValue: weak(self, type(of: self).onConfirmTap))
+            .weakSinkAssumingMainActor(object: self) { o, _ in
+                o.onConfirmTap()
+            }
             .store(in: &subscriptions)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         model.state
