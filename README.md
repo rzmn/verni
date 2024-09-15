@@ -1,7 +1,7 @@
 # The App
 [![Xcode - Build and Analyze](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml)
 [![Xcode - Test](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml)
-[![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5&query=%24.record.coverage&label=Code%20Coverage)
+[![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
 
 Shared Expenses Tracker App iOS Client.
 

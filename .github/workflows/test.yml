@@ -33,6 +33,6 @@ jobs:
           curl --location --request PUT 'https://api.jsonbin.io/v3/b/66e66909acd3cb34a884adb5' \
             --header "X-Master-Key: ${JSONBINS_KEY}" \
             --header "Content-Type: application/json" \
-            --data "{\"coverage\":\"${percentage_int}\"}"
+            --data "{\"coverage\":\"${percentage_int}%\"}"
         env:
           JSONBINS_KEY: ${{ secrets.JSONBINS_KEY }}
