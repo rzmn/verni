@@ -1,4 +1,5 @@
 # The App
+[![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
 [![Xcode - Build and Analyze](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml)
 [![Xcode - Test](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml)
 [![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
@@ -13,7 +14,7 @@ Let's try to realize the desire to implement the application the way I'd like it
 
 ## Tech stack
 
-- swift 6
+- swift testing
 
 - strict concurrency
 
