@@ -21,7 +21,7 @@ public protocol DIContainer: AppCommonCovertible, Sendable {
 public protocol ActiveSessionDIContainer: AppCommonCovertible {
     var userId: User.ID { get }
 
-    var profileRepository: ProfileRepository { get }
+    var profileRepository: any ProfileRepository { get }
     var usersRepository:  UsersRepository { get }
     var spendingsRepository: SpendingsRepository { get }
     var friendListRepository: FriendsRepository { get }

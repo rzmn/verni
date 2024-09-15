@@ -24,8 +24,8 @@ public actor AccountFlow {
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
     private let editingUseCase: ProfileEditingUseCase
-    private let profileRepository: ProfileRepository
-    private var subscriptions = Set<AnyCancellable>()
+    private let profileRepository: any ProfileRepository
+    private var subscriptions = [any CancellableStream]()
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -44,9 +44,13 @@ public actor AccountFlow {
             return
         }
         if active {
-            await viewModel.subscribeTo(
-                profilePublisher: await profileRepository.profileUpdated()
-            )
+            let subscription = await profileRepository.profileUpdated()
+            subscriptions.append(subscription)
+            Task {
+                for await profile in await subscription.stream {
+                    await viewModel.reload(profile: profile)
+                }
+            }
         } else {
             subscriptions.removeAll()
         }

@@ -3,28 +3,34 @@ import Combine
 public actor ExternallyUpdatable<T: Sendable> {
     private var object: T?
     private var actions: [@Sendable (T) -> T] = []
-    private let subject = PassthroughSubject<T, Never>()
+    private let broadcast: AsyncBroadcast<T>
 
-    public init() {}
+    public init(taskFactory: TaskFactory) {
+        broadcast = AsyncBroadcast(taskFactory: taskFactory)
+    }
 }
 
 extension ExternallyUpdatable {
-    public var relevant: AnyPublisher<T, Never> {
-        subject.eraseToAnyPublisher()
+    public var relevant: AsyncBroadcast<T> {
+        broadcast
     }
 
-    public func update(_ object: T) {
+    public func update(_ object: T) async {
         self.object = object
         self.actions = []
-        subject.send(object)
+        await publish()
     }
 
-    public func add(action: @Sendable @escaping (T) -> T) {
+    public func add(action: @Sendable @escaping (T) -> T) async {
+        actions.append(action)
+        await publish()
+    }
+
+    private func publish() async {
         guard let object else {
             return
         }
-        actions.append(action)
-        subject.send(
+        await broadcast.yield(
             actions.reduce(object) { current, action in
                 action(current)
             }

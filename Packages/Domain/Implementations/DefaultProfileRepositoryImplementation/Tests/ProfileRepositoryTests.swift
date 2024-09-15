@@ -64,23 +64,24 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
             api: provider.api,
             logger: .shared,
             offline: offlineRepository,
-            profile: ExternallyUpdatable(),
+            profile: ExternallyUpdatable(taskFactory: taskFactory),
             taskFactory: taskFactory
         )
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-                .profileUpdated()
-                .sink { profileFromPublisher in
+            let cancellableStream = await repository.profileUpdated()
+            let stream = await cancellableStream.stream
+            let profileFromRepository = try await repository.refreshProfile()
+            taskFactory.task {
+                for await profileFromPublisher in stream {
                     #expect(profile == profileFromPublisher)
                     confirmation()
                 }
-                .store(in: &subscriptions)
-            let profileFromRepository = try await repository.refreshProfile()
+            }
             #expect(profileFromRepository == profile)
+            await cancellableStream.cancel()
             try await taskFactory.runUntilIdle()
         }
 

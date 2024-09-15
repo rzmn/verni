@@ -110,7 +110,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         )
         self.usersOfflineRepository = usersOfflineRepository
 
-        updatableProfile = ExternallyUpdatable()
+        updatableProfile = ExternallyUpdatable(taskFactory: DefaultTaskFactory())
 
         profileRepository = await DefaultProfileRepository(
             api: api,
