@@ -2,7 +2,7 @@ import UIKit
 internal import Base
 internal import DesignSystem
 
-public class NavigationController: UINavigationController {
+@MainActor public class NavigationController: UINavigationController {
     private var onClose: (@MainActor (UIViewController) async -> Void)?
     private lazy var delegateAdapter = DelegateAdapter(holderController: self)
     public override var delegate: (any UINavigationControllerDelegate)? {
@@ -71,7 +71,7 @@ extension NavigationController {
                 return
             }
             let latestVisibleStack = latestVisibleStack
-            Task.detached { @MainActor in
+            Task {
                 for viewController in latestVisibleStack[holderController.viewControllers.count ..< latestVisibleStack.count].reversed() {
                     guard let navigationStackMember = viewController as? NavigationStackMember else {
                         continue

@@ -15,7 +15,9 @@ class SignInHintView: View<SignInViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [button].forEach(addSubview)
+        for view in [button] {
+            addSubview(view)
+        }
         button.tapPublisher
             .sink(receiveValue: curry(model.handle)(.onOpenSignInTap))
             .store(in: &subscriptions)

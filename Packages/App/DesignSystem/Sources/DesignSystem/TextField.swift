@@ -106,7 +106,9 @@ public class TextField: UITextField {
     private func setupView() {
         borderStyle = .roundedRect
         render(config)
-        [hintLabel].forEach(addSubview)
+        for view in [hintLabel] {
+            addSubview(view)
+        }
         clipsToBounds = false
         addAction({ [unowned self] in
             textSubject.send(text)

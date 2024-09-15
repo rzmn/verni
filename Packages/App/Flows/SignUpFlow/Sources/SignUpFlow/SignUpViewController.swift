@@ -1,7 +1,7 @@
 import UIKit
 import AppBase
 
-class SignUpViewController: ViewController<SignUpView, SignUpViewActions> {
+@MainActor class SignUpViewController: ViewController<SignUpView, SignUpViewActions> {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "signup_title".localized

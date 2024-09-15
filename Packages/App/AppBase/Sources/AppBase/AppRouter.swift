@@ -64,14 +64,14 @@ internal import ProgressHUD
     }
 
     public func present(_ controller: Routable, animated: Bool = true, onPop: (@MainActor () async -> Void)? = nil) async {
-        await scheduler.run { [unowned self] in
+        await scheduler.run { @MainActor [unowned self] in
             let viewController = controller.create { [unowned self] viewController in
                 await pop(viewController)
             }
             if let onPop {
-                await addHandler(onPop, to: viewController)
+                addHandler(onPop, to: viewController)
             }
-            await hideHud()
+            hideHud()
             await doPresent(viewController, animated: animated)
         }
     }

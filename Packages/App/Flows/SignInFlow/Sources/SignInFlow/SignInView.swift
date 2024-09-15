@@ -48,7 +48,9 @@ class SignInView: View<SignInViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [email, password, close, confirm, createAccount, appIcon].forEach(addSubview)
+        for view in [email, password, close, confirm, createAccount, appIcon] {
+            addSubview(view)
+        }
         close.tapPublisher
             .sink(receiveValue: curry(model.handle)(.onSignInCloseTap))
             .store(in: &subscriptions)
@@ -61,10 +63,14 @@ class SignInView: View<SignInViewActions> {
             .sink(receiveValue: model.handle • SignInViewActionType.onPasswordTextUpdated)
             .store(in: &subscriptions)
         confirm.tapPublisher
-            .sink(receiveValue: weak(self, type(of: self).onConfirmTap))
+            .weakSinkAssumingMainActor(object: self) { o, _ in
+                o.onConfirmTap()
+            }
             .store(in: &subscriptions)
         createAccount.tapPublisher
-            .sink(receiveValue: weak(self, type(of: self).onCreateAccountTap))
+            .weakSinkAssumingMainActor(object: self) { o, _ in
+                o.onCreateAccountTap()
+            }
             .store(in: &subscriptions)
         email.delegate = self
         password.delegate = self

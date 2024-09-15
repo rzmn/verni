@@ -22,6 +22,14 @@ public func weak<O: AnyObject>(_ object: O, _ method: @escaping (O) -> () -> Voi
     }
 }
 
+@MainActor public func weak<O: AnyObject>(_ object: O, _ method: @escaping @Sendable (O) -> @MainActor () -> Void) -> @MainActor () -> Void {
+    return { @MainActor [weak object] in
+        if let object = object {
+            method(object)()
+        }
+    }
+}
+
 public func weak<O: AnyObject, A, B>(_ object: O, _ method: @escaping (O) -> (A, B) -> Void) -> (A, B) -> Void {
     return { [weak object] a, b in
         if let object = object {

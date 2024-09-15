@@ -35,7 +35,7 @@ public actor SignUpFlow {
 // MARK: - Flow
 
 extension SignUpFlow: Flow {
-    public enum TerminationEvent {
+    public enum TerminationEvent: Sendable {
         case canceled
         case created(ActiveSessionDIContainer)
     }

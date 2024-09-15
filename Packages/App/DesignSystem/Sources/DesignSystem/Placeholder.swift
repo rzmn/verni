@@ -40,7 +40,9 @@ public class Placeholder: UIControl {
     }
 
     private func setupView() {
-        [icon, title].forEach(addSubview)
+        for view in [icon, title] {
+            addSubview(view)
+        }
         render(config)
     }
 

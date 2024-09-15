@@ -34,7 +34,9 @@ class SignUpView: View<SignUpViewActions> {
 
     override func setupView() {
         backgroundColor = .p.background
-        [email, password, passwordRepeat, confirm].forEach(addSubview)
+        for view in [email, password, passwordRepeat, confirm] {
+            addSubview(view)
+        }
         email.delegate = self
         password.delegate = self
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))

@@ -1,7 +1,7 @@
 import Domain
 import Foundation
 
-public protocol UrlResolver: AnyObject {
+public protocol UrlResolver: AnyObject, Sendable {
     func canResolve(url: AppUrl) async -> Bool
     func resolve(url: AppUrl) async
 }

@@ -2,7 +2,7 @@ import UIKit
 import Combine
 internal import Base
 
-public class KeyboardObserver {
+@MainActor public class KeyboardObserver {
     public struct Event {
         public enum Kind {
             case willHide
@@ -30,45 +30,45 @@ public class KeyboardObserver {
 
     public static let shared = KeyboardObserver()
 
-    public let notifier = PassthroughSubject<Event, Never>()
+    public let notifier: PassthroughSubject<Event, Never>
+    private var subscriptions = Set<AnyCancellable>()
 
     private init() {
-        NotificationCenter.default.addObserver(
-            forName: UIResponder.keyboardWillHideNotification,
-            object: nil,
-            queue: .main,
-            using: weak(self, type(of: self).handle)
-        )
-        NotificationCenter.default.addObserver(
-            forName: UIResponder.keyboardWillChangeFrameNotification,
-            object: nil,
-            queue: .main,
-            using: weak(self, type(of: self).handle)
-        )
-    }
+        notifier = PassthroughSubject<Event, Never>()
+        let mapper = { (notification: Notification) -> Event? in
+            guard let frameInfo = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
+                return nil
+            }
+            let keyboardFrame = frameInfo.cgRectValue
 
-    private func handle(notification: Notification) {
-        guard let keyboardFrame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
-
-        let duration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0.25
-        let curve = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber).flatMap {
-            UIView.AnimationCurve(rawValue: $0.intValue)
-        } ?? .easeInOut
-
-        let event: Event
-        if notification.name == UIResponder.keyboardWillHideNotification {
-            event = Event(
-                kind: .willHide,
-                animationDuration: duration,
-                curve: curve
-            )
-        } else {
-            event = Event(
-                kind: .willChangeFrame(keyboardFrame),
-                animationDuration: duration,
-                curve: curve
-            )
+            let duration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0.25
+            let curve = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber).flatMap {
+                UIView.AnimationCurve(rawValue: $0.intValue)
+            } ?? .easeInOut
+            switch notification.name {
+            case UIResponder.keyboardWillHideNotification:
+                return Event(
+                    kind: .willHide,
+                    animationDuration: duration,
+                    curve: curve
+                )
+            default:
+                return Event(
+                    kind: .willChangeFrame(keyboardFrame),
+                    animationDuration: duration,
+                    curve: curve
+                )
+            }
         }
-        notifier.send(event)
+        NotificationCenter.default
+            .publisher(for: UIResponder.keyboardWillHideNotification)
+            .compactMap(mapper)
+            .sink(receiveValue: notifier.send)
+            .store(in: &subscriptions)
+        NotificationCenter.default
+            .publisher(for: UIResponder.keyboardWillChangeFrameNotification)
+            .compactMap(mapper)
+            .sink(receiveValue: notifier.send)
+            .store(in: &subscriptions)
     }
 }

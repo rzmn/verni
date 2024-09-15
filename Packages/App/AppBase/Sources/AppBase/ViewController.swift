@@ -1,6 +1,6 @@
 import UIKit
 
-open class ViewController<V: View<Model>, Model>: UIViewController {
+@MainActor open class ViewController<V: View<Model>, Model>: UIViewController {
     public var onClose: (@MainActor (UIViewController) async -> Void)?
     public var onPop: (@MainActor () async -> Void)?
 

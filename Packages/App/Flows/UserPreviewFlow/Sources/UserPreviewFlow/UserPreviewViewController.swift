@@ -3,7 +3,7 @@ import UIKit
 import Combine
 internal import Base
 
-class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewViewActions> {
+@MainActor class UserPreviewViewController: ViewController<UserPreviewView, UserPreviewViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func viewDidLoad() {

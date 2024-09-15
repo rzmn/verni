@@ -1,12 +1,12 @@
 import Domain
 import Foundation
 
-public enum AppUrl {
+public enum AppUrl: Sendable {
     private var scheme: String {
         "rzmnse"
     }
 
-    public enum Users {
+    public enum Users: Sendable {
         case show(User.ID)
     }
     case users(Users)

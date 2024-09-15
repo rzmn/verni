@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+internal import Base
 
 public class IconButton: UIButton {
     public struct Config {
