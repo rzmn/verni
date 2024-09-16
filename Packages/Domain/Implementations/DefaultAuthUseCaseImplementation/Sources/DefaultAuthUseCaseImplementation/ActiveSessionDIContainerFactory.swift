@@ -1,7 +1,7 @@
 import Domain
 import Api
 import PersistentStorage
-import Combine
+import AsyncExtensions
 import DI
 
 public protocol ActiveSessionDIContainerFactory: Sendable {
@@ -9,7 +9,7 @@ public protocol ActiveSessionDIContainerFactory: Sendable {
         api: ApiProtocol,
         persistency: Persistency,
         longPoll: LongPoll,
-        logoutSubject: PassthroughSubject<LogoutReason, Never>,
+        logoutSubject: AsyncBroadcast<LogoutReason>,
         userId: User.ID
     ) async -> ActiveSessionDIContainer
 }

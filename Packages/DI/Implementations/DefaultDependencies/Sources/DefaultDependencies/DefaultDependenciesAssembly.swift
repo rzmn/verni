@@ -116,6 +116,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     public func authUseCase() async -> any AuthUseCaseReturningActiveSession {
         AuthUseCaseAdapter(
             impl: await DefaultAuthUseCase(
+                taskFactory: DefaultTaskFactory(),
                 api: anonymousApi,
                 apiServiceFactory: apiServiceFactory,
                 persistencyFactory: persistencyFactory,

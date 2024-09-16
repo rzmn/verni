@@ -4,7 +4,7 @@ import DI
 import PersistentStorage
 import ApiService
 import Domain
-import Combine
+import AsyncExtensions
 internal import Base
 
 actor ActiveSession: ActiveSessionDIContainerConvertible {
@@ -27,8 +27,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
     private let apiFactoryProvider: @Sendable (TokenRefresher) async -> ApiFactory
     private let anonymousApi: ApiProtocol
     private let factory: ActiveSessionDIContainerFactory
-    private let logoutSubject = PassthroughSubject<LogoutReason, Never>()
-    private var subscriptions = Set<AnyCancellable>()
+    private let logoutSubject: AsyncBroadcast<LogoutReason>
 
     private let tokenRefresher: TokenRefresher
     private let userId: User.ID
@@ -36,6 +35,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
     private let accessToken: String?
 
     static func create(
+        taskFactory: TaskFactory,
         anonymousApi: ApiProtocol,
         hostId: User.ID,
         accessToken: String?,
@@ -47,6 +47,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
     ) async throws -> ActiveSession {
         let persistency = try await persistencyFactory.create(host: hostId, refreshToken: refreshToken)
         return await ActiveSession(
+            taskFactory: taskFactory,
             anonymousApi: anonymousApi,
             persistency: persistency,
             activeSessionDIContainerFactory: activeSessionDIContainerFactory,
@@ -56,6 +57,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
     }
 
     static func awake(
+        taskFactory: TaskFactory,
         anonymousApi: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
@@ -69,6 +71,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
             return nil
         }
         return await ActiveSession(
+            taskFactory: taskFactory,
             anonymousApi: anonymousApi,
             persistency: persistency,
             activeSessionDIContainerFactory: activeSessionDIContainerFactory,
@@ -78,6 +81,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
     }
 
     private init(
+        taskFactory: TaskFactory,
         anonymousApi: ApiProtocol,
         persistency: Persistency,
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
@@ -90,18 +94,18 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
         self.apiFactoryProvider = apiFactoryProvider
         self.factory = activeSessionDIContainerFactory
         self.userId = await persistency.userId()
+        self.logoutSubject = AsyncBroadcast(taskFactory: taskFactory)
         tokenRefresher = RefreshTokenManager(
             api: anonymousApi,
             persistency: persistency,
-            onRefreshTokenExpiredOnInvalid: curry(weak(logoutSubject, type(of: logoutSubject).send))(.refreshTokenFailed)
+            onRefreshTokenExpiredOnInvalid: { [taskFactory, logoutSubject] in
+                taskFactory.task {
+                    await logoutSubject.yield(.refreshTokenFailed)
+                }
+            }
         )
         self.authenticatedApiFactory = await apiFactoryProvider(tokenRefresher)
         let sessionHost = SessionHost()
         await sessionHost.sessionStarted(host: self.userId)
-        logoutSubject.sink { _ in
-            Task {
-                await sessionHost.sessionFinished()
-            }
-        }.store(in: &subscriptions)
     }
 }

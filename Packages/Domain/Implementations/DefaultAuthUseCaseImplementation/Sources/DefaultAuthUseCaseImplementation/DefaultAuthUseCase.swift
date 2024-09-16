@@ -3,9 +3,11 @@ import Api
 import ApiService
 import PersistentStorage
 import DI
+import AsyncExtensions
 internal import DataTransferObjects
 
 public actor DefaultAuthUseCase {
+    private let taskFactory: TaskFactory
     private let api: ApiProtocol
     private let apiServiceFactory: ApiServiceFactory
     private let persistencyFactory: PersistencyFactory
@@ -13,12 +15,14 @@ public actor DefaultAuthUseCase {
     private let apiFactoryProvider: @Sendable (TokenRefresher) async -> ApiFactory
 
     public init(
+        taskFactory: TaskFactory,
         api: ApiProtocol,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory,
         activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
         apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
     ) async {
+        self.taskFactory = taskFactory
         self.api = api
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
@@ -30,6 +34,7 @@ public actor DefaultAuthUseCase {
 extension DefaultAuthUseCase: AuthUseCase {
     public func awake() async throws(AwakeError) -> any ActiveSessionDIContainerConvertible {
         guard let session = await ActiveSession.awake(
+            taskFactory: taskFactory,
             anonymousApi: api,
             apiServiceFactory: apiServiceFactory,
             persistencyFactory: persistencyFactory,
@@ -73,6 +78,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         do {
             return try await ActiveSession.create(
+                taskFactory: taskFactory,
                 anonymousApi: api,
                 hostId: token.id,
                 accessToken: token.accessToken,
@@ -119,6 +125,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         do {
             return try await ActiveSession.create(
+                taskFactory: taskFactory,
                 anonymousApi: api,
                 hostId: token.id,
                 accessToken: token.accessToken,

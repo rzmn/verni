@@ -1,4 +1,4 @@
-import Combine
+import AsyncExtensions
 
 public enum LogoutReason: Sendable {
     case refreshTokenFailed
@@ -7,5 +7,5 @@ public enum LogoutReason: Sendable {
 public protocol LogoutUseCase: Sendable {
     func logout() async
 
-    var didLogoutPublisher: AnyPublisher<LogoutReason, Never> { get async }
+    var didLogoutPublisher: any AsyncPublisher<LogoutReason> { get async }
 }

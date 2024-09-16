@@ -1,57 +1,41 @@
 import Domain
 import PersistentStorage
-import Combine
+import AsyncExtensions
 import Base
 import AsyncExtensions
 internal import ApiDomainConvenience
 internal import DataTransferObjects
 
 public actor DefaultLogoutUseCase {
-    private let didLogoutSubject = PassthroughSubject<LogoutReason, Never>()
+    private let didLogoutBroadcast: AsyncBroadcast<LogoutReason>
     private let persistency: Persistency
     private let taskFactory: TaskFactory
-    private var subscriptions = Set<AnyCancellable>()
+    private var didLogoutSubscription: (any CancellableEventSource)?
     private var loggedOutHandler = LoggedOutHandler()
 
     public init(
         persistency: Persistency,
-        shouldLogout: AnyPublisher<LogoutReason, Never>,
+        shouldLogout: any AsyncPublisher<LogoutReason>,
         taskFactory: TaskFactory
     ) async {
+        self.didLogoutBroadcast = AsyncBroadcast(taskFactory: taskFactory)
         self.persistency = persistency
         self.taskFactory = taskFactory
-        typealias Promise = @Sendable (Result<LogoutReason?, Never>) -> Void
-        let sendablePromise: @Sendable (LogoutReason, @escaping Promise) -> Void = { reason, promise in
-            print("[debug] receive \(reason)")
-            self.taskFactory.task {
-                if await self.doLogout() {
-                    promise(.success(reason))
-                } else {
-                    promise(.success(nil))
+        didLogoutSubscription = await shouldLogout.subscribe { [weak self] reason in
+            self?.taskFactory.task { [weak self] in
+                guard let self else { return }
+                guard await self.doLogout() else {
+                    return
                 }
+                await self.didLogoutBroadcast.yield(reason)
             }
         }
-        shouldLogout
-            .flatMap { reason -> Future<LogoutReason?, Never> in
-                Future { [sendablePromise] promise in
-                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
-                    print("[debug] future \(reason) start")
-                    nonisolated(unsafe) let promise = promise
-                    sendablePromise(reason) {
-                        promise($0)
-                        print("[debug] future \(reason) finished")
-                    }
-                }
-            }
-            .compactMap { $0 }
-            .sink(receiveValue: didLogoutSubject.send)
-            .store(in: &subscriptions)
     }
 }
 
 extension DefaultLogoutUseCase: LogoutUseCase {
-    public var didLogoutPublisher: AnyPublisher<LogoutReason, Never> {
-        didLogoutSubject.eraseToAnyPublisher()
+    public var didLogoutPublisher: any AsyncPublisher<LogoutReason> {
+        didLogoutBroadcast
     }
 
     public func logout() async {

@@ -1,5 +1,4 @@
 import Testing
-import Combine
 import Domain
 import DataTransferObjects
 import Base
@@ -30,28 +29,26 @@ private actor PersistencyProvider {
         // given
 
         let taskFactory = TestTaskFactory()
-        let subject = PassthroughSubject<LogoutReason, Never>()
+        let subject = AsyncBroadcast<LogoutReason>(taskFactory: taskFactory)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             persistency: provider.persistency,
-            shouldLogout: subject.eraseToAnyPublisher(),
+            shouldLogout: subject,
             taskFactory: taskFactory
         )
         let reason = LogoutReason.refreshTokenFailed
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await useCase
-                .didLogoutPublisher
-                .sink { reasonFromPublisher in
-                    #expect(reason == reasonFromPublisher)
-                    confirmation()
-                }
-                .store(in: &subscriptions)
-            subject.send(reason)
+            let cancellableStream = await useCase.didLogoutPublisher
+            let subscription = await cancellableStream.subscribe { reasonFromPublisher in
+                #expect(reason == reasonFromPublisher)
+                confirmation()
+            }
+            await subject.yield(reason)
             try await taskFactory.runUntilIdle()
+            await subscription.cancel()
         }
 
         // then
@@ -64,11 +61,11 @@ private actor PersistencyProvider {
         // given
 
         let taskFactory = TestTaskFactory()
-        let subject = PassthroughSubject<LogoutReason, Never>()
+        let subject = AsyncBroadcast<LogoutReason>(taskFactory: taskFactory)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             persistency: provider.persistency,
-            shouldLogout: subject.eraseToAnyPublisher(),
+            shouldLogout: subject,
             taskFactory: taskFactory
         )
 
