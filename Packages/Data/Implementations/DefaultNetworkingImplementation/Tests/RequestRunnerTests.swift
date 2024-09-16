@@ -1,7 +1,8 @@
 import Networking
 import Testing
 import Foundation
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import DefaultNetworkingImplementation
 
 @Suite(.serialized) struct RequestRunnerTests {

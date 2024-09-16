@@ -4,11 +4,24 @@ import DataTransferObjects
 import Foundation
 import Domain
 import Api
-import Combine
 import ApiDomainConvenience
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import DefaultFriendsRepositoryImplementation
 @testable import MockApiImplementation
+
+private struct MockLongPoll: LongPoll {
+    let friendsBroadcast: AsyncBroadcast<LongPollFriendsQuery.Update>
+
+    func poll<Query>(for query: Query) async -> any AsyncPublisher<Query.Update>
+    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
+        if Query.self == LongPollFriendsQuery.self {
+            return friendsBroadcast as! any AsyncPublisher<Query.Update>
+        } else {
+            fatalError()
+        }
+    }
+}
 
 private actor ApiProvider {
     let api: MockApi
@@ -17,16 +30,16 @@ private actor ApiProvider {
     var getUsersCalls: [ [UserDto.ID] ] = []
     let getFriendsResponse: [Int: [UserDto.ID]]
     let getUsersResponse: [UserDto]
-    let getFriendsSubject = PassthroughSubject<LongPollFriendsQuery.Update, Never>()
 
     init(
         getFriendsResponse: [Int: [UserDto.ID]] = [:],
-        getUsersResponse: [UserDto] = []
+        getUsersResponse: [UserDto] = [],
+        taskFactory: TaskFactory
     ) async {
         self.getFriendsResponse = getFriendsResponse
         self.getUsersResponse = getUsersResponse
         api = MockApi()
-        mockLongPoll = MockLongPoll()
+        mockLongPoll = MockLongPoll(friendsBroadcast: AsyncBroadcast(taskFactory: taskFactory))
         await api.mutate { api in
             api._runMethodWithParams = { method in
                 return await self.mutate { s in
@@ -39,19 +52,6 @@ private actor ApiProvider {
                     } else {
                         fatalError()
                     }
-                }
-            }
-        }
-        await mockLongPoll.mutate { longPoll in
-            longPoll._poll = { query in
-                if let _ = query as? LongPollFriendsQuery {
-                    return self.getFriendsSubject
-                        .map {
-                            $0 as Decodable & Sendable
-                        }
-                        .eraseToAnyPublisher()
-                } else {
-                    fatalError()
                 }
             }
         }
@@ -87,7 +87,8 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
         ]
         let provider = await ApiProvider(
             getFriendsResponse: friends.mapValues { $0.map(\.id) },
-            getUsersResponse: friends.values.flatMap { $0.map(UserDto.init) }
+            getUsersResponse: friends.values.flatMap { $0.map(UserDto.init) },
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = DefaultFriendsRepository(
@@ -106,17 +107,18 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-                .friendsUpdated(ofKind: set)
-                .sink { friendsFromPublisher in
-                    #expect(friendsFromPublisher == friendsCasted)
+            let cancellableStream = await repository.friendsUpdated(ofKind: set).subscribeWithStream()
+            let stream = await cancellableStream.eventSource.stream
+            let friendsFromRepository = try await repository.refreshFriends(ofKind: set)
+            taskFactory.task {
+                for await friendsFromPublisher in stream {
+                    #expect(friendsCasted == friendsFromPublisher)
                     confirmation()
                 }
-                .store(in: &subscriptions)
-            let friendsFromRepository = try await repository.refreshFriends(ofKind: set)
+            }
             #expect(friendsFromRepository == friendsCasted)
+            await cancellableStream.cancel()
             try await taskFactory.runUntilIdle()
         }
 
@@ -147,7 +149,8 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
         ]
         let provider = await ApiProvider(
             getFriendsResponse: friends.mapValues { $0.map(\.id) },
-            getUsersResponse: friends.values.flatMap { $0.map(UserDto.init) }
+            getUsersResponse: friends.values.flatMap { $0.map(UserDto.init) },
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = DefaultFriendsRepository(
@@ -166,20 +169,17 @@ private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-                .friendsUpdated(ofKind: set)
-                .dropFirst()
-                .sink { friendsFromPublisher in
-                    #expect(friendsFromPublisher == friendsCasted)
-                    confirmation()
-                }
-                .store(in: &subscriptions)
-            provider.getFriendsSubject.send(
+            let subscription = await repository.friendsUpdated(ofKind: set).subscribe { friendsFromPublisher in
+                #expect(friendsCasted == friendsFromPublisher)
+                confirmation()
+            }
+            try await taskFactory.runUntilIdle()
+            await provider.mockLongPoll.friendsBroadcast.yield(
                 LongPollFriendsQuery.Update(category: .friends)
             )
             try await taskFactory.runUntilIdle()
+            await subscription.cancel()
         }
 
         // then

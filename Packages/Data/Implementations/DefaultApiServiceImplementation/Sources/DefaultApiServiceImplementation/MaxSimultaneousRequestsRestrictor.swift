@@ -1,6 +1,7 @@
 import Foundation
 import ApiService
 import Base
+import AsyncExtensions
 
 actor MaxSimultaneousRequestsRestrictor {
     private let manager: ApiServiceRequestRunnersManager

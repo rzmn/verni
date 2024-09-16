@@ -3,6 +3,7 @@ import Domain
 import DI
 import AppBase
 import Combine
+import AsyncExtensions
 internal import DesignSystem
 internal import ProgressHUD
 internal import UserPreviewFlow
@@ -22,8 +23,8 @@ public actor FriendsFlow {
     private let router: AppRouter
     private let usersRepository: UsersRepository
     private let spendingsRepository: SpendingsRepository
-    private let friendListRepository: FriendsRepository
-    private var subscriptions = Set<AnyCancellable>()
+    private let friendsRepository: FriendsRepository
+    private var friendsSubscription: (any CancellableEventSource)?
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -45,25 +46,24 @@ public actor FriendsFlow {
         }
         spendingsRepository = di.spendingsRepository
         usersRepository = di.usersRepository
-        friendListRepository = di.friendListRepository
+        friendsRepository = di.friendListRepository
     }
 
     public func setActive(_ active: Bool) async {
-        let wasActive = !subscriptions.isEmpty
+        let wasActive = friendsSubscription != nil
         guard active != wasActive else {
             return
         }
         if active {
-            await friendListRepository
-                .friendsUpdated(ofKind: .all)
-                .sink(receiveValue: { friends in
-                    Task.detached {
-                        await self.viewModel.reload(friends: friends)
-                    }
-                })
-                .store(in: &subscriptions)
+            friendsSubscription = await friendsRepository.friendsUpdated(ofKind: .all).subscribe { [weak self] friends in
+                guard let self else { return }
+                Task {
+                    await self.viewModel.reload(friends: friends)
+                }
+            }
         } else {
-            subscriptions.removeAll()
+            await friendsSubscription?.cancel()
+            friendsSubscription = nil
         }
     }
 }
@@ -170,7 +170,7 @@ extension FriendsFlow {
             self.viewModel.content = .loading(previous: state.content)
         }
 
-        async let asyncFriends = friendListRepository.refreshFriendsNoTypedThrow(ofKind: .all)
+        async let asyncFriends = friendsRepository.refreshFriendsNoTypedThrow(ofKind: .all)
         async let asyncSpendings = spendingsRepository.refreshSpendingCounterpartiesNoTypedThrow()
 
         let result = await (asyncFriends, asyncSpendings)

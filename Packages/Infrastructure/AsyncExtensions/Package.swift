@@ -4,25 +4,19 @@
 import PackageDescription
 
 let package = Package(
-    name: "Domain",
+    name: "AsyncExtensions",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "Domain",
-            targets: ["Domain"]
+            name: "AsyncExtensions",
+            targets: ["AsyncExtensions"]
         )
-    ],
-    dependencies: [
-        .package(path: "../../Infrastructure/AsyncExtensions")
     ],
     targets: [
         .target(
-            name: "Domain",
-            dependencies: [
-                "AsyncExtensions"
-            ],
+            name: "AsyncExtensions",
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

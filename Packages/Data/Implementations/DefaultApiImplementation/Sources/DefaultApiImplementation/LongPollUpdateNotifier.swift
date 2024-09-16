@@ -1,16 +1,17 @@
 import Api
-import Combine
 import Base
+import AsyncExtensions
 internal import Logging
 
 actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable & Sendable {
-    var publisher: AnyPublisher<Query.Update, Never> {
-        subject.upstream.eraseToAnyPublisher()
+    var publisher: any AsyncPublisher<Query.Update> {
+        broadcast
     }
-    private let subject = OnDemandPublisher<Query.Update>()
+    private let broadcast: AsyncBroadcast<Query.Update>
+    private let hasSubscribersBroadcast: AsyncBroadcast<Int>
+    private var hasSubscribersSubscription: BlockAsyncSubscription<Int>?
 
     let logger: Logger = .shared.with(prefix: "[lp] ")
-    private var subscriptions = Set<AnyCancellable>()
     private let poller: Poller<Query>
     private let taskFactory: TaskFactory
     private var isListening = false
@@ -18,16 +19,18 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
     init(query: Query, api: DefaultApi, taskFactory: TaskFactory) async where Query.Update: Decodable & Sendable {
         self.poller = await Poller(query: query, api: api)
         self.taskFactory = taskFactory
-        subject.hasSubscribers
-            .sink { hasSubscribers in
-                self.taskFactory.task {
-                    if hasSubscribers {
-                        self.startListening()
-                    } else {
-                        self.cancelListening()
-                    }
+        self.hasSubscribersBroadcast = AsyncBroadcast(taskFactory: taskFactory)
+        self.broadcast = AsyncBroadcast(taskFactory: taskFactory, subscribersCountTracking: hasSubscribersBroadcast)
+        hasSubscribersSubscription = await hasSubscribersBroadcast.subscribe { [weak self, taskFactory] subscribersCount in
+            taskFactory.task { [weak self] in
+                guard let self else { return }
+                if subscribersCount > 0 {
+                    await self.startListening()
+                } else {
+                    await self.cancelListening()
                 }
-            }.store(in: &subscriptions)
+            }
+        }
     }
 
     private func startListening() {
@@ -66,7 +69,9 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
                 return
             }
             logI { "startListening: publishind update..." }
-            updates.forEach(subject.upstream.send)
+            for update in updates {
+                await broadcast.yield(update)
+            }
         } while true
     }
 }

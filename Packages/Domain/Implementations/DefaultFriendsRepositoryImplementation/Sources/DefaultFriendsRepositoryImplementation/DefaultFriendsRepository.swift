@@ -1,10 +1,37 @@
 import Domain
 import Api
-import Combine
 import Logging
 import Base
+import AsyncExtensions
+import OnDemandPolling
 internal import DataTransferObjects
 internal import ApiDomainConvenience
+
+private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
+    let broadcast: AsyncBroadcast<T>
+    private let subscription: OnDemandLongPollSubscription<Q>
+    init(
+        longPoll: LongPoll,
+        taskFactory: TaskFactory,
+        query: Q
+    ) async where Q.Update: Decodable {
+        let subscribersCountBroadcast: AsyncBroadcast<Int> = AsyncBroadcast(taskFactory: taskFactory)
+        broadcast = AsyncBroadcast(
+            taskFactory: taskFactory,
+            subscribersCountTracking: subscribersCountBroadcast
+        )
+        subscription = await OnDemandLongPollSubscription(
+            subscribersCountPublisher: subscribersCountBroadcast,
+            longPoll: longPoll,
+            taskFactory: taskFactory,
+            query: query
+        )
+    }
+
+    func start(onLongPoll: @escaping @Sendable (Q.Update) -> Void) async {
+        await subscription.start(onLongPoll: onLongPoll)
+    }
+}
 
 public actor DefaultFriendsRepository {
     public let logger: Logger
@@ -13,7 +40,7 @@ public actor DefaultFriendsRepository {
     private let offline: FriendsOfflineMutableRepository
     private let longPoll: LongPoll
     private let taskFactory: TaskFactory
-    private var subjects = [FriendshipKindSet: PassthroughSubject<[FriendshipKind: [User]], Never>]()
+    private var subjects = [FriendshipKindSet: BroadcastWithOnDemandLongPoll<[FriendshipKind: [User]], LongPollFriendsQuery>]()
 
     public init(
         api: ApiProtocol,
@@ -31,37 +58,29 @@ public actor DefaultFriendsRepository {
 }
 
 extension DefaultFriendsRepository: FriendsRepository {
-    private func subject(for kind: FriendshipKindSet) -> PassthroughSubject<[FriendshipKind: [User]], Never> {
+    private func subject(
+        for kind: FriendshipKindSet
+    ) async -> BroadcastWithOnDemandLongPoll<[FriendshipKind: [User]], LongPollFriendsQuery> {
         guard let subject = subjects[kind] else {
             logI { "subject created for \(kind)" }
-            let subject = PassthroughSubject<[FriendshipKind: [User]], Never>()
+            let subject = await BroadcastWithOnDemandLongPoll<[FriendshipKind: [User]], LongPollFriendsQuery>(
+                longPoll: longPoll,
+                taskFactory: taskFactory,
+                query: LongPollFriendsQuery()
+            )
+            await subject.start { update in
+                self.taskFactory.task {
+                    try? await self.refreshFriends(ofKind: kind)
+                }
+            }
             subjects[kind] = subject
             return subject
         }
         return subject
     }
 
-    public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
-        let sendablePromise: @Sendable (@Sendable @escaping (Result<[FriendshipKind: [User]]?, Never>) -> Void) -> Void = { promise in
-            self.logI { "got lp [friendsUpdated, kind=\(kind)], refreshing data" }
-            self.taskFactory.task {
-                let result = try? await self.refreshFriends(ofKind: kind)
-                promise(.success(result))
-            }
-        }
-        return await longPoll.poll(for: LongPollFriendsQuery())
-            .flatMap { _ in
-                Future { [sendablePromise] promise in
-                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
-                    nonisolated(unsafe) let promise = promise
-                    sendablePromise {
-                        promise($0)
-                    }
-                }
-            }
-            .compactMap { $0 }
-            .merge(with: subject(for: kind))
-            .eraseToAnyPublisher()
+    public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> any AsyncPublisher<[FriendshipKind: [User]]> {
+        await subject(for: kind).broadcast
     }
 
     public func refreshFriends(ofKind kind: FriendshipKindSet) async throws(GeneralError) -> [FriendshipKind: [User]] {
@@ -107,7 +126,7 @@ extension DefaultFriendsRepository: FriendsRepository {
         taskFactory.detached {
             await self.offline.storeFriends(friendsByKind, for: kind)
         }
-        subject(for: kind).send(friendsByKind)
+        await subject(for: kind).broadcast.yield(friendsByKind)
         return friendsByKind
     }
 }

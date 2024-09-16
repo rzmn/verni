@@ -1,5 +1,6 @@
 import Foundation
-@testable import Base
+import Base
+@testable import AsyncExtensions
 
 @MainActor class URLProtocolMock: URLProtocol, @unchecked Sendable {
     nonisolated(unsafe) private(set) static var mockURLs = [URL?: (error: Error?, data: Data?, response: URLResponse?)]()

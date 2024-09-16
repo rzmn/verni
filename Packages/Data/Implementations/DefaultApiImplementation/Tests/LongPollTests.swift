@@ -1,7 +1,8 @@
 import Testing
 import Foundation
 import ApiService
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import Api
 @testable import DefaultApiImplementation
 

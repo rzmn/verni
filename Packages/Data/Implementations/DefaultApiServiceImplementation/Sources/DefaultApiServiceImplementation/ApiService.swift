@@ -3,6 +3,7 @@ import Logging
 import ApiService
 import Foundation
 import Base
+import AsyncExtensions
 
 actor DefaultApiService {
     let logger: Logger

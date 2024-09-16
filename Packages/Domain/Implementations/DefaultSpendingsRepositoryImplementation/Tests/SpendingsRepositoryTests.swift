@@ -1,23 +1,38 @@
 import Testing
 import DataTransferObjects
 import Domain
-import Combine
+import AsyncExtensions
 import Foundation
+import Base
+@testable import AsyncExtensions
 @testable import Api
-@testable import Base
 @testable import DefaultSpendingsRepositoryImplementation
 @testable import MockApiImplementation
+
+private struct MockLongPoll: LongPoll {
+    let getCounterpartiesBroadcast: AsyncBroadcast<LongPollCounterpartiesQuery.Update>
+    let getSpendingsHistoryBroadcast: AsyncBroadcast<LongPollSpendingsHistoryQuery.Update>
+
+    func poll<Query>(for query: Query) async -> any AsyncPublisher<Query.Update>
+    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
+        if Query.self == LongPollCounterpartiesQuery.self {
+            return getCounterpartiesBroadcast as! any AsyncPublisher<Query.Update>
+        } else if Query.self == LongPollSpendingsHistoryQuery.self {
+            return getSpendingsHistoryBroadcast as! any AsyncPublisher<Query.Update>
+        } else {
+            fatalError()
+        }
+    }
+}
 
 private actor ApiProvider {
     let api: MockApi
     let mockLongPoll: MockLongPoll
 
     var getCounterpartiesCalledCount = 0
-    let getCounterpartiesSubject = PassthroughSubject<LongPollCounterpartiesQuery.Update, Never>()
     private let getCounterpartiesResponse: [SpendingsPreviewDto]
 
     var getSpendingsHistoryCalls: [UserDto.ID] = []
-    let getSpendingsHistorySubject = PassthroughSubject<LongPollSpendingsHistoryQuery.Update, Never>()
     private let getSpendingsHistoryResponse: [UserDto.ID: [IdentifiableDealDto]]
 
     var getDealCalls: [DealDto.ID] = []
@@ -26,13 +41,21 @@ private actor ApiProvider {
     init(
         getCounterpartiesResponse: [SpendingsPreviewDto] = [],
         getSpendingsHistoryResponse: [UserDto.ID: [IdentifiableDealDto]] = [:],
-        getDealResponse: [DealDto.ID: DealDto] = [:]
+        getDealResponse: [DealDto.ID: DealDto] = [:],
+        taskFactory: TaskFactory
     ) async {
         self.getCounterpartiesResponse = getCounterpartiesResponse
         self.getSpendingsHistoryResponse = getSpendingsHistoryResponse
         self.getDealResponse = getDealResponse
         api = MockApi()
-        mockLongPoll = MockLongPoll()
+        mockLongPoll = MockLongPoll(
+            getCounterpartiesBroadcast: AsyncBroadcast(
+                taskFactory: taskFactory
+            ),
+            getSpendingsHistoryBroadcast: AsyncBroadcast(
+                taskFactory: taskFactory
+            )
+        )
         await api.mutate { api in
             api._runMethodWithoutParams = { method in
                 await self.mutate { s in
@@ -54,25 +77,6 @@ private actor ApiProvider {
                     return self.getSpendingsHistoryResponse[method.parameters.counterparty]
                 } else if let method = method as? Spendings.GetDeal {
                     return self.getDealResponse[method.parameters.dealId]
-                } else {
-                    fatalError()
-                }
-            }
-        }
-        await mockLongPoll.mutate { longPoll in
-            longPoll._poll = { query in
-                if let _ = query as? LongPollCounterpartiesQuery {
-                    return self.getCounterpartiesSubject
-                        .map {
-                            $0 as Decodable & Sendable
-                        }
-                        .eraseToAnyPublisher()
-                } else if let _ = query as? LongPollSpendingsHistoryQuery {
-                    return self.getSpendingsHistorySubject
-                        .map {
-                            $0 as Decodable & Sendable
-                        }
-                        .eraseToAnyPublisher()
                 } else {
                     fatalError()
                 }
@@ -111,10 +115,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getCounterpartiesResponse: counterparties.map(SpendingsPreviewDto.init)
+            getCounterpartiesResponse: counterparties.map(SpendingsPreviewDto.init),
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
-        let repository = DefaultSpendingsRepository(
+        let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
             logger: .shared,
@@ -124,17 +129,18 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-               .spendingCounterpartiesUpdated()
-                .sink { spendingCounterpartiesFromPublisher in
-                    #expect(spendingCounterpartiesFromPublisher == counterparties)
+            let cancellableStream = await repository.spendingCounterpartiesUpdated().subscribeWithStream()
+            let stream = await cancellableStream.eventSource.stream
+            let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
+            taskFactory.task {
+                for await counterpartiesFromPublisher in stream {
+                    #expect(counterparties == counterpartiesFromPublisher)
                     confirmation()
                 }
-                .store(in: &subscriptions)
-            let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
+            }
             #expect(counterpartiesFromRepository == counterparties)
+            await cancellableStream.cancel()
             try await taskFactory.runUntilIdle()
         }
 
@@ -158,10 +164,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getCounterpartiesResponse: counterparties.map(SpendingsPreviewDto.init)
+            getCounterpartiesResponse: counterparties.map(SpendingsPreviewDto.init),
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
-        let repository = DefaultSpendingsRepository(
+        let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
             logger: .shared,
@@ -171,20 +178,17 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-               .spendingCounterpartiesUpdated()
-               .dropFirst()
-               .sink { spendingCounterpartiesFromPublisher in
-                    #expect(spendingCounterpartiesFromPublisher == counterparties)
-                    confirmation()
-                }
-                .store(in: &subscriptions)
-            apiProvider.getCounterpartiesSubject.send(
+            let subscription = await repository.spendingCounterpartiesUpdated().subscribe { counterpartiesFromPublisher in
+                #expect(counterparties == counterpartiesFromPublisher)
+                confirmation()
+            }
+            try await taskFactory.runUntilIdle()
+            await apiProvider.mockLongPoll.getCounterpartiesBroadcast.yield(
                 LongPollCounterpartiesQuery.Update(category: .counterparties)
             )
             try await taskFactory.runUntilIdle()
+            await subscription.cancel()
         }
 
         // then
@@ -214,10 +218,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableDealDto.init)]
+            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableDealDto.init)],
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
-        let repository = DefaultSpendingsRepository(
+        let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
             logger: .shared,
@@ -227,17 +232,18 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-                .spendingsHistoryUpdated(for: counterparty)
-                .sink { spendingsHistoryFromPublisher in
-                    #expect(spendingsHistoryFromPublisher == history)
+            let cancellableStream = await repository.spendingsHistoryUpdated(for: counterparty).subscribeWithStream()
+            let stream = await cancellableStream.eventSource.stream
+            let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
+            taskFactory.task {
+                for await spendingsHistoryFromPublisher in stream {
+                    #expect(history == spendingsHistoryFromPublisher)
                     confirmation()
                 }
-                .store(in: &subscriptions)
-            let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
+            }
             #expect(historyFromRepository == history)
+            await cancellableStream.cancel()
             try await taskFactory.runUntilIdle()
         }
 
@@ -268,10 +274,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableDealDto.init)]
+            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableDealDto.init)],
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
-        let repository = DefaultSpendingsRepository(
+        let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
             logger: .shared,
@@ -281,22 +288,19 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // when
 
-        var subscriptions = Set<AnyCancellable>()
         try await confirmation { confirmation in
-            await repository
-                .spendingsHistoryUpdated(for: counterparty)
-                .dropFirst()
-                .sink { spendingsHistoryFromPublisher in
-                    #expect(spendingsHistoryFromPublisher == history)
-                    confirmation()
-                }
-                .store(in: &subscriptions)
-            apiProvider.getSpendingsHistorySubject.send(
+            let subscription = await repository.spendingsHistoryUpdated(for: counterparty).subscribe { spendingsHistoryFromPublisher in
+                #expect(history == spendingsHistoryFromPublisher)
+                confirmation()
+            }
+            try await taskFactory.runUntilIdle()
+            await apiProvider.mockLongPoll.getSpendingsHistoryBroadcast.yield(
                 LongPollSpendingsHistoryQuery.Update(
                     category: .spendings(uid: counterparty)
                 )
             )
             try await taskFactory.runUntilIdle()
+            await subscription.cancel()
         }
 
         // then
@@ -323,10 +327,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             id: UUID().uuidString
         )
         let apiProvider = await ApiProvider(
-            getDealResponse: [deal.id: DealDto(domain: deal.spending)]
+            getDealResponse: [deal.id: DealDto(domain: deal.spending)],
+            taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
-        let repository = DefaultSpendingsRepository(
+        let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
             logger: .shared,

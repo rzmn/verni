@@ -2,7 +2,8 @@ import Foundation
 import Testing
 import PersistentStorage
 import DataTransferObjects
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import PersistentStorageSQLite
 
 @Suite(.serialized) struct PersistentStorageSQLiteTests {

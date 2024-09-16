@@ -18,6 +18,7 @@ let package = Package(
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/OnDemandPolling"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
@@ -26,7 +27,14 @@ let package = Package(
     targets: [
         .target(
             name: "DefaultSpendingsRepositoryImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage",
+                "OnDemandPolling"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

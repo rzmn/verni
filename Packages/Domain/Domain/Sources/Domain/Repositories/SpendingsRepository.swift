@@ -1,5 +1,5 @@
 import Foundation
-import Combine
+import AsyncExtensions
 
 public enum GetSpendingsHistoryError: Error, Sendable {
     case noSuchCounterparty(Error)
@@ -22,8 +22,8 @@ public protocol SpendingsRepository: Sendable {
 
     func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending
 
-    func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never>
-    func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never>
+    func spendingCounterpartiesUpdated() async -> any AsyncPublisher<[SpendingsPreview]>
+    func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncPublisher<[IdentifiableSpending]>
 }
 
 public extension SpendingsRepository {

@@ -3,6 +3,7 @@ import Logging
 import PersistentStorage
 import DataTransferObjects
 import Base
+import AsyncExtensions
 internal import SQLite
 
 public actor SQLitePersistencyFactory {

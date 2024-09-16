@@ -1,4 +1,5 @@
 import Combine
+import AsyncExtensions
 
 public actor ExternallyUpdatable<T: Sendable> {
     private var object: T?

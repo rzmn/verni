@@ -1,4 +1,4 @@
-import Combine
+import AsyncExtensions
 
 public protocol FriendsRepository: Sendable {
     @discardableResult
@@ -8,7 +8,7 @@ public protocol FriendsRepository: Sendable {
 
     func friendsUpdated(
         ofKind kind: FriendshipKindSet
-    ) async -> AnyPublisher<[FriendshipKind: [User]], Never>
+    ) async -> any AsyncPublisher<[FriendshipKind: [User]]>
 }
 
 public extension FriendsRepository {

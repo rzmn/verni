@@ -3,6 +3,7 @@ import Api
 import Foundation
 import PersistentStorage
 import Base
+import AsyncExtensions
 internal import ApiDomainConvenience
 
 public actor DefaultProfileEditingUseCase {

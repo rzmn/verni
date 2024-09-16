@@ -1,15 +1,11 @@
 import Api
-import Combine
+import AsyncExtensions
 
 actor MockLongPoll: LongPoll {
-    var _poll: (@Sendable (any LongPollQuery) async -> AnyPublisher<any Decodable & Sendable, Never>)?
+    var _impl: LongPoll?
 
-    func poll<Query>(for query: Query) async -> AnyPublisher<Query.Update, Never>
+    func poll<Query>(for query: Query) async -> any AsyncPublisher<Query.Update>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
-        await _poll!(query)
-            .map {
-                $0 as! Query.Update
-            }
-            .eraseToAnyPublisher()
+        await _impl!.poll(for: query)
     }
 }

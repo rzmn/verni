@@ -2,6 +2,7 @@ import Domain
 import Api
 import Logging
 import Base
+import AsyncExtensions
 internal import DataTransferObjects
 internal import ApiDomainConvenience
 

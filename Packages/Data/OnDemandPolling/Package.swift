@@ -4,24 +4,28 @@
 import PackageDescription
 
 let package = Package(
-    name: "Domain",
+    name: "OnDemandPolling",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "Domain",
-            targets: ["Domain"]
+            name: "OnDemandPolling",
+            targets: ["OnDemandPolling"]
         )
     ],
     dependencies: [
+        .package(path: "../Api"),
+        .package(path: "../../Infrastructure/Base"),
         .package(path: "../../Infrastructure/AsyncExtensions")
     ],
     targets: [
         .target(
-            name: "Domain",
+            name: "OnDemandPolling",
             dependencies: [
-                "AsyncExtensions"
+                "Base",
+                "AsyncExtensions",
+                "Api"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

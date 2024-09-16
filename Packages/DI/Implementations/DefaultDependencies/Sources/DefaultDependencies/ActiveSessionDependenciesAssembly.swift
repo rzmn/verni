@@ -1,6 +1,7 @@
 import DI
 import Domain
 import Combine
+import AsyncExtensions
 internal import Base
 internal import Api
 internal import ApiService
@@ -125,7 +126,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
             offline: usersOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
-        spendingsRepository = DefaultSpendingsRepository(
+        spendingsRepository = await DefaultSpendingsRepository(
             api: api,
             longPoll: longPoll,
             logger: .shared.with(prefix: "[spendings.repo] "),

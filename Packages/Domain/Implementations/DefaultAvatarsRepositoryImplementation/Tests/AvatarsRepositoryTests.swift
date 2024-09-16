@@ -4,9 +4,10 @@ import Foundation
 import Domain
 import Api
 import DataTransferObjects
+import Base
+@testable import AsyncExtensions
 @testable import MockApiImplementation
 @testable import DefaultAvatarsRepositoryImplementation
-@testable import Base
 
 private actor MockOfflineRepository: AvatarsOfflineRepository, AvatarsOfflineMutableRepository {
     var getCalls: [Avatar.ID] = []

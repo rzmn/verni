@@ -1,8 +1,9 @@
 import Testing
 import Logging
 import Foundation
+import Base
+@testable import AsyncExtensions
 @testable import DefaultAvatarsRepositoryImplementation
-@testable import Base
 
 @Suite struct AvatarsOfflineRepositoryTests {
     let container: URL

@@ -1,6 +1,7 @@
 import Foundation
 import Domain
 import Base
+import AsyncExtensions
 
 extension AvatarsOfflineRepository {
     func getConcurrent(taskFactory: TaskFactory, ids: [Avatar.ID]) async -> [Avatar.ID: Data] {

@@ -2,7 +2,8 @@ import Testing
 import ApiService
 import Foundation
 import Logging
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import DefaultApiServiceImplementation
 
 actor TokenRefresherMock: TokenRefresher, Loggable {

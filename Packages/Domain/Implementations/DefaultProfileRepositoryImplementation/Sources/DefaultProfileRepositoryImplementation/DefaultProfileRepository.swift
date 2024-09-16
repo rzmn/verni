@@ -1,14 +1,10 @@
 import Domain
 import Api
-import Combine
 import Logging
 import Base
+import AsyncExtensions
 internal import DataTransferObjects
 internal import ApiDomainConvenience
-
-extension AsyncBroadcast.Subscription: @retroactive CancellableStream {
-    public typealias Element = T
-}
 
 public actor DefaultProfileRepository {
     public let logger: Logger
@@ -16,7 +12,7 @@ public actor DefaultProfileRepository {
     private let offline: ProfileOfflineMutableRepository
     private let profile: ExternallyUpdatable<Domain.Profile>
     private let taskFactory: TaskFactory
-    private let subscription: AsyncBroadcast<Domain.Profile>.BlockSubscription
+    private let subscription: BlockAsyncSubscription<Domain.Profile>
 
     public init(
         api: ApiProtocol,
@@ -39,8 +35,8 @@ public actor DefaultProfileRepository {
 }
 
 extension DefaultProfileRepository: ProfileRepository {
-    public func profileUpdated() async -> any CancellableStream<Domain.Profile> {
-        await profile.relevant.subscription()
+    public func profileUpdated() async -> any AsyncPublisher<Domain.Profile> {
+        await profile.relevant
     }
 
     public func refreshProfile() async throws(GeneralError) -> Domain.Profile {

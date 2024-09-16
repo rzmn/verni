@@ -2,6 +2,7 @@ import ApiService
 import Networking
 import Logging
 import Base
+import AsyncExtensions
 
 public actor DefaultApiServiceFactory {
     private let logger: Logger

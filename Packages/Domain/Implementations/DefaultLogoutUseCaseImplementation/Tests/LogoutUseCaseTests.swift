@@ -2,7 +2,8 @@ import Testing
 import Combine
 import Domain
 import DataTransferObjects
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import MockPersistentStorage
 @testable import DefaultLogoutUseCaseImplementation
 

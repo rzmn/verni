@@ -1,19 +1,47 @@
 import Domain
 import Api
 import PersistentStorage
-import Combine
 import Logging
 import Base
+import AsyncExtensions
+import OnDemandPolling
 internal import ApiDomainConvenience
+
+private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
+    let broadcast: AsyncBroadcast<T>
+    private let subscription: OnDemandLongPollSubscription<Q>
+    init(
+        longPoll: LongPoll,
+        taskFactory: TaskFactory,
+        query: Q
+    ) async where Q.Update: Decodable {
+        let subscribersCountBroadcast: AsyncBroadcast<Int> = AsyncBroadcast(taskFactory: taskFactory)
+        broadcast = AsyncBroadcast(
+            taskFactory: taskFactory,
+            subscribersCountTracking: subscribersCountBroadcast
+        )
+        subscription = await OnDemandLongPollSubscription(
+            subscribersCountPublisher: subscribersCountBroadcast,
+            longPoll: longPoll,
+            taskFactory: taskFactory,
+            query: query
+        )
+    }
+
+    func start(onLongPoll: @escaping @Sendable (Q.Update) -> Void) async {
+        await subscription.start(onLongPoll: onLongPoll)
+    }
+}
 
 public actor DefaultSpendingsRepository {
     public let logger: Logger
     private let api: ApiProtocol
     private let longPoll: LongPoll
     private let offline: SpendingsOfflineMutableRepository
-    private let counterpartiesSubject = PassthroughSubject<[SpendingsPreview], Never>()
     private let taskFactory: TaskFactory
-    private var spendingsHistorySubjectById = [User.ID: PassthroughSubject<[IdentifiableSpending], Never>]()
+
+    private let onDemandCounterpartiesSubscription: BroadcastWithOnDemandLongPoll<[SpendingsPreview], LongPollCounterpartiesQuery>
+    private var onDemandSpendingHistorySubscriptionById = [User.ID: BroadcastWithOnDemandLongPoll<[IdentifiableSpending], LongPollSpendingsHistoryQuery>]()
 
     public init(
         api: ApiProtocol,
@@ -21,12 +49,23 @@ public actor DefaultSpendingsRepository {
         logger: Logger,
         offline: SpendingsOfflineMutableRepository,
         taskFactory: TaskFactory
-    ) {
+    ) async {
         self.api = api
         self.longPoll = longPoll
         self.offline = offline
         self.logger = logger
         self.taskFactory = taskFactory
+        self.onDemandCounterpartiesSubscription = await BroadcastWithOnDemandLongPoll(
+            longPoll: longPoll,
+            taskFactory: taskFactory,
+            query: LongPollCounterpartiesQuery()
+        )
+        await onDemandCounterpartiesSubscription.start { [weak self] update in
+            guard let self else { return }
+            self.taskFactory.task {
+                try? await self.refreshSpendingCounterparties()
+            }
+        }
     }
 }
 
@@ -43,60 +82,33 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         return result
     }
 
-    private func spendingsHistorySubject(with uid: User.ID) -> PassthroughSubject<[IdentifiableSpending], Never> {
-        guard let subject = spendingsHistorySubjectById[uid] else {
+    private func spendingsHistorySubject(
+        with uid: User.ID
+    ) async -> BroadcastWithOnDemandLongPoll<[IdentifiableSpending], LongPollSpendingsHistoryQuery> {
+        guard let subject = onDemandSpendingHistorySubscriptionById[uid] else {
             logI { "subject created for \(uid)" }
-            let subject = PassthroughSubject<[IdentifiableSpending], Never>()
-            spendingsHistorySubjectById[uid] = subject
+            let subject = await BroadcastWithOnDemandLongPoll<[IdentifiableSpending], LongPollSpendingsHistoryQuery>(
+                longPoll: longPoll,
+                taskFactory: taskFactory,
+                query: LongPollSpendingsHistoryQuery(uid: uid)
+            )
+            await subject.start { update in
+                self.taskFactory.task {
+                    try? await self.refreshSpendingsHistory(counterparty: uid)
+                }
+            }
+            onDemandSpendingHistorySubscriptionById[uid] = subject
             return subject
         }
         return subject
     }
 
-    public func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never> {
-        let sendablePromise: @Sendable (@Sendable @escaping (Result<[SpendingsPreview]?, Never>) -> Void) -> Void = { promise in
-            self.logI { "got lp [spendingCounterpartiesUpdated], refreshing data" }
-            self.taskFactory.task {
-                let result = try? await self.refreshSpendingCounterparties()
-                promise(.success(result))
-            }
-        }
-        return await longPoll.poll(for: LongPollCounterpartiesQuery())
-            .flatMap { _ in
-                Future { [sendablePromise] promise in
-                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
-                    nonisolated(unsafe) let promise = promise
-                    sendablePromise {
-                        promise($0)
-                    }
-                }
-            }
-            .compactMap { $0 }
-            .merge(with: counterpartiesSubject)
-            .eraseToAnyPublisher()
+    public func spendingCounterpartiesUpdated() async -> any AsyncPublisher<[SpendingsPreview]> {
+        onDemandCounterpartiesSubscription.broadcast
     }
 
-    public func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never> {
-        let sendablePromise: @Sendable (@Sendable @escaping (Result<[IdentifiableSpending]?, Never>) -> Void) -> Void = { promise in
-            self.logI { "got lp spendingsHistoryUpdated[counterparty=\(id)], refreshing data" }
-            self.taskFactory.task {
-                let result = try? await self.refreshSpendingsHistory(counterparty: id)
-                promise(.success(result))
-            }
-        }
-        return await longPoll.poll(for: LongPollSpendingsHistoryQuery(uid: id))
-            .flatMap { _ in
-                Future { [sendablePromise] promise in
-                    // https://forums.swift.org/t/await-non-sendable-callback-violates-actor-isolation/69354
-                    nonisolated(unsafe) let promise = promise
-                    sendablePromise {
-                        promise($0)
-                    }
-                }
-            }
-            .compactMap { $0 }
-            .merge(with: spendingsHistorySubject(with: id))
-            .eraseToAnyPublisher()
+    public func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncPublisher<[IdentifiableSpending]> {
+        await spendingsHistorySubject(with: id).broadcast
     }
 
     public func refreshSpendingCounterparties() async throws(GeneralError) -> [SpendingsPreview] {
@@ -112,7 +124,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             await self.offline.updateSpendingCounterparties(counterparties)
         }
         logI { "refreshSpendingCounterparties ok" }
-        counterpartiesSubject.send(counterparties)
+        await onDemandCounterpartiesSubscription.broadcast.yield(counterparties)
         return counterparties
     }
 
@@ -129,7 +141,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             await self.offline.updateSpendingsHistory(counterparty: counterparty, history: spendings)
         }
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] ok" }
-        spendingsHistorySubject(with: counterparty).send(spendings)
+        await spendingsHistorySubject(with: counterparty).broadcast.yield(spendings)
         return spendings
     }
 }

@@ -3,6 +3,7 @@ import Domain
 import DI
 import AppBase
 import Combine
+import AsyncExtensions
 internal import DesignSystem
 internal import UpdateEmailFlow
 internal import UpdateDisplayNameFlow
@@ -25,7 +26,7 @@ public actor AccountFlow {
     private let router: AppRouter
     private let editingUseCase: ProfileEditingUseCase
     private let profileRepository: any ProfileRepository
-    private var subscriptions = [any CancellableStream]()
+    private var subscriptions = [any CancellableEventSource]()
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -44,13 +45,13 @@ public actor AccountFlow {
             return
         }
         if active {
-            let subscription = await profileRepository.profileUpdated()
-            subscriptions.append(subscription)
-            Task {
-                for await profile in await subscription.stream {
-                    await viewModel.reload(profile: profile)
+            subscriptions.append(
+                await profileRepository.profileUpdated().subscribe { [viewModel] profile in
+                    Task {
+                        await viewModel.reload(profile: profile)
+                    }
                 }
-            }
+            )
         } else {
             subscriptions.removeAll()
         }

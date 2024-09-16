@@ -3,6 +3,7 @@ import Domain
 import DI
 import AppBase
 import Combine
+import AsyncExtensions
 internal import DesignSystem
 internal import ProgressHUD
 internal import Base
@@ -20,7 +21,7 @@ public actor PickCounterpartyFlow {
     private let viewModel: PickCounterpartyViewModel
     private let friendsRepository: FriendsRepository
     private let router: AppRouter
-    private var subscriptions = Set<AnyCancellable>()
+    private var friendsSubscription: (any CancellableEventSource)?
     private var flowContinuation: Continuation?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter) async {
@@ -53,17 +54,20 @@ extension PickCounterpartyFlow: Flow {
 
     private func startFlow() async {
         await self.presenter().present()
-        await friendsRepository
-            .friendsUpdated(ofKind: .all)
-            .sink(receiveValue: friendsUpdated)
-            .store(in: &subscriptions)
+        friendsSubscription = await friendsRepository.friendsUpdated(ofKind: .all).subscribe { [weak self] friends in
+            guard let self else { return }
+            Task {
+                self.friendsUpdated(friends: friends)
+            }
+        }
     }
 
     private func handle(event: TerminationEvent) async {
         guard let flowContinuation else {
             return
         }
-        subscriptions.removeAll()
+        await friendsSubscription?.cancel()
+        friendsSubscription = nil
         self.flowContinuation = nil
         if case .canceledManually = event {
         } else {

@@ -3,6 +3,7 @@ import Foundation
 import PersistentStorage
 import Base
 import DataTransferObjects
+import AsyncExtensions
 internal import SQLite
 
 private struct FriendshipKindSet: OptionSet {

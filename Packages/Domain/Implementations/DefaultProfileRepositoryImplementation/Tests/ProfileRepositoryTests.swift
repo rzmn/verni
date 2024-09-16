@@ -6,7 +6,8 @@ import Domain
 import Api
 import Combine
 import ApiDomainConvenience
-@testable import Base
+import Base
+@testable import AsyncExtensions
 @testable import DefaultProfileRepositoryImplementation
 @testable import MockApiImplementation
 
@@ -71,8 +72,8 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
         // when
 
         try await confirmation { confirmation in
-            let cancellableStream = await repository.profileUpdated()
-            let stream = await cancellableStream.stream
+            let cancellableStream = await repository.profileUpdated().subscribeWithStream()
+            let stream = await cancellableStream.eventSource.stream
             let profileFromRepository = try await repository.refreshProfile()
             taskFactory.task {
                 for await profileFromPublisher in stream {

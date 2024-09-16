@@ -2,6 +2,7 @@ import Combine
 import AppBase
 import DI
 import Domain
+import AsyncExtensions
 
 public actor UserPreviewFlow {
     private var _presenter: UserPreviewPresenter?
@@ -19,7 +20,7 @@ public actor UserPreviewFlow {
     private let spendingsRepository: SpendingsRepository
     private let friendsRepository: FriendsRepository
     private var flowContinuation: Continuation?
-    private var subscriptions = Set<AnyCancellable>()
+    private var friendsSubscription: (any CancellableEventSource)?
 
     public init(di: ActiveSessionDIContainer, router: AppRouter, user: User) async {
         let spendingsOfflineRepository = di.spendingsOfflineRepository
@@ -54,10 +55,12 @@ extension UserPreviewFlow: Flow {
     }
 
     private func startFlow() async {
-        await self.friendsRepository
-            .friendsUpdated(ofKind: .all)
-            .sink(receiveValue: friendsUpdated)
-            .store(in: &subscriptions)
+        friendsSubscription = await friendsRepository.friendsUpdated(ofKind: .all).subscribe { [weak self] friends in
+            guard let self else { return }
+            Task {
+                self.friendsUpdated(friends: friends)
+            }
+        }
         await self.presenter().openUserPreview { [weak self] in
             guard let self else { return }
             await handle(result: .canceledManually)

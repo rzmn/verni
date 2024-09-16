@@ -4,8 +4,9 @@ import Domain
 import DataTransferObjects
 import Foundation
 import DefaultUsersRepositoryImplementation
+import Base
+@testable import AsyncExtensions
 @testable import MockApiImplementation
-@testable import Base
 
 private actor ApiProvider {
     let api: MockApi

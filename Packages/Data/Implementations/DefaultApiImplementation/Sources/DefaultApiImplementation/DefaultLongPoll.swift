@@ -1,6 +1,6 @@
-import Combine
 import Api
 import Base
+import AsyncExtensions
 
 public actor DefaultLongPoll: LongPoll {
     private var notifiers = [String: Any]()
@@ -14,7 +14,7 @@ public actor DefaultLongPoll: LongPoll {
 
     public func poll<Query>(
         for query: Query
-    ) async -> AnyPublisher<Query.Update, Never>
+    ) async -> any AsyncPublisher<Query.Update>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         await updateNotifier(for: query).publisher
     }

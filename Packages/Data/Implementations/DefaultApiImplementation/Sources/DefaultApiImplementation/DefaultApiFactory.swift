@@ -1,6 +1,7 @@
 import Api
 import ApiService
 import Base
+import AsyncExtensions
 
 public final class DefaultApiFactory: Sendable {
     private let service: ApiService

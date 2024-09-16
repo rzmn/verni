@@ -14,9 +14,15 @@ let package = Package(
             targets: ["Base"]
         )
     ],
+    dependencies: [
+        .package(path: "../AsyncExtensions")
+    ],
     targets: [
         .target(
             name: "Base",
+            dependencies: [
+                "AsyncExtensions"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
