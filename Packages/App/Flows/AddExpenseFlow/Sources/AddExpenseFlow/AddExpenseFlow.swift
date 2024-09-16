@@ -10,13 +10,15 @@ internal import Logging
 
 public actor AddExpenseFlow {
     private var _presenter: AddExpensePresenter?
-    private func presenter() async -> AddExpensePresenter {
-        guard let _presenter else {
-            let presenter = await AddExpensePresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> AddExpensePresenter {
+        guard let presenter = await _presenter else {
+            let presenter = await AddExpensePresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: AddExpenseViewModel
     private let spendingInteractions: SpendingInteractionsUseCase
@@ -71,8 +73,8 @@ extension AddExpenseFlow: Flow {
 // MARK: - User Actions
 
 extension AddExpenseFlow {
-    private func makeActions() async -> AddExpenseViewActions {
-        await AddExpenseViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() async -> AddExpenseViewActions {
+        AddExpenseViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onCancelTap:

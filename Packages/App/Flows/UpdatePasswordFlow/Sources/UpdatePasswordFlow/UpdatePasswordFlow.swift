@@ -5,13 +5,15 @@ import DI
 
 public actor UpdatePasswordFlow {
     private var _presenter: UpdatePasswordPresenter?
-    private func presenter() async -> UpdatePasswordPresenter {
-        guard let _presenter else {
-            let presenter = await UpdatePasswordPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> UpdatePasswordPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = UpdatePasswordPresenter(router: router, actions: await makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
@@ -74,8 +76,8 @@ extension UpdatePasswordFlow: Flow {
 // MARK: - User Actions
 
 extension UpdatePasswordFlow {
-    private func makeActions() async -> UpdatePasswordViewActions {
-        await UpdatePasswordViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() async -> UpdatePasswordViewActions {
+        UpdatePasswordViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onOldPasswordTextChanged(let text):

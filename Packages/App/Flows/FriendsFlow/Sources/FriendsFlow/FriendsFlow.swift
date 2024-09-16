@@ -10,13 +10,15 @@ internal import UserPreviewFlow
 
 public actor FriendsFlow {
     private var _presenter: FriendsPresenter?
-    private func presenter() async -> FriendsPresenter {
-        guard let _presenter else {
-            let presenter = await FriendsPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> FriendsPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = FriendsPresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: FriendsViewModel
     private let di: ActiveSessionDIContainer
@@ -82,8 +84,8 @@ extension FriendsFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension FriendsFlow {
-    private func makeActions() async -> FriendsViewActions {
-        await FriendsViewActions(state: viewModel.$state) { action in
+    @MainActor private func makeActions() -> FriendsViewActions {
+        FriendsViewActions(state: viewModel.$state) { action in
             Task.detached { [weak self] in
                 guard let self else { return }
                 switch action {

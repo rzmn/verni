@@ -2,7 +2,6 @@ import UIKit
 import Domain
 import DI
 import AppBase
-import Combine
 import AsyncExtensions
 internal import DesignSystem
 internal import ProgressHUD
@@ -10,13 +9,15 @@ internal import Base
 
 public actor PickCounterpartyFlow {
     private var _presenter: PickCounterpartyPresenter?
-    private func presenter() async -> PickCounterpartyPresenter {
-        guard let _presenter else {
-            let presenter = await PickCounterpartyPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> PickCounterpartyPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = PickCounterpartyPresenter(router: router, actions: await makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: PickCounterpartyViewModel
     private let friendsRepository: FriendsRepository
@@ -80,8 +81,8 @@ extension PickCounterpartyFlow: Flow {
 // MARK: - User Actions
 
 extension PickCounterpartyFlow {
-    private func makeActions() async -> PickCounterpartyViewActions {
-        await PickCounterpartyViewActions(state: viewModel.$state) { [weak self] userAction in
+    @MainActor private func makeActions() async -> PickCounterpartyViewActions {
+        PickCounterpartyViewActions(state: viewModel.$state) { [weak self] userAction in
             guard let self else { return }
             switch userAction {
             case .onCancelTap:

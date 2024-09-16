@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class UpdatePasswordView: View<UpdatePasswordViewActions> {
+@MainActor class UpdatePasswordView: View<UpdatePasswordViewActions> {
     private let oldPassword = TextField(
         config: TextField.Config(
             placeholder: "enter_old_pwd_placeholder".localized,
@@ -53,8 +53,8 @@ class UpdatePasswordView: View<UpdatePasswordViewActions> {
             .sink(receiveValue: model.handle • UpdatePasswordViewActionType.onRepeatNewPasswordTextChanged)
             .store(in: &subscriptions)
         confirm.tapPublisher
-            .weakSinkAssumingMainActor(object: self) { o, _ in
-                o.onConfirmTap()
+            .sink { [weak self] in
+                self?.onConfirmTap()
             }
             .store(in: &subscriptions)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))

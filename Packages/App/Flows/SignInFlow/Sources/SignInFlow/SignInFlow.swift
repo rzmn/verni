@@ -9,13 +9,15 @@ internal import ProgressHUD
 
 public actor SignInFlow {
     private var _presenter: SignInPresenter?
-    private func presenter() async -> SignInPresenter {
-        guard let _presenter else {
-            let presenter = await SignInPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> SignInPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = await SignInPresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private var subscriptions = Set<AnyCancellable>()
     private let viewModel: SignInViewModel
@@ -63,8 +65,8 @@ extension SignInFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension SignInFlow {
-    private func makeActions() async -> SignInViewActions {
-        await SignInViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() async -> SignInViewActions {
+        SignInViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onEmailTextUpdated(let text):

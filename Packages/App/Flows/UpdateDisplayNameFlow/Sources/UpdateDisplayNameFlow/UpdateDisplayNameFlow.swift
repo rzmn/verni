@@ -5,13 +5,15 @@ import Combine
 
 public actor UpdateDisplayNameFlow {
     private var _presenter: UpdateDisplayNamePresenter?
-    private func presenter() async -> UpdateDisplayNamePresenter {
-        guard let _presenter else {
-            let presenter = await UpdateDisplayNamePresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> UpdateDisplayNamePresenter {
+        guard let presenter = await _presenter else {
+            let presenter = UpdateDisplayNamePresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let router: AppRouter
     private let viewModel: UpdateDisplayNameViewModel
@@ -67,8 +69,8 @@ extension UpdateDisplayNameFlow: Flow {
 // MARK: - User Actions
 
 extension UpdateDisplayNameFlow {
-    private func makeActions() async -> UpdateDisplayNameViewActions {
-        await UpdateDisplayNameViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() -> UpdateDisplayNameViewActions {
+        UpdateDisplayNameViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onDisplayNameTextChanged(let text):

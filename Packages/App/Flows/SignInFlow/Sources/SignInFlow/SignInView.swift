@@ -63,13 +63,13 @@ class SignInView: View<SignInViewActions> {
             .sink(receiveValue: model.handle • SignInViewActionType.onPasswordTextUpdated)
             .store(in: &subscriptions)
         confirm.tapPublisher
-            .weakSinkAssumingMainActor(object: self) { o, _ in
-                o.onConfirmTap()
+            .sink { [weak self] in
+                self?.onConfirmTap()
             }
             .store(in: &subscriptions)
         createAccount.tapPublisher
-            .weakSinkAssumingMainActor(object: self) { o, _ in
-                o.onCreateAccountTap()
+            .sink { [weak self] in
+                self?.onCreateAccountTap()
             }
             .store(in: &subscriptions)
         email.delegate = self

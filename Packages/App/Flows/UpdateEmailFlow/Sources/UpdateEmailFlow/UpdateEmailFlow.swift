@@ -6,13 +6,15 @@ import DI
 
 public actor UpdateEmailFlow {
     private var _presenter: UpdateEmailPresenter?
-    private func presenter() async -> UpdateEmailPresenter {
-        guard let _presenter else {
-            let presenter = await UpdateEmailPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> UpdateEmailPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = UpdateEmailPresenter(router: router, actions: await makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: UpdateEmailViewModel
     private let router: AppRouter
@@ -63,8 +65,8 @@ extension UpdateEmailFlow: Flow {
 // MARK: - User Actions
 
 extension UpdateEmailFlow {
-    private func makeActions() async -> UpdateEmailViewActions {
-        await UpdateEmailViewActions(state: viewModel.$state) { [weak self] actions in
+    @MainActor private func makeActions() async -> UpdateEmailViewActions {
+        UpdateEmailViewActions(state: viewModel.$state) { [weak self] actions in
             guard let self else { return }
             switch actions {
             case .onConfirmTap:

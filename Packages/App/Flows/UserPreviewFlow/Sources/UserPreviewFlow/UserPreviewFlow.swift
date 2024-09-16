@@ -6,13 +6,15 @@ import AsyncExtensions
 
 public actor UserPreviewFlow {
     private var _presenter: UserPreviewPresenter?
-    private func presenter() async -> UserPreviewPresenter {
-        guard let _presenter else {
-            let presenter = await UserPreviewPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> UserPreviewPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = UserPreviewPresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: UserPreviewViewModel
     private let router: AppRouter
@@ -83,8 +85,8 @@ extension UserPreviewFlow: Flow {
 // MARK: - User Actions
 
 extension UserPreviewFlow {
-    private func makeActions() async -> UserPreviewViewActions {
-        await UserPreviewViewActions(state: viewModel.$state) { action in
+    @MainActor private func makeActions() -> UserPreviewViewActions {
+        UserPreviewViewActions(state: viewModel.$state) { action in
             Task.detached { [weak self] in
                 guard let self else { return }
                 switch action {

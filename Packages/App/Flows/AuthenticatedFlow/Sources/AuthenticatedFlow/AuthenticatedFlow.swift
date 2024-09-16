@@ -10,13 +10,15 @@ internal import AddExpenseFlow
 
 public actor AuthenticatedFlow {
     private var _presenter: AuthenticatedPresenter?
-    private func presenter() async -> AuthenticatedPresenter {
-        guard let _presenter else {
-            let presenter = await AuthenticatedPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> AuthenticatedPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = await AuthenticatedPresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: AuthenticatedViewModel
 
@@ -81,8 +83,8 @@ extension AuthenticatedFlow: Flow {
 // MARK: - User Actions
 
 extension AuthenticatedFlow {
-    private func makeActions() async -> AuthenticatedViewActions {
-        await AuthenticatedViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() async -> AuthenticatedViewActions {
+        AuthenticatedViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onAddExpenseTap:

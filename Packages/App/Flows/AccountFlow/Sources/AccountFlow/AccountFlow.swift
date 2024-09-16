@@ -13,13 +13,15 @@ internal import UpdateAvatarFlow
 
 public actor AccountFlow {
     private var _presenter: AccountPresenter?
-    private func presenter() async -> AccountPresenter {
-        guard let _presenter else {
-            let presenter = await AccountPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> AccountPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = await AccountPresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: AccountViewModel
     private let di: ActiveSessionDIContainer
@@ -101,8 +103,8 @@ extension AccountFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension AccountFlow {
-    private func makeActions() async -> AccountViewActions {
-        await AccountViewActions(state: viewModel.$state) { action in
+    @MainActor private func makeActions() async -> AccountViewActions {
+        AccountViewActions(state: viewModel.$state) { action in
             Task.detached { [weak self] in
                 guard let self else { return }
                 switch action {

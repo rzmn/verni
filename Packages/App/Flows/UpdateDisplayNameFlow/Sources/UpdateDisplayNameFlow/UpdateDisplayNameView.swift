@@ -31,8 +31,8 @@ class UpdateDisplayNameView: View<UpdateDisplayNameViewActions> {
             .sink(receiveValue: model.handle • UpdateDisplayNameViewActionType.onDisplayNameTextChanged)
             .store(in: &subscriptions)
         confirm.tapPublisher
-            .weakSinkAssumingMainActor(object: self) { o, _ in
-                o.onConfirmTap()
+            .sink { [weak self] in
+                self?.onConfirmTap()
             }
             .store(in: &subscriptions)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))

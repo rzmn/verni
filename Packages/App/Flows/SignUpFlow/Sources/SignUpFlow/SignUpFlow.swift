@@ -8,13 +8,15 @@ internal import ProgressHUD
 
 public actor SignUpFlow {
     private var _presenter: SignUpPresenter?
-    private func presenter() async -> SignUpPresenter {
-        guard let _presenter else {
-            let presenter = await SignUpPresenter(router: router, actions: await makeActions())
-            _presenter = presenter
+    @MainActor private func presenter() async -> SignUpPresenter {
+        guard let presenter = await _presenter else {
+            let presenter = SignUpPresenter(router: router, actions: makeActions())
+            await mutate { s in
+                s._presenter = presenter
+            }
             return presenter
         }
-        return _presenter
+        return presenter
     }
     private let viewModel: SignUpViewModel
     private var subscriptions = Set<AnyCancellable>()
@@ -68,8 +70,8 @@ extension SignUpFlow: Flow {
 // MARK: - User Actions
 
 extension SignUpFlow {
-    private func makeActions() async -> SignUpViewActions {
-        await SignUpViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() -> SignUpViewActions {
+        SignUpViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onEmailTextUpdated(let text):
