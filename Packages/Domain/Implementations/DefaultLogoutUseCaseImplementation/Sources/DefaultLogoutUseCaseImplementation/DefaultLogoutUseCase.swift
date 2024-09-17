@@ -7,7 +7,7 @@ internal import ApiDomainConvenience
 internal import DataTransferObjects
 
 public actor DefaultLogoutUseCase {
-    private let didLogoutBroadcast: AsyncBroadcast<LogoutReason>
+    private let didLogoutBroadcast: AsyncSubject<LogoutReason>
     private let persistency: Persistency
     private let taskFactory: TaskFactory
     private var didLogoutSubscription: (any CancellableEventSource)?
@@ -15,10 +15,10 @@ public actor DefaultLogoutUseCase {
 
     public init(
         persistency: Persistency,
-        shouldLogout: any AsyncPublisher<LogoutReason>,
+        shouldLogout: any AsyncBroadcast<LogoutReason>,
         taskFactory: TaskFactory
     ) async {
-        self.didLogoutBroadcast = AsyncBroadcast(taskFactory: taskFactory)
+        self.didLogoutBroadcast = AsyncSubject(taskFactory: taskFactory)
         self.persistency = persistency
         self.taskFactory = taskFactory
         didLogoutSubscription = await shouldLogout.subscribe { [weak self] reason in
@@ -34,7 +34,7 @@ public actor DefaultLogoutUseCase {
 }
 
 extension DefaultLogoutUseCase: LogoutUseCase {
-    public var didLogoutPublisher: any AsyncPublisher<LogoutReason> {
+    public var didLogoutPublisher: any AsyncBroadcast<LogoutReason> {
         didLogoutBroadcast
     }
 

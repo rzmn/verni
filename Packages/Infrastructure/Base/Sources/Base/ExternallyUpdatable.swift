@@ -3,15 +3,15 @@ import AsyncExtensions
 public actor ExternallyUpdatable<T: Sendable> {
     private var object: T?
     private var actions: [@Sendable (T) -> T] = []
-    private let broadcast: AsyncBroadcast<T>
+    private let broadcast: AsyncSubject<T>
 
     public init(taskFactory: TaskFactory) {
-        broadcast = AsyncBroadcast(taskFactory: taskFactory)
+        broadcast = AsyncSubject(taskFactory: taskFactory)
     }
 }
 
 extension ExternallyUpdatable {
-    public var relevant: AsyncBroadcast<T> {
+    public var relevant: AsyncSubject<T> {
         broadcast
     }
 

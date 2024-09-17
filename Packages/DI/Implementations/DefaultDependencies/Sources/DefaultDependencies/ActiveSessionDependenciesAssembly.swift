@@ -38,7 +38,7 @@ final class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFa
         api: ApiProtocol,
         persistency: Persistency,
         longPoll: LongPoll,
-        logoutSubject: AsyncBroadcast<LogoutReason>,
+        logoutSubject: AsyncSubject<LogoutReason>,
         userId: User.ID
     ) async -> ActiveSessionDIContainer {
         await ActiveSessionDependenciesAssembly(
@@ -57,7 +57,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     private let persistency: Persistency
     private let longPoll: LongPoll
 
-    private let logoutSubject: AsyncBroadcast<LogoutReason>
+    private let logoutSubject: AsyncSubject<LogoutReason>
     private let updatableProfile: ExternallyUpdatable<Domain.Profile>
 
     var appCommon: AppCommon {
@@ -83,7 +83,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         persistency: Persistency,
         longPoll: LongPoll,
         defaultDependencies: DefaultDependenciesAssembly,
-        logoutSubject: AsyncBroadcast<LogoutReason>,
+        logoutSubject: AsyncSubject<LogoutReason>,
         userId: User.ID
     ) async {
         self.api = api

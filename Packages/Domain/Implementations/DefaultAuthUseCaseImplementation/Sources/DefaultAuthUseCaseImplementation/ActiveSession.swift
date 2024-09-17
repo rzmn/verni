@@ -27,7 +27,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
     private let apiFactoryProvider: @Sendable (TokenRefresher) async -> ApiFactory
     private let anonymousApi: ApiProtocol
     private let factory: ActiveSessionDIContainerFactory
-    private let logoutSubject: AsyncBroadcast<LogoutReason>
+    private let logoutSubject: AsyncSubject<LogoutReason>
 
     private let tokenRefresher: TokenRefresher
     private let userId: User.ID
@@ -94,7 +94,7 @@ actor ActiveSession: ActiveSessionDIContainerConvertible {
         self.apiFactoryProvider = apiFactoryProvider
         self.factory = activeSessionDIContainerFactory
         self.userId = await persistency.userId()
-        self.logoutSubject = AsyncBroadcast(taskFactory: taskFactory)
+        self.logoutSubject = AsyncSubject(taskFactory: taskFactory)
         tokenRefresher = RefreshTokenManager(
             api: anonymousApi,
             persistency: persistency,

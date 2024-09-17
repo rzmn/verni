@@ -7,5 +7,5 @@ public enum LogoutReason: Sendable {
 public protocol LogoutUseCase: Sendable {
     func logout() async
 
-    var didLogoutPublisher: any AsyncPublisher<LogoutReason> { get async }
+    var didLogoutPublisher: any AsyncBroadcast<LogoutReason> { get async }
 }

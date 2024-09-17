@@ -4,10 +4,10 @@ import AsyncExtensions
 internal import Logging
 
 actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable & Sendable {
-    var publisher: any AsyncPublisher<Query.Update> {
+    var publisher: any AsyncBroadcast<Query.Update> {
         broadcast
     }
-    private let broadcast: AsyncBroadcast<Query.Update>
+    private let broadcast: AsyncSubject<Query.Update>
     private var hasSubscribersSubscription: BlockAsyncSubscription<Int>?
 
     let logger: Logger = .shared.with(prefix: "[lp] ")
@@ -18,7 +18,7 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
     init(query: Query, api: DefaultApi, taskFactory: TaskFactory) async where Query.Update: Decodable & Sendable {
         self.poller = await Poller(query: query, api: api)
         self.taskFactory = taskFactory
-        self.broadcast = AsyncBroadcast(taskFactory: taskFactory)
+        self.broadcast = AsyncSubject(taskFactory: taskFactory)
         hasSubscribersSubscription = await broadcast.subscribersCount.countPublisher.subscribe { [weak self, taskFactory] subscribersCount in
             taskFactory.task { [weak self] in
                 guard let self else { return }

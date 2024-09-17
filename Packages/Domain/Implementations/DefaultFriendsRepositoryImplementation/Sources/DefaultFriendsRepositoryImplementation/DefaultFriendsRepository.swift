@@ -8,7 +8,7 @@ internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
-    let broadcast: AsyncBroadcast<T>
+    let broadcast: AsyncSubject<T>
     private let subscription: OnDemandLongPollSubscription<T, Q>
     init(
         longPoll: LongPoll,
@@ -16,7 +16,7 @@ private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
         query: Q,
         logger: Logger = .shared
     ) async where Q.Update: Decodable {
-        broadcast = AsyncBroadcast(
+        broadcast = AsyncSubject(
             taskFactory: taskFactory
         )
         subscription = await OnDemandLongPollSubscription(
@@ -79,7 +79,7 @@ extension DefaultFriendsRepository: FriendsRepository {
         return subject
     }
 
-    public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> any AsyncPublisher<[FriendshipKind: [User]]> {
+    public func friendsUpdated(ofKind kind: FriendshipKindSet) async -> any AsyncBroadcast<[FriendshipKind: [User]]> {
         await subject(for: kind).broadcast
     }
 

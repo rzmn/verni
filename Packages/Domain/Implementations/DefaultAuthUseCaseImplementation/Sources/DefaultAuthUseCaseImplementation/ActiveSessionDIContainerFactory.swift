@@ -9,7 +9,7 @@ public protocol ActiveSessionDIContainerFactory: Sendable {
         api: ApiProtocol,
         persistency: Persistency,
         longPoll: LongPoll,
-        logoutSubject: AsyncBroadcast<LogoutReason>,
+        logoutSubject: AsyncSubject<LogoutReason>,
         userId: User.ID
     ) async -> ActiveSessionDIContainer
 }

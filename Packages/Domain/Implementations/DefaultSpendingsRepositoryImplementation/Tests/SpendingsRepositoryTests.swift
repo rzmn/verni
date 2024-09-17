@@ -10,15 +10,15 @@ import Base
 @testable import MockApiImplementation
 
 private struct MockLongPoll: LongPoll {
-    let getCounterpartiesBroadcast: AsyncBroadcast<LongPollCounterpartiesQuery.Update>
-    let getSpendingsHistoryBroadcast: AsyncBroadcast<LongPollSpendingsHistoryQuery.Update>
+    let getCounterpartiesBroadcast: AsyncSubject<LongPollCounterpartiesQuery.Update>
+    let getSpendingsHistoryBroadcast: AsyncSubject<LongPollSpendingsHistoryQuery.Update>
 
-    func poll<Query>(for query: Query) async -> any AsyncPublisher<Query.Update>
+    func poll<Query>(for query: Query) async -> any AsyncBroadcast<Query.Update>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         if Query.self == LongPollCounterpartiesQuery.self {
-            return getCounterpartiesBroadcast as! any AsyncPublisher<Query.Update>
+            return getCounterpartiesBroadcast as! any AsyncBroadcast<Query.Update>
         } else if Query.self == LongPollSpendingsHistoryQuery.self {
-            return getSpendingsHistoryBroadcast as! any AsyncPublisher<Query.Update>
+            return getSpendingsHistoryBroadcast as! any AsyncBroadcast<Query.Update>
         } else {
             fatalError()
         }
@@ -49,10 +49,10 @@ private actor ApiProvider {
         self.getDealResponse = getDealResponse
         api = MockApi()
         mockLongPoll = MockLongPoll(
-            getCounterpartiesBroadcast: AsyncBroadcast(
+            getCounterpartiesBroadcast: AsyncSubject(
                 taskFactory: taskFactory
             ),
-            getSpendingsHistoryBroadcast: AsyncBroadcast(
+            getSpendingsHistoryBroadcast: AsyncSubject(
                 taskFactory: taskFactory
             )
         )

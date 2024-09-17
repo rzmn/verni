@@ -6,7 +6,7 @@ public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
     public let logger: Logger
     private let taskFactory: TaskFactory
     private let subscribersCount: SubscribersCount<T>
-    private let longPollPublisher: any AsyncPublisher<Q.Update>
+    private let longPollPublisher: any AsyncBroadcast<Q.Update>
 
     private var subsctiptionsCountSubscription: (any CancellableEventSource)?
     private var longPollSubscription: (any CancellableEventSource)?

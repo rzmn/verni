@@ -29,7 +29,7 @@ private actor PersistencyProvider {
         // given
 
         let taskFactory = TestTaskFactory()
-        let subject = AsyncBroadcast<LogoutReason>(taskFactory: taskFactory)
+        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             persistency: provider.persistency,
@@ -61,7 +61,7 @@ private actor PersistencyProvider {
         // given
 
         let taskFactory = TestTaskFactory()
-        let subject = AsyncBroadcast<LogoutReason>(taskFactory: taskFactory)
+        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             persistency: provider.persistency,

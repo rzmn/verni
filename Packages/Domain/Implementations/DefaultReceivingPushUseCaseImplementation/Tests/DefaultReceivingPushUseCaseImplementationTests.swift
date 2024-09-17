@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import Domain
-import Combine
+@testable import AsyncExtensions
 @testable import DefaultReceivingPushUseCaseImplementation
 
 actor MockUsersRepository: UsersRepository {
@@ -29,6 +29,17 @@ actor MockUsersRepository: UsersRepository {
 
 actor MockFriendsRepository: FriendsRepository {
     var refreshFriendsCalls = [FriendshipKindSet]()
+    private let friendsUpdatedBroadcast: AsyncSubject<[FriendshipKind: [User]]>
+
+    init(taskFactory: TaskFactory) {
+        friendsUpdatedBroadcast = AsyncSubject(taskFactory: taskFactory)
+    }
+
+    func friendsUpdated(
+        ofKind kind: FriendshipKindSet
+    ) async -> any AsyncBroadcast<[FriendshipKind: [User]]> {
+        friendsUpdatedBroadcast
+    }
 
     func refreshFriends(
         ofKind kind: FriendshipKindSet
@@ -45,16 +56,20 @@ actor MockFriendsRepository: FriendsRepository {
             ]
         ]
     }
-
-    func friendsUpdated(ofKind kind: FriendshipKindSet) async -> AnyPublisher<[FriendshipKind: [User]], Never> {
-        PassthroughSubject().eraseToAnyPublisher()
-    }
 }
 
 actor MockSpendingsRepository: SpendingsRepository {
     var refreshSpendingCounterpartiesCalls: [Void] = [Void]()
     var refreshSpendingsHistoryCalls = [User.ID]()
     var getSpendingCalls = [Spending.ID]()
+
+    private let spendingCounterpartiesUpdatedBroadcast: AsyncSubject<[SpendingsPreview]>
+    private let spendingsHistoryUpdatedBroadcast: AsyncSubject<[IdentifiableSpending]>
+
+    init(taskFactory: TaskFactory) {
+        spendingCounterpartiesUpdatedBroadcast = AsyncSubject(taskFactory: taskFactory)
+        spendingsHistoryUpdatedBroadcast = AsyncSubject(taskFactory: taskFactory)
+    }
 
     func refreshSpendingCounterparties() async throws(GeneralError) -> [SpendingsPreview] {
         refreshSpendingCounterpartiesCalls.append(())
@@ -92,22 +107,22 @@ actor MockSpendingsRepository: SpendingsRepository {
         )
     }
 
-    func spendingCounterpartiesUpdated() async -> AnyPublisher<[SpendingsPreview], Never> {
-        PassthroughSubject().eraseToAnyPublisher()
+    func spendingCounterpartiesUpdated() async -> any AsyncBroadcast<[SpendingsPreview]> {
+        spendingCounterpartiesUpdatedBroadcast
     }
 
-    func spendingsHistoryUpdated(for id: User.ID) async -> AnyPublisher<[IdentifiableSpending], Never> {
-        PassthroughSubject().eraseToAnyPublisher()
+    func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncBroadcast<[IdentifiableSpending]> {
+        spendingsHistoryUpdatedBroadcast
     }
-
 }
 
 @Suite struct DefaultReceivingPushUseCaseTests {
     @Test func testReceivePush() async throws {
+        let taskFactory = TestTaskFactory()
         let useCase = DefaultReceivingPushUseCase(
             usersRepository: MockUsersRepository(),
-            friendsRepository: MockFriendsRepository(),
-            spendingsRepository: MockSpendingsRepository(),
+            friendsRepository: MockFriendsRepository(taskFactory: taskFactory),
+            spendingsRepository: MockSpendingsRepository(taskFactory: taskFactory),
             logger: .shared.with(prefix: "[DefaultReceivingPushUseCaseTests] ")
         )
         let jsonString =

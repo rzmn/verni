@@ -4,12 +4,12 @@ import Api
 @testable import AsyncExtensions
 
 private struct MockLongPoll: LongPoll {
-    let friendsBroadcast: AsyncBroadcast<LongPollFriendsQuery.Update>
+    let friendsBroadcast: AsyncSubject<LongPollFriendsQuery.Update>
 
-    func poll<Query>(for query: Query) async -> any AsyncPublisher<Query.Update>
+    func poll<Query>(for query: Query) async -> any AsyncBroadcast<Query.Update>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         if Query.self == LongPollFriendsQuery.self {
-            return friendsBroadcast as! any AsyncPublisher<Query.Update>
+            return friendsBroadcast as! any AsyncBroadcast<Query.Update>
         } else {
             fatalError()
         }
@@ -23,7 +23,7 @@ private struct MockLongPoll: LongPoll {
         // given
 
         let taskFactory = TestTaskFactory()
-        let broadcast = AsyncBroadcast<LongPollFriendsQuery.Update>(
+        let broadcast = AsyncSubject<LongPollFriendsQuery.Update>(
             taskFactory: taskFactory,
             logger: .shared.with(prefix: "[events.pub]")
         )
@@ -53,7 +53,7 @@ private struct MockLongPoll: LongPoll {
         // given
 
         let taskFactory = TestTaskFactory()
-        let broadcast = AsyncBroadcast<LongPollFriendsQuery.Update>(
+        let broadcast = AsyncSubject<LongPollFriendsQuery.Update>(
             taskFactory: taskFactory,
             logger: .shared.with(prefix: "[events.pub]")
         )

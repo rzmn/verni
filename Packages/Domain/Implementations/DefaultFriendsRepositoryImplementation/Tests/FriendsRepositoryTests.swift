@@ -11,12 +11,12 @@ import Base
 @testable import MockApiImplementation
 
 private struct MockLongPoll: LongPoll {
-    let friendsBroadcast: AsyncBroadcast<LongPollFriendsQuery.Update>
+    let friendsBroadcast: AsyncSubject<LongPollFriendsQuery.Update>
 
-    func poll<Query>(for query: Query) async -> any AsyncPublisher<Query.Update>
+    func poll<Query>(for query: Query) async -> any AsyncBroadcast<Query.Update>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         if Query.self == LongPollFriendsQuery.self {
-            return friendsBroadcast as! any AsyncPublisher<Query.Update>
+            return friendsBroadcast as! any AsyncBroadcast<Query.Update>
         } else {
             fatalError()
         }
@@ -39,7 +39,7 @@ private actor ApiProvider {
         self.getFriendsResponse = getFriendsResponse
         self.getUsersResponse = getUsersResponse
         api = MockApi()
-        mockLongPoll = MockLongPoll(friendsBroadcast: AsyncBroadcast(taskFactory: taskFactory))
+        mockLongPoll = MockLongPoll(friendsBroadcast: AsyncSubject(taskFactory: taskFactory))
         await api.mutate { api in
             api._runMethodWithParams = { method in
                 return await self.mutate { s in

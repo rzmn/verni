@@ -22,8 +22,8 @@ public protocol SpendingsRepository: Sendable {
 
     func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending
 
-    func spendingCounterpartiesUpdated() async -> any AsyncPublisher<[SpendingsPreview]>
-    func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncPublisher<[IdentifiableSpending]>
+    func spendingCounterpartiesUpdated() async -> any AsyncBroadcast<[SpendingsPreview]>
+    func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncBroadcast<[IdentifiableSpending]>
 }
 
 public extension SpendingsRepository {

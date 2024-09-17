@@ -8,7 +8,7 @@ public protocol FriendsRepository: Sendable {
 
     func friendsUpdated(
         ofKind kind: FriendshipKindSet
-    ) async -> any AsyncPublisher<[FriendshipKind: [User]]>
+    ) async -> any AsyncBroadcast<[FriendshipKind: [User]]>
 }
 
 public extension FriendsRepository {

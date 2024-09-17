@@ -1,18 +1,18 @@
 import Foundation
 import Logging
 
-public protocol AsyncPublisher<Element>: Sendable, Identifiable<String> {
+public protocol AsyncBroadcast<Element>: Sendable, Identifiable<String> {
     associatedtype Element: Sendable
     func subscribeWithStream() async -> StreamAsyncSubscription<Element>
     func subscribe(with block: @escaping @Sendable (Element) -> Void) async ->  BlockAsyncSubscription<Element>
 }
 
 public struct SubscribersCount<T: Sendable>: Sendable {
-    public let countPublisher: any AsyncPublisher<Int>
-    public let ownerPublisher: any AsyncPublisher<T>
+    public let countPublisher: any AsyncBroadcast<Int>
+    public let ownerPublisher: any AsyncBroadcast<T>
 }
 
-public actor AsyncBroadcast<Element: Sendable> {
+public actor AsyncSubject<Element: Sendable> {
     public let logger: Logger
     public let id = UUID().uuidString
 
@@ -20,13 +20,13 @@ public actor AsyncBroadcast<Element: Sendable> {
     private var subscriptions = [String: WeakSubscription]()
     private let taskFactory: TaskFactory
 
-    private var subscribersCountTracking: AsyncBroadcast<Int>?
+    private var subscribersCountTracking: AsyncSubject<Int>?
     public lazy var subscribersCount: SubscribersCount<Element> = {
-        let countPublisher: any AsyncPublisher<Int>
+        let countPublisher: any AsyncBroadcast<Int>
         if let subscribersCountTracking {
             countPublisher = subscribersCountTracking
         } else {
-            let tracking = AsyncBroadcast<Int>(taskFactory: taskFactory, logger: logger.with(prefix: "[sub] "))
+            let tracking = AsyncSubject<Int>(taskFactory: taskFactory, logger: logger.with(prefix: "[sub] "))
             subscribersCountTracking = tracking
             countPublisher = tracking
         }
@@ -51,7 +51,7 @@ public actor AsyncBroadcast<Element: Sendable> {
     }
 }
 
-extension AsyncBroadcast: AsyncPublisher {
+extension AsyncSubject: AsyncBroadcast {
     public func subscribeWithStream() async -> StreamAsyncSubscription<Element> {
         let stream: AsyncStream<Element>
         let continuation: AsyncStream<Element>.Continuation
@@ -71,7 +71,7 @@ extension AsyncBroadcast: AsyncPublisher {
 
 // MARK: - Private
 
-extension AsyncBroadcast {
+extension AsyncSubject {
     private func store<Source: AsyncEventSource>(
         source: Source
     ) async -> AsyncSubscription<Source> where Source.Element == Element {
@@ -108,4 +108,4 @@ extension AsyncBroadcast {
     }
 }
 
-extension AsyncBroadcast: Loggable {}
+extension AsyncSubject: Loggable {}

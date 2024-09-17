@@ -35,7 +35,7 @@ public actor DefaultProfileRepository {
 }
 
 extension DefaultProfileRepository: ProfileRepository {
-    public func profileUpdated() async -> any AsyncPublisher<Domain.Profile> {
+    public func profileUpdated() async -> any AsyncBroadcast<Domain.Profile> {
         await profile.relevant
     }
 

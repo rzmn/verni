@@ -14,7 +14,7 @@ public actor DefaultLongPoll: LongPoll {
 
     public func poll<Query>(
         for query: Query
-    ) async -> any AsyncPublisher<Query.Update>
+    ) async -> any AsyncBroadcast<Query.Update>
     where Query: LongPollQuery, Query.Update: Decodable & Sendable {
         await updateNotifier(for: query).publisher
     }

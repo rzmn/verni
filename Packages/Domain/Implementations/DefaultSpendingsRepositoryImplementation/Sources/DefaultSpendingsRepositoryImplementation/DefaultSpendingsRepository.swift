@@ -8,7 +8,7 @@ import OnDemandPolling
 internal import ApiDomainConvenience
 
 private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
-    let broadcast: AsyncBroadcast<T>
+    let broadcast: AsyncSubject<T>
     private let subscription: OnDemandLongPollSubscription<T, Q>
     init(
         longPoll: LongPoll,
@@ -16,7 +16,7 @@ private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
         query: Q,
         logger: Logger = .shared
     ) async where Q.Update: Decodable {
-        broadcast = AsyncBroadcast(
+        broadcast = AsyncSubject(
             taskFactory: taskFactory
         )
         subscription = await OnDemandLongPollSubscription(
@@ -103,11 +103,11 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         return subject
     }
 
-    public func spendingCounterpartiesUpdated() async -> any AsyncPublisher<[SpendingsPreview]> {
+    public func spendingCounterpartiesUpdated() async -> any AsyncBroadcast<[SpendingsPreview]> {
         onDemandCounterpartiesSubscription.broadcast
     }
 
-    public func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncPublisher<[IdentifiableSpending]> {
+    public func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncBroadcast<[IdentifiableSpending]> {
         await spendingsHistorySubject(with: id).broadcast
     }
 
