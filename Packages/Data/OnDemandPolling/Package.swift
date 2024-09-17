@@ -33,6 +33,21 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        )
+        ),
+        .testTarget(
+            name: "OnDemandPollingTests",
+            dependencies: [
+                "Base",
+                "AsyncExtensions",
+                "Api",
+                "OnDemandPolling"
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("AccessLevelOnImport"),
+                .unsafeFlags([
+                    "-warnings-as-errors"
+                ], .when(configuration: .debug))
+            ]
+        ),
     ]
 )

@@ -9,22 +9,22 @@ internal import ApiDomainConvenience
 
 private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
     let broadcast: AsyncBroadcast<T>
-    private let subscription: OnDemandLongPollSubscription<Q>
+    private let subscription: OnDemandLongPollSubscription<T, Q>
     init(
         longPoll: LongPoll,
         taskFactory: TaskFactory,
-        query: Q
+        query: Q,
+        logger: Logger = .shared
     ) async where Q.Update: Decodable {
-        let subscribersCountBroadcast: AsyncBroadcast<Int> = AsyncBroadcast(taskFactory: taskFactory)
         broadcast = AsyncBroadcast(
-            taskFactory: taskFactory,
-            subscribersCountTracking: subscribersCountBroadcast
+            taskFactory: taskFactory
         )
         subscription = await OnDemandLongPollSubscription(
-            subscribersCountPublisher: subscribersCountBroadcast,
+            subscribersCount: broadcast.subscribersCount,
             longPoll: longPoll,
             taskFactory: taskFactory,
-            query: query
+            query: query,
+            logger: logger
         )
     }
 

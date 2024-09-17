@@ -8,7 +8,6 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
         broadcast
     }
     private let broadcast: AsyncBroadcast<Query.Update>
-    private let hasSubscribersBroadcast: AsyncBroadcast<Int>
     private var hasSubscribersSubscription: BlockAsyncSubscription<Int>?
 
     let logger: Logger = .shared.with(prefix: "[lp] ")
@@ -19,9 +18,8 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable
     init(query: Query, api: DefaultApi, taskFactory: TaskFactory) async where Query.Update: Decodable & Sendable {
         self.poller = await Poller(query: query, api: api)
         self.taskFactory = taskFactory
-        self.hasSubscribersBroadcast = AsyncBroadcast(taskFactory: taskFactory)
-        self.broadcast = AsyncBroadcast(taskFactory: taskFactory, subscribersCountTracking: hasSubscribersBroadcast)
-        hasSubscribersSubscription = await hasSubscribersBroadcast.subscribe { [weak self, taskFactory] subscribersCount in
+        self.broadcast = AsyncBroadcast(taskFactory: taskFactory)
+        hasSubscribersSubscription = await broadcast.subscribersCount.countPublisher.subscribe { [weak self, taskFactory] subscribersCount in
             taskFactory.task { [weak self] in
                 guard let self else { return }
                 if subscribersCount > 0 {
