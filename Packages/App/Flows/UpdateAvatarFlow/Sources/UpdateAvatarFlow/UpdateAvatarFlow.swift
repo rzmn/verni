@@ -131,7 +131,7 @@ extension UpdateAvatarFlow {
             onImage(.failure(.canceledManually))
         }
 
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.editedImage] as? UIImage {
                 onImage(.success(image))
             } else if let image = info[.originalImage] as? UIImage {

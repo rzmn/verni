@@ -14,7 +14,7 @@ actor PersistencyMock: Persistency {
     var _getSpendingsHistoryWithCounterparty: (@Sendable (UserDto.ID) async -> [IdentifiableDealDto]?)?
     var _updateSpendingsHistoryForCounterparty: (@Sendable (UserDto.ID, [IdentifiableDealDto]) async -> Void)?
     var _getFriendsWithKind: (@Sendable (Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]?)?
-    var _updateFriendsForKind:(@Sendable ([FriendshipKindDto: [UserDto]], Set<FriendshipKindDto>) async -> Void)?
+    var _updateFriendsForKind: (@Sendable ([FriendshipKindDto: [UserDto]], Set<FriendshipKindDto>) async -> Void)?
     var _close: (@Sendable () async -> Void)?
     var _invalidate: (@Sendable () async -> Void)?
 

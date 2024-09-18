@@ -48,6 +48,6 @@ let package = Package(
                     "-warnings-as-errors"
                 ], .when(configuration: .debug))
             ]
-        ),
+        )
     ]
 )

@@ -91,7 +91,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         }
     }
 
-    public func get(ids: [Avatar.ID]) async -> [Avatar.ID : Data] {
+    public func get(ids: [Avatar.ID]) async -> [Avatar.ID: Data] {
         let cached = await offlineRepository.getConcurrent(taskFactory: taskFactory, ids: ids)
         let alreadyRequested = await waitForScheduled(
             ids: ids.filter { cached[$0] == nil },

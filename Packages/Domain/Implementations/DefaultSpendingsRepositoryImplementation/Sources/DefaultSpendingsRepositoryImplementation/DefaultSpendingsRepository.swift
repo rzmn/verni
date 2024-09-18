@@ -60,7 +60,7 @@ public actor DefaultSpendingsRepository {
             taskFactory: taskFactory,
             query: LongPollCounterpartiesQuery()
         )
-        await onDemandCounterpartiesSubscription.start { [weak self] update in
+        await onDemandCounterpartiesSubscription.start { [weak self] _ in
             guard let self else { return }
             self.taskFactory.task {
                 try? await self.refreshSpendingCounterparties()
@@ -92,7 +92,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
                 taskFactory: taskFactory,
                 query: LongPollSpendingsHistoryQuery(uid: uid)
             )
-            await subject.start { update in
+            await subject.start { _ in
                 self.taskFactory.task {
                     try? await self.refreshSpendingsHistory(counterparty: uid)
                 }

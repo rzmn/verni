@@ -35,7 +35,7 @@ import Networking
         let endpoint = Endpoint(path: "https://url.com")
         let method = "method"
         let parameters = [
-            "a":"A",
+            "a": "A",
             "b": "B"
         ]
         let request = MockNetworkRequest(

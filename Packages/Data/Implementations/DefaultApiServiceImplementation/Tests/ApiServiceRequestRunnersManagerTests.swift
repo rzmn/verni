@@ -74,7 +74,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
     func run<Request, Response>(
         request: Request
-    ) async throws(ApiServiceError) -> Response where Request: ApiServiceRequest, Response : Decodable & Sendable {
+    ) async throws(ApiServiceError) -> Response where Request: ApiServiceRequest, Response: Decodable & Sendable {
         logI { "\(label) run req[\((request as! MockRequest).label)]" }
         do {
             try await Task.sleep(nanoseconds: runResponseTimeSec * NSEC_PER_SEC)

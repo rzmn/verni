@@ -5,7 +5,7 @@ import Base
 struct AnyApiServiceRequest: ApiServiceRequest, CustomStringConvertible {
     let parameters: [String: String]
     let path: String
-    private(set) var headers: [String : String]
+    private(set) var headers: [String: String]
     let httpMethod: String
 
     init(

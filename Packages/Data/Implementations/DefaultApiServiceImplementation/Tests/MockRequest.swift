@@ -15,7 +15,7 @@ class MockRequest: ApiServiceRequest, Loggable, @unchecked Sendable {
     let parameters: [String: String] = [:]
     let httpMethod: String = ""
 
-    init(label: String, headers: [String : String] = [:]) {
+    init(label: String, headers: [String: String] = [:]) {
         self.label = label
         self.headers = headers
     }

@@ -4,7 +4,7 @@ import Logging
 public protocol AsyncBroadcast<Element>: Sendable, Identifiable<String> {
     associatedtype Element: Sendable
     func subscribeWithStream() async -> StreamAsyncSubscription<Element>
-    func subscribe(with block: @escaping @Sendable (Element) -> Void) async ->  BlockAsyncSubscription<Element>
+    func subscribe(with block: @escaping @Sendable (Element) -> Void) async -> BlockAsyncSubscription<Element>
 }
 
 public struct SubscribersCount<T: Sendable>: Sendable {
@@ -64,7 +64,7 @@ extension AsyncSubject: AsyncBroadcast {
         )
     }
 
-    public func subscribe(with block: @escaping @Sendable (Element) -> Void) async ->  BlockAsyncSubscription<Element> {
+    public func subscribe(with block: @escaping @Sendable (Element) -> Void) async -> BlockAsyncSubscription<Element> {
         await store(source: BlockEventSource(block: block))
     }
 }

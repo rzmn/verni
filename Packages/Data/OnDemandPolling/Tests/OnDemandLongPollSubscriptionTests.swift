@@ -38,7 +38,7 @@ private struct MockLongPoll: LongPoll {
 
         // when
 
-        await onDemandSubscription.start { update in
+        await onDemandSubscription.start { _ in
             Issue.record("should not get updates there")
         }
         await broadcast.yield(update)
@@ -70,7 +70,7 @@ private struct MockLongPoll: LongPoll {
         // when
 
         try await confirmation { confirmation in
-            await onDemandSubscription.start { update in
+            await onDemandSubscription.start { _ in
                 confirmation()
             }
             await broadcast.yield(update)
@@ -84,8 +84,6 @@ private struct MockLongPoll: LongPoll {
             try await taskFactory.runUntilIdle()
             await broadcast.yield(update)
         }
-
-
 
         // then
     }

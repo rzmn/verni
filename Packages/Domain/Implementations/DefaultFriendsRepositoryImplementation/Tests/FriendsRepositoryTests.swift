@@ -60,7 +60,7 @@ private actor ApiProvider {
 private actor MockOfflineMutableRepository: FriendsOfflineMutableRepository {
     var updates: [([FriendshipKind: [User]], FriendshipKindSet)] = []
 
-    func storeFriends(_ friends: [FriendshipKind : [User]], for set: FriendshipKindSet) async {
+    func storeFriends(_ friends: [FriendshipKind: [User]], for set: FriendshipKindSet) async {
         updates.append((friends, set))
     }
 }

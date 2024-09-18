@@ -68,7 +68,7 @@ extension DefaultFriendsRepository: FriendsRepository {
                 taskFactory: taskFactory,
                 query: LongPollFriendsQuery()
             )
-            await subject.start { update in
+            await subject.start { _ in
                 self.taskFactory.task {
                     try? await self.refreshFriends(ofKind: kind)
                 }
