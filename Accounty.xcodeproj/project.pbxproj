@@ -411,6 +411,7 @@
 			buildConfigurationList = 614AC1A32C6802EE005B2CD5 /* Build configuration list for PBXNativeTarget "NotificationService" */;
 			buildPhases = (
 				614AC1972C6802EE005B2CD5 /* Sources */,
+				6147E7E42C9B23F800358A73 /* ShellScript */,
 				614AC1982C6802EE005B2CD5 /* Frameworks */,
 				614AC1992C6802EE005B2CD5 /* Resources */,
 			);
@@ -487,6 +488,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6147E7E42C9B23F800358A73 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		61414F7A2C2F02A100B2C027 /* Sources */ = {
