@@ -1,5 +1,3 @@
 public protocol NetworkService: Sendable {
-    func run<T: NetworkRequest>(
-        _ request: T
-    ) async throws(NetworkServiceError) -> NetworkServiceResponse
+    func run(_ request: some NetworkRequest) async throws(NetworkServiceError) -> NetworkServiceResponse
 }

@@ -3,7 +3,7 @@ import Base
 import AsyncExtensions
 internal import Logging
 
-actor LongPollUpdateNotifier<Query: LongPollQuery> where Query.Update: Decodable & Sendable {
+actor LongPollUpdateNotifier<Query: LongPollQuery> {
     var publisher: any AsyncBroadcast<Query.Update> {
         broadcast
     }

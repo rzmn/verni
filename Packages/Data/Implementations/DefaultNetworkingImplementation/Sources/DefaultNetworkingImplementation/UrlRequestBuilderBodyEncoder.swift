@@ -5,9 +5,7 @@ internal import Base
 struct UrlRequestBuilderBodyEncoder {
     let encoder: JSONEncoder
 
-    func encodeBody<T: NetworkRequest>(
-        from request: T
-    ) throws(NetworkServiceError) -> Data? {
+    func encodeBody(from request: some NetworkRequest) throws(NetworkServiceError) -> Data? {
         guard let request = request as? (any NetworkRequestWithBody) else {
             return nil
         }

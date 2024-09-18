@@ -27,10 +27,9 @@ extension DefaultApi {
 extension DefaultApi {
     private var longPollTimeout: Int { 29 }
 
-    func longPoll<Query>(
+    func longPoll<Query: LongPollQuery>(
         query: Query
-    ) async throws(LongPollError) -> [Query.Update]
-    where Query: LongPollQuery, Query.Update: Decodable {
+    ) async throws(LongPollError) -> [Query.Update] {
         let result: LongPollResultDto<Query.Update>
         do {
             result = try await service.run(

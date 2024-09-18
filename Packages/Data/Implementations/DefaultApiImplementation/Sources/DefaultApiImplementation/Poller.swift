@@ -1,7 +1,7 @@
 import Api
 internal import Logging
 
-actor Poller<Query: LongPollQuery> where Query.Update: Decodable & Sendable {
+actor Poller<Query: LongPollQuery> {
     enum PollingTerminationEvent: Error, Sendable {
         case offline
         case canceled

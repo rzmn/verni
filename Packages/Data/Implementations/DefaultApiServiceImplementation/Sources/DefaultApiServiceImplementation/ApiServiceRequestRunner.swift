@@ -8,8 +8,8 @@ protocol ApiServiceRequestRunnerFactory: Sendable {
 }
 
 protocol ApiServiceRequestRunner {
-    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
-        request: Request
+    func run<Response: Decodable & Sendable>(
+        request: some ApiServiceRequest
     ) async throws(ApiServiceError) -> Response
 }
 
@@ -35,8 +35,8 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
         self.networkService = networkService
     }
 
-    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
-        request: Request
+    func run<Response: Decodable & Sendable>(
+        request: some ApiServiceRequest
     ) async throws(ApiServiceError) -> Response {
         logI { "\(request): starting request" }
         var request = request

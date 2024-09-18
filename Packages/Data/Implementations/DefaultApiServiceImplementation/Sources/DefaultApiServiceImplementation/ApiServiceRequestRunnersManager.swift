@@ -27,8 +27,8 @@ actor ApiServiceRequestRunnersManager: Loggable {
         self.runnerFactory = runnerFactory
     }
 
-    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
-        request: Request
+    func run<Response: Decodable & Sendable>(
+        request: some ApiServiceRequest
     ) async throws(ApiServiceError) -> Response {
         try await run(request: request, status: .regular)
     }
@@ -37,8 +37,8 @@ actor ApiServiceRequestRunnersManager: Loggable {
 // MARK: - Private
 
 extension ApiServiceRequestRunnersManager {
-    private func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
-        request: Request,
+    private func run<Response: Decodable & Sendable>(
+        request: some ApiServiceRequest,
         status: RequestStatus
     ) async throws(ApiServiceError) -> Response {
         guard let tokenRefresher else {

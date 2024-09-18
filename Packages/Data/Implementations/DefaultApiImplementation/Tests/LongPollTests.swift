@@ -10,7 +10,7 @@ struct MockLongPollQueryUpdate: Sendable, Decodable, Equatable {
     let data: String
 }
 
-struct MockLongPollQuery<Update: Sendable>: LongPollQuery {
+struct MockLongPollQuery<Update: Sendable & Decodable>: LongPollQuery {
 
     func updateIsRelevant(_ update: Update) -> Bool {
         relevant
@@ -21,7 +21,7 @@ struct MockLongPollQuery<Update: Sendable>: LongPollQuery {
     let method: String
 }
 
-struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService where Query.Update: Decodable {
+struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
     let result: Result<LongPollResultDto<Query.Update>, ApiServiceError>
 
     init(type: Query.Type, result: Result<LongPollResultDto<Query.Update>, ApiServiceError>) {

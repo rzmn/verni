@@ -7,7 +7,7 @@ actor MockRequestService: NetworkService {
         self.result = result
     }
 
-    func run<T: NetworkRequest>(_ request: T) async throws(NetworkServiceError) -> NetworkServiceResponse {
+    func run(_ request: some NetworkRequest) async throws(NetworkServiceError) -> NetworkServiceResponse {
         try result.get()
     }
 }

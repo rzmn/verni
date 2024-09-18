@@ -1,5 +1,5 @@
 public protocol ApiService: Sendable {
-    func run<Request: ApiServiceRequest, Response: Decodable & Sendable>(
-        request: Request
+    func run<Response: Decodable & Sendable>(
+        request: some ApiServiceRequest
     ) async throws(ApiServiceError) -> Response
 }

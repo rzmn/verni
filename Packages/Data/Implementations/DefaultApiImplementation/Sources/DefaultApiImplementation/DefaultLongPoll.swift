@@ -12,17 +12,15 @@ public actor DefaultLongPoll: LongPoll {
         self.taskFactory = taskFactory
     }
 
-    public func poll<Query>(
+    public func poll<Query: LongPollQuery>(
         for query: Query
-    ) async -> any AsyncBroadcast<Query.Update>
-    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
+    ) async -> any AsyncBroadcast<Query.Update> {
         await updateNotifier(for: query).publisher
     }
 
-    func updateNotifier<Query>(
+    func updateNotifier<Query: LongPollQuery>(
         for query: Query
-    ) async -> LongPollUpdateNotifier<Query>
-    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
+    ) async -> LongPollUpdateNotifier<Query> {
         let existed: LongPollUpdateNotifier<Query>?
         if let anyExisted = notifiers[query.eventId] {
             if let existedCasted = anyExisted as? LongPollUpdateNotifier<Query> {

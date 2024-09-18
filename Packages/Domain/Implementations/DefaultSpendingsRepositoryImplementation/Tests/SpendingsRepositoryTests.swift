@@ -13,8 +13,7 @@ private struct MockLongPoll: LongPoll {
     let getCounterpartiesBroadcast: AsyncSubject<LongPollCounterpartiesQuery.Update>
     let getSpendingsHistoryBroadcast: AsyncSubject<LongPollSpendingsHistoryQuery.Update>
 
-    func poll<Query>(for query: Query) async -> any AsyncBroadcast<Query.Update>
-    where Query: LongPollQuery, Query.Update: Decodable & Sendable {
+    func poll<Query: LongPollQuery>(for query: Query) async -> any AsyncBroadcast<Query.Update> {
         if Query.self == LongPollCounterpartiesQuery.self {
             return getCounterpartiesBroadcast as! any AsyncBroadcast<Query.Update>
         } else if Query.self == LongPollSpendingsHistoryQuery.self {
