@@ -1,6 +1,7 @@
 import Foundation
 
 protocol Printer: Sendable {
+    // swiftlint:disable:next no_direct_standard_out_logs
     func print(_ message: String)
 }
 
@@ -13,7 +14,9 @@ private struct PrinterWithCurrentDate: Printer {
         self.formatter = formatter
     }
 
+    // swiftlint:disable:next no_direct_standard_out_logs
     func print(_ message: String) {
+        // swiftlint:disable:next no_direct_standard_out_logs
         Swift.print("\(formatter.string(from: Date())) \(message)")
     }
 }
@@ -26,6 +29,7 @@ public struct Logger: Sendable {
     private let printer: Printer
     private let prefix: String
     public var logBlock: (String) -> Void {
+        // swiftlint:disable:next no_direct_standard_out_logs
         { printer.print("\(prefix) \($0)") }
     }
 

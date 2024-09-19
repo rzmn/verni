@@ -57,12 +57,28 @@ extension NavigationController {
             latestVisibleStack = holderController.viewControllers
         }
 
-        public func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-            externalDelegate?.navigationController?(navigationController, willShow: viewController, animated: animated)
+        public func navigationController(
+            _ navigationController: UINavigationController,
+            willShow viewController: UIViewController,
+            animated: Bool
+        ) {
+            externalDelegate?.navigationController?(
+                navigationController,
+                willShow: viewController,
+                animated: animated
+            )
         }
 
-        public func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-            externalDelegate?.navigationController?(navigationController, didShow: viewController, animated: animated)
+        public func navigationController(
+            _ navigationController: UINavigationController,
+            didShow viewController: UIViewController,
+            animated: Bool
+        ) {
+            externalDelegate?.navigationController?(
+                navigationController,
+                didShow: viewController,
+                animated: animated
+            )
             guard let holderController, holderController === navigationController else {
                 return
             }
@@ -72,7 +88,8 @@ extension NavigationController {
             }
             let latestVisibleStack = latestVisibleStack
             Task {
-                for viewController in latestVisibleStack[holderController.viewControllers.count ..< latestVisibleStack.count].reversed() {
+                let offset = holderController.viewControllers.count
+                for viewController in latestVisibleStack[offset ..< latestVisibleStack.count].reversed() {
                     guard let navigationStackMember = viewController as? NavigationStackMember else {
                         continue
                     }

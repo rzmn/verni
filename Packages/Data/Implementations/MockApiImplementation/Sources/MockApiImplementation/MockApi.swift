@@ -7,11 +7,13 @@ actor MockApi: ApiProtocol {
 
     func run<Method>(method: Method) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable & Sendable, Method.Parameters: Encodable & Sendable {
+        // swiftlint:disable:next force_cast
         try await _runMethodWithParams!(method) as! Method.Response
     }
 
     func run<Method>(method: Method) async throws(ApiError) -> Method.Response
     where Method: ApiMethod, Method.Response: Decodable & Sendable, Method.Parameters == NoParameters {
+        // swiftlint:disable:next force_cast
         try await _runMethodWithoutParams!(method) as! Method.Response
     }
 

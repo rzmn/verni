@@ -154,13 +154,11 @@ extension UpdatePasswordView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         switch textField {
         case newPasswordRepeat:
-            model.handle(.onUpdateTap)
+            confirm.sendActions(for: .touchUpInside)
         case oldPassword:
             newPassword.becomeFirstResponder()
         case newPassword:
             newPasswordRepeat.becomeFirstResponder()
-        case newPasswordRepeat:
-            confirm.sendActions(for: .touchUpInside)
         default:
             break
         }

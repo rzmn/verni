@@ -129,7 +129,9 @@ extension DefaultApi {
         }
     }
 
-    private func mapApiResponse<R: ApiResponse>(_ call: () async throws(ApiServiceError) -> R) async throws(ApiError) -> R.Success {
+    private func mapApiResponse<R: ApiResponse>(
+        _ call: () async throws(ApiServiceError) -> R
+    ) async throws(ApiError) -> R.Success {
         let response: R
         do {
             response = try await call()

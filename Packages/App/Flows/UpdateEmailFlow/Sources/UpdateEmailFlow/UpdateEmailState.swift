@@ -10,7 +10,12 @@ struct UpdateEmailState: Equatable {
             let confirmationInProgress: Bool
 
             static var initial: Self {
-                Unconfirmed(currentCode: "", resendCountdownHint: nil, resendInProgress: false, confirmationInProgress: false)
+                Unconfirmed(
+                    currentCode: "",
+                    resendCountdownHint: nil,
+                    resendInProgress: false,
+                    confirmationInProgress: false
+                )
             }
         }
 

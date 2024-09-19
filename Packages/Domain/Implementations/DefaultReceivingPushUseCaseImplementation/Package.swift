@@ -26,7 +26,15 @@ let package = Package(
     targets: [
         .target(
             name: "DefaultReceivingPushUseCaseImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage", "Logging", "Base"],
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "DataTransferObjects",
+                "PersistentStorage",
+                "Logging",
+                "Base"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

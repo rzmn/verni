@@ -32,7 +32,10 @@ private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
         await subscription.start(onLongPoll: onLongPoll)
     }
 }
-
+private typealias FriendsBroadcast = BroadcastWithOnDemandLongPoll<
+    [FriendshipKind: [User]],
+    LongPollFriendsQuery
+>
 public actor DefaultFriendsRepository {
     public let logger: Logger
 
@@ -40,7 +43,7 @@ public actor DefaultFriendsRepository {
     private let offline: FriendsOfflineMutableRepository
     private let longPoll: LongPoll
     private let taskFactory: TaskFactory
-    private var subjects = [FriendshipKindSet: BroadcastWithOnDemandLongPoll<[FriendshipKind: [User]], LongPollFriendsQuery>]()
+    private var subjects = [FriendshipKindSet: FriendsBroadcast]()
 
     public init(
         api: ApiProtocol,

@@ -97,12 +97,8 @@ extension AsyncSubject {
     }
 
     private func refreshSubscriptionsCount() async {
-        subscriptions = subscriptions.filter { (key, value) in
-            guard let _ = value() else {
-                logI { "subscription outdated with id: \(key)" }
-                return false
-            }
-            return true
+        subscriptions = subscriptions.filter { (_, value) in
+            value() != nil
         }
         await subscribersCountTracking?.yield(subscriptions.count)
     }

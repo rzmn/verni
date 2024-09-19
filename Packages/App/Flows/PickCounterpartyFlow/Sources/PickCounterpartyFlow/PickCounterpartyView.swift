@@ -19,12 +19,11 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
         table.backgroundColor = .p.background
         table.backgroundView = UIView()
         table.separatorColor = .clear
-        table.register(UserCell.self, forCellReuseIdentifier: "\(UserCell.self)")
+        table.register(UserCell.self)
         return table
     }()
-    private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
-        guard let self else { return UITableViewCell() }
-        let cell = tableView.dequeueReusableCell(withIdentifier: "\(UserCell.self)") as! UserCell
+    private lazy var cellProvider: DataSource.CellProvider = { [unowned self] tableView, indexPath, _ in
+        let cell = tableView.dequeue(UserCell.self, at: indexPath)
         let item = items(in: sections[indexPath.section])[indexPath.row]
         cell.render(user: item)
         cell.contentView.backgroundColor = .p.backgroundContent
@@ -97,7 +96,12 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
             emptyPlaceholder.isHidden = !emptyState
         case .loading(let previous):
             if let error = previous.error {
-                emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+                emptyPlaceholder.render(
+                    Placeholder.Config(
+                        message: error.hint,
+                        icon: error.iconName.flatMap(UIImage.init(systemName:))
+                    )
+                )
                 emptyPlaceholder.isHidden = false
             } else if case .initial = previous {
                 emptyPlaceholder.isHidden = true
@@ -109,7 +113,12 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
                 emptyPlaceholder.isHidden = !emptyState
             }
         case .failed(_, let error):
-            emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+            emptyPlaceholder.render(
+                Placeholder.Config(
+                    message: error.hint,
+                    icon: error.iconName.flatMap(UIImage.init(systemName:))
+                )
+            )
             emptyPlaceholder.isHidden = false
         }
     }

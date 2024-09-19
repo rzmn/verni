@@ -19,16 +19,17 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> {
         self.poller = await Poller(query: query, api: api)
         self.taskFactory = taskFactory
         self.broadcast = AsyncSubject(taskFactory: taskFactory)
-        hasSubscribersSubscription = await broadcast.subscribersCount.countPublisher.subscribe { [weak self, taskFactory] subscribersCount in
-            taskFactory.task { [weak self] in
-                guard let self else { return }
-                if subscribersCount > 0 {
-                    await self.startListening()
-                } else {
-                    await self.cancelListening()
+        hasSubscribersSubscription = await broadcast.subscribersCount.countPublisher
+            .subscribe { [weak self, taskFactory] subscribersCount in
+                taskFactory.task { [weak self] in
+                    guard let self else { return }
+                    if subscribersCount > 0 {
+                        await self.startListening()
+                    } else {
+                        await self.cancelListening()
+                    }
                 }
             }
-        }
     }
 
     private func startListening() {

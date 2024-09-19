@@ -17,12 +17,18 @@ let package = Package(
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api")
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Infrastructure/Logging")
     ],
     targets: [
         .target(
             name: "DefaultSaveCredendialsUseCaseImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience"],
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "Logging"
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

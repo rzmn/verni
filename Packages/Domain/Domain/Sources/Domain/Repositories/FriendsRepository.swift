@@ -13,7 +13,9 @@ public protocol FriendsRepository: Sendable {
 
 public extension FriendsRepository {
     @discardableResult
-    func refreshFriendsNoTypedThrow(ofKind kind: FriendshipKindSet) async -> Result<[FriendshipKind: [User]], GeneralError> {
+    func refreshFriendsNoTypedThrow(
+        ofKind kind: FriendshipKindSet
+    ) async -> Result<[FriendshipKind: [User]], GeneralError> {
         do {
             return .success(try await refreshFriends(ofKind: kind))
         } catch {

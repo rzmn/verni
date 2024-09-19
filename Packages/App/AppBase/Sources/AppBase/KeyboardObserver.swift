@@ -2,6 +2,38 @@ import UIKit
 import Combine
 internal import Base
 
+private extension Notification {
+    var keyboardFrame: CGRect? {
+        guard let object = userInfo?[UIResponder.keyboardFrameEndUserInfoKey] else {
+            return nil
+        }
+        guard let value = object as? NSValue else {
+            return nil
+        }
+        return value.cgRectValue
+    }
+
+    var animationDuration: TimeInterval? {
+        guard let object = userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] else {
+            return nil
+        }
+        guard let number = object as? NSNumber else {
+            return nil
+        }
+        return number.doubleValue
+    }
+
+    var animationCurve: UIView.AnimationCurve? {
+        guard let object = userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] else {
+            return nil
+        }
+        guard let number = object as? NSNumber else {
+            return nil
+        }
+        return UIView.AnimationCurve(rawValue: number.intValue)
+    }
+}
+
 @MainActor public class KeyboardObserver {
     public struct Event {
         public enum Kind {
@@ -36,15 +68,11 @@ internal import Base
     private init() {
         notifier = PassthroughSubject<Event, Never>()
         let mapper = { (notification: Notification) -> Event? in
-            guard let frameInfo = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
+            guard let keyboardFrame = notification.keyboardFrame else {
                 return nil
             }
-            let keyboardFrame = frameInfo.cgRectValue
-
-            let duration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0.25
-            let curve = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber).flatMap {
-                UIView.AnimationCurve(rawValue: $0.intValue)
-            } ?? .easeInOut
+            let duration = notification.animationDuration ?? 0.25
+            let curve = notification.animationCurve ?? .easeInOut
             switch notification.name {
             case UIResponder.keyboardWillHideNotification:
                 return Event(

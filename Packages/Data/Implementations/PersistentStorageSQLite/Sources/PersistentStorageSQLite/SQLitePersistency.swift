@@ -96,15 +96,15 @@ private struct FriendshipKindSet: OptionSet {
 
     public func getProfile() -> ProfileDto? {
         do {
-            guard let row = try db.prepare(Schema.Profiles.table).first(where: { row in
-                guard try row.get(Schema.Profiles.Keys.id) == hostId else {
+            guard let row = try db.prepare(Schema.Profile.table).first(where: { row in
+                guard try row.get(Schema.Profile.Keys.id) == hostId else {
                     return false
                 }
                 return true
             }) else {
                 return nil
             }
-            return try row.get(Schema.Profiles.Keys.payload).value
+            return try row.get(Schema.Profile.Keys.payload).value
         } catch {
             logE { "fetch profile failed error: \(error)" }
             return nil
@@ -114,10 +114,10 @@ private struct FriendshipKindSet: OptionSet {
     func update(profile: ProfileDto) {
         assert(profile.user.id == hostId)
         do {
-            try db.run(Schema.Profiles.table.upsert(
-                Schema.Profiles.Keys.id <- profile.user.id,
-                Schema.Profiles.Keys.payload <- CodableBlob(value: profile),
-                onConflictOf: Schema.Profiles.Keys.id
+            try db.run(Schema.Profile.table.upsert(
+                Schema.Profile.Keys.id <- profile.user.id,
+                Schema.Profile.Keys.payload <- CodableBlob(value: profile),
+                onConflictOf: Schema.Profile.Keys.id
             ))
         } catch {
             logE { "failed to update profile error: \(error)" }

@@ -1,12 +1,15 @@
 import Domain
 import Foundation
 import Security
+import Logging
 
 public struct DefaultSaveCredendialsUseCase {
+    public let logger: Logger
     private let website: String
 
-    public init(website: String) {
+    public init(website: String, logger: Logger) {
         self.website = website
+        self.logger = logger
     }
 }
 
@@ -16,8 +19,10 @@ extension DefaultSaveCredendialsUseCase: SaveCredendialsUseCase {
             website as CFString,
             email as CFString,
             password as CFString, { error in
-                print("\(error.debugDescription)")
+                logger.logE { "save credentials failed error: \(error.debugDescription)" }
             }
         )
     }
 }
+
+extension DefaultSaveCredendialsUseCase: Loggable {}

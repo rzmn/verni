@@ -7,6 +7,7 @@ import UIKit
     public let model: Model
 
     var contentView: V {
+        // swiftlint:disable:next force_cast
         view as! V
     }
 

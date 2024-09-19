@@ -5,15 +5,11 @@ import AsyncExtensions
 internal import Base
 internal import Api
 internal import ApiService
-internal import DefaultApiImplementation
 internal import Networking
 internal import PersistentStorage
 internal import DefaultAuthUseCaseImplementation
-internal import DefaultApiServiceImplementation
-internal import DefaultNetworkingImplementation
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
-internal import PersistentStorageSQLite
 
 private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let impl: any AuthUseCase
@@ -48,67 +44,41 @@ private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 }
 
 public final class DefaultDependenciesAssembly: DIContainer, Sendable {
-    private let anonymousApi: ApiProtocol
-    private let apiServiceFactory: ApiServiceFactory
-    private let networkServiceFactory: NetworkServiceFactory
+    private let dataLayer: DataLayerDependencies
     private let avatarsRepository: AvatarsRepository
-    private let apiEndpoint = "http://193.124.113.41:8082"
     private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
     private let taskFactory = DefaultTaskFactory()
-    private let persistencyFactory: PersistencyFactory
 
     let avatarsOfflineMutableRepository: AvatarsOfflineMutableRepository
     public let appCommon: AppCommon
 
     public init() async throws {
-        guard let permanentCacheDirectory = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.com.rzmn.accountydev.app"
-        ), let temporaryCacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+        dataLayer = try await DataLayerDependencies(taskFactory: taskFactory)
+        guard let temporaryCacheDirectory = FileManager.default.urls(
+            for: .cachesDirectory,
+            in: .userDomainMask
+        ).first else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }
-        networkServiceFactory = DefaultNetworkServiceFactory(
-            logger: .shared.with(
-                prefix: "[net] "
-            ),
-            session: .shared,
-            endpoint: Endpoint(
-                path: apiEndpoint
-            )
-        )
-        apiServiceFactory = DefaultApiServiceFactory(
-            logger: .shared.with(
-                prefix: "[api.s] "
-            ),
-            networkServiceFactory: networkServiceFactory,
-            taskFactory: taskFactory
-        )
-        let apiFactory = await DefaultApiFactory(
-            service: apiServiceFactory.create(tokenRefresher: nil),
-            taskFactory: taskFactory
-        )
-        persistencyFactory = try SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[db] "),
-            dbDirectory: permanentCacheDirectory,
-            taskFactory: taskFactory
-        )
-        anonymousApi = apiFactory.create()
+
         let avatarsOfflineRepository = try DefaultAvatarsOfflineRepository(
             container: temporaryCacheDirectory,
             logger: .shared.with(prefix: "[avatars.offline] ")
         )
         avatarsOfflineMutableRepository = avatarsOfflineRepository
         avatarsRepository = DefaultAvatarsRepository(
-            api: anonymousApi,
+            api: dataLayer.anonymousApi,
             taskFactory: DefaultTaskFactory(),
             offlineRepository: avatarsOfflineRepository,
             offlineMutableRepository: avatarsOfflineRepository,
-            logger: .shared.with(prefix: "avatars")
+            logger: .shared.with(prefix: "[avatars] ")
         )
         appCommon = AppCommonDependencies(
-            api: anonymousApi,
+            api: dataLayer.anonymousApi,
             avatarsRepository: avatarsRepository,
             saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
-                website: webcredentials
+                website: webcredentials,
+                logger: .shared.with(prefix: "[credentials.save] ")
             )
         )
     }
@@ -117,19 +87,14 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
         AuthUseCaseAdapter(
             impl: await DefaultAuthUseCase(
                 taskFactory: DefaultTaskFactory(),
-                api: anonymousApi,
-                apiServiceFactory: apiServiceFactory,
-                persistencyFactory: persistencyFactory,
+                api: dataLayer.anonymousApi,
+                apiServiceFactory: dataLayer.apiServiceFactory,
+                persistencyFactory: dataLayer.persistencyFactory,
                 activeSessionDIContainerFactory: ActiveSessionDependenciesAssemblyFactory(
                     defaultDependencies: self
                 ),
                 apiFactoryProvider: { refresher in
-                    await DefaultApiFactory(
-                        service: self.apiServiceFactory.create(
-                            tokenRefresher: refresher
-                        ),
-                        taskFactory: self.taskFactory
-                    )
+                    await self.dataLayer.apiFactory(refresher: refresher)
                 }
             )
         )

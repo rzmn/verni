@@ -83,7 +83,12 @@ class UpdateEmailView: View<UpdateEmailViewActions> {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        let size = email.sizeThatFits(CGSize(width: max(0, bounds.width - .p.defaultHorizontal * 2), height: bounds.height))
+        let size = email.sizeThatFits(
+            CGSize(
+                width: max(0, bounds.width - .p.defaultHorizontal * 2),
+                height: bounds.height
+            )
+        )
         email.frame = CGRect(
             x: .p.defaultHorizontal,
             y: safeAreaInsets.top + .p.defaultVertical,

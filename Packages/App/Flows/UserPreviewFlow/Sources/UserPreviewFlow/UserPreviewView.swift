@@ -36,12 +36,11 @@ class UserPreviewView: View<UserPreviewViewActions> {
         table.backgroundColor = .p.background
         table.backgroundView = UIView()
         table.separatorColor = .clear
-        table.register(SpendingCell.self, forCellReuseIdentifier: "\(SpendingCell.self)")
+        table.register(SpendingCell.self)
         return table
     }()
-    private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
-        guard let self else { return UITableViewCell() }
-        let cell = tableView.dequeueReusableCell(withIdentifier: "\(SpendingCell.self)") as! SpendingCell
+    private lazy var cellProvider: DataSource.CellProvider = { [unowned self] tableView, indexPath, _ in
+        let cell = tableView.dequeue(SpendingCell.self, at: indexPath)
         let item = items(in: sections[indexPath.section])[indexPath.row]
         cell.render(spending: item)
         cell.contentView.backgroundColor = .p.backgroundContent
@@ -125,7 +124,12 @@ class UserPreviewView: View<UserPreviewViewActions> {
             emptyPlaceholder.isHidden = !emptyState
         case .loading(let previous):
             if let error = previous.error {
-                emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+                emptyPlaceholder.render(
+                    Placeholder.Config(
+                        message: error.hint,
+                        icon: error.iconName.flatMap(UIImage.init(systemName:))
+                    )
+                )
                 emptyPlaceholder.isHidden = false
             } else if case .initial = previous {
                 emptyPlaceholder.isHidden = true
@@ -137,7 +141,12 @@ class UserPreviewView: View<UserPreviewViewActions> {
                 emptyPlaceholder.isHidden = !emptyState
             }
         case .failed(_, let error):
-            emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+            emptyPlaceholder.render(
+                Placeholder.Config(
+                    message: error.hint,
+                    icon: error.iconName.flatMap(UIImage.init(systemName:))
+                )
+            )
             emptyPlaceholder.isHidden = false
         }
         setNeedsLayout()

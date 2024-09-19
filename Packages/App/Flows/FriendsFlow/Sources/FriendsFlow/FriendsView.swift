@@ -20,12 +20,11 @@ class FriendsView: View<FriendsViewActions> {
         table.backgroundColor = .p.background
         table.backgroundView = UIView()
         table.separatorColor = .clear
-        table.register(FriendCell.self, forCellReuseIdentifier: "\(FriendCell.self)")
+        table.register(FriendCell.self)
         return table
     }()
-    private lazy var cellProvider: DataSource.CellProvider = { [weak self] tableView, indexPath, _ in
-        guard let self else { return UITableViewCell() }
-        let cell = tableView.dequeueReusableCell(withIdentifier: "\(FriendCell.self)") as! FriendCell
+    private lazy var cellProvider: DataSource.CellProvider = { [unowned self] tableView, indexPath, _ in
+        let cell = tableView.dequeue(FriendCell.self, at: indexPath)
         let item = items(in: sections[indexPath.section])[indexPath.row]
         cell.render(item: item)
         cell.contentView.backgroundColor = .p.backgroundContent
@@ -105,7 +104,12 @@ class FriendsView: View<FriendsViewActions> {
             emptyPlaceholder.isHidden = !emptyState
         case .loading(let previous):
             if let error = previous.error {
-                emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+                emptyPlaceholder.render(
+                    Placeholder.Config(
+                        message: error.hint,
+                        icon: error.iconName.flatMap(UIImage.init(systemName:))
+                    )
+                )
                 emptyPlaceholder.isHidden = false
             } else if case .initial = previous {
                 emptyPlaceholder.isHidden = true
@@ -117,7 +121,12 @@ class FriendsView: View<FriendsViewActions> {
                 emptyPlaceholder.isHidden = !emptyState
             }
         case .failed(_, let error):
-            emptyPlaceholder.render(Placeholder.Config(message: error.hint, icon: error.iconName.flatMap(UIImage.init(systemName:))))
+            emptyPlaceholder.render(
+                Placeholder.Config(
+                    message: error.hint,
+                    icon: error.iconName.flatMap(UIImage.init(systemName:))
+                )
+            )
             emptyPlaceholder.isHidden = false
         }
     }

@@ -57,7 +57,9 @@ public actor FriendsFlow {
             return
         }
         if active {
-            friendsSubscription = await friendsRepository.friendsUpdated(ofKind: .all).subscribe { [weak self] friends in
+            friendsSubscription = await friendsRepository.friendsUpdated(
+                ofKind: .all
+            ).subscribe { [weak self] friends in
                 guard let self else { return }
                 Task {
                     await self.viewModel.reload(friends: friends)

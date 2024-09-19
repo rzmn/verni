@@ -109,6 +109,7 @@ public struct DefaultTaskFactory: TaskFactory {
     }
 }
 
+// swiftlint:disable:next no_unchecked_sendable
 final class TestTaskFactory: TaskFactory, @unchecked Sendable {
     private let lock = NSLock()
     private var tasks: [Waitable] = []

@@ -34,7 +34,8 @@ private actor PersistencyProvider {
         let useCase = await DefaultLogoutUseCase(
             persistency: provider.persistency,
             shouldLogout: subject,
-            taskFactory: taskFactory
+            taskFactory: taskFactory,
+            logger: .shared
         )
         let reason = LogoutReason.refreshTokenFailed
 
@@ -66,7 +67,8 @@ private actor PersistencyProvider {
         let useCase = await DefaultLogoutUseCase(
             persistency: provider.persistency,
             shouldLogout: subject,
-            taskFactory: taskFactory
+            taskFactory: taskFactory,
+            logger: .shared
         )
 
         // when

@@ -2,6 +2,12 @@ import ApiService
 import Api
 import Base
 
+private extension String {
+    var httpHeaderDescription: String {
+        starts(with: "Bearer") ? prefix("Bearer".count + 4) + "..." : self
+    }
+}
+
 struct AnyApiServiceRequest: ApiServiceRequest, CustomStringConvertible {
     let parameters: [String: String]
     let path: String
@@ -43,6 +49,10 @@ struct AnyApiServiceRequest: ApiServiceRequest, CustomStringConvertible {
     }
 
     var description: String {
-        "<m=\(httpMethod) p=\(path) h=\(headers.mapValues { v in v.starts(with: "Bearer") ? "\(v.prefix("Bearer".count + 4)).."  : v })>"
+        "<" + [
+            "m=\(httpMethod)",
+            "p=\(path)",
+            "h=\(headers.mapValues(\.httpHeaderDescription))"
+        ].joined(separator: ", ") + ">"
     }
 }

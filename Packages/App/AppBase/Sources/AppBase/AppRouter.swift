@@ -63,7 +63,11 @@ internal import ProgressHUD
         ProgressHUD.animate()
     }
 
-    public func present(_ controller: Routable, animated: Bool = true, onPop: (@MainActor () async -> Void)? = nil) async {
+    public func present(
+        _ controller: Routable,
+        animated: Bool = true,
+        onPop: (@MainActor () async -> Void)? = nil
+    ) async {
         await scheduler.run { @MainActor [unowned self] in
             let viewController = controller.create { [unowned self] viewController in
                 await pop(viewController)
@@ -121,7 +125,9 @@ internal import ProgressHUD
             if let controller = current as? UINavigationController {
                 navigation = controller
                 break
-            } else if let tabBar = current as? UITabBarController, let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
+            } else if
+                let tabBar = current as? UITabBarController,
+                let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
                 navigation = controller
                 break
             }
@@ -140,7 +146,9 @@ internal import ProgressHUD
         let navigation: UINavigationController
         if let controller = viewControllers.last as? UINavigationController {
             navigation = controller
-        } else if let tabBar = viewControllers.last as? UITabBarController, let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
+        } else if
+            let tabBar = viewControllers.last as? UITabBarController,
+            let controller = tabBar.viewControllers?[tabBar.selectedIndex] as? UINavigationController {
             navigation = controller
         } else {
             return assertionFailure("cannot push from non-navigation controller")

@@ -58,12 +58,12 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     private let longPoll: LongPoll
 
     private let logoutSubject: AsyncSubject<LogoutReason>
-    private let updatableProfile: ExternallyUpdatable<Domain.Profile>
-
+    private let updatableProfile  = ExternallyUpdatable<Domain.Profile>(
+        taskFactory: DefaultTaskFactory()
+    )
     var appCommon: AppCommon {
         defaultDependencies.appCommon
     }
-
     let defaultDependencies: DefaultDependenciesAssembly
     let profileRepository: ProfileRepository
     let usersRepository: UsersRepository
@@ -92,26 +92,14 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         self.defaultDependencies = defaultDependencies
         self.logoutSubject = logoutSubject
         self.userId = userId
-
-        let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(
-            persistency: persistency
-        )
+        let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(persistency: persistency)
         self.spendingsOfflineRepository = spendingsOfflineRepository
-        let friendsOfflineRepository = DefaultFriendsOfflineRepository(
-            persistency: persistency
-        )
+        let friendsOfflineRepository = DefaultFriendsOfflineRepository(persistency: persistency)
         self.friendsOfflineRepository = friendsOfflineRepository
-        let profileOfflineRepository = DefaultProfileOfflineRepository(
-            persistency: persistency
-        )
+        let profileOfflineRepository = DefaultProfileOfflineRepository(persistency: persistency)
         self.profileOfflineRepository = profileOfflineRepository
-        let usersOfflineRepository = DefaultUsersOfflineRepository(
-            persistency: persistency
-        )
+        let usersOfflineRepository = DefaultUsersOfflineRepository(persistency: persistency)
         self.usersOfflineRepository = usersOfflineRepository
-
-        updatableProfile = ExternallyUpdatable(taskFactory: DefaultTaskFactory())
-
         profileRepository = await DefaultProfileRepository(
             api: api,
             logger: .shared.with(prefix: "[profile.repo] "),
@@ -142,7 +130,8 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
         logoutUseCase = await DefaultLogoutUseCase(
             persistency: persistency,
             shouldLogout: logoutSubject,
-            taskFactory: DefaultTaskFactory()
+            taskFactory: DefaultTaskFactory(),
+            logger: .shared.with(prefix: "[logout] ")
         )
     }
 

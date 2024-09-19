@@ -1,9 +1,9 @@
 import Testing
 import DataTransferObjects
 import Domain
-import AsyncExtensions
 import Foundation
 import Base
+@testable import AsyncExtensions
 @testable import Api
 @testable import DefaultSpendingsRepositoryImplementation
 @testable import MockApiImplementation

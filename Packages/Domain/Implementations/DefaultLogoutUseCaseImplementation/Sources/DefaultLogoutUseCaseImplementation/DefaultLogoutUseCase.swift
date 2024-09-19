@@ -2,10 +2,12 @@ import Domain
 import PersistentStorage
 import AsyncExtensions
 import Base
+import Logging
 internal import ApiDomainConvenience
 internal import DataTransferObjects
 
 public actor DefaultLogoutUseCase {
+    public let logger: Logger
     private let didLogoutBroadcast: AsyncSubject<LogoutReason>
     private let persistency: Persistency
     private let taskFactory: TaskFactory
@@ -15,11 +17,13 @@ public actor DefaultLogoutUseCase {
     public init(
         persistency: Persistency,
         shouldLogout: any AsyncBroadcast<LogoutReason>,
-        taskFactory: TaskFactory
+        taskFactory: TaskFactory,
+        logger: Logger
     ) async {
         self.didLogoutBroadcast = AsyncSubject(taskFactory: taskFactory)
         self.persistency = persistency
         self.taskFactory = taskFactory
+        self.logger = logger
         didLogoutSubscription = await shouldLogout.subscribe { [weak self] reason in
             self?.taskFactory.task { [weak self] in
                 guard let self else { return }
@@ -46,14 +50,13 @@ extension DefaultLogoutUseCase {
     @discardableResult
     private func doLogout() async -> Bool {
         guard await loggedOutHandler.allowLogout() else {
-            print("[debug] doLogout: skip")
             return false
         }
-        print("[debug] doLogout: ok")
         taskFactory.task {
             await self.persistency.invalidate()
-            print("[debug] doLogout: invalidated")
         }
         return true
     }
 }
+
+extension DefaultLogoutUseCase: Loggable {}

@@ -115,9 +115,9 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             t.column(Schema.SpendingCounterparties.Keys.id, primaryKey: true)
             t.column(Schema.SpendingCounterparties.Keys.payload)
         })
-        try db.run(Schema.Profiles.table.create { t in
-            t.column(Schema.Profiles.Keys.id, primaryKey: true)
-            t.column(Schema.Profiles.Keys.payload)
+        try db.run(Schema.Profile.table.create { t in
+            t.column(Schema.Profile.Keys.id, primaryKey: true)
+            t.column(Schema.Profile.Keys.payload)
         })
     }
 }

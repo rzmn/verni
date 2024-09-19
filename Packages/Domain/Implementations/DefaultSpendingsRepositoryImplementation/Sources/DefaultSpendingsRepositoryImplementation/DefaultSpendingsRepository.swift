@@ -7,7 +7,7 @@ import AsyncExtensions
 import OnDemandPolling
 internal import ApiDomainConvenience
 
-private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
+private struct OnDemandLongPollBroadcast<T: Sendable, Q: LongPollQuery> {
     let broadcast: AsyncSubject<T>
     private let subscription: OnDemandLongPollSubscription<T, Q>
     init(
@@ -32,7 +32,14 @@ private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
         await subscription.start(onLongPoll: onLongPoll)
     }
 }
-
+private typealias CounterpartiesBroadcast = OnDemandLongPollBroadcast<
+    [SpendingsPreview],
+    LongPollCounterpartiesQuery
+>
+private typealias SpendingsHistoryBroadcast = OnDemandLongPollBroadcast<
+    [IdentifiableSpending],
+    LongPollSpendingsHistoryQuery
+>
 public actor DefaultSpendingsRepository {
     public let logger: Logger
     private let api: ApiProtocol
@@ -40,8 +47,8 @@ public actor DefaultSpendingsRepository {
     private let offline: SpendingsOfflineMutableRepository
     private let taskFactory: TaskFactory
 
-    private let onDemandCounterpartiesSubscription: BroadcastWithOnDemandLongPoll<[SpendingsPreview], LongPollCounterpartiesQuery>
-    private var onDemandSpendingHistorySubscriptionById = [User.ID: BroadcastWithOnDemandLongPoll<[IdentifiableSpending], LongPollSpendingsHistoryQuery>]()
+    private let onDemandCounterpartiesSubscription: CounterpartiesBroadcast
+    private var onDemandSpendingHistorySubscriptionById = [User.ID: SpendingsHistoryBroadcast]()
 
     public init(
         api: ApiProtocol,
@@ -55,7 +62,7 @@ public actor DefaultSpendingsRepository {
         self.offline = offline
         self.logger = logger
         self.taskFactory = taskFactory
-        self.onDemandCounterpartiesSubscription = await BroadcastWithOnDemandLongPoll(
+        self.onDemandCounterpartiesSubscription = await OnDemandLongPollBroadcast(
             longPoll: longPoll,
             taskFactory: taskFactory,
             query: LongPollCounterpartiesQuery()
@@ -84,10 +91,10 @@ extension DefaultSpendingsRepository: SpendingsRepository {
 
     private func spendingsHistorySubject(
         with uid: User.ID
-    ) async -> BroadcastWithOnDemandLongPoll<[IdentifiableSpending], LongPollSpendingsHistoryQuery> {
+    ) async -> OnDemandLongPollBroadcast<[IdentifiableSpending], LongPollSpendingsHistoryQuery> {
         guard let subject = onDemandSpendingHistorySubscriptionById[uid] else {
             logI { "subject created for \(uid)" }
-            let subject = await BroadcastWithOnDemandLongPoll<[IdentifiableSpending], LongPollSpendingsHistoryQuery>(
+            let subject = await OnDemandLongPollBroadcast<[IdentifiableSpending], LongPollSpendingsHistoryQuery>(
                 longPoll: longPoll,
                 taskFactory: taskFactory,
                 query: LongPollSpendingsHistoryQuery(uid: uid)
@@ -128,11 +135,17 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         return counterparties
     }
 
-    public func refreshSpendingsHistory(counterparty: User.ID) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
+    public func refreshSpendingsHistory(
+        counterparty: User.ID
+    ) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] start" }
         let spendings: [IdentifiableSpending]
         do {
-            spendings = try await api.run(method: Spendings.GetDeals(counterparty: counterparty)).map(IdentifiableSpending.init)
+            spendings = try await api.run(
+                method: Spendings.GetDeals(
+                    counterparty: counterparty
+                )
+            ).map(IdentifiableSpending.init)
         } catch {
             logI { "refreshSpendingsHistory[counterparty=\(counterparty)] failed error: \(error)" }
             throw GetSpendingsHistoryError(apiError: error)

@@ -1,6 +1,7 @@
 import Domain
 
-public protocol AuthUseCaseReturningActiveSession: AuthUseCase where Self.AuthorizedSession == ActiveSessionDIContainer {}
+public protocol AuthUseCaseReturningActiveSession: AuthUseCase
+where Self.AuthorizedSession == ActiveSessionDIContainer {}
 
 public protocol AppCommon: Sendable {
     var localEmailValidationUseCase: EmailValidationUseCase { get }

@@ -7,6 +7,7 @@ open class TabBarController<Model, TabBar: UITabBar>: UITabBarController {
     public let model: Model
     public var contentTabTar: TabBar {
         loadViewIfNeeded()
+        // swiftlint:disable:next force_cast
         return tabBar as! TabBar
     }
 

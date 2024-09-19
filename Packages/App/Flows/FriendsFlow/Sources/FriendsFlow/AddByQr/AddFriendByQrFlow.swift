@@ -78,19 +78,30 @@ extension AddFriendByQrFlow {
             self.onData = onData
         }
 
-        func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem], allItems: [RecognizedItem]) {
+        func dataScanner(
+            _ dataScanner: DataScannerViewController,
+            didAdd addedItems: [RecognizedItem],
+            allItems: [RecognizedItem]
+        ) {
             Task {
                 await handle(dataScanner: dataScanner, items: allItems)
             }
         }
 
-        func dataScanner(_ dataScanner: DataScannerViewController, didUpdate updatedItems: [RecognizedItem], allItems: [RecognizedItem]) {
+        func dataScanner(
+            _ dataScanner: DataScannerViewController,
+            didUpdate updatedItems: [RecognizedItem],
+            allItems: [RecognizedItem]
+        ) {
             Task {
                 await handle(dataScanner: dataScanner, items: allItems)
             }
         }
 
-        private func handle(dataScanner: DataScannerViewController, items: [RecognizedItem]) async {
+        private func handle(
+            dataScanner: DataScannerViewController,
+            items: [RecognizedItem]
+        ) async {
             for item in items {
                 guard case .barcode(let barcode) = item else {
                     continue

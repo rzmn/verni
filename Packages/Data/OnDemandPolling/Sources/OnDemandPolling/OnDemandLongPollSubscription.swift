@@ -26,33 +26,42 @@ public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
 
     public func start(onLongPoll: @escaping @Sendable (Q.Update) -> Void) async {
         logI { "start polling" }
-        subsctiptionsCountSubscription = await subscribersCount.countPublisher.subscribe { [weak self, taskFactory] subscriptionsCount in
-            self?.logI { "subscriptions count updated: \(subscriptionsCount)" }
-            taskFactory.task { [weak self] in
-                await self?.mutate { s in
-                    let hadSubsriptions = s.longPollSubscription != nil
-                    let hasSubscriptions: Bool
-                    if hadSubsriptions {
-                        let isSubscribedToSamePublisher = s.longPollPublisher.id == s.subscribersCount.ownerPublisher.id
-                        hasSubscriptions = subscriptionsCount - (isSubscribedToSamePublisher ? 1 : 0) > 0
-                    } else {
-                        hasSubscriptions = subscriptionsCount > 0
-                    }
-                    guard hadSubsriptions != hasSubscriptions else {
-                        s.logI { "nothing to update" }
-                        return
-                    }
-                    s.logI { "updating onDemandPublishing: \(hasSubscriptions ? "has subscriptions" : "has no subscriptions")" }
-                    await s.longPollSubscription?.cancel()
-                    if hasSubscriptions {
-                        s.longPollSubscription = await s.longPollPublisher.subscribe { update in
-                            onLongPoll(update)
-                        }
-                    } else {
-                        s.longPollSubscription = nil
-                    }
+        subsctiptionsCountSubscription = await subscribersCount.countPublisher
+            .subscribe { [weak self, taskFactory] subscriptionsCount in
+                guard let self else { return }
+                logI { "subscriptions count updated: \(subscriptionsCount)" }
+                taskFactory.task { [weak self] in
+                    guard let self else { return }
+                    await subscriptionsCountUpdated(subscriptionsCount, onLongPoll: onLongPoll)
                 }
             }
+    }
+
+    private func subscriptionsCountUpdated(
+        _ subscriptionsCount: Int,
+        onLongPoll: @escaping @Sendable (Q.Update) -> Void
+    ) async {
+        logI { "subscriptions count updated: \(subscriptionsCount)" }
+        let hadSubsriptions = longPollSubscription != nil
+        let hasSubscriptions: Bool
+        if hadSubsriptions {
+            let isSubscribedToSamePublisher = longPollPublisher.id == subscribersCount.ownerPublisher.id
+            hasSubscriptions = subscriptionsCount - (isSubscribedToSamePublisher ? 1 : 0) > 0
+        } else {
+            hasSubscriptions = subscriptionsCount > 0
+        }
+        guard hadSubsriptions != hasSubscriptions else {
+            logI { "nothing to update" }
+            return
+        }
+        logI { "updating onDemandPublishing: \(hasSubscriptions ? "has subscriptions" : "has no subscriptions")" }
+        await longPollSubscription?.cancel()
+        if hasSubscriptions {
+            longPollSubscription = await longPollPublisher.subscribe { update in
+                onLongPoll(update)
+            }
+        } else {
+            longPollSubscription = nil
         }
     }
 }

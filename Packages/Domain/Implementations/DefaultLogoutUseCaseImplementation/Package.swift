@@ -20,7 +20,8 @@ let package = Package(
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockPersistentStorage")
+        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
+        .package(path: "../../../Infrastructure/Logging")
     ],
     targets: [
         .target(
@@ -30,7 +31,8 @@ let package = Package(
                 "Api",
                 "ApiDomainConvenience",
                 "DataTransferObjects",
-                "PersistentStorage"
+                "PersistentStorage",
+                "Logging"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
