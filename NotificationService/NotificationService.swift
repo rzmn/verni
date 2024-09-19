@@ -3,7 +3,7 @@ import DefaultDependencies
 import Domain
 import DI
 
-class NotificationService: UNNotificationServiceExtension {
+@MainActor class NotificationService: UNNotificationServiceExtension {
     override func didReceive(
         _ request: UNNotificationRequest,
         withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
@@ -33,7 +33,7 @@ class NotificationService: UNNotificationServiceExtension {
         do {
             pushContent = try await session
                 .receivingPushUseCase()
-                .process(rawPushPayload: content.userInfo)
+                .handle(rawPushPayload: content.userInfo)
         } catch {
             return
         }

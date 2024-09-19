@@ -7,6 +7,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     private var _app: App?
     func app() async -> App {
         guard let _app else {
+            // swiftlint:disable:next force_try
             let app = await App(di: try! await DefaultDependenciesAssembly())
             _app = app
             return app
@@ -14,17 +15,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return _app
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         return true
     }
 
     // MARK: UISceneSession Lifecycle
 
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    func application(
+        _ application: UIApplication, configurationForConnecting
+        connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        return UISceneConfiguration(
+            name: "Default Configuration",
+            sessionRole: connectingSceneSession.role
+        )
     }
 
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
         Task {
             await app().registerPushToken(
                 token: deviceToken
@@ -32,7 +46,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any]
+    ) async -> UIBackgroundFetchResult {
         .noData
     }
 }

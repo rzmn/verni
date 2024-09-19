@@ -8,7 +8,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         await (UIApplication.shared.delegate as? AppDelegate)?.app()
     }
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
@@ -19,7 +23,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        print("open url \(URLContexts)")
         guard let context = URLContexts.first else {
             return
         }
