@@ -8,6 +8,38 @@ internal import ProgressHUD
 internal import PickCounterpartyFlow
 internal import Logging
 
+private extension Dictionary where Key == User.ID, Value == Cost {
+    static func spendingBalance(
+        cost: Cost,
+        myId: User.ID,
+        counterpartyId: User.ID,
+        expenseOwnership: AddExpenseState.ExpenseOwnership,
+        splitEqually: Bool
+    ) -> Self {
+        let mine: Cost
+        let counterparties: Cost
+        if splitEqually {
+            mine = cost / 2
+            counterparties = cost / 2
+        } else {
+            mine = cost
+            counterparties = cost
+        }
+        switch expenseOwnership {
+        case .iOwe:
+            return [
+                counterpartyId: -counterparties,
+                myId: mine
+            ]
+        case .iAmOwned:
+            return [
+                counterpartyId: counterparties,
+                myId: -mine
+            ]
+        }
+    }
+}
+
 public actor AddExpenseFlow {
     private var _presenter: AddExpensePresenter?
     @MainActor private func presenter() async -> AddExpensePresenter {
@@ -125,29 +157,13 @@ extension AddExpenseFlow {
             details: state.expenseDescription,
             cost: cost,
             currency: state.selectedCurrency,
-            participants: {
-                let mine: Cost
-                let counterparties: Cost
-                if state.splitEqually {
-                    mine = cost / 2
-                    counterparties = cost / 2
-                } else {
-                    mine = cost
-                    counterparties = cost
-                }
-                switch state.expenseOwnership {
-                case .iOwe:
-                    return [
-                        counterparty.id: -counterparties,
-                        di.userId: mine
-                    ]
-                case .iAmOwned:
-                    return [
-                        counterparty.id: counterparties,
-                        di.userId: -mine
-                    ]
-                }
-            }()
+            participants: .spendingBalance(
+                cost: cost,
+                myId: di.userId,
+                counterpartyId: counterparty.id,
+                expenseOwnership: state.expenseOwnership,
+                splitEqually: state.splitEqually
+            )
         )
         await presenter().presentLoading()
         do {

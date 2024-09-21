@@ -201,8 +201,12 @@ extension AppRouter: UIAdaptivePresentationControllerDelegate {
 }
 
 extension AppRouter: UINavigationControllerDelegate {
-    public func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        // todo: 
+    public func navigationController(
+        _ navigationController: UINavigationController,
+        didShow viewController: UIViewController,
+        animated: Bool
+    ) {
+        // todo:
     }
 }
 

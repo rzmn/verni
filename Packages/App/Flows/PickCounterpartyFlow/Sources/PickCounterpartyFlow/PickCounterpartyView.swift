@@ -49,6 +49,7 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
         for view in [table, emptyPlaceholder] {
             addSubview(view)
         }
+        dataSource.defaultRowAnimation = .bottom
         model.state
             .map { $0 as PickCounterpartyState? }
             .assign(to: \.state, on: self)
@@ -74,17 +75,9 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
         case .loaded, .failed:
             self.table.refreshControl?.endRefreshing()
         }
-        let snapshot = {
-            var s = DataSnapshot()
-            let sections = self.sections
-            s.appendSections(sections)
-            for section in sections {
-                s.appendItems(items(in: section).map(\.id), toSection: section)
-            }
-            return s
-        }()
-        dataSource.defaultRowAnimation = .bottom
-        dataSource.apply(snapshot, animatingDifferences: !table.isDragging && !table.isDecelerating)
+        dataSource.apply(.snapshot(sections: sections, cells: { section in
+            items(in: section).map(\.id)
+        }), animatingDifferences: !table.isDragging && !table.isDecelerating)
         switch state.content {
         case .initial:
             emptyPlaceholder.isHidden = true

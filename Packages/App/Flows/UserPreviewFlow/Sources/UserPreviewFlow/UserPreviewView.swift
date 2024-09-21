@@ -64,6 +64,7 @@ class UserPreviewView: View<UserPreviewViewActions> {
         for view in [name, avatar, table, emptyPlaceholder] {
             addSubview(view)
         }
+        dataSource.defaultRowAnimation = .bottom
         model.state
             .map { $0 as UserPreviewState? }
             .assign(to: \.state, on: self)
@@ -97,22 +98,10 @@ class UserPreviewView: View<UserPreviewViewActions> {
 
     private func render(state: UserPreviewState, animated: Bool) {
         avatar.avatarId = state.user.avatar?.id
-        if case .me = state.user.status {
-            name.text = String(format: "login_your_format".localized, state.user.displayName)
-        } else {
-            name.text = state.user.displayName
-        }
-        let snapshot = {
-            var s = DataSnapshot()
-            let sections = self.sections
-            s.appendSections(sections)
-            for section in sections {
-                s.appendItems(items(in: section).map(\.id), toSection: section)
-            }
-            return s
-        }()
-        dataSource.defaultRowAnimation = .bottom
-        dataSource.apply(snapshot, animatingDifferences: animated && !table.isDragging && !table.isDecelerating)
+        name.text = state.userNameText
+        dataSource.apply(.snapshot(sections: sections, cells: { section in
+            items(in: section).map(\.id)
+        }), animatingDifferences: animated && !table.isDragging && !table.isDecelerating)
         switch state.spenginds {
         case .initial:
             emptyPlaceholder.isHidden = true
@@ -182,5 +171,4 @@ extension UserPreviewView {
     typealias DataSnapshot = NSDiffableDataSourceSnapshot<Section, Cell>
 }
 
-private class DataSource: UITableViewDiffableDataSource<UserPreviewView.Section, UserPreviewView.Cell> {
-}
+private class DataSource: UITableViewDiffableDataSource<UserPreviewView.Section, UserPreviewView.Cell> {}

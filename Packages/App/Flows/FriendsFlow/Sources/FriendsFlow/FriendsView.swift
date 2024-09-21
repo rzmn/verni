@@ -50,6 +50,7 @@ class FriendsView: View<FriendsViewActions> {
         for view in [table, emptyPlaceholder] {
             addSubview(view)
         }
+        dataSource.defaultRowAnimation = .bottom
         model.state
             .map { $0 as FriendsState? }
             .assign(to: \.state, on: self)
@@ -82,17 +83,9 @@ class FriendsView: View<FriendsViewActions> {
         case .loaded, .failed:
             table.refreshControl?.endRefreshing()
         }
-        let snapshot = {
-            var s = DataSnapshot()
-            let sections = self.sections
-            s.appendSections(sections)
-            for section in sections {
-                s.appendItems(items(in: section).map(\.id), toSection: section)
-            }
-            return s
-        }()
-        dataSource.defaultRowAnimation = .bottom
-        dataSource.apply(snapshot, animatingDifferences: !table.isDragging && !table.isDecelerating)
+        dataSource.apply(.snapshot(sections: sections, cells: { section in
+            items(in: section).map(\.id)
+        }), animatingDifferences: !table.isDragging && !table.isDecelerating)
         switch state.content {
         case .initial:
             emptyPlaceholder.isHidden = true

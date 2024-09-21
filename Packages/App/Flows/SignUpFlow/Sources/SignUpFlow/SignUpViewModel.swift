@@ -39,7 +39,7 @@ import Domain
         setupStateBuilder()
     }
 
-    private func setupStateBuilder() {
+    private func setupEmailValidator() {
         $email
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .map(localEmailValidator.validateEmail)
@@ -52,6 +52,9 @@ import Domain
                 }
             }
             .assign(to: &$emailHint)
+    }
+
+    private func setupPasswordValidator() {
         $password
             .map(localPasswordValidator.validatePassword)
             .map { result -> String? in
@@ -63,6 +66,9 @@ import Domain
                 }
             }
             .assign(to: &$passwordHint)
+    }
+
+    private func setupPasswordRepeatMatchChecker() {
         Publishers.CombineLatest($password, $passwordRepeat)
             .map { value -> Bool? in
                 let (password, passwordRepeat) = value
@@ -72,7 +78,12 @@ import Domain
                 return password == passwordRepeat
             }
             .assign(to: &$passwordsMatch)
+    }
 
+    private func setupStateBuilder() {
+        setupEmailValidator()
+        setupPasswordValidator()
+        setupPasswordRepeatMatchChecker()
         let credentials = Publishers.CombineLatest3($email, $password, $passwordRepeat)
         let hints = Publishers.CombineLatest3($emailHint, $passwordHint, $passwordsMatch)
         Publishers.CombineLatest(credentials, hints)

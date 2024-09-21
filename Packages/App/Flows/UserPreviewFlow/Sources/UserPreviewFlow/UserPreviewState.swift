@@ -18,4 +18,12 @@ struct UserPreviewState {
 
     let user: User
     let spenginds: Loadable<[SpendingPreview], Failure>
+
+    var userNameText: String {
+        if case .me = user.status {
+            return String(format: "login_your_format".localized, user.displayName)
+        } else {
+            return user.displayName
+        }
+    }
 }
