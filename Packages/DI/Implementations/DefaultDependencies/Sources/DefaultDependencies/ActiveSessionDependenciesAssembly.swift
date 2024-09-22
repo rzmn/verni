@@ -26,37 +26,10 @@ internal import DefaultSaveCredendialsUseCaseImplementation
 internal import DefaultProfileRepositoryImplementation
 internal import DefaultLogoutUseCaseImplementation
 internal import DefaultReceivingPushUseCaseImplementation
-
-final class ActiveSessionDependenciesAssemblyFactory: ActiveSessionDIContainerFactory {
-    let defaultDependencies: DefaultDependenciesAssembly
-
-    init(defaultDependencies: DefaultDependenciesAssembly) {
-        self.defaultDependencies = defaultDependencies
-    }
-
-    func create(
-        api: ApiProtocol,
-        persistency: Persistency,
-        longPoll: LongPoll,
-        logoutSubject: AsyncSubject<LogoutReason>,
-        userId: User.ID
-    ) async -> ActiveSessionDIContainer {
-        await ActiveSessionDependenciesAssembly(
-            api: api,
-            persistency: persistency,
-            longPoll: longPoll,
-            defaultDependencies: defaultDependencies,
-            logoutSubject: logoutSubject,
-            userId: userId
-        )
-    }
-}
+internal import DataLayerDependencies
 
 final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
-    private let api: ApiProtocol
-    private let persistency: Persistency
-    private let longPoll: LongPoll
-
+    private let dataLayer: AuthenticatedDataLayerSession
     private let logoutSubject: AsyncSubject<LogoutReason>
     private let updatableProfile  = ExternallyUpdatable<Domain.Profile>(
         taskFactory: DefaultTaskFactory()
@@ -79,56 +52,50 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
     let userId: User.ID
 
     init(
-        api: ApiProtocol,
-        persistency: Persistency,
-        longPoll: LongPoll,
         defaultDependencies: DefaultDependenciesAssembly,
-        logoutSubject: AsyncSubject<LogoutReason>,
-        userId: User.ID
+        dataLayer: AuthenticatedDataLayerSession
     ) async {
-        self.api = api
-        self.persistency = persistency
-        self.longPoll = longPoll
         self.defaultDependencies = defaultDependencies
-        self.logoutSubject = logoutSubject
-        self.userId = userId
-        let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(persistency: persistency)
+        self.logoutSubject = AsyncSubject<LogoutReason>(taskFactory: DefaultTaskFactory())
+        self.dataLayer = dataLayer
+        userId = await dataLayer.persistency.userId()
+        let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(persistency: dataLayer.persistency)
         self.spendingsOfflineRepository = spendingsOfflineRepository
-        let friendsOfflineRepository = DefaultFriendsOfflineRepository(persistency: persistency)
+        let friendsOfflineRepository = DefaultFriendsOfflineRepository(persistency: dataLayer.persistency)
         self.friendsOfflineRepository = friendsOfflineRepository
-        let profileOfflineRepository = DefaultProfileOfflineRepository(persistency: persistency)
+        let profileOfflineRepository = DefaultProfileOfflineRepository(persistency: dataLayer.persistency)
         self.profileOfflineRepository = profileOfflineRepository
-        let usersOfflineRepository = DefaultUsersOfflineRepository(persistency: persistency)
+        let usersOfflineRepository = DefaultUsersOfflineRepository(persistency: dataLayer.persistency)
         self.usersOfflineRepository = usersOfflineRepository
         profileRepository = await DefaultProfileRepository(
-            api: api,
+            api: dataLayer.api,
             logger: .shared.with(prefix: "[profile.repo] "),
             offline: profileOfflineRepository,
             profile: updatableProfile,
             taskFactory: DefaultTaskFactory()
         )
         usersRepository = DefaultUsersRepository(
-            api: api,
+            api: dataLayer.api,
             logger: .shared.with(prefix: "[users.repo] "),
             offline: usersOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         spendingsRepository = await DefaultSpendingsRepository(
-            api: api,
-            longPoll: longPoll,
+            api: dataLayer.api,
+            longPoll: dataLayer.longPoll,
             logger: .shared.with(prefix: "[spendings.repo] "),
             offline: spendingsOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         friendListRepository = DefaultFriendsRepository(
-            api: api,
-            longPoll: longPoll,
+            api: dataLayer.api,
+            longPoll: dataLayer.longPoll,
             logger: .shared.with(prefix: "[friends.repo] "),
             offline: friendsOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         logoutUseCase = await DefaultLogoutUseCase(
-            persistency: persistency,
+            persistency: dataLayer.persistency,
             shouldLogout: logoutSubject,
             taskFactory: DefaultTaskFactory(),
             logger: .shared.with(prefix: "[logout] ")
@@ -137,14 +104,14 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     func spendingInteractionsUseCase() -> SpendingInteractionsUseCase {
         DefaultSpendingInteractionsUseCase(
-            api: api
+            api: dataLayer.api
         )
     }
 
     func profileEditingUseCase() -> ProfileEditingUseCase {
         DefaultProfileEditingUseCase(
-            api: api,
-            persistency: persistency,
+            api: dataLayer.api,
+            persistency: dataLayer.persistency,
             taskFactory: DefaultTaskFactory(),
             avatarsRepository: defaultDependencies.avatarsOfflineMutableRepository,
             profile: updatableProfile
@@ -153,20 +120,20 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     func pushRegistrationUseCase() -> PushRegistrationUseCase {
         DefaultPushRegistrationUseCase(
-            api: api,
+            api: dataLayer.api,
             logger: .shared.with(prefix: "[push] ")
         )
     }
 
     func friendInterationsUseCase() -> FriendInteractionsUseCase {
         DefaultFriendInteractionsUseCase(
-            api: api
+            api: dataLayer.api
         )
     }
 
     func emailConfirmationUseCase() -> EmailConfirmationUseCase {
         DefaultEmailConfirmationUseCase(
-            api: api
+            api: dataLayer.api
         )
     }
 

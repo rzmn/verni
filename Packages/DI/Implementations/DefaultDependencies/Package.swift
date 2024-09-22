@@ -37,14 +37,8 @@ let package = Package(
         .package(path: "../../../Infrastructure/Logging"),
         .package(path: "../../../Infrastructure/Base"),
 
-        .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Data/Networking"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/ApiService"),
-        .package(path: "../../../Data/Implementations/PersistentStorageSQLite"),
-        .package(path: "../../../Data/Implementations/DefaultApiImplementation"),
-        .package(path: "../../../Data/Implementations/DefaultNetworkingImplementation"),
-        .package(path: "../../../Data/Implementations/DefaultApiServiceImplementation")
+        .package(path: "../../../Data/DI/DataLayerDependencies"),
+        .package(path: "../../../Data/Implementations/DefaultDataLayerDependencies")
     ],
     targets: [
         .target(
@@ -52,14 +46,9 @@ let package = Package(
             dependencies: [
                 "DI",
                 "Domain",
-                "Networking",
-                "Logging",
-                "ApiService",
-                "Api",
                 "Base",
-                "PersistentStorage",
-                "DefaultNetworkingImplementation",
-                "DefaultApiServiceImplementation",
+                "DataLayerDependencies",
+                "DefaultDataLayerDependencies",
                 "DefaultAuthUseCaseImplementation",
                 "DefaultUsersRepositoryImplementation",
                 "DefaultFriendsRepositoryImplementation",
@@ -67,8 +56,6 @@ let package = Package(
                 "DefaultQRInviteUseCaseImplementation",
                 "DefaultSpendingInteractionsUseCaseImplementation",
                 "DefaultSpendingsRepositoryImplementation",
-                "PersistentStorageSQLite",
-                "DefaultApiImplementation",
                 "DefaultProfileEditingUseCaseImplementation",
                 "DefaultValidationUseCasesImplementation",
                 "DefaultAvatarsRepositoryImplementation",

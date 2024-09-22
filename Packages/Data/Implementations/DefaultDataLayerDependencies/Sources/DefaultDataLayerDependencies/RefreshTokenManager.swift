@@ -1,20 +1,24 @@
 import Foundation
-import ApiService
 import PersistentStorage
 import Api
-private import DataTransferObjects
+import AsyncExtensions
+import DataTransferObjects
+internal import ApiService
 
 actor RefreshTokenManager {
     private let api: ApiProtocol
     private let persistency: Persistency
     private var accessTokenValue: String?
+    private let authenticationLostSubject: AsyncSubject<Void>
 
-    private let onRefreshTokenExpiredOnInvalid: () -> Void
-
-    init(api: ApiProtocol, persistency: Persistency, onRefreshTokenExpiredOnInvalid: @escaping () -> Void) {
+    init(
+        api: ApiProtocol,
+        persistency: Persistency,
+        authenticationLostSubject: AsyncSubject<Void>
+    ) {
         self.api = api
         self.persistency = persistency
-        self.onRefreshTokenExpiredOnInvalid = onRefreshTokenExpiredOnInvalid
+        self.authenticationLostSubject = authenticationLostSubject
     }
 }
 
@@ -34,7 +38,7 @@ extension RefreshTokenManager: TokenRefresher {
         } catch {
             switch error {
             case .api(let apiErrorCode, _):
-                onRefreshTokenExpiredOnInvalid()
+                await authenticationLostSubject.yield(())
                 switch apiErrorCode {
                 case .tokenExpired:
                     throw .expired(error)
@@ -44,7 +48,7 @@ extension RefreshTokenManager: TokenRefresher {
             case .noConnection(let error):
                 throw .noConnection(error)
             case .internalError(let error):
-                onRefreshTokenExpiredOnInvalid()
+                await authenticationLostSubject.yield(())
                 throw .internalError(error)
             }
         }

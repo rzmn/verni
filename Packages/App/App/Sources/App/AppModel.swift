@@ -46,7 +46,7 @@ public actor App {
             )
         } catch {
             switch error {
-            case .hasNoSession:
+            case .hasNoSession, .internalError:
                 return await startAnonynousSession(router: router)
             }
         }

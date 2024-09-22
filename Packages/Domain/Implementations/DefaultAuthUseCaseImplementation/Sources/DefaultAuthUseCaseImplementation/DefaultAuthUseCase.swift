@@ -4,52 +4,44 @@ import ApiService
 import PersistentStorage
 import DI
 import AsyncExtensions
+import DataLayerDependencies
 internal import DataTransferObjects
 
 public actor DefaultAuthUseCase {
     private let taskFactory: TaskFactory
-    private let api: ApiProtocol
-    private let apiServiceFactory: ApiServiceFactory
-    private let persistencyFactory: PersistencyFactory
-    private let activeSessionDIContainerFactory: ActiveSessionDIContainerFactory
-    private let apiFactoryProvider: @Sendable (TokenRefresher) async -> ApiFactory
+    private let dataLayer: AnonymousDataLayerSession
 
     public init(
         taskFactory: TaskFactory,
-        api: ApiProtocol,
-        apiServiceFactory: ApiServiceFactory,
-        persistencyFactory: PersistencyFactory,
-        activeSessionDIContainerFactory: ActiveSessionDIContainerFactory,
-        apiFactoryProvider: @escaping @Sendable (TokenRefresher) async -> ApiFactory
+        dataLayer: AnonymousDataLayerSession
     ) async {
         self.taskFactory = taskFactory
-        self.api = api
-        self.apiServiceFactory = apiServiceFactory
-        self.persistencyFactory = persistencyFactory
-        self.apiFactoryProvider = apiFactoryProvider
-        self.activeSessionDIContainerFactory = activeSessionDIContainerFactory
+        self.dataLayer = dataLayer
     }
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
-    public func awake() async throws(AwakeError) -> any ActiveSessionDIContainerConvertible {
-        guard let session = await ActiveSession.awake(
-            taskFactory: taskFactory,
-            anonymousApi: api,
-            apiServiceFactory: apiServiceFactory,
-            persistencyFactory: persistencyFactory,
-            activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-            apiFactoryProvider: apiFactoryProvider
-        ) else {
-            throw .hasNoSession
+    public func awake() async throws(AwakeError) -> any AuthenticatedDataLayerSession {
+        let dataLayer: AuthenticatedDataLayerSession
+        do {
+            dataLayer = try await self.dataLayer.authenticator.awakeAuthorizedSession()
+        } catch {
+            switch error {
+            case .hasNoSession:
+                throw .hasNoSession
+            case .internalError(let error):
+                throw .internalError(error)
+            }
         }
-        return session
+        return dataLayer
     }
 
-    public func login(credentials: Credentials) async throws(LoginError) -> any ActiveSessionDIContainerConvertible {
+    public func login(
+        credentials: Credentials
+    ) async throws(LoginError) -> any AuthenticatedDataLayerSession {
         let token: AuthTokenDto
         do {
-            token = try await api.run(
+            token = try await dataLayer.api.run(
                 method: Auth.Login(
                     credentials: CredentialsDto(
                         email: credentials.email,
@@ -58,45 +50,22 @@ extension DefaultAuthUseCase: AuthUseCase {
                 )
             )
         } catch {
-            let errorCode: ApiErrorCode
-            switch error {
-            case .api(let code, _):
-                errorCode = code
-            case .noConnection(let error):
-                throw .noConnection(error)
-            case .internalError(let error):
-                throw .other(error)
-            }
-            switch errorCode {
-            case .incorrectCredentials:
-                throw .incorrectCredentials(error)
-            case .wrongCredentialsFormat:
-                throw .wrongFormat(error)
-            default:
-                throw .other(error)
-            }
+            throw LoginError(apiError: error)
         }
         do {
-            return try await ActiveSession.create(
-                taskFactory: taskFactory,
-                anonymousApi: api,
-                hostId: token.id,
-                accessToken: token.accessToken,
-                refreshToken: token.refreshToken,
-                apiServiceFactory: apiServiceFactory,
-                persistencyFactory: persistencyFactory,
-                activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-                apiFactoryProvider: apiFactoryProvider
-            )
+            return try await dataLayer.authenticator
+                .createAuthorizedSession(token: token)
         } catch {
             throw .other(error)
         }
     }
 
-    public func signup(credentials: Credentials) async throws(SignupError) -> any ActiveSessionDIContainerConvertible {
+    public func signup(
+        credentials: Credentials
+    ) async throws(SignupError) -> any AuthenticatedDataLayerSession {
         let token: AuthTokenDto
         do {
-            token = try await api.run(
+            token = try await dataLayer.api.run(
                 method: Auth.Signup(
                     credentials: CredentialsDto(
                         email: credentials.email,
@@ -105,36 +74,11 @@ extension DefaultAuthUseCase: AuthUseCase {
                 )
             )
         } catch {
-            let errorCode: ApiErrorCode
-            switch error {
-            case .api(let code, _):
-                errorCode = code
-            case .noConnection(let error):
-                throw .noConnection(error)
-            case .internalError(let error):
-                throw .other(error)
-            }
-            switch errorCode {
-            case .loginAlreadyTaken:
-                throw .alreadyTaken(error)
-            case .wrongCredentialsFormat:
-                throw .wrongFormat(error)
-            default:
-                throw .other(error)
-            }
+            throw SignupError(apiError: error)
         }
         do {
-            return try await ActiveSession.create(
-                taskFactory: taskFactory,
-                anonymousApi: api,
-                hostId: token.id,
-                accessToken: token.accessToken,
-                refreshToken: token.refreshToken,
-                apiServiceFactory: apiServiceFactory,
-                persistencyFactory: persistencyFactory,
-                activeSessionDIContainerFactory: activeSessionDIContainerFactory,
-                apiFactoryProvider: apiFactoryProvider
-            )
+            return try await dataLayer.authenticator
+                .createAuthorizedSession(token: token)
         } catch {
             throw .other(error)
         }

@@ -111,6 +111,8 @@
 		61BA6ED82C71C0B6006F1140 /* UserPreviewFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UserPreviewFlow; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
+		61D11BE82CA020CB0058B77A /* DataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataLayerDependencies; sourceTree = "<group>"; };
+		61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDataLayerDependencies; sourceTree = "<group>"; };
 		61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultReceivingPushUseCaseImplementation; sourceTree = "<group>"; };
 		61D8456C2C7E69B200100E2E /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
 		61FD347B2C40242F002C1A5A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 		611CCD532C50AE3A00289D9E /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				61D11BE72CA020A90058B77A /* DI */,
 				61C90BF52C84B0E6006A44C0 /* Implementations */,
 				617AAB542C9852DD0087E4F5 /* OnDemandPolling */,
 				611CCD572C50AE3A00289D9E /* ApiService */,
@@ -348,6 +351,7 @@
 		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */,
 				6143A7F42C9162800030AAF1 /* MockNetworkingImplementation */,
 				611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */,
 				611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */,
@@ -365,6 +369,14 @@
 				611CCD4A2C50AE3A00289D9E /* DefaultDependencies */,
 			);
 			path = Implementations;
+			sourceTree = "<group>";
+		};
+		61D11BE72CA020A90058B77A /* DI */ = {
+			isa = PBXGroup;
+			children = (
+				61D11BE82CA020CB0058B77A /* DataLayerDependencies */,
+			);
+			path = DI;
 			sourceTree = "<group>";
 		};
 		61FD347A2C402416002C1A5A /* Resources */ = {

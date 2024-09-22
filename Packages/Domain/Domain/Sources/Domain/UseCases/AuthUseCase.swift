@@ -16,6 +16,7 @@ public enum SignupError: Error, Sendable {
 
 public enum AwakeError: Error, Sendable {
     case hasNoSession
+    case internalError(Error)
 }
 
 public protocol AuthUseCase: Sendable {

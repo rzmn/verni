@@ -2,11 +2,9 @@ import DI
 import Domain
 import Foundation
 import AsyncExtensions
+internal import DataLayerDependencies
+internal import DefaultDataLayerDependencies
 internal import Base
-internal import Api
-internal import ApiService
-internal import Networking
-internal import PersistentStorage
 internal import DefaultAuthUseCaseImplementation
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
@@ -17,16 +15,28 @@ private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
     private let loginHook: (Credentials) async throws(LoginError) -> any ActiveSessionDIContainer
     private let signupHook: (Credentials) async throws(SignupError) -> any ActiveSessionDIContainer
 
-    init<Impl: AuthUseCase>(impl: Impl) where Impl.AuthorizedSession == any ActiveSessionDIContainerConvertible {
+    init<Impl: AuthUseCase>(
+        impl: Impl,
+        dependencies: DefaultDependenciesAssembly
+    ) where Impl.AuthorizedSession == any AuthenticatedDataLayerSession {
         self.impl = impl
         awakeHook = { () async throws(AwakeError) -> any ActiveSessionDIContainer in
-            try await impl.awake().activeSessionDIContainer()
+            await ActiveSessionDependenciesAssembly(
+                defaultDependencies: dependencies,
+                dataLayer: try await impl.awake()
+            )
         }
         loginHook = { credentials async throws(LoginError) -> any ActiveSessionDIContainer in
-            try await impl.login(credentials: credentials).activeSessionDIContainer()
+            await ActiveSessionDependenciesAssembly(
+                defaultDependencies: dependencies,
+                dataLayer: try await impl.login(credentials: credentials)
+            )
         }
         signupHook = { credentials async throws(SignupError) -> any ActiveSessionDIContainer in
-            try await impl.signup(credentials: credentials).activeSessionDIContainer()
+            await ActiveSessionDependenciesAssembly(
+                defaultDependencies: dependencies,
+                dataLayer: try await impl.signup(credentials: credentials)
+            )
         }
     }
 
@@ -44,7 +54,7 @@ private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 }
 
 public final class DefaultDependenciesAssembly: DIContainer, Sendable {
-    private let dataLayer: DataLayerDependencies
+    private let dataLayer: AnonymousDataLayerSession
     private let avatarsRepository: AvatarsRepository
     private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
     private let taskFactory = DefaultTaskFactory()
@@ -53,7 +63,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     public let appCommon: AppCommon
 
     public init() async throws {
-        dataLayer = try await DataLayerDependencies(taskFactory: taskFactory)
+        dataLayer = try await DefaultAnonymousDataLayerSession(taskFactory: taskFactory)
         guard let temporaryCacheDirectory = FileManager.default.urls(
             for: .cachesDirectory,
             in: .userDomainMask
@@ -67,14 +77,14 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
         )
         avatarsOfflineMutableRepository = avatarsOfflineRepository
         avatarsRepository = DefaultAvatarsRepository(
-            api: dataLayer.anonymousApi,
+            api: dataLayer.api,
             taskFactory: DefaultTaskFactory(),
             offlineRepository: avatarsOfflineRepository,
             offlineMutableRepository: avatarsOfflineRepository,
             logger: .shared.with(prefix: "[avatars] ")
         )
         appCommon = AppCommonDependencies(
-            api: dataLayer.anonymousApi,
+            api: dataLayer.api,
             avatarsRepository: avatarsRepository,
             saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
                 website: webcredentials,
@@ -87,16 +97,8 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
         AuthUseCaseAdapter(
             impl: await DefaultAuthUseCase(
                 taskFactory: DefaultTaskFactory(),
-                api: dataLayer.anonymousApi,
-                apiServiceFactory: dataLayer.apiServiceFactory,
-                persistencyFactory: dataLayer.persistencyFactory,
-                activeSessionDIContainerFactory: ActiveSessionDependenciesAssemblyFactory(
-                    defaultDependencies: self
-                ),
-                apiFactoryProvider: { refresher in
-                    await self.dataLayer.apiFactory(refresher: refresher)
-                }
-            )
+                dataLayer: dataLayer
+            ), dependencies: self
         )
     }
 }

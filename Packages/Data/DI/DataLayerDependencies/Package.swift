@@ -4,30 +4,28 @@
 import PackageDescription
 
 let package = Package(
-    name: "DefaultAuthUseCaseImplementation",
+    name: "DataLayerDependencies",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultAuthUseCaseImplementation",
-            targets: ["DefaultAuthUseCaseImplementation"]
+            name: "DataLayerDependencies",
+            targets: ["DataLayerDependencies"]
         )
     ],
     dependencies: [
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/DataTransferObjects"),
-        .package(path: "../../../Data/DI/DataLayerDependencies")
+        .package(path: "../../DataTransferObjects"),
+        .package(path: "../../Api"),
+        .package(path: "../../PersistentStorage")
     ],
     targets: [
         .target(
-            name: "DefaultAuthUseCaseImplementation",
+            name: "DataLayerDependencies",
             dependencies: [
-                "Domain",
-                "Api",
                 "DataTransferObjects",
-                "DataLayerDependencies"
+                "PersistentStorage",
+                "Api"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
