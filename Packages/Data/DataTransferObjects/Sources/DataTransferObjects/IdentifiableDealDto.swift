@@ -23,15 +23,15 @@ public struct DealDto: Codable, Sendable, Equatable {
 }
 
 public extension DealDto {
-    typealias ID = String
+    typealias Identifier = String
 }
 
 @dynamicMemberLookup
 public struct IdentifiableDealDto: Codable, Sendable, Equatable {
-    public let id: DealDto.ID
+    public let id: DealDto.Identifier
     public let deal: DealDto
 
-    public init(id: DealDto.ID, deal: DealDto) {
+    public init(id: DealDto.Identifier, deal: DealDto) {
         self.id = id
         self.deal = deal
     }

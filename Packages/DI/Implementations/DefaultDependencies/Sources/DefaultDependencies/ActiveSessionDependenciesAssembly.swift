@@ -49,7 +49,7 @@ final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
 
     let logoutUseCase: LogoutUseCase
 
-    let userId: User.ID
+    let userId: User.Identifier
 
     init(
         defaultDependencies: DefaultDependenciesAssembly,

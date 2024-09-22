@@ -4,7 +4,7 @@ import PersistentStorage
 import DataLayerDependencies
 import AsyncExtensions
 
-final class DefaultAuthenticatedDataLayerSession: AuthenticatedDataLayerSession {
+final class DefaultAuthenticatedSession: AuthenticatedDataLayerSession {
     let api: ApiProtocol
     let longPoll: LongPoll
     let persistency: Persistency

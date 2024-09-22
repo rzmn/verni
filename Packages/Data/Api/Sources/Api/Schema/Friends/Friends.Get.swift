@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Friends {
     public struct Get: ApiMethod, FriendsScope {
-        public typealias Response = [Int: [UserDto.ID]]
+        public typealias Response = [Int: [UserDto.Identifier]]
 
         public struct Parameters: Encodable, Sendable {
             public let statuses: [Int]

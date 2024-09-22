@@ -5,7 +5,7 @@ fileprivate extension FriendsState.Content {
     @MainActor init(
         friends: [FriendshipKind: [User]],
         spendings: [SpendingsPreview],
-        items: inout [User.ID: FriendsState.Item]
+        items: inout [User.Identifier: FriendsState.Item]
     ) {
         let users = friends.values.flatMap { $0 }
         let ids = Set(users.map(\.id))
@@ -52,7 +52,7 @@ fileprivate extension FriendsState.Content {
     @Published var state: FriendsState
 
     @Published var content: Loadable<FriendsState.Content, FriendsState.Failure>
-    private var items: [User.ID: FriendsState.Item]
+    private var items: [User.Identifier: FriendsState.Item]
 
     private var currentFriends: [FriendshipKind: [User]]?
     private var currentSpendings: [SpendingsPreview]?
@@ -75,7 +75,7 @@ fileprivate extension FriendsState.Content {
         self.currentFriends = currentFriends
         self.currentSpendings = currentSpendings
         if let currentFriends, let currentSpendings {
-            var items = [User.ID: FriendsState.Item]()
+            var items = [User.Identifier: FriendsState.Item]()
             let content = FriendsState.Content(friends: currentFriends, spendings: currentSpendings, items: &items)
             self.items = items
             self.content = .loaded(content)

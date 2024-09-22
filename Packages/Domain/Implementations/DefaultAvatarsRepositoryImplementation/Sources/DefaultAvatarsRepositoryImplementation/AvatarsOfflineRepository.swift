@@ -30,13 +30,13 @@ public actor DefaultAvatarsOfflineRepository {
         }
     }
 
-    private func name(for id: Avatar.ID) -> String {
+    private func name(for id: Avatar.Identifier) -> String {
         "\(Constants.prefix)\(id)"
     }
 }
 
 extension DefaultAvatarsOfflineRepository: AvatarsOfflineRepository {
-    public func get(for id: Avatar.ID) async -> Data? {
+    public func get(for id: Avatar.Identifier) async -> Data? {
         let id = name(for: id)
         do {
             return try Data(contentsOf: container.appending(component: id))
@@ -48,7 +48,7 @@ extension DefaultAvatarsOfflineRepository: AvatarsOfflineRepository {
 }
 
 extension DefaultAvatarsOfflineRepository: AvatarsOfflineMutableRepository {
-    public func store(data: Data, for id: Avatar.ID) async {
+    public func store(data: Data, for id: Avatar.Identifier) async {
         let id = name(for: id)
         guard FileManager.default.createFile(
             atPath: container.appending(component: id).path,

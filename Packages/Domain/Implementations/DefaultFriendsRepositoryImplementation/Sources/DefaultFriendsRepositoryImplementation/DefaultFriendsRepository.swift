@@ -88,7 +88,7 @@ extension DefaultFriendsRepository: FriendsRepository {
 
     public func refreshFriends(ofKind kind: FriendshipKindSet) async throws(GeneralError) -> [FriendshipKind: [User]] {
         logI { "refreshFriends[kind=\(kind)]" }
-        let uids: [UserDto.ID]
+        let uids: [UserDto.Identifier]
         do {
             uids = try await api.run(
                 method: Friends.Get(

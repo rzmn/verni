@@ -47,7 +47,7 @@ extension PushPayload: Decodable {
 
 extension PushPayload {
     struct FriendRequestHasBeenAccepted: Decodable {
-        let target: User.ID
+        let target: User.Identifier
 
         enum CodingKeys: String, CodingKey {
             case target = "t"
@@ -57,7 +57,7 @@ extension PushPayload {
 
 extension PushPayload {
     struct GotFriendRequest: Decodable {
-        let sender: User.ID
+        let sender: User.Identifier
 
         enum CodingKeys: String, CodingKey {
             case sender = "s"
@@ -67,8 +67,8 @@ extension PushPayload {
 
 extension PushPayload {
     struct NewExpenseReceived: Decodable {
-        let spendingId: Spending.ID
-        let authorId: User.ID
+        let spendingId: Spending.Identifier
+        let authorId: User.Identifier
         let cost: Int64
 
         enum CodingKeys: String, CodingKey {

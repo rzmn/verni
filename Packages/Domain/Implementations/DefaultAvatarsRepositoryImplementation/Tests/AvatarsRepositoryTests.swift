@@ -10,16 +10,16 @@ import Base
 @testable import DefaultAvatarsRepositoryImplementation
 
 private actor MockOfflineRepository: AvatarsOfflineRepository, AvatarsOfflineMutableRepository {
-    var getCalls: [Avatar.ID] = []
-    var storeCalls: [(Data, Avatar.ID)] = []
-    var storage = [Avatar.ID: Data]()
+    var getCalls: [Avatar.Identifier] = []
+    var storeCalls: [(Data, Avatar.Identifier)] = []
+    var storage = [Avatar.Identifier: Data]()
 
-    func get(for id: Avatar.ID) async -> Data? {
+    func get(for id: Avatar.Identifier) async -> Data? {
         getCalls.append(id)
         return storage[id]
     }
 
-    func store(data: Data, for id: Avatar.ID) async {
+    func store(data: Data, for id: Avatar.Identifier) async {
         storeCalls.append((data, id))
         storage[id] = data
     }
@@ -27,10 +27,10 @@ private actor MockOfflineRepository: AvatarsOfflineRepository, AvatarsOfflineMut
 
 private actor ApiProvider {
     let api: MockApi
-    let getResponse: [Avatar.ID: Data]
-    var getCalls: [ [Avatar.ID] ] = []
+    let getResponse: [Avatar.Identifier: Data]
+    var getCalls: [ [Avatar.Identifier] ] = []
 
-    init(getResponse: [Avatar.ID: Data]) async {
+    init(getResponse: [Avatar.Identifier: Data]) async {
         self.getResponse = getResponse
         api = MockApi()
         await api.mutate { api in

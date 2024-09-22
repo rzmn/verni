@@ -11,7 +11,7 @@ import Base
 private actor ApiProvider {
     let api: MockApi
     var searchCalls: [String] = []
-    var getCalls: [[UserDto.ID]] = []
+    var getCalls: [[UserDto.Identifier]] = []
     private let getResponse: [UserDto]
     private let searchResponse: [UserDto]
 

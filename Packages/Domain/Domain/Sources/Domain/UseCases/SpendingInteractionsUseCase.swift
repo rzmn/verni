@@ -12,5 +12,5 @@ public enum DeleteSpendingError: Error, Sendable {
 
 public protocol SpendingInteractionsUseCase: Sendable {
     func create(spending: Spending) async throws(CreateSpendingError)
-    func delete(spending: Spending.ID) async throws(DeleteSpendingError)
+    func delete(spending: Spending.Identifier) async throws(DeleteSpendingError)
 }

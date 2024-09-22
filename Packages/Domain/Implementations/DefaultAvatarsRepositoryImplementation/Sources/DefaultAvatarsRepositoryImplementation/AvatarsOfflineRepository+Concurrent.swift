@@ -4,8 +4,8 @@ import Base
 import AsyncExtensions
 
 extension AvatarsOfflineRepository {
-    func getConcurrent(taskFactory: TaskFactory, ids: [Avatar.ID]) async -> [Avatar.ID: Data] {
-        await withTaskGroup(of: Optional<(id: Avatar.ID, data: Data)>.self) { group in
+    func getConcurrent(taskFactory: TaskFactory, ids: [Avatar.Identifier]) async -> [Avatar.Identifier: Data] {
+        await withTaskGroup(of: Optional<(id: Avatar.Identifier, data: Data)>.self) { group in
             for id in ids {
                 group.addTask {
                     let data = await get(for: id)
@@ -16,7 +16,7 @@ extension AvatarsOfflineRepository {
                     }
                 }
             }
-            var loaded = [Avatar.ID: Data]()
+            var loaded = [Avatar.Identifier: Data]()
             for await value in group {
                 guard let value else {
                     continue

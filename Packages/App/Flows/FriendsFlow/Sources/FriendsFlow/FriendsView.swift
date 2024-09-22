@@ -154,7 +154,7 @@ extension FriendsView {
 
 extension FriendsView {
     typealias Section = FriendshipKind
-    typealias Cell = User.ID
+    typealias Cell = User.Identifier
 
     typealias DataSnapshot = NSDiffableDataSourceSnapshot<Section, Cell>
 }

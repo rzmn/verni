@@ -3,7 +3,7 @@ import DataTransferObjects
 public struct LongPollSpendingsHistoryQuery: LongPollQuery {
     public struct Update: Decodable, Sendable {
         public enum Category: Decodable, Sendable {
-            case spendings(uid: UserDto.ID)
+            case spendings(uid: UserDto.Identifier)
 
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.singleValueContainer()
@@ -28,9 +28,9 @@ public struct LongPollSpendingsHistoryQuery: LongPollQuery {
         }
         let category: Category
     }
-    private let uid: UserDto.ID
+    private let uid: UserDto.Identifier
 
-    public init(uid: UserDto.ID) {
+    public init(uid: UserDto.Identifier) {
         self.uid = uid
     }
 

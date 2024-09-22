@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol AvatarsRepository: Sendable {
-    func get(ids: [Avatar.ID]) async -> [Avatar.ID: Data]
+    func get(ids: [Avatar.Identifier]) async -> [Avatar.Identifier: Data]
 }
 
 public enum AvatarsRepositoryError: Error, Sendable {
@@ -10,7 +10,7 @@ public enum AvatarsRepositoryError: Error, Sendable {
 }
 
 public extension AvatarsRepository {
-    func get(id: Avatar.ID) async -> Data? {
+    func get(id: Avatar.Identifier) async -> Data? {
         await get(ids: [id])[id]
     }
 }

@@ -10,7 +10,6 @@
 #   - custom_rules
 disabled_rules:
   - identifier_name
-  - type_name
 
 nesting:
   type_level: 3

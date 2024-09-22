@@ -26,7 +26,7 @@ public class AvatarView: UIImageView {
         }
     }
 
-    public var avatarId: Avatar.ID? {
+    public var avatarId: Avatar.Identifier? {
         didSet {
             task?.cancel()
             guard let avatarId else {

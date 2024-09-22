@@ -18,7 +18,7 @@ extension DefaultSpendingsOfflineRepository: SpendingsOfflineRepository {
         }
     }
 
-    public func getSpendingsHistory(counterparty: User.ID) async -> [IdentifiableSpending]? {
+    public func getSpendingsHistory(counterparty: User.Identifier) async -> [IdentifiableSpending]? {
         await persistency.getSpendingsHistory(counterparty: counterparty).flatMap {
             $0.map(IdentifiableSpending.init)
         }
@@ -30,7 +30,7 @@ extension DefaultSpendingsOfflineRepository: SpendingsOfflineMutableRepository {
         await persistency.updateSpendingCounterparties(counterparties.map(SpendingsPreviewDto.init))
     }
 
-    public func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async {
+    public func updateSpendingsHistory(counterparty: User.Identifier, history: [IdentifiableSpending]) async {
         await persistency.updateSpendingsHistory(
             counterparty: counterparty,
             history: history.map(IdentifiableDealDto.init)

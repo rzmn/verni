@@ -5,7 +5,7 @@ extension Users {
         public typealias Response = [UserDto]
 
         public struct Parameters: Encodable, Sendable {
-            public let ids: [UserDto.ID]
+            public let ids: [UserDto.Identifier]
         }
         public let parameters: Parameters
 
@@ -17,7 +17,7 @@ extension Users {
             .get
         }
 
-        public init(ids: [UserDto.ID]) {
+        public init(ids: [UserDto.Identifier]) {
             self.parameters = Parameters(ids: ids)
         }
     }

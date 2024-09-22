@@ -1,11 +1,11 @@
 public struct User: Equatable, Sendable {
-    public let id: ID
+    public let id: Identifier
     public let status: FriendStatus
     public let displayName: String
     public let avatar: Avatar?
 
     public init(
-        id: ID,
+        id: Identifier,
         status: FriendStatus,
         displayName: String,
         avatar: Avatar?
@@ -18,7 +18,7 @@ public struct User: Equatable, Sendable {
 
     public init(
         _ user: User,
-        id: ID? = nil,
+        id: Identifier? = nil,
         status: FriendStatus? = nil,
         displayName: String? = nil,
         avatar: Avatar?? = nil
@@ -33,5 +33,5 @@ public struct User: Equatable, Sendable {
 }
 
 extension User {
-    public typealias ID = String
+    public typealias Identifier = String
 }

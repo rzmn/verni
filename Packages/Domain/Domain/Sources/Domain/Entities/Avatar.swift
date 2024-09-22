@@ -1,13 +1,13 @@
 import Foundation
 
 public struct Avatar: Equatable, Sendable {
-    public let id: ID
+    public let id: Identifier
 
-    public init(id: Avatar.ID) {
+    public init(id: Avatar.Identifier) {
         self.id = id
     }
 }
 
 extension Avatar {
-    public typealias ID = String
+    public typealias Identifier = String
 }

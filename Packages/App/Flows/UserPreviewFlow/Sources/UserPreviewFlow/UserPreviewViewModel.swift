@@ -3,7 +3,7 @@ import Domain
 import Combine
 
 fileprivate extension IdentifiableSpending {
-    func preview(assuming hostId: User.ID) -> UserPreviewState.SpendingPreview? {
+    func preview(assuming hostId: User.Identifier) -> UserPreviewState.SpendingPreview? {
         guard let personalAmount = spending.participants[hostId] else {
             return nil
         }
@@ -24,9 +24,9 @@ fileprivate extension IdentifiableSpending {
     @Published private var user: User
     @Published private var spendings: Loadable<[IdentifiableSpending], UserPreviewState.Failure>
 
-    private let hostId: User.ID
+    private let hostId: User.Identifier
 
-    init(hostId: User.ID, counterparty: User, spendings: [IdentifiableSpending]?) async {
+    init(hostId: User.Identifier, counterparty: User, spendings: [IdentifiableSpending]?) async {
         self.hostId = hostId
         let initialSpendingPreviews = spendings.flatMap { spendings in
             spendings.compactMap {

@@ -13,7 +13,7 @@ public actor DefaultAvatarsRepository {
     private let offlineMutableRepository: AvatarsOfflineMutableRepository
     private let taskFactory: TaskFactory
 
-    private var loadingIds = [Avatar.ID: Task<Result<Data, GeneralError>, Never>]()
+    private var loadingIds = [Avatar.Identifier: Task<Result<Data, GeneralError>, Never>]()
 
     public init(
         api: ApiProtocol,
@@ -31,10 +31,10 @@ public actor DefaultAvatarsRepository {
 
 extension DefaultAvatarsRepository: AvatarsRepository {
     func waitForScheduled(
-        ids: [Avatar.ID],
-        from loadingIds: [Avatar.ID: Task<Result<Data, GeneralError>, Never>]
-    ) async -> [Avatar.ID: Data] {
-        await withTaskGroup(of: Optional<(id: Avatar.ID, data: Data)>.self) { group in
+        ids: [Avatar.Identifier],
+        from loadingIds: [Avatar.Identifier: Task<Result<Data, GeneralError>, Never>]
+    ) async -> [Avatar.Identifier: Data] {
+        await withTaskGroup(of: Optional<(id: Avatar.Identifier, data: Data)>.self) { group in
             for id in ids {
                 guard let task = loadingIds[id] else {
                     continue
@@ -49,7 +49,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
                     }
                 }
             }
-            var loaded = [Avatar.ID: Data]()
+            var loaded = [Avatar.Identifier: Data]()
             for await value in group {
                 guard let value else {
                     continue
@@ -60,7 +60,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         }
     }
 
-    func schedule(ids: [Avatar.ID]) {
+    func schedule(ids: [Avatar.Identifier]) {
         let fetchTask = taskFactory.task { [api] in
             try await api.run(method: Avatars.Get(ids: ids))
         }
@@ -91,7 +91,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         }
     }
 
-    public func get(ids: [Avatar.ID]) async -> [Avatar.ID: Data] {
+    public func get(ids: [Avatar.Identifier]) async -> [Avatar.Identifier: Data] {
         let cached = await offlineRepository.getConcurrent(taskFactory: taskFactory, ids: ids)
         let alreadyRequested = await waitForScheduled(
             ids: ids.filter { cached[$0] == nil },

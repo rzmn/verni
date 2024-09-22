@@ -1,3 +1,3 @@
 public protocol UsersOfflineRepository: Sendable {
-    func getUser(id: User.ID) async -> User?
+    func getUser(id: User.Identifier) async -> User?
 }

@@ -3,7 +3,7 @@ import Foundation
 
 struct UserPreviewState {
     struct SpendingPreview: Equatable {
-        let id: Spending.ID
+        let id: Spending.Identifier
         let date: Date
         let title: String
         let iOwe: Bool

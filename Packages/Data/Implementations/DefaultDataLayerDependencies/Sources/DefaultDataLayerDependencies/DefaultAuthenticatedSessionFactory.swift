@@ -7,7 +7,7 @@ internal import ApiService
 internal import DefaultApiImplementation
 internal import Base
 
-final class DefaultAuthenticatedDataLayerSessionFactory {
+final class DefaultAuthenticatedSessionFactory {
     private let persistencyFactory: PersistencyFactory
     private let sessionHost: SessionHost
     private let apiServiceFactory: ApiServiceFactory
@@ -28,7 +28,7 @@ final class DefaultAuthenticatedDataLayerSessionFactory {
     }
 }
 
-extension DefaultAuthenticatedDataLayerSessionFactory: AuthenticatedDataLayerSessionFactory {
+extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFactory {
     func awakeAuthorizedSession() async throws(DataLayerAwakeError) -> AuthenticatedDataLayerSession {
         guard let host = await sessionHost.active else {
             throw .hasNoSession
@@ -70,7 +70,7 @@ extension DefaultAuthenticatedDataLayerSessionFactory: AuthenticatedDataLayerSes
             service: apiService,
             taskFactory: taskFactory
         )
-        return DefaultAuthenticatedDataLayerSession(
+        return DefaultAuthenticatedSession(
             api: apiFactory.create(),
             longPoll: apiFactory.longPoll(),
             persistency: persistency,

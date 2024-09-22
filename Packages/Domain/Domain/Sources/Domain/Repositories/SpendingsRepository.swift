@@ -17,13 +17,13 @@ public protocol SpendingsRepository: Sendable {
 
     @discardableResult
     func refreshSpendingsHistory(
-        counterparty: User.ID
+        counterparty: User.Identifier
     ) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending]
 
-    func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending
+    func getSpending(id: Spending.Identifier) async throws(GetSpendingError) -> Spending
 
     func spendingCounterpartiesUpdated() async -> any AsyncBroadcast<[SpendingsPreview]>
-    func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncBroadcast<[IdentifiableSpending]>
+    func spendingsHistoryUpdated(for id: User.Identifier) async -> any AsyncBroadcast<[IdentifiableSpending]>
 }
 
 public extension SpendingsRepository {

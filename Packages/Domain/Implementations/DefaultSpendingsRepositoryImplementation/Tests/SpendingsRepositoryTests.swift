@@ -30,16 +30,16 @@ private actor ApiProvider {
     var getCounterpartiesCalledCount = 0
     private let getCounterpartiesResponse: [SpendingsPreviewDto]
 
-    var getSpendingsHistoryCalls: [UserDto.ID] = []
-    private let getSpendingsHistoryResponse: [UserDto.ID: [IdentifiableDealDto]]
+    var getSpendingsHistoryCalls: [UserDto.Identifier] = []
+    private let getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableDealDto]]
 
-    var getDealCalls: [DealDto.ID] = []
-    private let getDealResponse: [DealDto.ID: DealDto]
+    var getDealCalls: [DealDto.Identifier] = []
+    private let getDealResponse: [DealDto.Identifier: DealDto]
 
     init(
         getCounterpartiesResponse: [SpendingsPreviewDto] = [],
-        getSpendingsHistoryResponse: [UserDto.ID: [IdentifiableDealDto]] = [:],
-        getDealResponse: [DealDto.ID: DealDto] = [:],
+        getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableDealDto]] = [:],
+        getDealResponse: [DealDto.Identifier: DealDto] = [:],
         taskFactory: TaskFactory
     ) async {
         self.getCounterpartiesResponse = getCounterpartiesResponse
@@ -85,13 +85,13 @@ private actor ApiProvider {
 
 private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
     var spendingCounterpariesUpdates: [ [SpendingsPreview] ] = []
-    var spendingHisoryUpdatesById: [User.ID: [[IdentifiableSpending]]] = [:]
+    var spendingHisoryUpdatesById: [User.Identifier: [[IdentifiableSpending]]] = [:]
 
     func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async {
         spendingCounterpariesUpdates.append(counterparties)
     }
 
-    func updateSpendingsHistory(counterparty: User.ID, history: [IdentifiableSpending]) async {
+    func updateSpendingsHistory(counterparty: User.Identifier, history: [IdentifiableSpending]) async {
         let updates = spendingHisoryUpdatesById[counterparty, default: []] + [history]
         spendingHisoryUpdatesById[counterparty] = updates
     }

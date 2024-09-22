@@ -6,11 +6,11 @@ actor SessionHost {
         static let host = "host"
     }
 
-    var active: User.ID? {
+    var active: User.Identifier? {
         UserDefaults.standard.string(forKey: Constants.host)
     }
 
-    func sessionStarted(host: User.ID) {
+    func sessionStarted(host: User.Identifier) {
         UserDefaults.standard.set(host, forKey: Constants.host)
     }
 

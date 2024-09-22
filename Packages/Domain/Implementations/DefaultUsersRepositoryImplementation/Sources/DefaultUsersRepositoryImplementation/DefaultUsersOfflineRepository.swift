@@ -13,7 +13,7 @@ public actor DefaultUsersOfflineRepository {
 }
 
 extension DefaultUsersOfflineRepository: UsersOfflineRepository {
-    public func getUser(id: User.ID) async -> User? {
+    public func getUser(id: User.Identifier) async -> User? {
         await persistency.user(id: id).flatMap(User.init)
     }
 }

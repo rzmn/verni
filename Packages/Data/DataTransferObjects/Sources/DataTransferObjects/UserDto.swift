@@ -9,21 +9,21 @@ public struct UserDto: Codable, Sendable, Equatable {
         case me = 4
     }
     public struct Avatar: Codable, Sendable, Equatable {
-        public typealias ID = String
+        public typealias Identifier = String
 
-        public let id: ID?
+        public let id: Identifier?
 
-        public init(id: ID?) {
+        public init(id: Identifier?) {
             self.id = id
         }
     }
-    public typealias ID = String
-    public let id: ID
+    public typealias Identifier = String
+    public let id: Identifier
     public let friendStatus: FriendStatus
     public let displayName: String
     public let avatar: Avatar
 
-    public init(login: ID, friendStatus: FriendStatus, displayName: String, avatar: Avatar) {
+    public init(login: Identifier, friendStatus: FriendStatus, displayName: String, avatar: Avatar) {
         self.id = login
         self.friendStatus = friendStatus
         self.displayName = displayName

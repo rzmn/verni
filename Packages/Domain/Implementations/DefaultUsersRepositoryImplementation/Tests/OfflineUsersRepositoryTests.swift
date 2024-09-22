@@ -10,9 +10,9 @@ import ApiDomainConvenience
 
 private actor PersistencyProvider {
     let persistency: PersistencyMock
-    var getUserCalledCount: [UserDto.ID: Int] = [:]
+    var getUserCalledCount: [UserDto.Identifier: Int] = [:]
     var updateUsersCalls: [ [UserDto] ] = []
-    var users = [UserDto.ID: UserDto]()
+    var users = [UserDto.Identifier: UserDto]()
 
     init() async {
         persistency = PersistencyMock()

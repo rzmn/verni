@@ -146,7 +146,7 @@ extension PickCounterpartyView {
 
 extension PickCounterpartyView {
     typealias Section = PickCounterpartyState.Section.Kind
-    typealias Cell = User.ID
+    typealias Cell = User.Identifier
 
     typealias DataSnapshot = NSDiffableDataSourceSnapshot<Section, Cell>
 }

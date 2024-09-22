@@ -8,11 +8,11 @@ internal import ProgressHUD
 internal import PickCounterpartyFlow
 internal import Logging
 
-private extension Dictionary where Key == User.ID, Value == Cost {
+private extension Dictionary where Key == User.Identifier, Value == Cost {
     static func spendingBalance(
         cost: Cost,
-        myId: User.ID,
-        counterpartyId: User.ID,
+        myId: User.Identifier,
+        counterpartyId: User.Identifier,
         expenseOwnership: AddExpenseState.ExpenseOwnership,
         splitEqually: Bool
     ) -> Self {

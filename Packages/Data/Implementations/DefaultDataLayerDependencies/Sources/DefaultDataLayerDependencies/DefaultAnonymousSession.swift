@@ -16,7 +16,7 @@ struct Constants {
     static let appGroup = "group.\(appId)"
 }
 
-public final class DefaultAnonymousDataLayerSession: AnonymousDataLayerSession {
+public final class DefaultAnonymousSession: AnonymousDataLayerSession {
     public let authenticator: AuthenticatedDataLayerSessionFactory
     public let api: ApiProtocol
 
@@ -47,7 +47,7 @@ public final class DefaultAnonymousDataLayerSession: AnonymousDataLayerSession {
             service: apiServiceFactory.create(tokenRefresher: nil),
             taskFactory: taskFactory
         ).create()
-        authenticator = DefaultAuthenticatedDataLayerSessionFactory(
+        authenticator = DefaultAuthenticatedSessionFactory(
             api: api,
             taskFactory: taskFactory,
             apiServiceFactory: apiServiceFactory,

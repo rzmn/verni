@@ -11,11 +11,11 @@ private actor PersistencyProvider {
     var getSpendingCounterpartiesCalledCount = 0
     var updateSpendingCounterpartiesCalls: [ [SpendingsPreviewDto] ] = []
 
-    var getSpendingHistoryCalledCount: [UserDto.ID: Int] = [:]
-    var updateSpendingHistoryCalls: [ (UserDto.ID, [IdentifiableDealDto]) ] = []
+    var getSpendingHistoryCalledCount: [UserDto.Identifier: Int] = [:]
+    var updateSpendingHistoryCalls: [ (UserDto.Identifier, [IdentifiableDealDto]) ] = []
 
     var counterparties: [SpendingsPreviewDto]?
-    var spendingHistory = [UserDto.ID: [IdentifiableDealDto]]()
+    var spendingHistory = [UserDto.Identifier: [IdentifiableDealDto]]()
 
     init() async {
         persistency = PersistencyMock()

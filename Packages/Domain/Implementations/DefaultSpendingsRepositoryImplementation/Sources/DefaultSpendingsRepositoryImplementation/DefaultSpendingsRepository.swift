@@ -48,7 +48,7 @@ public actor DefaultSpendingsRepository {
     private let taskFactory: TaskFactory
 
     private let onDemandCounterpartiesSubscription: CounterpartiesBroadcast
-    private var onDemandSpendingHistorySubscriptionById = [User.ID: SpendingsHistoryBroadcast]()
+    private var onDemandSpendingHistorySubscriptionById = [User.Identifier: SpendingsHistoryBroadcast]()
 
     public init(
         api: ApiProtocol,
@@ -77,7 +77,7 @@ public actor DefaultSpendingsRepository {
 }
 
 extension DefaultSpendingsRepository: SpendingsRepository {
-    public func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending {
+    public func getSpending(id: Spending.Identifier) async throws(GetSpendingError) -> Spending {
         logI { "getSpending[id=\(id)] start" }
         let result: Spending
         do {
@@ -90,7 +90,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     }
 
     private func spendingsHistorySubject(
-        with uid: User.ID
+        with uid: User.Identifier
     ) async -> OnDemandLongPollBroadcast<[IdentifiableSpending], LongPollSpendingsHistoryQuery> {
         guard let subject = onDemandSpendingHistorySubscriptionById[uid] else {
             logI { "subject created for \(uid)" }
@@ -114,7 +114,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         onDemandCounterpartiesSubscription.broadcast
     }
 
-    public func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncBroadcast<[IdentifiableSpending]> {
+    public func spendingsHistoryUpdated(for id: User.Identifier) async -> any AsyncBroadcast<[IdentifiableSpending]> {
         await spendingsHistorySubject(with: id).broadcast
     }
 
@@ -136,7 +136,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
     }
 
     public func refreshSpendingsHistory(
-        counterparty: User.ID
+        counterparty: User.Identifier
     ) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
         logI { "refreshSpendingsHistory[counterparty=\(counterparty)] start" }
         let spendings: [IdentifiableSpending]

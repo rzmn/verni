@@ -26,12 +26,12 @@ private actor ApiProvider {
     let api: MockApi
     let mockLongPoll: MockLongPoll
     var getFriendsCalls: [ [Int] ] = []
-    var getUsersCalls: [ [UserDto.ID] ] = []
-    let getFriendsResponse: [Int: [UserDto.ID]]
+    var getUsersCalls: [ [UserDto.Identifier] ] = []
+    let getFriendsResponse: [Int: [UserDto.Identifier]]
     let getUsersResponse: [UserDto]
 
     init(
-        getFriendsResponse: [Int: [UserDto.ID]] = [:],
+        getFriendsResponse: [Int: [UserDto.Identifier]] = [:],
         getUsersResponse: [UserDto] = [],
         taskFactory: TaskFactory
     ) async {

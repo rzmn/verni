@@ -167,7 +167,7 @@ extension UserPreviewView {
     enum Section: Hashable {
         case main
     }
-    typealias Cell = Spending.ID
+    typealias Cell = Spending.Identifier
     typealias DataSnapshot = NSDiffableDataSourceSnapshot<Section, Cell>
 }
 

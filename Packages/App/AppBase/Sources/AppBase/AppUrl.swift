@@ -7,7 +7,7 @@ public enum AppUrl: Sendable {
     }
 
     public enum Users: Sendable {
-        case show(User.ID)
+        case show(User.Identifier)
     }
     case users(Users)
 

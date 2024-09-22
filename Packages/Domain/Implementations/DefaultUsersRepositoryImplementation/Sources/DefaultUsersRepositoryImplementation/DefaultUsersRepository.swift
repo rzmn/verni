@@ -26,7 +26,7 @@ public actor DefaultUsersRepository {
 }
 
 extension DefaultUsersRepository: UsersRepository {
-    public func getUsers(ids: [User.ID]) async throws(GeneralError) -> [User] {
+    public func getUsers(ids: [User.Identifier]) async throws(GeneralError) -> [User] {
         logI { "getUsers [\(ids.count) ids]" }
         if ids.isEmpty {
             logI { "get users query is empty, returning immediatly" }

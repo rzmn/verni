@@ -21,11 +21,11 @@ public actor SQLitePersistencyFactory {
 }
 
 extension SQLitePersistencyFactory: PersistencyFactory {
-    public func awake(host: UserDto.ID) async -> Persistency? {
+    public func awake(host: UserDto.Identifier) async -> Persistency? {
         await doAwake(host: host)
     }
 
-    @StorageActor private func doAwake(host: UserDto.ID) async -> Persistency? {
+    @StorageActor private func doAwake(host: UserDto.Identifier) async -> Persistency? {
         logI { "awaking persistence..." }
         let dbUrl: URL
         do {
@@ -67,11 +67,11 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
     }
 
-    public func create(host: UserDto.ID, refreshToken: String) async throws -> Persistency {
+    public func create(host: UserDto.Identifier, refreshToken: String) async throws -> Persistency {
         try await doCreate(host: host, refreshToken: refreshToken)
     }
 
-    @StorageActor private func doCreate(host: UserDto.ID, refreshToken: String) async throws -> Persistency {
+    @StorageActor private func doCreate(host: UserDto.Identifier, refreshToken: String) async throws -> Persistency {
         logI { "creating persistence..." }
         let dbUrl = try pathManager.create(owner: host).dbUrl
         let db = try Connection(dbUrl.path)

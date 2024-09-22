@@ -63,7 +63,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     public let appCommon: AppCommon
 
     public init() async throws {
-        dataLayer = try await DefaultAnonymousDataLayerSession(taskFactory: taskFactory)
+        dataLayer = try await DefaultAnonymousSession(taskFactory: taskFactory)
         guard let temporaryCacheDirectory = FileManager.default.urls(
             for: .cachesDirectory,
             in: .userDomainMask

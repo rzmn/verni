@@ -5,7 +5,7 @@ extension Friends {
         public typealias Response = NoResponse
 
         public struct Parameters: Encodable, Sendable {
-            public let target: UserDto.ID
+            public let target: UserDto.Identifier
         }
         public let parameters: Parameters
 
@@ -17,7 +17,7 @@ extension Friends {
             .post
         }
 
-        public init(target: UserDto.ID) {
+        public init(target: UserDto.Identifier) {
             self.parameters = Parameters(target: target)
         }
     }

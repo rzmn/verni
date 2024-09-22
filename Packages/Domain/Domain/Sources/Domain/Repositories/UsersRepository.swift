@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol UsersRepository: Sendable {
-    func getUsers(ids: [User.ID]) async throws(GeneralError) -> [User]
+    func getUsers(ids: [User.Identifier]) async throws(GeneralError) -> [User]
     func searchUsers(query: String) async throws(GeneralError) -> [User]
 }
 
@@ -11,7 +11,7 @@ public enum GetUserError: Error, Sendable {
 }
 
 public extension UsersRepository {
-    func getUser(id: User.ID) async throws(GetUserError) -> User {
+    func getUser(id: User.Identifier) async throws(GetUserError) -> User {
         let users: [User]
         do {
             users = try await getUsers(ids: [id])

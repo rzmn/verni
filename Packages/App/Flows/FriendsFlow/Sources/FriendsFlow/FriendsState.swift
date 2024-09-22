@@ -6,7 +6,7 @@ internal import Base
 struct FriendsState {
     @MainActor class Item: Equatable, Sendable {
         @Published var data: ItemData
-        let id: User.ID
+        let id: User.Identifier
 
         init(item: ItemData) {
             data = item

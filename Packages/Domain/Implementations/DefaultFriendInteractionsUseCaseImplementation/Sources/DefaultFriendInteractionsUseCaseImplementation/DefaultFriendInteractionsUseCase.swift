@@ -10,7 +10,7 @@ public actor DefaultFriendInteractionsUseCase {
 }
 
 extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
-    public func acceptFriendRequest(from user: User.ID) async throws(AcceptFriendRequestError) {
+    public func acceptFriendRequest(from user: User.Identifier) async throws(AcceptFriendRequestError) {
         do {
             try await api.run(method: Friends.AcceptRequest(sender: user))
         } catch {
@@ -18,7 +18,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
         }
     }
 
-    public func rejectFriendRequest(from user: User.ID) async throws(RejectFriendRequestError) {
+    public func rejectFriendRequest(from user: User.Identifier) async throws(RejectFriendRequestError) {
         do {
             try await api.run(method: Friends.RejectRequest(sender: user))
         } catch {
@@ -26,7 +26,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
         }
     }
 
-    public func sendFriendRequest(to user: User.ID) async throws(SendFriendRequestError) {
+    public func sendFriendRequest(to user: User.Identifier) async throws(SendFriendRequestError) {
         do {
             try await api.run(method: Friends.SendRequest(target: user))
         } catch {
@@ -34,7 +34,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
         }
     }
 
-    public func rollbackFriendRequest(to user: User.ID) async throws(RollbackFriendRequestError) {
+    public func rollbackFriendRequest(to user: User.Identifier) async throws(RollbackFriendRequestError) {
         do {
             try await api.run(method: Friends.RollbackRequest(target: user))
         } catch {
@@ -42,7 +42,7 @@ extension DefaultFriendInteractionsUseCase: FriendInteractionsUseCase {
         }
     }
 
-    public func unfriend(user: User.ID) async throws(UnfriendError) {
+    public func unfriend(user: User.Identifier) async throws(UnfriendError) {
         do {
             try await api.run(method: Friends.Unfriend(target: user))
         } catch {

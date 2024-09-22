@@ -5,10 +5,10 @@ import Domain
 @testable import DefaultReceivingPushUseCaseImplementation
 
 actor MockUsersRepository: UsersRepository {
-    var getUsersCalls = [[User.ID]]()
+    var getUsersCalls = [[User.Identifier]]()
     var searchUsersCalls = [String]()
 
-    func getUsers(ids: [User.ID]) async throws(GeneralError) -> [User] {
+    func getUsers(ids: [User.Identifier]) async throws(GeneralError) -> [User] {
         getUsersCalls.append(ids)
 
         return ids.map {
@@ -60,8 +60,8 @@ actor MockFriendsRepository: FriendsRepository {
 
 actor MockSpendingsRepository: SpendingsRepository {
     var refreshSpendingCounterpartiesCalls: [Void] = [Void]()
-    var refreshSpendingsHistoryCalls = [User.ID]()
-    var getSpendingCalls = [Spending.ID]()
+    var refreshSpendingsHistoryCalls = [User.Identifier]()
+    var getSpendingCalls = [Spending.Identifier]()
 
     private let spendingCounterpartiesUpdatedBroadcast: AsyncSubject<[SpendingsPreview]>
     private let spendingsHistoryUpdatedBroadcast: AsyncSubject<[IdentifiableSpending]>
@@ -76,7 +76,7 @@ actor MockSpendingsRepository: SpendingsRepository {
         return [SpendingsPreview(counterparty: UUID().uuidString, balance: [.russianRuble: 123])]
     }
 
-    func refreshSpendingsHistory(counterparty: User.ID) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
+    func refreshSpendingsHistory(counterparty: User.Identifier) async throws(GetSpendingsHistoryError) -> [IdentifiableSpending] {
         refreshSpendingsHistoryCalls.append(counterparty)
         return [
             IdentifiableSpending(
@@ -94,7 +94,7 @@ actor MockSpendingsRepository: SpendingsRepository {
         ]
     }
 
-    func getSpending(id: Spending.ID) async throws(GetSpendingError) -> Spending {
+    func getSpending(id: Spending.Identifier) async throws(GetSpendingError) -> Spending {
         getSpendingCalls.append(id)
         return Spending(
             date: Date(),
@@ -111,7 +111,7 @@ actor MockSpendingsRepository: SpendingsRepository {
         spendingCounterpartiesUpdatedBroadcast
     }
 
-    func spendingsHistoryUpdated(for id: User.ID) async -> any AsyncBroadcast<[IdentifiableSpending]> {
+    func spendingsHistoryUpdated(for id: User.Identifier) async -> any AsyncBroadcast<[IdentifiableSpending]> {
         spendingsHistoryUpdatedBroadcast
     }
 }

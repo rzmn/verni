@@ -1,7 +1,7 @@
 import Domain
 
 public protocol ActiveSessionDIContainer: AppCommonCovertible {
-    var userId: User.ID { get }
+    var userId: User.Identifier { get }
 
     var profileRepository: any ProfileRepository { get }
     var usersRepository: UsersRepository { get }

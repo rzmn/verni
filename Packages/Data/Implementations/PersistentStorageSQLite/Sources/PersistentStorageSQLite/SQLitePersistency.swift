@@ -43,13 +43,13 @@ private struct FriendshipKindSet: OptionSet {
     private let taskFactory: TaskFactory
     private let db: Connection
     private let dbInvalidationHandler: () throws -> Void
-    private let hostId: UserDto.ID
+    private let hostId: UserDto.Identifier
     private var refreshToken: String
 
     init(
         db: Connection,
         dbInvalidationHandler: @escaping () throws -> Void,
-        hostId: UserDto.ID,
+        hostId: UserDto.Identifier,
         refreshToken: String,
         logger: Logger,
         taskFactory: TaskFactory,
@@ -73,7 +73,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func userId() -> UserDto.ID {
+    func userId() -> UserDto.Identifier {
         hostId
     }
 
@@ -124,7 +124,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    public func user(id: UserDto.ID) -> UserDto? {
+    public func user(id: UserDto.Identifier) -> UserDto? {
         do {
             guard let row = try db.prepare(Schema.Users.table).first(where: { row in
                 guard try row.get(Schema.Users.Keys.id) == id else {
@@ -184,7 +184,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func getSpendingsHistory(counterparty: UserDto.ID) -> [IdentifiableDealDto]? {
+    func getSpendingsHistory(counterparty: UserDto.Identifier) -> [IdentifiableDealDto]? {
         do {
             guard let row = try db.prepare(Schema.SpendingsHistory.table).first(where: { row in
                 guard try row.get(Schema.SpendingsHistory.Keys.id) == counterparty else {
@@ -201,7 +201,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func updateSpendingsHistory(counterparty: UserDto.ID, history: [IdentifiableDealDto]) {
+    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableDealDto]) {
         do {
             try db.run(Schema.SpendingsHistory.table.upsert(
                 Schema.SpendingsHistory.Keys.id <- counterparty,

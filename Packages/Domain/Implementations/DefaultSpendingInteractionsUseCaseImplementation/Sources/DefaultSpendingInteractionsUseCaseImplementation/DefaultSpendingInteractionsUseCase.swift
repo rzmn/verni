@@ -27,7 +27,7 @@ extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
         }
     }
 
-    public func delete(spending: Spending.ID) async throws(DeleteSpendingError) {
+    public func delete(spending: Spending.Identifier) async throws(DeleteSpendingError) {
         do {
             try await api.run(method: Spendings.DeleteDeal(dealId: spending))
         } catch {

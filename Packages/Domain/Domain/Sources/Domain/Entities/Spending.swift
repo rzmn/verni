@@ -13,9 +13,9 @@ public struct Spending: Equatable, Sendable {
     public let details: String
     public let cost: Cost
     public let currency: Currency
-    public let participants: [User.ID: Cost]
+    public let participants: [User.Identifier: Cost]
 
-    public init(date: Date, details: String, cost: Cost, currency: Currency, participants: [User.ID: Cost]) {
+    public init(date: Date, details: String, cost: Cost, currency: Currency, participants: [User.Identifier: Cost]) {
         self.date = date.byRoudingSeconds
         self.details = details
         self.cost = cost
@@ -26,14 +26,14 @@ public struct Spending: Equatable, Sendable {
 
 public struct IdentifiableSpending: Equatable, Sendable {
     public let spending: Spending
-    public let id: Spending.ID
+    public let id: Spending.Identifier
 
-    public init(spending: Spending, id: Spending.ID) {
+    public init(spending: Spending, id: Spending.Identifier) {
         self.spending = spending
         self.id = id
     }
 }
 
 extension Spending {
-    public typealias ID = String
+    public typealias Identifier = String
 }

@@ -26,7 +26,7 @@ extension DealDto {
             details: domain.details,
             cost: CostDto(cost: domain.cost),
             currency: domain.currency.stringValue,
-            spendings: domain.participants.map { (key: User.ID, value: Cost) in
+            spendings: domain.participants.map { (key: User.Identifier, value: Cost) in
                 SpendingDto(userId: key, cost: CostDto(cost: value))
             }
         )
