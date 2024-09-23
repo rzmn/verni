@@ -14,7 +14,7 @@ class SignInHintView: View<SignInViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         for view in [button] {
             addSubview(view)
         }
@@ -26,10 +26,10 @@ class SignInHintView: View<SignInViewActions> {
     override func layoutSubviews() {
         super.layoutSubviews()
         button.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: bounds.midY - .p.buttonHeight,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: bounds.midY - .palette.buttonHeight,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
     }
 }

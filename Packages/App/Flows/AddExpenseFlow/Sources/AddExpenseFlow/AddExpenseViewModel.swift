@@ -15,14 +15,14 @@ import Domain
     @Published var amountHint: String?
     @Published var expenseDescriptionHint: String?
 
-    init(counterparty _counterparty: User?) async {
+    init(counterparty: User?) async {
         let initial = AddExpenseState(
             currencies: [
                 .russianRuble,
                 .euro,
                 .usDollar
             ],
-            counterparty: _counterparty,
+            counterparty: counterparty,
             selectedCurrency: .russianRuble,
             expenseDescription: "",
             amount: "",
@@ -34,7 +34,7 @@ import Domain
         state = initial
         splitEqually = initial.splitEqually
         expenseOwnership = initial.expenseOwnership
-        counterparty = initial.counterparty
+        self.counterparty = initial.counterparty
         description = initial.expenseDescription
         amount = initial.amount
         amountHint = initial.amountHint

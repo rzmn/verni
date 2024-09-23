@@ -41,13 +41,13 @@ private struct FriendshipKindSet: OptionSet {
     let logger: Logger
 
     private let taskFactory: TaskFactory
-    private let db: Connection
+    private let database: Connection
     private let dbInvalidationHandler: () throws -> Void
     private let hostId: UserDto.Identifier
     private var refreshToken: String
 
     init(
-        db: Connection,
+        database: Connection,
         dbInvalidationHandler: @escaping () throws -> Void,
         hostId: UserDto.Identifier,
         refreshToken: String,
@@ -55,7 +55,7 @@ private struct FriendshipKindSet: OptionSet {
         taskFactory: TaskFactory,
         storeInitialToken: Bool = false
     ) {
-        self.db = db
+        self.database = database
         self.hostId = hostId
         self.refreshToken = refreshToken
         self.logger = logger
@@ -63,7 +63,7 @@ private struct FriendshipKindSet: OptionSet {
         self.taskFactory = taskFactory
         if storeInitialToken {
             do {
-                try db.run(Schema.Tokens.table.insert(
+                try database.run(Schema.Tokens.table.insert(
                     Schema.Tokens.Keys.id <- self.hostId,
                     Schema.Tokens.Keys.token <- refreshToken
                 ))
@@ -84,7 +84,7 @@ private struct FriendshipKindSet: OptionSet {
     func update(refreshToken: String) {
         self.refreshToken = refreshToken
         do {
-            try db.run(
+            try database.run(
                 Schema.Tokens.table
                     .filter(Schema.Tokens.Keys.id == self.hostId)
                     .update(Schema.Tokens.Keys.token <- refreshToken)
@@ -96,7 +96,7 @@ private struct FriendshipKindSet: OptionSet {
 
     public func getProfile() -> ProfileDto? {
         do {
-            guard let row = try db.prepare(Schema.Profile.table).first(where: { row in
+            guard let row = try database.prepare(Schema.Profile.table).first(where: { row in
                 guard try row.get(Schema.Profile.Keys.id) == hostId else {
                     return false
                 }
@@ -114,7 +114,7 @@ private struct FriendshipKindSet: OptionSet {
     func update(profile: ProfileDto) {
         assert(profile.user.id == hostId)
         do {
-            try db.run(Schema.Profile.table.upsert(
+            try database.run(Schema.Profile.table.upsert(
                 Schema.Profile.Keys.id <- profile.user.id,
                 Schema.Profile.Keys.payload <- CodableBlob(value: profile),
                 onConflictOf: Schema.Profile.Keys.id
@@ -126,7 +126,7 @@ private struct FriendshipKindSet: OptionSet {
 
     public func user(id: UserDto.Identifier) -> UserDto? {
         do {
-            guard let row = try db.prepare(Schema.Users.table).first(where: { row in
+            guard let row = try database.prepare(Schema.Users.table).first(where: { row in
                 guard try row.get(Schema.Users.Keys.id) == id else {
                     return false
                 }
@@ -144,7 +144,7 @@ private struct FriendshipKindSet: OptionSet {
     public func update(users: [UserDto]) {
         do {
             try users.forEach {
-                try db.run(Schema.Users.table.upsert(
+                try database.run(Schema.Users.table.upsert(
                     Schema.Users.Keys.id <- $0.id,
                     Schema.Users.Keys.payload <- CodableBlob(value: $0),
                     onConflictOf: Schema.Users.Keys.id
@@ -157,7 +157,7 @@ private struct FriendshipKindSet: OptionSet {
 
     func getSpendingCounterparties() -> [SpendingsPreviewDto]? {
         do {
-            guard let row = try db.prepare(Schema.SpendingCounterparties.table).first(where: { row in
+            guard let row = try database.prepare(Schema.SpendingCounterparties.table).first(where: { row in
                 guard try row.get(Schema.SpendingCounterparties.Keys.id) == hostId else {
                     return false
                 }
@@ -174,7 +174,7 @@ private struct FriendshipKindSet: OptionSet {
 
     func updateSpendingCounterparties(_ counterparties: [SpendingsPreviewDto]) {
         do {
-            try db.run(Schema.SpendingCounterparties.table.upsert(
+            try database.run(Schema.SpendingCounterparties.table.upsert(
                 Schema.SpendingCounterparties.Keys.id <- hostId,
                 Schema.SpendingCounterparties.Keys.payload <- CodableBlob(value: counterparties),
                 onConflictOf: Schema.SpendingCounterparties.Keys.id
@@ -186,7 +186,7 @@ private struct FriendshipKindSet: OptionSet {
 
     func getSpendingsHistory(counterparty: UserDto.Identifier) -> [IdentifiableDealDto]? {
         do {
-            guard let row = try db.prepare(Schema.SpendingsHistory.table).first(where: { row in
+            guard let row = try database.prepare(Schema.SpendingsHistory.table).first(where: { row in
                 guard try row.get(Schema.SpendingsHistory.Keys.id) == counterparty else {
                     return false
                 }
@@ -203,7 +203,7 @@ private struct FriendshipKindSet: OptionSet {
 
     func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableDealDto]) {
         do {
-            try db.run(Schema.SpendingsHistory.table.upsert(
+            try database.run(Schema.SpendingsHistory.table.upsert(
                 Schema.SpendingsHistory.Keys.id <- counterparty,
                 Schema.SpendingsHistory.Keys.payload <- CodableBlob(value: history),
                 onConflictOf: Schema.SpendingsHistory.Keys.id
@@ -215,7 +215,7 @@ private struct FriendshipKindSet: OptionSet {
 
     func getFriends(set: Set<FriendshipKindDto>) -> [FriendshipKindDto: [UserDto]]? {
         do {
-            guard let row = try db.prepare(Schema.Friends.table).first(where: { row in
+            guard let row = try database.prepare(Schema.Friends.table).first(where: { row in
                 guard try row.get(Schema.Friends.Keys.id) == FriendshipKindSet(set: set).rawValue else {
                     return false
                 }
@@ -232,7 +232,7 @@ private struct FriendshipKindSet: OptionSet {
 
     func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) {
         do {
-            try db.run(Schema.Friends.table.upsert(
+            try database.run(Schema.Friends.table.upsert(
                 Schema.Friends.Keys.id <- FriendshipKindSet(set: set).rawValue,
                 Schema.Friends.Keys.payload <- CodableBlob(value: friends),
                 onConflictOf: Schema.Friends.Keys.id

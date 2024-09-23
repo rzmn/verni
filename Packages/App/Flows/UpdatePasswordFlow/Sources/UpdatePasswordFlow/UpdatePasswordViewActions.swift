@@ -8,7 +8,7 @@ enum UpdatePasswordViewActionType {
     case onUpdateTap
 }
 
-struct UpdatePasswordViewActions {
+@MainActor struct UpdatePasswordViewActions {
     let state: Published<UpdatePasswordState>.Publisher
     let handle: @MainActor (UpdatePasswordViewActionType) -> Void
 }

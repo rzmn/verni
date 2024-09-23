@@ -21,7 +21,7 @@ import UIKit
     }
 
     required public init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 }
 

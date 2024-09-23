@@ -2,6 +2,7 @@ import UIKit
 import Domain
 import DI
 import AppBase
+import AsyncExtensions
 internal import DesignSystem
 internal import ProgressHUD
 internal import AccountFlow
@@ -9,16 +10,13 @@ internal import FriendsFlow
 internal import AddExpenseFlow
 
 public actor AuthenticatedFlow {
-    private var _presenter: AuthenticatedPresenter?
-    @MainActor private func presenter() async -> AuthenticatedPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = await AuthenticatedPresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        AuthenticatedPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: AuthenticatedViewModel
 
@@ -48,7 +46,7 @@ extension AuthenticatedFlow: Flow {
     }
 
     public func perform() async -> TerminationEvent {
-        await presenter().start(
+        await presenter.value.start(
             tabs: viewModel.state.tabs.map { tab in
                 switch tab {
                 case .friends:
@@ -83,7 +81,7 @@ extension AuthenticatedFlow: Flow {
 // MARK: - User Actions
 
 extension AuthenticatedFlow {
-    @MainActor private func makeActions() async -> AuthenticatedViewActions {
+    @MainActor private func makeActions() -> AuthenticatedViewActions {
         AuthenticatedViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {

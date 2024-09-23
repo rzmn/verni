@@ -103,11 +103,11 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
         payload: PushPayload.NewExpenseReceived
     ) async throws(ProcessPushError) -> PushContent {
         Task {
-            async let a = try? spendingsRepository.refreshSpendingCounterparties()
-            async let b = try? spendingsRepository.refreshSpendingsHistory(
+            async let refreshSpendings = try? spendingsRepository.refreshSpendingCounterparties()
+            async let refreshHistory = try? spendingsRepository.refreshSpendingsHistory(
                 counterparty: payload.authorId
             )
-            _ = await [a, b] as [any Sendable]
+            _ = await [refreshSpendings, refreshHistory] as [any Sendable]
         }
         let spending: Spending
         do {

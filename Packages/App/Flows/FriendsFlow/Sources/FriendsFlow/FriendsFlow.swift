@@ -9,16 +9,13 @@ internal import ProgressHUD
 internal import UserPreviewFlow
 
 public actor FriendsFlow {
-    private var _presenter: FriendsPresenter?
-    @MainActor private func presenter() async -> FriendsPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = FriendsPresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        FriendsPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: FriendsViewModel
     private let di: ActiveSessionDIContainer
@@ -79,7 +76,7 @@ extension FriendsFlow: TabEmbedFlow {
     public func perform() async -> FlowResult {}
 
     @MainActor public func viewController() async -> Routable {
-        await presenter().tabViewController
+        await presenter.value.tabViewController
     }
 }
 
@@ -115,19 +112,19 @@ extension FriendsFlow: UrlResolver {
         guard case .show(let uid) = usersAction else {
             return
         }
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             let user = try await usersRepository.getUser(id: uid)
-            await presenter().dismissLoading()
+            await presenter.value.dismissLoading()
             let flow = await UserPreviewFlow(di: di, router: router, user: user)
             _ = await flow.perform()
         } catch {
-            await presenter().dismissLoading()
+            await presenter.value.dismissLoading()
             switch error {
             case .noSuchUser:
-                await presenter().errorHaptic()
+                await presenter.value.errorHaptic()
             case .other(let error):
-                await presenter().presentGeneralError(error)
+                await presenter.value.presentGeneralError(error)
             }
         }
     }
@@ -166,7 +163,7 @@ extension FriendsFlow {
         let hudShown: Bool
         if case .initial = state.content {
             hudShown = true
-            await presenter().presentLoading()
+            await presenter.value.presentLoading()
         } else {
             hudShown = false
         }
@@ -181,7 +178,7 @@ extension FriendsFlow {
 
         Task { @MainActor [unowned self] in
             if hudShown {
-                await presenter().dismissLoading()
+                await presenter.value.dismissLoading()
             }
             switch result {
             case (.success(let friends), .success(let spendings)):

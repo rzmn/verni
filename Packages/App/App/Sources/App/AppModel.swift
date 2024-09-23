@@ -36,7 +36,7 @@ public actor App {
         logI { "launching app" }
         let avatarsRepository = di.appCommon.avatarsRepository
         Task { @MainActor in
-            SetupAppearance()
+            setupAppearance()
             AvatarView.repository = avatarsRepository
         }
         do {

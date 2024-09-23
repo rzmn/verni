@@ -1,18 +1,13 @@
 import UIKit
 import App
 import DefaultDependencies
+import AsyncExtensions
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    private var _app: App?
-    func app() async -> App {
-        guard let _app else {
-            // swiftlint:disable:next force_try
-            let app = await App(di: try! await DefaultDependenciesAssembly())
-            _app = app
-            return app
-        }
-        return _app
+    lazy var app = AsyncLazyObject {
+        // swiftlint:disable:next force_try
+        await App(di: try! await DefaultDependenciesAssembly())
     }
 
     func application(
@@ -40,7 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         Task {
-            await app().registerPushToken(
+            await app.value.registerPushToken(
                 token: deviceToken
             )
         }

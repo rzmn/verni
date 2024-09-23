@@ -18,11 +18,11 @@ private actor ApiProvider {
     init(getResponse: ProfileDto) async {
         self.getResponse = getResponse
         api = MockApi()
-        await api.mutate { api in
-            api._runMethodWithoutParams = { method in
-                await self.mutate { s in
+        await api.performIsolated { api in
+            api.runMethodWithoutParamsBlock = { method in
+                await self.performIsolated { `self` in
                     if let _ = method as? Api.Profile.GetInfo {
-                        s.getCallsCount += 1
+                        self.getCallsCount += 1
                     }
                 }
                 return self.getResponse
@@ -49,7 +49,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
         let profile = Profile(
             user: User(
                 id: UUID().uuidString,
-                status: .no,
+                status: .notAFriend,
                 displayName: "some name",
                 avatar: nil
             ),

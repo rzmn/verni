@@ -10,7 +10,7 @@ enum UserPreviewViewActionType {
     case onUnfriendTap
 }
 
-struct UserPreviewViewActions {
+@MainActor struct UserPreviewViewActions {
     let state: Published<UserPreviewState>.Publisher
     let handle: @MainActor (UserPreviewViewActionType) -> Void
 }

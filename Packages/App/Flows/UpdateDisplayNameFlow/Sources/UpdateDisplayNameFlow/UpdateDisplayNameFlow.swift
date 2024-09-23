@@ -2,18 +2,16 @@ import AppBase
 import Domain
 import DI
 import Combine
+import AsyncExtensions
 
 public actor UpdateDisplayNameFlow {
-    private var _presenter: UpdateDisplayNamePresenter?
-    @MainActor private func presenter() async -> UpdateDisplayNamePresenter {
-        guard let presenter = await _presenter else {
-            let presenter = UpdateDisplayNamePresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        UpdateDisplayNamePresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let router: AppRouter
     private let viewModel: UpdateDisplayNameViewModel
@@ -47,7 +45,7 @@ extension UpdateDisplayNameFlow: Flow {
     }
 
     private func startFlow() async {
-        await presenter().presentDisplayNameEditing { [weak self] in
+        await presenter.value.presentDisplayNameEditing { [weak self] in
             guard let self else { return }
             await handle(event: .canceled)
         }
@@ -60,7 +58,7 @@ extension UpdateDisplayNameFlow: Flow {
         self.flowContinuation = nil
         if case .canceled = event {
         } else {
-            await presenter().dismissDisplayNameEditing()
+            await presenter.value.dismissDisplayNameEditing()
         }
         flowContinuation.resume(returning: event)
     }
@@ -90,20 +88,20 @@ extension UpdateDisplayNameFlow {
     private func confirmDisplayName() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter().errorHaptic()
+            return await presenter.value.errorHaptic()
         }
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             try await profileEditing.setDisplayName(state.displayName)
-            await presenter().successHaptic()
-            await presenter().presentSuccess()
+            await presenter.value.successHaptic()
+            await presenter.value.presentSuccess()
             await handle(event: .successfullySet)
         } catch {
             switch error {
             case .wrongFormat:
-                await presenter().presentWrongFormat()
+                await presenter.value.presentWrongFormat()
             case .other(let error):
-                await presenter().presentGeneralError(error)
+                await presenter.value.presentGeneralError(error)
             }
         }
     }

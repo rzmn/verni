@@ -101,8 +101,9 @@ extension DefaultAvatarsRepository: AvatarsRepository {
             cached[$0] == nil && alreadyRequested[$0] == nil
         }
         guard !idsToLoad.isEmpty else {
-            return alreadyRequested.reduce(into: cached) { dict, kv in
-                dict[kv.key] = kv.value
+            return alreadyRequested.reduce(into: cached) { dict, element in
+                let (key, value) = element
+                dict[key] = value
             }
         }
         schedule(ids: idsToLoad)
@@ -111,11 +112,13 @@ extension DefaultAvatarsRepository: AvatarsRepository {
             from: loadingIds
         )
         return loaded.reduce(
-            into: alreadyRequested.reduce(into: cached) { dict, kv in
-                dict[kv.key] = kv.value
+            into: alreadyRequested.reduce(into: cached) { dict, element in
+                let (key, value) = element
+                dict[key] = value
             }
-        ) { dict, kv in
-            dict[kv.key] = kv.value
+        ) { dict, element in
+            let (key, value) = element
+            dict[key] = value
         }
     }
 }

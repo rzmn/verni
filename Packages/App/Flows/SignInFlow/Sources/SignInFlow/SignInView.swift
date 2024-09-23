@@ -47,7 +47,7 @@ class SignInView: View<SignInViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         for view in [email, password, close, confirm, createAccount, appIcon] {
             addSubview(view)
         }
@@ -102,41 +102,41 @@ class SignInView: View<SignInViewActions> {
         super.layoutSubviews()
         let closeFitSize = close.sizeThatFits(bounds.size)
         close.frame = CGRect(
-            x: bounds.maxX - .p.defaultHorizontal - closeFitSize.width,
-            y: safeAreaInsets.top + .p.defaultVertical,
+            x: bounds.maxX - .palette.defaultHorizontal - closeFitSize.width,
+            y: safeAreaInsets.top + .palette.defaultVertical,
             width: closeFitSize.width,
             height: closeFitSize.height
         )
         appIcon.frame = CGRect(
             x: bounds.midX - appIconSize / 2,
-            y: close.frame.maxY + .p.defaultVertical,
+            y: close.frame.maxY + .palette.defaultVertical,
             width: appIconSize,
             height: appIconSize
         )
         email.frame = CGRect(
-            x: .p.defaultHorizontal,
+            x: .palette.defaultHorizontal,
             y: appIcon.frame.maxY + appIconBottomPadding,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         password.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: email.frame.maxY + .p.vButtonSpacing,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: email.frame.maxY + .palette.vButtonSpacing,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         createAccount.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: bounds.maxY - safeAreaInsets.bottom - .p.buttonHeight - .p.defaultVertical,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: bounds.maxY - safeAreaInsets.bottom - .palette.buttonHeight - .palette.defaultVertical,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         let confirmEmailMaxY = keyboardBottomInset == 0 ? createAccount.frame.minY : (bounds.maxY - keyboardBottomInset)
         confirm.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: confirmEmailMaxY - .p.vButtonSpacing - .p.buttonHeight,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: confirmEmailMaxY - .palette.vButtonSpacing - .palette.buttonHeight,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
     }
 

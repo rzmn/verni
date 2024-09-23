@@ -110,7 +110,7 @@ extension DefaultFriendsRepository: FriendsRepository {
             into: kind.array.reduce(into: [:], { dict, value in dict[value] = [User]() })
         ) { dict, user in
             switch user.status {
-            case .me, .no:
+            case .currentUser, .notAFriend:
                 break
             case .outgoing:
                 var array = dict[.subscription] ?? []

@@ -17,15 +17,15 @@ public class Placeholder: UIControl {
     private lazy var title = {
         let label = UILabel()
         label.numberOfLines = 0
-        label.font = .p.secondaryText
+        label.font = .palette.secondaryText
         label.textAlignment = .center
         return label
     }()
     private lazy var icon = {
-        let v = UIImageView()
-        v.tintColor = .p.accent
-        v.contentMode = .scaleAspectFit
-        return v
+        let view = UIImageView()
+        view.tintColor = .palette.accent
+        view.contentMode = .scaleAspectFit
+        return view
     }()
     private let config: Config
 
@@ -36,7 +36,7 @@ public class Placeholder: UIControl {
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func setupView() {

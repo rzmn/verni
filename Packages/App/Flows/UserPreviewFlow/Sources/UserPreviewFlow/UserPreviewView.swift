@@ -26,14 +26,14 @@ class UserPreviewView: View<UserPreviewViewActions> {
     }()
     private let name = {
         let label = UILabel()
-        label.textColor = .p.primary
-        label.font = .p.title2
+        label.textColor = .palette.primary
+        label.font = .palette.title2
         label.textAlignment = .center
         return label
     }()
     private let table = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
-        table.backgroundColor = .p.background
+        table.backgroundColor = .palette.background
         table.backgroundView = UIView()
         table.separatorColor = .clear
         table.register(SpendingCell.self)
@@ -43,7 +43,7 @@ class UserPreviewView: View<UserPreviewViewActions> {
         let cell = tableView.dequeue(SpendingCell.self, at: indexPath)
         let item = items(in: sections[indexPath.section])[indexPath.row]
         cell.render(spending: item)
-        cell.contentView.backgroundColor = .p.backgroundContent
+        cell.contentView.backgroundColor = .palette.backgroundContent
         return cell
     }
     private lazy var dataSource = DataSource(
@@ -60,7 +60,7 @@ class UserPreviewView: View<UserPreviewViewActions> {
     }
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         for view in [name, avatar, table, emptyPlaceholder] {
             addSubview(view)
         }
@@ -76,14 +76,14 @@ class UserPreviewView: View<UserPreviewViewActions> {
         let avatarSize = avatar.sizeThatFits(bounds.size)
         avatar.frame = CGRect(
             x: bounds.midX - avatarSize.width / 2,
-            y: safeAreaInsets.top + .p.defaultVertical,
+            y: safeAreaInsets.top + .palette.defaultVertical,
             width: avatarSize.width,
             height: avatarSize.height
         )
         let loginSize = name.sizeThatFits(bounds.size)
         name.frame = CGRect(
             x: bounds.midX - loginSize.width / 2,
-            y: avatar.frame.maxY + .p.vButtonSpacing,
+            y: avatar.frame.maxY + .palette.vButtonSpacing,
             width: loginSize.width,
             height: loginSize.height
         )

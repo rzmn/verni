@@ -54,21 +54,21 @@ private actor ApiProvider {
                 taskFactory: taskFactory
             )
         )
-        await api.mutate { api in
-            api._runMethodWithoutParams = { method in
-                await self.mutate { s in
+        await api.performIsolated { api in
+            api.runMethodWithoutParamsBlock = { method in
+                await self.performIsolated { `self` in
                     if let _ = method as? Spendings.GetCounterparties {
-                        s.getCounterpartiesCalledCount += 1
+                        self.getCounterpartiesCalledCount += 1
                     }
                 }
                 return self.getCounterpartiesResponse
             }
-            api._runMethodWithParams = { method in
-                await self.mutate { s in
+            api.runMethodWithParamsBlock = { method in
+                await self.performIsolated { `self` in
                     if let method = method as? Spendings.GetDeals {
-                        s.getSpendingsHistoryCalls.append(method.parameters.counterparty)
+                        self.getSpendingsHistoryCalls.append(method.parameters.counterparty)
                     } else if let method = method as? Spendings.GetDeal {
-                        s.getDealCalls.append(method.parameters.dealId)
+                        self.getDealCalls.append(method.parameters.dealId)
                     }
                 }
                 if let method = method as? Spendings.GetDeals {

@@ -3,21 +3,19 @@ import Domain
 import DI
 import AppBase
 import Combine
+import AsyncExtensions
 internal import SignUpFlow
 internal import DesignSystem
 internal import ProgressHUD
 
 public actor SignInFlow {
-    private var _presenter: SignInPresenter?
-    @MainActor private func presenter() async -> SignInPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = await SignInPresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        SignInPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private var subscriptions = Set<AnyCancellable>()
     private let viewModel: SignInViewModel
@@ -43,7 +41,7 @@ public actor SignInFlow {
 
 extension SignInFlow: TabEmbedFlow {
     @MainActor public func viewController() async -> any Routable {
-        await presenter().tabViewController
+        await presenter.value.tabViewController
     }
 
     public func perform() async -> ActiveSessionDIContainer {
@@ -65,7 +63,7 @@ extension SignInFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension SignInFlow {
-    @MainActor private func makeActions() async -> SignInViewActions {
+    @MainActor private func makeActions() -> SignInViewActions {
         SignInViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
@@ -98,7 +96,7 @@ extension SignInFlow {
 
 extension SignInFlow {
     private func createAccount() async {
-        await presenter().submitHaptic()
+        await presenter.value.submitHaptic()
         switch await signUpFlow.perform() {
         case .created(let session):
             await handle(session: session)
@@ -110,39 +108,39 @@ extension SignInFlow {
     private func signIn() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter().errorHaptic()
+            return await presenter.value.errorHaptic()
         }
         let credentials = Credentials(
             email: state.email,
             password: state.password
         )
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             let session = try await authUseCase.login(credentials: credentials)
             await saveCredentials.save(email: credentials.email, password: credentials.password)
             await handle(session: session)
         } catch {
-            await presenter().errorHaptic()
+            await presenter.value.errorHaptic()
             switch error {
             case .incorrectCredentials:
-                await presenter().presentIncorrectCredentials()
+                await presenter.value.presentIncorrectCredentials()
             case .wrongFormat:
-                await presenter().presentWrongFormat()
+                await presenter.value.presentWrongFormat()
             case .noConnection:
-                await presenter().presentNoConnection()
+                await presenter.value.presentNoConnection()
             case .other(let error):
-                await presenter().presentInternalError(error)
+                await presenter.value.presentInternalError(error)
             }
         }
     }
 
     private func openSignIn() async {
-        await presenter().submitHaptic()
-        await presenter().presentSignIn()
+        await presenter.value.submitHaptic()
+        await presenter.value.presentSignIn()
     }
 
     private func closeSignIn() async {
         subscriptions.removeAll()
-        await presenter().dismissSignIn()
+        await presenter.value.dismissSignIn()
     }
 }

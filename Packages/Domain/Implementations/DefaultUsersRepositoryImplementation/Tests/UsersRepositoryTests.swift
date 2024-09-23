@@ -19,13 +19,13 @@ private actor ApiProvider {
         self.getResponse = getResponse
         self.searchResponse = searchResponse
         api = MockApi()
-        await api.mutate { api in
-            api._runMethodWithParams = { method in
-                await self.mutate { s in
+        await api.performIsolated { api in
+            api.runMethodWithParamsBlock = { method in
+                await self.performIsolated { `self` in
                     if let method = method as? Users.Get {
-                        s.getCalls.append(method.parameters.ids)
+                        self.getCalls.append(method.parameters.ids)
                     } else if let method = method as? Users.Search {
-                        s.searchCalls.append(method.parameters.query)
+                        self.searchCalls.append(method.parameters.query)
                     }
                 }
                 if let _ = method as? Users.Get {
@@ -57,7 +57,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
         let taskFactory = TestTaskFactory()
         let user = UserDto(
             login: UUID().uuidString,
-            friendStatus: .me,
+            friendStatus: .currentUser,
             displayName: "some name",
             avatar: UserDto.Avatar(
                 id: nil
@@ -93,7 +93,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
         let taskFactory = TestTaskFactory()
         let user = UserDto(
             login: UUID().uuidString,
-            friendStatus: .me,
+            friendStatus: .currentUser,
             displayName: "some name",
             avatar: UserDto.Avatar(
                 id: nil

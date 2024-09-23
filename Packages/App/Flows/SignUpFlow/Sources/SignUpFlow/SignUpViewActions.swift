@@ -8,7 +8,7 @@ enum SignUpViewActionType {
     case onSignInTap
 }
 
-struct SignUpViewActions {
+@MainActor struct SignUpViewActions {
     let state: Published<SignUpState>.Publisher
     let handle: @MainActor (SignUpViewActionType) -> Void
 }

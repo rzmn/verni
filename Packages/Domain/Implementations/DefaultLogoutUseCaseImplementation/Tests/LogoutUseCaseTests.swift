@@ -12,10 +12,10 @@ private actor PersistencyProvider {
 
     init() async {
         persistency = PersistencyMock()
-        await persistency.mutate { persistency in
-            persistency._invalidate = {
-                await self.mutate { s in
-                    s.invalidateCalledCount += 1
+        await persistency.performIsolated { persistency in
+            persistency.invalidateBlock = {
+                await self.performIsolated { `self` in
+                    self.invalidateCalledCount += 1
                 }
             }
         }

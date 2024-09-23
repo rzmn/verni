@@ -5,12 +5,12 @@ public extension NSDiffableDataSourceSnapshot {
         sections: [SectionIdentifierType],
         cells: (SectionIdentifierType) -> [ItemIdentifierType]
     ) -> Self {
-        var s = Self()
+        var snapshot = Self()
         let sections = sections
-        s.appendSections(sections)
+        snapshot.appendSections(sections)
         for section in sections {
-            s.appendItems(cells(section), toSection: section)
+            snapshot.appendItems(cells(section), toSection: section)
         }
-        return s
+        return snapshot
     }
 }

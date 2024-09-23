@@ -34,7 +34,7 @@ public class SegmentedControl: UISegmentedControl {
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 
     func render(config: Config) {

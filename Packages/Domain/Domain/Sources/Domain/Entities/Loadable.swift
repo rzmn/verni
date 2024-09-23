@@ -32,10 +32,10 @@ public indirect enum Loadable<T: Equatable & Sendable, E: Equatable & Sendable>:
             return .initial
         case .loading(let previous):
             return .loading(previous: previous.mapValue(block))
-        case .loaded(let t):
-            return .loaded(block(t))
-        case .failed(let previous, let e):
-            return .failed(previous: previous.mapValue(block), e)
+        case .loaded(let value):
+            return .loaded(block(value))
+        case .failed(let previous, let error):
+            return .failed(previous: previous.mapValue(block), error)
         }
     }
 }

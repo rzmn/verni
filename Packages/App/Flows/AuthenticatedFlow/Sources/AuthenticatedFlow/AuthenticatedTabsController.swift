@@ -9,9 +9,9 @@ class AuthenticatedTabsController: TabBarController<AuthenticatedViewActions, Ta
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tabBar.tintColor = .p.accent
-        tabBar.unselectedItemTintColor = .p.iconSecondary
-        tabBar.backgroundColor = .p.backgroundContent
+        tabBar.tintColor = .palette.accent
+        tabBar.unselectedItemTintColor = .palette.iconSecondary
+        tabBar.backgroundColor = .palette.backgroundContent
         model.state
             .sink(receiveValue: render)
             .store(in: &subscriptions)

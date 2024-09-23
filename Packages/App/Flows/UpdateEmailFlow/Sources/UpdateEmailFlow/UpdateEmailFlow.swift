@@ -3,18 +3,16 @@ import Combine
 import Domain
 import UIKit
 import DI
+import AsyncExtensions
 
 public actor UpdateEmailFlow {
-    private var _presenter: UpdateEmailPresenter?
-    @MainActor private func presenter() async -> UpdateEmailPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = UpdateEmailPresenter(router: router, actions: await makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        UpdateEmailPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: UpdateEmailViewModel
     private let router: AppRouter
@@ -45,7 +43,7 @@ extension UpdateEmailFlow: Flow {
         return await withCheckedContinuation { continuation in
             self.flowContinuation = continuation
             Task {
-                await self.presenter().presentEmailEditing { [weak self] in
+                await self.presenter.value.presentEmailEditing { [weak self] in
                     guard let self else { return }
                     await handle(result: .failure(.canceledManually))
                 }
@@ -65,14 +63,14 @@ extension UpdateEmailFlow: Flow {
 // MARK: - User Actions
 
 extension UpdateEmailFlow {
-    @MainActor private func makeActions() async -> UpdateEmailViewActions {
+    @MainActor private func makeActions() -> UpdateEmailViewActions {
         UpdateEmailViewActions(state: viewModel.$state) { [weak self] actions in
             guard let self else { return }
             switch actions {
             case .onConfirmTap:
                 guard viewModel.state.canConfirm else {
                     Task.detached {
-                        await self.presenter().errorHaptic()
+                        await self.presenter.value.errorHaptic()
                     }
                     return
                 }
@@ -85,7 +83,7 @@ extension UpdateEmailFlow {
             case .onResendTap:
                 guard viewModel.state.canResendCode else {
                     Task.detached {
-                        await self.presenter().errorHaptic()
+                        await self.presenter.value.errorHaptic()
                     }
                     return
                 }
@@ -104,16 +102,16 @@ extension UpdateEmailFlow {
     func resendCode() async {
         do {
             try await emailConfirmationUseCase.sendConfirmationCode()
-            await presenter().codeSent()
+            await presenter.value.codeSent()
             await viewModel.startCountdownTimer()
         } catch {
             switch error {
             case .notDelivered:
-                await presenter().codeNotDelivered()
+                await presenter.value.codeNotDelivered()
             case .alreadyConfirmed:
-                await presenter().emailAlreadyConfirmed()
+                await presenter.value.emailAlreadyConfirmed()
             case .other(let error):
-                await presenter().presentGeneralError(error)
+                await presenter.value.presentGeneralError(error)
             }
         }
         Task { @MainActor [unowned viewModel] in
@@ -125,7 +123,7 @@ extension UpdateEmailFlow {
         guard case .uncorfirmed(let uncorfirmed) = await viewModel.state.confirmation else {
             return assertionFailure()
         }
-        await self.presenter().submitHaptic()
+        await self.presenter.value.submitHaptic()
         do {
             try await emailConfirmationUseCase.confirm(
                 code: uncorfirmed.currentCode.trimmingCharacters(in: CharacterSet.whitespaces)
@@ -134,17 +132,17 @@ extension UpdateEmailFlow {
             Task { @MainActor [unowned viewModel] in
                 viewModel.confirmed = true
             }
-            await presenter().successHaptic()
-            await presenter().presentSuccess()
+            await presenter.value.successHaptic()
+            await presenter.value.presentSuccess()
         } catch {
             switch error {
             case .codeIsWrong:
                 Task { @MainActor [unowned viewModel] in
                     viewModel.confirmationCode = ""
                 }
-                await presenter().codeIsWrong()
+                await presenter.value.codeIsWrong()
             case .other(let error):
-                await presenter().presentGeneralError(error)
+                await presenter.value.presentGeneralError(error)
             }
         }
         Task { @MainActor [unowned viewModel] in

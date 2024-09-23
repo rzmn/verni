@@ -5,28 +5,28 @@ import Logging
 
 public actor DefaultAvatarsOfflineRepository {
     public let logger: Logger
-    private let container: URL
+    private let storageDir: URL
 
     private enum Constants {
-        static let containerDirName = "avatars"
+        static let storageDirName = "avatars"
         static let prefix = "s_v1_"
     }
 
-    public init(container _container: URL, logger: Logger) throws {
-        self.container = _container.appendingPathComponent(Constants.containerDirName)
+    public init(container: URL, logger: Logger) throws {
+        self.storageDir = container.appendingPathComponent(Constants.storageDirName)
         self.logger = logger
         var isDirectory = ObjCBool(true)
         let exists = FileManager.default.fileExists(
-            atPath: container.path,
+            atPath: storageDir.path,
             isDirectory: &isDirectory
         )
         if !exists {
             try FileManager.default.createDirectory(
-                at: container,
+                at: storageDir,
                 withIntermediateDirectories: true
             )
         } else if !isDirectory.boolValue {
-            throw InternalError.error("already has a file at \(container)", underlying: nil)
+            throw InternalError.error("already has a file at \(storageDir)", underlying: nil)
         }
     }
 
@@ -39,7 +39,7 @@ extension DefaultAvatarsOfflineRepository: AvatarsOfflineRepository {
     public func get(for id: Avatar.Identifier) async -> Data? {
         let id = name(for: id)
         do {
-            return try Data(contentsOf: container.appending(component: id))
+            return try Data(contentsOf: storageDir.appending(component: id))
         } catch {
             logE { "failed to get data with id \(id), error: \(error)" }
             return nil
@@ -51,7 +51,7 @@ extension DefaultAvatarsOfflineRepository: AvatarsOfflineMutableRepository {
     public func store(data: Data, for id: Avatar.Identifier) async {
         let id = name(for: id)
         guard FileManager.default.createFile(
-            atPath: container.appending(component: id).path,
+            atPath: storageDir.appending(component: id).path,
             contents: data
         ) else {
             return logE { "failed to write data for id \(id)" }

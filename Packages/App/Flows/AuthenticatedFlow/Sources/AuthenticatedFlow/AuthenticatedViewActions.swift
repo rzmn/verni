@@ -5,7 +5,7 @@ enum AuthenticatedViewActionType {
     case onTabSelected(index: Int)
 }
 
-struct AuthenticatedViewActions {
+@MainActor struct AuthenticatedViewActions {
     let state: Published<AuthenticatedState>.Publisher
     let handle: @MainActor (AuthenticatedViewActionType) -> Void
 }

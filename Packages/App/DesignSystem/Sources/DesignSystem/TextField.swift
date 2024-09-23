@@ -88,8 +88,8 @@ public class TextField: UITextField {
     private var config: Config
     private let hintLabel = {
         let label = UILabel()
-        label.font = .p.secondaryText
-        label.textColor = .p.destructive
+        label.font = .palette.secondaryText
+        label.textColor = .palette.destructive
         return label
     }()
 
@@ -100,7 +100,7 @@ public class TextField: UITextField {
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func setupView() {
@@ -128,7 +128,7 @@ public class TextField: UITextField {
 
     public func render(_ config: Config) {
         attributedPlaceholder = NSAttributedString(string: config.placeholder, attributes: [
-            .font: UIFont.p.placeholder,
+            .font: UIFont.palette.placeholder,
             .foregroundColor: UIColor.secondaryLabel
         ])
         hintLabel.isHidden = config.formatHint == nil

@@ -27,17 +27,17 @@ public class IconButton: UIButton {
             configuration.imagePlacement = .all
             configuration.image = config.icon
             configuration.imageColorTransformer = UIConfigurationColorTransformer { _ in
-                .p.accent
+                .palette.accent
             }
             return configuration
         }()
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 
     public override func sizeThatFits(_ size: CGSize) -> CGSize {
-        CGSize(width: .p.iconSize, height: .p.iconSize)
+        CGSize(width: .palette.iconSize, height: .palette.iconSize)
     }
 }

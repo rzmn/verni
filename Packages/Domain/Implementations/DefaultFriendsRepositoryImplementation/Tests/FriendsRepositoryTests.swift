@@ -39,15 +39,15 @@ private actor ApiProvider {
         self.getUsersResponse = getUsersResponse
         api = MockApi()
         mockLongPoll = MockLongPoll(friendsBroadcast: AsyncSubject(taskFactory: taskFactory))
-        await api.mutate { api in
-            api._runMethodWithParams = { method in
-                return await self.mutate { s in
+        await api.performIsolated { api in
+            api.runMethodWithParamsBlock = { method in
+                return await self.performIsolated { `self` in
                     if let method = method as? Friends.Get {
-                        s.getFriendsCalls.append(method.parameters.statuses)
-                        return s.getFriendsResponse
+                        self.getFriendsCalls.append(method.parameters.statuses)
+                        return self.getFriendsResponse
                     } else if let method = method as? Users.Get {
-                        s.getUsersCalls.append(method.parameters.ids)
-                        return s.getUsersResponse
+                        self.getUsersCalls.append(method.parameters.ids)
+                        return self.getUsersResponse
                     } else {
                         fatalError()
                     }

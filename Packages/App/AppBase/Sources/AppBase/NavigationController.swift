@@ -21,7 +21,7 @@ internal import DesignSystem
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        navigationBar.tintColor = .p.primary
+        navigationBar.tintColor = .palette.primary
     }
 
     required init?(coder aDecoder: NSCoder) {

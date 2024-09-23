@@ -3,20 +3,18 @@ import Domain
 import DI
 import AppBase
 import Combine
+import AsyncExtensions
 internal import DesignSystem
 internal import ProgressHUD
 
 public actor SignUpFlow {
-    private var _presenter: SignUpPresenter?
-    @MainActor private func presenter() async -> SignUpPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = SignUpPresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        SignUpPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: SignUpViewModel
     private var subscriptions = Set<AnyCancellable>()
@@ -52,7 +50,7 @@ extension SignUpFlow: Flow {
     }
 
     private func startFlow() async {
-        await presenter().presentSignUp { [weak self] in
+        await presenter.value.presentSignUp { [weak self] in
             guard let self else { return }
             await handle(event: .canceled)
         }
@@ -95,13 +93,13 @@ extension SignUpFlow {
     private func signIn() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter().errorHaptic()
+            return await presenter.value.errorHaptic()
         }
         let credentials = Credentials(
             email: state.email,
             password: state.password
         )
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             await handle(
                 event: .created(
@@ -109,16 +107,16 @@ extension SignUpFlow {
                 )
             )
         } catch {
-            await presenter().errorHaptic()
+            await presenter.value.errorHaptic()
             switch error {
             case .alreadyTaken:
-                await presenter().presentAlreadyTaken()
+                await presenter.value.presentAlreadyTaken()
             case .wrongFormat:
-                await presenter().presentWrongFormat()
+                await presenter.value.presentWrongFormat()
             case .noConnection:
-                await presenter().presentNoConnection()
+                await presenter.value.presentNoConnection()
             case .other(let error):
-                await presenter().presentInternalError(error)
+                await presenter.value.presentInternalError(error)
             }
         }
     }

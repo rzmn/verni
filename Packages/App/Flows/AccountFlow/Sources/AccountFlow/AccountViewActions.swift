@@ -10,7 +10,7 @@ enum AccountViewActionType {
     case onLogoutTap
 }
 
-struct AccountViewActions {
+@MainActor struct AccountViewActions {
     let state: Published<AccountState>.Publisher
     let handle: @MainActor (AccountViewActionType) -> Void
 }

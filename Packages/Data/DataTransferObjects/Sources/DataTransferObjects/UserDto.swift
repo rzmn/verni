@@ -2,11 +2,11 @@ import Base
 
 public struct UserDto: Codable, Sendable, Equatable {
     public enum FriendStatus: Int, Codable, Sendable, Equatable {
-        case no = 0
+        case notAFriend = 0
         case incomingRequest = 1
         case outgoingRequest = 2
         case friends = 3
-        case me = 4
+        case currentUser = 4
     }
     public struct Avatar: Codable, Sendable, Equatable {
         public typealias Identifier = String

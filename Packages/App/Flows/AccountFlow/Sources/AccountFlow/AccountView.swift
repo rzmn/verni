@@ -38,7 +38,7 @@ class AccountView: View<AccountViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         for view in [updateAvatar, updateEmail, updateDisplayName, updatePassword, logout] {
             addSubview(view)
         }
@@ -62,34 +62,34 @@ class AccountView: View<AccountViewActions> {
     override func layoutSubviews() {
         super.layoutSubviews()
         updateAvatar.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: safeAreaInsets.top + .p.defaultVertical,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: safeAreaInsets.top + .palette.defaultVertical,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         updateEmail.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: updateAvatar.frame.maxY + .p.vButtonSpacing,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: updateAvatar.frame.maxY + .palette.vButtonSpacing,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         updateDisplayName.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: updateEmail.frame.maxY + .p.vButtonSpacing,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: updateEmail.frame.maxY + .palette.vButtonSpacing,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         updatePassword.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: updateDisplayName.frame.maxY + .p.vButtonSpacing,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: updateDisplayName.frame.maxY + .palette.vButtonSpacing,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         logout.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: bounds.maxY - safeAreaInsets.bottom - .p.buttonHeight - .p.defaultVertical,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: bounds.maxY - safeAreaInsets.bottom - .palette.buttonHeight - .palette.defaultVertical,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
     }
 }

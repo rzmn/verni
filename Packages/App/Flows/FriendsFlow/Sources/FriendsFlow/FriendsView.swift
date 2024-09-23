@@ -17,7 +17,7 @@ private extension Placeholder.Config {
 class FriendsView: View<FriendsViewActions> {
     private let table = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
-        table.backgroundColor = .p.background
+        table.backgroundColor = .palette.background
         table.backgroundView = UIView()
         table.separatorColor = .clear
         table.register(FriendCell.self)
@@ -27,7 +27,7 @@ class FriendsView: View<FriendsViewActions> {
         let cell = tableView.dequeue(FriendCell.self, at: indexPath)
         let item = items(in: sections[indexPath.section])[indexPath.row]
         cell.render(item: item)
-        cell.contentView.backgroundColor = .p.backgroundContent
+        cell.contentView.backgroundColor = .palette.backgroundContent
         return cell
     }
     private lazy var dataSource = DataSource(
@@ -44,7 +44,7 @@ class FriendsView: View<FriendsViewActions> {
     }
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         table.dataSource = dataSource
         table.delegate = self
         for view in [table, emptyPlaceholder] {
@@ -132,7 +132,7 @@ extension FriendsView: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        (view as? UITableViewHeaderFooterView)?.textLabel?.font = .p.secondaryText
+        (view as? UITableViewHeaderFooterView)?.textLabel?.font = .palette.secondaryText
     }
 }
 

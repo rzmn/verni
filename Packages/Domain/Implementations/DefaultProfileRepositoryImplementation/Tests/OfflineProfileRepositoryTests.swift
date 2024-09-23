@@ -17,22 +17,22 @@ private actor PersistencyProvider {
 
     init() async {
         persistency = PersistencyMock()
-        await persistency.mutate { persistency in
-            persistency._getProfile = {
-                await self.mutate { s in
-                    s.getProfileCalledCount += 1
+        await persistency.performIsolated { persistency in
+            persistency.getProfileBlock = {
+                await self.performIsolated { `self` in
+                    self.getProfileCalledCount += 1
                 }
                 return await self.profile
             }
-            persistency._updateProfile = { profile in
-                await self.mutate { s in
-                    s.updateProfileCalls.append(profile)
-                    s.profile = profile
+            persistency.updateProfileBlock = { profile in
+                await self.performIsolated { `self` in
+                    self.updateProfileCalls.append(profile)
+                    self.profile = profile
                 }
             }
-            persistency._updateUsers = { users in
-                await self.mutate { s in
-                    s.updateUsersCalls.append(users)
+            persistency.updateUsersBlock = { users in
+                await self.performIsolated { `self` in
+                    self.updateUsersCalls.append(users)
                 }
             }
         }
@@ -67,7 +67,7 @@ private actor PersistencyProvider {
         let profile = Profile(
             user: User(
                 id: UUID().uuidString,
-                status: .no,
+                status: .notAFriend,
                 displayName: "some name",
                 avatar: nil
             ),

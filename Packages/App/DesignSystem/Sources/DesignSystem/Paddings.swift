@@ -23,7 +23,7 @@ extension CGFloat {
         }
     }
 
-    public static var p: Paddings.Type {
+    public static var palette: Paddings.Type {
         Paddings.self
     }
 }

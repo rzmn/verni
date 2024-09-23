@@ -20,7 +20,7 @@ struct UserPreviewState {
     let spenginds: Loadable<[SpendingPreview], Failure>
 
     var userNameText: String {
-        if case .me = user.status {
+        if case .currentUser = user.status {
             return String(format: "login_your_format".localized, user.displayName)
         } else {
             return user.displayName

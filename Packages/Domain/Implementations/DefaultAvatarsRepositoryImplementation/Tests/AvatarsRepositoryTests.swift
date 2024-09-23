@@ -33,11 +33,11 @@ private actor ApiProvider {
     init(getResponse: [Avatar.Identifier: Data]) async {
         self.getResponse = getResponse
         api = MockApi()
-        await api.mutate { api in
-            api._runMethodWithParams = { method in
-                await self.mutate { s in
+        await api.performIsolated { api in
+            api.runMethodWithParamsBlock = { method in
+                await self.performIsolated { `self` in
                     if let method = method as? Avatars.Get {
-                        s.getCalls.append(method.parameters.ids)
+                        self.getCalls.append(method.parameters.ids)
                     }
                 }
                 if let _ = method as? Avatars.Get {

@@ -1,15 +1,9 @@
-# only_rules:
-#   - fatal_error_message
-#   - implicitly_unwrapped_optional
-#   - legacy_cggeometry_functions
-#   - legacy_constant
-#   - legacy_constructor
-#   - legacy_nsgeometry_functions
-#   - unused_optional_binding
-#   - unowned_variable_capture
-#   - custom_rules
-disabled_rules:
-  - identifier_name
+identifier_name:
+  excluded:
+    - di
+    - id
+    - on
+    - ok
 
 nesting:
   type_level: 3

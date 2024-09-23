@@ -21,7 +21,7 @@ class UpdateDisplayNameView: View<UpdateDisplayNameViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         for view in [newDisplayName, confirm] {
             addSubview(view)
         }
@@ -61,17 +61,17 @@ class UpdateDisplayNameView: View<UpdateDisplayNameViewActions> {
     override func layoutSubviews() {
         super.layoutSubviews()
         newDisplayName.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: safeAreaInsets.top + .p.defaultVertical,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: safeAreaInsets.top + .palette.defaultVertical,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         let bottomInset = keyboardBottomInset == 0 ? safeAreaInsets.bottom : keyboardBottomInset
         confirm.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: bounds.maxY - bottomInset - .p.buttonHeight - .p.defaultVertical,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: bounds.maxY - bottomInset - .palette.buttonHeight - .palette.defaultVertical,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
     }
 

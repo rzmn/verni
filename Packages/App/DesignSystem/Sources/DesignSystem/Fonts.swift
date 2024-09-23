@@ -30,7 +30,7 @@ extension UIFont {
             UIFont(name: "SF Pro", size: 13) ?? .systemFont(ofSize: 13)
         }
     }
-    public static var p: Predefined.Type {
+    public static var palette: Predefined.Type {
         Predefined.self
     }
 }

@@ -16,18 +16,18 @@ private actor PersistencyProvider {
 
     init() async {
         persistency = PersistencyMock()
-        await persistency.mutate { persistency in
-            persistency._userWithID = { id in
-                await self.mutate { s in
-                    s.getUserCalledCount[id] = s.getUserCalledCount[id, default: 0] + 1
+        await persistency.performIsolated { persistency in
+            persistency.userWithIDBlock = { id in
+                await self.performIsolated { `self` in
+                    self.getUserCalledCount[id] = self.getUserCalledCount[id, default: 0] + 1
                 }
                 return await self.users[id]
             }
-            persistency._updateUsers = { users in
-                await self.mutate { s in
-                    s.updateUsersCalls.append(users)
+            persistency.updateUsersBlock = { users in
+                await self.performIsolated { `self` in
+                    self.updateUsersCalls.append(users)
                     for user in users {
-                        s.users[user.id] = user
+                        self.users[user.id] = user
                     }
                 }
             }
@@ -63,7 +63,7 @@ private actor PersistencyProvider {
         let repository = DefaultUsersOfflineRepository(persistency: provider.persistency)
         let user = User(
             id: UUID().uuidString,
-            status: .no,
+            status: .notAFriend,
             displayName: "some name",
             avatar: nil
         )

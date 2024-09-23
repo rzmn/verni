@@ -34,23 +34,23 @@ private actor PersistencyProvider {
 
     init() async {
         persistency = PersistencyMock()
-        await persistency.mutate { persistency in
-            persistency._getFriendsWithKind = { kind in
-                await self.mutate { s in
-                    s.getFriendsCalls.append(FriendshipKindSet(kind))
+        await persistency.performIsolated { persistency in
+            persistency.getFriendsWithKindBlock = { kind in
+                await self.performIsolated { `self` in
+                    self.getFriendsCalls.append(FriendshipKindSet(kind))
                 }
                 return await self.friends[FriendshipKindSet(kind)]?.reduce(into: [:], { dict, kv in
                     dict[FriendshipKindDto(domain: kv.key)] = kv.value.map(UserDto.init)
                 })
             }
-            persistency._updateFriendsForKind = { friends, kind in
+            persistency.updateFriendsForKindBlock = { friends, kind in
                 let kindToSet = FriendshipKindSet(kind)
                 let friendsToSet = friends.reduce(into: [:], { dict, kv in
                     dict[FriendshipKind(dto: kv.key)] = kv.value.map(User.init)
                 })
-                await self.mutate { s in
-                    s.updateFriendsCalls.append((kindToSet, friendsToSet))
-                    s.friends[kindToSet] = friendsToSet
+                await self.performIsolated { `self` in
+                    self.updateFriendsCalls.append((kindToSet, friendsToSet))
+                    self.friends[kindToSet] = friendsToSet
                 }
             }
         }

@@ -19,29 +19,29 @@ private actor PersistencyProvider {
 
     init() async {
         persistency = PersistencyMock()
-        await persistency.mutate { persistency in
-            persistency._getSpendingCounterparties = {
-                await self.mutate { s in
-                    s.getSpendingCounterpartiesCalledCount += 1
+        await persistency.performIsolated { persistency in
+            persistency.getSpendingCounterpartiesBlock = {
+                await self.performIsolated { `self` in
+                    self.getSpendingCounterpartiesCalledCount += 1
                 }
                 return await self.counterparties
             }
-            persistency._updateSpendingCounterparties = { counterparties in
-                await self.mutate { s in
-                    s.updateSpendingCounterpartiesCalls.append(counterparties)
-                    s.counterparties = counterparties
+            persistency.updateSpendingCounterpartiesBlock = { counterparties in
+                await self.performIsolated { `self` in
+                    self.updateSpendingCounterpartiesCalls.append(counterparties)
+                    self.counterparties = counterparties
                 }
             }
-            persistency._getSpendingsHistoryWithCounterparty = { id in
-                await self.mutate { s in
-                    s.getSpendingHistoryCalledCount[id] = s.getSpendingHistoryCalledCount[id, default: 0] + 1
+            persistency.getSpendingsHistoryBlock = { id in
+                await self.performIsolated { `self` in
+                    self.getSpendingHistoryCalledCount[id] = self.getSpendingHistoryCalledCount[id, default: 0] + 1
                 }
                 return await self.spendingHistory[id]
             }
-            persistency._updateSpendingsHistoryForCounterparty = { id, history in
-                await self.mutate { s in
-                    s.updateSpendingHistoryCalls.append((id, history))
-                    s.spendingHistory[id] = history
+            persistency.updateSpendingsHistoryBlock = { id, history in
+                await self.performIsolated { `self` in
+                    self.updateSpendingHistoryCalls.append((id, history))
+                    self.spendingHistory[id] = history
                 }
             }
         }

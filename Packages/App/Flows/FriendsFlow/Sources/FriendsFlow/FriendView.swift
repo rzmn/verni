@@ -8,14 +8,14 @@ class FriendView: UIView {
     private var subscriptions = Set<AnyCancellable>()
     private let label = {
         let label = UILabel()
-        label.font = .p.text
-        label.textColor = .p.primary
+        label.font = .palette.text
+        label.textColor = .palette.primary
         return label
     }()
     private let balanceLabel = {
         let label = UILabel()
-        label.font = .p.subtitle
-        label.textColor = .p.primary
+        label.font = .palette.subtitle
+        label.textColor = .palette.primary
         return label
     }()
     private let avatar = {
@@ -35,14 +35,14 @@ class FriendView: UIView {
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func setupView() {
         for view in [label, avatar, balanceLabel] {
             addSubview(view)
         }
-        backgroundColor = .p.backgroundContent
+        backgroundColor = .palette.backgroundContent
     }
 
     func reuse() {
@@ -64,16 +64,16 @@ class FriendView: UIView {
         avatar.avatarId = user.avatar?.id
         if balance.isEmpty || balance.values.allSatisfy({ $0 == 0 }) {
             balanceLabel.text = "expense_settled_up".localized
-            balanceLabel.textColor = .p.primary
+            balanceLabel.textColor = .palette.primary
         } else {
             let description = balance.map { "\($0.key.stringValue):\($0.value)" }.joined(separator: ", ")
             let color: UIColor
             if balance.values.allSatisfy({ $0 >= 0 }) {
-                color = .p.positive
+                color = .palette.positive
             } else if balance.values.allSatisfy({ $0 <= 0 }) {
-                color = .p.destructive
+                color = .palette.destructive
             } else {
-                color = .p.primary
+                color = .palette.primary
             }
             balanceLabel.text = String(
                 format: "expense_balance_fmt".localized,
@@ -96,13 +96,13 @@ class FriendView: UIView {
         let balanceSize = balanceLabel.sizeThatFits(bounds.size)
         let minY = (bounds.height - labelSize.height - balanceSize.height) / 2
         label.frame = CGRect(
-            x: avatar.frame.maxX + .p.defaultHorizontal,
+            x: avatar.frame.maxX + .palette.defaultHorizontal,
             y: minY,
             width: labelSize.width,
             height: labelSize.height
         )
         balanceLabel.frame = CGRect(
-            x: avatar.frame.maxX + .p.defaultHorizontal,
+            x: avatar.frame.maxX + .palette.defaultHorizontal,
             y: label.frame.maxY,
             width: balanceSize.width,
             height: balanceSize.height

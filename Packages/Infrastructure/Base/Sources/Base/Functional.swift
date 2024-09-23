@@ -1,5 +1,7 @@
 import Foundation
 
+// swiftlint:disable identifier_name
+
 precedencegroup CompositionPrecedence {
     associativity: right
     higherThan: BitwiseShiftPrecedence
@@ -43,3 +45,5 @@ public func curry<A, B, C>(_ f: @escaping (A, B) throws -> C) -> (A) -> (B) thro
 public func curry<A, B, C, D>(_ f: @escaping (A, B, C) -> D) -> (A, B) -> (C) -> D {
     return { a, b in { c in f(a, b, c) } }
 }
+
+// swiftlint:enable identifier_name

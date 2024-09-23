@@ -1,8 +1,13 @@
 import UIKit
 
 private extension UIColor {
-    static func rgb(_ r: Int, _ g: Int, _ b: Int) -> UIColor {
-        UIColor(red: CGFloat(r) / 255, green: CGFloat(g) / 255, blue: CGFloat(b) / 255, alpha: 1)
+    static func rgb(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
+        UIColor(
+            red: CGFloat(red) / 255,
+            green: CGFloat(green) / 255,
+            blue: CGFloat(blue) / 255,
+            alpha: 1
+        )
     }
 }
 
@@ -87,7 +92,7 @@ extension UIColor {
         }
     }
 
-    public static var p: Palette.Type {
+    public static var palette: Palette.Type {
         Palette.self
     }
 }

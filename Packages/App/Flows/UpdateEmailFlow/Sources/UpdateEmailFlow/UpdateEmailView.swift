@@ -9,8 +9,8 @@ class UpdateEmailView: View<UpdateEmailViewActions> {
 
     private let email = {
         let label = UILabel()
-        label.font = .p.text
-        label.textColor = .p.primary
+        label.font = .palette.text
+        label.textColor = .palette.primary
         return label
     }()
     private let resendCode = Button(
@@ -37,7 +37,7 @@ class UpdateEmailView: View<UpdateEmailViewActions> {
         for view in [email, resendCode, enterCode, confirmEmail] {
             addSubview(view)
         }
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
         enterCode.delegate = self
         resendCode.tapPublisher
@@ -85,34 +85,34 @@ class UpdateEmailView: View<UpdateEmailViewActions> {
         super.layoutSubviews()
         let size = email.sizeThatFits(
             CGSize(
-                width: max(0, bounds.width - .p.defaultHorizontal * 2),
+                width: max(0, bounds.width - .palette.defaultHorizontal * 2),
                 height: bounds.height
             )
         )
         email.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: safeAreaInsets.top + .p.defaultVertical,
+            x: .palette.defaultHorizontal,
+            y: safeAreaInsets.top + .palette.defaultVertical,
             width: size.width,
             height: size.height
         )
         enterCode.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: email.frame.maxY + .p.defaultVertical,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: email.frame.maxY + .palette.defaultVertical,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         resendCode.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: bounds.maxY - safeAreaInsets.bottom - .p.defaultVertical - .p.buttonHeight,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: bounds.maxY - safeAreaInsets.bottom - .palette.defaultVertical - .palette.buttonHeight,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
         let confirmEmailMaxY = keyboardBottomInset == 0 ? resendCode.frame.minY : (bounds.maxY - keyboardBottomInset)
         confirmEmail.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: confirmEmailMaxY - .p.defaultVertical - .p.buttonHeight,
-            width: bounds.width - .p.defaultHorizontal * 2,
-            height: .p.buttonHeight
+            x: .palette.defaultHorizontal,
+            y: confirmEmailMaxY - .palette.defaultVertical - .palette.buttonHeight,
+            width: bounds.width - .palette.defaultHorizontal * 2,
+            height: .palette.buttonHeight
         )
     }
 

@@ -11,7 +11,7 @@ enum AddExpenseViewActionType {
     case onExpenseAmountChanged(String)
 }
 
-struct AddExpenseViewActions {
+@MainActor struct AddExpenseViewActions {
     let state: Published<AddExpenseState>.Publisher
     let handle: @MainActor (AddExpenseViewActionType) -> Void
 }

@@ -16,7 +16,7 @@ private extension Placeholder.Config {
 class PickCounterpartyView: View<PickCounterpartyViewActions> {
     private let table = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
-        table.backgroundColor = .p.background
+        table.backgroundColor = .palette.background
         table.backgroundView = UIView()
         table.separatorColor = .clear
         table.register(UserCell.self)
@@ -26,7 +26,7 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
         let cell = tableView.dequeue(UserCell.self, at: indexPath)
         let item = items(in: sections[indexPath.section])[indexPath.row]
         cell.render(user: item)
-        cell.contentView.backgroundColor = .p.backgroundContent
+        cell.contentView.backgroundColor = .palette.backgroundContent
         return cell
     }
     private lazy var dataSource = DataSource(
@@ -43,7 +43,7 @@ class PickCounterpartyView: View<PickCounterpartyViewActions> {
     }
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         table.dataSource = dataSource
         table.delegate = self
         for view in [table, emptyPlaceholder] {

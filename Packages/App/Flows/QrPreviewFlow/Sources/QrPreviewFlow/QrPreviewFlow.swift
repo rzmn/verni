@@ -22,8 +22,8 @@ public actor QrPreviewFlow {
         let view: UIView
         do {
             view = try await di.qrInviteUseCase().createView(
-                background: .p.backgroundContent,
-                tint: .p.primary,
+                background: .palette.backgroundContent,
+                tint: .palette.primary,
                 url: url.absoluteString
             )
         } catch {

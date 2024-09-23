@@ -12,16 +12,13 @@ internal import QrPreviewFlow
 internal import UpdateAvatarFlow
 
 public actor AccountFlow {
-    private var _presenter: AccountPresenter?
-    @MainActor private func presenter() async -> AccountPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = await AccountPresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        AccountPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: AccountViewModel
     private let di: ActiveSessionDIContainer
@@ -64,7 +61,7 @@ public actor AccountFlow {
 
 extension AccountFlow: TabEmbedFlow {
     @MainActor public func viewController() async -> Routable {
-        await presenter().tabViewController
+        await presenter.value.tabViewController
     }
 
     public enum TerminationEvent: Sendable {
@@ -86,7 +83,7 @@ extension AccountFlow: TabEmbedFlow {
             let profile = try await profileRepository.refreshProfile()
             await viewModel.reload(profile: profile)
         } catch {
-            await presenter().presentGeneralError(error)
+            await presenter.value.presentGeneralError(error)
         }
     }
 
@@ -103,7 +100,7 @@ extension AccountFlow: TabEmbedFlow {
 // MARK: - User Actions
 
 extension AccountFlow {
-    @MainActor private func makeActions() async -> AccountViewActions {
+    @MainActor private func makeActions() -> AccountViewActions {
         AccountViewActions(state: viewModel.$state) { action in
             Task.detached { [weak self] in
                 guard let self else { return }
@@ -133,32 +130,32 @@ extension AccountFlow {
         if let profile = await viewModel.state.info.value {
             return profile
         }
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             let profile = try await profileRepository.refreshProfile()
-            await presenter().dismissLoading()
+            await presenter.value.dismissLoading()
             return profile
         } catch {
             switch error {
             case .noConnection:
-                await presenter().presentNoConnection()
+                await presenter.value.presentNoConnection()
             case .notAuthorized:
-                await presenter().presentNotAuthorized()
+                await presenter.value.presentNotAuthorized()
             case .other(let error):
-                await presenter().presentInternalError(error)
+                await presenter.value.presentInternalError(error)
             }
             return nil
         }
     }
 
     private func updateAvatar() async {
-        await presenter().submitHaptic()
+        await presenter.value.submitHaptic()
         let flow = await UpdateAvatarFlow(di: di, router: router)
         _ = await flow.perform()
     }
 
     private func updateEmail() async {
-        await presenter().submitHaptic()
+        await presenter.value.submitHaptic()
         guard let profile = await getProfile() else {
             return
         }
@@ -167,7 +164,7 @@ extension AccountFlow {
     }
 
     private func updatePassword() async {
-        await presenter().submitHaptic()
+        await presenter.value.submitHaptic()
         guard let profile = await getProfile() else {
             return
         }
@@ -176,13 +173,13 @@ extension AccountFlow {
     }
 
     private func updateDisplayName() async {
-        await presenter().submitHaptic()
+        await presenter.value.submitHaptic()
         let flow = await UpdateDisplayNameFlow(di: di, router: router)
         _ = await flow.perform()
     }
 
     private func showQr() async {
-        await presenter().submitHaptic()
+        await presenter.value.submitHaptic()
         guard let profile = await getProfile() else {
             return
         }
@@ -190,7 +187,7 @@ extension AccountFlow {
         do {
             flow = try await QrPreviewFlow(di: di, router: router, profile: profile)
         } catch {
-            return await presenter().presentInternalError(error)
+            return await presenter.value.presentInternalError(error)
         }
         await flow.perform()
     }

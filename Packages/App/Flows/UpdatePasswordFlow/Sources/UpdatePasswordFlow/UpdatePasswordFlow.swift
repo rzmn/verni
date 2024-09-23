@@ -2,18 +2,16 @@ import AppBase
 import Combine
 import Domain
 import DI
+import AsyncExtensions
 
 public actor UpdatePasswordFlow {
-    private var _presenter: UpdatePasswordPresenter?
-    @MainActor private func presenter() async -> UpdatePasswordPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = UpdatePasswordPresenter(router: router, actions: await makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        UpdatePasswordPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let router: AppRouter
     private let profileEditing: ProfileEditingUseCase
@@ -54,7 +52,7 @@ extension UpdatePasswordFlow: Flow {
     }
 
     private func startFlow() async {
-        await presenter().presentPasswordEditing { [weak self] in
+        await presenter.value.presentPasswordEditing { [weak self] in
             guard let self else { return }
             await handle(event: .canceled)
         }
@@ -67,7 +65,7 @@ extension UpdatePasswordFlow: Flow {
         self.flowContinuation = nil
         if case .canceled = event {
         } else {
-            await presenter().cancelPasswordEditing()
+            await presenter.value.cancelPasswordEditing()
         }
         flowContinuation.resume(returning: event)
     }
@@ -76,7 +74,7 @@ extension UpdatePasswordFlow: Flow {
 // MARK: - User Actions
 
 extension UpdatePasswordFlow {
-    @MainActor private func makeActions() async -> UpdatePasswordViewActions {
+    @MainActor private func makeActions() -> UpdatePasswordViewActions {
         UpdatePasswordViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
@@ -101,23 +99,23 @@ extension UpdatePasswordFlow {
     private func updatePassword() async {
         let state = await viewModel.state
         guard state.canConfirm else {
-            return await presenter().errorHaptic()
+            return await presenter.value.errorHaptic()
         }
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             try await profileEditing.updatePassword(old: state.oldPassword, new: state.newPassword)
             await saveCredentials.save(email: profile.email, password: state.newPassword)
-            await presenter().successHaptic()
-            await presenter().presentSuccess()
+            await presenter.value.successHaptic()
+            await presenter.value.presentSuccess()
             await handle(event: .successfullySet)
         } catch {
             switch error {
             case .validationError:
-                await presenter().presentHint(message: "change_password_format_error".localized)
+                await presenter.value.presentHint(message: "change_password_format_error".localized)
             case .incorrectOldPassword:
-                await presenter().presentHint(message: "change_password_old_wrong".localized)
+                await presenter.value.presentHint(message: "change_password_old_wrong".localized)
             case .other(let error):
-                await presenter().presentGeneralError(error)
+                await presenter.value.presentGeneralError(error)
             }
         }
     }

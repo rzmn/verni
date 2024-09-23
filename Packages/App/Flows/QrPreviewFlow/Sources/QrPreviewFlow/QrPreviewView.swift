@@ -23,7 +23,7 @@ class QrPreviewView: View<QrPreviewFlow> {
             addSubview(view)
         }
         avatar.avatarId = model.state.user.avatar?.id
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
     }
 
     override func layoutSubviews() {

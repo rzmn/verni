@@ -27,8 +27,8 @@ class AddExpenseView: View<AddExpenseViewActions> {
     )
     private let splitEquallyDescription = {
         let label = UILabel()
-        label.font = .p.text
-        label.textColor = .p.primary
+        label.font = .palette.text
+        label.textColor = .palette.primary
         label.text = "expense_split_equally".localized
         return label
     }()
@@ -50,8 +50,8 @@ class AddExpenseView: View<AddExpenseViewActions> {
     }()
     private let counterpartyName = {
         let label = UILabel()
-        label.font = .p.text
-        label.textColor = .p.primary
+        label.font = .palette.text
+        label.textColor = .palette.primary
         return label
     }()
     private let expenseDescription = TextField(
@@ -68,7 +68,7 @@ class AddExpenseView: View<AddExpenseViewActions> {
     )
 
     override func setupView() {
-        backgroundColor = .p.background
+        backgroundColor = .palette.background
         for view in [
             whoOws,
             splitEqually,
@@ -107,83 +107,85 @@ class AddExpenseView: View<AddExpenseViewActions> {
         setNeedsLayout()
     }
 
+    // temporary implementation, skip linting
+    // swiftlint:disable:next function_body_length
     override func layoutSubviews() {
         super.layoutSubviews()
-        let paddedBounds = CGSize(width: bounds.width - .p.defaultHorizontal * 2, height: bounds.height)
+        let paddedBounds = CGSize(width: bounds.width - .palette.defaultHorizontal * 2, height: bounds.height)
         for index in 0 ..< whoOws.numberOfSegments {
             whoOws.setWidth(paddedBounds.width / CGFloat(whoOws.numberOfSegments), forSegmentAt: index)
         }
         whoOws.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: safeAreaInsets.top + .p.defaultVertical,
+            x: .palette.defaultHorizontal,
+            y: safeAreaInsets.top + .palette.defaultVertical,
             width: paddedBounds.width,
             height: whoOws.sizeThatFits(paddedBounds).height
         )
         let splitEquallySize = splitEqually.sizeThatFits(paddedBounds)
         splitEqually.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: whoOws.frame.maxY + .p.defaultVertical,
+            x: .palette.defaultHorizontal,
+            y: whoOws.frame.maxY + .palette.defaultVertical,
             width: splitEquallySize.width,
             height: splitEquallySize.height
         )
         let splitEquallyDescriptionSize = splitEquallyDescription.sizeThatFits(
             CGSize(
-                width: bounds.width - splitEqually.frame.maxX - .p.defaultHorizontal * 2,
-                height: .p.buttonHeight
+                width: bounds.width - splitEqually.frame.maxX - .palette.defaultHorizontal * 2,
+                height: .palette.buttonHeight
             )
         )
         splitEquallyDescription.frame = CGRect(
-            x: splitEqually.frame.maxX + .p.defaultHorizontal,
+            x: splitEqually.frame.maxX + .palette.defaultHorizontal,
             y: splitEqually.frame.midY - splitEquallyDescriptionSize.height / 2,
             width: splitEquallyDescriptionSize.width,
             height: splitEquallyDescriptionSize.height
         )
         if let text = counterpartyName.text, !text.isEmpty {
-            let chooseCounterpartyWidth = chooseCounterparty.intrinsicContentSize.width + .p.defaultHorizontal * 2
+            let chooseCounterpartyWidth = chooseCounterparty.intrinsicContentSize.width + .palette.defaultHorizontal * 2
             chooseCounterparty.frame = CGRect(
-                x: bounds.width - chooseCounterpartyWidth - .p.defaultHorizontal,
-                y: splitEqually.frame.maxY + .p.defaultVertical,
+                x: bounds.width - chooseCounterpartyWidth - .palette.defaultHorizontal,
+                y: splitEqually.frame.maxY + .palette.defaultVertical,
                 width: chooseCounterpartyWidth,
-                height: .p.buttonHeight
+                height: .palette.buttonHeight
             )
             let counterpartyAvatarSize = counterpartyAvatar.sizeThatFits(paddedBounds)
             counterpartyAvatar.frame = CGRect(
-                x: .p.defaultHorizontal,
+                x: .palette.defaultHorizontal,
                 y: chooseCounterparty.frame.midY - counterpartyAvatarSize.height / 2,
                 width: counterpartyAvatarSize.width,
                 height: counterpartyAvatarSize.height
             )
             let counterpartyNameSize = counterpartyName.sizeThatFits(
                 CGSize(
-                    width: chooseCounterparty.frame.minX - counterpartyAvatar.frame.maxX - .p.defaultHorizontal,
+                    width: chooseCounterparty.frame.minX - counterpartyAvatar.frame.maxX - .palette.defaultHorizontal,
                     height: chooseCounterparty.frame.height
                 )
             )
             counterpartyName.frame = CGRect(
-                x: counterpartyAvatar.frame.maxX + .p.defaultHorizontal,
+                x: counterpartyAvatar.frame.maxX + .palette.defaultHorizontal,
                 y: chooseCounterparty.frame.midY - counterpartyNameSize.height / 2,
                 width: counterpartyNameSize.width,
                 height: counterpartyNameSize.height
             )
         } else {
             chooseCounterparty.frame = CGRect(
-                x: .p.defaultHorizontal,
-                y: splitEqually.frame.maxY + .p.defaultVertical,
+                x: .palette.defaultHorizontal,
+                y: splitEqually.frame.maxY + .palette.defaultVertical,
                 width: paddedBounds.width,
-                height: .p.buttonHeight
+                height: .palette.buttonHeight
             )
         }
         expenseDescription.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: chooseCounterparty.frame.maxY + .p.defaultVertical,
+            x: .palette.defaultHorizontal,
+            y: chooseCounterparty.frame.maxY + .palette.defaultVertical,
             width: paddedBounds.width,
-            height: .p.buttonHeight
+            height: .palette.buttonHeight
         )
         expenseAmount.frame = CGRect(
-            x: .p.defaultHorizontal,
-            y: expenseDescription.frame.maxY + .p.defaultVertical,
+            x: .palette.defaultHorizontal,
+            y: expenseDescription.frame.maxY + .palette.defaultVertical,
             width: paddedBounds.width,
-            height: .p.buttonHeight
+            height: .palette.buttonHeight
         )
     }
 

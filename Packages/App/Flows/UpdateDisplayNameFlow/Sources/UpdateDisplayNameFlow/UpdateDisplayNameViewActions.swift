@@ -6,7 +6,7 @@ enum UpdateDisplayNameViewActionType {
     case onConfirmTap
 }
 
-struct UpdateDisplayNameViewActions {
+@MainActor struct UpdateDisplayNameViewActions {
     let state: Published<UpdateDisplayNameState>.Publisher
     let handle: @MainActor (UpdateDisplayNameViewActionType) -> Void
 }

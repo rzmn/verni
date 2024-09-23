@@ -1,17 +1,17 @@
 public extension Actor {
-    func mutate(_ block: @Sendable (isolated Self) -> Void) {
+    func performIsolated(_ block: @Sendable (isolated Self) -> Void) {
         block(self)
     }
 
-    func mutate<T: Sendable>(_ block: @Sendable (isolated Self) -> T) -> T {
+    func performIsolated<T: Sendable>(_ block: @Sendable (isolated Self) -> T) -> T {
         block(self)
     }
 
-    func mutate(_ block: @Sendable (isolated Self) async -> Void) async {
+    func performIsolated(_ block: @Sendable (isolated Self) async -> Void) async {
         await block(self)
     }
 
-    func mutate<T: Sendable>(_ block: @Sendable (isolated Self) async -> T) async -> T {
+    func performIsolated<T: Sendable>(_ block: @Sendable (isolated Self) async -> T) async -> T {
         await block(self)
     }
 }

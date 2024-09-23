@@ -7,8 +7,8 @@ class UserView: UIView {
     private var subscriptions = Set<AnyCancellable>()
     private let label = {
         let label = UILabel()
-        label.font = .p.text
-        label.textColor = .p.primary
+        label.font = .palette.text
+        label.textColor = .palette.primary
         return label
     }()
     private let avatar = {
@@ -28,7 +28,7 @@ class UserView: UIView {
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func setupView() {
@@ -37,7 +37,7 @@ class UserView: UIView {
         }
         layer.cornerRadius = 16
         layer.masksToBounds = true
-        backgroundColor = .p.backgroundContent
+        backgroundColor = .palette.backgroundContent
     }
 
     func reuse() {

@@ -41,8 +41,8 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
         logI { "found db url: \(dbUrl)" }
         do {
-            let db = try Connection(dbUrl.absoluteString)
-            let token = try db.prepare(Schema.Tokens.table)
+            let database = try Connection(dbUrl.absoluteString)
+            let token = try database.prepare(Schema.Tokens.table)
                 .first { row in
                     try row.get(Schema.Tokens.Keys.id) == host
                 }?
@@ -52,7 +52,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                 return nil
             }
             return SQLitePersistency(
-                db: db,
+                database: database,
                 dbInvalidationHandler: { [pathManager] in
                     try pathManager.invalidate(owner: host)
                 },
@@ -74,15 +74,15 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     @StorageActor private func doCreate(host: UserDto.Identifier, refreshToken: String) async throws -> Persistency {
         logI { "creating persistence..." }
         let dbUrl = try pathManager.create(owner: host).dbUrl
-        let db = try Connection(dbUrl.path)
+        let database = try Connection(dbUrl.path)
         do {
-            try createTables(for: db)
+            try createTables(for: database)
         } catch {
             try FileManager.default.removeItem(at: dbUrl)
             throw error
         }
         return SQLitePersistency(
-            db: db,
+            database: database,
             dbInvalidationHandler: {
                 try FileManager.default.removeItem(at: dbUrl)
             },
@@ -94,30 +94,30 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         )
     }
 
-    @StorageActor private func createTables(for db: Connection) throws {
-        try db.run(Schema.Tokens.table.create { t in
-            t.column(Schema.Tokens.Keys.id, primaryKey: true)
-            t.column(Schema.Tokens.Keys.token)
+    @StorageActor private func createTables(for database: Connection) throws {
+        try database.run(Schema.Tokens.table.create { table in
+            table.column(Schema.Tokens.Keys.id, primaryKey: true)
+            table.column(Schema.Tokens.Keys.token)
         })
-        try db.run(Schema.Users.table.create { t in
-            t.column(Schema.Users.Keys.id, primaryKey: true)
-            t.column(Schema.Users.Keys.payload)
+        try database.run(Schema.Users.table.create { table in
+            table.column(Schema.Users.Keys.id, primaryKey: true)
+            table.column(Schema.Users.Keys.payload)
         })
-        try db.run(Schema.Friends.table.create { t in
-            t.column(Schema.Friends.Keys.id, primaryKey: true)
-            t.column(Schema.Friends.Keys.payload)
+        try database.run(Schema.Friends.table.create { table in
+            table.column(Schema.Friends.Keys.id, primaryKey: true)
+            table.column(Schema.Friends.Keys.payload)
         })
-        try db.run(Schema.SpendingsHistory.table.create { t in
-            t.column(Schema.SpendingsHistory.Keys.id, primaryKey: true)
-            t.column(Schema.SpendingsHistory.Keys.payload)
+        try database.run(Schema.SpendingsHistory.table.create { table in
+            table.column(Schema.SpendingsHistory.Keys.id, primaryKey: true)
+            table.column(Schema.SpendingsHistory.Keys.payload)
         })
-        try db.run(Schema.SpendingCounterparties.table.create { t in
-            t.column(Schema.SpendingCounterparties.Keys.id, primaryKey: true)
-            t.column(Schema.SpendingCounterparties.Keys.payload)
+        try database.run(Schema.SpendingCounterparties.table.create { table in
+            table.column(Schema.SpendingCounterparties.Keys.id, primaryKey: true)
+            table.column(Schema.SpendingCounterparties.Keys.payload)
         })
-        try db.run(Schema.Profile.table.create { t in
-            t.column(Schema.Profile.Keys.id, primaryKey: true)
-            t.column(Schema.Profile.Keys.payload)
+        try database.run(Schema.Profile.table.create { table in
+            table.column(Schema.Profile.Keys.id, primaryKey: true)
+            table.column(Schema.Profile.Keys.payload)
         })
     }
 }

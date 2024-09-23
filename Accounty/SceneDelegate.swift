@@ -5,7 +5,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     private func app() async -> App? {
-        await (UIApplication.shared.delegate as? AppDelegate)?.app()
+        await (UIApplication.shared.delegate as? AppDelegate)?.app.value
     }
 
     func scene(

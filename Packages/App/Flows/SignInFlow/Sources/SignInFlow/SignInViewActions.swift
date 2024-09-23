@@ -10,7 +10,7 @@ enum SignInViewActionType {
     case onSignInCloseTap
 }
 
-struct SignInViewActions {
+@MainActor struct SignInViewActions {
     let state: Published<SignInState>.Publisher
     let handle: @MainActor (SignInViewActionType) -> Void
 }

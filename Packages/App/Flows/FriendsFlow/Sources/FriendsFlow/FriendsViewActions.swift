@@ -8,7 +8,7 @@ enum FriendsViewActionType {
     case onPulledToRefresh
 }
 
-struct FriendsViewActions {
+@MainActor struct FriendsViewActions {
     let state: Published<FriendsState>.Publisher
     let handle: @MainActor (FriendsViewActionType) -> Void
 }

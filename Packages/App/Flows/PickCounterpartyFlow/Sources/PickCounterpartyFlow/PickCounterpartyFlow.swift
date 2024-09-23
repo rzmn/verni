@@ -8,16 +8,13 @@ internal import ProgressHUD
 internal import Base
 
 public actor PickCounterpartyFlow {
-    private var _presenter: PickCounterpartyPresenter?
-    @MainActor private func presenter() async -> PickCounterpartyPresenter {
-        guard let presenter = await _presenter else {
-            let presenter = PickCounterpartyPresenter(router: router, actions: await makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        PickCounterpartyPresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: PickCounterpartyViewModel
     private let friendsRepository: FriendsRepository
@@ -54,7 +51,7 @@ extension PickCounterpartyFlow: Flow {
     }
 
     private func startFlow() async {
-        await self.presenter().present()
+        await self.presenter.value.present()
         friendsSubscription = await friendsRepository.friendsUpdated(ofKind: .all).subscribe { [weak self] friends in
             guard let self else { return }
             Task {
@@ -72,7 +69,7 @@ extension PickCounterpartyFlow: Flow {
         self.flowContinuation = nil
         if case .canceledManually = event {
         } else {
-            await presenter().dismiss()
+            await presenter.value.dismiss()
         }
         flowContinuation.resume(returning: event)
     }
@@ -81,13 +78,13 @@ extension PickCounterpartyFlow: Flow {
 // MARK: - User Actions
 
 extension PickCounterpartyFlow {
-    @MainActor private func makeActions() async -> PickCounterpartyViewActions {
+    @MainActor private func makeActions() -> PickCounterpartyViewActions {
         PickCounterpartyViewActions(state: viewModel.$state) { [weak self] userAction in
             guard let self else { return }
             switch userAction {
             case .onCancelTap:
                 Task.detached {
-                    await self.presenter().dismiss()
+                    await self.presenter.value.dismiss()
                 }
             case .onPickounterpartyTap(let user):
                 Task.detached {
@@ -115,12 +112,12 @@ extension PickCounterpartyFlow {
 extension PickCounterpartyFlow {
     private func refresh(firstCall: Bool, manually: Bool) async {
         if firstCall {
-            await presenter().presentLoading()
+            await presenter.value.presentLoading()
         }
         do {
             await updateFriends(friends: try await friendsRepository.refreshFriends(ofKind: .all))
         } catch {
-            await presenter().dismissLoading()
+            await presenter.value.dismissLoading()
             await viewModel.failed(error: error)
         }
     }
@@ -132,7 +129,7 @@ extension PickCounterpartyFlow {
     }
 
     private func updateFriends(friends: [FriendshipKind: [User]]) async {
-        await presenter().dismissLoading()
+        await presenter.value.dismissLoading()
         await viewModel.loaded(friends: friends)
     }
 }

@@ -7,7 +7,7 @@ enum UpdateEmailViewActionType {
     case onResendTap
 }
 
-struct UpdateEmailViewActions {
+@MainActor struct UpdateEmailViewActions {
     let state: Published<UpdateEmailState>.Publisher
     let handle: @MainActor (UpdateEmailViewActionType) -> Void
 }

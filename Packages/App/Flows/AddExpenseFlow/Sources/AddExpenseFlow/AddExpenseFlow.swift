@@ -3,6 +3,7 @@ import Domain
 import DI
 import AppBase
 import Combine
+import AsyncExtensions
 internal import DesignSystem
 internal import ProgressHUD
 internal import PickCounterpartyFlow
@@ -41,16 +42,13 @@ private extension Dictionary where Key == User.Identifier, Value == Cost {
 }
 
 public actor AddExpenseFlow {
-    private var _presenter: AddExpensePresenter?
-    @MainActor private func presenter() async -> AddExpensePresenter {
-        guard let presenter = await _presenter else {
-            let presenter = await AddExpensePresenter(router: router, actions: makeActions())
-            await mutate { s in
-                s._presenter = presenter
+    private lazy var presenter = AsyncLazyObject {
+        AddExpensePresenter(
+            router: self.router,
+            actions: await MainActor.run {
+                self.makeActions()
             }
-            return presenter
-        }
-        return presenter
+        )
     }
     private let viewModel: AddExpenseViewModel
     private let spendingInteractions: SpendingInteractionsUseCase
@@ -85,7 +83,7 @@ extension AddExpenseFlow: Flow {
     }
 
     private func startFlow() async {
-        await presenter().present()
+        await presenter.value.present()
     }
 
     private func handle(event: TerminationEvent) async {
@@ -96,7 +94,7 @@ extension AddExpenseFlow: Flow {
         self.flowContinuation = nil
         if case .canceledManually = event {
         } else {
-            await presenter().dismiss()
+            await presenter.value.dismiss()
         }
         flowContinuation.resume(returning: event)
     }
@@ -105,13 +103,13 @@ extension AddExpenseFlow: Flow {
 // MARK: - User Actions
 
 extension AddExpenseFlow {
-    @MainActor private func makeActions() async -> AddExpenseViewActions {
+    @MainActor private func makeActions() -> AddExpenseViewActions {
         AddExpenseViewActions(state: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onCancelTap:
                 Task.detached {
-                    await self.presenter().dismiss()
+                    await self.presenter.value.dismiss()
                     await self.handle(event: .canceledManually)
                 }
             case .onDoneTap:
@@ -141,16 +139,16 @@ extension AddExpenseFlow {
     private func addExpense() async {
         let state = await viewModel.state
         guard let counterparty = state.counterparty else {
-            return await presenter().needsPickCounterparty()
+            return await presenter.value.needsPickCounterparty()
         }
         guard state.canConfirm else {
-            return await presenter().errorHaptic()
+            return await presenter.value.errorHaptic()
         }
         let cost: Cost
         do {
             cost = try Cost(state.amount, format: .number)
         } catch {
-            return await presenter().errorHaptic()
+            return await presenter.value.errorHaptic()
         }
         let spending = Spending(
             date: .now,
@@ -165,20 +163,20 @@ extension AddExpenseFlow {
                 splitEqually: state.splitEqually
             )
         )
-        await presenter().presentLoading()
+        await presenter.value.presentLoading()
         do {
             try await spendingInteractions.create(spending: spending)
-            await presenter().dismissLoading()
-            await presenter().successHaptic()
+            await presenter.value.dismissLoading()
+            await presenter.value.successHaptic()
             await handle(event: .expenseAdded)
         } catch {
             switch error {
             case .noSuchUser:
-                await presenter().presentNoSuchUser()
+                await presenter.value.presentNoSuchUser()
             case .privacy:
-                await presenter().privacyViolated()
+                await presenter.value.privacyViolated()
             case .other(let error):
-                await presenter().presentGeneralError(error)
+                await presenter.value.presentGeneralError(error)
             }
         }
     }

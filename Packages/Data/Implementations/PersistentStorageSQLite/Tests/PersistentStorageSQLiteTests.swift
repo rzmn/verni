@@ -100,7 +100,7 @@ import Base
 
         let host = UserDto(
             login: UUID().uuidString,
-            friendStatus: .me,
+            friendStatus: .currentUser,
             displayName: "some name",
             avatar: UserDto.Avatar(
                 id: nil
@@ -164,7 +164,7 @@ import Base
 
         let host = UserDto(
             login: UUID().uuidString,
-            friendStatus: .me,
+            friendStatus: .currentUser,
             displayName: "some name",
             avatar: UserDto.Avatar(
                 id: nil

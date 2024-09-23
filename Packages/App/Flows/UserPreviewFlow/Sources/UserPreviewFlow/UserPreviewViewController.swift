@@ -35,7 +35,7 @@ internal import Base
 
     private func menuActions(by state: UserPreviewState) -> [UIAction] {
         switch state.user.status {
-        case .me:
+        case .currentUser:
             return []
         case .outgoing:
             return [
@@ -64,7 +64,7 @@ internal import Base
                     handler: curry(model.handle)(.onUnfriendTap) • nop
                 )
             ]
-        case .no:
+        case .notAFriend:
             return [
                 UIAction(
                     title: "friend_req_send".localized,
