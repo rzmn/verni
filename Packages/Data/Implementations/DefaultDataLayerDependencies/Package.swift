@@ -41,7 +41,9 @@ let package = Package(
                 "PersistentStorageSQLite",
                 "DefaultApiImplementation",
                 "AsyncExtensions",
-                "Base"
+                "Base",
+                "ApiService",
+                "Networking"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

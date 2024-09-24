@@ -45,6 +45,7 @@ let package = Package(
             name: "DefaultDependencies",
             dependencies: [
                 "DI",
+                "Logging",
                 "Domain",
                 "Base",
                 "DataLayerDependencies",
