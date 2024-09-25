@@ -46,7 +46,7 @@ public actor AddExpenseFlow {
         AddExpensePresenter(
             router: self.router,
             actions: await MainActor.run {
-                self.makeActions()
+                self.makeStore()
             }
         )
     }
@@ -103,8 +103,8 @@ extension AddExpenseFlow: Flow {
 // MARK: - User Actions
 
 extension AddExpenseFlow {
-    @MainActor private func makeActions() -> AddExpenseViewModel {
-        AddExpenseViewModel(state: viewModel.state) { [weak self] action in
+    @MainActor private func makeStore() -> Store<AddExpenseState, AddExpenseUserAction> {
+        Store(current: viewModel.state, publisher: viewModel.$state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onCancelTap:

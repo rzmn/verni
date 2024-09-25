@@ -7,7 +7,7 @@ internal import DesignSystem
 internal import Base
 
 struct AddExpenseView: View {
-    @StateObject var viewModel: AddExpenseViewModel
+    @StateObject var viewModel: Store<AddExpenseState, AddExpenseUserAction>
 
     var body: some View {
         VStack {
@@ -65,10 +65,10 @@ struct AddExpenseView: View {
 
 extension AddExpenseView {
     class Adapter: ViewProtocol {
-        let model: AddExpenseViewModel
+        let model: Store<AddExpenseState, AddExpenseUserAction>
         private let host: UIHostingController<AddExpenseView>
 
-        required init(model: AddExpenseViewModel) {
+        required init(model: Store<AddExpenseState, AddExpenseUserAction>) {
             self.model = model
             host = UIHostingController(rootView: AddExpenseView(viewModel: model))
         }
@@ -81,8 +81,8 @@ extension AddExpenseView {
 
 #Preview {
     AddExpenseView(
-        viewModel: AddExpenseViewModel(
-            state: AddExpenseState(
+        viewModel: Store<AddExpenseState, AddExpenseUserAction>(
+            current: AddExpenseState(
                 currencies: [
                     .euro, .russianRuble, .unknown("BUB")
                 ],

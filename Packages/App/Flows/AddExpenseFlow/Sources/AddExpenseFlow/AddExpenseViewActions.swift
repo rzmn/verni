@@ -1,7 +1,7 @@
 import Domain
 import Combine
 
-enum AddExpenseViewActionType: Sendable {
+enum AddExpenseUserAction: Sendable {
     case onCancelTap
     case onDoneTap
     case onPickCounterpartyTap
@@ -11,12 +11,17 @@ enum AddExpenseViewActionType: Sendable {
     case onExpenseAmountChanged(String)
 }
 
-@MainActor final class AddExpenseViewModel: ObservableObject {
-    var state: AddExpenseState
-    let handle: @MainActor (AddExpenseViewActionType) -> Void
+@MainActor final class Store<State: Sendable & Equatable, Action: Sendable>: ObservableObject {
+    @Published private(set) var state: State
+    let handle: @MainActor (Action) -> Void
 
-    init(state: AddExpenseState, handle: @MainActor @escaping (AddExpenseViewActionType) -> Void) {
-        self.state = state
+    init(
+        current: State,
+        publisher: Published<State>.Publisher? = nil,
+        handle: @MainActor @escaping (Action) -> Void
+    ) {
+        self.state = current
         self.handle = handle
+        publisher?.assign(to: &$state)
     }
 }

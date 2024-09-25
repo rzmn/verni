@@ -1,7 +1,7 @@
 import AppBase
 import UIKit
 
-class AddExpenseViewController: ViewController<AddExpenseView.Adapter, AddExpenseViewModel> {
+class AddExpenseViewController: ViewController<AddExpenseView.Adapter, Store<AddExpenseState, AddExpenseUserAction>> {
     override func viewDidLoad() {
         super.viewDidLoad()
         isModalInPresentation = true
