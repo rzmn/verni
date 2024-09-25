@@ -1,10 +1,14 @@
 import Domain
 import AppBase
 
-struct AddExpenseState: Equatable {
-    enum ExpenseOwnership: Equatable {
+struct AddExpenseState: Equatable, Sendable {
+    enum ExpenseOwnership: Equatable, Sendable, Identifiable {
         case iOwe
         case iAmOwned
+
+        var id: ExpenseOwnership {
+            self
+        }
     }
 
     let currencies: [Currency]
@@ -14,6 +18,7 @@ struct AddExpenseState: Equatable {
     let amount: String
     let splitEqually: Bool
     let expenseOwnership: ExpenseOwnership
+    let expenseOwnershipSelection: [ExpenseOwnership]
 
     let amountHint: String?
     let expenseDescriptionHint: String?

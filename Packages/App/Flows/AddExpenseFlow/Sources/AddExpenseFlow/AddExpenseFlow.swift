@@ -50,7 +50,7 @@ public actor AddExpenseFlow {
             }
         )
     }
-    private let viewModel: AddExpenseViewModel
+    private let viewModel: AddExpenseViewInteractor
     private let spendingInteractions: SpendingInteractionsUseCase
     private let di: ActiveSessionDIContainer
     private let router: AppRouter
@@ -61,7 +61,7 @@ public actor AddExpenseFlow {
         self.di = di
         self.router = router
         spendingInteractions = di.spendingInteractionsUseCase()
-        viewModel = await AddExpenseViewModel(counterparty: counterparty)
+        viewModel = await AddExpenseViewInteractor(counterparty: counterparty)
     }
 }
 
@@ -103,8 +103,8 @@ extension AddExpenseFlow: Flow {
 // MARK: - User Actions
 
 extension AddExpenseFlow {
-    @MainActor private func makeActions() -> AddExpenseViewActions {
-        AddExpenseViewActions(state: viewModel.$state) { [weak self] action in
+    @MainActor private func makeActions() -> AddExpenseViewModel {
+        AddExpenseViewModel(state: viewModel.state) { [weak self] action in
             guard let self else { return }
             switch action {
             case .onCancelTap:
@@ -122,8 +122,8 @@ extension AddExpenseFlow {
                 }
             case .onSplitRuleTap(let equally):
                 viewModel.splitEqually = equally
-            case .onOwnershipTap(let iOwe):
-                viewModel.expenseOwnership = iOwe ? .iOwe : .iAmOwned
+            case .onOwnershipSelected(let rule):
+                viewModel.expenseOwnership = rule
             case .onDescriptionChanged(let expenseDescription):
                 viewModel.description = expenseDescription
             case .onExpenseAmountChanged(let expenseAmount):

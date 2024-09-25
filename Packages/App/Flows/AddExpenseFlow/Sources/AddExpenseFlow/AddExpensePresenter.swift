@@ -3,9 +3,9 @@ import UIKit
 
 @MainActor class AddExpensePresenter: Presenter {
     let router: AppRouter
-    private let viewActions: AddExpenseViewActions
+    private let viewActions: AddExpenseViewModel
 
-    init(router: AppRouter, actions: AddExpenseViewActions) {
+    init(router: AppRouter, actions: AddExpenseViewModel) {
         self.router = router
         self.viewActions = actions
     }

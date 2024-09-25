@@ -22,10 +22,6 @@ public func • <A, B, C>(f: @escaping (B) -> C, g: @escaping (A) -> B) -> (A) -
     return { a in f(g(a)) }
 }
 
-public func • <A, B, C>(f: @escaping (B) throws -> C, g: @escaping (A) throws -> B) -> (A) throws -> C {
-    return { a in try f(g(a)) }
-}
-
 public func curry<A, B>(_ f: @escaping (A) -> B) -> (A) -> () -> B {
     return { a in { f(a) } }
 }

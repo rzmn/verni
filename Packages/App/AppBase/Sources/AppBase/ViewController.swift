@@ -18,8 +18,24 @@ import UIKit
     }
 
     open override func loadView() {
+
         content = Content(model: model)
-        view = content.view
+        if let host = content.view.closestResponder(of: UIViewController.self) {
+            view = UIView()
+            addChild(host)
+            view.addSubview(content.view)
+            content.view.frame = view.bounds
+            host.didMove(toParent: self)
+        } else {
+            view = content.view
+        }
+    }
+
+    open override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if view !== content.view {
+            content.view.frame = view.bounds
+        }
     }
 
     required public init?(coder: NSCoder) {

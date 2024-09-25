@@ -2,7 +2,7 @@ import Foundation
 import Combine
 import Domain
 
-@MainActor class AddExpenseViewModel {
+@MainActor class AddExpenseViewInteractor {
     typealias ExpenseOwnership = AddExpenseState.ExpenseOwnership
 
     @Published var state: AddExpenseState
@@ -28,6 +28,7 @@ import Domain
             amount: "",
             splitEqually: true,
             expenseOwnership: .iOwe,
+            expenseOwnershipSelection: [.iOwe, .iAmOwned],
             amountHint: nil,
             expenseDescriptionHint: nil
         )
@@ -39,10 +40,10 @@ import Domain
         amount = initial.amount
         amountHint = initial.amountHint
         expenseDescriptionHint = initial.expenseDescriptionHint
-        setupStateBuilder()
+        setupStateBuilder(initialState: initial)
     }
 
-    private func setupStateBuilder() {
+    private func setupStateBuilder(initialState: AddExpenseState) {
         $description
             .map { description -> String? in
                 guard !description.isEmpty else {
@@ -86,6 +87,7 @@ import Domain
                 amount: amount,
                 splitEqually: splitEqually,
                 expenseOwnership: expenseOwnership,
+                expenseOwnershipSelection: initialState.expenseOwnershipSelection,
                 amountHint: amountHint,
                 expenseDescriptionHint: descriptionHint
             )

@@ -12,4 +12,10 @@ extension UIResponder {
             return context.isInteractive
         }
     }
+
+    public func closestResponder<T>(of type: T.Type) -> T? {
+        sequence(first: self, next: \.next).lazy
+            .compactMap { $0 as? T }
+            .first
+    }
 }
