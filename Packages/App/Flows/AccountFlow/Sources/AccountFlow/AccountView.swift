@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class AccountView: View<AccountViewActions> {
+class AccountView: UIKitBasedView<AccountViewActions> {
     private let updateAvatar = Button(
         config: Button.Config(
             style: .primary,

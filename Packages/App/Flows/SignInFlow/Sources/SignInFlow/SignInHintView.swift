@@ -4,7 +4,7 @@ import Combine
 internal import DesignSystem
 internal import Base
 
-class SignInHintView: View<SignInViewActions> {
+class SignInHintView: UIKitBasedView<SignInViewActions> {
     private let button = Button(
         config: Button.Config(
             style: .primary,

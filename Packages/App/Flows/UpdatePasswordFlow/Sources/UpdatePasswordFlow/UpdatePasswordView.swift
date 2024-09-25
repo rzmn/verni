@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-@MainActor class UpdatePasswordView: View<UpdatePasswordViewActions> {
+@MainActor class UpdatePasswordView: UIKitBasedView<UpdatePasswordViewActions> {
     private let oldPassword = TextField(
         config: TextField.Config(
             placeholder: "enter_old_pwd_placeholder".localized,

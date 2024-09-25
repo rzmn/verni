@@ -14,4 +14,14 @@ enum AddExpenseViewActionType {
 @MainActor struct AddExpenseViewActions {
     let state: Published<AddExpenseState>.Publisher
     let handle: @MainActor (AddExpenseViewActionType) -> Void
+
+    static func mock(state: AddExpenseState) -> AddExpenseViewActions {
+        @MainActor class Holder {
+            @Published var state: AddExpenseState
+            init(state: AddExpenseState) {
+                self.state = state
+            }
+        }
+        return AddExpenseViewActions(state: Holder(state: state).$state, handle: { _ in })
+    }
 }

@@ -4,7 +4,7 @@ import Combine
 internal import DesignSystem
 internal import Base
 
-class UpdateEmailView: View<UpdateEmailViewActions> {
+class UpdateEmailView: UIKitBasedView<UpdateEmailViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     private let email = {

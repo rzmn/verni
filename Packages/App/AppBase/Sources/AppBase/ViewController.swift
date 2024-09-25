@@ -1,14 +1,15 @@
 import UIKit
 
-@MainActor open class ViewController<V: View<Model>, Model>: UIViewController {
+@MainActor open class ViewController<Content: ViewProtocol<Model>, Model>: UIViewController {
     public var onClose: (@MainActor (UIViewController) async -> Void)?
     public var onPop: (@MainActor () async -> Void)?
 
     public let model: Model
+    private var content: Content!
 
-    var contentView: V {
-        // swiftlint:disable:next force_cast
-        view as! V
+    public var contentView: Content {
+        loadViewIfNeeded()
+        return content
     }
 
     public init(model: Model) {
@@ -17,7 +18,8 @@ import UIKit
     }
 
     open override func loadView() {
-        view = V(model: model)
+        content = Content(model: model)
+        view = content.view
     }
 
     required public init?(coder: NSCoder) {

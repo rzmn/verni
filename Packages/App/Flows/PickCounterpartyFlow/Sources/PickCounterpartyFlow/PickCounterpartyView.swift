@@ -13,7 +13,7 @@ private extension Placeholder.Config {
     }
 }
 
-class PickCounterpartyView: View<PickCounterpartyViewActions> {
+class PickCounterpartyView: UIKitBasedView<PickCounterpartyViewActions> {
     private let table = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
         table.backgroundColor = .palette.background

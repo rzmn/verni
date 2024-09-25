@@ -6,7 +6,7 @@ internal import DesignSystem
 
 private let appIconSize: CGFloat = 158
 private let appIconBottomPadding: CGFloat = 48
-class SignInView: View<SignInViewActions> {
+class SignInView: UIKitBasedView<SignInViewActions> {
     private let appIcon = {
         let view = UIImageView()
         view.image = UIImage(named: "logo")

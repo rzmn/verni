@@ -13,7 +13,7 @@ private extension Placeholder.Config {
     }
 }
 
-class UserPreviewView: View<UserPreviewViewActions> {
+class UserPreviewView: UIKitBasedView<UserPreviewViewActions> {
     private let avatar = {
         let size: CGFloat = 88
         let frame = CGRect(origin: .zero, size: CGSize(width: size, height: size))

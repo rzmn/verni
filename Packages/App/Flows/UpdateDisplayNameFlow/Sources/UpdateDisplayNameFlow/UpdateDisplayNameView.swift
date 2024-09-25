@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class UpdateDisplayNameView: View<UpdateDisplayNameViewActions> {
+class UpdateDisplayNameView: UIKitBasedView<UpdateDisplayNameViewActions> {
     private let newDisplayName = TextField(
         config: TextField.Config(
             placeholder: "enter_new_display_name_placeholder".localized,

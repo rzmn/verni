@@ -3,7 +3,7 @@ import Domain
 import AppBase
 internal import DesignSystem
 
-class QrPreviewView: View<QrPreviewFlow> {
+class QrPreviewView: UIKitBasedView<QrPreviewFlow> {
     private let avatar = {
         let size: CGFloat = 88
         let frame = CGRect(origin: .zero, size: CGSize(width: size, height: size))

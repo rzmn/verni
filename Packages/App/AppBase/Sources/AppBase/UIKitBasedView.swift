@@ -1,7 +1,8 @@
 import UIKit
 
-open class View<Model>: UIView {
+open class UIKitBasedView<Model>: UIView, ViewProtocol {
     public let model: Model
+    open var view: UIView { self }
 
     public required init(model: Model) {
         self.model = model

@@ -2,10 +2,11 @@ import UIKit
 import Combine
 import Domain
 import AppBase
+import SwiftUI
 internal import DesignSystem
 internal import Base
 
-class AddExpenseView: View<AddExpenseViewActions> {
+class AddExpenseView: UIKitBasedView<AddExpenseViewActions> {
     private var subscriptions = Set<AnyCancellable>()
 
     private let whoOws = SegmentedControl(

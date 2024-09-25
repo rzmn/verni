@@ -14,7 +14,7 @@ private extension Placeholder.Config {
     }
 }
 
-class FriendsView: View<FriendsViewActions> {
+class FriendsView: UIKitBasedView<FriendsViewActions> {
     private let table = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
         table.backgroundColor = .palette.background

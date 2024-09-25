@@ -4,7 +4,7 @@ import Combine
 internal import Base
 internal import DesignSystem
 
-class SignUpView: View<SignUpViewActions> {
+class SignUpView: UIKitBasedView<SignUpViewActions> {
     private let email = TextField(
         config: TextField.Config(
             placeholder: "email_placeholder".localized,
