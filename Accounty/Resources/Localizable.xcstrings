@@ -774,6 +774,9 @@
     "Key" : {
       "extractionState" : "manual"
     },
+    "launching..." : {
+
+    },
     "login_go_to_signin" : {
       "extractionState" : "manual",
       "localizations" : {

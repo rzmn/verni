@@ -1,16 +1,14 @@
 import Combine
 import Domain
+import DI
 
-enum SignInViewActionType {
+enum SignInUserAction: Sendable {
     case onEmailTextUpdated(String)
     case onPasswordTextUpdated(String)
-    case onCreateAccountTap
     case onOpenSignInTap
     case onSignInTap
     case onSignInCloseTap
-}
 
-@MainActor struct SignInViewActions {
-    let state: Published<SignInState>.Publisher
-    let handle: @MainActor (SignInViewActionType) -> Void
+    case onOpenSignUpTap
+    case onSignUpVisibilityUpdatedManually(visible: Bool)
 }

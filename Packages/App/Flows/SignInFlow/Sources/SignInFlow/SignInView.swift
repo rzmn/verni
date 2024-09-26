@@ -1,193 +1,152 @@
 import UIKit
 import AppBase
 import Combine
+import SwiftUI
+internal import SignUpFlow
 internal import Base
 internal import DesignSystem
 
-private let appIconSize: CGFloat = 158
-private let appIconBottomPadding: CGFloat = 48
-class SignInView: UIKitBasedView<SignInViewActions> {
-    private let appIcon = {
-        let view = UIImageView()
-        view.image = UIImage(named: "logo")
-        view.layer.masksToBounds = true
-        view.layer.cornerRadius = appIconSize / 2
-        return view
-    }()
-    private let email = TextField(
-        config: TextField.Config(
-            placeholder: "email_placeholder".localized,
-            content: .email
-        )
-    )
-    private let password = TextField(
-        config: TextField.Config(
-            placeholder: "login_pwd_placeholder".localized,
-            content: .password
-        )
-    )
-    private let confirm = Button(
-        config: Button.Config(
-            style: .primary,
-            title: "login_go_to_signin".localized
-        )
-    )
-    private let createAccount = Button(
-        config: Button.Config(
-            style: .secondary,
-            title: "login_go_to_signup".localized
-        )
-    )
-    private let close = IconButton(
-        config: IconButton.Config(
-            icon: UIImage(systemName: "xmark.circle.fill")
-        )
-    )
-    private var keyboardBottomInset: CGFloat = 0
-    private var subscriptions = Set<AnyCancellable>()
+struct SignInView<SignUpView: View>: View {
+    @StateObject private var store: Store<SignInState, SignInUserAction>
+    @ViewBuilder private let signUpView: () -> SignUpView
 
-    override func setupView() {
-        backgroundColor = .palette.background
-        for view in [email, password, close, confirm, createAccount, appIcon] {
-            addSubview(view)
+    init(
+        store: Store<SignInState, SignInUserAction>,
+        signUpView: @escaping () -> SignUpView
+    ) {
+        _store = StateObject(wrappedValue: store)
+        self.signUpView = signUpView
+    }
+
+    var body: some View {
+        VStack {
+            Spacer()
+            openCredentialsFormButton
+            Spacer()
         }
-        close.tapPublisher
-            .sink(receiveValue: curry(model.handle)(.onSignInCloseTap))
-            .store(in: &subscriptions)
-        email.textPublisher
-            .map { $0 ?? "" }
-            .sink(receiveValue: model.handle • SignInViewActionType.onEmailTextUpdated)
-            .store(in: &subscriptions)
-        password.textPublisher
-            .map { $0 ?? "" }
-            .sink(receiveValue: model.handle • SignInViewActionType.onPasswordTextUpdated)
-            .store(in: &subscriptions)
-        confirm.tapPublisher
-            .sink { [weak self] in
-                self?.onConfirmTap()
-            }
-            .store(in: &subscriptions)
-        createAccount.tapPublisher
-            .sink { [weak self] in
-                self?.onCreateAccountTap()
-            }
-            .store(in: &subscriptions)
-        email.delegate = self
-        password.delegate = self
-        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        model.state
-            .sink(receiveValue: render)
-            .store(in: &subscriptions)
-        KeyboardObserver.shared.notifier
-            .sink { [weak self] event in
-                guard let self, !isInInteractiveTransition else { return }
-                switch event.kind {
-                case .willChangeFrame(let frame):
-                    keyboardBottomInset = max(0, bounds.maxY - convert(frame, to: window).minY)
-                case .willHide:
-                    keyboardBottomInset = 0
+        .fullScreenCover(
+            isPresented: Binding(
+                get: {
+                    store.state.presentingSignIn
+                },
+                set: { value in
+                    store.handle(.onOpenSignInTap)
                 }
-                setNeedsLayout()
-                UIView.animate(
-                    withDuration: event.animationDuration,
-                    delay: 0,
-                    options: event.options,
-                    animations: layoutIfNeeded
-                )
+            )
+        ) {
+            if let snackbar = store.state.snackbar {
+                signInCredentialsForm
+                    .snackbar(show: true, preset: snackbar)
+            } else {
+                signInCredentialsForm
             }
-            .store(in: &subscriptions)
+        }
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let closeFitSize = close.sizeThatFits(bounds.size)
-        close.frame = CGRect(
-            x: bounds.maxX - .palette.defaultHorizontal - closeFitSize.width,
-            y: safeAreaInsets.top + .palette.defaultVertical,
-            width: closeFitSize.width,
-            height: closeFitSize.height
-        )
-        appIcon.frame = CGRect(
-            x: bounds.midX - appIconSize / 2,
-            y: close.frame.maxY + .palette.defaultVertical,
-            width: appIconSize,
-            height: appIconSize
-        )
-        email.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: appIcon.frame.maxY + appIconBottomPadding,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-        password.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: email.frame.maxY + .palette.vButtonSpacing,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-        createAccount.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: bounds.maxY - safeAreaInsets.bottom - .palette.buttonHeight - .palette.defaultVertical,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-        let confirmEmailMaxY = keyboardBottomInset == 0 ? createAccount.frame.minY : (bounds.maxY - keyboardBottomInset)
-        confirm.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: confirmEmailMaxY - .palette.vButtonSpacing - .palette.buttonHeight,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-    }
-
-    private func render(state: SignInState) {
-        email.render(
-            TextField.Config(
-                placeholder: "email_placeholder".localized,
-                content: .email,
-                formatHint: state.emailHint
+    @ViewBuilder private var signInCredentialsForm: some View {
+        VStack {
+            email
+            password
+            confirm
+        }
+        .padding(.vertical, .palette.defaultVertical)
+        .padding(.horizontal, .palette.defaultHorizontal)
+        .background(Color(uiColor: .palette.background))
+        .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
+        .padding(.horizontal, .palette.defaultHorizontal)
+        .spinner(show: store.state.isLoading)
+        .fullScreenCover(
+            isPresented: Binding(
+                get: {
+                    store.state.presentingSignUp
+                },
+                set: { value in
+                    store.handle(.onSignUpVisibilityUpdatedManually(visible: value))
+                }
             )
-        )
-        password.render(
-            TextField.Config(
-                placeholder: "login_pwd_placeholder".localized,
-                content: .password
-            )
-        )
-        confirm.render(
-            config: Button.Config(
-                style: .primary,
-                title: "login_go_to_signin".localized,
-                enabled: state.canConfirm
-            )
+        ) {
+            signUpView()
+        }
+    }
+
+    @ViewBuilder private var openCredentialsFormButton: some View {
+        DS.Button(
+            style: .primary,
+            title: "login_go_to_signin".localized,
+            enabled: store.state.canConfirm
+        ) {
+            store.handle(.onOpenSignInTap)
+        }
+    }
+
+    @ViewBuilder private var email: some View {
+        DS.TextField(
+            content: .email,
+            text: Binding(
+                get: {
+                    store.state.email
+                },
+                set: { value in
+                    store.handle(.onEmailTextUpdated(value))
+                }
+            ),
+            placeholder: "email_placeholder".localized,
+            formatHint: store.state.emailHint
         )
     }
 
-    private func onConfirmTap() {
-        endEditing(true)
-        model.handle(.onSignInTap)
+    @ViewBuilder private var password: some View {
+        DS.TextField(
+            content: .newPassword,
+            text: Binding(
+                get: {
+                    store.state.password
+                },
+                set: { value in
+                    store.handle(.onPasswordTextUpdated(value))
+                }
+            ),
+            placeholder: "login_pwd_placeholder".localized,
+            formatHint: nil
+        )
     }
 
-    private func onCreateAccountTap() {
-        endEditing(true)
-        model.handle(.onCreateAccountTap)
+    @ViewBuilder private var confirm: some View {
+        DS.Button(
+            style: .primary,
+            title: "login_go_to_signin".localized,
+            enabled: store.state.canConfirm
+        ) {
+            store.handle(.onSignInTap)
+        }
     }
 
-    @objc private func onTap() {
-        endEditing(true)
+    @ViewBuilder private var signUp: some View {
+        DS.Button(
+            style: .secondary,
+            title: "login_go_to_signup".localized,
+            enabled: !store.state.presentingSignUp
+        ) {
+            store.handle(.onOpenSignUpTap)
+        }
     }
 }
 
-extension SignInView: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        switch textField {
-        case password:
-            confirm.sendActions(for: .touchUpInside)
-        case email:
-            password.becomeFirstResponder()
-        default:
-            break
-        }
-        return true
+#Preview {
+    SignInView(
+        store: Store(
+            current: SignInState(
+                email: "e@mail.com",
+                password: "",
+                emailHint: nil,
+                presentingSignUp: false,
+                presentingSignIn: true,
+                isLoading: true,
+                snackbar: .incorrectCredentials
+            ),
+            handle: { _ in }
+        )
+    ) {
+        Text("sign up screen there")
     }
 }

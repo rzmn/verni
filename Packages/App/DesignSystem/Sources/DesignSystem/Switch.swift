@@ -1,5 +1,16 @@
 import UIKit
 import Combine
+import SwiftUI
+
+extension DS {
+    public struct Switch: View {
+        public let isOn: Binding<Bool>
+
+        public var body: some View {
+            Toggle(isOn: isOn, label: {}).labelsHidden()
+        }
+    }
+}
 
 public class Switch: UISwitch {
     public struct Config {

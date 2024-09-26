@@ -1,160 +1,115 @@
 import UIKit
 import AppBase
 import Combine
+import SwiftUI
 internal import Base
 internal import DesignSystem
 
-class SignUpView: UIKitBasedView<SignUpViewActions> {
-    private let email = TextField(
-        config: TextField.Config(
-            placeholder: "email_placeholder".localized,
-            content: .email
-        )
-    )
-    private let password = TextField(
-        config: TextField.Config(
-            placeholder: "login_pwd_placeholder".localized,
-            content: .newPassword
-        )
-    )
-    private let passwordRepeat = TextField(
-        config: TextField.Config(
-            placeholder: "login_pwd_repeat_placeholder".localized,
-            content: .newPassword
-        )
-    )
-    private let confirm = Button(
-        config: Button.Config(
-            style: .primary,
-            title: "login_go_to_signup".localized
-        )
-    )
-    private var keyboardBottomInset: CGFloat = 0
-    private var subscriptions = Set<AnyCancellable>()
+struct SignUpView: View {
+    @StateObject private var store: Store<SignUpState, SignUpUserAction>
 
-    override func setupView() {
-        backgroundColor = .palette.background
-        for view in [email, password, passwordRepeat, confirm] {
-            addSubview(view)
+    init(store: Store<SignUpState, SignUpUserAction>) {
+        _store = StateObject(wrappedValue: store)
+    }
+
+    var body: some View {
+        if let snackbar = store.state.snackbar {
+            content
+                .snackbar(show: true, preset: snackbar)
+        } else {
+            content
         }
-        email.delegate = self
-        password.delegate = self
-        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap)))
-        email.textPublisher
-            .map { $0 ?? "" }
-            .sink(receiveValue: model.handle • SignUpViewActionType.onEmailTextUpdated)
-            .store(in: &subscriptions)
-        password.textPublisher
-            .map { $0 ?? "" }
-            .sink(receiveValue: model.handle • SignUpViewActionType.onPasswordTextUpdated)
-            .store(in: &subscriptions)
-        passwordRepeat.textPublisher
-            .map { $0 ?? "" }
-            .sink(receiveValue: model.handle • SignUpViewActionType.onRepeatPasswordTextUpdated)
-            .store(in: &subscriptions)
-        confirm.tapPublisher
-            .sink(receiveValue: curry(model.handle)(.onSignInTap))
-            .store(in: &subscriptions)
-        model.state
-            .sink(receiveValue: render)
-            .store(in: &subscriptions)
-        KeyboardObserver.shared.notifier
-            .sink { [weak self] event in
-                guard let self, !isInInteractiveTransition else { return }
-                switch event.kind {
-                case .willChangeFrame(let frame):
-                    keyboardBottomInset = max(0, bounds.maxY - convert(frame, to: window).minY)
-                case .willHide:
-                    keyboardBottomInset = 0
+    }
+
+    @ViewBuilder private var content: some View {
+        VStack(alignment: .center) {
+            email
+            password
+            passwordRepeat
+            confirm
+                .padding(.top, .palette.defaultVertical)
+        }
+        .padding(.vertical, .palette.defaultVertical)
+        .padding(.horizontal, .palette.defaultHorizontal)
+        .background(Color(uiColor: .palette.background))
+        .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
+        .padding(.horizontal, .palette.defaultHorizontal)
+        .spinner(show: store.state.isLoading)
+    }
+
+    @ViewBuilder private var email: some View {
+        DS.TextField(
+            content: .email,
+            text: Binding(
+                get: {
+                    store.state.email
+                },
+                set: { value in
+                    store.handle(.onEmailTextUpdated(value))
                 }
-                setNeedsLayout()
-                UIView.animate(
-                    withDuration: event.animationDuration,
-                    delay: 0,
-                    options: event.options,
-                    animations: layoutIfNeeded
-                )
-            }
-            .store(in: &subscriptions)
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        email.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: safeAreaInsets.top + .palette.defaultVertical,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-        password.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: email.frame.maxY + .palette.vButtonSpacing,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-        passwordRepeat.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: password.frame.maxY + .palette.vButtonSpacing,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
-        )
-        let bottomInset = keyboardBottomInset == 0 ? safeAreaInsets.bottom : keyboardBottomInset
-        confirm.frame = CGRect(
-            x: .palette.defaultHorizontal,
-            y: bounds.maxY - bottomInset - .palette.buttonHeight - .palette.defaultVertical,
-            width: bounds.width - .palette.defaultHorizontal * 2,
-            height: .palette.buttonHeight
+            ),
+            placeholder: "email_placeholder".localized,
+            formatHint: store.state.emailHint
         )
     }
 
-    private func render(state: SignUpState) {
-        email.render(
-            TextField.Config(
-                placeholder: "email_placeholder".localized,
-                content: .email,
-                formatHint: state.emailHint
-            )
-        )
-        password.render(
-            TextField.Config(
-                placeholder: "login_pwd_placeholder".localized,
-                content: .newPassword,
-                formatHint: state.passwordHint
-            )
-        )
-        passwordRepeat.render(
-            TextField.Config(
-                placeholder: "login_pwd_repeat_placeholder".localized,
-                content: .newPassword,
-                formatHint: state.passwordConfirmationHint
-            )
-        )
-        confirm.render(
-            config: Button.Config(
-                style: .primary,
-                title: "login_go_to_signup".localized,
-                enabled: state.canConfirm
-            )
+    @ViewBuilder private var password: some View {
+        DS.TextField(
+            content: .newPassword,
+            text: Binding(
+                get: {
+                    store.state.password
+                },
+                set: { value in
+                    store.handle(.onPasswordTextUpdated(value))
+                }
+            ),
+            placeholder: "login_pwd_placeholder".localized,
+            formatHint: store.state.passwordHint
         )
     }
 
-    @objc private func onTap() {
-        endEditing(true)
+    @ViewBuilder private var passwordRepeat: some View {
+        DS.TextField(
+            content: .newPassword,
+            text: Binding(
+                get: {
+                    store.state.passwordConfirmation
+                },
+                set: { value in
+                    store.handle(.onRepeatPasswordTextUpdated(value))
+                }
+            ),
+            placeholder: "login_pwd_placeholder".localized,
+            formatHint: store.state.passwordConfirmationHint
+        )
+    }
+
+    @ViewBuilder private var confirm: some View {
+        DS.Button(
+            style: .primary,
+            title: "login_go_to_signup".localized,
+            enabled: store.state.canConfirm
+        ) {
+            store.handle(.onSignInTap)
+        }
     }
 }
 
-extension SignUpView: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        switch textField {
-        case passwordRepeat:
-            confirm.sendActions(for: .touchUpInside)
-        case email:
-            password.becomeFirstResponder()
-        case password:
-            passwordRepeat.becomeFirstResponder()
-        default:
-            break
-        }
-        return true
-    }
+#Preview {
+    SignUpView(
+        store: Store(
+            current: SignUpState(
+                email: "e@mail.com",
+                password: "pwd",
+                passwordConfirmation: "",
+                emailHint: nil,
+                passwordHint: nil,
+                passwordConfirmationHint: "does not match",
+                isLoading: true,
+                snackbar: .emailAlreadyTaken
+            ),
+            handle: { _ in }
+        )
+    )
 }

@@ -1,5 +1,132 @@
 import UIKit
 import Combine
+import SwiftUI
+
+extension DS {
+    public struct TextField: View {
+        public enum ContentType {
+            case email
+            case displayName
+            case password
+            case oneTimeCode
+            case newPassword
+            case someDescription
+            case numberPad
+        }
+        let content: ContentType
+        let text: Binding<String>
+        let placeholder: String
+        let formatHint: String?
+
+        public init(content: ContentType, text: Binding<String>, placeholder: String, formatHint: String?) {
+            self.content = content
+            self.text = text
+            self.placeholder = placeholder
+            self.formatHint = formatHint
+        }
+
+        public var body: some View {
+            textField
+                .autocorrectionDisabled(autocorrectionDisabled)
+                .textContentType(contentType)
+                .textInputAutocapitalization(TextInputAutocapitalization(autocapitalization))
+                .keyboardType(keyboardType)
+                .frame(height: .palette.buttonHeight)
+        }
+
+        @ViewBuilder private var textField: some View {
+            if isSecure {
+                SecureField(placeholder, text: text)
+            } else {
+                SwiftUI.TextField(placeholder, text: text)
+            }
+        }
+
+        private var autocorrectionDisabled: Bool {
+            switch content {
+            case .email, .password, .newPassword, .numberPad, .displayName, .oneTimeCode:
+                return true
+            case .someDescription:
+                return false
+            }
+        }
+
+        private var contentType: UITextContentType? {
+            switch content {
+            case .email:
+                return .username
+            case .password:
+                return .password
+            case .newPassword:
+                return .newPassword
+            case .oneTimeCode:
+                return .oneTimeCode
+            case .numberPad, .someDescription, .displayName:
+                return .none
+            }
+        }
+
+        private var isSecure: Bool {
+            switch content {
+            case .password, .newPassword:
+                return true
+            case .email, .numberPad, .someDescription, .displayName, .oneTimeCode:
+                return false
+            }
+        }
+
+        private var autocapitalization: UITextAutocapitalizationType {
+            switch content {
+            case .password, .newPassword, .email, .numberPad, .displayName, .oneTimeCode:
+                return .none
+            case .someDescription:
+                return .sentences
+            }
+        }
+
+        private var keyboardType: UIKeyboardType {
+            switch content {
+            case .email:
+                return .emailAddress
+            case .numberPad:
+                return .decimalPad
+            case .oneTimeCode:
+                return .numberPad
+            case .someDescription, .password, .newPassword, .displayName:
+                return .default
+            }
+        }
+    }
+}
+
+#Preview {
+    VStack {
+        DS.TextField(
+            content: .email,
+            text: Binding(get: { "e@mail.com" }, set: { _ in }),
+            placeholder: "enter email",
+            formatHint: nil
+        ).debugBorder()
+        DS.TextField(
+            content: .email,
+            text: Binding(get: { "" }, set: { _ in }),
+            placeholder: "enter email",
+            formatHint: nil
+        )
+        DS.TextField(
+            content: .password,
+            text: Binding(get: { "password" }, set: { _ in }),
+            placeholder: "enter password",
+            formatHint: nil
+        )
+        DS.TextField(
+            content: .password,
+            text: Binding(get: { "" }, set: { _ in }),
+            placeholder: "enter password",
+            formatHint: nil
+        )
+    }
+}
 
 fileprivate extension TextField.ContentType {
     var autocorrectionType: UITextAutocorrectionType {

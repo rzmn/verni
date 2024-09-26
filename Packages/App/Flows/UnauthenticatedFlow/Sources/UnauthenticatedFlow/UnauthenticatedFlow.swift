@@ -2,42 +2,28 @@ import UIKit
 import Domain
 import DI
 import AppBase
+import SwiftUI
 internal import SignInFlow
 internal import DesignSystem
 internal import ProgressHUD
 
 public actor UnauthenticatedFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let presenter: UnauthenticatedPresenter
-
     private let signInFlow: SignInFlow
 
-    private var flowContinuation: Continuation?
-
-    public init(di: DIContainer, router: AppRouter) async {
+    public init(di: DIContainer) async {
         authUseCase = await di.authUseCase()
-        presenter = await UnauthenticatedPresenter(router: router)
-        signInFlow = await SignInFlow(di: di, router: router)
+        signInFlow = await SignInFlow(di: di)
     }
 }
 
-extension UnauthenticatedFlow: Flow {
-    public func perform() async -> ActiveSessionDIContainer {
-        await presenter.start(tabs: [signInFlow])
-        return await withCheckedContinuation { continuation in
-            flowContinuation = continuation
-            Task.detached { [weak self] in
-                guard let self else { return }
-                await handle(result: await signInFlow.perform())
+extension UnauthenticatedFlow: SUIFlow {
+    @ViewBuilder @MainActor
+    public func instantiate(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) -> some View {
+        TabView {
+            signInFlow.instantiate { session in
+                handler(session)
             }
         }
-    }
-
-    private func handle(result: ActiveSessionDIContainer) async {
-        guard let flowContinuation else {
-            return
-        }
-        self.flowContinuation = nil
-        flowContinuation.resume(returning: result)
     }
 }

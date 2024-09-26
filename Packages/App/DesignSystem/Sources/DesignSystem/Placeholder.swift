@@ -1,4 +1,32 @@
 import UIKit
+import SwiftUI
+
+extension DS {
+    public struct Placeholder: View {
+        public let message: String
+        public let icon: UIImage
+
+        public var body: some View {
+            VStack {
+                Text(message)
+                    .padding(.bottom, 22)
+                    .font(Font(UIFont.palette.secondaryText))
+                Image(uiImage: icon)
+                    .tint(Color(uiColor: .palette.accent))
+
+            }
+        }
+    }
+}
+
+#Preview {
+    VStack {
+        DS.Placeholder(
+            message: "placeholder",
+            icon: UIImage(systemName: "dollarsign")!
+        )
+    }
+}
 
 private let hPadding: CGFloat = 22
 private let iconTitleSpacing: CGFloat = 12

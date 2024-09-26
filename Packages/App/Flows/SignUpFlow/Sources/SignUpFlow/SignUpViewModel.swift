@@ -1,8 +1,10 @@
 import Foundation
 import Combine
 import Domain
+import AppBase
+internal import DesignSystem
 
-@MainActor class SignUpViewModel {
+@MainActor class SignUpViewModel: HapticManager {
     @Published var state: SignUpState
 
     @Published var password: String
@@ -11,6 +13,10 @@ import Domain
     @Published var passwordHint: String?
     @Published var passwordsMatch: Bool?
     @Published var emailHint: String?
+    @Published var isLoading: Bool
+    @Published var snackbar: Snackbar.Preset?
+
+    private var hideSnackbarTask: Task<Void, Never>?
 
     private let localEmailValidator: EmailValidationUseCase
     private let localPasswordValidator: PasswordValidationUseCase
@@ -22,7 +28,9 @@ import Domain
             passwordConfirmation: "",
             emailHint: nil,
             passwordHint: nil,
-            passwordConfirmationHint: nil
+            passwordConfirmationHint: nil,
+            isLoading: false,
+            snackbar: nil
         )
         state = initial
 
@@ -32,6 +40,8 @@ import Domain
         passwordHint = initial.passwordHint
         passwordsMatch = nil
         emailHint = initial.emailHint
+        isLoading = initial.isLoading
+        snackbar = initial.snackbar
 
         self.localEmailValidator = localEmailValidator
         self.localPasswordValidator = localPasswordValidator
@@ -39,6 +49,35 @@ import Domain
         setupStateBuilder()
     }
 
+    func loading(_ isLoading: Bool) {
+        self.isLoading = isLoading
+    }
+
+    func showSnackbar(_ snackbar: Snackbar.Preset) {
+        if let hideSnackbarTask {
+            hideSnackbarTask.cancel()
+        }
+        self.snackbar = snackbar
+        hideSnackbarTask = Task { @MainActor in
+            try? await Task.sleep(timeInterval: 3)
+            if Task.isCancelled {
+                return
+            }
+            hideSnackbar()
+        }
+    }
+
+    func hideSnackbar() {
+        if let hideSnackbarTask {
+            hideSnackbarTask.cancel()
+        }
+        self.snackbar = nil
+    }
+}
+
+// MARK: - Private
+
+extension SignUpViewModel {
     private func setupEmailValidator() {
         $email
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
@@ -86,11 +125,13 @@ import Domain
         setupPasswordRepeatMatchChecker()
         let credentials = Publishers.CombineLatest3($email, $password, $passwordRepeat)
         let hints = Publishers.CombineLatest3($emailHint, $passwordHint, $passwordsMatch)
-        Publishers.CombineLatest(credentials, hints)
+        let indicators = Publishers.CombineLatest($isLoading, $snackbar)
+        Publishers.CombineLatest3(credentials, hints, indicators)
             .map { value in
-                let (credentials, hints) = value
+                let (credentials, hints, indicators) = value
                 let (email, password, passwordRepeat) = credentials
                 let (emailHint, passwordHint, passwordsMatchHint) = hints
+                let (isLoading, snackbar) = indicators
                 return SignUpState(
                     email: email,
                     password: password,
@@ -106,7 +147,9 @@ import Domain
                         } else {
                             return nil
                         }
-                    }()
+                    }(),
+                    isLoading: isLoading,
+                    snackbar: snackbar
                 )
             }
             .removeDuplicates()

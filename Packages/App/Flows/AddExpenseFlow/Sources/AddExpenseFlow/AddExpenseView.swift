@@ -7,7 +7,7 @@ internal import DesignSystem
 internal import Base
 
 struct AddExpenseView: View {
-    @StateObject var viewModel: Store<AddExpenseState, AddExpenseUserAction>
+    @StateObject var store: Store<AddExpenseState, AddExpenseUserAction>
 
     var body: some View {
         VStack {
@@ -23,14 +23,14 @@ struct AddExpenseView: View {
         Picker(
             selection: Binding(
                 get: {
-                    viewModel.state.expenseOwnership
+                    store.state.expenseOwnership
                 },
                 set: { rule in
-                    viewModel.handle(.onOwnershipSelected(rule: rule))
+                    store.handle(.onOwnershipSelected(rule: rule))
                 }
             )
         ) {
-            ForEach(viewModel.state.expenseOwnershipSelection) { rule in
+            ForEach(store.state.expenseOwnershipSelection) { rule in
                 switch rule {
                 case .iAmOwned:
                     Text("expense_i_am_owed".localized)
@@ -49,10 +49,10 @@ struct AddExpenseView: View {
             Toggle(
                 isOn: Binding(
                     get: {
-                        viewModel.state.splitEqually
+                        store.state.splitEqually
                     },
                     set: { isOn in
-                        viewModel.handle(.onSplitRuleTap(equally: isOn))
+                        store.handle(.onSplitRuleTap(equally: isOn))
                     }
                 )
             ) {}
@@ -70,7 +70,7 @@ extension AddExpenseView {
 
         required init(model: Store<AddExpenseState, AddExpenseUserAction>) {
             self.model = model
-            host = UIHostingController(rootView: AddExpenseView(viewModel: model))
+            host = UIHostingController(rootView: AddExpenseView(store: model))
         }
 
         var view: UIView {
@@ -81,7 +81,7 @@ extension AddExpenseView {
 
 #Preview {
     AddExpenseView(
-        viewModel: Store<AddExpenseState, AddExpenseUserAction>(
+        store: Store<AddExpenseState, AddExpenseUserAction>(
             current: AddExpenseState(
                 currencies: [
                     .euro, .russianRuble, .unknown("BUB")

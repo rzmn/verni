@@ -1,5 +1,32 @@
 import UIKit
 import Combine
+import SwiftUI
+
+extension DS {
+    public protocol SegmentedControlItem: Identifiable, Hashable {
+        var title: String { get }
+        var onSelect: () -> Void { get }
+    }
+
+    public struct SegmentedControl<Item: SegmentedControlItem>: View {
+        let items: [Item]
+        let selected: Binding<Item>
+
+        public var body: some View {
+            Picker(
+                selection: selected
+            ) {
+                ForEach(items) { item in
+                    Text(item.title)
+                }
+            } label: {
+
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+        }
+    }
+}
 
 public class SegmentedControl: UISegmentedControl {
     public struct Config {

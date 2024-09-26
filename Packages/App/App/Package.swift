@@ -17,7 +17,6 @@ let package = Package(
     dependencies: [
         .package(path: "../DesignSystem"),
         .package(path: "../AppBase"),
-        .package(path: "../Flows/AuthenticatedFlow"),
         .package(path: "../Flows/UnauthenticatedFlow"),
         .package(path: "../../DI/DI"),
         .package(path: "../../Domain/Domain"),
@@ -36,7 +35,6 @@ let package = Package(
                 "Base",
                 "ProgressHUD",
                 "AppBase",
-                "AuthenticatedFlow",
                 "UnauthenticatedFlow"
             ],
             swiftSettings: [

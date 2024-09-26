@@ -19,6 +19,7 @@
 		618EDBE82C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */; };
 		61D799C72C7CB04F00F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799C62C7CB04F00F99010 /* DefaultDependencies */; };
 		61D799CB2C7CB08500F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799CA2C7CB08500F99010 /* DefaultDependencies */; };
+		61D7FA2B2CA5E46400204341 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D7FA2A2CA5E46200204341 /* App.swift */; };
 		61FD347C2C40242F002C1A5A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61FD347B2C40242F002C1A5A /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
@@ -50,11 +51,6 @@
 		61088A962C5E70DE005FFFC2 /* AppBase */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AppBase; sourceTree = "<group>"; };
 		61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultValidationUseCasesImplementation; sourceTree = "<group>"; };
 		61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileEditingUseCaseImplementation; sourceTree = "<group>"; };
-		611CABDF2C6B51E500D7DC5A /* UpdateEmailFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UpdateEmailFlow; sourceTree = "<group>"; };
-		611CABE02C6B619D00D7DC5A /* UpdateDisplayNameFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UpdateDisplayNameFlow; sourceTree = "<group>"; };
-		611CABE12C6B638A00D7DC5A /* UpdatePasswordFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UpdatePasswordFlow; sourceTree = "<group>"; };
-		611CABE22C6B663100D7DC5A /* QrPreviewFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = QrPreviewFlow; sourceTree = "<group>"; };
-		611CABE32C6B66D100D7DC5A /* UpdateAvatarFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UpdateAvatarFlow; sourceTree = "<group>"; };
 		611CCD4A2C50AE3A00289D9E /* DefaultDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDependencies; sourceTree = "<group>"; };
 		611CCD4B2C50AE3A00289D9E /* DI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DI; sourceTree = "<group>"; };
 		611CCD502C50AE3A00289D9E /* DataTransferObjects */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataTransferObjects; sourceTree = "<group>"; };
@@ -77,13 +73,10 @@
 		611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultUsersRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
 		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
-		612250812C6DD54500553D23 /* AddExpenseFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AddExpenseFlow; sourceTree = "<group>"; };
-		6126313A2C5FC49400445300 /* AuthenticatedFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthenticatedFlow; sourceTree = "<group>"; };
 		6126313B2C5FC49400445300 /* UnauthenticatedFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UnauthenticatedFlow; sourceTree = "<group>"; };
 		612631412C5FC60700445300 /* SignInFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInFlow; sourceTree = "<group>"; };
 		612631422C5FC60700445300 /* SignUpFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignUpFlow; sourceTree = "<group>"; };
 		612631462C60AAFF00445300 /* SF-Pro.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro.ttf"; sourceTree = "<group>"; };
-		612A06FE2C6104BE00F79192 /* AccountFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AccountFlow; sourceTree = "<group>"; };
 		61414F7E2C2F02A100B2C027 /* Accounty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accounty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61414F812C2F02A100B2C027 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		61414F832C2F02A100B2C027 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -94,7 +87,6 @@
 		6143A7D72C908D4E0030AAF1 /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
 		6143A7F32C90CBF90030AAF1 /* MockApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockApiImplementation; sourceTree = "<group>"; };
 		6143A7F42C9162800030AAF1 /* MockNetworkingImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockNetworkingImplementation; sourceTree = "<group>"; };
-		614AC1962C67E315005B2CD5 /* FriendsFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FriendsFlow; sourceTree = "<group>"; };
 		614AC19B2C6802EE005B2CD5 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		614AC19D2C6802EE005B2CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		614AC19F2C6802EE005B2CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -107,13 +99,12 @@
 		618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro-Display-Semibold.otf"; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
 		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
-		61BA6ED62C70ABD9006F1140 /* PickCounterpartyFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PickCounterpartyFlow; sourceTree = "<group>"; };
-		61BA6ED82C71C0B6006F1140 /* UserPreviewFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UserPreviewFlow; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
 		61D11BE82CA020CB0058B77A /* DataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataLayerDependencies; sourceTree = "<group>"; };
 		61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDataLayerDependencies; sourceTree = "<group>"; };
 		61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultReceivingPushUseCaseImplementation; sourceTree = "<group>"; };
+		61D7FA2A2CA5E46200204341 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		61D8456C2C7E69B200100E2E /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
 		61FD347B2C40242F002C1A5A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		61FD347D2C4069F8002C1A5A /* Accounty.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accounty.entitlements; sourceTree = "<group>"; };
@@ -143,7 +134,6 @@
 		61088A912C5E61C9005FFFC2 /* Flows */ = {
 			isa = PBXGroup;
 			children = (
-				612631402C5FC5AD00445300 /* Authenticated */,
 				6126313F2C5FC59F00445300 /* Unauthenticated */,
 			);
 			path = Flows;
@@ -227,19 +217,6 @@
 			path = Domain;
 			sourceTree = "<group>";
 		};
-		612250802C6DD4F500553D23 /* Account */ = {
-			isa = PBXGroup;
-			children = (
-				611CABE32C6B66D100D7DC5A /* UpdateAvatarFlow */,
-				611CABE22C6B663100D7DC5A /* QrPreviewFlow */,
-				611CABE12C6B638A00D7DC5A /* UpdatePasswordFlow */,
-				611CABE02C6B619D00D7DC5A /* UpdateDisplayNameFlow */,
-				611CABDF2C6B51E500D7DC5A /* UpdateEmailFlow */,
-				612A06FE2C6104BE00F79192 /* AccountFlow */,
-			);
-			name = Account;
-			sourceTree = "<group>";
-		};
 		6126313F2C5FC59F00445300 /* Unauthenticated */ = {
 			isa = PBXGroup;
 			children = (
@@ -248,17 +225,6 @@
 				6126313B2C5FC49400445300 /* UnauthenticatedFlow */,
 			);
 			name = Unauthenticated;
-			sourceTree = "<group>";
-		};
-		612631402C5FC5AD00445300 /* Authenticated */ = {
-			isa = PBXGroup;
-			children = (
-				61BA6ED72C71C08C006F1140 /* Friends */,
-				61BA6ED52C70AAEC006F1140 /* AddExpense */,
-				612250802C6DD4F500553D23 /* Account */,
-				6126313A2C5FC49400445300 /* AuthenticatedFlow */,
-			);
-			name = Authenticated;
 			sourceTree = "<group>";
 		};
 		612631452C60AACB00445300 /* Fonts */ = {
@@ -293,6 +259,7 @@
 		61414F802C2F02A100B2C027 /* Accounty */ = {
 			isa = PBXGroup;
 			children = (
+				61D7FA2A2CA5E46200204341 /* App.swift */,
 				61FD347A2C402416002C1A5A /* Resources */,
 				61414F812C2F02A100B2C027 /* AppDelegate.swift */,
 				61414F832C2F02A100B2C027 /* SceneDelegate.swift */,
@@ -328,24 +295,6 @@
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		61BA6ED52C70AAEC006F1140 /* AddExpense */ = {
-			isa = PBXGroup;
-			children = (
-				61BA6ED62C70ABD9006F1140 /* PickCounterpartyFlow */,
-				612250812C6DD54500553D23 /* AddExpenseFlow */,
-			);
-			name = AddExpense;
-			sourceTree = "<group>";
-		};
-		61BA6ED72C71C08C006F1140 /* Friends */ = {
-			isa = PBXGroup;
-			children = (
-				61BA6ED82C71C0B6006F1140 /* UserPreviewFlow */,
-				614AC1962C67E315005B2CD5 /* FriendsFlow */,
-			);
-			name = Friends;
 			sourceTree = "<group>";
 		};
 		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
@@ -527,6 +476,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61D7FA2B2CA5E46400204341 /* App.swift in Sources */,
 				61414F822C2F02A100B2C027 /* AppDelegate.swift in Sources */,
 				61414F842C2F02A100B2C027 /* SceneDelegate.swift in Sources */,
 			);

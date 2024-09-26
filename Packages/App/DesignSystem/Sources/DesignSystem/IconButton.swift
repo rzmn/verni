@@ -1,6 +1,30 @@
 import UIKit
 import Combine
+import SwiftUI
 internal import Base
+
+extension DS {
+    public struct IconButton: View {
+        let icon: UIImage
+        let action: () -> Void
+
+        public var body: some View {
+            SwiftUI.Button(action: action) {
+                Image(uiImage: icon)
+                    .frame(width: .palette.iconSize, height: .palette.iconSize)
+                    .tint(Color(uiColor: .palette.accent))
+            }
+        }
+    }
+}
+
+#Preview {
+    VStack {
+        DS.IconButton(
+            icon: UIImage(systemName: "dollarsign")!
+        ) {}
+    }
+}
 
 public class IconButton: UIButton {
     public struct Config {

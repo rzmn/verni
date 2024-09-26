@@ -2,32 +2,12 @@ import UIKit
 import App
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-    var window: UIWindow?
-
-    private func app() async -> App? {
-        await (UIApplication.shared.delegate as? AppDelegate)?.app.value
-    }
-
-    func scene(
-        _ scene: UIScene,
-        willConnectTo session: UISceneSession,
-        options connectionOptions: UIScene.ConnectionOptions
-    ) {
-        if let windowScene = scene as? UIWindowScene {
-            let window = UIWindow(windowScene: windowScene)
-            self.window = window
-            Task {
-                await app()?.start(on: window)
-            }
-        }
-    }
-
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        guard let context = URLContexts.first else {
-            return
-        }
-        Task {
-            await app()?.handle(url: context.url.absoluteString)
-        }
-    }
+//    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+//        guard let context = URLContexts.first else {
+//            return
+//        }
+//        Task {
+//            await app()?.handle(url: context.url.absoluteString)
+//        }
+//    }
 }

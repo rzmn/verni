@@ -2,12 +2,12 @@ import Domain
 import DI
 import UIKit
 import Logging
-internal import AppBase
+import AppBase
+import SwiftUI
 internal import DesignSystem
-internal import AuthenticatedFlow
 internal import UnauthenticatedFlow
 
-public actor App {
+public actor AppFlow {
     public let logger = Logger.shared.with(prefix: "[model.app] ")
     private let di: DIContainer
     private let authUseCase: any AuthUseCaseReturningActiveSession
@@ -25,53 +25,44 @@ public actor App {
         }
     }
     private var urlResolvers = UrlResolverContainer()
+    private let unauthenticatedFlow: UnauthenticatedFlow
 
     public init(di: DIContainer) async {
         self.di = di
         authUseCase = await di.authUseCase()
-    }
-
-    public func start(on window: UIWindow) async {
-        let router = await AppRouter(window: window)
-        logI { "launching app" }
-        let avatarsRepository = di.appCommon.avatarsRepository
-        Task { @MainActor in
+        unauthenticatedFlow = await UnauthenticatedFlow(di: di)
+        await MainActor.run {
             setupAppearance()
-            AvatarView.repository = avatarsRepository
+            AvatarView.repository = di.appCommon.avatarsRepository
         }
-        do {
-            await startAuthorizedSession(
-                session: try await authUseCase.awake(),
-                router: router
-            )
-        } catch {
-            switch error {
-            case .hasNoSession, .internalError:
-                return await startAnonynousSession(router: router)
-            }
-        }
-    }
-
-    private func startAuthorizedSession(session: ActiveSessionDIContainer, router: AppRouter) async {
-        currentSession = session
-        logI { "starting authenticated session \(session)" }
-        let flow = await AuthenticatedFlow(di: session, router: router)
-        await urlResolvers.add(flow)
-        switch await flow.perform() {
-        case .logout:
-            await urlResolvers.remove(flow)
-            await startAnonynousSession(router: router)
-        }
-    }
-
-    private func startAnonynousSession(router: AppRouter) async {
-        currentSession = nil
-        let unauthenticated = await UnauthenticatedFlow(di: di, router: router)
-        await startAuthorizedSession(session: await unauthenticated.perform(), router: router)
     }
 }
 
-extension App {
+extension AppFlow: SUIFlow {
+    public typealias FlowResult = Void
+
+    @ViewBuilder @MainActor
+    public func instantiate(handler: @escaping @MainActor (FlowResult) -> Void) -> some View {
+        AppView(
+            store: Store(
+                current: .unauthenticated,
+                handle: { _ in }
+            )
+        ) {
+            self.unauthenticatedFlow.instantiate { session in
+                self.authenticate(container: session)
+            }
+        } authenticatedView: { (session: NSObject) in
+            Text("hello from auth")
+        }
+    }
+
+    @MainActor private func authenticate(container: ActiveSessionDIContainer) {
+
+    }
+}
+
+extension AppFlow {
     public func registerPushToken(token: Data) async {
         if let currentSession {
             await currentSession
@@ -93,4 +84,3 @@ extension App {
     }
 }
 
-extension App: Loggable {}
