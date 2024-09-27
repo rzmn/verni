@@ -8,6 +8,11 @@ extension DS {
         let icon: UIImage
         let action: () -> Void
 
+        public init(icon: UIImage, action: @escaping () -> Void) {
+            self.icon = icon
+            self.action = action
+        }
+
         public var body: some View {
             SwiftUI.Button(action: action) {
                 Image(uiImage: icon)

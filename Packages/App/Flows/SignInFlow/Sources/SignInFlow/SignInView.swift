@@ -2,23 +2,26 @@ import UIKit
 import AppBase
 import Combine
 import SwiftUI
-internal import SignUpFlow
+import SignUpFlow
 internal import Base
 internal import DesignSystem
 
-struct SignInView<SignUpView: View>: View {
-    @StateObject private var store: Store<SignInState, SignInUserAction>
-    @ViewBuilder private let signUpView: () -> SignUpView
+public struct SignInView: View {
+    @StateObject private var store: Store<SignInState, SignInAction>
+    @ViewBuilder private let signUpView: () -> AnyView
+    private let actionsFactory: any ActionsFactory<SignInAction.Kind, SignInAction>
 
     init(
-        store: Store<SignInState, SignInUserAction>,
-        signUpView: @escaping () -> SignUpView
+        store: Store<SignInState, SignInAction>,
+        actionsFactory: any ActionsFactory<SignInAction.Kind, SignInAction>,
+        signUpView: @escaping () -> AnyView
     ) {
         _store = StateObject(wrappedValue: store)
         self.signUpView = signUpView
+        self.actionsFactory = actionsFactory
     }
 
-    var body: some View {
+    public var body: some View {
         VStack {
             Spacer()
             openCredentialsFormButton
@@ -30,7 +33,7 @@ struct SignInView<SignUpView: View>: View {
                     store.state.presentingSignIn
                 },
                 set: { value in
-                    store.handle(.onOpenSignInTap)
+                    dispatch(.signInCredentialsFormVisible(visible: value))
                 }
             )
         ) {
@@ -44,28 +47,43 @@ struct SignInView<SignUpView: View>: View {
     }
 
     @ViewBuilder private var signInCredentialsForm: some View {
-        VStack {
-            email
-            password
-            confirm
-        }
-        .padding(.vertical, .palette.defaultVertical)
-        .padding(.horizontal, .palette.defaultHorizontal)
-        .background(Color(uiColor: .palette.background))
-        .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
-        .padding(.horizontal, .palette.defaultHorizontal)
-        .spinner(show: store.state.isLoading)
-        .fullScreenCover(
-            isPresented: Binding(
-                get: {
-                    store.state.presentingSignUp
-                },
-                set: { value in
-                    store.handle(.onSignUpVisibilityUpdatedManually(visible: value))
+        ZStack {
+            VStack {
+                HStack {
+                    Spacer()
+                    DS.IconButton(
+                        icon: UIImage(systemName: "xmark")!
+                    ) {
+                        dispatch(.closeSignInCredentialsForm)
+                    }
+                    .padding([.top, .trailing], .palette.defaultVertical)
                 }
-            )
-        ) {
-            signUpView()
+                Spacer()
+            }
+            VStack {
+                email
+                password
+                confirm
+                signUp
+            }
+            .padding(.vertical, .palette.defaultVertical)
+            .padding(.horizontal, .palette.defaultHorizontal)
+            .background(Color(uiColor: .palette.background))
+            .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
+            .padding(.horizontal, .palette.defaultHorizontal)
+            .spinner(show: store.state.isLoading)
+            .fullScreenCover(
+                isPresented: Binding(
+                    get: {
+                        store.state.presentingSignUp
+                    },
+                    set: { value in
+                        dispatch(.signUpCredentialsFormVisible(visible: value))
+                    }
+                )
+            ) {
+                signUpView()
+            }
         }
     }
 
@@ -75,7 +93,7 @@ struct SignInView<SignUpView: View>: View {
             title: "login_go_to_signin".localized,
             enabled: store.state.canConfirm
         ) {
-            store.handle(.onOpenSignInTap)
+            dispatch(.openSignInCredentialsForm)
         }
     }
 
@@ -87,7 +105,7 @@ struct SignInView<SignUpView: View>: View {
                     store.state.email
                 },
                 set: { value in
-                    store.handle(.onEmailTextUpdated(value))
+                    dispatch(.emailTextChanged(value))
                 }
             ),
             placeholder: "email_placeholder".localized,
@@ -103,7 +121,7 @@ struct SignInView<SignUpView: View>: View {
                     store.state.password
                 },
                 set: { value in
-                    store.handle(.onPasswordTextUpdated(value))
+                    dispatch(.passwordTextChanged(value))
                 }
             ),
             placeholder: "login_pwd_placeholder".localized,
@@ -117,7 +135,7 @@ struct SignInView<SignUpView: View>: View {
             title: "login_go_to_signin".localized,
             enabled: store.state.canConfirm
         ) {
-            store.handle(.onSignInTap)
+            dispatch(.confirmSignIn)
         }
     }
 
@@ -127,8 +145,22 @@ struct SignInView<SignUpView: View>: View {
             title: "login_go_to_signup".localized,
             enabled: !store.state.presentingSignUp
         ) {
-            store.handle(.onOpenSignUpTap)
+            dispatch(.openSignUpCredentialsForm)
         }
+    }
+}
+
+extension SignInView {
+    private func dispatch(_ actionKind: SignInAction.Kind) {
+        store.dispatch(actionsFactory.action(actionKind))
+    }
+}
+
+// MARK: - Preview
+
+private struct FakeActionsFactory: ActionsFactory {
+    func action(_ kind: SignInAction.Kind) -> SignInAction {
+        .action(kind: kind)
     }
 }
 
@@ -144,9 +176,10 @@ struct SignInView<SignUpView: View>: View {
                 isLoading: true,
                 snackbar: .incorrectCredentials
             ),
-            handle: { _ in }
-        )
+            reducer: { state, _ in state }
+        ),
+        actionsFactory: FakeActionsFactory()
     ) {
-        Text("sign up screen there")
+        AnyView(Text("sign up screen there"))
     }
 }

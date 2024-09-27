@@ -16,7 +16,7 @@ public protocol Presenter: HapticManager {
     @MainActor func presentGeneralError(_ error: GeneralError)
 }
 
-public protocol HapticManager {
+public protocol HapticManager: Sendable {
     @MainActor func errorHaptic()
     @MainActor func successHaptic()
     @MainActor func warningHaptic()
@@ -39,6 +39,10 @@ public extension HapticManager {
     @MainActor func warningHaptic() {
         UINotificationFeedbackGenerator().notificationOccurred(.warning)
     }
+}
+
+public struct DefaultHapticManager: HapticManager {
+    public init() {}
 }
 
 public extension Presenter {

@@ -5,120 +5,210 @@ import AppBase
 import Combine
 import AsyncExtensions
 import SwiftUI
-internal import SignUpFlow
+import SignUpFlow
 internal import DesignSystem
 internal import ProgressHUD
 
-public actor SignInFlow {
-    private let viewModel: SignInViewModel
-    private let signUpFlow: SignUpFlow
+actor SignInFlow {
+    private let di: DIContainer
+    private let signUpFlow: any SUIFlow<SignUpTerminationEvent, SignUpView>
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let saveCredentials: SaveCredendialsUseCase
+    private let store: Store<SignInState, SignInAction>
 
-    public init(di: DIContainer) async {
+    private let haptic: HapticManager
+    @MainActor private var hideSnackbarTask: Task<Void, Never>?
+    @MainActor private var handler: (@MainActor (ActiveSessionDIContainer) -> Void)?
+
+    init(
+        di: DIContainer,
+        haptic: HapticManager,
+        signUpFlowFactory: SignUpFlowFactory
+    ) async {
+        self.di = di
+        self.haptic = haptic
         authUseCase = await di.authUseCase()
-        viewModel = await SignInViewModel(
-            localEmailValidator: di.appCommon.localEmailValidationUseCase,
-            passwordValidator: di.appCommon.localPasswordValidationUseCase
+        signUpFlow = await signUpFlowFactory.create()
+        store = await Store(
+            current: Self.initialState,
+            reducer: Self.reducer
         )
-        saveCredentials = di.appCommon.saveCredentialsUseCase
-        self.signUpFlow = await SignUpFlow(di: di)
     }
 }
 
 // MARK: - Flow
 
-extension SignInFlow: SUIFlow {
+@MainActor extension SignInFlow: SUIFlow {
+    private func with(
+        handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void
+    ) -> Self {
+        self.handler = handler
+        return self
+    }
 
-    @ViewBuilder @MainActor
-    public func instantiate(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) -> some View {
-        SignInView(
-            store: Store<SignInState, SignInUserAction>(
-                current: viewModel.state,
-                publisher: viewModel.$state
-            ) { [weak self] action in
-                guard let self else { return }
-                switch action {
-                case .onEmailTextUpdated(let text):
-                    viewModel.email = text
-                case .onPasswordTextUpdated(let text):
-                    viewModel.password = text
-                case .onOpenSignInTap:
-                    Task {
-                        await self.openSignIn()
+    @ViewBuilder func instantiate(
+        handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void
+    ) -> SignInView {
+        SignInView(store: store, actionsFactory: self.with(handler: handler)) {
+            AnyView(
+                self.signUpFlow.instantiate { event in
+                    switch event {
+                    case .canceled:
+                        self.store.dispatch(self.action(.closeSignUpCredentialsForm))
+                    case .created(let session):
+                        handler(session)
                     }
-                case .onSignInTap:
-                    Task {
-                        await self.signIn(handler: handler)
-                    }
-                case .onSignInCloseTap:
-                    Task {
-                        await self.closeSignIn()
-                    }
-                case .onOpenSignUpTap:
-                    viewModel.presentingSignUp = true
-                case .onSignUpVisibilityUpdatedManually(let visible):
-                    viewModel.presentingSignUp = visible
                 }
-            }
-        ) {
-            self.signUpFlow.instantiate { event in
-                switch event {
-                case .canceled:
-                    self.viewModel.presentingSignUp = false
-                case .created(let session):
-                    handler(session)
-                }
-            }
+            )
         }
     }
 }
 
-// MARK: - Private
+// MARK: - Actions
 
-extension SignInFlow {
-    private func signIn(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) async {
-        let state = await viewModel.state
-        guard state.canConfirm else {
-            return await viewModel.errorHaptic()
+@MainActor extension SignInFlow: ActionsFactory {
+    func action(_ kind: SignInAction.Kind) -> SignInAction {
+        switch kind {
+        case .openSignInCredentialsForm:
+            openSignInCredentialsForm()
+        case .closeSignInCredentialsForm:
+            closeSignInCredentialsForm()
+        case .signInCredentialsFormVisible(let visible):
+            signInCredentialsFormVisible(visible: visible)
+        case .openSignUpCredentialsForm:
+            openSignUpCredentialsForm()
+        case .closeSignUpCredentialsForm:
+            closeSignUpCredentialsForm()
+        case .signUpCredentialsFormVisible(let visible):
+            signUpCredentialsFormVisible(visible: visible)
+        case .emailTextChanged(let text):
+            emailTextChanged(text: text)
+        case .passwordTextChanged(let text):
+            passwordTextChanged(text: text)
+        case .spinner(let running):
+            spinner(running: running)
+        case .showSnackbar(let preset):
+            showSnackbar(preset)
+        case .hideSnackbar:
+            hideSnackbar()
+        case .confirmSignIn:
+            confirmSignIn()
         }
-        await viewModel.loading(true)
+    }
+
+    private func openSignInCredentialsForm() -> SignInAction {
+        .action(kind: .openSignInCredentialsForm) {
+            self.store.dispatch(self.signInCredentialsFormVisible(visible: true))
+        }
+    }
+
+    private func closeSignInCredentialsForm() -> SignInAction {
+        .action(kind: .openSignInCredentialsForm) {
+            self.store.dispatch(self.signInCredentialsFormVisible(visible: false))
+        }
+    }
+
+    private func signInCredentialsFormVisible(visible: Bool) -> SignInAction {
+        .action(kind: .signInCredentialsFormVisible(visible: visible))
+    }
+
+    private func signUpCredentialsFormVisible(visible: Bool) -> SignInAction {
+        .action(kind: .signUpCredentialsFormVisible(visible: visible))
+    }
+
+    private func openSignUpCredentialsForm() -> SignInAction {
+        .action(kind: .openSignUpCredentialsForm) {
+            self.store.dispatch(self.signUpCredentialsFormVisible(visible: true))
+        }
+    }
+
+    private func closeSignUpCredentialsForm() -> SignInAction {
+        .action(kind: .openSignUpCredentialsForm) {
+            self.store.dispatch(self.signUpCredentialsFormVisible(visible: false))
+        }
+    }
+
+    private func emailTextChanged(text: String) -> SignInAction {
+        .action(kind: .emailTextChanged(text)) {
+            // validation runs there
+        }
+    }
+
+    private func passwordTextChanged(text: String) -> SignInAction {
+        .action(kind: .passwordTextChanged(text)) {
+            // validation runs there
+        }
+    }
+
+    private func showSnackbar(_ preset: Snackbar.Preset) -> SignInAction {
+        .action(kind: .showSnackbar(preset)) { [weak self] in
+            guard let self else { return }
+            if let hideSnackbarTask {
+                hideSnackbarTask.cancel()
+            }
+            hideSnackbarTask = Task { @MainActor in
+                try? await Task.sleep(timeInterval: 3)
+                if Task.isCancelled {
+                    return
+                }
+                self.store.dispatch(hideSnackbar())
+            }
+        }
+    }
+
+    private func hideSnackbar() -> SignInAction {
+        .action(kind: .hideSnackbar) { [weak self] in
+            guard let self else { return }
+            if let hideSnackbarTask {
+                hideSnackbarTask.cancel()
+            }
+            hideSnackbarTask = nil
+        }
+    }
+
+    private func spinner(running: Bool) -> SignInAction {
+        .action(kind: .spinner(running))
+    }
+
+    private func confirmSignIn() -> SignInAction {
+        .action(kind: .confirmSignIn) { [weak self] in
+            guard let self else { return }
+            let state = store.state
+            guard state.canConfirm else {
+                return haptic.errorHaptic()
+            }
+            Task.detached {
+                await self.signIn(state: state)
+            }
+        }
+    }
+
+    private func signIn(state: SignInState) async {
+        store.dispatch(spinner(running: true))
         do {
             let credentials = Credentials(
                 email: state.email,
                 password: state.password
             )
             let session = try await authUseCase.login(credentials: credentials)
-            await saveCredentials.save(
+            await di.appCommon.saveCredentialsUseCase.save(
                 email: credentials.email,
                 password: credentials.password
             )
-            await handler(session)
+            store.dispatch(spinner(running: false))
+            handler?(session)
         } catch {
-            await viewModel.errorHaptic()
+            store.dispatch(spinner(running: false))
+            haptic.errorHaptic()
             switch error {
             case .incorrectCredentials:
-                await viewModel.showSnackbar(.incorrectCredentials)
+                store.dispatch(showSnackbar(.incorrectCredentials))
             case .wrongFormat:
-                await viewModel.showSnackbar(.wrongFormat)
+                store.dispatch(showSnackbar(.wrongFormat))
             case .noConnection:
-                await viewModel.showSnackbar(.noConnection)
+                store.dispatch(showSnackbar(.noConnection))
             case .other(let error):
-                await viewModel.showSnackbar(.internalError("\(error)"))
+                store.dispatch(showSnackbar(.internalError("\(error)")))
             }
-        }
-    }
-
-    private func openSignIn() async {
-        await MainActor.run {
-            viewModel.submitHaptic()
-            viewModel.presentingSignIn = true
-        }
-    }
-
-    private func closeSignIn() async {
-        await MainActor.run {
-            viewModel.presentingSignIn = false
         }
     }
 }

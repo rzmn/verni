@@ -3,25 +3,25 @@ import Domain
 import DI
 import AppBase
 import SwiftUI
-internal import SignInFlow
+import SignInFlow
 internal import DesignSystem
 internal import ProgressHUD
 
 public actor UnauthenticatedFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let signInFlow: SignInFlow
+    private let signInFlow: any SUIFlow<ActiveSessionDIContainer, SignInView>
 
-    public init(di: DIContainer) async {
+    public init(di: DIContainer, signInFlowFactory: SignInFlowFactory) async {
         authUseCase = await di.authUseCase()
-        signInFlow = await SignInFlow(di: di)
+        signInFlow = await signInFlowFactory.create()
     }
 }
 
 extension UnauthenticatedFlow: SUIFlow {
     @ViewBuilder @MainActor
     public func instantiate(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) -> some View {
-        TabView {
-            signInFlow.instantiate { session in
+        UnauthenticatedTabsView {
+            self.signInFlow.instantiate { session in
                 handler(session)
             }
         }

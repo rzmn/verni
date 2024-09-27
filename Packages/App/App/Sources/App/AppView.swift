@@ -3,12 +3,12 @@ import DI
 import AppBase
 
 struct AppView<UnauthenticatedView: View, AuthenticatedView: View, Session: AnyObject>: View {
-    @StateObject private var store: Store<AppState<Session>, AppUserAction>
+    @StateObject private var store: Store<AppState<Session>, AppUserAction<Session>>
     @ViewBuilder private let unauthenticatedView: () -> UnauthenticatedView
     @ViewBuilder private let authenticatedView: (Session) -> AuthenticatedView
 
     init(
-        store: Store<AppState<Session>, AppUserAction>,
+        store: Store<AppState<Session>, AppUserAction<Session>>,
         unauthenticatedView: @escaping () -> UnauthenticatedView,
         authenticatedView: @escaping (Session) -> AuthenticatedView
     ) {

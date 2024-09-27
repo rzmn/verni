@@ -1,6 +1,6 @@
 import DI
 
-enum AppState<Session: AnyObject>: Equatable {
+enum AppState<Session: AnyObject & Sendable>: Equatable, Sendable {
     case authenticated(Session)
     case unauthenticated
 

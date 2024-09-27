@@ -4,8 +4,12 @@ import UIKit
 import Logging
 import AppBase
 import SwiftUI
+internal import SignInFlow
+internal import SignUpFlow
 internal import DesignSystem
 internal import UnauthenticatedFlow
+
+actor AuthenticatedFlow {}
 
 public actor AppFlow {
     public let logger = Logger.shared.with(prefix: "[model.app] ")
@@ -26,15 +30,30 @@ public actor AppFlow {
     }
     private var urlResolvers = UrlResolverContainer()
     private let unauthenticatedFlow: UnauthenticatedFlow
+    private let store: Store<AppState<AuthenticatedFlow>, AppUserAction<AuthenticatedFlow>>
 
     public init(di: DIContainer) async {
         self.di = di
         authUseCase = await di.authUseCase()
-        unauthenticatedFlow = await UnauthenticatedFlow(di: di)
+        unauthenticatedFlow = await UnauthenticatedFlow(
+            di: di,
+            signInFlowFactory: DefaultSignInFlowFactory(
+                di: di,
+                haptic: DefaultHapticManager(),
+                signUpFlowFactory: DefaultSignUpFlowFactory(
+                    di: di,
+                    haptic: DefaultHapticManager()
+                )
+            )
+        )
         await MainActor.run {
             setupAppearance()
             AvatarView.repository = di.appCommon.avatarsRepository
         }
+        store = await Store(
+            current: .unauthenticated,
+            reducer: Self.reducer()
+        )
     }
 }
 
@@ -44,15 +63,12 @@ extension AppFlow: SUIFlow {
     @ViewBuilder @MainActor
     public func instantiate(handler: @escaping @MainActor (FlowResult) -> Void) -> some View {
         AppView(
-            store: Store(
-                current: .unauthenticated,
-                handle: { _ in }
-            )
+            store: store
         ) {
             self.unauthenticatedFlow.instantiate { session in
                 self.authenticate(container: session)
             }
-        } authenticatedView: { (session: NSObject) in
+        } authenticatedView: { _ in
             Text("hello from auth")
         }
     }
@@ -83,4 +99,3 @@ extension AppFlow {
         await urlResolvers.resolve(url: url)
     }
 }
-

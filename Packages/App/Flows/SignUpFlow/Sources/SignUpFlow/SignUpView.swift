@@ -5,14 +5,19 @@ import SwiftUI
 internal import Base
 internal import DesignSystem
 
-struct SignUpView: View {
-    @StateObject private var store: Store<SignUpState, SignUpUserAction>
+public struct SignUpView: View {
+    @StateObject private var store: Store<SignUpState, SignUpAction>
+    private let actionsFactory: any ActionsFactory<SignUpAction.Kind, SignUpAction>
 
-    init(store: Store<SignUpState, SignUpUserAction>) {
+    init(
+        store: Store<SignUpState, SignUpAction>,
+        actionsFactory: any ActionsFactory<SignUpAction.Kind, SignUpAction>
+    ) {
         _store = StateObject(wrappedValue: store)
+        self.actionsFactory = actionsFactory
     }
 
-    var body: some View {
+    public var body: some View {
         if let snackbar = store.state.snackbar {
             content
                 .snackbar(show: true, preset: snackbar)
@@ -22,19 +27,33 @@ struct SignUpView: View {
     }
 
     @ViewBuilder private var content: some View {
-        VStack(alignment: .center) {
-            email
-            password
-            passwordRepeat
-            confirm
-                .padding(.top, .palette.defaultVertical)
+        ZStack {
+            VStack {
+                HStack {
+                    Spacer()
+                    DS.IconButton(
+                        icon: UIImage(systemName: "xmark")!
+                    ) {
+                        dispatch(.closeSignUp)
+                    }
+                    .padding([.top, .trailing], .palette.defaultVertical)
+                }
+                Spacer()
+            }
+            VStack(alignment: .center) {
+                email
+                password
+                passwordRepeat
+                confirm
+                    .padding(.top, .palette.defaultVertical)
+            }
+            .padding(.vertical, .palette.defaultVertical)
+            .padding(.horizontal, .palette.defaultHorizontal)
+            .background(Color(uiColor: .palette.background))
+            .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
+            .padding(.horizontal, .palette.defaultHorizontal)
+            .spinner(show: store.state.isLoading)
         }
-        .padding(.vertical, .palette.defaultVertical)
-        .padding(.horizontal, .palette.defaultHorizontal)
-        .background(Color(uiColor: .palette.background))
-        .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
-        .padding(.horizontal, .palette.defaultHorizontal)
-        .spinner(show: store.state.isLoading)
     }
 
     @ViewBuilder private var email: some View {
@@ -45,7 +64,7 @@ struct SignUpView: View {
                     store.state.email
                 },
                 set: { value in
-                    store.handle(.onEmailTextUpdated(value))
+                    dispatch(.emailTextChanged(value))
                 }
             ),
             placeholder: "email_placeholder".localized,
@@ -61,7 +80,7 @@ struct SignUpView: View {
                     store.state.password
                 },
                 set: { value in
-                    store.handle(.onPasswordTextUpdated(value))
+                    dispatch(.passwordTextChanged(value))
                 }
             ),
             placeholder: "login_pwd_placeholder".localized,
@@ -77,7 +96,7 @@ struct SignUpView: View {
                     store.state.passwordConfirmation
                 },
                 set: { value in
-                    store.handle(.onRepeatPasswordTextUpdated(value))
+                    dispatch(.passwordRepeatTextChanged(value))
                 }
             ),
             placeholder: "login_pwd_placeholder".localized,
@@ -91,8 +110,22 @@ struct SignUpView: View {
             title: "login_go_to_signup".localized,
             enabled: store.state.canConfirm
         ) {
-            store.handle(.onSignInTap)
+            dispatch(.confirmSignUp)
         }
+    }
+}
+
+extension SignUpView {
+    private func dispatch(_ actionKind: SignUpAction.Kind) {
+        store.dispatch(actionsFactory.action(actionKind))
+    }
+}
+
+// MARK: - Preview
+
+private struct FakeActionsFactory: ActionsFactory {
+    func action(_ kind: SignUpAction.Kind) -> SignUpAction {
+        .action(kind: kind)
     }
 }
 
@@ -109,7 +142,8 @@ struct SignUpView: View {
                 isLoading: true,
                 snackbar: .emailAlreadyTaken
             ),
-            handle: { _ in }
-        )
+            reducer: { state, _ in state }
+        ),
+        actionsFactory: FakeActionsFactory()
     )
 }

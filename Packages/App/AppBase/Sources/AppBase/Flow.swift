@@ -7,7 +7,7 @@ public protocol Flow: Sendable {
     func perform() async -> FlowResult
 }
 
-public protocol SUIFlow: Sendable {
+public protocol SUIFlow<FlowResult, Body>: Sendable {
     associatedtype FlowResult: Sendable
     associatedtype Body: View
 

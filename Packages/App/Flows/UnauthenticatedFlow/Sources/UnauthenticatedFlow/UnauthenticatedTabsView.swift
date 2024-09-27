@@ -1,7 +1,7 @@
 import UIKit
 import AppBase
 import SwiftUI
-internal import SignInFlow
+import SignInFlow
 
 struct UnauthenticatedTabsView<SignInView: View>: View {
     @ViewBuilder private let signInView: () -> SignInView
@@ -17,5 +17,11 @@ struct UnauthenticatedTabsView<SignInView: View>: View {
                     Label("Menu", systemImage: "list.dash")
                 }
         }
+    }
+}
+
+#Preview {
+    UnauthenticatedTabsView {
+        Text("sign in view")
     }
 }
