@@ -27,38 +27,24 @@ public struct SignUpView: View {
     }
 
     @ViewBuilder private var content: some View {
-        ZStack {
-            VStack {
-                HStack {
-                    Spacer()
-                    DS.IconButton(
-                        icon: UIImage(systemName: "xmark")!
-                    ) {
-                        dispatch(.closeSignUp)
-                    }
-                    .padding([.top, .trailing], .palette.defaultVertical)
-                }
-                Spacer()
-            }
-            VStack(alignment: .center) {
-                email
-                password
-                passwordRepeat
-                confirm
-                    .padding(.top, .palette.defaultVertical)
-            }
-            .padding(.vertical, .palette.defaultVertical)
-            .padding(.horizontal, .palette.defaultHorizontal)
-            .background(Color(uiColor: .palette.background))
-            .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
-            .padding(.horizontal, .palette.defaultHorizontal)
-            .spinner(show: store.state.isLoading)
+        VStack(alignment: .center) {
+            email
+            password
+            passwordRepeat
+            confirm
+                .padding(.top, .palette.defaultVertical)
         }
+        .padding(.vertical, .palette.defaultVertical)
+        .padding(.horizontal, .palette.defaultHorizontal)
+        .background(Color.palette.background)
+        .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
+        .padding(.horizontal, .palette.defaultHorizontal)
+        .spinner(show: store.state.isLoading)
     }
 
     @ViewBuilder private var email: some View {
-        DS.TextField(
-            content: .email,
+        TextField(
+            "email_placeholder".localized,
             text: Binding(
                 get: {
                     store.state.email
@@ -66,15 +52,14 @@ public struct SignUpView: View {
                 set: { value in
                     dispatch(.emailTextChanged(value))
                 }
-            ),
-            placeholder: "email_placeholder".localized,
-            formatHint: store.state.emailHint
+            )
         )
+        .textFieldStyle(content: .email, formatHint: store.state.emailHint)
     }
 
     @ViewBuilder private var password: some View {
-        DS.TextField(
-            content: .newPassword,
+        SecureField(
+            "login_pwd_placeholder".localized,
             text: Binding(
                 get: {
                     store.state.password
@@ -82,15 +67,14 @@ public struct SignUpView: View {
                 set: { value in
                     dispatch(.passwordTextChanged(value))
                 }
-            ),
-            placeholder: "login_pwd_placeholder".localized,
-            formatHint: store.state.passwordHint
+            )
         )
+        .textFieldStyle(content: .newPassword, formatHint: store.state.passwordHint)
     }
 
     @ViewBuilder private var passwordRepeat: some View {
-        DS.TextField(
-            content: .newPassword,
+        SecureField(
+            "login_pwd_placeholder".localized,
             text: Binding(
                 get: {
                     store.state.passwordConfirmation
@@ -98,20 +82,18 @@ public struct SignUpView: View {
                 set: { value in
                     dispatch(.passwordRepeatTextChanged(value))
                 }
-            ),
-            placeholder: "login_pwd_placeholder".localized,
-            formatHint: store.state.passwordConfirmationHint
+            )
         )
+        .textFieldStyle(content: .newPassword, formatHint: store.state.passwordConfirmationHint)
     }
 
     @ViewBuilder private var confirm: some View {
-        DS.Button(
-            style: .primary,
-            title: "login_go_to_signup".localized,
-            enabled: store.state.canConfirm
-        ) {
+        Button {
             dispatch(.confirmSignUp)
+        } label: {
+            Text("login_go_to_signup".localized)
         }
+        .buttonStyle(type: .primary, enabled: store.state.canConfirm)
     }
 }
 

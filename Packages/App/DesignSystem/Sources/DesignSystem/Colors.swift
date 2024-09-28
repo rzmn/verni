@@ -1,4 +1,4 @@
-import UIKit
+import SwiftUI
 
 private extension UIColor {
     static func rgb(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
@@ -11,9 +11,37 @@ private extension UIColor {
     }
 }
 
-extension UIColor {
+extension Color {
     public enum Palette {
-        public static var accent: UIColor {
+        public static var accent: Color {
+            Color(uiColor: _accent)
+        }
+        public static var iconSecondary: Color {
+            Color(uiColor: _iconSecondary)
+        }
+        public static var separator: Color {
+            Color(uiColor: _separator)
+        }
+        public static var primary: Color {
+            Color(uiColor: _primary)
+        }
+        public static var backgroundContent: Color {
+            Color(uiColor: _backgroundContent)
+        }
+        public static var background: Color {
+            Color(uiColor: _background)
+        }
+        public static var destructive: Color {
+            Color(uiColor: _destructive)
+        }
+        public static var positive: Color {
+            Color(uiColor: _positive)
+        }
+        public static var destructiveBackground: Color {
+            Color(uiColor: _destructiveBackground)
+        }
+
+        private static var _accent: UIColor {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
@@ -24,15 +52,15 @@ extension UIColor {
             }
         }
 
-        public static var iconSecondary: UIColor {
-            accent.withAlphaComponent(0.34)
+        private static var _iconSecondary: UIColor {
+            _accent.withAlphaComponent(0.34)
         }
 
-        public static var separator: UIColor {
-            iconSecondary
+        private static var _separator: UIColor {
+            _iconSecondary
         }
 
-        public static var primary: UIColor {
+        private static var _primary: UIColor {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
@@ -43,7 +71,7 @@ extension UIColor {
             }
         }
 
-        public static var backgroundContent: UIColor {
+        private static var _backgroundContent: UIColor {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
@@ -54,7 +82,7 @@ extension UIColor {
             }
         }
 
-        public static var background: UIColor {
+        private static var _background: UIColor {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
@@ -65,7 +93,7 @@ extension UIColor {
             }
         }
 
-        public static var destructive: UIColor {
+        private static var _destructive: UIColor {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
@@ -76,19 +104,19 @@ extension UIColor {
             }
         }
 
-        public static var positive: UIColor {
+        private static var _positive: UIColor {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
-                    return rgb(118, 171, 174)
+                    return .rgb(118, 171, 174)
                 default:
-                    return rgb(87, 166, 161)
+                    return .rgb(87, 166, 161)
                 }
             }
         }
 
-        public static var destructiveBackground: UIColor {
-            destructive.withAlphaComponent(0.16)
+        private static var _destructiveBackground: UIColor {
+            _destructive.withAlphaComponent(0.16)
         }
     }
 

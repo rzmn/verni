@@ -57,19 +57,19 @@ public struct Snackbar: View {
     private var backgroundColor: Color {
         switch style {
         case .warning:
-            return Color(uiColor: .palette.backgroundContent)
+            .palette.backgroundContent
         }
     }
     private var textColor: Color {
         switch style {
         case .warning:
-            return Color(uiColor: .palette.primary)
+            .palette.primary
         }
     }
     private var iconColor: Color {
         switch style {
         case .warning:
-            return Color(uiColor: .palette.primary)
+            .palette.primary
         }
     }
 }
@@ -82,6 +82,7 @@ extension Snackbar {
         case wrongFormat
         case noConnection
         case incorrectCredentials
+        case notAuthorized
         case internalError(String)
 
         var kind: String {
@@ -96,6 +97,8 @@ extension Snackbar {
                 return "internalError"
             case .incorrectCredentials:
                 return "incorrectCredentials"
+            case .notAuthorized:
+                return "notAuthorized"
             }
         }
     }
@@ -110,6 +113,8 @@ extension Snackbar {
             self = .noConnection(show: show)
         case .incorrectCredentials:
             self = .incorrectCredentials(show: show)
+        case .notAuthorized:
+            self = .notAuthorized(show: show)
         case .internalError(let error):
             self = .internalError(show: show, error: error)
         }
@@ -156,6 +161,28 @@ extension Snackbar {
             style: .warning,
             icon: nil,
             message: "no_connection_hint".localized
+        )
+    }
+
+    private static func notAuthorized(
+        show: Bool
+    ) -> Snackbar {
+        Snackbar(
+            show: show,
+            style: .warning,
+            icon: nil,
+            message: "alert_title_unauthorized".localized
+        )
+    }
+
+    private static func noSuchUser(
+        show: Bool
+    ) -> Snackbar {
+        Snackbar(
+            show: show,
+            style: .warning,
+            icon: nil,
+            message: "alert_action_no_such_user".localized
         )
     }
 

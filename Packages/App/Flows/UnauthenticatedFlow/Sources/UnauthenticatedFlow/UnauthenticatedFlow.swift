@@ -18,8 +18,7 @@ public actor UnauthenticatedFlow {
 }
 
 extension UnauthenticatedFlow: SUIFlow {
-    @ViewBuilder @MainActor
-    public func instantiate(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) -> some View {
+    @MainActor public func instantiate(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) -> some View {
         UnauthenticatedTabsView(
             signInView: self.signInFlow.instantiate { session in
                 handler(session)

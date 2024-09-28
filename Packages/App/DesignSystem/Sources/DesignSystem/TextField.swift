@@ -2,144 +2,56 @@ import UIKit
 import Combine
 import SwiftUI
 
-extension DS {
-    public struct TextField: View {
-        public enum ContentType {
-            case email
-            case displayName
-            case password
-            case oneTimeCode
-            case newPassword
-            case someDescription
-            case numberPad
-        }
-        let content: ContentType
-        let text: Binding<String>
-        let placeholder: String
-        let formatHint: String?
+public enum TextFieldContentType {
+    case email
+    case displayName
+    case password
+    case oneTimeCode
+    case newPassword
+    case someDescription
+    case numberPad
+}
 
-        public init(content: ContentType, text: Binding<String>, placeholder: String, formatHint: String?) {
-            self.content = content
-            self.text = text
-            self.placeholder = placeholder
-            self.formatHint = formatHint
-        }
+private struct TextFieldStyle: ViewModifier {
+    let content: TextFieldContentType
+    let formatHint: String?
 
-        public var body: some View {
-            textField
+    func body(content: Content) -> some View {
+        VStack(spacing: 0) {
+            content
                 .autocorrectionDisabled(autocorrectionDisabled)
                 .textContentType(contentType)
                 .textInputAutocapitalization(TextInputAutocapitalization(autocapitalization))
                 .keyboardType(keyboardType)
                 .frame(height: .palette.buttonHeight)
-        }
-
-        @ViewBuilder private var textField: some View {
-            if isSecure {
-                SecureField(placeholder, text: text)
+            if let formatHint {
+                HStack {
+                    VStack {
+                        Text(formatHint)
+                            .font(.palette.subtitle)
+                        Spacer()
+                    }
+                    .frame(height: 18)
+                    Spacer()
+                }
             } else {
-                SwiftUI.TextField(placeholder, text: text)
-            }
-        }
-
-        private var autocorrectionDisabled: Bool {
-            switch content {
-            case .email, .password, .newPassword, .numberPad, .displayName, .oneTimeCode:
-                return true
-            case .someDescription:
-                return false
-            }
-        }
-
-        private var contentType: UITextContentType? {
-            switch content {
-            case .email:
-                return .username
-            case .password:
-                return .password
-            case .newPassword:
-                return .newPassword
-            case .oneTimeCode:
-                return .oneTimeCode
-            case .numberPad, .someDescription, .displayName:
-                return .none
-            }
-        }
-
-        private var isSecure: Bool {
-            switch content {
-            case .password, .newPassword:
-                return true
-            case .email, .numberPad, .someDescription, .displayName, .oneTimeCode:
-                return false
-            }
-        }
-
-        private var autocapitalization: UITextAutocapitalizationType {
-            switch content {
-            case .password, .newPassword, .email, .numberPad, .displayName, .oneTimeCode:
-                return .none
-            case .someDescription:
-                return .sentences
-            }
-        }
-
-        private var keyboardType: UIKeyboardType {
-            switch content {
-            case .email:
-                return .emailAddress
-            case .numberPad:
-                return .decimalPad
-            case .oneTimeCode:
-                return .numberPad
-            case .someDescription, .password, .newPassword, .displayName:
-                return .default
+                Spacer()
+                    .frame(height: 18)
             }
         }
     }
-}
 
-#Preview {
-    VStack {
-        DS.TextField(
-            content: .email,
-            text: Binding(get: { "e@mail.com" }, set: { _ in }),
-            placeholder: "enter email",
-            formatHint: nil
-        ).debugBorder()
-        DS.TextField(
-            content: .email,
-            text: Binding(get: { "" }, set: { _ in }),
-            placeholder: "enter email",
-            formatHint: nil
-        )
-        DS.TextField(
-            content: .password,
-            text: Binding(get: { "password" }, set: { _ in }),
-            placeholder: "enter password",
-            formatHint: nil
-        )
-        DS.TextField(
-            content: .password,
-            text: Binding(get: { "" }, set: { _ in }),
-            placeholder: "enter password",
-            formatHint: nil
-        )
-    }
-}
-
-fileprivate extension TextField.ContentType {
-    var autocorrectionType: UITextAutocorrectionType {
-        switch self {
+    private var autocorrectionDisabled: Bool {
+        switch content {
         case .email, .password, .newPassword, .numberPad, .displayName, .oneTimeCode:
-            return .no
+            return true
         case .someDescription:
-            return .yes
+            return false
         }
     }
 
-    var contentType: UITextContentType? {
-        switch self {
+    private var contentType: UITextContentType? {
+        switch content {
         case .email:
             return .username
         case .password:
@@ -153,17 +65,8 @@ fileprivate extension TextField.ContentType {
         }
     }
 
-    var isSecure: Bool {
-        switch self {
-        case .password, .newPassword:
-            return true
-        case .email, .numberPad, .someDescription, .displayName, .oneTimeCode:
-            return false
-        }
-    }
-
-    var autocapitalization: UITextAutocapitalizationType {
-        switch self {
+    private var autocapitalization: UITextAutocapitalizationType {
+        switch content {
         case .password, .newPassword, .email, .numberPad, .displayName, .oneTimeCode:
             return .none
         case .someDescription:
@@ -171,8 +74,8 @@ fileprivate extension TextField.ContentType {
         }
     }
 
-    var keyboardType: UIKeyboardType {
-        switch self {
+    private var keyboardType: UIKeyboardType {
+        switch content {
         case .email:
             return .emailAddress
         case .numberPad:
@@ -185,89 +88,37 @@ fileprivate extension TextField.ContentType {
     }
 }
 
-public class TextField: UITextField {
-    public enum ContentType {
-        case email
-        case displayName
-        case password
-        case oneTimeCode
-        case newPassword
-        case someDescription
-        case numberPad
+extension View {
+    public func textFieldStyle(content: TextFieldContentType, formatHint: String?) -> some View {
+        modifier(TextFieldStyle(content: content, formatHint: formatHint))
     }
+}
 
-    public struct Config {
-        let content: ContentType
-        let placeholder: String
-        let formatHint: String?
-
-        public init(placeholder: String, content: ContentType, formatHint: String? = nil) {
-            self.content = content
-            self.placeholder = placeholder
-            self.formatHint = formatHint
-        }
-    }
-    public var textPublisher: AnyPublisher<String?, Never> {
-        textSubject.eraseToAnyPublisher()
-    }
-    private let textSubject = PassthroughSubject<String?, Never>()
-
-    private var config: Config
-    private let hintLabel = {
-        let label = UILabel()
-        label.font = .palette.secondaryText
-        label.textColor = .palette.destructive
-        return label
-    }()
-
-    public init(config: Config) {
-        self.config = config
-        super.init(frame: .zero)
-        setupView()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupView() {
-        borderStyle = .roundedRect
-        render(config)
-        for view in [hintLabel] {
-            addSubview(view)
-        }
-        clipsToBounds = false
-        addAction({ [unowned self] in
-            textSubject.send(text)
-        }, for: .editingChanged)
-    }
-
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        let hintSize = hintLabel.sizeThatFits(bounds.size)
-        hintLabel.frame = CGRect(
-            x: 2,
-            y: bounds.maxY,
-            width: hintSize.width,
-            height: hintSize.height
+#Preview {
+    VStack(spacing: 12) {
+        TextField(
+            "enter email",
+            text: Binding(get: { "e@mail.com" }, set: { _ in })
         )
-    }
-
-    public func render(_ config: Config) {
-        attributedPlaceholder = NSAttributedString(string: config.placeholder, attributes: [
-            .font: UIFont.palette.placeholder,
-            .foregroundColor: UIColor.secondaryLabel
-        ])
-        hintLabel.isHidden = config.formatHint == nil
-        if hintLabel.text != config.formatHint {
-            setNeedsLayout()
-        }
-        hintLabel.text = config.formatHint
-
-        textContentType = config.content.contentType
-        autocorrectionType = config.content.autocorrectionType
-        isSecureTextEntry = config.content.isSecure
-        autocapitalizationType = config.content.autocapitalization
-        keyboardType = config.content.keyboardType
+        .textFieldStyle(content: .email, formatHint: nil)
+        .debugBorder()
+        TextField(
+            "enter email",
+            text: Binding(get: { "" }, set: { _ in })
+        )
+        .textFieldStyle(content: .email, formatHint: "email is empty")
+        .debugBorder()
+        SecureField(
+            "enter password",
+            text: Binding(get: { "password" }, set: { _ in })
+        )
+        .textFieldStyle(content: .email, formatHint: nil)
+        .debugBorder()
+        SecureField(
+            "enter password",
+            text: Binding(get: { "" }, set: { _ in })
+        )
+        .textFieldStyle(content: .email, formatHint: "password is empty")
+        .debugBorder()
     }
 }

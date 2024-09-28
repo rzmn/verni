@@ -12,12 +12,10 @@ actor SignUpFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let store: Store<SignUpState, SignUpAction>
 
-    private let haptic: HapticManager
     @MainActor private var hideSnackbarTask: Task<Void, Never>?
     @MainActor private var handler: (@MainActor (SignUpTerminationEvent) -> Void)?
 
-    public init(di: DIContainer, haptic: HapticManager = DefaultHapticManager()) async {
-        self.haptic = haptic
+    init(di: DIContainer) async {
         authUseCase = await di.authUseCase()
         store = await Store(
             current: Self.initialState,
@@ -131,7 +129,7 @@ actor SignUpFlow {
             guard let self else { return }
             let state = store.state
             guard state.canConfirm else {
-                return haptic.errorHaptic()
+                return AppServices.default.haptic.errorHaptic()
             }
             Task.detached {
                 await self.signIn(state: state)
@@ -152,7 +150,7 @@ actor SignUpFlow {
             handler?(.created(container))
         } catch {
             store.dispatch(spinner(running: false))
-            haptic.errorHaptic()
+            AppServices.default.haptic.errorHaptic()
             switch error {
             case .alreadyTaken:
                 store.dispatch(showSnackbar(.emailAlreadyTaken))

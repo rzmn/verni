@@ -39,15 +39,12 @@ public actor AppFlow {
             di: di,
             signInFlowFactory: DefaultSignInFlowFactory(
                 di: di,
-                haptic: DefaultHapticManager(),
                 signUpFlowFactory: DefaultSignUpFlowFactory(
-                    di: di,
-                    haptic: DefaultHapticManager()
+                    di: di
                 )
             )
         )
         await MainActor.run {
-            setupAppearance()
             AvatarView.repository = di.appCommon.avatarsRepository
         }
         store = await Store(
@@ -62,9 +59,7 @@ extension AppFlow: SUIFlow {
 
     @ViewBuilder @MainActor
     public func instantiate(handler: @escaping @MainActor (FlowResult) -> Void) -> some View {
-        AppView(
-            store: store
-        ) {
+        AppView(store: store) {
             self.unauthenticatedFlow.instantiate { session in
                 self.authenticate(container: session)
             }

@@ -1,6 +1,14 @@
 import UIKit
 import Combine
+import SwiftUI
 internal import Base
+
+@MainActor public struct AppServices: Sendable {
+    public static let `default` = AppServices(keyboard: Keyboard(), haptic: DefaultHapticManager())
+
+    public let keyboard: Keyboard
+    public let haptic: HapticManager
+}
 
 private extension Notification {
     var keyboardFrame: CGRect? {
@@ -34,7 +42,7 @@ private extension Notification {
     }
 }
 
-@MainActor public class KeyboardObserver {
+@MainActor public struct Keyboard {
     public struct Event {
         public enum Kind {
             case willHide
@@ -57,46 +65,58 @@ private extension Notification {
                 return .curveEaseInOut
             }
         }
-
     }
 
-    public static let shared = KeyboardObserver()
-
-    public let notifier: PassthroughSubject<Event, Never>
-    private var subscriptions = Set<AnyCancellable>()
-
-    private init() {
-        notifier = PassthroughSubject<Event, Never>()
-        let mapper = { (notification: Notification) -> Event? in
-            guard let keyboardFrame = notification.keyboardFrame else {
-                return nil
-            }
-            let duration = notification.animationDuration ?? 0.25
-            let curve = notification.animationCurve ?? .easeInOut
-            switch notification.name {
-            case UIResponder.keyboardWillHideNotification:
-                return Event(
-                    kind: .willHide,
-                    animationDuration: duration,
-                    curve: curve
-                )
-            default:
-                return Event(
-                    kind: .willChangeFrame(keyboardFrame),
-                    animationDuration: duration,
-                    curve: curve
-                )
-            }
-        }
-        NotificationCenter.default
+    public var eventPublisher: AnyPublisher<Event, Never> {
+        let willHide = NotificationCenter.default
             .publisher(for: UIResponder.keyboardWillHideNotification)
-            .compactMap(mapper)
-            .sink(receiveValue: notifier.send)
-            .store(in: &subscriptions)
-        NotificationCenter.default
+            .compactMap(mapKeyboardNotification)
+        let willChangeFrame = NotificationCenter.default
             .publisher(for: UIResponder.keyboardWillChangeFrameNotification)
-            .compactMap(mapper)
-            .sink(receiveValue: notifier.send)
-            .store(in: &subscriptions)
+            .compactMap(mapKeyboardNotification)
+        return Publishers.Merge(willHide, willChangeFrame)
+            .eraseToAnyPublisher()
+    }
+
+    private func mapKeyboardNotification(_ notification: Notification) -> Event? {
+        guard let keyboardFrame = notification.keyboardFrame else {
+            return nil
+        }
+        let duration = notification.animationDuration ?? 0.25
+        let curve = notification.animationCurve ?? .easeInOut
+        switch notification.name {
+        case UIResponder.keyboardWillHideNotification:
+            return Event(
+                kind: .willHide,
+                animationDuration: duration,
+                curve: curve
+            )
+        default:
+            return Event(
+                kind: .willChangeFrame(keyboardFrame),
+                animationDuration: duration,
+                curve: curve
+            )
+        }
+    }
+}
+
+extension View {
+    public func keyboardDismiss() -> some View {
+        modifier(KeyboardDismiss())
+    }
+}
+
+private struct KeyboardDismiss: ViewModifier {
+    func body(content: Content) -> some View {
+        content.onTapGesture {
+            UIApplication.shared.connectedScenes
+                .filter { $0.activationState == .foregroundActive }
+                .first { $0 is UIWindowScene }
+                .flatMap { $0 as? UIWindowScene }?
+                .windows
+                .first(where: \.isKeyWindow)?
+                .endEditing(true)
+        }
     }
 }

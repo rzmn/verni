@@ -8,13 +8,13 @@ public struct Spinner: View {
             Group {
                 Circle()
                     .trim(from: 0, to: 0.7)
-                    .stroke(Color(uiColor: .palette.accent), lineWidth: 4)
+                    .stroke(Color.palette.accent, lineWidth: 4)
                     .frame(width: 44, height: 44)
                     .rotationEffect(Angle(degrees: show ? 360 : 0))
                     .animation(.linear.repeatForever(), value: show)
             }
             .padding(.all, .palette.defaultHorizontal)
-            .background(Color(uiColor: .palette.backgroundContent))
+            .background(Color.palette.backgroundContent)
             .clipShape(.rect(cornerRadius: 10))
         }
     }

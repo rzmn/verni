@@ -15,17 +15,14 @@ actor SignInFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let store: Store<SignInState, SignInAction>
 
-    private let haptic: HapticManager
     @MainActor private var hideSnackbarTask: Task<Void, Never>?
     @MainActor private var handler: (@MainActor (ActiveSessionDIContainer) -> Void)?
 
     init(
         di: DIContainer,
-        haptic: HapticManager,
         signUpFlowFactory: SignUpFlowFactory
     ) async {
         self.di = di
-        self.haptic = haptic
         authUseCase = await di.authUseCase()
         signUpFlow = await signUpFlowFactory.create()
         store = await Store(
@@ -49,8 +46,7 @@ actor SignInFlow {
 
     func instantiate(
         handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void
-    ) -> BodyBuilder
-    {
+    ) -> BodyBuilder {
         let signInBuilder = signUpFlow.instantiate(
             handler: { event in
                 switch event {
@@ -182,7 +178,7 @@ actor SignInFlow {
             guard let self else { return }
             let state = store.state
             guard state.canConfirm else {
-                return haptic.errorHaptic()
+                return AppServices.default.haptic.errorHaptic()
             }
             Task.detached {
                 await self.signIn(state: state)
@@ -206,7 +202,7 @@ actor SignInFlow {
             handler?(session)
         } catch {
             store.dispatch(spinner(running: false))
-            haptic.errorHaptic()
+            AppServices.default.haptic.errorHaptic()
             switch error {
             case .incorrectCredentials:
                 store.dispatch(showSnackbar(.incorrectCredentials))
