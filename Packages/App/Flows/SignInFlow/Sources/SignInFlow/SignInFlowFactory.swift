@@ -3,7 +3,7 @@ import AppBase
 import DI
 
 @MainActor public protocol SignInFlowFactory: Sendable {
-    func create() async -> any SUIFlow<ActiveSessionDIContainer, SignInView>
+    func create() async -> any SUIFlow<ActiveSessionDIContainer, () -> SignInView>
 }
 
 public class DefaultSignInFlowFactory: SignInFlowFactory {
@@ -21,7 +21,7 @@ public class DefaultSignInFlowFactory: SignInFlowFactory {
         self.signUpFlowFactory = signUpFlowFactory
     }
 
-    public func create() async -> any SUIFlow<ActiveSessionDIContainer, SignInView> {
+    public func create() async -> any SUIFlow<ActiveSessionDIContainer, () -> SignInView> {
         await SignInFlow(di: di, haptic: haptic, signUpFlowFactory: signUpFlowFactory)
     }
 }

@@ -7,7 +7,7 @@ public enum SignUpTerminationEvent: Sendable {
 }
 
 @MainActor public protocol SignUpFlowFactory: Sendable {
-    func create() async -> any SUIFlow<SignUpTerminationEvent, SignUpView>
+    func create() async -> any SUIFlow<SignUpTerminationEvent, () -> SignUpView>
 }
 
 public class DefaultSignUpFlowFactory: SignUpFlowFactory {
@@ -19,7 +19,7 @@ public class DefaultSignUpFlowFactory: SignUpFlowFactory {
         self.haptic = haptic
     }
 
-    public func create() async -> any SUIFlow<SignUpTerminationEvent, SignUpView> {
+    public func create() async -> any SUIFlow<SignUpTerminationEvent, () -> SignUpView> {
         await SignUpFlow(di: di, haptic: haptic)
     }
 }

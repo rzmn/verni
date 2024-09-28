@@ -29,6 +29,8 @@ actor SignUpFlow {
 // MARK: - Flow
 
 @MainActor extension SignUpFlow: SUIFlow {
+    typealias BodyBuilder = () -> SignUpView
+
     private func with(
         handler: @escaping @MainActor (SignUpTerminationEvent) -> Void
     ) -> Self {
@@ -36,12 +38,13 @@ actor SignUpFlow {
         return self
     }
 
-    @ViewBuilder
-    func instantiate(handler: @escaping @MainActor (SignUpTerminationEvent) -> Void) -> SignUpView {
-        SignUpView(
-            store: store,
-            actionsFactory: self.with(handler: handler)
-        )
+    func instantiate(handler: @escaping @MainActor (SignUpTerminationEvent) -> Void) -> BodyBuilder {
+        return {
+            SignUpView(
+                store: self.store,
+                actionsFactory: self.with(handler: handler)
+            )
+        }
     }
 }
 

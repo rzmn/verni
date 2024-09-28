@@ -7,12 +7,11 @@ public protocol Flow: Sendable {
     func perform() async -> FlowResult
 }
 
-public protocol SUIFlow<FlowResult, Body>: Sendable {
+public protocol SUIFlow<FlowResult, BodyBuilder>: Sendable {
     associatedtype FlowResult: Sendable
-    associatedtype Body: View
+    associatedtype BodyBuilder
 
-    @ViewBuilder @MainActor
-    func instantiate(handler: @MainActor @escaping (FlowResult) -> Void) -> Body
+    @MainActor func instantiate(handler: @MainActor @escaping (FlowResult) -> Void) -> BodyBuilder
 }
 
 extension Flow {

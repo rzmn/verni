@@ -11,7 +11,7 @@ internal import ProgressHUD
 
 actor SignInFlow {
     private let di: DIContainer
-    private let signUpFlow: any SUIFlow<SignUpTerminationEvent, SignUpView>
+    private let signUpFlow: any SUIFlow<SignUpTerminationEvent, () -> SignUpView>
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let store: Store<SignInState, SignInAction>
 
@@ -38,6 +38,8 @@ actor SignInFlow {
 // MARK: - Flow
 
 @MainActor extension SignInFlow: SUIFlow {
+    typealias BodyBuilder = () -> SignInView
+
     private func with(
         handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void
     ) -> Self {
@@ -45,19 +47,25 @@ actor SignInFlow {
         return self
     }
 
-    @ViewBuilder func instantiate(
+    func instantiate(
         handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void
-    ) -> SignInView {
-        SignInView(store: store, actionsFactory: self.with(handler: handler)) {
-            AnyView(
-                self.signUpFlow.instantiate { event in
-                    switch event {
-                    case .canceled:
-                        self.store.dispatch(self.action(.closeSignUpCredentialsForm))
-                    case .created(let session):
-                        handler(session)
-                    }
+    ) -> BodyBuilder
+    {
+        let signInBuilder = signUpFlow.instantiate(
+            handler: { event in
+                switch event {
+                case .canceled:
+                    self.store.dispatch(self.action(.closeSignUpCredentialsForm))
+                case .created(let session):
+                    handler(session)
                 }
+            }
+        )
+        return {
+            SignInView(
+                store: self.store,
+                actionsFactory: self.with(handler: handler),
+                signUpView: signInBuilder
             )
         }
     }

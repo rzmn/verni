@@ -9,7 +9,7 @@ internal import ProgressHUD
 
 public actor UnauthenticatedFlow {
     private let authUseCase: any AuthUseCaseReturningActiveSession
-    private let signInFlow: any SUIFlow<ActiveSessionDIContainer, SignInView>
+    private let signInFlow: any SUIFlow<ActiveSessionDIContainer, () -> SignInView>
 
     public init(di: DIContainer, signInFlowFactory: SignInFlowFactory) async {
         authUseCase = await di.authUseCase()
@@ -20,10 +20,10 @@ public actor UnauthenticatedFlow {
 extension UnauthenticatedFlow: SUIFlow {
     @ViewBuilder @MainActor
     public func instantiate(handler: @escaping @MainActor (ActiveSessionDIContainer) -> Void) -> some View {
-        UnauthenticatedTabsView {
-            self.signInFlow.instantiate { session in
+        UnauthenticatedTabsView(
+            signInView: self.signInFlow.instantiate { session in
                 handler(session)
             }
-        }
+        )
     }
 }

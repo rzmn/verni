@@ -8,13 +8,13 @@ internal import DesignSystem
 
 public struct SignInView: View {
     @StateObject private var store: Store<SignInState, SignInAction>
-    @ViewBuilder private let signUpView: () -> AnyView
+    @ViewBuilder private let signUpView: () -> SignUpView
     private let actionsFactory: any ActionsFactory<SignInAction.Kind, SignInAction>
 
     init(
         store: Store<SignInState, SignInAction>,
         actionsFactory: any ActionsFactory<SignInAction.Kind, SignInAction>,
-        signUpView: @escaping () -> AnyView
+        signUpView: @escaping () -> SignUpView
     ) {
         _store = StateObject(wrappedValue: store)
         self.signUpView = signUpView
@@ -172,7 +172,7 @@ private struct FakeActionsFactory: ActionsFactory {
                 password: "",
                 emailHint: nil,
                 presentingSignUp: false,
-                presentingSignIn: true,
+                presentingSignIn: false,
                 isLoading: true,
                 snackbar: .incorrectCredentials
             ),
@@ -180,6 +180,6 @@ private struct FakeActionsFactory: ActionsFactory {
         ),
         actionsFactory: FakeActionsFactory()
     ) {
-        AnyView(Text("sign up screen there"))
+        SignUpView.preview
     }
 }

@@ -123,27 +123,33 @@ extension SignUpView {
 
 // MARK: - Preview
 
-private struct FakeActionsFactory: ActionsFactory {
-    func action(_ kind: SignUpAction.Kind) -> SignUpAction {
-        .action(kind: kind)
+extension SignUpView {
+    private struct FakeActionsFactory: ActionsFactory {
+        func action(_ kind: SignUpAction.Kind) -> SignUpAction {
+            .action(kind: kind)
+        }
+    }
+
+    @ViewBuilder public static var preview: SignUpView {
+        SignUpView(
+            store: Store(
+                current: SignUpState(
+                    email: "e@mail.com",
+                    password: "pwd",
+                    passwordConfirmation: "",
+                    emailHint: nil,
+                    passwordHint: nil,
+                    passwordConfirmationHint: "does not match",
+                    isLoading: true,
+                    snackbar: .emailAlreadyTaken
+                ),
+                reducer: { state, _ in state }
+            ),
+            actionsFactory: FakeActionsFactory()
+        )
     }
 }
 
 #Preview {
-    SignUpView(
-        store: Store(
-            current: SignUpState(
-                email: "e@mail.com",
-                password: "pwd",
-                passwordConfirmation: "",
-                emailHint: nil,
-                passwordHint: nil,
-                passwordConfirmationHint: "does not match",
-                isLoading: true,
-                snackbar: .emailAlreadyTaken
-            ),
-            reducer: { state, _ in state }
-        ),
-        actionsFactory: FakeActionsFactory()
-    )
+    SignUpView.preview
 }
