@@ -73,9 +73,6 @@
 		611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultUsersRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
 		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
-		6126313B2C5FC49400445300 /* UnauthenticatedFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UnauthenticatedFlow; sourceTree = "<group>"; };
-		612631412C5FC60700445300 /* SignInFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInFlow; sourceTree = "<group>"; };
-		612631422C5FC60700445300 /* SignUpFlow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignUpFlow; sourceTree = "<group>"; };
 		612631462C60AAFF00445300 /* SF-Pro.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro.ttf"; sourceTree = "<group>"; };
 		61414F7E2C2F02A100B2C027 /* Accounty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accounty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61414F812C2F02A100B2C027 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -98,6 +95,9 @@
 		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
 		618EDBE72C6510EA00CE47E4 /* SF-Pro-Display-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro-Display-Semibold.otf"; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
+		61A1D3972CA95632006C496F /* SignInOfferScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInOfferScreen; sourceTree = "<group>"; };
+		61A1D3982CA95632006C496F /* SignInScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInScreen; sourceTree = "<group>"; };
+		61A1D3992CA95632006C496F /* SignUpScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignUpScreen; sourceTree = "<group>"; };
 		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
@@ -131,14 +131,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		61088A912C5E61C9005FFFC2 /* Flows */ = {
-			isa = PBXGroup;
-			children = (
-				6126313F2C5FC59F00445300 /* Unauthenticated */,
-			);
-			path = Flows;
-			sourceTree = "<group>";
-		};
 		611CCD4C2C50AE3A00289D9E /* DI */ = {
 			isa = PBXGroup;
 			children = (
@@ -166,7 +158,7 @@
 		611CCD562C50AE3A00289D9E /* App */ = {
 			isa = PBXGroup;
 			children = (
-				61088A912C5E61C9005FFFC2 /* Flows */,
+				61A1D3962CA9556C006C496F /* Screens */,
 				61088A962C5E70DE005FFFC2 /* AppBase */,
 				611CCD542C50AE3A00289D9E /* App */,
 				611CCD552C50AE3A00289D9E /* DesignSystem */,
@@ -215,16 +207,6 @@
 				611CCD672C50AE3A00289D9E /* Domain */,
 			);
 			path = Domain;
-			sourceTree = "<group>";
-		};
-		6126313F2C5FC59F00445300 /* Unauthenticated */ = {
-			isa = PBXGroup;
-			children = (
-				612631412C5FC60700445300 /* SignInFlow */,
-				612631422C5FC60700445300 /* SignUpFlow */,
-				6126313B2C5FC49400445300 /* UnauthenticatedFlow */,
-			);
-			name = Unauthenticated;
 			sourceTree = "<group>";
 		};
 		612631452C60AACB00445300 /* Fonts */ = {
@@ -276,6 +258,16 @@
 				614AC19F2C6802EE005B2CD5 /* Info.plist */,
 			);
 			path = NotificationService;
+			sourceTree = "<group>";
+		};
+		61A1D3962CA9556C006C496F /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				61A1D3972CA95632006C496F /* SignInOfferScreen */,
+				61A1D3982CA95632006C496F /* SignInScreen */,
+				61A1D3992CA95632006C496F /* SignUpScreen */,
+			);
+			path = Screens;
 			sourceTree = "<group>";
 		};
 		61B74FDF2C305ECA001182A2 /* Packages */ = {

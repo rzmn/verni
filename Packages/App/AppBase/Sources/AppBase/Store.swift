@@ -1,37 +1,63 @@
 import Combine
 
-@MainActor public protocol Action<Kind>: Sendable {
-    associatedtype Kind: Sendable
+@MainActor public struct ActionExecutor<Action: Sendable>: Sendable {
+    let action: Action
+    private let executor: (@MainActor () -> Void)?
 
-    var kind: Kind { get }
-    func run()
+    public static func make(action: Action, executor: (@MainActor () -> Void)? = nil) -> Self {
+        Self(action: action, executor: executor)
+    }
+
+    func execute() {
+        executor?()
+    }
 }
 
-public extension Action {
-    func run() {}
+public protocol ActionExecutorFactory<Action> {
+    associatedtype Action: Sendable
+
+    @MainActor func executor(for action: Action) -> ActionExecutor<Action>
 }
 
-public protocol ActionsFactory<ActionKind, ActionType> {
-    associatedtype ActionKind
-    associatedtype ActionType: Action where ActionType.Kind == ActionKind
+public struct FakeActionExecutorFactory<Action: Sendable>: ActionExecutorFactory {
+    public init() {}
 
-    @MainActor func action(_ kind: ActionKind) -> ActionType
+    public func executor(for action: Action) -> ActionExecutor<Action> {
+        .make(action: action)
+    }
 }
 
-@MainActor public final class Store<State: Sendable & Equatable, ActionType: Action>: ObservableObject {
+@MainActor public final class Store<State: Sendable & Equatable, Action: Sendable>: ObservableObject {
     @Published public private(set) var state: State
-    let reducer: @MainActor (State, ActionType.Kind) -> State
+    let reducer: @MainActor (State, Action) -> State
 
     public init(
-        current: State,
-        reducer: @MainActor @escaping (State, ActionType.Kind) -> State
+        state: State,
+        reducer: @MainActor @escaping (State, Action) -> State
     ) {
-        self.state = current
+        self.state = state
         self.reducer = reducer
     }
 
-    public func dispatch(_ action: ActionType) {
-        state = reducer(state, action.kind)
-        action.run()
+    public func dispatch(_ executor: ActionExecutor<Action>) {
+        state = reducer(state, executor.action)
+        executor.execute()
+    }
+}
+
+extension Store {
+    @MainActor public struct StoreWithFactory {
+        let store: Store
+        let factory: any ActionExecutorFactory<Action>
+
+        public func dispatch(_ action: Action) {
+            store.dispatch(factory.executor(for: action))
+        }
+    }
+
+    public func with(
+        _ factory: any ActionExecutorFactory<Action>
+    ) -> StoreWithFactory {
+        StoreWithFactory(store: self, factory: factory)
     }
 }

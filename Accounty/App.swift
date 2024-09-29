@@ -1,9 +1,10 @@
 import SwiftUI
 import DefaultDependencies
+import AppBase
 import App
 
 enum State {
-    case launched(AppFlow)
+    case launched(any ScreenProvider<Void, AppView>)
     case launching
 }
 
@@ -13,9 +14,11 @@ enum State {
     init() {
         self.state = .launching
         Task { @MainActor in
-            // swiftlint:disable:next force_try
-            let appFlow = await AppFlow(di: try! await DefaultDependenciesAssembly())
-            state = .launched(appFlow)
+            let screenProvider = await DefaultAppFactory(
+                // swiftlint:disable:next force_try
+                di: try! await DefaultDependenciesAssembly()
+            ).create()
+            state = .launched(screenProvider)
         }
     }
 }
@@ -27,8 +30,8 @@ struct MainApp: SwiftUI.App {
     var body: some Scene {
         WindowGroup {
             switch launch.state {
-            case .launched(let appFlow):
-                appFlow.instantiate { /* empty */}
+            case .launched(let appScreenProvider):
+                appScreenProvider.instantiate { /* empty */}
             case .launching:
                 Text("launching...")
             }

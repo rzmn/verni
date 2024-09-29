@@ -1,34 +1,31 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "App",
+    name: "SignInScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "App",
-            targets: ["App"]
+            name: "SignInScreen",
+            targets: ["SignInScreen"]
         )
     ],
     dependencies: [
-        .package(path: "../DesignSystem"),
-        .package(path: "../AppBase"),
-        .package(path: "../Screens/SignInScreen"),
-        .package(path: "../Screens/SignInOfferScreen"),
-        .package(path: "../Screens/SignUpScreen"),
-        .package(path: "../../DI/DI"),
-        .package(path: "../../Domain/Domain"),
-        .package(path: "../../Infrastructure/Logging"),
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../AppBase"),
+        .package(path: "../../DesignSystem"),
+        .package(path: "../../../DI/DI"),
+        .package(path: "../../../Domain/Domain"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Base"),
         .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
     ],
     targets: [
         .target(
-            name: "App",
+            name: "SignInScreen",
             dependencies: [
                 "DesignSystem",
                 "DI",
@@ -36,10 +33,7 @@ let package = Package(
                 "Logging",
                 "Base",
                 "ProgressHUD",
-                "AppBase",
-                "SignInScreen",
-                "SignUpScreen",
-                "SignInOfferScreen"
+                "AppBase"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

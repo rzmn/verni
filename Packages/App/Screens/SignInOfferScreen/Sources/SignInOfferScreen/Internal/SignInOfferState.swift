@@ -1,0 +1,1 @@
+struct SignInOfferState: Sendable, Equatable {}

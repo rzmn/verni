@@ -1,8 +1,10 @@
 import SwiftUI
 
-public protocol SUIFlow<FlowResult, BodyBuilder>: Sendable {
-    associatedtype FlowResult: Sendable
-    associatedtype BodyBuilder
+public protocol ScreenProvider<Event, Screen>: Sendable {
+    associatedtype Event: Sendable
+    associatedtype Screen
 
-    @MainActor func instantiate(handler: @MainActor @escaping (FlowResult) -> Void) -> BodyBuilder
+    @MainActor func instantiate(
+        handler: @MainActor @escaping (Event) -> Void
+    ) -> Screen
 }
