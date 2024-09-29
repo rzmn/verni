@@ -4,9 +4,9 @@ extension SignUpModel {
             email: "",
             password: "",
             passwordConfirmation: "",
-            emailHint: nil,
-            passwordHint: nil,
-            passwordConfirmationHint: nil,
+            emailHint: .noHint,
+            passwordHint: .noHint,
+            passwordConfirmationHint: .noHint,
             isLoading: false,
             snackbar: nil
         )

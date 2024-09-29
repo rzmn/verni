@@ -37,6 +37,9 @@ extension Color {
         public static var positive: Color {
             Color(uiColor: _positive)
         }
+        public static var warning: Color {
+            Color(uiColor: _warning)
+        }
         public static var destructiveBackground: Color {
             Color(uiColor: _destructiveBackground)
         }
@@ -108,9 +111,20 @@ extension Color {
             UIColor { traits in
                 switch traits.userInterfaceStyle {
                 case .dark:
-                    return .rgb(118, 171, 174)
+                    return .rgb(73, 186, 74)
                 default:
-                    return .rgb(87, 166, 161)
+                    return .rgb(54, 138, 55)
+                }
+            }
+        }
+
+        private static var _warning: UIColor {
+            UIColor { traits in
+                switch traits.userInterfaceStyle {
+                case .dark:
+                    return .rgb(173, 151, 61)
+                default:
+                    return .rgb(117, 98, 21)
                 }
             }
         }

@@ -19,6 +19,7 @@ private struct ButtonStyle: ViewModifier {
             .tint(tintColor)
             .background(backgroundColor)
             .clipShape(.rect(cornerRadius: 10))
+            .opacity(enabled ? 1 : 0.34)
     }
 
     private var tintColor: Color {
@@ -70,5 +71,14 @@ extension View {
 
         Button {} label: { Text("destructive") }
         .buttonStyle(type: .destructive, enabled: true)
+
+        Button {} label: { Text("primary") }
+        .buttonStyle(type: .primary, enabled: false)
+
+        Button {} label: { Text("secondary") }
+        .buttonStyle(type: .secondary, enabled: false)
+
+        Button {} label: { Text("destructive") }
+        .buttonStyle(type: .destructive, enabled: false)
     }
 }

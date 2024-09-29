@@ -12,7 +12,12 @@ actor SignUpModel {
     private let authUseCase: any AuthUseCaseReturningActiveSession
     private let store: Store<SignUpState, SignUpAction>
 
+    @MainActor private let emailSubject = PassthroughSubject<String, Never>()
+    @MainActor private let passwordSubject = PassthroughSubject<String, Never>()
+    @MainActor private let passwordRepeatSubject = PassthroughSubject<String, Never>()
+
     @MainActor private var hideSnackbarTask: Task<Void, Never>?
+    @MainActor private var subscriptions = Set<AnyCancellable>()
     @MainActor private var handler: (@MainActor (SignUpEvent) -> Void)?
 
     init(di: DIContainer) async {
@@ -21,6 +26,61 @@ actor SignUpModel {
             state: Self.initialState,
             reducer: Self.reducer
         )
+        await setupValidators(di: di)
+    }
+
+    @MainActor private func setupValidators(di: DIContainer) {
+        emailSubject
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
+            .map { email in
+                if email.isEmpty {
+                    return .isEmpty
+                }
+                switch di.appCommon.localEmailValidationUseCase.validateEmail(email) {
+                case .success:
+                    return .message(.acceptable("email ok"))
+                case .failure(let error):
+                    return .message(.unacceptable(error.message))
+                }
+            }
+            .sink { value in
+                self.store.with(self).dispatch(.emailHintUpdated(value))
+            }
+            .store(in: &subscriptions)
+        passwordSubject
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
+            .map { password in
+                if password.isEmpty {
+                    return .isEmpty
+                }
+                switch di.appCommon.localPasswordValidationUseCase.validatePassword(password) {
+                case .strong:
+                    return .message(.acceptable("password ok"))
+                case .weak(let message):
+                    return .message(.warning(message))
+                case .invalid(let message):
+                    return .message(.unacceptable(message))
+                }
+            }
+            .sink { value in
+                self.store.with(self).dispatch(.passwordHintUpdated(value))
+            }
+            .store(in: &subscriptions)
+        Publishers.CombineLatest(passwordSubject, passwordRepeatSubject)
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
+            .map { password, passwordRepeat in
+                if passwordRepeat.isEmpty {
+                    return .isEmpty
+                }
+                if password == passwordRepeat {
+                    return .noHint
+                }
+                return .message(.unacceptable("pwd_didnt_match".localized))
+            }
+            .sink { value in
+                self.store.with(self).dispatch(.passwordRepeatHintUpdated(value))
+            }
+            .store(in: &subscriptions)
     }
 }
 
@@ -53,6 +113,12 @@ actor SignUpModel {
             passwordTextChanged(text: text)
         case .passwordRepeatTextChanged(let text):
             passwordRepeatTextChanged(text: text)
+        case .emailHintUpdated(let hint):
+            emailHintUpdated(hint: hint)
+        case .passwordHintUpdated(let hint):
+            passwordHintUpdated(hint: hint)
+        case .passwordRepeatHintUpdated(let hint):
+            passwordRepeatHintUpdated(hint: hint)
         case .spinner(let running):
             spinner(running: running)
         case .showSnackbar(let preset):
@@ -66,20 +132,32 @@ actor SignUpModel {
 
     private func emailTextChanged(text: String) -> ActionExecutor<SignUpAction> {
         .make(action: .emailTextChanged(text)) {
-            // validation runs there
+            self.emailSubject.send(text)
         }
     }
 
     private func passwordTextChanged(text: String) -> ActionExecutor<SignUpAction> {
         .make(action: .passwordTextChanged(text)) {
-            // validation runs there
+            self.passwordSubject.send(text)
         }
     }
 
     private func passwordRepeatTextChanged(text: String) -> ActionExecutor<SignUpAction> {
         .make(action: .passwordRepeatTextChanged(text)) {
-            // validation runs there
+            self.passwordRepeatSubject.send(text)
         }
+    }
+
+    private func emailHintUpdated(hint: SignUpState.CredentialHint) -> ActionExecutor<SignUpAction> {
+        .make(action: .emailHintUpdated(hint))
+    }
+
+    private func passwordHintUpdated(hint: SignUpState.CredentialHint) -> ActionExecutor<SignUpAction> {
+        .make(action: .passwordHintUpdated(hint))
+    }
+
+    private func passwordRepeatHintUpdated(hint: SignUpState.CredentialHint) -> ActionExecutor<SignUpAction> {
+        .make(action: .passwordRepeatHintUpdated(hint))
     }
 
     private func showSnackbar(_ preset: Snackbar.Preset) -> ActionExecutor<SignUpAction> {

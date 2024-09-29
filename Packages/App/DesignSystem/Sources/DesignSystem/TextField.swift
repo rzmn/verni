@@ -12,9 +12,26 @@ public enum TextFieldContentType {
     case numberPad
 }
 
+public enum TextFieldFormatHint: Sendable, Equatable {
+    case acceptable(String)
+    case warning(String)
+    case unacceptable(String)
+
+    var text: String {
+        switch self {
+        case .acceptable(let string):
+            return string
+        case .warning(let string):
+            return string
+        case .unacceptable(let string):
+            return string
+        }
+    }
+}
+
 private struct TextFieldStyle: ViewModifier {
     let content: TextFieldContentType
-    let formatHint: String?
+    let formatHint: TextFieldFormatHint?
 
     func body(content: Content) -> some View {
         VStack(spacing: 0) {
@@ -27,8 +44,9 @@ private struct TextFieldStyle: ViewModifier {
             if let formatHint {
                 HStack {
                     VStack {
-                        Text(formatHint)
+                        Text(formatHint.text)
                             .font(.palette.subtitle)
+                            .foregroundStyle(color(for: formatHint))
                         Spacer()
                     }
                     .frame(height: 18)
@@ -38,6 +56,17 @@ private struct TextFieldStyle: ViewModifier {
                 Spacer()
                     .frame(height: 18)
             }
+        }
+    }
+
+    private func color(for hint: TextFieldFormatHint) -> Color {
+        switch hint {
+        case .acceptable:
+            .palette.positive
+        case .warning:
+            .palette.warning
+        case .unacceptable:
+            .palette.destructive
         }
     }
 
@@ -89,7 +118,7 @@ private struct TextFieldStyle: ViewModifier {
 }
 
 extension View {
-    public func textFieldStyle(content: TextFieldContentType, formatHint: String?) -> some View {
+    public func textFieldStyle(content: TextFieldContentType, formatHint: TextFieldFormatHint?) -> some View {
         modifier(TextFieldStyle(content: content, formatHint: formatHint))
     }
 }
@@ -100,25 +129,25 @@ extension View {
             "enter email",
             text: Binding(get: { "e@mail.com" }, set: { _ in })
         )
-        .textFieldStyle(content: .email, formatHint: nil)
+        .textFieldStyle(content: .email, formatHint: .acceptable("email ok"))
         .debugBorder()
         TextField(
             "enter email",
             text: Binding(get: { "" }, set: { _ in })
         )
-        .textFieldStyle(content: .email, formatHint: "email is empty")
+        .textFieldStyle(content: .email, formatHint: nil)
         .debugBorder()
         SecureField(
             "enter password",
             text: Binding(get: { "password" }, set: { _ in })
         )
-        .textFieldStyle(content: .email, formatHint: nil)
+        .textFieldStyle(content: .email, formatHint: .warning("weak password"))
         .debugBorder()
         SecureField(
             "enter password",
-            text: Binding(get: { "" }, set: { _ in })
+            text: Binding(get: { "))" }, set: { _ in })
         )
-        .textFieldStyle(content: .email, formatHint: "password is empty")
+        .textFieldStyle(content: .email, formatHint: .unacceptable("wrong format"))
         .debugBorder()
     }
 }

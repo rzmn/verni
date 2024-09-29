@@ -2,12 +2,34 @@ import Foundation
 internal import DesignSystem
 
 struct SignUpState: Sendable, Equatable {
+    enum CredentialHint: Sendable, Equatable {
+        case isEmpty
+        case noHint
+        case message(TextFieldFormatHint)
+
+        var isAcceptable: Bool {
+            switch self {
+            case .isEmpty:
+                return false
+            case .noHint:
+                return true
+            case .message(let hint):
+                switch hint {
+                case .acceptable, .warning:
+                    return true
+                case .unacceptable:
+                    return false
+                }
+            }
+        }
+    }
+
     let email: String
     let password: String
     let passwordConfirmation: String
-    let emailHint: String?
-    let passwordHint: String?
-    let passwordConfirmationHint: String?
+    let emailHint: CredentialHint
+    let passwordHint: CredentialHint
+    let passwordConfirmationHint: CredentialHint
     let isLoading: Bool
     let snackbar: Snackbar.Preset?
 
@@ -15,9 +37,9 @@ struct SignUpState: Sendable, Equatable {
         email: String,
         password: String,
         passwordConfirmation: String,
-        emailHint: String?,
-        passwordHint: String?,
-        passwordConfirmationHint: String?,
+        emailHint: CredentialHint,
+        passwordHint: CredentialHint,
+        passwordConfirmationHint: CredentialHint,
         isLoading: Bool,
         snackbar: Snackbar.Preset?
     ) {
@@ -36,18 +58,18 @@ struct SignUpState: Sendable, Equatable {
         email: String? = nil,
         password: String? = nil,
         passwordConfirmation: String? = nil,
-        emailHint: String?? = nil,
-        passwordHint: String?? = nil,
-        passwordConfirmationHint: String?? = nil,
+        emailHint: CredentialHint? = nil,
+        passwordHint: CredentialHint? = nil,
+        passwordConfirmationHint: CredentialHint? = nil,
         isLoading: Bool? = nil,
         snackbar: Snackbar.Preset?? = nil
     ) {
         self.email = email ?? state.email
         self.password = password ?? state.password
         self.passwordConfirmation = passwordConfirmation ?? state.passwordConfirmation
-        self.emailHint = emailHint == nil ? state.emailHint : emailHint?.flatMap { $0 }
-        self.passwordHint = passwordHint == nil ? state.passwordHint : passwordHint?.flatMap { $0 }
-        self.passwordConfirmationHint = passwordConfirmationHint == nil ? state.passwordConfirmationHint : passwordConfirmationHint?.flatMap { $0 }
+        self.emailHint = emailHint ?? state.emailHint
+        self.passwordHint = passwordHint ?? state.passwordHint
+        self.passwordConfirmationHint = passwordConfirmationHint ?? state.passwordConfirmationHint
         self.isLoading = isLoading ?? state.isLoading
         self.snackbar = snackbar == nil ? state.snackbar : snackbar?.flatMap { $0 }
     }
@@ -56,7 +78,7 @@ struct SignUpState: Sendable, Equatable {
         if email.isEmpty || password.isEmpty || passwordConfirmation.isEmpty {
             return false
         }
-        if emailHint != nil || passwordHint != nil || passwordConfirmationHint != nil {
+        guard emailHint.isAcceptable && passwordHint.isAcceptable && passwordConfirmationHint.isAcceptable else {
             return false
         }
         return true

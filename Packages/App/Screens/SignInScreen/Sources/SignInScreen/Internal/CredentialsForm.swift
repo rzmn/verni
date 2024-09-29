@@ -33,7 +33,7 @@ struct CredentialsForm: View {
                 )
             )
             .focused($focusedField, equals: .email)
-            .textFieldStyle(content: .email, formatHint: store.state.emailHint)
+            .textFieldStyle(content: .email, formatHint: store.state.emailHint.textFieldHint)
 
             SecureField(
                 "login_pwd_placeholder".localized,
@@ -61,7 +61,7 @@ struct CredentialsForm: View {
             } label: {
                 Text("login_go_to_signup".localized)
             }
-            .buttonStyle(type: .secondary, enabled: !store.state.presentingSignUp)
+            .buttonStyle(type: .secondary, enabled: true)
         }
         .padding(.vertical, .palette.defaultVertical)
         .padding(.horizontal, .palette.defaultHorizontal)

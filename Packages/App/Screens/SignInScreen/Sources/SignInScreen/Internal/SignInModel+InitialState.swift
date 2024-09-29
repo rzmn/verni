@@ -3,9 +3,7 @@ extension SignInModel {
         SignInState(
             email: "",
             password: "",
-            emailHint: nil,
-            presentingSignUp: false,
-            presentingSignIn: false,
+            emailHint: .noHint,
             isLoading: false,
             snackbar: nil
         )

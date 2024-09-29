@@ -5,6 +5,17 @@ import SwiftUI
 internal import Base
 internal import DesignSystem
 
+extension SignUpState.CredentialHint {
+    var textFieldHint: TextFieldFormatHint? {
+        switch self {
+        case .noHint, .isEmpty:
+            return nil
+        case .message(let hint):
+            return hint
+        }
+    }
+}
+
 public struct SignUpView: View {
     @ObservedObject private var store: Store<SignUpState, SignUpAction>
     private let executorFactory: any ActionExecutorFactory<SignUpAction>
@@ -27,18 +38,26 @@ public struct SignUpView: View {
     }
 
     @ViewBuilder private var content: some View {
-        VStack(alignment: .center) {
-            email
-            password
-            passwordRepeat
-            confirm
-                .padding(.top, .palette.defaultVertical)
+        VStack {
+            Spacer()
+
+            VStack(alignment: .center) {
+                email
+                password
+                passwordRepeat
+                confirm
+                    .padding(.top, .palette.defaultVertical)
+            }
+            .padding(.vertical, .palette.defaultVertical)
+            .padding(.horizontal, .palette.defaultHorizontal)
+            .background(Color.palette.backgroundContent)
+            .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
+            .padding(.horizontal, .palette.defaultHorizontal)
+
+            Spacer()
         }
-        .padding(.vertical, .palette.defaultVertical)
-        .padding(.horizontal, .palette.defaultHorizontal)
         .background(Color.palette.background)
-        .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
-        .padding(.horizontal, .palette.defaultHorizontal)
+        .keyboardDismiss()
         .spinner(show: store.state.isLoading)
     }
 
@@ -54,7 +73,10 @@ public struct SignUpView: View {
                 }
             )
         )
-        .textFieldStyle(content: .email, formatHint: store.state.emailHint)
+        .textFieldStyle(
+            content: .email,
+            formatHint: store.state.emailHint.textFieldHint
+        )
     }
 
     @ViewBuilder private var password: some View {
@@ -69,7 +91,10 @@ public struct SignUpView: View {
                 }
             )
         )
-        .textFieldStyle(content: .newPassword, formatHint: store.state.passwordHint)
+        .textFieldStyle(
+            content: .newPassword,
+            formatHint: store.state.passwordHint.textFieldHint
+        )
     }
 
     @ViewBuilder private var passwordRepeat: some View {
@@ -84,7 +109,10 @@ public struct SignUpView: View {
                 }
             )
         )
-        .textFieldStyle(content: .newPassword, formatHint: store.state.passwordConfirmationHint)
+        .textFieldStyle(
+            content: .newPassword,
+            formatHint: store.state.passwordConfirmationHint.textFieldHint
+        )
     }
 
     @ViewBuilder private var confirm: some View {
@@ -104,9 +132,9 @@ public struct SignUpView: View {
                 email: "e@mail.com",
                 password: "pwd",
                 passwordConfirmation: "",
-                emailHint: nil,
-                passwordHint: nil,
-                passwordConfirmationHint: "does not match",
+                emailHint: .noHint,
+                passwordHint: .noHint,
+                passwordConfirmationHint: .message(.unacceptable("does not match")),
                 isLoading: true,
                 snackbar: .emailAlreadyTaken
             ),

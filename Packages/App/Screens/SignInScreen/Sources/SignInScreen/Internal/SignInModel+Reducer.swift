@@ -3,9 +3,11 @@ extension SignInModel {
         return { state, action in
             switch action {
             case .emailTextChanged(let email):
-                return SignInState(state, email: email)
+                return SignInState(state, email: email, emailHint: email.isEmpty ? .isEmpty : nil)
             case .passwordTextChanged(let password):
                 return SignInState(state, password: password)
+            case .emailHintUpdated(let hint):
+                return SignInState(state, emailHint: hint)
             case .spinner(let running):
                 return SignInState(state, isLoading: running)
             case .showSnackbar(let preset):

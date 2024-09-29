@@ -1,29 +1,56 @@
 import Foundation
 internal import DesignSystem
 
+extension SignInState.CredentialHint {
+    var textFieldHint: TextFieldFormatHint? {
+        switch self {
+        case .noHint, .isEmpty:
+            return nil
+        case .message(let hint):
+            return hint
+        }
+    }
+}
+
 struct SignInState: Equatable, Sendable {
+    enum CredentialHint: Sendable, Equatable {
+        case noHint
+        case isEmpty
+        case message(TextFieldFormatHint)
+
+        var isAcceptable: Bool {
+            switch self {
+            case .isEmpty:
+                return false
+            case .noHint:
+                return true
+            case .message(let hint):
+                switch hint {
+                case .acceptable, .warning:
+                    return true
+                case .unacceptable:
+                    return false
+                }
+            }
+        }
+    }
+
     let email: String
     let password: String
-    let emailHint: String?
-    let presentingSignUp: Bool
-    let presentingSignIn: Bool
+    let emailHint: CredentialHint
     let isLoading: Bool
     let snackbar: Snackbar.Preset?
 
     init(
         email: String,
         password: String,
-        emailHint: String?,
-        presentingSignUp: Bool,
-        presentingSignIn: Bool,
+        emailHint: CredentialHint,
         isLoading: Bool,
         snackbar: Snackbar.Preset?
     ) {
         self.email = email
         self.password = password
         self.emailHint = emailHint
-        self.presentingSignUp = presentingSignUp
-        self.presentingSignIn = presentingSignIn
         self.isLoading = isLoading
         self.snackbar = snackbar
     }
@@ -32,7 +59,7 @@ struct SignInState: Equatable, Sendable {
         _ state: Self,
         email: String? = nil,
         password: String? = nil,
-        emailHint: String?? = nil,
+        emailHint: CredentialHint? = nil,
         presentingSignUp: Bool? = nil,
         presentingSignIn: Bool? = nil,
         isLoading: Bool? = nil,
@@ -40,9 +67,7 @@ struct SignInState: Equatable, Sendable {
     ) {
         self.email = email ?? state.email
         self.password = password ?? state.password
-        self.emailHint = emailHint == nil ? state.emailHint : emailHint?.flatMap { $0 }
-        self.presentingSignUp = presentingSignUp ?? state.presentingSignUp
-        self.presentingSignIn = presentingSignIn ?? state.presentingSignIn
+        self.emailHint = emailHint ?? state.emailHint
         self.isLoading = isLoading ?? state.isLoading
         self.snackbar = snackbar == nil ? state.snackbar : snackbar?.flatMap { $0 }
     }
@@ -51,7 +76,7 @@ struct SignInState: Equatable, Sendable {
         if email.isEmpty || password.isEmpty {
             return false
         }
-        if emailHint != nil {
+        guard emailHint.isAcceptable else {
             return false
         }
         return true

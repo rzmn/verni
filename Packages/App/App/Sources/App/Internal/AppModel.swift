@@ -10,8 +10,6 @@ internal import SignUpScreen
 internal import DesignSystem
 
 actor AppModel {
-    private let di: DIContainer
-    private let authUseCase: any AuthUseCaseReturningActiveSession
     private var pendingPushToken: Data?
     private var currentSession: ActiveSessionDIContainer? {
         didSet {
@@ -28,16 +26,10 @@ actor AppModel {
 
     private var urlResolvers = UrlResolverContainer()
     private let store: Store<AppState, AppAction>
-    private let signInOfferScreen: any ScreenProvider<SignInOfferEvent, SignInOfferView>
-    private let signInScreen: any ScreenProvider<SignInEvent, SignInView>
-    private let signUpScreen: any ScreenProvider<SignUpEvent, SignUpView>
+    @MainActor private let appDependencies: AppDependencies
 
     init(di: DIContainer) async {
-        self.di = di
-        authUseCase = await di.authUseCase()
-        signInOfferScreen = await DefaultSignInOfferFactory(di: di).create()
-        signInScreen = await DefaultSignInFactory(di: di).create()
-        signUpScreen = await DefaultSignUpFactory(di: di).create()
+        appDependencies = await AppDependencies(di: di)
         await MainActor.run {
             AvatarView.repository = di.appCommon.avatarsRepository
         }
@@ -55,9 +47,7 @@ extension AppModel: ScreenProvider {
         AppView(
             store: store,
             executorFactory: self,
-            signInOfferScreen: signInOfferScreen,
-            signInScreen: signInScreen,
-            signUpScreen: signUpScreen
+            dependencies: appDependencies
         )
     }
 }
@@ -90,7 +80,9 @@ extension AppModel: ScreenProvider {
         .make(action: .changeSignInStackVisibility(visible: visible))
     }
 
-    private func changeSignInStack(stack: [UnauthenticatedState.AccountTabState.SignInStackElement]) -> ActionExecutor<AppAction> {
+    private func changeSignInStack(
+        stack: [UnauthenticatedState.AccountTabState.SignInStackElement]
+    ) -> ActionExecutor<AppAction> {
         .make(action: .changeSignInStack(stack: stack))
     }
 
