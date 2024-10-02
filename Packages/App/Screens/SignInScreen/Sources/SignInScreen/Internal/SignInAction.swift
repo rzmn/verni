@@ -11,6 +11,8 @@ enum SignInAction {
     case hideSnackbar
 
     case confirm
+    case confirmFailedFeedback
+
     case createAccount
     case close
 }

@@ -5,18 +5,15 @@ struct SignInNavigationView: View {
     typealias State = UnauthenticatedState.AccountTabState.SignInStack
     typealias Element = UnauthenticatedState.AccountTabState.SignInStackElement
 
-    private let state: State
     @ObservedObject private var store: Store<AppState, AppAction>
     private let executorFactory: any ActionExecutorFactory<AppAction>
     private let dependencies: AppDependencies
 
     init(
-        state: State,
         store: Store<AppState, AppAction>,
         executorFactory: any ActionExecutorFactory<AppAction>,
         dependencies: AppDependencies
     ) {
-        self.state = state
         self.store = store
         self.executorFactory = executorFactory
         self.dependencies = dependencies
@@ -34,7 +31,7 @@ struct SignInNavigationView: View {
                     store.with(executorFactory).dispatch(.onAuthorized(container))
                 }
             }
-            .navigationDestination(for: UnauthenticatedState.AccountTabState.SignInStackElement.self) { selection in
+            .navigationDestination(for: Element.self) { selection in
                 switch selection {
                 case .createAccount:
                     dependencies.signUpScreen.instantiate { event in
@@ -49,13 +46,18 @@ struct SignInNavigationView: View {
     }
 
     private var navigationPath: Binding<[Element]> {
-        Binding(
-            get: {
-                state.elements
-            },
-            set: { stack in
-                store.with(executorFactory).dispatch(.changeSignInStack(stack: stack))
+        Binding {
+            guard case .unauthenticated(let state) = store.state else {
+                return []
             }
-        )
+            return state.tabs.compactMap { tab -> [Element]? in
+                guard case .account(let state) = tab else {
+                    return nil
+                }
+                return state.signInStack.elements
+            }.first ?? []
+        } set: { stack in
+            store.with(executorFactory).dispatch(.changeSignInStack(stack: stack))
+        }
     }
 }

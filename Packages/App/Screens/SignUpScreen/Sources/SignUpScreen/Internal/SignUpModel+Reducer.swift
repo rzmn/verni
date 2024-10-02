@@ -22,6 +22,8 @@ extension SignUpModel {
                 return SignUpState(state, isLoading: running)
             case .showSnackbar(let preset):
                 return SignUpState(state, snackbar: preset)
+            case .confirmFailedFeedback:
+                return SignUpState(state, shakingCounter: state.shakingCounter + 1)
             case .hideSnackbar:
                 return SignUpState(state, snackbar: .some(nil))
             case .confirm:

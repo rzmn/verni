@@ -91,6 +91,8 @@ actor SignInModel {
             confirm()
         case .createAccount:
             createAccount()
+        case .confirmFailedFeedback:
+            confirmFailedFeedback()
         case .close:
             close()
         }
@@ -140,6 +142,12 @@ actor SignInModel {
         .make(action: .spinner(running))
     }
 
+    private func confirmFailedFeedback() -> ActionExecutor<SignInAction> {
+        .make(action: .confirmFailedFeedback) {
+            AppServices.default.haptic.errorHaptic()
+        }
+    }
+
     private func createAccount() -> ActionExecutor<SignInAction> {
         .make(action: .createAccount) {
             self.handler?(.routeToSignUp)
@@ -157,7 +165,7 @@ actor SignInModel {
             guard let self else { return }
             let state = store.state
             guard state.canConfirm else {
-                return AppServices.default.haptic.errorHaptic()
+                return store.dispatch(confirmFailedFeedback())
             }
             Task.detached {
                 await self.signIn(state: state)
@@ -181,11 +189,12 @@ actor SignInModel {
             handler?(.signedIn(session))
         } catch {
             store.dispatch(spinner(running: false))
-            AppServices.default.haptic.errorHaptic()
             switch error {
             case .incorrectCredentials:
+                store.dispatch(confirmFailedFeedback())
                 store.dispatch(showSnackbar(.incorrectCredentials))
             case .wrongFormat:
+                store.dispatch(confirmFailedFeedback())
                 store.dispatch(showSnackbar(.wrongFormat))
             case .noConnection:
                 store.dispatch(showSnackbar(.noConnection))

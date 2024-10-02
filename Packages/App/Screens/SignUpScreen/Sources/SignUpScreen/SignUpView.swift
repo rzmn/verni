@@ -19,6 +19,7 @@ extension SignUpState.CredentialHint {
 public struct SignUpView: View {
     @ObservedObject private var store: Store<SignUpState, SignUpAction>
     private let executorFactory: any ActionExecutorFactory<SignUpAction>
+    @State private var shakingCounter = 0
 
     init(
         store: Store<SignUpState, SignUpAction>,
@@ -29,99 +30,28 @@ public struct SignUpView: View {
     }
 
     public var body: some View {
-        if let snackbar = store.state.snackbar {
-            content
-                .snackbar(show: true, preset: snackbar)
-        } else {
-            content
-        }
-    }
-
-    @ViewBuilder private var content: some View {
         VStack {
             Spacer()
-
-            VStack(alignment: .center) {
-                email
-                password
-                passwordRepeat
-                confirm
-                    .padding(.top, .palette.defaultVertical)
+            CredentialsForm(
+                executorFactory: executorFactory,
+                store: store
+            )
+            .padding(.horizontal, .palette.defaultHorizontal)
+            .shake(counter: $shakingCounter)
+            .onChange(of: store.state.shakingCounter) {
+                withAnimation(.easeInOut.speed(1.5)) {
+                    shakingCounter += 1
+                }
             }
-            .padding(.vertical, .palette.defaultVertical)
-            .padding(.horizontal, .palette.defaultHorizontal)
-            .background(Color.palette.backgroundContent)
-            .clipShape(.rect(cornerRadius: .palette.defaultHorizontal))
-            .padding(.horizontal, .palette.defaultHorizontal)
-
+            Spacer()
             Spacer()
         }
+        .ignoresSafeArea()
         .background(Color.palette.background)
         .keyboardDismiss()
+//        .snackbar(preset: store.state.snackbar)
+        .keyboardDismiss()
         .spinner(show: store.state.isLoading)
-    }
-
-    @ViewBuilder private var email: some View {
-        TextField(
-            "email_placeholder".localized,
-            text: Binding(
-                get: {
-                    store.state.email
-                },
-                set: { value in
-                    store.with(executorFactory).dispatch(.emailTextChanged(value))
-                }
-            )
-        )
-        .textFieldStyle(
-            content: .email,
-            formatHint: store.state.emailHint.textFieldHint
-        )
-    }
-
-    @ViewBuilder private var password: some View {
-        SecureField(
-            "login_pwd_placeholder".localized,
-            text: Binding(
-                get: {
-                    store.state.password
-                },
-                set: { value in
-                    store.with(executorFactory).dispatch(.passwordTextChanged(value))
-                }
-            )
-        )
-        .textFieldStyle(
-            content: .newPassword,
-            formatHint: store.state.passwordHint.textFieldHint
-        )
-    }
-
-    @ViewBuilder private var passwordRepeat: some View {
-        SecureField(
-            "login_pwd_placeholder".localized,
-            text: Binding(
-                get: {
-                    store.state.passwordConfirmation
-                },
-                set: { value in
-                    store.with(executorFactory).dispatch(.passwordRepeatTextChanged(value))
-                }
-            )
-        )
-        .textFieldStyle(
-            content: .newPassword,
-            formatHint: store.state.passwordConfirmationHint.textFieldHint
-        )
-    }
-
-    @ViewBuilder private var confirm: some View {
-        Button {
-            store.with(executorFactory).dispatch(.confirm)
-        } label: {
-            Text("login_go_to_signup".localized)
-        }
-        .buttonStyle(type: .primary, enabled: store.state.canConfirm)
     }
 }
 
@@ -136,6 +66,7 @@ public struct SignUpView: View {
                 passwordHint: .noHint,
                 passwordConfirmationHint: .message(.unacceptable("does not match")),
                 isLoading: true,
+                shakingCounter: 0,
                 snackbar: .emailAlreadyTaken
             ),
             reducer: SignUpModel.reducer

@@ -16,14 +16,19 @@ public struct SignInOfferView: View {
     public var body: some View {
         VStack {
             Spacer()
-            Button {
-                store.with(executorFactory).dispatch(.onSignInTap)
-            } label: {
-                Text("login_go_to_signin".localized)
+            HStack {
+                Spacer()
+                Button {
+                    store.with(executorFactory).dispatch(.onSignInTap)
+                } label: {
+                    Text("login_go_to_signin".localized)
+                }
+                .buttonStyle(type: .primary, enabled: true)
+                Spacer()
             }
-            .buttonStyle(type: .primary, enabled: true)
             Spacer()
         }
+        .background(Color.palette.background)
     }
 }
 

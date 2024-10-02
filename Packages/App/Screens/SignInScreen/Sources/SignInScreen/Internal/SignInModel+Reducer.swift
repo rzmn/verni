@@ -18,6 +18,8 @@ extension SignInModel {
                 return state
             case .createAccount:
                 return state
+            case .confirmFailedFeedback:
+                return SignInState(state, shakingCounter: state.shakingCounter + 1)
             case .close:
                 return state
             }

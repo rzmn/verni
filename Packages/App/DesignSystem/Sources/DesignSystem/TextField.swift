@@ -29,6 +29,10 @@ public enum TextFieldFormatHint: Sendable, Equatable {
     }
 }
 
+private let textFieldHeight: CGFloat = 48
+private let hintHeight: CGFloat = 16
+private let cornerRadius: CGFloat = 8
+
 private struct TextFieldStyle: ViewModifier {
     let content: TextFieldContentType
     let formatHint: TextFieldFormatHint?
@@ -36,25 +40,30 @@ private struct TextFieldStyle: ViewModifier {
     func body(content: Content) -> some View {
         VStack(spacing: 0) {
             content
+                .fontStyle(.text)
                 .autocorrectionDisabled(autocorrectionDisabled)
                 .textContentType(contentType)
                 .textInputAutocapitalization(TextInputAutocapitalization(autocapitalization))
                 .keyboardType(keyboardType)
-                .frame(height: .palette.buttonHeight)
+                .frame(height: textFieldHeight)
+                .padding(.horizontal, .palette.defaultHorizontal)
+                .background(Color.palette.backgroundContent)
+                .clipShape(.rect(cornerRadius: cornerRadius))
             if let formatHint {
                 HStack {
-                    VStack {
+                    VStack(spacing: 0) {
+                        Spacer()
                         Text(formatHint.text)
-                            .font(.palette.subtitle)
+                            .fontStyle(.textSecondary)
                             .foregroundStyle(color(for: formatHint))
                         Spacer()
                     }
-                    .frame(height: 18)
                     Spacer()
                 }
+                .frame(height: hintHeight)
             } else {
                 Spacer()
-                    .frame(height: 18)
+                    .frame(height: hintHeight)
             }
         }
     }
@@ -127,25 +136,25 @@ extension View {
     VStack(spacing: 12) {
         TextField(
             "enter email",
-            text: Binding(get: { "e@mail.com" }, set: { _ in })
+            text: Binding { "e@mail.com" } set: { _ in }
         )
         .textFieldStyle(content: .email, formatHint: .acceptable("email ok"))
         .debugBorder()
         TextField(
             "enter email",
-            text: Binding(get: { "" }, set: { _ in })
+            text: Binding { "" } set: { _ in }
         )
         .textFieldStyle(content: .email, formatHint: nil)
         .debugBorder()
         SecureField(
             "enter password",
-            text: Binding(get: { "password" }, set: { _ in })
+            text: Binding { "password" } set: { _ in }
         )
         .textFieldStyle(content: .email, formatHint: .warning("weak password"))
         .debugBorder()
         SecureField(
             "enter password",
-            text: Binding(get: { "))" }, set: { _ in })
+            text: Binding { "))" } set: { _ in }
         )
         .textFieldStyle(content: .email, formatHint: .unacceptable("wrong format"))
         .debugBorder()

@@ -810,17 +810,6 @@
         }
       }
     },
-    "login_pwd_didnt_match" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Password did not match"
-          }
-        }
-      }
-    },
     "login_pwd_matches" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -960,6 +949,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Password is weak"
+          }
+        }
+      }
+    },
+    "pwd_didnt_match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password did not match"
           }
         }
       }

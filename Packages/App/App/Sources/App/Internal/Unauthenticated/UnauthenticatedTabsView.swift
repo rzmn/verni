@@ -31,22 +31,24 @@ struct UnauthenticatedTabsView: View {
                         store: store,
                         executorFactory: executorFactory,
                         dependencies: dependencies
-                    ).tabItem {
+                    )
+                    .tabItem {
                         Label("account_nav_title".localized, systemImage: "person.circle")
+                            .background(Color.palette.backgroundContent)
                     }
+                    .toolbarBackground(.visible, for: .tabBar)
+                    .toolbarBackground(Color.palette.backgroundContent, for: .tabBar)
                 }
             }
         }
+        .tint(Color.palette.accent)
     }
 
     private var selectedTab: Binding<UnauthenticatedState.TabState> {
-        Binding(
-            get: {
-                state.tab
-            },
-            set: { tab in
-                store.with(executorFactory).dispatch(.selectTab(tab))
-            }
-        )
+        Binding {
+            state.tab
+        } set: { tab in
+            store.with(executorFactory).dispatch(.selectTab(tab))
+        }
     }
 }

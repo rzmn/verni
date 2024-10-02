@@ -31,6 +31,7 @@ struct SignUpState: Sendable, Equatable {
     let passwordHint: CredentialHint
     let passwordConfirmationHint: CredentialHint
     let isLoading: Bool
+    let shakingCounter: Int
     let snackbar: Snackbar.Preset?
 
     init(
@@ -41,6 +42,7 @@ struct SignUpState: Sendable, Equatable {
         passwordHint: CredentialHint,
         passwordConfirmationHint: CredentialHint,
         isLoading: Bool,
+        shakingCounter: Int,
         snackbar: Snackbar.Preset?
     ) {
         self.email = email
@@ -50,6 +52,7 @@ struct SignUpState: Sendable, Equatable {
         self.passwordHint = passwordHint
         self.passwordConfirmationHint = passwordConfirmationHint
         self.isLoading = isLoading
+        self.shakingCounter = 0
         self.snackbar = snackbar
     }
 
@@ -62,6 +65,7 @@ struct SignUpState: Sendable, Equatable {
         passwordHint: CredentialHint? = nil,
         passwordConfirmationHint: CredentialHint? = nil,
         isLoading: Bool? = nil,
+        shakingCounter: Int? = nil,
         snackbar: Snackbar.Preset?? = nil
     ) {
         self.email = email ?? state.email
@@ -71,6 +75,7 @@ struct SignUpState: Sendable, Equatable {
         self.passwordHint = passwordHint ?? state.passwordHint
         self.passwordConfirmationHint = passwordConfirmationHint ?? state.passwordConfirmationHint
         self.isLoading = isLoading ?? state.isLoading
+        self.shakingCounter = shakingCounter ?? state.shakingCounter
         self.snackbar = snackbar == nil ? state.snackbar : snackbar?.flatMap { $0 }
     }
 

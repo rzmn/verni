@@ -4,54 +4,43 @@ public struct Snackbar: View {
     enum Style {
         case warning
     }
-    private let show: Bool
     private let style: Style
     private let icon: String?
     private let message: String
 
     init(
-        show: Bool,
         style: Style,
         icon: String?,
         message: String
     ) {
-        self.show = show
         self.style = style
         self.icon = icon
         self.message = message
     }
 
     public var body: some View {
-        if show {
-            VStack {
-                Spacer()
-                HStack(alignment: .center, spacing: 12) {
-                    if let name = icon {
-                        Image(systemName: name)
-                            .resizable()
-                            .foregroundColor(self.iconColor)
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 14, height: 14)
-                    }
-
-                    Text(message)
-                        .foregroundColor(textColor)
-                        .font(.system(size: 14))
-                        .frame(alignment: .leading)
+        VStack(spacing: 0) {
+            HStack(alignment: .center, spacing: 12) {
+                if let name = icon {
+                    Image(systemName: name)
+                        .resizable()
+                        .foregroundColor(self.iconColor)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 18, height: 18)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .frame(maxWidth: .infinity, minHeight: 35)
-                .padding(.vertical, 8)
-                .background(backgroundColor)
-                .cornerRadius(10)
-                .padding(.horizontal, 16)
-                .padding(.bottom, show ? 54 : 0)
-                .animation(.easeInOut, value: show)
+                Text(message)
+                    .fontStyle(.text)
+                    .foregroundColor(textColor)
+                    .font(.system(size: 14))
+                    .frame(alignment: .leading)
+                Spacer()
             }
-            .transition(.move(edge: .bottom))
-            .edgesIgnoringSafeArea(.bottom)
+            .frame(height: 48)
         }
+        .padding(.horizontal, 16)
+        .background(backgroundColor)
+        .clipShape(.rect(cornerRadius: 10))
+        .padding(.horizontal, 16)
     }
 
     private var backgroundColor: Color {
@@ -103,95 +92,73 @@ extension Snackbar {
         }
     }
 
-    init(show: Bool, preset: Preset) {
+    init(preset: Preset) {
         switch preset {
         case .emailAlreadyTaken:
-            self = .emailAlreadyTaken(show: show)
+            self = .emailAlreadyTaken()
         case .wrongFormat:
-            self = .wrongFormat(show: show)
+            self = .wrongFormat()
         case .noConnection:
-            self = .noConnection(show: show)
+            self = .noConnection()
         case .incorrectCredentials:
-            self = .incorrectCredentials(show: show)
+            self = .incorrectCredentials()
         case .notAuthorized:
-            self = .notAuthorized(show: show)
+            self = .notAuthorized()
         case .internalError(let error):
-            self = .internalError(show: show, error: error)
+            self = .internalError(error: error)
         }
     }
 
-    private static func incorrectCredentials(
-        show: Bool
-    ) -> Snackbar {
+    private static func incorrectCredentials() -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "wrong_credentials_hint".localized
         )
     }
 
-    private static func emailAlreadyTaken(
-        show: Bool
-    ) -> Snackbar {
+    private static func emailAlreadyTaken() -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "email_already_taken".localized
         )
     }
 
-    private static func wrongFormat(
-        show: Bool
-    ) -> Snackbar {
+    private static func wrongFormat() -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "wrong_credentials_format_hint".localized
         )
     }
 
-    private static func noConnection(
-        show: Bool
-    ) -> Snackbar {
+    private static func noConnection() -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "no_connection_hint".localized
         )
     }
 
-    private static func notAuthorized(
-        show: Bool
-    ) -> Snackbar {
+    private static func notAuthorized() -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "alert_title_unauthorized".localized
         )
     }
 
-    private static func noSuchUser(
-        show: Bool
-    ) -> Snackbar {
+    private static func noSuchUser() -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "alert_action_no_such_user".localized
         )
     }
 
-    private static func internalError(
-        show: Bool,
-        error: String
-    ) -> Snackbar {
+    private static func internalError(error: String) -> Snackbar {
         Snackbar(
-            show: show,
             style: .warning,
             icon: nil,
             message: "\(error)"
@@ -203,32 +170,35 @@ extension Snackbar {
 
 extension Snackbar {
     struct Modifier: ViewModifier {
-        private let show: Bool
-        private let preset: Preset
+        @Binding var preset: Preset?
 
-        init(show: Bool, preset: Preset) {
-            self.show = show
-            self.preset = preset
+        init(preset: Binding<Preset?>) {
+            _preset = preset
         }
 
         func body(content: Content) -> some View {
             ZStack {
                 content
-                Snackbar(show: show, preset: preset)
+                VStack {
+                    if let preset {
+                        Snackbar(preset: preset)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    Spacer()
+                }
             }
         }
     }
 }
 
 extension View {
-    public func snackbar(show: Bool, preset: Snackbar.Preset) -> some View {
-        modifier(Snackbar.Modifier(show: show, preset: preset))
+    @ViewBuilder public func snackbar(preset: Binding<Snackbar.Preset?>) -> some View {
+        modifier(Snackbar.Modifier(preset: preset))
     }
 }
 
 #Preview {
     Snackbar(
-        show: true,
         style: .warning,
         icon: "network.slash",
         message: "message"

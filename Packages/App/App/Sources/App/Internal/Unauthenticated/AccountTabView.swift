@@ -29,7 +29,6 @@ struct AccountTabView: View {
         }
         .fullScreenCover(isPresented: isSignInPresented) {
             SignInNavigationView(
-                state: state.signInStack,
                 store: store,
                 executorFactory: executorFactory,
                 dependencies: dependencies
@@ -38,13 +37,10 @@ struct AccountTabView: View {
     }
 
     private var isSignInPresented: Binding<Bool> {
-        Binding(
-            get: {
-                state.signInStackVisible
-            },
-            set: { visible in
-                store.with(executorFactory).dispatch(.changeSignInStackVisibility(visible: visible))
-            }
-        )
+        Binding {
+            state.signInStackVisible
+        } set: { visible in
+            store.with(executorFactory).dispatch(.changeSignInStackVisibility(visible: visible))
+        }
     }
 }

@@ -13,7 +13,7 @@ private struct ButtonStyle: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .font(font)
+            .fontStyle(textContentType)
             .frame(height: .palette.buttonHeight)
             .padding(.horizontal, .palette.defaultHorizontal)
             .tint(tintColor)
@@ -25,29 +25,29 @@ private struct ButtonStyle: ViewModifier {
     private var tintColor: Color {
         switch type {
         case .primary:
-            .palette.primary
+            .palette.buttonText
         case .secondary:
-            .palette.iconSecondary
+            .palette.accent
         case .destructive:
-            .palette.destructive
+            .palette.buttonText
         }
     }
 
     private var backgroundColor: Color {
         switch type {
         case .primary:
-            .palette.backgroundContent
+            .palette.accent
         case .secondary:
             .clear
         case .destructive:
-            .palette.destructiveBackground
+            .palette.destructive
         }
     }
 
-    private var font: Font {
+    private var textContentType: TextContentType {
         switch type {
         case .primary, .secondary, .destructive:
-            .palette.title2
+            .button
         }
     }
 }
@@ -62,23 +62,33 @@ extension View {
 }
 
 #Preview {
-    VStack {
-        Button {} label: { Text("primary") }
-        .buttonStyle(type: .primary, enabled: true)
+    HStack {
+        Spacer()
+        VStack {
+            Spacer()
 
-        Button {} label: { Text("secondary") }
-        .buttonStyle(type: .secondary, enabled: true)
+            Button {} label: { Text("primary") }
+            .buttonStyle(type: .primary, enabled: true)
 
-        Button {} label: { Text("destructive") }
-        .buttonStyle(type: .destructive, enabled: true)
+            Button {} label: { Text("secondary") }
+            .buttonStyle(type: .secondary, enabled: true)
 
-        Button {} label: { Text("primary") }
-        .buttonStyle(type: .primary, enabled: false)
+            Button {} label: { Text("destructive") }
+            .buttonStyle(type: .destructive, enabled: true)
 
-        Button {} label: { Text("secondary") }
-        .buttonStyle(type: .secondary, enabled: false)
+            Button {} label: { Text("primary") }
+            .buttonStyle(type: .primary, enabled: false)
 
-        Button {} label: { Text("destructive") }
-        .buttonStyle(type: .destructive, enabled: false)
+            Button {} label: { Text("secondary") }
+            .buttonStyle(type: .secondary, enabled: false)
+
+            Button {} label: { Text("destructive") }
+            .buttonStyle(type: .destructive, enabled: false)
+
+            Spacer()
+        }
+        Spacer()
     }
+    .ignoresSafeArea()
+    .background(Color.palette.background)
 }

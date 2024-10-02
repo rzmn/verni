@@ -8,6 +8,7 @@ extension SignUpModel {
             passwordHint: .noHint,
             passwordConfirmationHint: .noHint,
             isLoading: false,
+            shakingCounter: 0,
             snackbar: nil
         )
     }

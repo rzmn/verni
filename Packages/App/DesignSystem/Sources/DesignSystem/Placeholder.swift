@@ -9,7 +9,7 @@ public struct Placeholder: View {
         VStack {
             Text(message)
                 .padding(.bottom, 22)
-                .font(.palette.secondaryText)
+                .fontStyle(.textSecondary)
             icon
                 .tint(.palette.accent)
 

@@ -125,6 +125,8 @@ actor SignUpModel {
             showSnackbar(preset)
         case .hideSnackbar:
             hideSnackbar()
+        case .confirmFailedFeedback:
+            confirmFailedFeedback()
         case .confirm:
             confirm()
         }
@@ -186,6 +188,12 @@ actor SignUpModel {
         }
     }
 
+    private func confirmFailedFeedback() -> ActionExecutor<SignUpAction> {
+        .make(action: .confirmFailedFeedback) {
+            AppServices.default.haptic.errorHaptic()
+        }
+    }
+
     private func spinner(running: Bool) -> ActionExecutor<SignUpAction> {
         .make(action: .spinner(running))
     }
@@ -195,7 +203,7 @@ actor SignUpModel {
             guard let self else { return }
             let state = store.state
             guard state.canConfirm else {
-                return AppServices.default.haptic.errorHaptic()
+                return store.dispatch(confirmFailedFeedback())
             }
             Task.detached {
                 await self.signIn(state: state)

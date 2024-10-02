@@ -5,7 +5,8 @@ extension SignInModel {
             password: "",
             emailHint: .noHint,
             isLoading: false,
-            snackbar: nil
+            snackbar: nil,
+            shakingCounter: 0
         )
     }
 }

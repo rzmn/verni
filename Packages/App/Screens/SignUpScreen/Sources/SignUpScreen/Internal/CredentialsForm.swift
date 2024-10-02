@@ -2,13 +2,13 @@ import SwiftUI
 import AppBase
 
 struct CredentialsForm: View {
-    private let executorFactory: any ActionExecutorFactory<SignInAction>
-    @ObservedObject private var store: Store<SignInState, SignInAction>
+    private let executorFactory: any ActionExecutorFactory<SignUpAction>
+    @ObservedObject private var store: Store<SignUpState, SignUpAction>
     @FocusState private var focusedField: Field?
 
     init(
-        executorFactory: any ActionExecutorFactory<SignInAction>,
-        store: Store<SignInState, SignInAction>
+        executorFactory: any ActionExecutorFactory<SignUpAction>,
+        store: Store<SignUpState, SignUpAction>
     ) {
         self.executorFactory = executorFactory
         self.store = store
@@ -17,6 +17,7 @@ struct CredentialsForm: View {
     enum Field: Hashable {
         case email
         case password
+        case passwordRepeat
     }
 
     var body: some View {
@@ -40,24 +41,30 @@ struct CredentialsForm: View {
                     store.with(executorFactory).dispatch(.passwordTextChanged(value))
                 }
             )
-            .focused($focusedField, equals: .password)
-            .textFieldStyle(content: .password, formatHint: nil)
+            .focused($focusedField, equals: .passwordRepeat)
+            .textFieldStyle(content: .newPassword, formatHint: store.state.passwordHint.textFieldHint)
+
+            SecureField(
+                "login_pwd_repeat_placeholder".localized,
+                text: Binding {
+                    store.state.passwordConfirmation
+                } set: { value in
+                    store.with(executorFactory).dispatch(.passwordRepeatTextChanged(value))
+                }
+            )
+            .focused($focusedField, equals: .passwordRepeat)
+            .textFieldStyle(
+                content: .newPassword,
+                formatHint: store.state.passwordConfirmationHint.textFieldHint
+            )
             .padding(.bottom, .palette.defaultVertical)
 
             Button {
                 store.with(executorFactory).dispatch(.confirm)
             } label: {
-                Text("login_go_to_signin".localized)
-            }
-            .buttonStyle(type: .primary, enabled: store.state.canConfirm)
-            .padding(.bottom, .palette.defaultVertical)
-
-            Button {
-                store.with(executorFactory).dispatch(.createAccount)
-            } label: {
                 Text("login_go_to_signup".localized)
             }
-            .buttonStyle(type: .secondary, enabled: true)
+            .buttonStyle(type: .primary, enabled: store.state.canConfirm)
         }
     }
 }
@@ -66,8 +73,8 @@ struct CredentialsForm: View {
     CredentialsForm(
         executorFactory: FakeActionExecutorFactory(),
         store: Store(
-            state: SignInModel.initialState,
-            reducer: SignInModel.reducer
+            state: SignUpModel.initialState,
+            reducer: SignUpModel.reducer
         )
     )
 }

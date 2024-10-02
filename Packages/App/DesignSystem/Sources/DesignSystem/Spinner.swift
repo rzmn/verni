@@ -1,7 +1,8 @@
 import SwiftUI
 
 public struct Spinner: View {
-    let show: Bool
+    @State var show: Bool
+    @State private var isRotating = 0.0
 
     public var body: some View {
         if show {
@@ -10,8 +11,15 @@ public struct Spinner: View {
                     .trim(from: 0, to: 0.7)
                     .stroke(Color.palette.accent, lineWidth: 4)
                     .frame(width: 44, height: 44)
-                    .rotationEffect(Angle(degrees: show ? 360 : 0))
-                    .animation(.linear.repeatForever(), value: show)
+                    .rotationEffect(.degrees(isRotating))
+                    .onAppear {
+                        withAnimation(
+                            .linear(duration: 1)
+                            .repeatForever(autoreverses: false)
+                        ) {
+                            isRotating = 360
+                        }
+                    }
             }
             .padding(.all, .palette.defaultHorizontal)
             .background(Color.palette.backgroundContent)
@@ -23,6 +31,7 @@ public struct Spinner: View {
 extension Spinner {
     struct Modifier: ViewModifier {
         private let show: Bool
+        @State private var appeared = false
 
         init(show: Bool) {
             self.show = show
@@ -31,7 +40,15 @@ extension Spinner {
         func body(content: Content) -> some View {
             ZStack {
                 content
-                Spinner(show: show)
+                if show && appeared {
+                    Color.palette.dimBackground
+                        .transition(.opacity)
+                    Spinner(show: show)
+                }
+            }.onAppear {
+                withAnimation {
+                    appeared = true
+                }
             }
         }
     }
@@ -44,5 +61,7 @@ extension View {
 }
 
 #Preview {
-    Spinner(show: true)
+    Color.palette.background
+        .spinner(show: true)
+        .ignoresSafeArea()
 }

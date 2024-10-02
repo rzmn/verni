@@ -39,6 +39,7 @@ struct SignInState: Equatable, Sendable {
     let password: String
     let emailHint: CredentialHint
     let isLoading: Bool
+    let shakingCounter: Int
     let snackbar: Snackbar.Preset?
 
     init(
@@ -46,13 +47,15 @@ struct SignInState: Equatable, Sendable {
         password: String,
         emailHint: CredentialHint,
         isLoading: Bool,
-        snackbar: Snackbar.Preset?
+        snackbar: Snackbar.Preset?,
+        shakingCounter: Int
     ) {
         self.email = email
         self.password = password
         self.emailHint = emailHint
         self.isLoading = isLoading
         self.snackbar = snackbar
+        self.shakingCounter = shakingCounter
     }
 
     init(
@@ -63,13 +66,15 @@ struct SignInState: Equatable, Sendable {
         presentingSignUp: Bool? = nil,
         presentingSignIn: Bool? = nil,
         isLoading: Bool? = nil,
-        snackbar: Snackbar.Preset?? = nil
+        snackbar: Snackbar.Preset?? = nil,
+        shakingCounter: Int? = nil
     ) {
         self.email = email ?? state.email
         self.password = password ?? state.password
         self.emailHint = emailHint ?? state.emailHint
         self.isLoading = isLoading ?? state.isLoading
         self.snackbar = snackbar == nil ? state.snackbar : snackbar?.flatMap { $0 }
+        self.shakingCounter = shakingCounter ?? state.shakingCounter
     }
 
     var canConfirm: Bool {
