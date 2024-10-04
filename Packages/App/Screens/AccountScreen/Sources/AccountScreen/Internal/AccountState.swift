@@ -1,0 +1,1 @@
+struct AccountState: Sendable, Equatable {}

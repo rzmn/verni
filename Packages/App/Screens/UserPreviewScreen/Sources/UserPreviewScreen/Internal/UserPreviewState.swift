@@ -1,0 +1,1 @@
+struct UserPreviewState: Sendable, Equatable {}

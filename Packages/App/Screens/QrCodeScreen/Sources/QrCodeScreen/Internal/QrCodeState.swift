@@ -1,0 +1,1 @@
+struct QrCodeState: Sendable, Equatable {}

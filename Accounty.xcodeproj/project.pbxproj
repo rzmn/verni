@@ -103,6 +103,11 @@
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
 		61D11BE82CA020CB0058B77A /* DataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataLayerDependencies; sourceTree = "<group>"; };
 		61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDataLayerDependencies; sourceTree = "<group>"; };
+		61D62B352CAF0D3A00954E0C /* AccountScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AccountScreen; sourceTree = "<group>"; };
+		61D62B362CAF106000954E0C /* FriendsScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FriendsScreen; sourceTree = "<group>"; };
+		61D62B372CAF113100954E0C /* AddExpenseScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AddExpenseScreen; sourceTree = "<group>"; };
+		61D62B382CAF12D200954E0C /* UserPreviewScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UserPreviewScreen; sourceTree = "<group>"; };
+		61D62B392CAF13C900954E0C /* QrCodeScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = QrCodeScreen; sourceTree = "<group>"; };
 		61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultReceivingPushUseCaseImplementation; sourceTree = "<group>"; };
 		61D7FA2A2CA5E46200204341 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		61D8456C2C7E69B200100E2E /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
@@ -263,6 +268,11 @@
 		61A1D3962CA9556C006C496F /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				61D62B392CAF13C900954E0C /* QrCodeScreen */,
+				61D62B382CAF12D200954E0C /* UserPreviewScreen */,
+				61D62B372CAF113100954E0C /* AddExpenseScreen */,
+				61D62B362CAF106000954E0C /* FriendsScreen */,
+				61D62B352CAF0D3A00954E0C /* AccountScreen */,
 				61A1D3972CA95632006C496F /* SignInOfferScreen */,
 				61A1D3982CA95632006C496F /* SignInScreen */,
 				61A1D3992CA95632006C496F /* SignUpScreen */,

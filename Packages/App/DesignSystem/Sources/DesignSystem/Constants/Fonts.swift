@@ -1,6 +1,7 @@
 import SwiftUI
 
 public enum TextContentType: Hashable {
+    case title1
     case button
     case text
     case textSecondary
@@ -26,6 +27,8 @@ private struct TextContentModifier: ViewModifier {
 
     private var font: Font {
         switch contentType {
+        case .title1:
+            .display(size: 27)
         case .button:
             .display(size: 17)
         case .text:
@@ -52,6 +55,7 @@ private struct TextItem: Hashable, Identifiable {
 #Preview {
     VStack {
         ForEach([
+            TextItem(contentType: .title1, name: "title1"),
             TextItem(contentType: .button, name: "button"),
             TextItem(contentType: .text, name: "text"),
             TextItem(contentType: .textSecondary, name: "text secondary")
