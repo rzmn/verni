@@ -1,21 +1,6 @@
 import SwiftUI
 import AppBase
 
-//enum SignInAction {
-//    case emailTextChanged(String)
-//    case passwordTextChanged(String)
-//
-//    case emailHintUpdated(SignInState.CredentialHint)
-//
-//    case spinner(Bool)
-//    case showSnackbar(Snackbar.Preset)
-//    case hideSnackbar
-//
-//    case confirm
-//    case createAccount
-//    case close
-//}
-
 struct SignInDebugView: View {
     private let executorFactory: any ActionExecutorFactory<SignInAction>
     @ObservedObject private var store: Store<SignInState, SignInAction>

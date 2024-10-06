@@ -74,7 +74,7 @@
 		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
 		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
 		612631462C60AAFF00445300 /* SF-Pro.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-Pro.ttf"; sourceTree = "<group>"; };
-		61414F7E2C2F02A100B2C027 /* Accounty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accounty.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		61414F7E2C2F02A100B2C027 /* Verni.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Verni.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61414F812C2F02A100B2C027 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		61414F832C2F02A100B2C027 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		61414F8A2C2F02A200B2C027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -237,7 +237,7 @@
 		61414F7F2C2F02A100B2C027 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				61414F7E2C2F02A100B2C027 /* Accounty.app */,
+				61414F7E2C2F02A100B2C027 /* Verni.app */,
 				614AC19B2C6802EE005B2CD5 /* NotificationService.appex */,
 			);
 			name = Products;
@@ -346,9 +346,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		61414F7D2C2F02A100B2C027 /* Accounty */ = {
+		61414F7D2C2F02A100B2C027 /* Verni */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Accounty" */;
+			buildConfigurationList = 61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Verni" */;
 			buildPhases = (
 				61414F7A2C2F02A100B2C027 /* Sources */,
 				61414F7B2C2F02A100B2C027 /* Frameworks */,
@@ -360,13 +360,13 @@
 			dependencies = (
 				614AC1A12C6802EE005B2CD5 /* PBXTargetDependency */,
 			);
-			name = Accounty;
+			name = Verni;
 			packageProductDependencies = (
 				610E9BE72C5F7551003D1A79 /* App */,
 				61D799C62C7CB04F00F99010 /* DefaultDependencies */,
 			);
 			productName = SharedExpenses;
-			productReference = 61414F7E2C2F02A100B2C027 /* Accounty.app */;
+			productReference = 61414F7E2C2F02A100B2C027 /* Verni.app */;
 			productType = "com.apple.product-type.application";
 		};
 		614AC19A2C6802EE005B2CD5 /* NotificationService */ = {
@@ -423,7 +423,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				61414F7D2C2F02A100B2C027 /* Accounty */,
+				61414F7D2C2F02A100B2C027 /* Verni */,
 				614AC19A2C6802EE005B2CD5 /* NotificationService */,
 			);
 		};
@@ -645,7 +645,7 @@
 				DEVELOPMENT_TEAM = NPZKGHFT2A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Accounty/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Сплитевайсе";
+				INFOPLIST_KEY_CFBundleDisplayName = Verni;
 				INFOPLIST_KEY_NSCameraUsageDescription = "For Adding Friends Via QR Code";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Set Avatar Image";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -683,7 +683,7 @@
 				DEVELOPMENT_TEAM = NPZKGHFT2A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Accounty/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Сплитевайсе";
+				INFOPLIST_KEY_CFBundleDisplayName = Verni;
 				INFOPLIST_KEY_NSCameraUsageDescription = "For Adding Friends Via QR Code";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Set Avatar Image";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -779,7 +779,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Accounty" */ = {
+		61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Verni" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				61414F932C2F02A200B2C027 /* Debug */,

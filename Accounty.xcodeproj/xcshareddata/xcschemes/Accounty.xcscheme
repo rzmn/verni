@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "61414F7D2C2F02A100B2C027"
-               BuildableName = "Accounty.app"
-               BlueprintName = "Accounty"
+               BuildableName = "Verni.app"
+               BlueprintName = "Verni"
                ReferencedContainer = "container:Accounty.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -50,8 +50,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "61414F7D2C2F02A100B2C027"
-            BuildableName = "Accounty.app"
-            BlueprintName = "Accounty"
+            BuildableName = "Verni.app"
+            BlueprintName = "Verni"
             ReferencedContainer = "container:Accounty.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -67,8 +67,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "61414F7D2C2F02A100B2C027"
-            BuildableName = "Accounty.app"
-            BlueprintName = "Accounty"
+            BuildableName = "Verni.app"
+            BlueprintName = "Verni"
             ReferencedContainer = "container:Accounty.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
