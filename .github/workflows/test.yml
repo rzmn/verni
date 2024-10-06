@@ -21,9 +21,9 @@ jobs:
         run: |
           set -e -x
           cd $(git rev-parse --show-toplevel)
-          xcodebuild test -project Accounty.xcodeproj \
+          xcodebuild test -project Verni.xcodeproj \
             -derivedDataPath testsDerivedData \
-            -scheme Accounty \
+            -scheme Verni \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 15 Pro' | xcpretty
           report=$(find testsDerivedData -name "*.xcresult" -print | head -n 1)

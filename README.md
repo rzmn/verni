@@ -1,16 +1,11 @@
-# The App
+# Verni
+
 [![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
-[![Xcode - Build and Analyze](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/build.yml)
-[![Xcode - Test](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Accounty-iOS/actions/workflows/test.yml)
+[![Xcode - Build and Analyze](https://github.com/rzmn/Verni.App.iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/build.yml)
+[![Xcode - Test](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml)
 [![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
 
 Shared Expenses Tracker App iOS Client.
-
----
-
-I dreamed of working on a product that wouldn't have boring commercial stuff like supporting 4yr old iOS deployment target or demands to test some random idea ASAP just to measure its impact on user's timestamp or reabstracting awful api designed by incapable of negotiation backend team or whatever. So I made one. 
-
-Let's try to realize the desire to implement the application the way I'd like it to be, keeping focus on scalability, testability and maintainability.
 
 ## Tech stack
 
@@ -18,9 +13,7 @@ Let's try to realize the desire to implement the application the way I'd like it
 
 - strict concurrency
 
-- combine
-
-- UIKit
+- swiftui
 
 - SPM
 
@@ -98,40 +91,11 @@ Use cases have access to repositories. Use cases are able to provide a "data upd
 
 ### App (Presentation) Layer
 
-The App Layer is a set of _Flows_. _Flow_ is a complete and reusable fragment of some user path.
+The App Layer is a set of _Screens_. _Screen_ is a complete and reusable fragment of some user story. _Screen_ should be able to appear from anywhere.
 
-_Flow_ is presenting and dismissing itself on its own. _Flow_ should be able to start from anywhere.
+Each _Screen_ is provided as a _Swift Package_. Each *Screen* is not dependent on any other _Screen_.
 
-It's convenient to consider _Flow_ as a single async function:
-
-```swift
-public protocol Flow {
-    associatedtype FlowResult
-    func perform() async -> FlowResult
-}
-```
-
-<details>
-  <summary>Example (Flow for asking for push notification permission)</summary>
-
-```swift
-actor AskForPushNotificationPermissionFlow: Flow {
-    enum Verdict {
-        case allowed, denied
-    }
-    func perform() async -> Verdict {
-        let allowed = await UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound, .badge])
-        return allowed ? .allowed : .denied
-    }
-}
-```
-
-</details>
-
-Each _Flow_ is provided as a _Swift Package_.
-
-### Flow Components
+### Screen Components
 
 #### Flow
 
@@ -175,36 +139,11 @@ Each _Flow_ is provided as a _Swift Package_.
 
 ```mermaid
 graph LR
-    View(View) -- creating and publishing user actions --> ViewActions(View Actions)
-    ViewActions(ViewActions) -- publishing user actions --> Flow(Flow)
-    ViewModel(View Model) -- creating and publishing view state --> ViewActions(View Actions)
-    ViewActions(View Actions) -- publishing view state --> View(View)
-    Flow(Flow) -- creating and mutating --> ViewModel(View Model)
-    Flow(Flow) -- creating and configuring --> Presenter(Presenter)
-    Presenter(Presenter) -- creating and presenting --> View(View)
+    View(View) -- creating actions --> Store(Store)
+    Store(Store) -- sending actions --> Reducer(Reducer)
+    Store(Store) -- action --> ActionExecutor(ActionExecutor)
+    ActionExecutor(ActionExecutor) -- creating actions --> Store(Store)
+    Reducer(Reducer) -- creating state --> View(View)
+    
+
 ```
-
-Each flow knows about its direct children only
-
-<details>
-  <summary>Flow hierarchy</summary>
-
-```mermaid
-graph LR
-    App(App) -- if has stored session --> AuthenticatedFlow(AuthenticatedFlow)
-    AuthenticatedFlow(AuthenticatedFlow) -- as tab --> AccountFlow(AccountFlow)
-    AccountFlow(AccountFlow) -- starts --> UpdateAvatarFlow(UpdateAvatarFlow)
-    AccountFlow(AccountFlow) -- starts --> QrPreviewFlow(QrPreviewFlow)
-    AccountFlow(AccountFlow) -- starts --> UpdatePasswordFlow(UpdatePasswordFlow)
-    AccountFlow(AccountFlow) -- starts --> UpdateDisplayNameFlow(UpdateDisplayNameFlow)
-    AccountFlow(AccountFlow) -- starts --> UpdateEmailFlow(UpdateEmailFlow)
-    AuthenticatedFlow(AuthenticatedFlow) -- as tab --> FriendsFlow(FriendsFlow)
-    FriendsFlow(FriendsFlow) -- starts --> UserPreviewFlow(UserPreviewFlow)
-    AuthenticatedFlow(AuthenticatedFlow) -- starts --> AddExpenseFlow(AddExpenseFlow)
-    AddExpenseFlow(AddExpenseFlow) -- starts --> PickCounterpartyFlow(PickCounterpartyFlow)
-    App(App) -- if does not have stored session --> UnauthenticatedFlow(UnauthenticatedFlow)
-    UnauthenticatedFlow(UnauthenticatedFlow) -- as tab --> SignInFlow(SignInFlow)
-    SignInFlow(SignInFlow) -- starts --> SignUpFlow(SignUpFlow)
-```
-
-</details>
