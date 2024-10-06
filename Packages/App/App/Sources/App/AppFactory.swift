@@ -1,8 +1,8 @@
 import AppBase
 import DI
 
-public protocol AppFactory: Sendable {
-    func create() async -> any ScreenProvider<Void, AppView>
+@MainActor public protocol AppFactory: Sendable {
+    func create() -> any ScreenProvider<Void, AppView>
 }
 
 public final class DefaultAppFactory: AppFactory {
@@ -12,7 +12,7 @@ public final class DefaultAppFactory: AppFactory {
         self.di = di
     }
 
-    public func create() async -> any ScreenProvider<Void, AppView> {
-        await AppModel(di: di)
+    public func create() -> any ScreenProvider<Void, AppView> {
+        AppModel(di: di)
     }
 }

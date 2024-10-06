@@ -21,9 +21,9 @@ public actor DefaultApiServiceFactory {
 }
 
 extension DefaultApiServiceFactory: ApiServiceFactory {
-    public func create(
+    nonisolated public func create(
         tokenRefresher: (any TokenRefresher)?
-    ) async -> any ApiService {
+    ) -> any ApiService {
         DefaultApiService(
             logger: logger,
             networkServiceFactory: networkServiceFactory,

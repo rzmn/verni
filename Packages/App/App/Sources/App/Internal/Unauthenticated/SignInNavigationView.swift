@@ -47,7 +47,7 @@ struct SignInNavigationView: View {
 
     private var navigationPath: Binding<[Element]> {
         Binding {
-            guard case .unauthenticated(let state) = store.state else {
+            guard case .launched(_, let state) = store.state, case .unauthenticated(let state) = state else {
                 return []
             }
             return state.tabs.compactMap { tab -> [Element]? in

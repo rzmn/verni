@@ -26,14 +26,11 @@ actor AppModel {
 
     private var urlResolvers = UrlResolverContainer()
     private let store: Store<AppState, AppAction>
-    @MainActor private let appDependencies: AppDependencies
+    private let di: DIContainer
 
-    init(di: DIContainer) async {
-        appDependencies = await AppDependencies(di: di)
-        await MainActor.run {
-            AvatarView.repository = di.appCommon.avatarsRepository
-        }
-        store = await Store(
+    @MainActor init(di: DIContainer) {
+        self.di = di
+        store = Store(
             state: AppModel.initialState,
             reducer: AppModel.reducer
         )
@@ -46,8 +43,7 @@ extension AppModel: ScreenProvider {
     @MainActor func instantiate(handler: @escaping @MainActor (FlowResult) -> Void) -> AppView {
         AppView(
             store: store,
-            executorFactory: self,
-            dependencies: appDependencies
+            executorFactory: self
         )
     }
 }
@@ -55,6 +51,10 @@ extension AppModel: ScreenProvider {
 @MainActor extension AppModel: ActionExecutorFactory {
     func executor(for action: AppAction) -> ActionExecutor<AppAction> {
         switch action {
+        case .launch:
+            launch()
+        case .launched(let dependencies):
+            launched(dependencies: dependencies)
         case .selectTab(let tab):
             selectTab(tab: tab)
         case .changeSignInStackVisibility(let visible):
@@ -70,6 +70,23 @@ extension AppModel: ScreenProvider {
         case .onAuthorized(let container):
             onAuthorized(container: container)
         }
+    }
+
+    private func launch() -> ActionExecutor<AppAction> {
+        .make(action: .launch) {
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                let appDependencies = await AppDependencies(di: di)
+                await MainActor.run {
+                    AvatarView.repository = self.di.appCommon.avatarsRepository
+                }
+                store.dispatch(launched(dependencies: appDependencies))
+            }
+        }
+    }
+
+    private func launched(dependencies: AppDependencies) -> ActionExecutor<AppAction> {
+        .make(action: .launched(dependencies))
     }
 
     private func selectTab(tab: UnauthenticatedState.TabState) -> ActionExecutor<AppAction> {

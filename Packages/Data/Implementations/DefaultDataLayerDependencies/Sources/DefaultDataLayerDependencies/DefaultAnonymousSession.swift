@@ -20,7 +20,7 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
     public let authenticator: AuthenticatedDataLayerSessionFactory
     public let api: ApiProtocol
 
-    public init(taskFactory: TaskFactory) async throws {
+    public init(taskFactory: TaskFactory) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: Constants.appGroup
         ) else {
@@ -43,7 +43,7 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
             networkServiceFactory: networkServiceFactory,
             taskFactory: taskFactory
         )
-        api = await DefaultApiFactory(
+        api = DefaultApiFactory(
             service: apiServiceFactory.create(tokenRefresher: nil),
             taskFactory: taskFactory
         ).create()

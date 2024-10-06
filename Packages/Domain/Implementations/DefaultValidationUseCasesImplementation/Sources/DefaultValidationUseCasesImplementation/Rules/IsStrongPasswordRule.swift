@@ -12,7 +12,7 @@ struct IsStrongPasswordRule: Rule {
             return .shouldBeAtLeastNCharacterTypesCount(
                 count: characterTypesCountToBeStrong,
                 has: has,
-                of: characterTypes
+                allowed: characterTypes
             )
         }
         return nil

@@ -65,7 +65,7 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
             persistency: persistency,
             authenticationLostSubject: authenticationLostSubject
         )
-        let apiService = await apiServiceFactory.create(tokenRefresher: tokenRefresher)
+        let apiService = apiServiceFactory.create(tokenRefresher: tokenRefresher)
         let apiFactory = DefaultApiFactory(
             service: apiService,
             taskFactory: taskFactory

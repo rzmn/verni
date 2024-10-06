@@ -1,5 +1,12 @@
 import DI
 
+struct LaunchingState: Equatable, Sendable {}
+
+enum LaunchedState: Equatable, Sendable {
+    case authenticated(AuthenticatedState)
+    case unauthenticated(UnauthenticatedState)
+}
+
 struct AuthenticatedState: Equatable, Sendable {
     struct Session: Equatable, Sendable {
         let container: ActiveSessionDIContainer
@@ -37,6 +44,15 @@ struct UnauthenticatedState: Equatable, Sendable {
 }
 
 enum AppState: Equatable, Sendable {
-    case authenticated(AuthenticatedState)
-    case unauthenticated(UnauthenticatedState)
+    case launching(LaunchingState)
+    case launched(AppDependencies, LaunchedState)
+
+    static func == (lhs: AppState, rhs: AppState) -> Bool {
+        switch (lhs, rhs) {
+        case (.launching, .launching), (.launched, .launched):
+            return true
+        default:
+            return false
+        }
+    }
 }

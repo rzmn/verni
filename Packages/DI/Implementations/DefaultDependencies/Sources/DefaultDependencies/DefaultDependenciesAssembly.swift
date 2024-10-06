@@ -62,8 +62,8 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     let avatarsOfflineMutableRepository: AvatarsOfflineMutableRepository
     public let appCommon: AppCommon
 
-    public init() async throws {
-        dataLayer = try await DefaultAnonymousSession(taskFactory: taskFactory)
+    public init() throws {
+        dataLayer = try DefaultAnonymousSession(taskFactory: taskFactory)
         guard let temporaryCacheDirectory = FileManager.default.urls(
             for: .cachesDirectory,
             in: .userDomainMask

@@ -24,7 +24,7 @@ public enum PasswordValidationVerdict: Error, Sendable {
         case hasInvalidCharacter(found: Character, allowed: [CharacterType])
     }
     public enum WeaknessReason: Sendable {
-        case shouldBeAtLeastNCharacterTypesCount(count: Int, has: [CharacterType], of: [CharacterType])
+        case shouldBeAtLeastNCharacterTypesCount(count: Int, has: [CharacterType], allowed: [CharacterType])
     }
     case invalid(InvalidityReason)
     case weak(WeaknessReason)

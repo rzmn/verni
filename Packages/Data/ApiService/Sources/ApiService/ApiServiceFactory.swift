@@ -1,3 +1,3 @@
 public protocol ApiServiceFactory: Sendable {
-    func create(tokenRefresher: TokenRefresher?) async -> ApiService
+    func create(tokenRefresher: TokenRefresher?) -> ApiService
 }

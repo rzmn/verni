@@ -8,6 +8,26 @@ extension AppModel {
                 return state
             }
             switch action {
+            case .launch:
+                return state
+            case .launched(let dependencies):
+                let accountTab = UnauthenticatedState.TabState.account(
+                    UnauthenticatedState.AccountTabState(
+                        signInStack: UnauthenticatedState.AccountTabState.SignInStack(
+                            elements: []
+                        ),
+                        signInStackVisible: false
+                    )
+                )
+                return .launched(
+                    dependencies,
+                    .unauthenticated(
+                        UnauthenticatedState(
+                            tabs: [accountTab],
+                            tab: accountTab
+                        )
+                    )
+                )
             case .acceptedSignInOffer:
                 return state
             case .onCreateAccount:
@@ -17,7 +37,7 @@ extension AppModel {
             case .onAuthorized:
                 return state
             case .changeSignInStack(let elements):
-                guard case .unauthenticated(let state) = state else {
+                guard case .launched(let dependencies, let state) = state, case .unauthenticated(let state) = state else {
                     return unexpectedState()
                 }
                 guard let newAccountTab: UnauthenticatedState.TabState = state.tabs.compactMap({ tab in
@@ -41,14 +61,17 @@ extension AppModel {
                     }
                     return newAccountTab
                 }
-                return .unauthenticated(
-                    UnauthenticatedState(
-                        tabs: newTabs,
-                        tab: newAccountTab
+                return .launched(
+                    dependencies,
+                    .unauthenticated(
+                        UnauthenticatedState(
+                            tabs: newTabs,
+                            tab: newAccountTab
+                        )
                     )
                 )
             case .changeSignInStackVisibility(let visible):
-                guard case .unauthenticated(let state) = state else {
+                guard case .launched(let dependencies, let state) = state, case .unauthenticated(let state) = state else {
                     return unexpectedState()
                 }
                 guard let newAccountTab: UnauthenticatedState.TabState = state.tabs.compactMap({ tab in
@@ -70,14 +93,17 @@ extension AppModel {
                     }
                     return newAccountTab
                 }
-                return .unauthenticated(
-                    UnauthenticatedState(
-                        tabs: newTabs,
-                        tab: newAccountTab
+                return .launched(
+                    dependencies,
+                    .unauthenticated(
+                        UnauthenticatedState(
+                            tabs: newTabs,
+                            tab: newAccountTab
+                        )
                     )
                 )
             case .selectTab(let tabToSelect):
-                guard case .unauthenticated(let state) = state else {
+                guard case .launched(let dependencies, let state) = state, case .unauthenticated(let state) = state else {
                     return unexpectedState()
                 }
                 let newTabs = state.tabs.map { tab in
@@ -87,10 +113,13 @@ extension AppModel {
                         return tab
                     }
                 }
-                return .unauthenticated(
-                    UnauthenticatedState(
-                        tabs: newTabs,
-                        tab: tabToSelect
+                return .launched(
+                    dependencies,
+                    .unauthenticated(
+                        UnauthenticatedState(
+                            tabs: newTabs,
+                            tab: tabToSelect
+                        )
                     )
                 )
             }
