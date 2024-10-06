@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		610E9BE82C5F7551003D1A79 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE72C5F7551003D1A79 /* App */; };
-		613AB13D2CB2F26600C730EC /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1332CB2F26600C730EC /* Info.plist */; };
 		613AB13E2CB2F26600C730EC /* SF-Pro-Display-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 613AB12F2CB2F26600C730EC /* SF-Pro-Display-Semibold.otf */; };
 		613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1322CB2F26600C730EC /* Assets.xcassets */; };
 		613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 613AB13B2CB2F26600C730EC /* Tests.xctestplan */; };
@@ -435,7 +434,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				613AB13D2CB2F26600C730EC /* Info.plist in Resources */,
 				613AB13E2CB2F26600C730EC /* SF-Pro-Display-Semibold.otf in Resources */,
 				613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */,
 				613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */,
