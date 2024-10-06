@@ -36,11 +36,11 @@ actor SignInModel {
                 if email.isEmpty {
                     return .isEmpty
                 }
-                switch di.appCommon.localEmailValidationUseCase.validateEmail(email) {
-                case .success:
-                    return .message(.acceptable("email ok"))
-                case .failure(let error):
-                    return .message(.unacceptable(error.message))
+                do {
+                    try di.appCommon.localEmailValidationUseCase.validateEmail(email)
+                    return .isEmpty
+                } catch {
+                    return .message(.unacceptable(.l10n.auth.emailWrongFormat))
                 }
             }
             .sink { value in
@@ -195,7 +195,7 @@ actor SignInModel {
                 store.dispatch(showSnackbar(.incorrectCredentials))
             case .wrongFormat:
                 store.dispatch(confirmFailedFeedback())
-                store.dispatch(showSnackbar(.wrongFormat))
+                store.dispatch(showSnackbar(.internalError("\(error)")))
             case .noConnection:
                 store.dispatch(showSnackbar(.noConnection))
             case .other(let error):

@@ -1,5 +1,6 @@
 import SwiftUI
 import AppBase
+internal import DesignSystem
 
 struct CredentialsForm: View {
     private let executorFactory: any ActionExecutorFactory<SignInAction>
@@ -22,7 +23,7 @@ struct CredentialsForm: View {
     var body: some View {
         VStack(spacing: 0) {
             TextField(
-                "email_placeholder".localized,
+                .l10n.auth.emailPlaceholder,
                 text: Binding {
                     store.state.email
                 } set: { value in
@@ -33,7 +34,7 @@ struct CredentialsForm: View {
             .textFieldStyle(content: .email, formatHint: store.state.emailHint.textFieldHint)
 
             SecureField(
-                "login_pwd_placeholder".localized,
+                .l10n.auth.passwordPlaceholder,
                 text: Binding {
                     store.state.password
                 } set: { value in
@@ -47,7 +48,7 @@ struct CredentialsForm: View {
             Button {
                 store.with(executorFactory).dispatch(.confirm)
             } label: {
-                Text("login_go_to_signin".localized)
+                Text(String.l10n.auth.signIn)
             }
             .buttonStyle(type: .primary, enabled: store.state.canConfirm)
             .padding(.bottom, .palette.defaultVertical)
@@ -55,7 +56,7 @@ struct CredentialsForm: View {
             Button {
                 store.with(executorFactory).dispatch(.createAccount)
             } label: {
-                Text("login_go_to_signup".localized)
+                Text(.l10n.auth.createAccount)
             }
             .buttonStyle(type: .secondary, enabled: true)
         }

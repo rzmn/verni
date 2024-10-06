@@ -68,7 +68,6 @@ public struct Snackbar: View {
 extension Snackbar {
     public enum Preset: Sendable, Equatable {
         case emailAlreadyTaken
-        case wrongFormat
         case noConnection
         case incorrectCredentials
         case notAuthorized
@@ -78,8 +77,6 @@ extension Snackbar {
             switch self {
             case .emailAlreadyTaken:
                 return "emailAlreadyTaken"
-            case .wrongFormat:
-                return "wrongFormat"
             case .noConnection:
                 return "noConnection"
             case .internalError:
@@ -96,8 +93,6 @@ extension Snackbar {
         switch preset {
         case .emailAlreadyTaken:
             self = .emailAlreadyTaken()
-        case .wrongFormat:
-            self = .wrongFormat()
         case .noConnection:
             self = .noConnection()
         case .incorrectCredentials:
@@ -113,7 +108,7 @@ extension Snackbar {
         Snackbar(
             style: .warning,
             icon: nil,
-            message: "wrong_credentials_hint".localized
+            message: .l10n.auth.wrongCredentials
         )
     }
 
@@ -121,15 +116,7 @@ extension Snackbar {
         Snackbar(
             style: .warning,
             icon: nil,
-            message: "email_already_taken".localized
-        )
-    }
-
-    private static func wrongFormat() -> Snackbar {
-        Snackbar(
-            style: .warning,
-            icon: nil,
-            message: "wrong_credentials_format_hint".localized
+            message: .l10n.auth.emailAlreadyTaken
         )
     }
 
@@ -137,7 +124,7 @@ extension Snackbar {
         Snackbar(
             style: .warning,
             icon: nil,
-            message: "no_connection_hint".localized
+            message: .l10n.noConnection
         )
     }
 
@@ -145,7 +132,7 @@ extension Snackbar {
         Snackbar(
             style: .warning,
             icon: nil,
-            message: "alert_title_unauthorized".localized
+            message: .l10n.auth.unauthorized
         )
     }
 
@@ -153,7 +140,7 @@ extension Snackbar {
         Snackbar(
             style: .warning,
             icon: nil,
-            message: "alert_action_no_such_user".localized
+            message: .l10n.noSuchUser
         )
     }
 

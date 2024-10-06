@@ -1,13 +1,19 @@
-struct IsStrongPasswordRule: Rule {
-    func validate(_ string: String) -> ValidationFailureMessage? {
-        let hasNumber = string.contains(where: \.isNumber)
-        let hasUppercase = string.filter(\.isLetter).contains(where: \.isUppercase)
-        let hasLowercase = string.filter(\.isLetter).contains(where: \.isLowercase)
-        let hasSpecialCharacter = string.contains(where: String.allowedSymbolsForPassword.contains)
-        let rulesPassed = [hasNumber, hasUppercase, hasLowercase, hasSpecialCharacter].filter { $0 }.count
+import Domain
 
-        guard rulesPassed >= 2 else {
-            return "password_weak_warning".localized
+struct IsStrongPasswordRule: Rule {
+    let characterTypes: [PasswordValidationVerdict.CharacterType]
+    let characterTypesCountToBeStrong: Int
+
+    func validate(_ string: String) -> PasswordValidationVerdict.WeaknessReason? {
+        let has = characterTypes.filter { type in
+            string.contains(where: type.contains)
+        }
+        if has.count < characterTypesCountToBeStrong {
+            return .shouldBeAtLeastNCharacterTypesCount(
+                count: characterTypesCountToBeStrong,
+                has: has,
+                of: characterTypes
+            )
         }
         return nil
     }

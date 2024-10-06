@@ -6,22 +6,41 @@ public struct LocalValidationUseCases {
 }
 
 extension LocalValidationUseCases: EmailValidationUseCase {
-    public func validateEmail(_ email: String) -> Result<Void, EmailValidationError> {
-        if let message = IsEmailRule().validate(email) {
-            return .failure(EmailValidationError(message: message))
+    public func validateEmail(_ email: String) throws(EmailValidationError) {
+        guard IsEmailRule().validate(email) else {
+            throw .isNotEmail
         }
-        return .success(())
     }
 }
 
 extension LocalValidationUseCases: PasswordValidationUseCase {
     public func validatePassword(_ password: String) -> PasswordValidationVerdict {
-        if let message = ValidSymbolsRule().validate(password) {
-            return .invalid(message: message)
-        } else if let message = LengthRule(minAllowedLength: 8).validate(password) {
-            return .invalid(message: message)
-        } else if let message = IsStrongPasswordRule().validate(password) {
-            return .weak(message: message)
+        let supportedCharacterTypes: [PasswordValidationVerdict.CharacterType] = [
+            .lowercaseLetters,
+            .uppercaseLetters,
+            .numbers,
+            .characterSet("~`! @#$%^&*()_-+={[}]|\\:;\"'<,>.?/")
+        ]
+
+        let validSymbolsRule = ValidCharactersRule(
+            allowedCharacterTypes: supportedCharacterTypes
+        )
+        switch validSymbolsRule.validate(password) {
+        case .valid:
+            break
+        case .foundInvalidCharacter(let character):
+            return .invalid(.hasInvalidCharacter(found: character, allowed: validSymbolsRule.allowedCharacterTypes))
+        }
+        let lengthRule = LengthRule(minAllowedLength: 8)
+        guard lengthRule.validate(password) else {
+            return .invalid(.minimalCharacterCount(lengthRule.minAllowedLength))
+        }
+        let strongnessRule = IsStrongPasswordRule(
+            characterTypes: supportedCharacterTypes,
+            characterTypesCountToBeStrong: 2
+        )
+        if let weakness = strongnessRule.validate(password) {
+            return .weak(weakness)
         }
         return .strong
     }

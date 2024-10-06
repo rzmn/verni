@@ -33,7 +33,7 @@ struct UnauthenticatedTabsView: View {
                         dependencies: dependencies
                     )
                     .tabItem {
-                        Label("account_nav_title".localized, systemImage: "person.circle")
+                        Label(.l10n.accountTabTitle, systemImage: "person.circle")
                             .background(Color.palette.backgroundContent)
                     }
                     .toolbarBackground(.visible, for: .tabBar)

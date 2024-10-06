@@ -1,5 +1,5 @@
-protocol Rule {
-    typealias ValidationFailureMessage = String
+protocol Rule<Verdict> {
+    associatedtype Verdict
 
-    func validate(_ string: String) -> ValidationFailureMessage?
+    func validate(_ string: String) -> Verdict
 }

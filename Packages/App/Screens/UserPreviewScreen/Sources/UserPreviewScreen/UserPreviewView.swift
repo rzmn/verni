@@ -21,7 +21,7 @@ public struct UserPreviewView: View {
                 Button {
                     store.with(executorFactory).dispatch(.onLogoutTap)
                 } label: {
-                    Text("login_go_to_signin".localized)
+                    Text(verbatim: .l10n.authSignIn)
                 }
                 .buttonStyle(type: .destructive, enabled: true)
                 Spacer()

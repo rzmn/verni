@@ -1,5 +1,6 @@
 import SwiftUI
 import AppBase
+internal import DesignSystem
 
 public struct SignInOfferView: View {
     private let executorFactory: any ActionExecutorFactory<SignInOfferAction>
@@ -21,7 +22,7 @@ public struct SignInOfferView: View {
                 Button {
                     store.with(executorFactory).dispatch(.onSignInTap)
                 } label: {
-                    Text("login_go_to_signin".localized)
+                    Text(.l10n.auth.signIn)
                 }
                 .buttonStyle(type: .primary, enabled: true)
                 Spacer()

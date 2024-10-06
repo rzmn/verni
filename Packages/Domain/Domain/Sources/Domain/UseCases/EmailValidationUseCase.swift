@@ -1,11 +1,7 @@
-public struct EmailValidationError: Error, Sendable {
-    public let message: String
-
-    public init(message: String) {
-        self.message = message
-    }
+public enum EmailValidationError: Error, Sendable {
+    case isNotEmail
 }
 
 public protocol EmailValidationUseCase: Sendable {
-    func validateEmail(_ email: String) -> Result<Void, EmailValidationError>
+    func validateEmail(_ email: String) throws(EmailValidationError)
 }
