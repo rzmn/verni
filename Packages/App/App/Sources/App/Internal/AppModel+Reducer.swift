@@ -37,7 +37,7 @@ extension AppModel {
             case .onAuthorized:
                 return state
             case .changeSignInStack(let elements):
-                guard case .launched(let dependencies, let state) = state, case .unauthenticated(let state) = state else {
+                guard let (dependencies, state) = state.launched, let state = state.unauthenticated else {
                     return unexpectedState()
                 }
                 guard let newAccountTab: UnauthenticatedState.TabState = state.tabs.compactMap({ tab in
@@ -71,7 +71,7 @@ extension AppModel {
                     )
                 )
             case .changeSignInStackVisibility(let visible):
-                guard case .launched(let dependencies, let state) = state, case .unauthenticated(let state) = state else {
+                guard let (dependencies, state) = state.launched, let state = state.unauthenticated else {
                     return unexpectedState()
                 }
                 guard let newAccountTab: UnauthenticatedState.TabState = state.tabs.compactMap({ tab in
@@ -103,7 +103,7 @@ extension AppModel {
                     )
                 )
             case .selectTab(let tabToSelect):
-                guard case .launched(let dependencies, let state) = state, case .unauthenticated(let state) = state else {
+                guard let (dependencies, state) = state.launched, let state = state.unauthenticated else {
                     return unexpectedState()
                 }
                 let newTabs = state.tabs.map { tab in

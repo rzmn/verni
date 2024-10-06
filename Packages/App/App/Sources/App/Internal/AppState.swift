@@ -5,6 +5,20 @@ struct LaunchingState: Equatable, Sendable {}
 enum LaunchedState: Equatable, Sendable {
     case authenticated(AuthenticatedState)
     case unauthenticated(UnauthenticatedState)
+
+    var authenticated: AuthenticatedState? {
+        guard case .authenticated(let authenticated) = self else {
+            return nil
+        }
+        return authenticated
+    }
+
+    var unauthenticated: UnauthenticatedState? {
+        guard case .unauthenticated(let unauthenticated) = self else {
+            return nil
+        }
+        return unauthenticated
+    }
 }
 
 struct AuthenticatedState: Equatable, Sendable {
@@ -54,5 +68,19 @@ enum AppState: Equatable, Sendable {
         default:
             return false
         }
+    }
+
+    var launching: LaunchingState? {
+        guard case .launching(let launching) = self else {
+            return nil
+        }
+        return launching
+    }
+
+    var launched: (dependencies: AppDependencies, state: LaunchedState)? {
+        guard case .launched(let dependencies, let state) = self else {
+            return nil
+        }
+        return (dependencies, state)
     }
 }
