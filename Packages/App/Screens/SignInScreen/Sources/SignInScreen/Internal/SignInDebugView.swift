@@ -2,36 +2,31 @@ import SwiftUI
 import AppBase
 
 struct SignInDebugView: View {
-    private let executorFactory: any ActionExecutorFactory<SignInAction>
     @ObservedObject private var store: Store<SignInState, SignInAction>
 
-    init(
-        executorFactory: any ActionExecutorFactory<SignInAction>,
-        store: Store<SignInState, SignInAction>
-    ) {
-        self.executorFactory = executorFactory
+    init(store: Store<SignInState, SignInAction>) {
         self.store = store
     }
 
     var body: some View {
         VStack(spacing: 12) {
             Button("email empty") {
-                store.with(executorFactory).dispatch(.emailTextChanged(""))
+                store.dispatch(.emailTextChanged(""))
             }
             Button("snackbar incorrectCredentials") {
-                store.with(executorFactory).dispatch(.showSnackbar(.incorrectCredentials))
+                store.dispatch(.showSnackbar(.incorrectCredentials))
             }
             Button("hide snackbar") {
-                store.with(executorFactory).dispatch(.hideSnackbar)
+                store.dispatch(.hideSnackbar)
             }
             Button("spinner show") {
-                store.with(executorFactory).dispatch(.spinner(true))
+                store.dispatch(.spinner(true))
             }
             Button("spinner hide") {
-                store.with(executorFactory).dispatch(.spinner(false))
+                store.dispatch(.spinner(false))
             }
             Button("failed sign in") {
-                store.with(executorFactory).dispatch(.confirmFailedFeedback)
+                store.dispatch(.confirmFailedFeedback)
             }
         }
         .tint(.palette.primary)
@@ -42,22 +37,17 @@ struct SignInDebugView: View {
 }
 
 private struct DebugModifier: ViewModifier {
-    private let executorFactory: any ActionExecutorFactory<SignInAction>
     private var store: Store<SignInState, SignInAction>
     @State private var offset = CGSize.zero
 
-    init(
-        executorFactory: any ActionExecutorFactory<SignInAction>,
-        store: Store<SignInState, SignInAction>
-    ) {
-        self.executorFactory = executorFactory
+    init(store: Store<SignInState, SignInAction>) {
         self.store = store
     }
 
     func body(content: Content) -> some View {
         ZStack {
             content
-            SignInDebugView(executorFactory: executorFactory, store: store)
+            SignInDebugView(store: store)
                 .offset(x: offset.width, y: offset.height)
                 .gesture(
                     DragGesture()
@@ -70,17 +60,13 @@ private struct DebugModifier: ViewModifier {
 }
 
 extension View {
-    func debugStore(
-        executorFactory: any ActionExecutorFactory<SignInAction>,
-        store: Store<SignInState, SignInAction>
-    ) -> some View {
-        modifier(DebugModifier(executorFactory: executorFactory, store: store))
+    func debugStore(store: Store<SignInState, SignInAction>) -> some View {
+        modifier(DebugModifier(store: store))
     }
 }
 
 #Preview {
     SignInDebugView(
-        executorFactory: FakeActionExecutorFactory(),
         store: Store(
             state: SignInModel.initialState,
             reducer: SignInModel.reducer

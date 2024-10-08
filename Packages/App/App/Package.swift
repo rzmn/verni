@@ -18,8 +18,6 @@ let package = Package(
         .package(path: "../DesignSystem"),
         .package(path: "../AppBase"),
         .package(path: "../Screens/SignInScreen"),
-        .package(path: "../Screens/SignInOfferScreen"),
-        .package(path: "../Screens/SignUpScreen"),
         .package(path: "../../DI/DI"),
         .package(path: "../../Domain/Domain"),
         .package(path: "../../Infrastructure/Logging"),
@@ -37,9 +35,7 @@ let package = Package(
                 "Base",
                 "ProgressHUD",
                 "AppBase",
-                "SignInScreen",
-                "SignUpScreen",
-                "SignInOfferScreen"
+                "SignInScreen"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

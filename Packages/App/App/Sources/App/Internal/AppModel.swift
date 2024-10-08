@@ -4,9 +4,8 @@ import UIKit
 import Logging
 import AppBase
 import SwiftUI
-internal import SignInOfferScreen
+internal import Base
 internal import SignInScreen
-internal import SignUpScreen
 internal import DesignSystem
 
 actor AppModel {
@@ -23,107 +22,38 @@ actor AppModel {
             }
         }
     }
-
-    private var urlResolvers = UrlResolverContainer()
     private let store: Store<AppState, AppAction>
-    private let di: DIContainer
 
     @MainActor init(di: DIContainer) {
-        self.di = di
         store = Store(
             state: AppModel.initialState,
             reducer: AppModel.reducer
+        )
+        store.append(
+            middleware: AppSideEffects(
+                store: store,
+                di: di
+            ),
+            keepingUnique: true
         )
     }
 }
 
 extension AppModel: ScreenProvider {
-    typealias FlowResult = Void
+    typealias Event = Void
 
-    @MainActor func instantiate(handler: @escaping @MainActor (FlowResult) -> Void) -> AppView {
+    @MainActor func instantiate(handler: @escaping @MainActor (Event) -> Void) -> AppView {
         AppView(
-            store: store,
-            executorFactory: self
-        )
-    }
-}
-
-@MainActor extension AppModel: ActionExecutorFactory {
-    func executor(for action: AppAction) -> ActionExecutor<AppAction> {
-        switch action {
-        case .launch:
-            launch()
-        case .launched(let dependencies):
-            launched(dependencies: dependencies)
-        case .selectTab(let tab):
-            selectTab(tab: tab)
-        case .changeSignInStackVisibility(let visible):
-            changeSignInStackVisibility(visible: visible)
-        case .changeSignInStack(let stack):
-            changeSignInStack(stack: stack)
-        case .acceptedSignInOffer:
-            acceptedSignInOffer()
-        case .onCreateAccount:
-            onCreateAccount()
-        case .onCloseSignIn:
-            onCloseSignIn()
-        case .onAuthorized(let container):
-            onAuthorized(container: container)
-        }
-    }
-
-    private func launch() -> ActionExecutor<AppAction> {
-        .make(action: .launch) {
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                let appDependencies = await AppDependencies(di: di)
-                await MainActor.run {
-                    AvatarView.repository = self.di.appCommon.avatarsRepository
-                }
-                store.dispatch(launched(dependencies: appDependencies))
+            store: tap(store) { store in
+                store.append(
+                    middleware: AnyMiddleware(
+                        id: "\(Event.self)",
+                        handleBlock: { _ in }
+                    ),
+                    keepingUnique: true
+                )
             }
-        }
-    }
-
-    private func launched(dependencies: AppDependencies) -> ActionExecutor<AppAction> {
-        .make(action: .launched(dependencies))
-    }
-
-    private func selectTab(tab: UnauthenticatedState.TabState) -> ActionExecutor<AppAction> {
-        .make(action: .selectTab(tab))
-    }
-
-    private func changeSignInStackVisibility(visible: Bool) -> ActionExecutor<AppAction> {
-        .make(action: .changeSignInStackVisibility(visible: visible))
-    }
-
-    private func changeSignInStack(
-        stack: [UnauthenticatedState.AccountTabState.SignInStackElement]
-    ) -> ActionExecutor<AppAction> {
-        .make(action: .changeSignInStack(stack: stack))
-    }
-
-    private func acceptedSignInOffer() -> ActionExecutor<AppAction> {
-        .make(action: .acceptedSignInOffer) {
-            self.store.dispatch(self.changeSignInStackVisibility(visible: true))
-        }
-    }
-
-    private func onCreateAccount() -> ActionExecutor<AppAction> {
-        .make(action: .onCreateAccount) {
-            self.store.dispatch(self.changeSignInStack(stack: [.createAccount]))
-        }
-    }
-
-    private func onCloseSignIn() -> ActionExecutor<AppAction> {
-        .make(action: .acceptedSignInOffer) {
-            self.store.dispatch(self.changeSignInStackVisibility(visible: false))
-            self.store.dispatch(self.changeSignInStack(stack: []))
-        }
-    }
-
-    private func onAuthorized(container: ActiveSessionDIContainer) -> ActionExecutor<AppAction> {
-        .make(action: .onAuthorized(container))
+        )
     }
 }
 
@@ -139,12 +69,6 @@ extension AppModel {
     }
 
     public func handle(url: String) async {
-        guard let url = AppUrl(string: url) else {
-            return
-        }
-        guard await urlResolvers.canResolve(url: url) else {
-            return
-        }
-        await urlResolvers.resolve(url: url)
+        // stub
     }
 }

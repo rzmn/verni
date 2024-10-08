@@ -16,7 +16,6 @@
 		613AB1432CB2F26600C730EC /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1362CB2F26600C730EC /* Localizable.xcstrings */; };
 		613AB1442CB2F26600C730EC /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB1382CB2F26600C730EC /* App.swift */; };
 		613AB1452CB2F26600C730EC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB13A2CB2F26600C730EC /* SceneDelegate.swift */; };
-		613AB1462CB2F26600C730EC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB1392CB2F26600C730EC /* AppDelegate.swift */; };
 		614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614AC19D2C6802EE005B2CD5 /* NotificationService.swift */; };
 		614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		61D799C72C7CB04F00F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799C62C7CB04F00F99010 /* DefaultDependencies */; };
@@ -81,7 +80,6 @@
 		613AB1342CB2F26600C730EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		613AB1362CB2F26600C730EC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		613AB1382CB2F26600C730EC /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		613AB1392CB2F26600C730EC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		613AB13A2CB2F26600C730EC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		613AB13B2CB2F26600C730EC /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
 		61414F7E2C2F02A100B2C027 /* Verni.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Verni.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -98,19 +96,12 @@
 		6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultLogoutUseCaseImplementation; sourceTree = "<group>"; };
 		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
-		61A1D3972CA95632006C496F /* SignInOfferScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInOfferScreen; sourceTree = "<group>"; };
 		61A1D3982CA95632006C496F /* SignInScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignInScreen; sourceTree = "<group>"; };
-		61A1D3992CA95632006C496F /* SignUpScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SignUpScreen; sourceTree = "<group>"; };
 		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
 		61D11BE82CA020CB0058B77A /* DataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataLayerDependencies; sourceTree = "<group>"; };
 		61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDataLayerDependencies; sourceTree = "<group>"; };
-		61D62B352CAF0D3A00954E0C /* AccountScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AccountScreen; sourceTree = "<group>"; };
-		61D62B362CAF106000954E0C /* FriendsScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FriendsScreen; sourceTree = "<group>"; };
-		61D62B372CAF113100954E0C /* AddExpenseScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AddExpenseScreen; sourceTree = "<group>"; };
-		61D62B382CAF12D200954E0C /* UserPreviewScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UserPreviewScreen; sourceTree = "<group>"; };
-		61D62B392CAF13C900954E0C /* QrCodeScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = QrCodeScreen; sourceTree = "<group>"; };
 		61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultReceivingPushUseCaseImplementation; sourceTree = "<group>"; };
 		61D8456C2C7E69B200100E2E /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -241,7 +232,6 @@
 			children = (
 				613AB1372CB2F26600C730EC /* Resources */,
 				613AB1382CB2F26600C730EC /* App.swift */,
-				613AB1392CB2F26600C730EC /* AppDelegate.swift */,
 				613AB13A2CB2F26600C730EC /* SceneDelegate.swift */,
 				613AB13B2CB2F26600C730EC /* Tests.xctestplan */,
 			);
@@ -281,14 +271,7 @@
 		61A1D3962CA9556C006C496F /* Screens */ = {
 			isa = PBXGroup;
 			children = (
-				61D62B392CAF13C900954E0C /* QrCodeScreen */,
-				61D62B382CAF12D200954E0C /* UserPreviewScreen */,
-				61D62B372CAF113100954E0C /* AddExpenseScreen */,
-				61D62B362CAF106000954E0C /* FriendsScreen */,
-				61D62B352CAF0D3A00954E0C /* AccountScreen */,
-				61A1D3972CA95632006C496F /* SignInOfferScreen */,
 				61A1D3982CA95632006C496F /* SignInScreen */,
-				61A1D3992CA95632006C496F /* SignUpScreen */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -480,7 +463,6 @@
 			files = (
 				613AB1442CB2F26600C730EC /* App.swift in Sources */,
 				613AB1452CB2F26600C730EC /* SceneDelegate.swift in Sources */,
-				613AB1462CB2F26600C730EC /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

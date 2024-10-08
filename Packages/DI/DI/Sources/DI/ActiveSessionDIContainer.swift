@@ -23,7 +23,3 @@ public protocol ActiveSessionDIContainer: AppCommonCovertible {
     func receivingPushUseCase() -> ReceivingPushUseCase
     func qrInviteUseCase() -> QRInviteUseCase
 }
-
-public protocol ActiveSessionDIContainerConvertible: Sendable {
-    func activeSessionDIContainer() async -> ActiveSessionDIContainer
-}

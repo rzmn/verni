@@ -1,1 +1,0 @@
-struct AddExpenseState: Sendable, Equatable {}

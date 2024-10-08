@@ -56,7 +56,7 @@ private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
 public final class DefaultDependenciesAssembly: DIContainer, Sendable {
     private let dataLayer: AnonymousDataLayerSession
     private let avatarsRepository: AvatarsRepository
-    private let webcredentials = "https://d5d29sfljfs1v5kq0382.apigw.yandexcloud.net"
+    private let webcredentials = "https://verni.app"
     private let taskFactory = DefaultTaskFactory()
 
     let avatarsOfflineMutableRepository: AvatarsOfflineMutableRepository
@@ -93,9 +93,9 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
         )
     }
 
-    public func authUseCase() async -> any AuthUseCaseReturningActiveSession {
+    public func authUseCase() -> any AuthUseCaseReturningActiveSession {
         AuthUseCaseAdapter(
-            impl: await DefaultAuthUseCase(
+            impl: DefaultAuthUseCase(
                 taskFactory: DefaultTaskFactory(),
                 dataLayer: dataLayer
             ), dependencies: self

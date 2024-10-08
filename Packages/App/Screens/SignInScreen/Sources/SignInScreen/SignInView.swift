@@ -3,26 +3,18 @@ import AppBase
 internal import DesignSystem
 
 public struct SignInView: View {
-    private let executorFactory: any ActionExecutorFactory<SignInAction>
     @ObservedObject private var store: Store<SignInState, SignInAction>
     @State private var shakingCounter = 0
     @State private var snackbarPreset: Snackbar.Preset?
 
-    init(
-        executorFactory: any ActionExecutorFactory<SignInAction>,
-        store: Store<SignInState, SignInAction>
-    ) {
-        self.executorFactory = executorFactory
+    init(store: Store<SignInState, SignInAction>) {
         self.store = store
     }
 
     public var body: some View {
         let content = VStack {
             Spacer()
-            CredentialsForm(
-                executorFactory: executorFactory,
-                store: store
-            )
+            CredentialsForm(store: store)
             .padding(.horizontal, .palette.defaultHorizontal)
             .shake(counter: $shakingCounter)
             .onChange(of: store.state.shakingCounter) {
@@ -48,7 +40,7 @@ public struct SignInView: View {
                 snackbarPreset = newValue
             }
         }
-        .debugStore(executorFactory: executorFactory, store: store)
+        .debugStore(store: store)
     }
 
     @ViewBuilder private var closeButton: some View {
@@ -56,7 +48,7 @@ public struct SignInView: View {
             HStack {
                 Spacer()
                 Button {
-                    store.with(executorFactory).dispatch(.close)
+                    store.dispatch(.close)
                 } label: {
                     Image.palette.cross
                 }
@@ -70,7 +62,6 @@ public struct SignInView: View {
 
 #Preview {
     SignInView(
-        executorFactory: FakeActionExecutorFactory(),
         store: Store(
             state: SignInModel.initialState,
             reducer: SignInModel.reducer

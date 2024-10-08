@@ -1,10 +1,11 @@
 import DI
+internal import Base
 
 struct LaunchingState: Equatable, Sendable {}
 
 enum LaunchedState: Equatable, Sendable {
     case authenticated(AuthenticatedState)
-    case unauthenticated(UnauthenticatedState)
+    case anonymous(AnonymousState)
 
     var authenticated: AuthenticatedState? {
         guard case .authenticated(let authenticated) = self else {
@@ -13,62 +14,25 @@ enum LaunchedState: Equatable, Sendable {
         return authenticated
     }
 
-    var unauthenticated: UnauthenticatedState? {
-        guard case .unauthenticated(let unauthenticated) = self else {
+    var anonymous: AnonymousState? {
+        guard case .anonymous(let anonymous) = self else {
             return nil
         }
-        return unauthenticated
+        return anonymous
     }
 }
 
 struct AuthenticatedState: Equatable, Sendable {
-    struct Session: Equatable, Sendable {
-        let container: ActiveSessionDIContainer
-
-        static func == (lhs: Session, rhs: Session) -> Bool {
-            lhs.container.userId == rhs.container.userId
-        }
-    }
-    let session: Session
+    @EquatableByAddress var session: AuthenticatedPresentationLayerSession
 }
 
-struct UnauthenticatedState: Equatable, Sendable {
-    struct AccountTabState: Hashable, Sendable {
-        enum SignInStackElement: Hashable, Sendable {
-            case createAccount
-        }
-        struct SignInStack: Hashable, Sendable {
-            let elements: [SignInStackElement]
-        }
-        let signInStack: SignInStack
-        let signInStackVisible: Bool
-    }
-    enum TabState: Hashable, Sendable, Identifiable {
-        case account(AccountTabState)
-
-        var id: String {
-            switch self {
-            case .account:
-                return "account"
-            }
-        }
-    }
-    let tabs: [TabState]
-    let tab: TabState
+struct AnonymousState: Equatable, Sendable {
+    @EquatableByAddress var session: AnonymousPresentationLayerSession
 }
 
 enum AppState: Equatable, Sendable {
     case launching(LaunchingState)
-    case launched(AppDependencies, LaunchedState)
-
-    static func == (lhs: AppState, rhs: AppState) -> Bool {
-        switch (lhs, rhs) {
-        case (.launching, .launching), (.launched, .launched):
-            return true
-        default:
-            return false
-        }
-    }
+    case launched(LaunchedState)
 
     var launching: LaunchingState? {
         guard case .launching(let launching) = self else {
@@ -77,10 +41,10 @@ enum AppState: Equatable, Sendable {
         return launching
     }
 
-    var launched: (dependencies: AppDependencies, state: LaunchedState)? {
-        guard case .launched(let dependencies, let state) = self else {
+    var launched: LaunchedState? {
+        guard case .launched(let state) = self else {
             return nil
         }
-        return (dependencies, state)
+        return state
     }
 }

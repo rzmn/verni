@@ -1,1 +1,0 @@
-struct FriendsState: Sendable, Equatable {}

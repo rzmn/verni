@@ -14,7 +14,7 @@ public actor DefaultAuthUseCase {
     public init(
         taskFactory: TaskFactory,
         dataLayer: AnonymousDataLayerSession
-    ) async {
+    ) {
         self.taskFactory = taskFactory
         self.dataLayer = dataLayer
     }

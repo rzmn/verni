@@ -3,15 +3,10 @@ import AppBase
 internal import DesignSystem
 
 struct CredentialsForm: View {
-    private let executorFactory: any ActionExecutorFactory<SignInAction>
     @ObservedObject private var store: Store<SignInState, SignInAction>
     @FocusState private var focusedField: Field?
 
-    init(
-        executorFactory: any ActionExecutorFactory<SignInAction>,
-        store: Store<SignInState, SignInAction>
-    ) {
-        self.executorFactory = executorFactory
+    init(store: Store<SignInState, SignInAction>) {
         self.store = store
     }
 
@@ -27,7 +22,7 @@ struct CredentialsForm: View {
                 text: Binding {
                     store.state.email
                 } set: { value in
-                    store.with(executorFactory).dispatch(.emailTextChanged(value))
+                    store.dispatch(.emailTextChanged(value))
                 }
             )
             .focused($focusedField, equals: .email)
@@ -38,7 +33,7 @@ struct CredentialsForm: View {
                 text: Binding {
                     store.state.password
                 } set: { value in
-                    store.with(executorFactory).dispatch(.passwordTextChanged(value))
+                    store.dispatch(.passwordTextChanged(value))
                 }
             )
             .focused($focusedField, equals: .password)
@@ -46,7 +41,7 @@ struct CredentialsForm: View {
             .padding(.bottom, .palette.defaultVertical)
 
             Button {
-                store.with(executorFactory).dispatch(.confirm)
+                store.dispatch(.confirm)
             } label: {
                 Text(String.l10n.auth.signIn)
             }
@@ -54,7 +49,7 @@ struct CredentialsForm: View {
             .padding(.bottom, .palette.defaultVertical)
 
             Button {
-                store.with(executorFactory).dispatch(.createAccount)
+                store.dispatch(.createAccount)
             } label: {
                 Text(.l10n.auth.createAccount)
             }
@@ -65,7 +60,6 @@ struct CredentialsForm: View {
 
 #Preview {
     CredentialsForm(
-        executorFactory: FakeActionExecutorFactory(),
         store: Store(
             state: SignInModel.initialState,
             reducer: SignInModel.reducer

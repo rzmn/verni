@@ -1,35 +1,29 @@
 import Combine
 
-@MainActor public struct ActionExecutor<Action: Sendable>: Sendable {
-    let action: Action
-    private let executor: (@MainActor () -> Void)?
-
-    public static func make(action: Action, executor: (@MainActor () -> Void)? = nil) -> Self {
-        Self(action: action, executor: executor)
-    }
-
-    func execute() {
-        executor?()
-    }
-}
-
-public protocol ActionExecutorFactory<Action> {
+@MainActor public protocol Middleware<Action> {
     associatedtype Action: Sendable
-
-    @MainActor func executor(for action: Action) -> ActionExecutor<Action>
+    func handle(_ action: Action)
+    var id: String { get }
 }
 
-public struct FakeActionExecutorFactory<Action: Sendable>: ActionExecutorFactory {
-    public init() {}
+@MainActor public struct AnyMiddleware<Action: Sendable>: Middleware {
+    public let id: String
+    private let handleBlock: @MainActor (Action) -> Void
 
-    public func executor(for action: Action) -> ActionExecutor<Action> {
-        .make(action: action)
+    public init(id: String, handleBlock: @MainActor @escaping (Action) -> Void) {
+        self.id = id
+        self.handleBlock = handleBlock
+    }
+
+    public func handle(_ action: Action) {
+        handleBlock(action)
     }
 }
 
 @MainActor public final class Store<State: Sendable & Equatable, Action: Sendable>: ObservableObject {
     @Published public private(set) var state: State
     let reducer: @MainActor (State, Action) -> State
+    private var middlewares = [any Middleware<Action>]()
 
     public init(
         state: State,
@@ -39,25 +33,27 @@ public struct FakeActionExecutorFactory<Action: Sendable>: ActionExecutorFactory
         self.reducer = reducer
     }
 
-    public func dispatch(_ executor: ActionExecutor<Action>) {
-        state = reducer(state, executor.action)
-        executor.execute()
+    public func append(middleware: some Middleware<Action>, keepingUnique: Bool) {
+        if keepingUnique {
+            removeMiddleware(middleware.id)
+        }
+        middlewares.append(middleware)
     }
-}
 
-extension Store {
-    @MainActor public struct StoreWithFactory {
-        let store: Store
-        let factory: any ActionExecutorFactory<Action>
-
-        public func dispatch(_ action: Action) {
-            store.dispatch(factory.executor(for: action))
+    public func update(middleware: some Middleware<Action>) {
+        middlewares = middlewares.map {
+            $0.id == middleware.id ? middleware : $0
         }
     }
 
-    public func with(
-        _ factory: any ActionExecutorFactory<Action>
-    ) -> StoreWithFactory {
-        StoreWithFactory(store: self, factory: factory)
+    public func removeMiddleware(_ id: String) {
+        middlewares.removeAll(where: { $0.id == id })
+    }
+
+    public func dispatch(_ action: Action) {
+        state = reducer(state, action)
+        for middleware in middlewares {
+            middleware.handle(action)
+        }
     }
 }
