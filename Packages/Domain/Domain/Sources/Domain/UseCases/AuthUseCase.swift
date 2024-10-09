@@ -19,7 +19,7 @@ public enum AwakeError: Error, Sendable {
     case internalError(Error)
 }
 
-public protocol AuthUseCase: Sendable {
+public protocol AuthUseCase<AuthorizedSession>: Sendable {
     associatedtype AuthorizedSession: Sendable
     func awake() async throws(AwakeError) -> AuthorizedSession
     func login(credentials: Credentials) async throws(LoginError) -> AuthorizedSession

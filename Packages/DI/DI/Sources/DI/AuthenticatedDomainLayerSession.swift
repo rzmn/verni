@@ -1,6 +1,6 @@
 import Domain
 
-public protocol ActiveSessionDIContainer: AppCommonCovertible {
+public protocol AuthenticatedDomainLayerSession: AppCommonCovertible {
     var userId: User.Identifier { get }
 
     var profileRepository: any ProfileRepository { get }

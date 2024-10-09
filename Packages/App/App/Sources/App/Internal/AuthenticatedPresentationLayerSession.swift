@@ -3,7 +3,7 @@ import AppBase
 internal import SignInScreen
 
 @MainActor final class AuthenticatedPresentationLayerSession: Sendable {
-    init(di: ActiveSessionDIContainer) async {
+    init(di: AuthenticatedDomainLayerSession) async {
         // stub
     }
 }

@@ -6,9 +6,9 @@ public protocol SignInFactory: Sendable {
 }
 
 public final class DefaultSignInFactory: SignInFactory {
-    let di: DIContainer
+    let di: AnonymousDomainLayerSession
 
-    public init(di: DIContainer) {
+    public init(di: AnonymousDomainLayerSession) {
         self.di = di
     }
 

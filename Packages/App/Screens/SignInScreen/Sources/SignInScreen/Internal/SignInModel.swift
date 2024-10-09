@@ -12,7 +12,7 @@ internal import ProgressHUD
 actor SignInModel {
     private let store: Store<SignInState, SignInAction>
 
-    init(di: DIContainer) async {
+    init(di: AnonymousDomainLayerSession) async {
         store = await Store(
             state: Self.initialState,
             reducer: Self.reducer

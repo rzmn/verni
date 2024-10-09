@@ -10,7 +10,7 @@ internal import DesignSystem
 
 actor AppModel {
     private var pendingPushToken: Data?
-    private var currentSession: ActiveSessionDIContainer? {
+    private var currentSession: AuthenticatedDomainLayerSession? {
         didSet {
             if let currentSession, let pendingPushToken {
                 self.pendingPushToken = nil
@@ -24,7 +24,7 @@ actor AppModel {
     }
     private let store: Store<AppState, AppAction>
 
-    @MainActor init(di: DIContainer) {
+    @MainActor init(di: AnonymousDomainLayerSession) {
         store = Store(
             state: AppModel.initialState,
             reducer: AppModel.reducer

@@ -23,7 +23,7 @@ import DI
         defer {
             handler(content)
         }
-        let session: ActiveSessionDIContainer
+        let session: AuthenticatedDomainLayerSession
         do {
             session = try await DefaultDependenciesAssembly().authUseCase().awake()
         } catch {

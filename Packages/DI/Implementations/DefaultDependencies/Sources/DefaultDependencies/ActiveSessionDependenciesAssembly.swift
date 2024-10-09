@@ -28,7 +28,7 @@ internal import DefaultLogoutUseCaseImplementation
 internal import DefaultReceivingPushUseCaseImplementation
 internal import DataLayerDependencies
 
-final class ActiveSessionDependenciesAssembly: ActiveSessionDIContainer {
+final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     private let dataLayer: AuthenticatedDataLayerSession
     private let logoutSubject: AsyncSubject<LogoutReason>
     private let updatableProfile  = ExternallyUpdatable<Domain.Profile>(

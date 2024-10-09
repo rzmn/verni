@@ -6,9 +6,9 @@ import DI
 }
 
 public final class DefaultAppFactory: AppFactory {
-    let di: DIContainer
+    let di: AnonymousDomainLayerSession
 
-    public init(di: DIContainer) {
+    public init(di: AnonymousDomainLayerSession) {
         self.di = di
     }
 

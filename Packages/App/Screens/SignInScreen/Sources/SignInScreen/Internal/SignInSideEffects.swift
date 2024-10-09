@@ -10,7 +10,7 @@ internal import DesignSystem
 
     private let saveCredentialsUseCase: SaveCredendialsUseCase
     private let emailValidationUseCase: EmailValidationUseCase
-    private let authUseCase: any AuthUseCaseReturningActiveSession
+    private let authUseCase: any AuthUseCase<AuthenticatedDomainLayerSession>
 
     private let emailSubject = PassthroughSubject<String, Never>()
     private var hideSnackbarTask: Task<Void, Never>?
@@ -21,7 +21,7 @@ internal import DesignSystem
         store: Store<SignInState, SignInAction>,
         saveCredentialsUseCase: SaveCredendialsUseCase,
         emailValidationUseCase: EmailValidationUseCase,
-        authUseCase: any AuthUseCaseReturningActiveSession
+        authUseCase: any AuthUseCase<AuthenticatedDomainLayerSession>
     ) {
         self.store = store
         self.saveCredentialsUseCase = saveCredentialsUseCase

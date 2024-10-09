@@ -5,7 +5,7 @@ internal import SignInScreen
 @MainActor final class AnonymousPresentationLayerSession: Sendable {
     let signInScreen: any ScreenProvider<SignInEvent, SignInView>
 
-    init(di: DIContainer) async {
+    init(di: AnonymousDomainLayerSession) async {
         signInScreen = await DefaultSignInFactory(di: di).create()
     }
 }

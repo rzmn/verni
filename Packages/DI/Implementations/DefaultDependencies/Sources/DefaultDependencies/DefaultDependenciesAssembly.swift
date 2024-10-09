@@ -9,30 +9,30 @@ internal import DefaultAuthUseCaseImplementation
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
 
-private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
+private actor AuthUseCaseAdapter: AuthUseCase {
     private let impl: any AuthUseCase
-    private let awakeHook: () async throws(AwakeError) -> any ActiveSessionDIContainer
-    private let loginHook: (Credentials) async throws(LoginError) -> any ActiveSessionDIContainer
-    private let signupHook: (Credentials) async throws(SignupError) -> any ActiveSessionDIContainer
+    private let awakeHook: () async throws(AwakeError) -> any AuthenticatedDomainLayerSession
+    private let loginHook: (Credentials) async throws(LoginError) -> any AuthenticatedDomainLayerSession
+    private let signupHook: (Credentials) async throws(SignupError) -> any AuthenticatedDomainLayerSession
 
     init<Impl: AuthUseCase>(
         impl: Impl,
         dependencies: DefaultDependenciesAssembly
     ) where Impl.AuthorizedSession == any AuthenticatedDataLayerSession {
         self.impl = impl
-        awakeHook = { () async throws(AwakeError) -> any ActiveSessionDIContainer in
+        awakeHook = { () async throws(AwakeError) -> any AuthenticatedDomainLayerSession in
             await ActiveSessionDependenciesAssembly(
                 defaultDependencies: dependencies,
                 dataLayer: try await impl.awake()
             )
         }
-        loginHook = { credentials async throws(LoginError) -> any ActiveSessionDIContainer in
+        loginHook = { credentials async throws(LoginError) -> any AuthenticatedDomainLayerSession in
             await ActiveSessionDependenciesAssembly(
                 defaultDependencies: dependencies,
                 dataLayer: try await impl.login(credentials: credentials)
             )
         }
-        signupHook = { credentials async throws(SignupError) -> any ActiveSessionDIContainer in
+        signupHook = { credentials async throws(SignupError) -> any AuthenticatedDomainLayerSession in
             await ActiveSessionDependenciesAssembly(
                 defaultDependencies: dependencies,
                 dataLayer: try await impl.signup(credentials: credentials)
@@ -40,20 +40,20 @@ private actor AuthUseCaseAdapter: AuthUseCaseReturningActiveSession {
         }
     }
 
-    func awake() async throws(AwakeError) -> any ActiveSessionDIContainer {
+    func awake() async throws(AwakeError) -> any AuthenticatedDomainLayerSession {
         try await awakeHook()
     }
 
-    func login(credentials: Credentials) async throws(LoginError) -> any ActiveSessionDIContainer {
+    func login(credentials: Credentials) async throws(LoginError) -> any AuthenticatedDomainLayerSession {
         try await loginHook(credentials)
     }
 
-    func signup(credentials: Credentials) async throws(SignupError) -> any ActiveSessionDIContainer {
+    func signup(credentials: Credentials) async throws(SignupError) -> any AuthenticatedDomainLayerSession {
         try await signupHook(credentials)
     }
 }
 
-public final class DefaultDependenciesAssembly: DIContainer, Sendable {
+public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sendable {
     private let dataLayer: AnonymousDataLayerSession
     private let avatarsRepository: AvatarsRepository
     private let webcredentials = "https://verni.app"
@@ -93,7 +93,7 @@ public final class DefaultDependenciesAssembly: DIContainer, Sendable {
         )
     }
 
-    public func authUseCase() -> any AuthUseCaseReturningActiveSession {
+    public func authUseCase() -> any AuthUseCase<AuthenticatedDomainLayerSession> {
         AuthUseCaseAdapter(
             impl: DefaultAuthUseCase(
                 taskFactory: DefaultTaskFactory(),

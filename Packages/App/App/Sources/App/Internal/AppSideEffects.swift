@@ -3,9 +3,9 @@ import DI
 
 @MainActor final class AppSideEffects: Sendable {
     private unowned let store: Store<AppState, AppAction>
-    private let di: DIContainer
+    private let di: AnonymousDomainLayerSession
 
-    init(store: Store<AppState, AppAction>, di: DIContainer) {
+    init(store: Store<AppState, AppAction>, di: AnonymousDomainLayerSession) {
         self.store = store
         self.di = di
     }
