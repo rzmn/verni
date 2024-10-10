@@ -23,7 +23,7 @@ Shared Expenses Tracker App iOS Client.
 
 ## Architecture/Implementation overview
 
-The App's architecture can be considered as a set of _Layers_. Each layer knows only about the "previous" one. 
+The App's architecture can be considered as a set of _Layers_. Each layer knows only about the layer "below".
 
 ```mermaid
 graph LR
@@ -63,11 +63,11 @@ The Data Layer is mostly about how to store, fetch and serialize data.
 
 `ApiService` - Authorization and Data Serialization Service
 
-`Api` - REST API Schema + Polling
+`Api` - REST API Schema and Polling
 
 `PersistentStorage` - Persistent Data Storage
 
-Networking service is URLSession-based, service is responsible to perform request retries (exponential backoff). Reachability retries are considered to be responsibility of the App Layer. 
+Networking service implementation is URLSession-based, service is responsible to perform request retries (exponential backoff). Reachability retries are considered to be responsibility of the App Layer. 
 
 Api Service is responsible for refreshing token (JWT) when a request fails due token expiration and then restarting it with a refreshed token. The Api Service can make N requests simultaneously keeping relevant refresh token for each one.
 
@@ -77,7 +77,7 @@ Serialization is Codable-based, the same object types are used both in Api Schem
 
 The Domain Layer contains three kind of objects describing business logic
 
-- Entities - pure data representing core concepts of problem domain
+- Entities - pure data representing core concepts of a problem domain
 
 - Repositories - read-only data providers
 
@@ -91,59 +91,114 @@ Use cases have access to repositories. Use cases are able to provide a "data upd
 
 ### App (Presentation) Layer
 
-The App Layer is a set of _Screens_. _Screen_ is a complete and reusable fragment of some user story. _Screen_ should be able to appear from anywhere.
+The App Layer is a set of _Screens_. _Screen_ is a complete and reusable fragment of some user story. _Screen_ should be able to appear from anywhere. Navigation is being managed by screen coordinator
 
-Each _Screen_ is provided as a _Swift Package_. Each *Screen* is not dependent on any other _Screen_.
-
-### Screen Components
-
-#### Flow
-
-- Entry point for some user path as described above
-
-- The only public entity in a corresponding swift package
-
-- Interacts with domain layer. (Use Cases, Repositories, Entities)
-
-- _Presenter_ and _ViewModel_ are created by a _Flow_
-
-- Listening for _User Actions_
-
-- Sending updates to _ViewModel_
-  
-  #### Presenter
-
-- Responsible for UI presentation (view controllers, HUDs, popups etc)
-
-- Interacts with _AppRouter_. _AppRouter_ provides an information about current navigation state.
-
-- _View_ is created by a _Presenter_
-  
-  #### ViewModel
-
-- Responsible for creating and publishing a _ViewState_ to _ViewActions_
-
-- _ViewModel_ is istening for updates from _Flow_. _ViewState_ is being created based on that updates
-  
-  #### ViewActions
-
-- Publishing _ViewState_ to _View_
-
-- Listening for user actions from _View_
-  
-  #### View
-
-- Passive
-
-- Listening for _ViewState_ from _ViewActions_ and renders it
+Each _Screen_ is provided as a _Swift Package_. Each *Screen* is not dependent on any other _Screen_. The screen itself is made up of redux-like components:
 
 ```mermaid
-graph LR
-    View(View) -- creating actions --> Store(Store)
-    Store(Store) -- sending actions --> Reducer(Reducer)
-    Store(Store) -- action --> ActionExecutor(ActionExecutor)
-    ActionExecutor(ActionExecutor) -- creating actions --> Store(Store)
-    Reducer(Reducer) -- creating state --> View(View)
-    
-
+flowchart
+    View(View) -- creating actions --> ActionHandler(Action Handler)
+    subgraph Store
+    ActionHandler(Action Handler) -- delivers actions --> Reducer(Reducer)
+    end
+    Reducer(Reducer) -. creates state .-> View(View)
+    ActionHandler(Action Handler) -- interacting with --> SideEffects(Side Effects)
+    SideEffects(Side Effects) -. creating actions .-> ActionHandler(Action Handler)
 ```
+
+#### View
+
+- View is a function of state
+
+- Subscribed to state updates
+
+- Sending user actions
+
+<details>
+  <summary>View Example Implementation</summary>
+
+```swift
+struct ExampleView: View {
+    @ObservedObject private var store: Store<State, Action>
+
+    var body: some View {
+        Button {
+            store.dispatch(.buttonTapped)
+        } label: {
+            Text(store.state.buttonTitle)    
+        }
+    }
+}
+```
+
+</details>
+
+#### Store
+
+- Responding to user actions
+
+- Holds screen state
+
+<details>
+  <summary>Store Example Implementation</summary>
+
+```swift
+class ExampleStore<State, Action>: Store {
+    @Published var state: State
+    private var handlers: [ActionHandler<Action>]
+    private let reducer: (State, Action) -> State
+
+    func dispatch(action: Action) {
+        state = reducer(state, action)
+        for handler in handlers {
+            handler.handle(action)
+        }
+    }
+}
+```
+
+</details>
+
+#### Reducer
+
+- Pure function returning a new state based on user action and the prevous state
+
+#### Action Handler
+
+- Handling user actions
+
+- Dealing with side effects
+
+- Producing new actions if necessary
+
+
+<details>
+  <summary>Action Handler Example Implementation</summary>
+
+```swift
+class ExampleActionHandler<Action>: ActionHandler {
+    private unowned let store: Store<State, Action>
+    private let api: Api
+
+    func handle(action: Action) {
+        switch action {
+        case .onRefreshDataTap: refreshData()
+        default: break
+        }
+    }
+
+    private func refreshData() {
+        store.dispatch(.dataIsLoading)
+        Task {
+            do {
+                let data = try api.loadData()
+                store.dispatch(.dataLoaded(data))
+            } catch {
+                store.dispatch(.loadDataFailed(error))
+            }
+        }
+    }
+}
+```
+
+</details>
