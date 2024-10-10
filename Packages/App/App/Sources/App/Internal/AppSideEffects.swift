@@ -11,7 +11,7 @@ import DI
     }
 }
 
-extension AppSideEffects: Middleware {
+extension AppSideEffects: ActionHandler {
     var id: String {
         "\(Self.self)"
     }

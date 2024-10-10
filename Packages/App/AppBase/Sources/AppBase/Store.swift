@@ -1,12 +1,12 @@
 import Combine
 
-@MainActor public protocol Middleware<Action> {
+@MainActor public protocol ActionHandler<Action> {
     associatedtype Action: Sendable
     func handle(_ action: Action)
     var id: String { get }
 }
 
-@MainActor public struct AnyMiddleware<Action: Sendable>: Middleware {
+@MainActor public struct AnyActionHandler<Action: Sendable>: ActionHandler {
     public let id: String
     private let handleBlock: @MainActor (Action) -> Void
 
@@ -23,7 +23,7 @@ import Combine
 @MainActor public final class Store<State: Sendable & Equatable, Action: Sendable>: ObservableObject {
     @Published public private(set) var state: State
     let reducer: @MainActor (State, Action) -> State
-    private var middlewares = [any Middleware<Action>]()
+    private var handlers = [any ActionHandler<Action>]()
 
     public init(
         state: State,
@@ -33,27 +33,27 @@ import Combine
         self.reducer = reducer
     }
 
-    public func append(middleware: some Middleware<Action>, keepingUnique: Bool) {
+    public func append(handler: some ActionHandler<Action>, keepingUnique: Bool) {
         if keepingUnique {
-            removeMiddleware(middleware.id)
+            removeHandler(handler.id)
         }
-        middlewares.append(middleware)
+        handlers.append(handler)
     }
 
-    public func update(middleware: some Middleware<Action>) {
-        middlewares = middlewares.map {
-            $0.id == middleware.id ? middleware : $0
+    public func update(handler: some ActionHandler<Action>) {
+        handlers = handlers.map {
+            $0.id == handler.id ? handler : $0
         }
     }
 
-    public func removeMiddleware(_ id: String) {
-        middlewares.removeAll(where: { $0.id == id })
+    public func removeHandler(_ id: String) {
+        handlers.removeAll(where: { $0.id == id })
     }
 
     public func dispatch(_ action: Action) {
         state = reducer(state, action)
-        for middleware in middlewares {
-            middleware.handle(action)
+        for handler in handlers {
+            handler.handle(action)
         }
     }
 }

@@ -18,7 +18,7 @@ actor SignInModel {
             reducer: Self.reducer
         )
         await store.append(
-            middleware: SignInSideEffects(
+            handler: SignInSideEffects(
                 store: store,
                 saveCredentialsUseCase: di.appCommon.saveCredentialsUseCase,
                 emailValidationUseCase: di.appCommon.localEmailValidationUseCase,
@@ -36,7 +36,7 @@ actor SignInModel {
         SignInView(
             store: tap(store) { store in
                 store.append(
-                    middleware: AnyMiddleware(
+                    handler: AnyActionHandler(
                         id: "\(SignInEvent.self)",
                         handleBlock: { action in
                             switch action {

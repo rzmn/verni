@@ -30,7 +30,7 @@ actor AppModel {
             reducer: AppModel.reducer
         )
         store.append(
-            middleware: AppSideEffects(
+            handler: AppSideEffects(
                 store: store,
                 di: di
             ),
@@ -46,7 +46,7 @@ extension AppModel: ScreenProvider {
         AppView(
             store: tap(store) { store in
                 store.append(
-                    middleware: AnyMiddleware(
+                    handler: AnyActionHandler(
                         id: "\(Event.self)",
                         handleBlock: { _ in }
                     ),

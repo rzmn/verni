@@ -51,7 +51,7 @@ internal import DesignSystem
     }
 }
 
-extension SignInSideEffects: Middleware {
+extension SignInSideEffects: ActionHandler {
     var id: String {
         "\(Self.self)"
     }
