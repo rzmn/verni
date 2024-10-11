@@ -11,6 +11,7 @@ internal import DesignSystem
     private let saveCredentialsUseCase: SaveCredendialsUseCase
     private let emailValidationUseCase: EmailValidationUseCase
     private let authUseCase: any AuthUseCase<AuthenticatedDomainLayerSession>
+    private let haptic: HapticManager
 
     private let emailSubject = PassthroughSubject<String, Never>()
     private var hideSnackbarTask: Task<Void, Never>?
@@ -19,10 +20,12 @@ internal import DesignSystem
 
     init(
         store: Store<SignInState, SignInAction>,
+        haptic: HapticManager,
         saveCredentialsUseCase: SaveCredendialsUseCase,
         emailValidationUseCase: EmailValidationUseCase,
         authUseCase: any AuthUseCase<AuthenticatedDomainLayerSession>
     ) {
+        self.haptic = haptic
         self.store = store
         self.saveCredentialsUseCase = saveCredentialsUseCase
         self.emailValidationUseCase = emailValidationUseCase
@@ -118,7 +121,7 @@ extension SignInSideEffects: ActionHandler {
     }
 
     private func confirmFailedFeedback() {
-        AppServices.default.haptic.errorHaptic()
+        haptic.errorHaptic()
     }
 
     private func createAccount() {

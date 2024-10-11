@@ -24,7 +24,7 @@ actor AppModel {
     }
     private let store: Store<AppState, AppAction>
 
-    @MainActor init(di: AnonymousDomainLayerSession) {
+    @MainActor init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
         store = Store(
             state: AppModel.initialState,
             reducer: AppModel.reducer
@@ -32,7 +32,8 @@ actor AppModel {
         store.append(
             handler: AppSideEffects(
                 store: store,
-                di: di
+                di: di,
+                haptic: haptic
             ),
             keepingUnique: true
         )

@@ -4,10 +4,16 @@ import DI
 @MainActor final class AppSideEffects: Sendable {
     private unowned let store: Store<AppState, AppAction>
     private let di: AnonymousDomainLayerSession
+    private let haptic: HapticManager
 
-    init(store: Store<AppState, AppAction>, di: AnonymousDomainLayerSession) {
+    init(
+        store: Store<AppState, AppAction>,
+        di: AnonymousDomainLayerSession,
+        haptic: HapticManager
+    ) {
         self.store = store
         self.di = di
+        self.haptic = haptic
     }
 }
 
@@ -29,7 +35,7 @@ extension AppSideEffects: ActionHandler {
 
     private func launch() {
         Task {
-            let session = await AnonymousPresentationLayerSession(di: di)
+            let session = await AnonymousPresentationLayerSession(di: di, haptic: haptic)
             store.dispatch(.launched(.anonymous(session)))
         }
     }

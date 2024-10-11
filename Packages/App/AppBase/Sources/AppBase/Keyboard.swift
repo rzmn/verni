@@ -3,13 +3,6 @@ import Combine
 import SwiftUI
 internal import Base
 
-@MainActor public struct AppServices: Sendable {
-    public static let `default` = AppServices(keyboard: Keyboard(), haptic: DefaultHapticManager())
-
-    public let keyboard: Keyboard
-    public let haptic: HapticManager
-}
-
 private extension Notification {
     var keyboardFrame: CGRect? {
         guard let object = userInfo?[UIResponder.keyboardFrameEndUserInfoKey] else {
@@ -42,7 +35,15 @@ private extension Notification {
     }
 }
 
-@MainActor public struct Keyboard {
+extension EnvironmentValues {
+    public var keyboard: Keyboard {
+        self[Keyboard.self]
+    }
+}
+
+public struct Keyboard: Sendable {
+    public static let shared = Keyboard()
+
     public struct Event {
         public enum Kind {
             case willHide
@@ -67,7 +68,7 @@ private extension Notification {
         }
     }
 
-    public var eventPublisher: AnyPublisher<Event, Never> {
+    @MainActor public var eventPublisher: AnyPublisher<Event, Never> {
         let willHide = NotificationCenter.default
             .publisher(for: UIResponder.keyboardWillHideNotification)
             .compactMap(mapKeyboardNotification)
@@ -101,22 +102,8 @@ private extension Notification {
     }
 }
 
-extension View {
-    public func keyboardDismiss() -> some View {
-        modifier(KeyboardDismiss())
-    }
-}
-
-private struct KeyboardDismiss: ViewModifier {
-    func body(content: Content) -> some View {
-        content.onTapGesture {
-            UIApplication.shared.connectedScenes
-                .filter { $0.activationState == .foregroundActive }
-                .first { $0 is UIWindowScene }
-                .flatMap { $0 as? UIWindowScene }?
-                .windows
-                .first(where: \.isKeyWindow)?
-                .endEditing(true)
-        }
+extension Keyboard: EnvironmentKey {
+    public static var defaultValue: Keyboard {
+        shared
     }
 }

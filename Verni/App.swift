@@ -4,10 +4,11 @@ import AppBase
 import App
 
 @main
-struct MainApp: SwiftUI.App {
-    let provider = DefaultAppFactory(
+struct App: SwiftUI.App {
+    private let provider = DefaultAppFactory(
         // swiftlint:disable:next force_try
-        di: try! DefaultDependenciesAssembly()
+        di: try! DefaultDependenciesAssembly(),
+        haptic: DefaultHapticManager()
     ).create()
 
     var body: some Scene {

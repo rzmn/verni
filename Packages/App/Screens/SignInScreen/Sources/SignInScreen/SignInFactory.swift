@@ -6,13 +6,15 @@ public protocol SignInFactory: Sendable {
 }
 
 public final class DefaultSignInFactory: SignInFactory {
-    let di: AnonymousDomainLayerSession
+    private let di: AnonymousDomainLayerSession
+    private let haptic: HapticManager
 
-    public init(di: AnonymousDomainLayerSession) {
+    public init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
         self.di = di
+        self.haptic = haptic
     }
 
     public func create() async -> any ScreenProvider<SignInEvent, SignInView> {
-        await SignInModel(di: di)
+        await SignInModel(di: di, haptic: haptic)
     }
 }

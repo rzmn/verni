@@ -6,13 +6,15 @@ import DI
 }
 
 public final class DefaultAppFactory: AppFactory {
-    let di: AnonymousDomainLayerSession
+    private let di: AnonymousDomainLayerSession
+    private let haptic: HapticManager
 
-    public init(di: AnonymousDomainLayerSession) {
+    public init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
         self.di = di
+        self.haptic = haptic
     }
 
     public func create() -> any ScreenProvider<Void, AppView> {
-        AppModel(di: di)
+        AppModel(di: di, haptic: haptic)
     }
 }

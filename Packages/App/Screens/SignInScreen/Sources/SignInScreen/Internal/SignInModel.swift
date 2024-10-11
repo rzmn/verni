@@ -12,7 +12,7 @@ internal import ProgressHUD
 actor SignInModel {
     private let store: Store<SignInState, SignInAction>
 
-    init(di: AnonymousDomainLayerSession) async {
+    init(di: AnonymousDomainLayerSession, haptic: HapticManager) async {
         store = await Store(
             state: Self.initialState,
             reducer: Self.reducer
@@ -20,6 +20,7 @@ actor SignInModel {
         await store.append(
             handler: SignInSideEffects(
                 store: store,
+                haptic: haptic,
                 saveCredentialsUseCase: di.appCommon.saveCredentialsUseCase,
                 emailValidationUseCase: di.appCommon.localEmailValidationUseCase,
                 authUseCase: di.authUseCase()
