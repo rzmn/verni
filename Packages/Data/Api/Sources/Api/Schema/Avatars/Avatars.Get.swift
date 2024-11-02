@@ -2,10 +2,10 @@ import DataTransferObjects
 
 extension Avatars {
     public struct Get: ApiMethod, AvatarsScope {
-        public typealias Response = [UserDto.Avatar.Identifier: AvatarDataDto]
+        public typealias Response = [ImageDto.Identifier: ImageDto]
 
         public struct Parameters: Encodable, Sendable {
-            public let ids: [UserDto.Avatar.Identifier]
+            public let ids: [ImageDto.Identifier]
         }
         public let parameters: Parameters
 
@@ -17,7 +17,7 @@ extension Avatars {
             .get
         }
 
-        public init(ids: [UserDto.Avatar.Identifier]) {
+        public init(ids: [ImageDto.Identifier]) {
             self.parameters = Parameters(ids: ids)
         }
     }

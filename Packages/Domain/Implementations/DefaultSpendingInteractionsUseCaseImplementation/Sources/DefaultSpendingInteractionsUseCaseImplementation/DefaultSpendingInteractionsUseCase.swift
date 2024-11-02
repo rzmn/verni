@@ -17,7 +17,7 @@ extension DefaultSpendingInteractionsUseCase: SpendingInteractionsUseCase {
         do {
             try await api.run(
                 method: Spendings.CreateDeal(
-                    deal: DealDto(
+                    deal: ExpenseDto(
                         domain: spending
                     )
                 )

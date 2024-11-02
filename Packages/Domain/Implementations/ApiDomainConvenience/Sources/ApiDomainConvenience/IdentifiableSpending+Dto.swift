@@ -4,7 +4,7 @@ import Foundation
 import DataTransferObjects
 
 extension IdentifiableSpending {
-    public init(dto: IdentifiableDealDto) {
+    public init(dto: IdentifiableExpenseDto) {
         self.init(
             spending: Spending(
                 dto: dto.deal
@@ -14,11 +14,11 @@ extension IdentifiableSpending {
     }
 }
 
-extension IdentifiableDealDto {
+extension IdentifiableExpenseDto {
     public init(domain: IdentifiableSpending) {
         self.init(
             id: domain.id,
-            deal: DealDto(
+            deal: ExpenseDto(
                 domain: domain.spending
             )
         )

@@ -42,7 +42,7 @@ private actor ApiProvider {
                 }
                 if let _ = method as? Avatars.Get {
                     return getResponse.map {
-                        AvatarDataDto(id: $0.key, base64Data: $0.value.base64EncodedString())
+                        ImageDto(id: $0.key, base64: $0.value.base64EncodedString())
                     }.reduce(into: [:]) { dict, kv in
                         dict[kv.id] = kv
                     }

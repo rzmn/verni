@@ -9,13 +9,13 @@ private actor PersistencyProvider {
     let persistency: PersistencyMock
 
     var getSpendingCounterpartiesCalledCount = 0
-    var updateSpendingCounterpartiesCalls: [ [SpendingsPreviewDto] ] = []
+    var updateSpendingCounterpartiesCalls: [ [BalanceDto] ] = []
 
     var getSpendingHistoryCalledCount: [UserDto.Identifier: Int] = [:]
-    var updateSpendingHistoryCalls: [ (UserDto.Identifier, [IdentifiableDealDto]) ] = []
+    var updateSpendingHistoryCalls: [ (UserDto.Identifier, [IdentifiableExpenseDto]) ] = []
 
-    var counterparties: [SpendingsPreviewDto]?
-    var spendingHistory = [UserDto.Identifier: [IdentifiableDealDto]]()
+    var counterparties: [BalanceDto]?
+    var spendingHistory = [UserDto.Identifier: [IdentifiableExpenseDto]]()
 
     init() async {
         persistency = PersistencyMock()
@@ -76,7 +76,7 @@ private actor PersistencyProvider {
 
         #expect(couterpartiesFromRepository == couterparties)
         #expect(await provider.getSpendingCounterpartiesCalledCount == 1)
-        #expect(await provider.updateSpendingCounterpartiesCalls == [couterparties.map(SpendingsPreviewDto.init)])
+        #expect(await provider.updateSpendingCounterpartiesCalls == [couterparties.map(BalanceDto.init)])
     }
 
     @Test func testNoCounterparties() async throws {
@@ -131,7 +131,7 @@ private actor PersistencyProvider {
 
         #expect(historyFromRepository == history)
         #expect(await provider.updateSpendingHistoryCalls.map(\.0) == [counterparty])
-        #expect(await provider.updateSpendingHistoryCalls.map(\.1) == [history.map(IdentifiableDealDto.init)])
+        #expect(await provider.updateSpendingHistoryCalls.map(\.1) == [history.map(IdentifiableExpenseDto.init)])
         #expect(await provider.getSpendingHistoryCalledCount[counterparty, default: 0] == 1)
     }
 

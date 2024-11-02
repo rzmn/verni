@@ -5,7 +5,7 @@ extension Spendings {
         public typealias Response = NoResponse
 
         public struct Parameters: Encodable, Sendable {
-            public let deal: DealDto
+            public let deal: ExpenseDto
         }
         public let parameters: Parameters
 
@@ -17,7 +17,7 @@ extension Spendings {
             .post
         }
 
-        public init(deal: DealDto) {
+        public init(deal: ExpenseDto) {
             self.parameters = Parameters(deal: deal)
         }
     }

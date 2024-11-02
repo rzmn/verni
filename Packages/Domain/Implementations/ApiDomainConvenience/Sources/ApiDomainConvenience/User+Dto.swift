@@ -4,7 +4,7 @@ import UIKit
 
 extension User {
     public init(dto: UserDto) {
-        let data = dto.avatar.id.flatMap {
+        let data = dto.avatarId.flatMap {
             Avatar(id: $0)
         }
         self = User(
@@ -22,10 +22,7 @@ extension UserDto {
             login: user.id,
             friendStatus: FriendStatus(domain: user.status),
             displayName: user.displayName,
-            avatar: Avatar(
-                id: user.avatar?.id
-            )
-
+            avatarId: user.avatar?.id
         )
     }
 }

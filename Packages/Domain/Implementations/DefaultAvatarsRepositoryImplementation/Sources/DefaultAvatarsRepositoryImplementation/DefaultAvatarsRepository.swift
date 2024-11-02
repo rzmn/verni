@@ -78,7 +78,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
                     }
                 }
                 if let avatar = fetchResult[id] {
-                    if let data = avatar.base64Data.flatMap({ Data(base64Encoded: $0) }) {
+                    if let data = Data(base64Encoded: avatar.base64) {
                         await offlineMutableRepository.store(data: data, for: id)
                         return .success(data)
                     } else {

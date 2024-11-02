@@ -155,7 +155,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func getSpendingCounterparties() -> [SpendingsPreviewDto]? {
+    func getSpendingCounterparties() -> [BalanceDto]? {
         do {
             guard let row = try database.prepare(Schema.SpendingCounterparties.table).first(where: { row in
                 guard try row.get(Schema.SpendingCounterparties.Keys.id) == hostId else {
@@ -172,7 +172,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func updateSpendingCounterparties(_ counterparties: [SpendingsPreviewDto]) {
+    func updateSpendingCounterparties(_ counterparties: [BalanceDto]) {
         do {
             try database.run(Schema.SpendingCounterparties.table.upsert(
                 Schema.SpendingCounterparties.Keys.id <- hostId,
@@ -184,7 +184,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func getSpendingsHistory(counterparty: UserDto.Identifier) -> [IdentifiableDealDto]? {
+    func getSpendingsHistory(counterparty: UserDto.Identifier) -> [IdentifiableExpenseDto]? {
         do {
             guard let row = try database.prepare(Schema.SpendingsHistory.table).first(where: { row in
                 guard try row.get(Schema.SpendingsHistory.Keys.id) == counterparty else {
@@ -201,7 +201,7 @@ private struct FriendshipKindSet: OptionSet {
         }
     }
 
-    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableDealDto]) {
+    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableExpenseDto]) {
         do {
             try database.run(Schema.SpendingsHistory.table.upsert(
                 Schema.SpendingsHistory.Keys.id <- counterparty,

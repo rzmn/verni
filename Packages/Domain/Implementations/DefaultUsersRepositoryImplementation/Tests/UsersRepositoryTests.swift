@@ -59,9 +59,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
             login: UUID().uuidString,
             friendStatus: .currentUser,
             displayName: "some name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let provider = await ApiProvider(
             getResponse: [user]
@@ -95,9 +93,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
             login: UUID().uuidString,
             friendStatus: .currentUser,
             displayName: "some name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let provider = await ApiProvider(
             searchResponse: [user]

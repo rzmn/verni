@@ -9,10 +9,10 @@ actor PersistencyMock: Persistency {
     var updateProfileBlock: (@Sendable (ProfileDto) async -> Void)?
     var userWithIDBlock: (@Sendable (UserDto.Identifier) async -> UserDto?)?
     var updateUsersBlock: (@Sendable ([UserDto]) async -> Void)?
-    var getSpendingCounterpartiesBlock: (@Sendable () async -> [SpendingsPreviewDto]?)?
-    var updateSpendingCounterpartiesBlock: (@Sendable ([SpendingsPreviewDto]) async -> Void)?
-    var getSpendingsHistoryBlock: (@Sendable (UserDto.Identifier) async -> [IdentifiableDealDto]?)?
-    var updateSpendingsHistoryBlock: (@Sendable (UserDto.Identifier, [IdentifiableDealDto]) async -> Void)?
+    var getSpendingCounterpartiesBlock: (@Sendable () async -> [BalanceDto]?)?
+    var updateSpendingCounterpartiesBlock: (@Sendable ([BalanceDto]) async -> Void)?
+    var getSpendingsHistoryBlock: (@Sendable (UserDto.Identifier) async -> [IdentifiableExpenseDto]?)?
+    var updateSpendingsHistoryBlock: (@Sendable (UserDto.Identifier, [IdentifiableExpenseDto]) async -> Void)?
     var getFriendsWithKindBlock: (@Sendable (Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]?)?
     var updateFriendsForKindBlock: (@Sendable ([FriendshipKindDto: [UserDto]], Set<FriendshipKindDto>) async -> Void)?
     var closeBlock: (@Sendable () async -> Void)?
@@ -67,28 +67,28 @@ actor PersistencyMock: Persistency {
         return await updateUsersBlock(users)
     }
 
-    func getSpendingCounterparties() async -> [SpendingsPreviewDto]? {
+    func getSpendingCounterparties() async -> [BalanceDto]? {
         guard let getSpendingCounterpartiesBlock else {
             fatalError("not implemented")
         }
         return await getSpendingCounterpartiesBlock()
     }
 
-    func updateSpendingCounterparties(_ counterparties: [SpendingsPreviewDto]) async {
+    func updateSpendingCounterparties(_ counterparties: [BalanceDto]) async {
         guard let updateSpendingCounterpartiesBlock else {
             fatalError("not implemented")
         }
         return await updateSpendingCounterpartiesBlock(counterparties)
     }
 
-    func getSpendingsHistory(counterparty: UserDto.Identifier) async -> [IdentifiableDealDto]? {
+    func getSpendingsHistory(counterparty: UserDto.Identifier) async -> [IdentifiableExpenseDto]? {
         guard let getSpendingsHistoryBlock else {
             fatalError("not implemented")
         }
         return await getSpendingsHistoryBlock(counterparty)
     }
 
-    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableDealDto]) async {
+    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableExpenseDto]) async {
         guard let updateSpendingsHistoryBlock else {
             fatalError("not implemented")
         }

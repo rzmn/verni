@@ -102,9 +102,7 @@ import Base
             login: UUID().uuidString,
             friendStatus: .currentUser,
             displayName: "some name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let profile = ProfileDto(
             user: host,
@@ -166,17 +164,13 @@ import Base
             login: UUID().uuidString,
             friendStatus: .currentUser,
             displayName: "some name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let friend = UserDto(
             login: UUID().uuidString,
             friendStatus: .friends,
             displayName: "some name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let refreshToken = UUID().uuidString
 
@@ -220,17 +214,13 @@ import Base
             login: UUID().uuidString,
             friendStatus: .outgoingRequest,
             displayName: "sub name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let friend = UserDto(
             login: UUID().uuidString,
             friendStatus: .friends,
             displayName: "some name",
-            avatar: UserDto.Avatar(
-                id: nil
-            )
+            avatarId: nil
         )
         let friends: [FriendshipKindDto: [UserDto]] = [
             .friends: [friend],
@@ -304,8 +294,8 @@ import Base
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let counterparties = [
-            SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["USD": 16]),
-            SpendingsPreviewDto(counterparty: UUID().uuidString, balance: ["RUB": -13])
+            BalanceDto(counterparty: UUID().uuidString, currencies: ["USD": 16]),
+            BalanceDto(counterparty: UUID().uuidString, currencies: ["RUB": -13])
         ]
 
         // when
@@ -343,35 +333,37 @@ import Base
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let counterparty = UUID().uuidString
-        let history: [IdentifiableDealDto] = [
-            IdentifiableDealDto(
+        let history: [IdentifiableExpenseDto] = [
+            IdentifiableExpenseDto(
                 id: UUID().uuidString,
-                deal: DealDto(
+                deal: ExpenseDto(
                     timestamp: 123,
                     details: "456",
                     cost: 789,
                     currency: "RUB",
-                    spendings: [
-                        SpendingDto(
+                    shares: [
+                        ShareOfExpenseDto(
                             userId: UUID().uuidString,
                             cost: 234
                         )
-                    ]
+                    ],
+                    attachments: []
                 )
             ),
-            IdentifiableDealDto(
+            IdentifiableExpenseDto(
                 id: UUID().uuidString,
-                deal: DealDto(
+                deal: ExpenseDto(
                     timestamp: 123,
                     details: "456",
                     cost: 789,
                     currency: "RUB",
-                    spendings: [
-                        SpendingDto(
+                    shares: [
+                        ShareOfExpenseDto(
                             userId: UUID().uuidString,
                             cost: 234
                         )
-                    ]
+                    ],
+                    attachments: []
                 )
             )
         ]

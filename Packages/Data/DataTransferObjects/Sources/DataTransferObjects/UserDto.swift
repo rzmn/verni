@@ -8,26 +8,22 @@ public struct UserDto: Codable, Sendable, Equatable {
         case friends = 3
         case currentUser = 4
     }
-    public struct Avatar: Codable, Sendable, Equatable {
-        public typealias Identifier = String
-
-        public let id: Identifier?
-
-        public init(id: Identifier?) {
-            self.id = id
-        }
-    }
     public typealias Identifier = String
     public let id: Identifier
-    public let friendStatus: FriendStatus
     public let displayName: String
-    public let avatar: Avatar
+    public let avatarId: ImageDto.Identifier?
+    public let friendStatus: FriendStatus
 
-    public init(login: Identifier, friendStatus: FriendStatus, displayName: String, avatar: Avatar) {
+    public init(
+        login: Identifier,
+        friendStatus: FriendStatus,
+        displayName: String,
+        avatarId: ImageDto.Identifier?
+    ) {
         self.id = login
         self.friendStatus = friendStatus
         self.displayName = displayName
-        self.avatar = avatar
+        self.avatarId = avatarId
     }
 }
 

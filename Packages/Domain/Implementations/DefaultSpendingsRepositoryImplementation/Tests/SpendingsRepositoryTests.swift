@@ -28,18 +28,18 @@ private actor ApiProvider {
     let mockLongPoll: MockLongPoll
 
     var getCounterpartiesCalledCount = 0
-    private let getCounterpartiesResponse: [SpendingsPreviewDto]
+    private let getCounterpartiesResponse: [BalanceDto]
 
     var getSpendingsHistoryCalls: [UserDto.Identifier] = []
-    private let getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableDealDto]]
+    private let getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableExpenseDto]]
 
-    var getDealCalls: [DealDto.Identifier] = []
-    private let getDealResponse: [DealDto.Identifier: DealDto]
+    var getDealCalls: [ExpenseDto.Identifier] = []
+    private let getDealResponse: [ExpenseDto.Identifier: ExpenseDto]
 
     init(
-        getCounterpartiesResponse: [SpendingsPreviewDto] = [],
-        getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableDealDto]] = [:],
-        getDealResponse: [DealDto.Identifier: DealDto] = [:],
+        getCounterpartiesResponse: [BalanceDto] = [],
+        getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableExpenseDto]] = [:],
+        getDealResponse: [ExpenseDto.Identifier: ExpenseDto] = [:],
         taskFactory: TaskFactory
     ) async {
         self.getCounterpartiesResponse = getCounterpartiesResponse
@@ -113,7 +113,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getCounterpartiesResponse: counterparties.map(SpendingsPreviewDto.init),
+            getCounterpartiesResponse: counterparties.map(BalanceDto.init),
             taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
@@ -162,7 +162,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getCounterpartiesResponse: counterparties.map(SpendingsPreviewDto.init),
+            getCounterpartiesResponse: counterparties.map(BalanceDto.init),
             taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
@@ -216,7 +216,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableDealDto.init)],
+            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableExpenseDto.init)],
             taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
@@ -272,7 +272,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             )
         ]
         let apiProvider = await ApiProvider(
-            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableDealDto.init)],
+            getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableExpenseDto.init)],
             taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()
@@ -325,7 +325,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             id: UUID().uuidString
         )
         let apiProvider = await ApiProvider(
-            getDealResponse: [deal.id: DealDto(domain: deal.spending)],
+            getDealResponse: [deal.id: ExpenseDto(domain: deal.spending)],
             taskFactory: taskFactory
         )
         let offlineRepository = MockOfflineMutableRepository()

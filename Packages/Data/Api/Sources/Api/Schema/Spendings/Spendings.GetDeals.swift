@@ -2,7 +2,7 @@ import DataTransferObjects
 
 extension Spendings {
     public struct GetDeals: ApiMethod, SpendingsScope {
-        public typealias Response = [IdentifiableDealDto]
+        public typealias Response = [IdentifiableExpenseDto]
 
         public struct Parameters: Encodable, Sendable {
             public let counterparty: UserDto.Identifier
