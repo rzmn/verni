@@ -1,5 +1,3 @@
-# Verni
-
 [![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
 [![Xcode - Build and Analyze](https://github.com/rzmn/Verni.App.iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/build.yml)
 [![Xcode - Test](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml)
@@ -38,7 +36,7 @@ Verni is a mobile-first shared expenses tracker mostly inspired by [splitwise](h
 
 - tbd
 
-## Architecture/Implementation overview
+## Architecture Overview
 
 The App's architecture can be considered as a set of _Layers_. Each layer knows only about the layer "below".
 
@@ -69,6 +67,8 @@ No *abstract* module depends on any *implementation* module, which is strictly p
 It is highly recommended to keep *abstract* modules without any dependencies to provide better testability. There may be few exceptions: for example it would be redundant to keep presentation layer parts independent of domain entities.
 
 Each *module* is provided as a *Swift Package*.
+
+## Implementation Overview
 
 ### Data Layer
 
