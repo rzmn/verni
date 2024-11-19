@@ -5,16 +5,33 @@
 [![Xcode - Test](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml)
 [![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
 
-Shared Expenses Tracker App iOS Client.
+---
+# Verni
+Open-source shared expenses tracker
+
+**Project is under development.**
+# Table of Contents
+1. [👋 About](https://github.com/rzmn/swiftverni?tab=readme-ov-file#about)
+2. [👀 What's Verni?](https://github.com/rzmn/swiftverni?tab=readme-ov-file#whats-verni)
+3. [📋 Tech Stack](https://github.com/rzmn/swiftverni?tab=readme-ov-file#tech-stack)
+4. [🚀 Features](https://github.com/rzmn/swiftverni?tab=readme-ov-file#features)
+5. [💡 Architecture Overview](https://github.com/rzmn/swiftverni?tab=readme-ov-file#architecture-overview)
+6. [⚙️ Implementation Overview](https://github.com/rzmn/swiftverni?tab=readme-ov-file#implementation-overview)
+## About
+This project started as a system design practice. Over time, it evolved into the idea of ​​a product whose core value would be the scalability and reliability of the components it was made of. Components mean all stages of the implementation: starting from the codebase and ending with the design system.
+
+The main feature for final users is a complete absence of a desire to monetize user journeys. The user's needs should be met in the simplest possible way, forever free.
+
+## What's Verni?
+Verni is a mobile-first shared expenses tracker mostly inspired by [splitwise](https://www.splitwise.com/). The app keeps track of your shared expenses and balances with friends.
+
+[Verni Server Side](https://github.com/rzmn/governi/)
 
 ## Tech stack
 
 - swift testing
-
 - strict concurrency
-
 - swiftui
-
 - SPM
 
 ## Features
