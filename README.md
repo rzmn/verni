@@ -1,6 +1,6 @@
 [![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
-[![Xcode - Build and Analyze](https://github.com/rzmn/Verni.App.iOS/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/build.yml)
-[![Xcode - Test](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/Verni.App.iOS/actions/workflows/test.yml)
+[![Xcode - Build and Analyze](https://github.com/rzmn/swiftverni/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/build.yml)
+[![Xcode - Test](https://github.com/rzmn/swiftverni/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/test.yml)
 [![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
 
 ---
@@ -15,6 +15,7 @@ Open-source shared expenses tracker
 4. [🚀 Features](https://github.com/rzmn/swiftverni?tab=readme-ov-file#features)
 5. [💡 Architecture Overview](https://github.com/rzmn/swiftverni?tab=readme-ov-file#architecture-overview)
 6. [⚙️ Implementation Overview](https://github.com/rzmn/swiftverni?tab=readme-ov-file#implementation-overview)
+7. [🤝 Contributing](https://github.com/rzmn/swiftverni?tab=readme-ov-file#contributing)
 ## About
 This project started as a system design practice. Over time, it evolved into the idea of ​​a product whose core value would be the scalability and reliability of the components it was made of. Components mean all stages of the implementation: starting from the codebase and ending with the design system.
 
@@ -219,3 +220,21 @@ class ExampleActionHandler<Action>: ActionHandler {
 ```
 
 </details>
+
+## Contributing
+
+Contributing is more than welcome, feel free to take a look at the [issues page](https://github.com/rzmn/swiftverni/issues). Thanks!
+
+How To Contribute:
+
+- Report issues you're facing
+- Give a 👍 on issues that are relevant to you
+- Answer queries on the issue tracker
+
+If you don't know where to start:
+
+- Navigate to the [issues page](https://github.com/rzmn/swiftverni/issues)
+- Filter by label
+- Look for issues related to [good first issue](https://github.com/rzmn/swiftverni/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+
+When submitting an issue, please make sure your description is clear and has enough information for someone to be able to reproduce the issue
