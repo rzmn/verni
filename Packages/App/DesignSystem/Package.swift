@@ -16,14 +16,15 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Infrastructure/Base"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
     ],
     targets: [
         .target(
             name: "DesignSystem",
             dependencies: [
                 "Base",
-                "ProgressHUD"
+            ],
+            resources: [
+                .process("Resources")
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

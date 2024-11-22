@@ -1,163 +1,244 @@
 import SwiftUI
 
-extension Color {
-    public enum Palette {
-        public static var accent: Color {
-            Color(uiColor: UIColorsPalette.accent)
-        }
-        public static var buttonText: Color {
-            Color(uiColor: UIColorsPalette.buttonText)
-        }
-        public static var primary: Color {
-            Color(uiColor: UIColorsPalette.primary)
-        }
-        public static var backgroundContent: Color {
-            Color(uiColor: UIColorsPalette.backgroundContent)
-        }
-        public static var background: Color {
-            Color(uiColor: UIColorsPalette.background)
-        }
-        public static var destructive: Color {
-            Color(uiColor: UIColorsPalette.destructive)
-        }
-        public static var dimBackground: Color {
-            Color(uiColor: UIColorsPalette.dimBackground)
-        }
-        public static var positive: Color {
-            Color(uiColor: UIColorsPalette.positive)
-        }
-        public static var warning: Color {
-            Color(uiColor: UIColorsPalette.warning)
-        }
+@Observable @MainActor public class ColorPalette: Sendable {
+    enum Theme {
+        case dark
+        case light
     }
-
-    public static var palette: Palette.Type {
-        Palette.self
-    }
-}
-
-private extension UIColor {
-    static func rgb(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
-        UIColor(
-            red: CGFloat(red) / 255,
-            green: CGFloat(green) / 255,
-            blue: CGFloat(blue) / 255,
-            alpha: 1
+    
+    private(set) var theme: Theme
+    
+    convenience init() {
+        self.init(
+            theme: {
+                switch UIScreen.main.traitCollection.userInterfaceStyle {
+                case .dark:
+                    .dark
+                default:
+                    .light
+                }
+            }()
         )
     }
-
-    static func gray(_ value: Int) -> UIColor {
-        .rgb(value, value, value)
+    
+    private init(theme: Theme) {
+        self.theme = theme
+    }
+    
+    public static var dark: ColorPalette {
+        ColorPalette(theme: .dark)
+    }
+    
+    public static var light: ColorPalette {
+        ColorPalette(theme: .light)
     }
 }
 
-private extension UIColor {
-    var dark: UIColor {
-        resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))
-    }
-
-    var light: UIColor {
-        resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
+private extension Color {
+    static func hex(_ code: UInt) -> Color {
+        let component: (UInt) -> Double = { shift in
+            Double((code >> shift) & 0xff) / 255
+        }
+        return Color(.sRGB, red: component(16), green: component(8), blue: component(0))
     }
 }
 
-private struct UIColorsPalette {
-    static var accent: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(228, 146, 115)
-            default:
-                return .rgb(78, 65, 135)
+extension ColorPalette {
+    public struct Text {
+        let theme: Theme
+        
+        public struct Primary {
+            let theme: Theme
+            
+            public var alternative: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xFFFFFF)
+                case .light:
+                    .hex(0xFFFFFF)
+                }
+            }
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x051125)
+                case .light:
+                    .hex(0x051125)
+                }
             }
         }
-    }
-
-    static var buttonText: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .white
-            default:
-                return .white
+        
+        public struct Secondary {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x69707C)
+                case .light:
+                    .hex(0x69707C)
+                }
             }
         }
-    }
-
-    static var primary: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(244, 244, 244)
-            default:
-                return .rgb(9, 9, 9)
+        
+        public struct Tertiary {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x9BA0A8)
+                case .light:
+                    .hex(0x9BA0A8)
+                }
             }
         }
-    }
-
-    static var backgroundContent: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(49, 54, 63)
-            default:
-                return .rgb(227, 226, 224)
-            }
+        
+        public var primary: Primary {
+            Primary(theme: theme)
+        }
+        
+        public var secondary: Secondary {
+            Secondary(theme: theme)
+        }
+        
+        public var tertiary: Tertiary {
+            Tertiary(theme: theme)
         }
     }
+    
+    public var text: Text {
+        Text(theme: theme)
+    }
+}
 
-    static var background: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(34, 40, 49)
-            default:
-                return .rgb(237, 236, 234)
+extension ColorPalette {
+    public struct Background {
+        let theme: Theme
+        
+        public struct Primary {
+            let theme: Theme
+            
+            public var alternative: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xFFFFFF)
+                case .light:
+                    .hex(0xFFFFFF)
+                }
+            }
+            
+            public var brand: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x593EFF)
+                case .light:
+                    .hex(0x593EFF)
+                }
             }
         }
-    }
-
-    static var dimBackground: UIColor {
-        .black.withAlphaComponent(0.18)
-    }
-
-    static var destructive: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(190, 49, 68)
-            default:
-                return .rgb(191, 67, 66)
+        
+        public struct Secondary {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xEBECEE)
+                case .light:
+                    .hex(0xEBECEE)
+                }
+            }
+            
+            public var alternative: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x374151)
+                case .light:
+                    .hex(0x374151)
+                }
             }
         }
-    }
-
-    static var positive: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(73, 186, 74)
-            default:
-                return .rgb(54, 138, 55)
-            }
+        
+        public var primary: Primary {
+            Primary(theme: theme)
+        }
+        
+        public var secondary: Secondary {
+            Secondary(theme: theme)
         }
     }
+    
+    public var background: Background {
+        Background(theme: theme)
+    }
+}
 
-    static var warning: UIColor {
-        UIColor { traits in
-            switch traits.userInterfaceStyle {
-            case .dark:
-                return .rgb(173, 151, 61)
-            default:
-                return .rgb(117, 98, 21)
+extension ColorPalette {
+    public struct Icon {
+        let theme: Theme
+        
+        public struct Primary {
+            let theme: Theme
+            
+            public var alternative: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xFFFFFF)
+                case .light:
+                    .hex(0xFFFFFF)
+                }
+            }
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x051125)
+                case .light:
+                    .hex(0x051125)
+                }
             }
         }
+        
+        public struct Tertiary {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x9BA0A8)
+                case .light:
+                    .hex(0x9BA0A8)
+                }
+            }
+        }
+        
+        public var primary: Primary {
+            Primary(theme: theme)
+        }
+        
+        public var tertiary: Tertiary {
+            Tertiary(theme: theme)
+        }
+    }
+    
+    public var icon: Icon {
+        Icon(theme: theme)
     }
 }
 
 private struct ColorItem: Identifiable, Hashable {
-    let uiColor: UIColor
+    let color: (ColorPalette) -> Color
     let name: String
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
 
     var id: String {
         name
@@ -167,25 +248,39 @@ private struct ColorItem: Identifiable, Hashable {
 #Preview {
     VStack {
         ForEach([
-            ColorItem(uiColor: UIColorsPalette.accent, name: "accent"),
-            ColorItem(uiColor: UIColorsPalette.primary, name: "primary"),
-            ColorItem(uiColor: UIColorsPalette.backgroundContent, name: "background content"),
-            ColorItem(uiColor: UIColorsPalette.background, name: "background"),
-            ColorItem(uiColor: UIColorsPalette.destructive, name: "destructive"),
-            ColorItem(uiColor: UIColorsPalette.positive, name: "positive"),
-            ColorItem(uiColor: UIColorsPalette.warning, name: "warning")
-        ]) { color in
+            ColorItem(color: \ColorPalette.text.primary.alternative, name: "text/primary/alternative"),
+            ColorItem(color: \ColorPalette.text.primary.default, name: "text/primary/default"),
+            ColorItem(color: \ColorPalette.text.secondary.default, name: "text/secondary/default"),
+            ColorItem(color: \ColorPalette.text.tertiary.default, name: "text/tertiary/default"),
+            ColorItem(color: \ColorPalette.background.primary.alternative, name: "background/primary/alternative"),
+            ColorItem(color: \ColorPalette.background.primary.brand, name: "background/primary/brand"),
+            ColorItem(color: \ColorPalette.background.secondary.alternative, name: "background/secondary/alternative"),
+            ColorItem(color: \ColorPalette.background.secondary.default, name: "background/secondary/default"),
+            ColorItem(color: \ColorPalette.icon.primary.alternative, name: "icon/primary/alternative"),
+            ColorItem(color: \ColorPalette.icon.primary.default, name: "icon/primary/default"),
+            ColorItem(color: \ColorPalette.icon.tertiary.default, name: "icon/tertiary/default"),
+        ]) { item in
             HStack {
-                Text(color.name)
+                Text(item.name)
                 Spacer()
                 Image(systemName: "sun.max")
-                Color(uiColor: color.uiColor.light)
+                Color.gray
                     .frame(width: 44, height: 44)
                     .clipShape(.rect(cornerRadius: 8))
+                    .overlay {
+                        item.color(.light)
+                            .frame(width: 42, height: 42)
+                            .clipShape(.rect(cornerRadius: 8))
+                    }
                 Image(systemName: "moon")
-                Color(uiColor: color.uiColor.dark)
+                Color.gray
                     .frame(width: 44, height: 44)
                     .clipShape(.rect(cornerRadius: 8))
+                    .overlay {
+                        item.color(.dark)
+                            .frame(width: 42, height: 42)
+                            .clipShape(.rect(cornerRadius: 8))
+                    }
             }
             .padding(.horizontal, .palette.defaultHorizontal)
         }

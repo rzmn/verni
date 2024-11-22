@@ -1,19 +1,20 @@
 import SwiftUI
 
 public enum TextContentType: Hashable {
-    case title1
     case button
     case text
-    case textSecondary
 }
 
-private extension Font {
-    static func text(size: CGFloat) -> Font {
-        Font(UIFont(name: "SF Pro", size: size) ?? .systemFont(ofSize: size))
+extension Font {
+    static let mediumTextFontName = "JetBrainsMono-Medium"
+    static let regularTextFontName = "JetBrainsMono-Regular"
+    
+    public static func regular(size: CGFloat) -> Font {
+        Font.custom(regularTextFontName, size: size)
     }
-
-    static func display(size: CGFloat) -> Font {
-        Font(UIFont(name: "SF Pro Display Semibold", size: size) ?? .systemFont(ofSize: size, weight: .bold))
+    
+    public static func medium(size: CGFloat) -> Font {
+        Font.custom(mediumTextFontName, size: size)
     }
 }
 
@@ -27,14 +28,10 @@ private struct TextContentModifier: ViewModifier {
 
     private var font: Font {
         switch contentType {
-        case .title1:
-            .display(size: 27)
         case .button:
-            .display(size: 17)
+            .medium(size: 15)
         case .text:
-            .text(size: 16)
-        case .textSecondary:
-            .text(size: 13)
+            .medium(size: 15)
         }
     }
 }
@@ -55,14 +52,13 @@ private struct TextItem: Hashable, Identifiable {
 #Preview {
     VStack {
         ForEach([
-            TextItem(contentType: .title1, name: "title1"),
             TextItem(contentType: .button, name: "button"),
             TextItem(contentType: .text, name: "text"),
-            TextItem(contentType: .textSecondary, name: "text secondary")
         ]) { item in
             Text(item.name)
                 .fontStyle(item.contentType)
                 .padding(.palette.defaultHorizontal)
         }
     }
+    .loadCustomFonts()
 }

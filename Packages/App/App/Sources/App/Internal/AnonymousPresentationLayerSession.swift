@@ -1,11 +1,11 @@
 import DI
 import AppBase
-internal import SignInScreen
+internal import AuthWelcomeScreen
 
 @MainActor final class AnonymousPresentationLayerSession: Sendable {
-    let signInScreen: any ScreenProvider<SignInEvent, SignInView>
+    let authWelcomeScreen: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView>
 
     init(di: AnonymousDomainLayerSession, haptic: HapticManager) async {
-        signInScreen = await DefaultSignInFactory(di: di, haptic: haptic).create()
+        authWelcomeScreen = await DefaultAuthWelcomeFactory(di: di, haptic: haptic).create()
     }
 }

@@ -9,7 +9,7 @@ public struct Spinner: View {
             Group {
                 Circle()
                     .trim(from: 0, to: 0.7)
-                    .stroke(Color.palette.accent, lineWidth: 4)
+                    .stroke(ColorPalette.dark.icon.primary.default, lineWidth: 4)
                     .frame(width: 44, height: 44)
                     .rotationEffect(.degrees(isRotating))
                     .onAppear {
@@ -22,7 +22,7 @@ public struct Spinner: View {
                     }
             }
             .padding(.all, .palette.defaultHorizontal)
-            .background(Color.palette.backgroundContent)
+            .background(ColorPalette.dark.background.primary.brand)
             .clipShape(.rect(cornerRadius: 10))
         }
     }
@@ -41,7 +41,7 @@ extension Spinner {
             ZStack {
                 content
                 if show && appeared {
-                    Color.palette.dimBackground
+                    ColorPalette.dark.background.primary.brand
                         .transition(.opacity)
                     Spinner(show: show)
                 }
@@ -61,7 +61,7 @@ extension View {
 }
 
 #Preview {
-    Color.palette.background
+    ColorPalette.dark.background.primary.brand
         .spinner(show: true)
         .ignoresSafeArea()
 }

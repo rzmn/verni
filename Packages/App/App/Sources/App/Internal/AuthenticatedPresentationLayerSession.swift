@@ -1,6 +1,6 @@
 import DI
 import AppBase
-internal import SignInScreen
+internal import AuthWelcomeScreen
 
 @MainActor final class AuthenticatedPresentationLayerSession: Sendable {
     init(di: AuthenticatedDomainLayerSession) async {

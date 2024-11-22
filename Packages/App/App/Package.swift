@@ -17,12 +17,11 @@ let package = Package(
     dependencies: [
         .package(path: "../DesignSystem"),
         .package(path: "../AppBase"),
-        .package(path: "../Screens/SignInScreen"),
+        .package(path: "../Screens/AuthWelcomeScreen"),
         .package(path: "../../DI/DI"),
         .package(path: "../../Domain/Domain"),
         .package(path: "../../Infrastructure/Logging"),
-        .package(path: "../../Infrastructure/Base"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
+        .package(path: "../../Infrastructure/Base")
     ],
     targets: [
         .target(
@@ -33,9 +32,8 @@ let package = Package(
                 "Domain",
                 "Logging",
                 "Base",
-                "ProgressHUD",
                 "AppBase",
-                "SignInScreen"
+                "AuthWelcomeScreen"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

@@ -1,5 +1,6 @@
 import AppBase
 import DI
+internal import DesignSystem
 
 @MainActor public protocol AppFactory: Sendable {
     func create() -> any ScreenProvider<Void, AppView>
@@ -12,6 +13,7 @@ public final class DefaultAppFactory: AppFactory {
     public init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
         self.di = di
         self.haptic = haptic
+        CustomFonts.registerCustomFonts(class: DefaultAppFactory.self)
     }
 
     public func create() -> any ScreenProvider<Void, AppView> {

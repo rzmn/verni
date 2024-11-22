@@ -18,8 +18,7 @@ let package = Package(
         .package(path: "../../Infrastructure/Base"),
         .package(path: "../../Infrastructure/Logging"),
         .package(path: "../../Domain/Domain"),
-        .package(path: "../../DesignSystem"),
-        .package(url: "https://github.com/rzmn/ProgressHUD.git", branch: "rzmn/without-privacy-manifest")
+        .package(path: "../../DesignSystem")
     ],
     targets: [
         .target(
@@ -27,7 +26,6 @@ let package = Package(
             dependencies: [
                 "Base",
                 "Logging",
-                "ProgressHUD",
                 "Domain",
                 "DesignSystem"
             ],

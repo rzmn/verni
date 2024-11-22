@@ -1,15 +1,6 @@
 {
-  "originHash" : "9b06cbb77069fb0bec8f02465c35fa7ac281199be2ccd1c9cd8ffbb08fba13cc",
+  "originHash" : "a275f8f189eeee0d406fe3c0705c2f8f60dabcd123172a17da39b0ee23355345",
   "pins" : [
-    {
-      "identity" : "progresshud",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/rzmn/ProgressHUD.git",
-      "state" : {
-        "branch" : "rzmn/without-privacy-manifest",
-        "revision" : "d0a164ab1d8dca9ffd9c16654b9a7378d49a1405"
-      }
-    },
     {
       "identity" : "qrcode",
       "kind" : "remoteSourceControl",

@@ -22,8 +22,8 @@
 	</array>
 	<key>UIAppFonts</key>
 	<array>
-		<string>SF-Pro-Display-Semibold.otf</string>
-		<string>SF-Pro.ttf</string>
+		<string>JetBrainsMono-Medium.ttf</string>
+		<string>JetBrainsMono-Regular.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

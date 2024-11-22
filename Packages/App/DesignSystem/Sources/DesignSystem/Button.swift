@@ -1,63 +1,117 @@
 import UIKit
 import SwiftUI
 
-public enum ButtonType {
-    case primary
-    case secondary
-    case destructive
-}
-
-private struct ButtonStyle: ViewModifier {
-    public let type: ButtonType
-    public let enabled: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .fontStyle(textContentType)
-            .frame(height: .palette.buttonHeight)
-            .padding(.horizontal, .palette.defaultHorizontal)
-            .tint(tintColor)
-            .background(backgroundColor)
-            .clipShape(.rect(cornerRadius: 10))
-            .opacity(enabled ? 1 : 0.34)
+public struct Button: View {
+    @Environment(ColorPalette.self) var palette
+    
+    public enum Style {
+        case primary
+        case secondary
     }
-
-    private var tintColor: Color {
-        switch type {
-        case .primary:
-            .palette.buttonText
-        case .secondary:
-            .palette.accent
-        case .destructive:
-            .palette.buttonText
+    
+    public enum Icon {
+        case left(Image)
+        case right(Image)
+    }
+    
+    public struct Config {
+        public let style: Style
+        public let text: LocalizedStringKey
+        public let icon: Icon?
+        
+        public init(style: Style, text: LocalizedStringKey, icon: Icon?) {
+            self.style = style
+            self.text = text
+            self.icon = icon
         }
     }
-
+    
+    private let config: Config
+    private let action: () -> Void
+    
+    public init(config: Config, action: @escaping () -> Void) {
+        self.config = config
+        self.action = action
+    }
+    
+    public var body: some View {
+        SwiftUI.Button(action: action) {
+            if let icon = config.icon {
+                HStack(spacing: -10) {
+                    switch icon {
+                    case .left(let image):
+                        self.icon(image: image)
+                        button
+                    case .right(let image):
+                        button
+                        self.icon(image: image)
+                    }
+                }
+            } else {
+                button
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+    }
+    
+    private func icon(image: Image) -> some View {
+        backgroundColor
+            .frame(width: height, height: height)
+            .clipShape(.rect(cornerRadius: height / 2))
+            .overlay {
+                image.tint(iconColor)
+            }
+    }
+    
+    private var button: some View {
+        backgroundColor
+            .frame(height: height)
+            .clipShape(.rect(cornerRadius: 16))
+            .overlay {
+                Text(config.text)
+                    .font(.medium(size: 15))
+                    .tint(textColor)
+            }
+    }
+    
+    private var height: CGFloat {
+        54
+    }
+    
     private var backgroundColor: Color {
-        switch type {
+        switch config.style {
         case .primary:
-            .palette.accent
+            palette.background.primary.brand
         case .secondary:
-            .clear
-        case .destructive:
-            .palette.destructive
+            palette.background.secondary.default
         }
     }
-
-    private var textContentType: TextContentType {
-        switch type {
-        case .primary, .secondary, .destructive:
-            .button
+    
+    private var textColor: Color {
+        switch config.style {
+        case .primary:
+            palette.text.primary.alternative
+        case .secondary:
+            palette.text.primary.default
+        }
+    }
+    
+    private var iconColor: Color {
+        switch config.style {
+        case .primary:
+            palette.icon.primary.alternative
+        case .secondary:
+            palette.icon.primary.default
         }
     }
 }
 
-extension View {
-    public func buttonStyle(
-        type: ButtonType,
-        enabled: Bool
-    ) -> some View {
-        modifier(ButtonStyle(type: type, enabled: enabled))
+private struct ConfigForPreview: Identifiable {
+    let config: Button.Config
+    
+    var id: String {
+        "\(config)"
     }
 }
 
@@ -66,29 +120,22 @@ extension View {
         Spacer()
         VStack {
             Spacer()
-
-            Button {} label: { Text("primary") }
-            .buttonStyle(type: .primary, enabled: true)
-
-            Button {} label: { Text("secondary") }
-            .buttonStyle(type: .secondary, enabled: true)
-
-            Button {} label: { Text("destructive") }
-            .buttonStyle(type: .destructive, enabled: true)
-
-            Button {} label: { Text("primary") }
-            .buttonStyle(type: .primary, enabled: false)
-
-            Button {} label: { Text("secondary") }
-            .buttonStyle(type: .secondary, enabled: false)
-
-            Button {} label: { Text("destructive") }
-            .buttonStyle(type: .destructive, enabled: false)
-
+            
+            let image = Image(systemName: "heart.fill")
+            let configs = [.primary, .secondary].flatMap { (style: Button.Style) -> [Button.Config] in
+                [.left(image), .right(image), nil].map { icon in
+                    Button.Config(style: style, text: "LABEL", icon: icon)
+                }
+            }.map(ConfigForPreview.init)
+            
+            ForEach(configs) { identifiableWrapper in
+                Button(config: identifiableWrapper.config, action: {})
+            }
             Spacer()
         }
         Spacer()
     }
+    .environment(ColorPalette.dark)
+    .loadCustomFonts()
     .ignoresSafeArea()
-    .background(Color.palette.background)
 }

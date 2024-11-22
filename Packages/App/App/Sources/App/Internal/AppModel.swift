@@ -5,7 +5,7 @@ import Logging
 import AppBase
 import SwiftUI
 internal import Base
-internal import SignInScreen
+internal import AuthWelcomeScreen
 internal import DesignSystem
 
 actor AppModel {
