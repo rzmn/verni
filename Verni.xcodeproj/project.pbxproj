@@ -11,7 +11,6 @@
 		613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1322CB2F26600C730EC /* Assets.xcassets */; };
 		613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 613AB13B2CB2F26600C730EC /* Tests.xctestplan */; };
 		613AB1422CB2F26600C730EC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1352CB2F26600C730EC /* LaunchScreen.storyboard */; };
-		613AB1432CB2F26600C730EC /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1362CB2F26600C730EC /* Localizable.xcstrings */; };
 		613AB1442CB2F26600C730EC /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB1382CB2F26600C730EC /* App.swift */; };
 		613AB1452CB2F26600C730EC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB13A2CB2F26600C730EC /* SceneDelegate.swift */; };
 		614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614AC19D2C6802EE005B2CD5 /* NotificationService.swift */; };
@@ -74,7 +73,6 @@
 		613AB1322CB2F26600C730EC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		613AB1332CB2F26600C730EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		613AB1342CB2F26600C730EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		613AB1362CB2F26600C730EC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		613AB1382CB2F26600C730EC /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		613AB13A2CB2F26600C730EC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		613AB13B2CB2F26600C730EC /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
@@ -209,7 +207,6 @@
 				613AB1322CB2F26600C730EC /* Assets.xcassets */,
 				613AB1332CB2F26600C730EC /* Info.plist */,
 				613AB1352CB2F26600C730EC /* LaunchScreen.storyboard */,
-				613AB1362CB2F26600C730EC /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -408,7 +405,6 @@
 				613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */,
 				613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */,
 				613AB1422CB2F26600C730EC /* LaunchScreen.storyboard in Resources */,
-				613AB1432CB2F26600C730EC /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -47,11 +47,9 @@ public struct DebugMenuView: View {
 #Preview {
     DebugMenuView(
         store: Store(
-            state: DebugMenuModel.initialState,
+            state: DebugMenuModel.reducer(DebugMenuModel.initialState, .debugMenuSectionTapped(.designSystem(DebugMenuModel.initialDesignSystemState))),
             reducer: DebugMenuModel.reducer
         )
     )
-    .environment(ColorPalette.light)
-    .environment(PaddingsPalette.default)
-    .loadCustomFonts(class: DebugMenuModel.self)
+    .preview(packageClass: DebugMenuModel.self)
 }

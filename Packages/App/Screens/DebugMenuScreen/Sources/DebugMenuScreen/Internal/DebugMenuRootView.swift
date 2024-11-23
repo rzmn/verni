@@ -74,7 +74,5 @@ struct DebugMenuRootView: View {
             reducer: DebugMenuModel.reducer
         )
     )
-    .environment(ColorPalette.light)
-    .environment(PaddingsPalette.default)
-    .loadCustomFonts(class: DebugMenuModel.self)
+    .preview(packageClass: DebugMenuModel.self)
 }

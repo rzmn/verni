@@ -210,6 +210,19 @@ extension ColorPalette {
             }
         }
         
+        public struct Secondary {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x69707C)
+                case .light:
+                    .hex(0x69707C)
+                }
+            }
+        }
+        
         public struct Tertiary {
             let theme: Theme
             
@@ -225,6 +238,10 @@ extension ColorPalette {
         
         public var primary: Primary {
             Primary(theme: theme)
+        }
+        
+        public var secondary: Secondary {
+            Secondary(theme: theme)
         }
         
         public var tertiary: Tertiary {

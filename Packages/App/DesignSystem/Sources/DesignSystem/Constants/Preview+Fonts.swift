@@ -9,9 +9,7 @@ extension Bundle {
         // It used to be "LocalPackages_<ModuleName>" for iOS. To find out what it is, print out  the path for
         // Bundle(for: CurrentBundleFinder.self).resourceURL?.deletingLastPathComponent().deletingLastPathComponent()
         // and then look for what bundle is named in there.
-        
-        let bundleNameIOS = "DesignSystem_DesignSystem"
-        
+        let bundleName = "DesignSystem_DesignSystem"
         let urlsForClass: (AnyClass) -> [URL?] = { `class` in
             [
                 Bundle(for: `class`).resourceURL,
@@ -44,7 +42,7 @@ extension Bundle {
         ].flatMap { $0 }
 
         for candidate in candidates {
-            let bundlePathiOS = candidate?.appendingPathComponent(bundleNameIOS + ".bundle")
+            let bundlePathiOS = candidate?.appendingPathComponent(bundleName + ".bundle")
             if let bundle = bundlePathiOS.flatMap(Bundle.init(url:)) {
                 return bundle
             }
@@ -74,8 +72,6 @@ public enum CustomFonts {
 }
 
 extension View {
-    /// Attach this to any Xcode Preview's view to have custom fonts displayed
-    /// Note: Not needed for the actual app
     @ViewBuilder public func loadCustomFonts(class: AnyClass? = nil) -> some View {
         if let text = CustomFonts.registerCustomFonts(class: `class`) {
             self.overlay {

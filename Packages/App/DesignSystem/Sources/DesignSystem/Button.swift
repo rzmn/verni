@@ -36,43 +36,65 @@ public struct Button: View {
     
     public var body: some View {
         SwiftUI.Button(action: action) {
-            if let icon = config.icon {
-                HStack(spacing: -10) {
-                    switch icon {
-                    case .left(let image):
-                        self.icon(image: image)
-                        button
-                    case .right(let image):
-                        button
-                        self.icon(image: image)
-                    }
-                }
-            } else {
-                button
-            }
+            buttonWithIcon
+                .background(backgroundShape)
         }
         .frame(maxWidth: .infinity)
         .frame(height: height)
     }
     
-    private func icon(image: Image) -> some View {
-        backgroundColor
-            .frame(width: height, height: height)
-            .clipShape(.rect(cornerRadius: height / 2))
-            .overlay {
-                image.tint(iconColor)
+    @ViewBuilder private var buttonWithIcon: some View {
+        if let icon = config.icon {
+            HStack(spacing: -10) {
+                switch icon {
+                case .left(let image):
+                    image.tint(iconColor)
+                        .frame(width: height, height: height)
+                    button
+                case .right(let image):
+                    button
+                    image.tint(iconColor)
+                        .frame(width: height, height: height)
+                }
             }
+        } else {
+            button
+        }
+        
+    }
+    
+    @ViewBuilder private var backgroundShape: some View {
+        if let icon = config.icon {
+            let iconSizeSubtractingOverlap = height - 10
+            let sign: CGFloat = {
+                switch icon {
+                case .left:
+                    return -1
+                case .right:
+                    return +1
+                }
+            }()
+            GeometryReader { proxy in
+                Circle()
+                    .offset(x: (proxy.size.width - height) * sign / 2)
+                    .union(.rect(cornerRadius: 16).offset(x: iconSizeSubtractingOverlap * -sign / 2))
+                    .padding(.horizontal, 54 / 2)
+                    .foregroundStyle(backgroundColor)
+            }
+        } else {
+            backgroundColor.clipShape(.rect(cornerRadius: 16))
+        }
     }
     
     private var button: some View {
-        backgroundColor
-            .frame(height: height)
-            .clipShape(.rect(cornerRadius: 16))
-            .overlay {
-                Text(config.text)
-                    .font(.medium(size: 15))
-                    .tint(textColor)
-            }
+        HStack {
+            Spacer()
+            Text(config.text)
+                .font(.medium(size: 15))
+                .tint(textColor)
+            Spacer()
+        }
+        .frame(height: height)
     }
     
     private var height: CGFloat {

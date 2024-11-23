@@ -39,8 +39,5 @@ struct ButtonsView: View {
 
 #Preview {
     ButtonsView()
-        .environment(ColorPalette.dark)
-        .environment(PaddingsPalette.default)
-        .loadCustomFonts()
-        .ignoresSafeArea()
+        .preview(packageClass: DebugMenuModel.self)
 }

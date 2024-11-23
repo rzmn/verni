@@ -21,7 +21,7 @@
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                        <color key="backgroundColor" name="stroke.accent"/>
+                        <color key="backgroundColor" name="AccentColor"/>
                         <constraints>
                             <constraint firstItem="5Ig-Rc-0Nd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="3gX-HS-PKq"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="5Ig-Rc-0Nd" secondAttribute="bottom" id="7s0-3P-J4M"/>
@@ -37,7 +37,7 @@
     </scenes>
     <resources>
         <image name="splash" width="375" height="741"/>
-        <namedColor name="stroke.accent">
+        <namedColor name="AccentColor">
             <color red="0.34901960784313724" green="0.24313725490196078" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>

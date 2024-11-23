@@ -104,7 +104,5 @@ public struct AuthWelcomeView: View {
             reducer: AuthWelcomeModel.reducer
         )
     )
-    .environment(ColorPalette.light)
-    .environment(PaddingsPalette.default)
-    .loadCustomFonts(class: AuthWelcomeModel.self)
+    .preview(packageClass: AuthWelcomeModel.self)
 }

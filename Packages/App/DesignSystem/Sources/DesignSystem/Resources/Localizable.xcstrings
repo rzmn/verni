@@ -1,6 +1,116 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+      "buttons_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buttons"
+          }
+        }
+      }
+    },
+    "colors_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colors"
+          }
+        }
+      }
+    },
+    "debug_menu_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug Menu"
+          }
+        }
+      }
+    },
+    "design_system_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Design System"
+          }
+        }
+      }
+    },
+    "fonts_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonts"
+          }
+        }
+      }
+    },
+    "text_fields_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Fields"
+          }
+        }
+      }
+    },
+      "auth_welcome_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free open-source app for tracking shared expenses and balances with people"
+          }
+        }
+      }
+    },
+    "log_in" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOG IN"
+          }
+        }
+      }
+    },
+    "sign_in_with" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with"
+          }
+        }
+      }
+    },
+    "sign_up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CREATE ACCOUNT"
+          }
+        }
+      }
+    },
     "apple_oauth_title" : {
       "extractionState" : "manual",
       "localizations" : {

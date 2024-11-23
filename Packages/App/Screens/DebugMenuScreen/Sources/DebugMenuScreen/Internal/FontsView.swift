@@ -34,7 +34,5 @@ struct FontsView: View {
 
 #Preview {
     FontsView()
-        .environment(ColorPalette.dark)
-        .environment(PaddingsPalette.default)
-        .loadCustomFonts(class: DebugMenuModel.self)
+        .preview(packageClass: DebugMenuModel.self)
 }

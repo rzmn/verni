@@ -33,9 +33,6 @@ let package = Package(
                 "Base",
                 "AppBase"
             ],
-            resources: [
-                .process("Resources")
-            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([

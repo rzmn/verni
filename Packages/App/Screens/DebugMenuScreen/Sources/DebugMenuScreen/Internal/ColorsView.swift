@@ -37,6 +37,7 @@ struct ColorsView: View {
                 ColorItem(color: \ColorPalette.background.secondary.default, name: "background/secondary/default"),
                 ColorItem(color: \ColorPalette.icon.primary.alternative, name: "icon/primary/alternative"),
                 ColorItem(color: \ColorPalette.icon.primary.default, name: "icon/primary/default"),
+                ColorItem(color: \ColorPalette.icon.secondary.default, name: "icon/secondary/default"),
                 ColorItem(color: \ColorPalette.icon.tertiary.default, name: "icon/tertiary/default"),
             ]) { item in
                 HStack {
@@ -75,6 +76,5 @@ struct ColorsView: View {
 
 #Preview {
     ColorsView()
-        .environment(PaddingsPalette.default)
-        .environment(ColorPalette.light)
+        .preview(packageClass: DebugMenuModel.self)
 }

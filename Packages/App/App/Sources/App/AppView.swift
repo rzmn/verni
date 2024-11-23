@@ -6,7 +6,7 @@ internal import DesignSystem
 
 public struct AppView: View {
     @ObservedObject private var store: Store<AppState, AppAction>
-    @State var showingDebugMenu = false
+    @State var showingDebugMenu = true
 
     init(store: Store<AppState, AppAction>) {
         self.store = store
