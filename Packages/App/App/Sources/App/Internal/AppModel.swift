@@ -45,7 +45,7 @@ extension AppModel: ScreenProvider {
 
     @MainActor func instantiate(handler: @escaping @MainActor (Event) -> Void) -> AppView {
         AppView(
-            store: tap(store) { store in
+            store: modify(store) { store in
                 store.append(
                     handler: AnyActionHandler(
                         id: "\(Event.self)",

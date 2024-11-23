@@ -34,7 +34,7 @@ public struct AuthWelcomeView: View {
             )
         }
         .background(
-            Color.black
+            colors.background.primary.default
                 .ignoresSafeArea()
         )
     }

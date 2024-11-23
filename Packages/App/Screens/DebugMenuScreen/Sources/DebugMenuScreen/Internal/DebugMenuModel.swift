@@ -8,8 +8,8 @@ import SwiftUI
 internal import Base
 internal import DesignSystem
 
-actor AuthWelcomeModel {
-    private let store: Store<AuthWelcomeState, AuthWelcomeAction>
+actor DebugMenuModel {
+    private let store: Store<DebugMenuState, DebugMenuAction>
 
     init(di: AnonymousDomainLayerSession, haptic: HapticManager) async {
         store = await Store(
@@ -19,22 +19,21 @@ actor AuthWelcomeModel {
     }
 }
 
-@MainActor extension AuthWelcomeModel: ScreenProvider {
+@MainActor extension DebugMenuModel: ScreenProvider {
     func instantiate(
-        handler: @escaping @MainActor (AuthWelcomeEvent) -> Void
-    ) -> AuthWelcomeView {
-        AuthWelcomeView(
+        handler: @escaping @MainActor (DebugMenuEvent) -> Void
+    ) -> DebugMenuView {
+        DebugMenuView(
             store: modify(store) { store in
+                let store = store
                 store.append(
                     handler: AnyActionHandler(
-                        id: "\(AuthWelcomeEvent.self)",
+                        id: "\(DebugMenuEvent.self)",
                         handleBlock: { action in
                             switch action {
-                            case .logInTapped:
-                                handler(.logIn)
-                            case .signUpTapped:
-                                handler(.signUp)
-                            case .signInWithGoogleTapped, .signInWithAppleTapped:
+                            case .onTapBack where store.state.section == nil:
+                                handler(.dismiss)
+                            default:
                                 break
                             }
                         }

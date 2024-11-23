@@ -106,36 +106,3 @@ public struct Button: View {
         }
     }
 }
-
-private struct ConfigForPreview: Identifiable {
-    let config: Button.Config
-    
-    var id: String {
-        "\(config)"
-    }
-}
-
-#Preview {
-    HStack {
-        Spacer()
-        VStack {
-            Spacer()
-            
-            let image = Image(systemName: "heart.fill")
-            let configs = [.primary, .secondary].flatMap { (style: Button.Style) -> [Button.Config] in
-                [.left(image), .right(image), nil].map { icon in
-                    Button.Config(style: style, text: "LABEL", icon: icon)
-                }
-            }.map(ConfigForPreview.init)
-            
-            ForEach(configs) { identifiableWrapper in
-                Button(config: identifiableWrapper.config, action: {})
-            }
-            Spacer()
-        }
-        Spacer()
-    }
-    .environment(ColorPalette.dark)
-    .loadCustomFonts()
-    .ignoresSafeArea()
-}

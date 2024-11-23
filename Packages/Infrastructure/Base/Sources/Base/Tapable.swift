@@ -1,4 +1,5 @@
-public func tap<T: AnyObject>(_ object: T, block: (T) -> Void) -> T {
-    block(object)
+public func modify<T>(_ object: T, block: (inout T) -> Void) -> T {
+    var object = object
+    block(&object)
     return object
 }

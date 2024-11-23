@@ -6,6 +6,7 @@ internal import DesignSystem
 
 public struct AppView: View {
     @ObservedObject private var store: Store<AppState, AppAction>
+    @State var showingDebugMenu = false
 
     init(store: Store<AppState, AppAction>) {
         self.store = store
@@ -13,6 +14,27 @@ public struct AppView: View {
 
     public var body: some View {
         content
+            .onShake {
+                if !showingDebugMenu {
+                    withAnimation {
+                        showingDebugMenu = true
+                    }
+                }
+            }
+            .fullScreenCover(isPresented: $showingDebugMenu, content: {
+                if case .launched(let state) = store.state, case .anonymous(let state) = state {
+                    state.session.debugMenuScreen.instantiate { event in
+                        switch event {
+                        case .dismiss:
+                            withAnimation {
+                                showingDebugMenu = false
+                            }
+                        }
+                    }
+                } else {
+                    Text("debug menu for authenticated")
+                }
+            })
             .environment(ColorPalette.light)
             .environment(PaddingsPalette.default)
     }

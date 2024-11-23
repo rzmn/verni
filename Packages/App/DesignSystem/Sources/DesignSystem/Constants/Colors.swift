@@ -137,6 +137,15 @@ extension ColorPalette {
                     .hex(0x593EFF)
                 }
             }
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x051125)
+                case .light:
+                    .hex(0x051125)
+                }
+            }
         }
         
         public struct Secondary {
@@ -225,64 +234,5 @@ extension ColorPalette {
     
     public var icon: Icon {
         Icon(theme: theme)
-    }
-}
-
-private struct ColorItem: Identifiable, Hashable {
-    let color: (ColorPalette) -> Color
-    let name: String
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
-    }
-    
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    var id: String {
-        name
-    }
-}
-
-#Preview {
-    VStack {
-        ForEach([
-            ColorItem(color: \ColorPalette.text.primary.alternative, name: "text/primary/alternative"),
-            ColorItem(color: \ColorPalette.text.primary.default, name: "text/primary/default"),
-            ColorItem(color: \ColorPalette.text.secondary.default, name: "text/secondary/default"),
-            ColorItem(color: \ColorPalette.text.tertiary.default, name: "text/tertiary/default"),
-            ColorItem(color: \ColorPalette.background.primary.alternative, name: "background/primary/alternative"),
-            ColorItem(color: \ColorPalette.background.primary.brand, name: "background/primary/brand"),
-            ColorItem(color: \ColorPalette.background.secondary.alternative, name: "background/secondary/alternative"),
-            ColorItem(color: \ColorPalette.background.secondary.default, name: "background/secondary/default"),
-            ColorItem(color: \ColorPalette.icon.primary.alternative, name: "icon/primary/alternative"),
-            ColorItem(color: \ColorPalette.icon.primary.default, name: "icon/primary/default"),
-            ColorItem(color: \ColorPalette.icon.tertiary.default, name: "icon/tertiary/default"),
-        ]) { item in
-            HStack {
-                Text(item.name)
-                Spacer()
-                Image(systemName: "sun.max")
-                Color.gray
-                    .frame(width: 44, height: 44)
-                    .clipShape(.rect(cornerRadius: 8))
-                    .overlay {
-                        item.color(.light)
-                            .frame(width: 42, height: 42)
-                            .clipShape(.rect(cornerRadius: 8))
-                    }
-                Image(systemName: "moon")
-                Color.gray
-                    .frame(width: 44, height: 44)
-                    .clipShape(.rect(cornerRadius: 8))
-                    .overlay {
-                        item.color(.dark)
-                            .frame(width: 42, height: 42)
-                            .clipShape(.rect(cornerRadius: 8))
-                    }
-            }
-            .padding(.horizontal, .palette.defaultHorizontal)
-        }
     }
 }

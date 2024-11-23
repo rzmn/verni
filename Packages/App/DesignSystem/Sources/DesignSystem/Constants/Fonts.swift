@@ -41,24 +41,3 @@ extension View {
         modifier(TextContentModifier(contentType: content))
     }
 }
-
-private struct TextItem: Hashable, Identifiable {
-    let contentType: TextContentType
-    let name: String
-
-    var id: String { name }
-}
-
-#Preview {
-    VStack {
-        ForEach([
-            TextItem(contentType: .button, name: "button"),
-            TextItem(contentType: .text, name: "text"),
-        ]) { item in
-            Text(item.name)
-                .fontStyle(item.contentType)
-                .padding(.palette.defaultHorizontal)
-        }
-    }
-    .loadCustomFonts()
-}

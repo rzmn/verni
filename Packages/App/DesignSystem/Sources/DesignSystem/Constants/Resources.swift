@@ -12,6 +12,10 @@ extension Image {
     public static var arrowRight: Image {
         Image("arrow_right", bundle: .module)
     }
+    
+    public static var arrowLeft: Image {
+        Image("arrow_left", bundle: .module)
+    }
 }
 
 extension LocalizedStringKey {

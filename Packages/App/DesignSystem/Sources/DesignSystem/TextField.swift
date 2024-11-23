@@ -1,10 +1,15 @@
 import UIKit
 import SwiftUI
 
-struct TextField: View {
-    struct Config {
+public struct TextField: View {
+    public struct Config {
         let placeholder: LocalizedStringKey
         let hint: LocalizedStringKey
+        
+        public init(placeholder: LocalizedStringKey, hint: LocalizedStringKey) {
+            self.placeholder = placeholder
+            self.hint = hint
+        }
     }
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
@@ -15,13 +20,13 @@ struct TextField: View {
         "placeholderId"
     }
     
-    init(text: Binding<String>, config: Config) {
+    public init(text: Binding<String>, config: Config) {
         _text = text
         self.config = config
         self.placeholderIsOnFocus = text.wrappedValue.isEmpty
     }
     
-    var body: some View {
+    public var body: some View {
         textFieldWithPlaceholderAndHint
             .onChange(of: text) { oldValue, newValue in
                 if oldValue.isEmpty != newValue.isEmpty {
@@ -76,7 +81,6 @@ struct TextField: View {
             SwiftUI.TextField("", text: $text)
                 .font(Font.medium(size: 15))
                 .foregroundStyle(colors.text.primary.default)
-                .debugBorder(Color.blue)
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -90,28 +94,7 @@ struct TextField: View {
             .font(Font.medium(size: isOnFocus ? 15 : 12))
             .foregroundStyle(colors.text.secondary.default)
             .padding(.top, isOnFocus ? 0 : 8)
-            .debugBorder(.brown)
     }
-}
-
-#Preview {
-    HStack {
-        Spacer()
-        VStack {
-            Spacer()
-            
-            TextField(text: .constant(""), config: TextField.Config(placeholder: "Label", hint: "Hint"))
-            TextField(text: .constant("Text"), config: TextField.Config(placeholder: "Label", hint: "Hint"))
-            
-            Spacer()
-        }
-        Spacer()
-    }
-    .environment(ColorPalette.dark)
-    .environment(PaddingsPalette())
-    .loadCustomFonts()
-    .ignoresSafeArea()
-    .background(Color.white)
 }
 
 //public enum TextFieldContentType {
