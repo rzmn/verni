@@ -7,6 +7,7 @@ public struct Button: View {
     public enum Style {
         case primary
         case secondary
+        case tertiary
     }
     
     public enum Icon {
@@ -45,7 +46,7 @@ public struct Button: View {
     
     @ViewBuilder private var buttonWithIcon: some View {
         if let icon = config.icon {
-            HStack(spacing: -10) {
+            HStack(spacing: -overlap) {
                 switch icon {
                 case .left(let image):
                     image.tint(iconColor)
@@ -65,7 +66,14 @@ public struct Button: View {
     
     @ViewBuilder private var backgroundShape: some View {
         if let icon = config.icon {
-            let iconSizeSubtractingOverlap = height - 10
+            let rectInset: UIEdgeInsets = {
+                switch icon {
+                case .left:
+                    UIEdgeInsets(top: 0, left: height - overlap, bottom: 0, right: 0)
+                case .right:
+                    UIEdgeInsets(top: 0, left: 0, bottom: 0, right: height - overlap)
+                }
+            }()
             let sign: CGFloat = {
                 switch icon {
                 case .left:
@@ -77,12 +85,18 @@ public struct Button: View {
             GeometryReader { proxy in
                 Circle()
                     .offset(x: (proxy.size.width - height) * sign / 2)
-                    .union(.rect(cornerRadius: 16).offset(x: iconSizeSubtractingOverlap * -sign / 2))
-                    .padding(.horizontal, 54 / 2)
+                    .union(
+                        Path { path in
+                            path.addRoundedRect(
+                                in: CGRect(origin: .zero, size: proxy.size).inset(by: rectInset),
+                                cornerSize: CGSize(width: cornerRadius, height: cornerRadius)
+                            )
+                        }
+                    )
                     .foregroundStyle(backgroundColor)
             }
         } else {
-            backgroundColor.clipShape(.rect(cornerRadius: 16))
+            backgroundColor.clipShape(.rect(cornerRadius: cornerRadius))
         }
     }
     
@@ -101,12 +115,22 @@ public struct Button: View {
         54
     }
     
+    private var overlap: CGFloat {
+        10
+    }
+    
+    private var cornerRadius: CGFloat {
+        16
+    }
+    
     private var backgroundColor: Color {
         switch config.style {
         case .primary:
             palette.background.primary.brand
         case .secondary:
             palette.background.secondary.default
+        case .tertiary:
+            .clear
         }
     }
     
@@ -115,6 +139,8 @@ public struct Button: View {
         case .primary:
             palette.text.primary.alternative
         case .secondary:
+            palette.text.primary.default
+        case .tertiary:
             palette.text.primary.default
         }
     }
@@ -125,6 +151,20 @@ public struct Button: View {
             palette.icon.primary.alternative
         case .secondary:
             palette.icon.primary.default
+        case .tertiary:
+            palette.icon.primary.default
         }
     }
+}
+
+#Preview {
+    Button(
+        config: Button.Config(
+            style: .primary,
+            text: .logIn,
+            icon: .right(.arrowRight)
+        ), action: {}
+    )
+    .environment(ColorPalette.light)
+    .environment(PaddingsPalette.default)
 }

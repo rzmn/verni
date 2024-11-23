@@ -75,6 +75,22 @@ extension LocalizedStringKey {
         key("sign_up")
     }
     
+    public static var loginForgotPassword: LocalizedStringKey {
+        key("login_forgot_password")
+    }
+    
+    public static var loginEmailPlaceholder: LocalizedStringKey {
+        key("login_email_placeholder")
+    }
+    
+    public static var loginPasswordPlaceholder: LocalizedStringKey {
+        key("login_password_placeholder")
+    }
+    
+    public static var loginScreenTitle: LocalizedStringKey {
+        key("login_screen_title")
+    }
+    
     private static func key(_ key: String) -> LocalizedStringKey {
         LocalizedStringKey(NSLocalizedString(key, bundle: .module, comment: ""))
     }

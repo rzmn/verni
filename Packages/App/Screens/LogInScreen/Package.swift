@@ -1,43 +1,37 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "App",
+    name: "LogInScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "App",
-            targets: ["App"]
+            name: "LogInScreen",
+            targets: ["LogInScreen"]
         )
     ],
     dependencies: [
-        .package(path: "../DesignSystem"),
-        .package(path: "../AppBase"),
-        .package(path: "../Screens/AuthWelcomeScreen"),
-        .package(path: "../Screens/DebugMenuScreen"),
-        .package(path: "../Screens/LogInScreen"),
-        .package(path: "../../DI/DI"),
-        .package(path: "../../Domain/Domain"),
-        .package(path: "../../Infrastructure/Logging"),
-        .package(path: "../../Infrastructure/Base")
+        .package(path: "../../AppBase"),
+        .package(path: "../../DesignSystem"),
+        .package(path: "../../../DI/DI"),
+        .package(path: "../../../Domain/Domain"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Base")
     ],
     targets: [
         .target(
-            name: "App",
+            name: "LogInScreen",
             dependencies: [
                 "DesignSystem",
                 "DI",
                 "Domain",
                 "Logging",
                 "Base",
-                "AppBase",
-                "AuthWelcomeScreen",
-                "DebugMenuScreen",
-                "LogInScreen"
+                "AppBase"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

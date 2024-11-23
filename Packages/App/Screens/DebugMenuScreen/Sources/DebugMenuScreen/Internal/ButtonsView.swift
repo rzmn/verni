@@ -18,7 +18,6 @@ struct ButtonsView: View {
             Spacer()
             VStack {
                 Spacer()
-                
                 let image = Image(systemName: "heart.fill")
                 let configs = [.primary, .secondary].flatMap { (style: DesignSystem.Button.Style) -> [DesignSystem.Button.Config] in
                     [.left(image), .right(image), nil].map { icon in

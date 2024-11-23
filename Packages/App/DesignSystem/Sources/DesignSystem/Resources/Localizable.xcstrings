@@ -1,7 +1,29 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-      "buttons_section" : {
+    "apple_oauth_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APPLE ID"
+          }
+        }
+      }
+    },
+    "auth_welcome_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free open-source app for tracking shared expenses and balances with people"
+          }
+        }
+      }
+    },
+    "buttons_section" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -56,24 +78,13 @@
         }
       }
     },
-    "text_fields_section" : {
+    "google_oauth_title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Text Fields"
-          }
-        }
-      }
-    },
-      "auth_welcome_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Free open-source app for tracking shared expenses and balances with people"
+            "value" : "GOOGLE"
           }
         }
       }
@@ -85,6 +96,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "LOG IN"
+          }
+        }
+      }
+    },
+    "login_email_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
+          }
+        }
+      }
+    },
+    "login_forgot_password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FORGOT YOUR PASSWORD?"
+          }
+        }
+      }
+    },
+    "login_password_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password"
+          }
+        }
+      }
+    },
+    "login_screen_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log in"
           }
         }
       }
@@ -111,24 +166,13 @@
         }
       }
     },
-    "apple_oauth_title" : {
+    "text_fields_section" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "APPLE ID"
-          }
-        }
-      }
-    },
-    "google_oauth_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GOOGLE"
+            "value" : "Text Fields"
           }
         }
       }

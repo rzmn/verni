@@ -13,10 +13,10 @@ public struct TextField: View {
     }
     public struct Config {
         let placeholder: LocalizedStringKey
-        let hint: LocalizedStringKey
+        let hint: LocalizedStringKey?
         let content: Content
         
-        public init(placeholder: LocalizedStringKey, hint: LocalizedStringKey, content: Content = .unspecified) {
+        public init(placeholder: LocalizedStringKey, hint: LocalizedStringKey? = nil, content: Content = .unspecified) {
             self.placeholder = placeholder
             self.hint = hint
             self.content = content
@@ -38,22 +38,19 @@ public struct TextField: View {
     }
     
     public var body: some View {
-        textFieldWithPlaceholderAndHint
-    }
-    
-    private var textFieldWithPlaceholderAndHint: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 0) {
             textFieldWithPlaceholder
-            HStack {
-                Text(config.hint)
-                    .font(Font.medium(size: 12))
-                    .foregroundStyle(colors.text.secondary.default)
-                Spacer()
+            if let hint = config.hint {
+                HStack {
+                    Text(hint)
+                        .font(Font.medium(size: 12))
+                        .foregroundStyle(colors.text.secondary.default)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
-            Spacer()
         }
-        .frame(height: 74)
+        .frame(height: config.hint == nil ? 54 : 74)
     }
     
     @ViewBuilder private var textFieldWithPlaceholder: some View {
@@ -100,8 +97,6 @@ public struct TextField: View {
                             
                         )
                         .background(
-                            //This will sit on below but will look like it is on top
-                            //It will reduce in size to match lettering
                             Text(textFieldBinding.wrappedValue.map({ _ in "*" }).joined())
                                 .font(Font.medium(size: 15))
                                 .foregroundStyle(colors.text.primary.default)
@@ -231,4 +226,11 @@ public struct TextField: View {
             false
         }
     }
+}
+
+#Preview {
+    TextField(text: .constant("Text"), config: TextField.Config(placeholder: "Placeholder", hint: "123"))
+        .environment(ColorPalette.light)
+        .environment(PaddingsPalette.default)
+        .loadCustomFonts()
 }

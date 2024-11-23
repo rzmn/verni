@@ -19,14 +19,30 @@ struct TextFieldsView: View {
                     text: $displayNameValue,
                     config: DesignSystem.TextField.Config(
                         placeholder: "Enter Display Name",
-                        hint: "Display Name"
+                        hint: "Display Name",
+                        content: .displayName
                     )
                 )
                 DesignSystem.TextField(
                     text: $displayNameValueEmpty,
                     config: DesignSystem.TextField.Config(
                         placeholder: "Enter Display Name",
-                        hint: "Display Name"
+                        hint: "Display Name",
+                        content: .displayName
+                    )
+                )
+                DesignSystem.TextField(
+                    text: $displayNameValue,
+                    config: DesignSystem.TextField.Config(
+                        placeholder: "Enter Email",
+                        content: .email
+                    )
+                )
+                DesignSystem.TextField(
+                    text: $displayNameValueEmpty,
+                    config: DesignSystem.TextField.Config(
+                        placeholder: "Enter Email",
+                        content: .email
                     )
                 )
                 DesignSystem.TextField(

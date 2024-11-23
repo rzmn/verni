@@ -6,7 +6,8 @@ internal import DesignSystem
 
 public struct AppView: View {
     @ObservedObject private var store: Store<AppState, AppAction>
-    @State var showingDebugMenu = true
+    @State var showingDebugMenu = false
+    @State var showingLoginScreen = false
 
     init(store: Store<AppState, AppAction>) {
         self.store = store
@@ -21,6 +22,22 @@ public struct AppView: View {
                     }
                 }
             }
+            .fullScreenCover(isPresented: $showingLoginScreen, content: {
+                if case .launched(let state) = store.state, case .anonymous(let state) = state {
+                    state.session.logInScreen.instantiate { event in
+                        switch event {
+                        case .dismiss:
+                            withAnimation {
+                                showingLoginScreen = false
+                            }
+                        default:
+                            break
+                        }
+                    }
+                } else {
+                    Text("debug menu for authenticated")
+                }
+            })
             .fullScreenCover(isPresented: $showingDebugMenu, content: {
                 if case .launched(let state) = store.state, case .anonymous(let state) = state {
                     state.session.debugMenuScreen.instantiate { event in
@@ -52,7 +69,12 @@ public struct AppView: View {
                 Text("launched...")
             case .anonymous(let state):
                 state.session.authWelcomeScreen.instantiate { event in
-                    // not implemented
+                    switch event {
+                    case .logIn:
+                        showingLoginScreen = true
+                    case .signUp:
+                        break
+                    }
                 }
             }
         }
