@@ -6,8 +6,8 @@ public enum TextContentType: Hashable {
 }
 
 extension Font {
-    static let mediumTextFontName = "JetBrainsMono-Medium"
-    static let regularTextFontName = "JetBrainsMono-Regular"
+    static let mediumTextFontName = "JetBrainsMonoNL-Medium"
+    static let regularTextFontName = "JetBrainsMonoNL-Regular"
     
     public static func regular(size: CGFloat) -> Font {
         Font.custom(regularTextFontName, size: size)

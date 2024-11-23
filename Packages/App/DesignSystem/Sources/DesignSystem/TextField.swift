@@ -87,7 +87,7 @@ public struct TextField: View {
                         .font(Font.medium(size: 15))
                         .foregroundStyle(colors.text.primary.default)
                         .lineLimit(1)
-                        .opacity(showSecureFieldContent ? 1 : 0)
+                        .opacity(0)
                         .overlay(
                             SecureField("", text: textFieldBinding)
                                 .font(Font.medium(size: 15))
@@ -97,12 +97,18 @@ public struct TextField: View {
                             
                         )
                         .background(
-                            Text(textFieldBinding.wrappedValue.map({ _ in "*" }).joined())
-                                .font(Font.medium(size: 15))
-                                .foregroundStyle(colors.text.primary.default)
-                                .multilineTextAlignment(.leading)
-                                .opacity(showSecureFieldContent ? 0 : 1)
-                                .lineLimit(1)
+                            Text(
+                                showSecureFieldContent
+                                    ? textFieldBinding.wrappedValue
+                                    : textFieldBinding.wrappedValue.map({ _ in "*" }).joined()
+                                
+                            )
+                            .contentTransition(.numericText(countsDown: !showSecureFieldContent))
+                            .font(Font.medium(size: 15))
+                            .foregroundStyle(colors.text.primary.default)
+                            .multilineTextAlignment(.leading)
+                            .opacity(1)
+                            .lineLimit(1)
                         )
                         .foregroundColor(Color(UIColor.clear))
                     Spacer()
@@ -124,7 +130,9 @@ public struct TextField: View {
                 HStack {
                     Spacer()
                     SwiftUI.Button {
-                        showSecureFieldContent = !showSecureFieldContent
+                        withAnimation(.easeInOut.speed(2)) {
+                            showSecureFieldContent = !showSecureFieldContent
+                        }
                     } label: {
                         Image.eye
                             .foregroundStyle(colors.icon.secondary.default)
@@ -157,7 +165,7 @@ public struct TextField: View {
             text
         }, set: { newValue in
             if placeholderIsOnFocus != newValue.isEmpty {
-                withAnimation(.default.speed(5)) {
+                withAnimation(.default.speed(4)) {
                     placeholderIsOnFocus = newValue.isEmpty
                 }
             }
