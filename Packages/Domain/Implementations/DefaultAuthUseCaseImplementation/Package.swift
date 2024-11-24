@@ -16,6 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Domain"),
+        .package(path: "../../../DI/DI"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/DI/DataLayerDependencies")
@@ -26,6 +27,7 @@ let package = Package(
             dependencies: [
                 "Domain",
                 "Api",
+                "DI",
                 "DataTransferObjects",
                 "DataLayerDependencies"
             ],

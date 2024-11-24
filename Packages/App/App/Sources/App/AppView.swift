@@ -34,24 +34,40 @@ public struct AppView: View {
                             break
                         }
                     }
-                } else {
-                    Text("debug menu for authenticated")
-                }
-            })
-            .fullScreenCover(isPresented: $showingDebugMenu, content: {
-                if case .launched(let state) = store.state, case .anonymous(let state) = state {
-                    state.session.debugMenuScreen.instantiate { event in
-                        switch event {
-                        case .dismiss:
-                            withAnimation {
-                                showingDebugMenu = false
+                    .fullScreenCover(
+                        isPresented: Binding(
+                            get: {
+                                if !showingLoginScreen {
+                                    return false
+                                }
+                                return showingDebugMenu
+                            }, set: { newValue in
+                                showingDebugMenu = newValue
                             }
+                        ),
+                        content: {
+                            debugMenu
                         }
-                    }
+                    )
                 } else {
                     Text("debug menu for authenticated")
                 }
             })
+            .fullScreenCover(
+                isPresented: Binding(
+                    get: {
+                        if showingLoginScreen {
+                            return false
+                        }
+                        return showingDebugMenu
+                    }, set: { newValue in
+                        showingDebugMenu = newValue
+                    }
+                ),
+                content: {
+                    debugMenu
+                }
+            )
             .environment(ColorPalette.light)
             .environment(PaddingsPalette.default)
     }
@@ -77,6 +93,21 @@ public struct AppView: View {
                     }
                 }
             }
+        }
+    }
+    
+    @ViewBuilder private var debugMenu: some View {
+        if case .launched(let state) = store.state, case .anonymous(let state) = state {
+            state.session.debugMenuScreen.instantiate { event in
+                switch event {
+                case .dismiss:
+                    withAnimation {
+                        showingDebugMenu = false
+                    }
+                }
+            }
+        } else {
+            Text("debug menu for authenticated")
         }
     }
 }

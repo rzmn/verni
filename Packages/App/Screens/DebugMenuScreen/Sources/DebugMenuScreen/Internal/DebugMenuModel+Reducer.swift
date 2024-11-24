@@ -30,6 +30,10 @@ extension DebugMenuModel {
                     return modify(state) { state in
                         state.navigation.append(.fonts)
                     }
+                case .haptic:
+                    return modify(state) { state in
+                        state.navigation.append(.haptic)
+                    }
                 }
             case .updateNavigationStack(let stack):
                 return modify(state) { state in

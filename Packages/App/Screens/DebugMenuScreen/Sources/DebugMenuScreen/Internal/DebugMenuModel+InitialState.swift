@@ -14,7 +14,8 @@ extension DebugMenuModel {
                 .button,
                 .colors,
                 .fonts,
-                .textField
+                .textField,
+                .haptic
             ]
         )
     }

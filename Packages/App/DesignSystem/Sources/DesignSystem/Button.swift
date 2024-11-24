@@ -20,7 +20,7 @@ public struct Button: View {
         public let text: LocalizedStringKey
         public let icon: Icon?
         
-        public init(style: Style, text: LocalizedStringKey, icon: Icon?) {
+        public init(style: Style, text: LocalizedStringKey, icon: Icon? = nil) {
             self.style = style
             self.text = text
             self.icon = icon

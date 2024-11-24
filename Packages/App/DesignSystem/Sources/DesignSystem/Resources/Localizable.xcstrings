@@ -89,6 +89,17 @@
         }
       }
     },
+    "haptic_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haptic"
+          }
+        }
+      }
+    },
     "log_in" : {
       "extractionState" : "manual",
       "localizations" : {

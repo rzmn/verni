@@ -37,6 +37,8 @@ public struct DebugMenuView: View {
                         ColorsView()
                     case .fonts:
                         FontsView()
+                    case .haptic:
+                        HapticView()
                     }
                 }
         }
