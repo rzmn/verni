@@ -27,7 +27,7 @@ struct DebugMenuRootView: View {
             .overlay {
                 Text(.debugMenuTitle)
                     .font(.medium(size: 15))
-                    .foregroundStyle(colors.text.primary.alternative)
+                    .foregroundStyle(colors.text.primary.staticLight)
             }
             VStack {
                 ForEach(store.state.sections) { section in
@@ -49,12 +49,12 @@ struct DebugMenuRootView: View {
             .frame(maxHeight: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(colors.background.primary.alternative)
+                    .fill(colors.background.primary.default)
                     .edgesIgnoringSafeArea([.bottom])
             )
         }
         .background(
-            colors.background.primary.default
+            colors.background.brand.static
                 .ignoresSafeArea()
         )
     }

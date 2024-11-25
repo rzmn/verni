@@ -27,7 +27,7 @@ public struct LogInView: View {
             .overlay {
                 Text(.loginScreenTitle)
                     .font(.medium(size: 15))
-                    .foregroundStyle(colors.text.primary.alternative)
+                    .foregroundStyle(colors.text.primary.staticLight)
             }
             VStack {
                 DesignSystem.TextField(
@@ -61,12 +61,12 @@ public struct LogInView: View {
             .frame(maxHeight: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(colors.background.primary.alternative)
+                    .fill(colors.background.primary.default)
                     .edgesIgnoringSafeArea([.bottom])
             )
         }
         .background(
-            colors.background.primary.default
+            colors.background.brand.static
                 .ignoresSafeArea()
         )
         .keyboardDismiss()
@@ -75,7 +75,7 @@ public struct LogInView: View {
     private var titleSection: some View {
         Text(.authWelcomeTitle)
             .foregroundStyle(colors.text.secondary.default)
-            .font(.regular(size: 13))
+            .font(.medium(size: 13))
             .multilineTextAlignment(.center)
             .padding(.all, 16)
     }

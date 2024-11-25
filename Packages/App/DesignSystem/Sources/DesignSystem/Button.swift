@@ -126,7 +126,7 @@ public struct Button: View {
     private var backgroundColor: Color {
         switch config.style {
         case .primary:
-            palette.background.primary.brand
+            palette.background.brand.static
         case .secondary:
             palette.background.secondary.default
         case .tertiary:
@@ -137,7 +137,7 @@ public struct Button: View {
     private var textColor: Color {
         switch config.style {
         case .primary:
-            palette.text.primary.alternative
+            palette.text.primary.staticLight
         case .secondary:
             palette.text.primary.default
         case .tertiary:
@@ -148,7 +148,7 @@ public struct Button: View {
     private var iconColor: Color {
         switch config.style {
         case .primary:
-            palette.icon.primary.alternative
+            palette.icon.primary.staticLight
         case .secondary:
             palette.icon.primary.default
         case .tertiary:
@@ -161,10 +161,12 @@ public struct Button: View {
     Button(
         config: Button.Config(
             style: .primary,
-            text: .logIn,
+            text: "bla019好👩🏼‍❤️‍💋‍👨🏿中х уй國👀",
             icon: .right(.arrowRight)
         ), action: {}
     )
     .environment(ColorPalette.light)
     .environment(PaddingsPalette.default)
+    .loadCustomFonts()
 }
+

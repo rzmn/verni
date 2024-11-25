@@ -100,6 +100,7 @@
 		844CD9B42CF0E68000092DD1 /* DebugMenuScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DebugMenuScreen; sourceTree = "<group>"; };
 		84650DDC2CEF300100907DB0 /* AuthWelcomeScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthWelcomeScreen; sourceTree = "<group>"; };
 		8476A23C2CF2243E001CBF5A /* LogInScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LogInScreen; sourceTree = "<group>"; };
+		84E809102CF3695A00B5A32C /* ProfileScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ProfileScreen; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -256,6 +257,7 @@
 		61A1D3962CA9556C006C496F /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				84E809102CF3695A00B5A32C /* ProfileScreen */,
 				8476A23C2CF2243E001CBF5A /* LogInScreen */,
 				844CD9B42CF0E68000092DD1 /* DebugMenuScreen */,
 				84650DDC2CEF300100907DB0 /* AuthWelcomeScreen */,

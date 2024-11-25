@@ -22,7 +22,7 @@ struct FontsView: View {
             ]) { item in
                 Text(item.name)
                     .fontStyle(item.contentType)
-                    .foregroundStyle(colors.text.primary.alternative)
+                    .foregroundStyle(colors.text.primary.staticLight)
                     .padding(.palette.defaultHorizontal)
             }
             Spacer()

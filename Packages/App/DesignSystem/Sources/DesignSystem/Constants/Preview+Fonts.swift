@@ -56,7 +56,7 @@ public enum CustomFonts {
     public static func registerCustomFonts(class: AnyClass?) -> String? {
         let errors = [
             "\(Font.mediumTextFontName).ttf",
-            "\(Font.regularTextFontName).ttf"
+            "\(Font.boldTextFontName).ttf"
         ].compactMap { font in
             guard let bundle = Bundle.forModule(class: `class`) else {
                 return "Cannot find bundle for class \(`class`.debugDescription)"

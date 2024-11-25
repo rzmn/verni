@@ -155,6 +155,61 @@
         }
       }
     },
+    "profile_action_account_settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACCOUNT SETTINGS"
+          }
+        }
+      }
+    },
+    "profile_action_edit_profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EDIT PROFILE"
+          }
+        }
+      }
+    },
+    "profile_action_notification_settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NOTIFICATION SETTINGS"
+          }
+        }
+      }
+    },
+    "profile_actions_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACTIONS"
+          }
+        }
+      }
+    },
+    "profile_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
+          }
+        }
+      }
+    },
     "sign_in_with" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -173,6 +228,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "CREATE ACCOUNT"
+          }
+        }
+      }
+    },
+    "spendings_negative_balance" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "you are owed"
+          }
+        }
+      }
+    },
+    "spendings_positive_balance" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "you owe"
           }
         }
       }

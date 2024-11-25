@@ -69,6 +69,35 @@ extension LocalizedStringKey {
         key("login_screen_title")
     }
     
+    
+    public static var profileActionsTitle: LocalizedStringKey {
+        key("profile_actions_title")
+    }
+    
+    public static var profileTitle: LocalizedStringKey {
+        key("profile_title")
+    }
+    
+    public static var profileActionNotificationSettings: LocalizedStringKey {
+        key("profile_action_notification_settings")
+    }
+    
+    public static var profileActionEditProfile: LocalizedStringKey {
+        key("profile_action_edit_profile")
+    }
+    
+    public static var profileActionAccountSettings: LocalizedStringKey {
+        key("profile_action_account_settings")
+    }
+    
+    public static var spendingsNegativeBalance: LocalizedStringKey {
+        key("spendings_negative_balance")
+    }
+    
+    public static var spendingsPositiveBalance: LocalizedStringKey {
+        key("spendings_positive_balance")
+    }
+    
     private static func key(_ key: String) -> LocalizedStringKey {
         LocalizedStringKey(NSLocalizedString(key, bundle: .module, comment: ""))
     }

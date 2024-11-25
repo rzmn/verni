@@ -5,6 +5,7 @@ internal import AuthWelcomeScreen
 internal import DesignSystem
 
 public struct AppView: View {
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
     @ObservedObject private var store: Store<AppState, AppAction>
     @State var showingDebugMenu = false
     @State var showingLoginScreen = false
@@ -68,7 +69,7 @@ public struct AppView: View {
                     debugMenu
                 }
             )
-            .environment(ColorPalette.light)
+            .environment(ColorPalette(scheme: colorScheme))
             .environment(PaddingsPalette.default)
     }
     

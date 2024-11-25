@@ -17,6 +17,7 @@ public struct AuthWelcomeView: View {
                 .resizable()
                 .aspectRatio(373.0 / 208.0 /* ??? */, contentMode: .fill)
                 .scaledToFit()
+                .foregroundStyle(colors.background.primary.default)
             VStack {
                 titleSection
                 Spacer()
@@ -29,12 +30,12 @@ public struct AuthWelcomeView: View {
             .frame(maxHeight: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(colors.background.primary.alternative)
+                    .fill(colors.background.primary.default)
                     .edgesIgnoringSafeArea([.bottom])
             )
         }
         .background(
-            colors.background.primary.default
+            colors.background.brand.static
                 .ignoresSafeArea()
         )
     }
@@ -42,7 +43,7 @@ public struct AuthWelcomeView: View {
     private var titleSection: some View {
         Text(.authWelcomeTitle)
             .foregroundStyle(colors.text.secondary.default)
-            .font(.regular(size: 13))
+            .font(.medium(size: 13))
             .multilineTextAlignment(.center)
             .padding(.all, 16)
     }

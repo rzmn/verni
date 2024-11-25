@@ -46,7 +46,7 @@ public struct IconButton: View {
     private var backgroundColor: Color {
         switch config.style {
         case .primary:
-            palette.background.primary.alternative
+            palette.background.primary.default
         case .secondary:
             palette.background.secondary.alternative
         }
@@ -57,7 +57,7 @@ public struct IconButton: View {
         case .primary:
             palette.icon.primary.default
         case .secondary:
-            palette.icon.primary.alternative
+            palette.icon.primary.staticLight
         }
     }
 }
@@ -90,7 +90,7 @@ private struct ConfigForPreview: Identifiable {
         }
         Spacer()
     }
-    .environment(ColorPalette.dark)
+    .environment(ColorPalette.light)
     .loadCustomFonts()
     .ignoresSafeArea()
 }

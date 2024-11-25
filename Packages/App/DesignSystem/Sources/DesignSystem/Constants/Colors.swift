@@ -8,10 +8,12 @@ import SwiftUI
     
     private(set) var theme: Theme
     
-    convenience init() {
+    public convenience init(scheme: ColorScheme) {
         self.init(
             theme: {
-                switch UIScreen.main.traitCollection.userInterfaceStyle {
+                switch scheme {
+                case .light:
+                    .light
                 case .dark:
                     .dark
                 default:
@@ -50,7 +52,7 @@ extension ColorPalette {
         public struct Primary {
             let theme: Theme
             
-            public var alternative: Color {
+            public var staticLight: Color {
                 switch theme {
                 case .dark:
                     .hex(0xFFFFFF)
@@ -62,7 +64,7 @@ extension ColorPalette {
             public var `default`: Color {
                 switch theme {
                 case .dark:
-                    .hex(0x051125)
+                    .hex(0xFFFFFF)
                 case .light:
                     .hex(0x051125)
                 }
@@ -75,7 +77,7 @@ extension ColorPalette {
             public var `default`: Color {
                 switch theme {
                 case .dark:
-                    .hex(0x69707C)
+                    .hex(0x9BA0A8)
                 case .light:
                     .hex(0x69707C)
                 }
@@ -95,6 +97,19 @@ extension ColorPalette {
             }
         }
         
+        public struct Negative {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xCB2C30)
+                case .light:
+                    .hex(0xCB2C30)
+                }
+            }
+        }
+        
         public var primary: Primary {
             Primary(theme: theme)
         }
@@ -105,6 +120,10 @@ extension ColorPalette {
         
         public var tertiary: Tertiary {
             Tertiary(theme: theme)
+        }
+        
+        public var negative: Negative {
+            Negative(theme: theme)
         }
     }
     
@@ -129,21 +148,25 @@ extension ColorPalette {
                 }
             }
             
-            public var brand: Color {
-                switch theme {
-                case .dark:
-                    .hex(0x593EFF)
-                case .light:
-                    .hex(0x593EFF)
-                }
-            }
-            
             public var `default`: Color {
                 switch theme {
                 case .dark:
                     .hex(0x051125)
                 case .light:
-                    .hex(0x051125)
+                    .hex(0xFFFFFF)
+                }
+            }
+        }
+        
+        public struct Brand {
+            let theme: Theme
+            
+            public var `static`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x593EFF)
+                case .light:
+                    .hex(0x593EFF)
                 }
             }
         }
@@ -154,7 +177,7 @@ extension ColorPalette {
             public var `default`: Color {
                 switch theme {
                 case .dark:
-                    .hex(0xEBECEE)
+                    .hex(0x374151)
                 case .light:
                     .hex(0xEBECEE)
                 }
@@ -170,12 +193,50 @@ extension ColorPalette {
             }
         }
         
+        public struct Negative {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xFFEBEB)
+                case .light:
+                    .hex(0xFFEBEB)
+                }
+            }
+        }
+        
+        public struct Positive {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xE7F6EC)
+                case .light:
+                    .hex(0xE7F6EC)
+                }
+            }
+        }
+        
         public var primary: Primary {
             Primary(theme: theme)
         }
         
         public var secondary: Secondary {
             Secondary(theme: theme)
+        }
+        
+        public var brand: Brand {
+            Brand(theme: theme)
+        }
+        
+        public var negative: Negative {
+            Negative(theme: theme)
+        }
+        
+        public var positive: Positive {
+            Positive(theme: theme)
         }
     }
     
@@ -191,7 +252,7 @@ extension ColorPalette {
         public struct Primary {
             let theme: Theme
             
-            public var alternative: Color {
+            public var staticLight: Color {
                 switch theme {
                 case .dark:
                     .hex(0xFFFFFF)
@@ -203,7 +264,7 @@ extension ColorPalette {
             public var `default`: Color {
                 switch theme {
                 case .dark:
-                    .hex(0x051125)
+                    .hex(0xFFFFFF)
                 case .light:
                     .hex(0x051125)
                 }
@@ -216,9 +277,35 @@ extension ColorPalette {
             public var `default`: Color {
                 switch theme {
                 case .dark:
-                    .hex(0x69707C)
+                    .hex(0x9BA0A8)
                 case .light:
                     .hex(0x69707C)
+                }
+            }
+        }
+        
+        public struct Negative {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0xCB2C30)
+                case .light:
+                    .hex(0xCB2C30)
+                }
+            }
+        }
+        
+        public struct Positive {
+            let theme: Theme
+            
+            public var `default`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x0E873C)
+                case .light:
+                    .hex(0x0E873C)
                 }
             }
         }
@@ -229,9 +316,9 @@ extension ColorPalette {
             public var `default`: Color {
                 switch theme {
                 case .dark:
-                    .hex(0x9BA0A8)
+                    .hex(0x0E873C)
                 case .light:
-                    .hex(0x9BA0A8)
+                    .hex(0x0E873C)
                 }
             }
         }
@@ -246,6 +333,14 @@ extension ColorPalette {
         
         public var tertiary: Tertiary {
             Tertiary(theme: theme)
+        }
+        
+        public var negative: Negative {
+            Negative(theme: theme)
+        }
+        
+        public var positive: Positive {
+            Positive(theme: theme)
         }
     }
     
