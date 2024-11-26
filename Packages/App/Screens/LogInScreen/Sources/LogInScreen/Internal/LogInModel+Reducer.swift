@@ -14,10 +14,26 @@ extension LogInModel {
                 return modify(state) {
                     $0.email = text
                 }
-            case .onCreateAccountTap:
+            case .onForgotPasswordTap:
                 return state
             case .onLogInTap:
                 return state
+            case .onLoggingInStarted:
+                return modify(state) {
+                    $0.canSubmitCredentials = false
+                }
+            case .onLoggingInFailed:
+                return modify(state) {
+                    $0.canSubmitCredentials = true
+                }
+            case .onUpdateBottomSheet(let preset):
+                return modify(state) {
+                    $0.bottomSheet = preset
+                }
+            case .loggedIn:
+                return modify(state) {
+                    $0.canSubmitCredentials = true
+                }
             }
         }
     }

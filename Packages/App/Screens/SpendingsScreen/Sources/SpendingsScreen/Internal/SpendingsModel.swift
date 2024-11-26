@@ -8,8 +8,8 @@ import SwiftUI
 internal import Base
 internal import DesignSystem
 
-actor ProfileModel {
-    private let store: Store<ProfileState, ProfileAction>
+actor SpendingsModel {
+    private let store: Store<SpendingsState, SpendingsAction>
 
     init(di: AuthenticatedDomainLayerSession, haptic: HapticManager) async {
         store = await Store(
@@ -19,19 +19,19 @@ actor ProfileModel {
     }
 }
 
-@MainActor extension ProfileModel: ScreenProvider {
+@MainActor extension SpendingsModel: ScreenProvider {
     func instantiate(
-        handler: @escaping @MainActor (ProfileEvent) -> Void
+        handler: @escaping @MainActor (SpendingsEvent) -> Void
     ) -> ProfileView {
         ProfileView(
             store: modify(store) { store in
                 store.append(
                     handler: AnyActionHandler(
-                        id: "\(ProfileEvent.self)",
+                        id: "\(SpendingsEvent.self)",
                         handleBlock: { action in
                             switch action {
-                            case .onLogoutConfirmTap:
-                                handler(.logout)
+                            case .onUserTap(let user):
+                                handler(.onUserTap(user))
                             default:
                                 break
                             }

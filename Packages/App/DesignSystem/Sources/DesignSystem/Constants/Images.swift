@@ -60,5 +60,29 @@ extension Image {
     public static var minus: Image {
         Image("minus", bundle: .module)
     }
+    
+    public static var qrCode: Image {
+        Image("qr-code", bundle: .module)
+    }
+    
+    public static var search: Image {
+        Image("search", bundle: .module)
+    }
+    
+    public static var chevronDown: Image {
+        Image("chevron-down", bundle: .module)
+    }
+    
+    public static var noConnection: Image {
+        Image("no-connection", bundle: .module)
+    }
+    
+    public static var refresh: Image {
+        Image("refresh", bundle: .module)
+    }
+    
+    public static var close: Image {
+        Image("close", bundle: .module)
+    }
 }
 

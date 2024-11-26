@@ -1,6 +1,7 @@
 import SwiftUI
 import AppBase
 internal import DesignSystem
+internal import Base
 
 public struct LogInView: View {
     @ObservedObject var store: Store<LogInState, LogInAction>
@@ -70,6 +71,16 @@ public struct LogInView: View {
                 .ignoresSafeArea()
         )
         .keyboardDismiss()
+        .bottomSheet(
+            preset: Binding(
+                get: {
+                    store.state.bottomSheet
+                },
+                set: { preset in
+                    store.dispatch(.onUpdateBottomSheet(preset))
+                }
+            )
+        )
     }
     
     private var titleSection: some View {
@@ -97,7 +108,7 @@ public struct LogInView: View {
                     text: .loginForgotPassword,
                     icon: .none
                 ), action: {
-                    store.dispatch(.onCreateAccountTap)
+                    store.dispatch(.onForgotPasswordTap)
                 }
             )
         }
@@ -109,7 +120,9 @@ public struct LogInView: View {
 #Preview {
     LogInView(
         store: Store(
-            state: LogInModel.initialState,
+            state: modify(LogInModel.initialState) {
+                $0.bottomSheet = .service("service message", onClose: {})
+            },
             reducer: LogInModel.reducer
         )
     )

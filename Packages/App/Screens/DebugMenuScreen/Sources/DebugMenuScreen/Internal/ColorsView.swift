@@ -25,6 +25,7 @@ struct ColorsView: View {
     private var colorItems: [ColorItem] {
         [
             ColorItem(color: \ColorPalette.text.primary.staticLight, name: "text/primary/staticLight"),
+            ColorItem(color: \ColorPalette.text.primary.alternative, name: "text/primary/alternative"),
             ColorItem(color: \ColorPalette.text.primary.default, name: "text/primary/default"),
             ColorItem(color: \ColorPalette.text.secondary.default, name: "text/secondary/default"),
             ColorItem(color: \ColorPalette.text.tertiary.default, name: "text/tertiary/default"),

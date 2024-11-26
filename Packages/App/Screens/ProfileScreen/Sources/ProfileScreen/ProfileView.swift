@@ -64,7 +64,7 @@ public struct ProfileView: View {
                             IconButton(
                                 config: IconButton.Config(
                                     style: .primary,
-                                    icon: .eye
+                                    icon: .qrCode
                                 )
                             ) {
                                 store.dispatch(.onFlipAvatarTap)
@@ -78,6 +78,17 @@ public struct ProfileView: View {
                         .foregroundStyle(colors.background.secondary.default)
                         .padding(.bottom, 22)
                 )
+            MenuOption(
+                config: MenuOption.Config(
+                    style: .primary,
+                    icon: .pencilFill,
+                    title: .profileActionEditProfile,
+                    accessoryIcon: .chevronRight
+                )
+            ) {
+                store.dispatch(.onEditProfileTap)
+            }
+            .padding(.top, 2)
             HStack(spacing: 0) {
                 Spacer()
                     .frame(width: 16)
@@ -91,17 +102,6 @@ public struct ProfileView: View {
                 Spacer()
             }
             .frame(height: 39)
-            MenuOption(
-                config: MenuOption.Config(
-                    style: .primary,
-                    icon: .pencilFill,
-                    title: .profileActionEditProfile,
-                    accessoryIcon: .chevronRight
-                )
-            ) {
-                store.dispatch(.onEditProfileTap)
-            }
-            .padding(.top, 2)
             MenuOption(
                 config: MenuOption.Config(
                     style: .primary,

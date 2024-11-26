@@ -16,6 +16,12 @@ actor LogInModel {
             state: Self.initialState,
             reducer: Self.reducer
         )
+        await store.append(
+            handler: LoginSideEffects(
+                store: store,
+                di: di
+            ), keepingUnique: true
+        )
     }
 }
 

@@ -61,6 +61,15 @@ extension ColorPalette {
                 }
             }
             
+            public var alternative: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x051125)
+                case .light:
+                    .hex(0xFFFFFF)
+                }
+            }
+            
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -80,6 +89,15 @@ extension ColorPalette {
                     .hex(0x9BA0A8)
                 case .light:
                     .hex(0x69707C)
+                }
+            }
+            
+            public var alternative: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x69707C)
+                case .light:
+                    .hex(0x9BA0A8)
                 }
             }
         }

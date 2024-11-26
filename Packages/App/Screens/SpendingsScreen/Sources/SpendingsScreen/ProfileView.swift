@@ -1,143 +1,105 @@
 import SwiftUI
 import AppBase
+import Domain
 internal import DesignSystem
 
 public struct ProfileView: View {
-    @ObservedObject var store: Store<ProfileState, ProfileAction>
+    @ObservedObject var store: Store<SpendingsState, SpendingsAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
 
-    init(store: Store<ProfileState, ProfileAction>) {
+    init(store: Store<SpendingsState, SpendingsAction>) {
         self.store = store
     }
 
     public var body: some View {
         VStack(spacing: 0) {
             HStack {
-                IconButton(
-                    config: IconButton.Config(
-                        style: .primary,
-                        icon: .bellBorder
-                    )
-                ) {
-                    store.dispatch(.onNotificationsTap)
-                }
                 Spacer()
                 IconButton(
                     config: IconButton.Config(
                         style: .primary,
-                        icon: .logout
+                        icon: .search
                     )
                 ) {
-                    store.dispatch(.onNotificationsTap)
+                    store.dispatch(.onSearchTap)
                 }
             }
             .frame(height: 54)
             .overlay {
-                Text(.profileTitle)
+                Text(.spendingsTitle)
                     .font(.medium(size: 15))
                     .foregroundStyle(colors.text.primary.default)
             }
-            .background(colors.background.secondary.default)
-            colors.background.primary.default
-                .aspectRatio(371.0 / 281.0, contentMode: .fit)
-                .clipShape(.rect(cornerRadius: 22))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 22)
-                        .foregroundStyle(
-                            .linearGradient(
-                                colors: [
-                                    colors.background.brand.static,
-                                    .green.opacity(0.4),
-                                ],
-                                startPoint: UnitPoint(x: 0.5, y: 1),
-                                endPoint: UnitPoint(x: 0.5, y: 97.0 / 281.0)
-                            )
-                        )
-                        .padding(.all, 2)
-                }
-                .overlay {
-                    HStack {
-                        Spacer()
-                        VStack {
-                            Spacer()
-                            IconButton(
-                                config: IconButton.Config(
-                                    style: .primary,
-                                    icon: .eye
-                                )
-                            ) {
-                                store.dispatch(.onFlipAvatarTap)
-                            }
-                        }
-                    }
-                    .padding([.bottom, .trailing], 12)
-                }
-                .background(
-                    Rectangle()
-                        .foregroundStyle(colors.background.secondary.default)
-                        .padding(.bottom, 22)
+            overallSection
+            ForEach(items) { (item: SpendingsState.Item) in
+                SpendingsItem(
+                    config: SpendingsItem.Config(
+                        avatar: item.user.avatar,
+                        name: item.user.displayName,
+                        style: .negative,
+                        amount: ""
+                    )
                 )
-            HStack(spacing: 0) {
-                Spacer()
-                    .frame(width: 16)
-                VStack(spacing: 0) {
-                    Spacer()
-                        .frame(height: 16)
-                    Text(.profileActionsTitle)
-                        .foregroundStyle(colors.text.secondary.default)
-                        .font(.bold(size: 13))
-                }
-                Spacer()
             }
-            .frame(height: 39)
-            MenuOption(
-                config: MenuOption.Config(
-                    style: .primary,
-                    icon: .pencilFill,
-                    title: .profileActionEditProfile,
-                    accessoryIcon: .chevronRight
-                )
-            ) {
-                store.dispatch(.onEditProfileTap)
-            }
-            .padding(.top, 2)
-            MenuOption(
-                config: MenuOption.Config(
-                    style: .primary,
-                    icon: .settingsFill,
-                    title: .profileActionAccountSettings,
-                    accessoryIcon: .chevronRight
-                )
-            ) {
-                store.dispatch(.onEditProfileTap)
-            }
-            .padding(.top, 2)
-            MenuOption(
-                config: MenuOption.Config(
-                    style: .primary,
-                    icon: .bellFill,
-                    title: .profileActionNotificationSettings,
-                    accessoryIcon: .chevronRight
-                )
-            ) {
-                store.dispatch(.onEditProfileTap)
-            }
-            .padding(.top, 2)
             Spacer()
         }
-        .background(colors.background.primary.default)
+        .background(colors.background.secondary.default)
+    }
+    
+    private var items: [SpendingsState.Item] {
+        store.state.previews.value ?? []
     }
 
+    private var overallSection: some View {
+        HStack(spacing: 0) {
+            Image.chevronDown
+                .frame(width: 24, height: 24)
+                .padding(.leading, 16)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(.spendingsOverallTitle)
+                    .font(.bold(size: 15))
+                    .foregroundStyle(colors.text.primary.alternative)
+                    .padding(.top, 20)
+                Spacer()
+                Text(.spendingsPeopleInvolved(count: store.state.previews.value?.count ?? 0))
+                    .font(.medium(size: 15))
+                    .foregroundStyle(colors.text.secondary.alternative)
+                    .padding(.bottom, 20)
+            }
+            .padding(.leading, 12)
+            Spacer()
+        }
+        .background(colors.background.primary.alternative)
+        .frame(height: 82)
+        .clipShape(.rect(cornerRadius: 24))
+    }
 }
 
 #Preview {
     ProfileView(
         store: Store(
-            state: ProfileModel.initialState,
-            reducer: ProfileModel.reducer
+            state: SpendingsState(
+                previews: .loaded(
+                    [
+                        SpendingsState.Item(
+                            user: User(
+                                id: UUID().uuidString,
+                                status: .friend,
+                                displayName: "berchikk",
+                                avatar: nil
+                            ),
+                            balance: [
+                                .euro: 123
+                            ]
+                        )
+                    ]
+                )
+            ),
+            reducer: SpendingsModel.reducer
         )
     )
     .environment(ColorPalette.dark)
-    .preview(packageClass: ProfileModel.self)
+    .environment(AvatarView.Repository.preview)
+    .preview(packageClass: SpendingsModel.self)
 }

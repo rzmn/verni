@@ -2,6 +2,6 @@ import DI
 
 public enum LogInEvent: Sendable {
     case dismiss
-    case createAccount
+    case forgotPassword
     case logIn(AuthenticatedDomainLayerSession)
 }

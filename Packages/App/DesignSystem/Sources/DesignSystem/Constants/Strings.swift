@@ -98,6 +98,48 @@ extension LocalizedStringKey {
         key("spendings_positive_balance")
     }
     
+    public static var spendingsTitle: LocalizedStringKey {
+        key("spendings_title")
+    }
+    
+    public static var spendingsOverallTitle: LocalizedStringKey {
+        key("spendings_overall_title")
+    }
+    
+    public static var sheetInternalErrorTitle: LocalizedStringKey {
+        key("sheet_internal_title")
+    }
+    
+    public static var sheetInternalErrorSubtitle: LocalizedStringKey {
+        key("sheet_internal_subtitle")
+    }
+    
+    public static var sheetNoConnectionTitle: LocalizedStringKey {
+        key("sheet_no_connection_title")
+    }
+    
+    public static var sheetNoConnectionSubtitle: LocalizedStringKey {
+        key("sheet_no_connection_subtitle")
+    }
+    
+    public static var sheetActionTryAgain: LocalizedStringKey {
+        key("sheet_action_try_again")
+    }
+    
+    public static var serviceMessageWarning: LocalizedStringKey {
+        key("service_message_warning")
+    }
+    
+    public static var sheetClose: LocalizedStringKey {
+        key("sheet_close")
+    }
+    
+    public static func spendingsPeopleInvolved(count: Int) -> LocalizedStringKey {
+        let key = NSLocalizedString("spendings_people_involved", bundle: .module, comment: "")
+        let formatted = String(format: key, count)
+        return LocalizedStringKey(formatted)
+    }
+    
     private static func key(_ key: String) -> LocalizedStringKey {
         LocalizedStringKey(NSLocalizedString(key, bundle: .module, comment: ""))
     }

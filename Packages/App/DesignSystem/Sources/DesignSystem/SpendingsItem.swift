@@ -9,13 +9,13 @@ public struct SpendingsItem: View {
     }
     
     public struct Config {
-        let image: Image
-        let name: LocalizedStringKey
+        let avatar: AvatarView.AvatarId?
+        let name: String
         let style: Style
         let amount: String
         
-        public init(image: Image, name: LocalizedStringKey, style: Style, amount: String) {
-            self.image = image
+        public init(avatar: AvatarView.AvatarId?, name: String, style: Style, amount: String) {
+            self.avatar = avatar
             self.name = name
             self.style = style
             self.amount = amount
@@ -23,7 +23,7 @@ public struct SpendingsItem: View {
     }
     private let config: Config
     
-    init(config: Config) {
+    public init(config: Config) {
         self.config = config
     }
     
@@ -52,11 +52,12 @@ public struct SpendingsItem: View {
     
     private var userPreview: some View {
         VStack(alignment: .leading, spacing: 0) {
-            config.image
-                .frame(width: 38, height: 38)
-                .clipShape(.rect(cornerRadius: 19))
-                .debugBorder()
-                .padding(.top, 12)
+            AvatarView(
+                fitSize: CGSize(width: 38, height: 38),
+                avatar: config.avatar
+            )
+            .clipShape(.rect(cornerRadius: 19))
+            .padding(.top, 12)
             Spacer()
             Text(config.name)
                 .font(.medium(size: 20))
@@ -119,7 +120,7 @@ public struct SpendingsItem: View {
         Spacer()
         SpendingsItem(
             config: SpendingsItem.Config(
-                image: .googleLogo,
+                avatar: nil,
                 name: "berchikk",
                 style: .negative,
                 amount: "23$"

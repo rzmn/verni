@@ -161,7 +161,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ACCOUNT SETTINGS"
+            "value" : "ACCOUNT"
           }
         }
       }
@@ -183,7 +183,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "NOTIFICATION SETTINGS"
+            "value" : "NOTIFICATIONS"
           }
         }
       }
@@ -194,7 +194,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ACTIONS"
+            "value" : "SETTINGS"
           }
         }
       }
@@ -206,6 +206,83 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profile"
+          }
+        }
+      }
+    },
+    "service_message_warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is a service message"
+          }
+        }
+      }
+    },
+    "sheet_action_try_again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TRY AGAIN"
+          }
+        }
+      }
+    },
+    "sheet_close" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLOSE"
+          }
+        }
+      }
+    },
+    "sheet_internal_subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again later"
+          }
+        }
+      }
+    },
+    "sheet_internal_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SOMETHING WENT WRONG"
+          }
+        }
+      }
+    },
+    "sheet_no_connection_subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check your internet connection  and try again"
+          }
+        }
+      }
+    },
+    "sheet_no_connection_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOU ARE OFFLINE"
           }
         }
       }
@@ -243,6 +320,28 @@
         }
       }
     },
+    "spendings_overall_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OVERALL BALANCE"
+          }
+        }
+      }
+    },
+    "spendings_people_involved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d people involved"
+          }
+        }
+      }
+    },
     "spendings_positive_balance" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -250,6 +349,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "you owe"
+          }
+        }
+      }
+    },
+    "spendings_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
           }
         }
       }
