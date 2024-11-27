@@ -14,11 +14,13 @@ actor RefreshTokenManager {
     init(
         api: ApiProtocol,
         persistency: Persistency,
-        authenticationLostSubject: AsyncSubject<Void>
+        authenticationLostSubject: AsyncSubject<Void>,
+        accessToken: String?
     ) {
         self.api = api
         self.persistency = persistency
         self.authenticationLostSubject = authenticationLostSubject
+        self.accessTokenValue = accessToken
     }
 }
 

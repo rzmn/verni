@@ -20,6 +20,8 @@
 		<string>group.com.rzmn.accountydev.app</string>
 	</array>
 	<key>keychain-access-groups</key>
-	<array/>
+	<array>
+		<string>$(AppIdentifierPrefix).com.rzmn.accountydev.app</string>
+	</array>
 </dict>
 </plist>

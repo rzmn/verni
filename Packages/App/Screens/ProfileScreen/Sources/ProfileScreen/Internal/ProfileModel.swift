@@ -12,8 +12,13 @@ actor ProfileModel {
     private let store: Store<ProfileState, ProfileAction>
 
     init(di: AuthenticatedDomainLayerSession, haptic: HapticManager) async {
+        let profile = await di.profileOfflineRepository.getProfile()
         store = await Store(
-            state: Self.initialState,
+            state: modify(Self.initialState) {
+                if let profile {
+                    $0.profile = .loaded(profile)
+                }
+            },
             reducer: Self.reducer
         )
     }

@@ -23,11 +23,25 @@ enum LaunchedState: Equatable, Sendable {
 }
 
 struct AuthenticatedState: Equatable, Sendable {
+    enum Tab {
+        case spendings
+        case profile
+    }
     @EquatableByAddress var session: AuthenticatedPresentationLayerSession
+    var tabs: [Tab]
+    var tab: Tab
 }
 
 struct AnonymousState: Equatable, Sendable {
+    struct AuthState: Equatable {
+        var loggingIn: Bool
+    }
+    enum Tab: Equatable {
+        case auth(AuthState)
+    }
     @EquatableByAddress var session: AnonymousPresentationLayerSession
+    var tabs: [Tab]
+    var tab: Tab
 }
 
 enum AppState: Equatable, Sendable {

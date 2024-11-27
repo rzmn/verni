@@ -10,4 +10,6 @@ enum AppAction: Sendable {
     case logout(AnonymousPresentationLayerSession)
     case launched(LaunchSession)
     case onAuthorized(AuthenticatedPresentationLayerSession)
+    
+    case loggingIn(Bool)
 }

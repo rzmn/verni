@@ -1,6 +1,8 @@
 import SwiftUI
 import AppBase
+import Domain
 internal import DesignSystem
+internal import Base
 
 public struct ProfileView: View {
     @ObservedObject var store: Store<ProfileState, ProfileAction>
@@ -29,7 +31,7 @@ public struct ProfileView: View {
                         icon: .logout
                     )
                 ) {
-                    store.dispatch(.onNotificationsTap)
+                    store.dispatch(.onLogoutTap)
                 }
             }
             .frame(height: 54)
@@ -58,6 +60,15 @@ public struct ProfileView: View {
                 }
                 .overlay {
                     HStack {
+                        if let profile = store.state.profile.value {
+                            VStack {
+                                Spacer()
+                                Text(profile.user.displayName)
+                                    .font(.medium(size: 28))
+                                    .foregroundStyle(colors.text.primary.staticLight)
+                                    .padding([.leading, .bottom], 16)
+                            }
+                        }
                         Spacer()
                         VStack {
                             Spacer()
@@ -70,8 +81,8 @@ public struct ProfileView: View {
                                 store.dispatch(.onFlipAvatarTap)
                             }
                         }
+                        .padding([.bottom, .trailing], 12)
                     }
-                    .padding([.bottom, .trailing], 12)
                 }
                 .background(
                     Rectangle()
@@ -127,6 +138,12 @@ public struct ProfileView: View {
             Spacer()
         }
         .background(colors.background.primary.default)
+        .onAppear {
+            guard case .initial = store.state.profile else {
+                return
+            }
+            store.dispatch(.onRefreshProfile)
+        }
     }
 
 }
@@ -134,7 +151,20 @@ public struct ProfileView: View {
 #Preview {
     ProfileView(
         store: Store(
-            state: ProfileModel.initialState,
+            state: modify(ProfileModel.initialState) {
+                $0.profile = .loaded(
+                    Profile(
+                        user: User(
+                            id: "",
+                            status: .currentUser,
+                            displayName: "display name",
+                            avatar: nil
+                        ),
+                        email: "email@verni.co",
+                        isEmailVerified: false
+                    )
+                )
+            },
             reducer: ProfileModel.reducer
         )
     )

@@ -8,4 +8,6 @@ enum ProfileAction {
     case onLogoutTap
     case onNotificationsTap
     case onLogoutConfirmTap
+    
+    case onRefreshProfile
 }

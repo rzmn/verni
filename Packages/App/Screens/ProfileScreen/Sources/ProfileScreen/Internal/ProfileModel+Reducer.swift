@@ -18,6 +18,8 @@ extension ProfileModel {
                 return state
             case .onLogoutConfirmTap:
                 return state
+            case .onRefreshProfile:
+                return state
             }
         }
     }

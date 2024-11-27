@@ -1,7 +1,10 @@
 import Foundation
+import Domain
 internal import DesignSystem
 
 struct ProfileState: Equatable, Sendable {
-    var email: String
-    var password: String
+    enum ProfileLoadingFailureReason: Equatable, Sendable {
+        case noInternet
+    }
+    var profile: Loadable<Profile, ProfileLoadingFailureReason>
 }

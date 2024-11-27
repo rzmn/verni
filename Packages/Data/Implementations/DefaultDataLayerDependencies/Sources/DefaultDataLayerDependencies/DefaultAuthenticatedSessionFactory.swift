@@ -42,7 +42,7 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
                 )
             )
         }
-        return await buildSession(persistency: persistency)
+        return await buildSession(persistency: persistency, accessToken: nil)
     }
 
     func createAuthorizedSession(
@@ -53,17 +53,19 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
             refreshToken: token.refreshToken
         )
         await sessionHost.sessionStarted(host: token.id)
-        return await buildSession(persistency: persistency)
+        return await buildSession(persistency: persistency, accessToken: token.accessToken)
     }
 
     private func buildSession(
-        persistency: Persistency
+        persistency: Persistency,
+        accessToken: String?
     ) async -> AuthenticatedDataLayerSession {
         let authenticationLostSubject = AsyncSubject<Void>(taskFactory: taskFactory)
         let tokenRefresher = RefreshTokenManager(
             api: api,
             persistency: persistency,
-            authenticationLostSubject: authenticationLostSubject
+            authenticationLostSubject: authenticationLostSubject,
+            accessToken: accessToken
         )
         let apiService = apiServiceFactory.create(tokenRefresher: tokenRefresher)
         let apiFactory = DefaultApiFactory(

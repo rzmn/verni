@@ -69,6 +69,7 @@ internal import Base
             let session = try await authUseCase.login(
                 credentials: credentials
             )
+            _ = try? await session.profileRepository.refreshProfile()
             Task {
                 await saveCredentialsUseCase.save(email: credentials.email, password: credentials.password)
             }

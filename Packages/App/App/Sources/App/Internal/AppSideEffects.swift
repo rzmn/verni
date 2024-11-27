@@ -23,6 +23,7 @@ extension AppSideEffects: ActionHandler {
     }
 
     func handle(_ action: AppAction) {
+        print("[\(Self.self)] got \(action)")
         switch action {
         case .launch:
             launch()
@@ -32,6 +33,8 @@ extension AppSideEffects: ActionHandler {
             onAuthorized()
         case .logout:
             logout()
+        case .loggingIn:
+            loggingIn()
         }
     }
 
@@ -51,6 +54,10 @@ extension AppSideEffects: ActionHandler {
     }
     
     private func logout() {
+        // stub
+    }
+    
+    private func loggingIn() {
         // stub
     }
 }
