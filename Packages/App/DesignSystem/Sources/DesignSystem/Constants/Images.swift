@@ -84,5 +84,21 @@ extension Image {
     public static var close: Image {
         Image("close", bundle: .module)
     }
+    
+    public static var homeFill: Image {
+        Image("home-fill", bundle: .module)
+    }
+    
+    public static var homeBorder: Image {
+        Image("home-border", bundle: .module)
+    }
+    
+    public static var userCircleBorder: Image {
+        Image("user-circle-border", bundle: .module)
+    }
+    
+    public static var userFill: Image {
+        Image("user-fill", bundle: .module)
+    }
 }
 

@@ -8,11 +8,11 @@ import SwiftUI
 internal import Base
 internal import DesignSystem
 
-actor DebugMenuModel {
+@MainActor final class DebugMenuModel {
     private let store: Store<DebugMenuState, DebugMenuAction>
 
-    init(di: AnonymousDomainLayerSession, haptic: HapticManager) async {
-        store = await Store(
+    init() {
+        store = Store(
             state: Self.initialState,
             reducer: Self.reducer
         )

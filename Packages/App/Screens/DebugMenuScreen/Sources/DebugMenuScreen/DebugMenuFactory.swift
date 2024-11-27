@@ -1,20 +1,15 @@
 import AppBase
 import DI
 
-public protocol DebugMenuFactory: Sendable {
-    func create() async -> any ScreenProvider<DebugMenuEvent, DebugMenuView>
+@MainActor public protocol DebugMenuFactory: Sendable {
+    func create() -> any ScreenProvider<DebugMenuEvent, DebugMenuView>
 }
 
-public final class DefaultDebugMenuFactory: DebugMenuFactory {
-    private let di: AnonymousDomainLayerSession
-    private let haptic: HapticManager
+@MainActor public final class DefaultDebugMenuFactory: DebugMenuFactory {
 
-    public init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
-        self.di = di
-        self.haptic = haptic
-    }
+    public init() {}
 
-    public func create() async -> any ScreenProvider<DebugMenuEvent, DebugMenuView> {
-        await DebugMenuModel(di: di, haptic: haptic)
+    public func create() -> any ScreenProvider<DebugMenuEvent, DebugMenuView> {
+        DebugMenuModel()
     }
 }

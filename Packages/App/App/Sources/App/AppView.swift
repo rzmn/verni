@@ -1,21 +1,43 @@
 import SwiftUI
 import DI
 import AppBase
-internal import AuthWelcomeScreen
+internal import DebugMenuScreen
 internal import DesignSystem
 
 public struct AppView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @ObservedObject private var store: Store<AppState, AppAction>
+    @State private var showingDebugMenu = false
 
     init(store: Store<AppState, AppAction>) {
         self.store = store
     }
 
     public var body: some View {
-        content
+        contentWithDebugMenu
             .environment(ColorPalette(scheme: colorScheme))
             .environment(PaddingsPalette.default)
+    }
+    
+    @ViewBuilder private var contentWithDebugMenu: some View {
+        content
+            .onShake {
+                withAnimation {
+                    showingDebugMenu = true
+                }
+            }
+            .fullScreenCover(isPresented: $showingDebugMenu) {
+                DefaultDebugMenuFactory()
+                    .create()
+                    .instantiate { event in
+                        switch event {
+                        case .dismiss:
+                            withAnimation {
+                                showingDebugMenu = false
+                            }
+                        }
+                    }
+            }
     }
     
     @ViewBuilder private var content: some View {
