@@ -47,6 +47,8 @@ public struct DesignSystemView: View {
             .fontsSection
         case .haptic:
             .hapticSection
+        case .popups:
+            .popupsSection
         }
     }
 }

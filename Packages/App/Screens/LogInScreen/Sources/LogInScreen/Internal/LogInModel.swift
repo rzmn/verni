@@ -38,6 +38,8 @@ actor LogInModel {
                             switch action {
                             case .onTapBack:
                                 handler(.dismiss)
+                            case .loggedIn(let session):
+                                handler(.logIn(session))
                             default:
                                 break
                             }

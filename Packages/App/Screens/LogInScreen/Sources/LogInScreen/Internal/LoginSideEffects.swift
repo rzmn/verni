@@ -9,6 +9,7 @@ internal import Base
     private let authUseCase: any AuthUseCase<AuthenticatedDomainLayerSession>
     private let emailValidationUseCase: EmailValidationUseCase
     private let passwordValidationUseCase: PasswordValidationUseCase
+    private let saveCredentialsUseCase: SaveCredendialsUseCase
     
     var id: String {
         "\(LoginSideEffects.self)"
@@ -22,6 +23,7 @@ internal import Base
         self.authUseCase = di.authUseCase()
         self.emailValidationUseCase = di.appCommon.localEmailValidationUseCase
         self.passwordValidationUseCase = di.appCommon.localPasswordValidationUseCase
+        self.saveCredentialsUseCase = di.appCommon.saveCredentialsUseCase
     }
     
     func handle(_ action: LogInAction) {
@@ -64,13 +66,13 @@ internal import Base
     
     private func doLogIn(credentials: Credentials) async {
         do {
-            store.dispatch(
-                .loggedIn(
-                    try await authUseCase.login(
-                        credentials: credentials
-                    )
-                )
+            let session = try await authUseCase.login(
+                credentials: credentials
             )
+            Task {
+                await saveCredentialsUseCase.save(email: credentials.email, password: credentials.password)
+            }
+            store.dispatch(.loggedIn(session))
         } catch {
             switch error {
             case .noConnection:

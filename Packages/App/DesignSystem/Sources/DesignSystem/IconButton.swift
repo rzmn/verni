@@ -48,7 +48,7 @@ public struct IconButton: View {
         case .primary:
             palette.background.primary.default
         case .secondary:
-            palette.background.secondary.alternative
+            palette.background.secondary.default
         }
     }
     
@@ -57,7 +57,7 @@ public struct IconButton: View {
         case .primary:
             palette.icon.primary.default
         case .secondary:
-            palette.icon.primary.staticLight
+            palette.icon.primary.default
         }
     }
 }

@@ -31,6 +31,11 @@ public struct AppView: View {
                             withAnimation {
                                 showingLoginScreen = false
                             }
+                        case .logIn(let session):
+                            Task { @MainActor in
+                                let presentationSession = await AuthenticatedPresentationLayerSession(di: session, fallback: state.session)
+                                store.dispatch(.onAuthorized(presentationSession))
+                            }
                         default:
                             break
                         }
@@ -82,8 +87,13 @@ public struct AppView: View {
                 }
         case .launched(let state):
             switch state {
-            case .authenticated:
-                Text("launched...")
+            case .authenticated(let state):
+                state.session.profileScreen.instantiate { event in
+                    switch event {
+                    case .logout:
+                        store.dispatch(.logout(state.session.fallback))
+                    }
+                }
             case .anonymous(let state):
                 state.session.authWelcomeScreen.instantiate { event in
                     switch event {

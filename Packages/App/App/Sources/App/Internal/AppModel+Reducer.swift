@@ -15,6 +15,8 @@ extension AppModel {
                 }
             case .onAuthorized(let session):
                 return .launched(.authenticated(AuthenticatedState(session: session)))
+            case .logout(let session):
+                return .launched(.anonymous(AnonymousState(session: session)))
             }
         }
     }

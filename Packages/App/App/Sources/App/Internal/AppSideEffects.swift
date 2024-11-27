@@ -30,6 +30,8 @@ extension AppSideEffects: ActionHandler {
             launched()
         case .onAuthorized:
             onAuthorized()
+        case .logout:
+            logout()
         }
     }
 
@@ -45,6 +47,10 @@ extension AppSideEffects: ActionHandler {
     }
 
     private func onAuthorized() {
+        // stub
+    }
+    
+    private func logout() {
         // stub
     }
 }

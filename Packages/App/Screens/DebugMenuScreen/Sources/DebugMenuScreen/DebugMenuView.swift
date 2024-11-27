@@ -39,6 +39,8 @@ public struct DebugMenuView: View {
                         FontsView()
                     case .haptic:
                         HapticView()
+                    case .popups:
+                        PopupsView()
                     }
                 }
         }

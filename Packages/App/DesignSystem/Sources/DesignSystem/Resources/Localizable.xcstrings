@@ -155,6 +155,17 @@
         }
       }
     },
+    "popups_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Popups"
+          }
+        }
+      }
+    },
     "profile_action_account_settings" : {
       "extractionState" : "manual",
       "localizations" : {

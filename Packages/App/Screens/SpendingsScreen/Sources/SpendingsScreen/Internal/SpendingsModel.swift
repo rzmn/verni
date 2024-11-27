@@ -22,8 +22,8 @@ actor SpendingsModel {
 @MainActor extension SpendingsModel: ScreenProvider {
     func instantiate(
         handler: @escaping @MainActor (SpendingsEvent) -> Void
-    ) -> ProfileView {
-        ProfileView(
+    ) -> SpendingsView {
+        SpendingsView(
             store: modify(store) { store in
                 store.append(
                     handler: AnyActionHandler(

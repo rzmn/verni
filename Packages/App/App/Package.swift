@@ -19,6 +19,8 @@ let package = Package(
         .package(path: "../AppBase"),
         .package(path: "../Screens/AuthWelcomeScreen"),
         .package(path: "../Screens/DebugMenuScreen"),
+        .package(path: "../Screens/SpendingsScreen"),
+        .package(path: "../Screens/ProfileScreen"),
         .package(path: "../Screens/LogInScreen"),
         .package(path: "../../DI/DI"),
         .package(path: "../../Domain/Domain"),
@@ -37,7 +39,9 @@ let package = Package(
                 "AppBase",
                 "AuthWelcomeScreen",
                 "DebugMenuScreen",
-                "LogInScreen"
+                "LogInScreen",
+                "SpendingsScreen",
+                "ProfileScreen"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

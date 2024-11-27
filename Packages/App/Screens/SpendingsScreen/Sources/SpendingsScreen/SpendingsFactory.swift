@@ -2,7 +2,7 @@ import AppBase
 import DI
 
 public protocol SpendingsFactory: Sendable {
-    func create() async -> any ScreenProvider<SpendingsEvent, ProfileView>
+    func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView>
 }
 
 public final class DefaultSpendingsFactory: SpendingsFactory {
@@ -14,7 +14,7 @@ public final class DefaultSpendingsFactory: SpendingsFactory {
         self.haptic = haptic
     }
 
-    public func create() async -> any ScreenProvider<SpendingsEvent, ProfileView> {
+    public func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView> {
         await SpendingsModel(di: di, haptic: haptic)
     }
 }

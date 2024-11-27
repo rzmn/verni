@@ -25,6 +25,10 @@ extension LocalizedStringKey {
         key("haptic_section")
     }
     
+    public static var popupsSection: LocalizedStringKey {
+        key("popups_section")
+    }
+    
     public static var textFieldsSection: LocalizedStringKey {
         key("text_fields_section")
     }

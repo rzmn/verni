@@ -3,7 +3,7 @@ import AppBase
 import Domain
 internal import DesignSystem
 
-public struct ProfileView: View {
+public struct SpendingsView: View {
     @ObservedObject var store: Store<SpendingsState, SpendingsAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
@@ -35,7 +35,7 @@ public struct ProfileView: View {
             ForEach(items) { (item: SpendingsState.Item) in
                 SpendingsItem(
                     config: SpendingsItem.Config(
-                        avatar: item.user.avatar,
+                        avatar: item.user.avatar?.id,
                         name: item.user.displayName,
                         style: .negative,
                         amount: ""
@@ -77,7 +77,7 @@ public struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(
+    SpendingsView(
         store: Store(
             state: SpendingsState(
                 previews: .loaded(

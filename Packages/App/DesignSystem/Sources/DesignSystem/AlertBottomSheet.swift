@@ -130,7 +130,14 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
 // MARK: - View Modifier
 
 private struct AlertBottomSheetModifier: ViewModifier {
-    @Binding var preset: AlertBottomSheetPreset?
+    @Binding private var preset: AlertBottomSheetPreset?
+    @State private var presentToBeKeptOnDismissalTransition: AlertBottomSheetPreset?
+    @State private var appeared: Bool = false
+    @State private var shown: Bool = false
+    @State private var offset: CGFloat = 0
+    @State private var dragOffset: CGFloat = 0
+    @State private var dragOffsetTranslationTrust: CGFloat = 0
+    @State private var contentHeight: CGFloat = 0
     @Environment(ColorPalette.self) var colors
 
     init(preset: Binding<AlertBottomSheetPreset?>) {
@@ -140,27 +147,121 @@ private struct AlertBottomSheetModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay {
-                if preset != nil {
+                if shown {
                     Color.black
                         .opacity(0.36)
                         .transition(.opacity)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            withAnimation {
-                                preset = nil
-                            }
+                            appeared = false
                         }
                 }
             }
             .overlay {
-                VStack {
-                    Spacer()
-                    if let preset {
-                        preset.view(colors: colors)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                GeometryReader { geometry in
+                    VStack {
+                        if let preset {
+                            self.content(geometry: geometry, preset: preset)
+                        } else if let preset = presentToBeKeptOnDismissalTransition {
+                            self.content(geometry: geometry, preset: preset)
+                                .onAppear {
+                                    appeared = false
+                                }
+                        }
+                        Spacer()
+                    }
+                    .onChange(of: contentHeight) { _, _ in
+                        performTransitionAnimationWhenNeeded()
+                    }
+                    .onChange(of: appeared) { _, _ in
+                        performTransitionAnimationWhenNeeded()
+                    }
+                    .ignoresSafeArea()
+                }
+            }
+    }
+    
+    @ViewBuilder private func content(geometry: GeometryProxy, preset: AlertBottomSheetPreset) -> some View {
+        let overallHeight = [
+            geometry.safeAreaInsets.bottom,
+            geometry.size.height,
+            geometry.safeAreaInsets.top,
+            offset,
+            dragOffset
+        ].reduce(0, +)
+        preset.view(colors: colors)
+            .overlay {
+                GeometryReader { contentGeometry in
+                    HStack {}
+                        .onAppear {
+                            presentToBeKeptOnDismissalTransition = preset
+                            contentHeight = contentGeometry.size.height + geometry.safeAreaInsets.bottom
+                        }
+                }
+            }
+            .offset(y: overallHeight)
+            .gesture(dragGesture)
+            .onAppear {
+                appeared = true
+            }
+    }
+    
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { gesture in
+                dragOffsetTranslationTrust = min(1, dragOffsetTranslationTrust + 0.1)
+                let dy = gesture.translation.height * dragOffsetTranslationTrust
+                if dy > 0 {
+                    dragOffset = dy
+                } else {
+                    dragOffset = -sqrt(abs(dy))
+                }
+            }
+            .onEnded { _ in
+                if dragOffset > 100 {
+                    appeared = false
+                } else {
+                    withAnimation(animation) {
+                        dragOffset = 0
+                        dragOffsetTranslationTrust = 0
                     }
                 }
             }
+    }
+    
+    private func performTransitionAnimationWhenNeeded() {
+        if shown {
+            if !appeared && contentHeight != 0 {
+                performDismissTransition()
+            }
+        } else {
+            if appeared && contentHeight != 0 {
+                performAppearTransition()
+            }
+        }
+    }
+    
+    private func performAppearTransition() {
+        withAnimation(animation) {
+            shown = true
+            offset = -contentHeight
+        }
+    }
+    
+    private func performDismissTransition() {
+        withAnimation(animation) {
+            shown = false
+            offset = 0
+        } completion: {
+            preset = nil
+            presentToBeKeptOnDismissalTransition = nil
+            dragOffset = 0
+            dragOffsetTranslationTrust = 0
+        }
+    }
+    
+    private var animation: Animation {
+        .snappy.speed(1.5)
     }
 }
 

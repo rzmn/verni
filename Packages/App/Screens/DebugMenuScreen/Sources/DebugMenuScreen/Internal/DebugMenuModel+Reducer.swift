@@ -34,6 +34,10 @@ extension DebugMenuModel {
                     return modify(state) { state in
                         state.navigation.append(.haptic)
                     }
+                case .popups:
+                    return modify(state) { state in
+                        state.navigation.append(.popups)
+                    }
                 }
             case .updateNavigationStack(let stack):
                 return modify(state) { state in

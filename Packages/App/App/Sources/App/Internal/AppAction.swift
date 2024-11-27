@@ -7,6 +7,7 @@ enum LaunchSession {
 
 enum AppAction: Sendable {
     case launch
+    case logout(AnonymousPresentationLayerSession)
     case launched(LaunchSession)
     case onAuthorized(AuthenticatedPresentationLayerSession)
 }

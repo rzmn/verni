@@ -8,6 +8,7 @@ enum StackMember {
     case fonts
     case textFields
     case haptic
+    case popups
 }
 
 struct DesignSystemState: Equatable, Sendable {
@@ -17,6 +18,7 @@ struct DesignSystemState: Equatable, Sendable {
         case colors
         case fonts
         case haptic
+        case popups
         
         var id: Int {
             rawValue
