@@ -43,7 +43,6 @@ public struct AvatarView: View {
     
     public var body: some View {
         content
-            .frame(width: fitSize.width, height: fitSize.height)
             .onDisappear {
                 task?.cancel()
                 task = nil
@@ -53,7 +52,13 @@ public struct AvatarView: View {
     @ViewBuilder private var content: some View {
         if let imageData {
             if let image = UIImage(data: imageData) {
-                Image(uiImage: image)
+                GeometryReader { geometry in
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width)
+                        .clipped()
+                }
             } else {
                 failedToLoadStub
             }
@@ -81,13 +86,16 @@ public struct AvatarView: View {
                       
     @ViewBuilder var noAvatarStub: some View {
         Image(uiImage: "🥷".image(fitSize: self.fitSize) ?? UIImage())
+            .frame(width: fitSize.width, height: fitSize.height)
     }
     
     @ViewBuilder var failedToLoadStub: some View {
         Image(uiImage: "❌".image(fitSize: self.fitSize) ?? UIImage())
+            .frame(width: fitSize.width, height: fitSize.height)
     }
     
     @ViewBuilder var loadingStub: some View {
         Image(uiImage: "⌛".image(fitSize: self.fitSize) ?? UIImage())
+            .frame(width: fitSize.width, height: fitSize.height)
     }
 }

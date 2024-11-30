@@ -1,5 +1,9 @@
 extension ProfileModel {
     static var initialState: ProfileState {
-        ProfileState(profile: .initial)
+        ProfileState(
+            profile: .initial,
+            avatarCardFlipCount: 0,
+            qrHintVisible: false
+        )
     }
 }

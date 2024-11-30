@@ -23,8 +23,10 @@ actor AppModel {
         }
     }
     private let store: Store<AppState, AppAction>
+    private let di: AnonymousDomainLayerSession
 
     @MainActor init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
+        self.di = di
         store = Store(
             state: AppModel.initialState,
             reducer: AppModel.reducer

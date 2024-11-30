@@ -138,6 +138,14 @@ extension LocalizedStringKey {
         key("sheet_close")
     }
     
+    public static var qrHintTitle: LocalizedStringKey {
+        key("qr_hint_title")
+    }
+    
+    public static var qrHintSubtitle: LocalizedStringKey {
+        key("qr_hint_subtitle")
+    }
+    
     public static func spendingsPeopleInvolved(count: Int) -> LocalizedStringKey {
         let key = NSLocalizedString("spendings_people_involved", bundle: .module, comment: "")
         let formatted = String(format: key, count)

@@ -100,5 +100,9 @@ extension Image {
     public static var userFill: Image {
         Image("user-fill", bundle: .module)
     }
+    
+    public static var question: Image {
+        Image("question", bundle: .module)
+    }
 }
 

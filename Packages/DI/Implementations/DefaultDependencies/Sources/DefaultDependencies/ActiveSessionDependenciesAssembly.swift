@@ -138,7 +138,10 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     }
 
     func qrInviteUseCase() -> QRInviteUseCase {
-        DefaultQRInviteUseCase()
+        DefaultQRInviteUseCase(
+            logger: .shared.with(prefix: "[qr] "),
+            urlById: { AppUrl.users(.show(id: $0)).url }
+        )
     }
 
     func receivingPushUseCase() -> ReceivingPushUseCase {

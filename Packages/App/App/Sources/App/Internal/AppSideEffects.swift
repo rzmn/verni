@@ -35,13 +35,38 @@ extension AppSideEffects: ActionHandler {
             logout()
         case .loggingIn:
             loggingIn()
+        case .selectTabAnonymous, .selectTabAuthenticated, .addExpense, .unauthorized:
+            break
         }
     }
 
     private func launch() {
         Task {
-            let session = await AnonymousPresentationLayerSession(di: di, haptic: haptic)
-            store.dispatch(.launched(.anonymous(session)))
+            await doLaunch()
+        }
+    }
+    
+    private func doLaunch() async {
+        let session = await AnonymousPresentationLayerSession(di: di, haptic: haptic)
+        do {
+            store.dispatch(
+                .launched(
+                    .authenticated(
+                        await AuthenticatedPresentationLayerSession(
+                            di: try await di.authUseCase().awake(),
+                            fallback: session
+                        )
+                    )
+                )
+            )
+        } catch {
+            switch error {
+            case .hasNoSession:
+                store.dispatch(.launched(.anonymous(session)))
+            case .internalError(let error):
+                assertionFailure("log me \(error)")
+                store.dispatch(.launched(.anonymous(session)))
+            }
         }
     }
 

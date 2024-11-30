@@ -1,4 +1,3 @@
-import Domain
 import Foundation
 
 public enum AppUrl: Sendable {
@@ -7,16 +6,16 @@ public enum AppUrl: Sendable {
     }
 
     public enum Users: Sendable {
-        case show(User.Identifier)
+        case show(id: String)
     }
     case users(Users)
 
-    public var url: URL? {
+    public var url: String {
         switch self {
         case .users(let action):
             switch action {
             case .show(let id):
-                return URL(string: "\(scheme)://u/\(id)")
+                return "\(scheme)://u/\(id)"
             }
         }
     }
@@ -34,7 +33,7 @@ public enum AppUrl: Sendable {
         let components = url.pathComponents
         if host == "u", components.count == 2 {
             let uid = components[1]
-            self = .users(.show(uid))
+            self = .users(.show(id: uid))
             return
         }
         return nil

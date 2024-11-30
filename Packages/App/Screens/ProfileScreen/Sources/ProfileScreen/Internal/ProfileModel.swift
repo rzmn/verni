@@ -21,6 +21,15 @@ actor ProfileModel {
             },
             reducer: Self.reducer
         )
+        await store.append(
+            handler: ProfileSideEffects(
+                store: store,
+                repository: di.profileRepository,
+                qrUseCase: di.qrInviteUseCase(),
+                userId: di.userId
+            ),
+            keepingUnique: true
+        )
     }
 }
 
@@ -37,6 +46,8 @@ actor ProfileModel {
                             switch action {
                             case .onLogoutConfirmTap:
                                 handler(.logout)
+                            case .unauthorized(let reason):
+                                handler(.unauthorized(reason: reason))
                             default:
                                 break
                             }

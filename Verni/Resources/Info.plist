@@ -16,7 +16,7 @@
 			<string>com.rzmn.accounty</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>rzmnse</string>
+				<string>verni</string>
 			</array>
 		</dict>
 	</array>

@@ -64,6 +64,7 @@ private struct AlertBottomSheet<Content: View>: View {
 public enum AlertBottomSheetPreset: Sendable, Equatable {
     case noConnection(onRetry: @MainActor @Sendable () -> Void, onClose: @MainActor @Sendable () -> Void)
     case service(String, onClose: @MainActor @Sendable () -> Void)
+    case blocker(title: String, subtitle: String, actionTitle: String, action: @MainActor @Sendable () -> Void)
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.kind == rhs.kind
@@ -75,6 +76,17 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
             "noConnection"
         case .service(let description, _):
             "service_\(description)"
+        case .blocker(let title, _, _, _):
+            "blocker_\(title)"
+        }
+    }
+    
+    var canClose: Bool {
+        switch self {
+        case .noConnection, .service:
+            true
+        case .blocker:
+            false
         }
     }
     
@@ -123,6 +135,25 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
                 .padding([.leading, .trailing, .bottom], 16)
                 .padding(.top, 18)
             }
+        case .blocker(let title, let subtitle, let actionTitle, let action):
+            AlertBottomSheet(
+                config: AlertBottomSheet.Config(
+                    image: nil,
+                    title: LocalizedStringKey(title),
+                    subtitle: LocalizedStringKey(subtitle)
+                ),
+                onClose: nil
+            ) {
+                Button(
+                    config: Button.Config(
+                        style: .secondary,
+                        text: LocalizedStringKey(actionTitle)
+                    ),
+                    action: action
+                )
+                .padding([.leading, .trailing, .bottom], 16)
+                .padding(.top, 18)
+            }
         }
     }
 }
@@ -153,7 +184,9 @@ private struct AlertBottomSheetModifier: ViewModifier {
                         .transition(.opacity)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            appeared = false
+                            if let preset, preset.canClose {
+                                appeared = false
+                            }
                         }
                 }
             }
@@ -276,7 +309,7 @@ extension View {
 #Preview {
     Color.gray
         .ignoresSafeArea()
-        .bottomSheet(preset: .constant(.noConnection(onRetry: {}, onClose: {})))
+        .bottomSheet(preset: .constant(.blocker(title: "title", subtitle: "subtitle", actionTitle: "action", action: {})))
         .environment(ColorPalette.light)
         .loadCustomFonts()
 }

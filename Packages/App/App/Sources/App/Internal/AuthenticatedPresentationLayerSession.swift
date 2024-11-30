@@ -1,5 +1,6 @@
 import DI
 import AppBase
+import Domain
 internal import ProfileScreen
 internal import SpendingsScreen
 

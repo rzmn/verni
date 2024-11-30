@@ -23,13 +23,18 @@ enum LaunchedState: Equatable, Sendable {
 }
 
 struct AuthenticatedState: Equatable, Sendable {
-    enum Tab {
+    enum Tab: Equatable {
+        case item(TabItem)
+        case addExpense
+    }
+    enum TabItem: Equatable {
         case spendings
         case profile
     }
     @EquatableByAddress var session: AuthenticatedPresentationLayerSession
     var tabs: [Tab]
-    var tab: Tab
+    var tab: TabItem
+    var unauthenticatedFailure: String?
 }
 
 struct AnonymousState: Equatable, Sendable {

@@ -1,10 +1,12 @@
 import SwiftUI
 
 public struct BottomBarTab: Equatable {
-    let icon: Image
-    let selectedIcon: Image
+    public let id: String
+    public let icon: Image
+    public let selectedIcon: Image
     
-    public init(icon: Image, selectedIcon: Image) {
+    public init(id: String, icon: Image, selectedIcon: Image) {
+        self.id = id
         self.icon = icon
         self.selectedIcon = selectedIcon
     }
@@ -23,6 +25,7 @@ public struct BottomBarConfig {
     }
 }
 
+private let barContentHeight: CGFloat = 107
 struct BottomBar: View {
     @Environment(ColorPalette.self) var colors
     private let items: [AnyIdentifiable<BottomBarItem>]
@@ -38,32 +41,29 @@ struct BottomBar: View {
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            VStack {
-                Spacer()
-                VStack {
-                    HStack {
-                        ForEach(items) { item in
-                            itemView(item.value)
-                        }
-                    }
-                    .frame(height: 107)
-                    Spacer()
-                        .frame(height: geometry.safeAreaInsets.bottom)
-                }
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color.clear,
-                            colors.background.primary.default
-                        ],
-                        startPoint: UnitPoint(x: 0.5, y: 0),
-                        endPoint: UnitPoint(x: 0.5, y: 1)
-                    )
-                )
+        HStack {
+            ForEach(items) { item in
+                itemView(item.value)
             }
         }
-        .ignoresSafeArea(edges: .bottom)
+        .frame(height: barContentHeight)
+        .background(
+            LinearGradient(
+                stops: [
+                    Gradient.Stop(
+                        color: .clear,
+                        location: 0
+                    ),
+                    Gradient.Stop(
+                        color: colors.background.primary.default,
+                        location: 0.5
+                    )
+                ],
+                startPoint: UnitPoint(x: 0.5, y: 0),
+                endPoint: UnitPoint(x: 0.5, y: 1)
+            )
+            .ignoresSafeArea(edges: .bottom)
+        )
     }
     
     @ViewBuilder private func itemView(_ item: BottomBarItem) -> some View {
@@ -74,6 +74,9 @@ struct BottomBar: View {
                 (tab == self.tab ? tab.selectedIcon : tab.icon)
                     .foregroundStyle(colors.icon.primary.default)
                     .frame(width: itemSize, height: itemSize)
+                    .onTapGesture {
+                        self.tab = tab
+                    }
             case .action(let image, _):
                 image
                     .foregroundStyle(colors.icon.primary.default)
@@ -100,7 +103,8 @@ struct BottomBarModifier: ViewModifier {
     }
     
     func body(content: Content) -> some View {
-        content.overlay {
+        VStack(spacing: -barContentHeight * 0.7) {
+            content
             BottomBar(config: config, tab: $tab)
         }
     }
@@ -113,18 +117,16 @@ extension View {
 }
 
 #Preview {
-    VStack {
-        Spacer()
-        BottomBar(
+    Color.gray
+        .bottomBar(
             config: BottomBarConfig(
                 items: [
-                    .tab(BottomBarTab(icon: .homeBorder, selectedIcon: .homeFill)),
+                    .tab(BottomBarTab(id: "home", icon: .homeBorder, selectedIcon: .homeFill)),
                     .action(.plus, {}),
-                    .tab(BottomBarTab(icon: .userCircleBorder, selectedIcon: .userFill)),
+                    .tab(BottomBarTab(id: "user", icon: .userCircleBorder, selectedIcon: .userFill)),
                 ]
             ),
-            tab: .constant(BottomBarTab(icon: .homeBorder, selectedIcon: .homeFill))
+            tab: .constant(BottomBarTab(id: "home", icon: .homeBorder, selectedIcon: .homeFill))
         )
-    }
-    .environment(ColorPalette.dark)
+        .environment(ColorPalette.dark)
 }

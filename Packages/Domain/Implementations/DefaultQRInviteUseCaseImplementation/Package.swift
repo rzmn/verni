@@ -25,6 +25,9 @@ let package = Package(
                 .product(name: "QRCode", package: "qrcode"),
                 "Domain"
             ],
+            resources: [
+                .process("Resources")
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
                 .unsafeFlags([
