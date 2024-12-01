@@ -1,4 +1,5 @@
 import Domain
+import SwiftUICore
 import AppBase
 import DI
 internal import DesignSystem
@@ -95,7 +96,7 @@ internal import Base
             default:
                 store.dispatch(
                     .onUpdateBottomSheet(
-                        .service("log in failed \(error)", onClose: { [weak self] in
+                        .hint(title: "[debug] login failed", subtitle: "reason: \(error)", actionTitle: .sheetClose, action: { [weak self] in
                             guard let self else { return }
                             store.dispatch(.onUpdateBottomSheet(nil))
                         })

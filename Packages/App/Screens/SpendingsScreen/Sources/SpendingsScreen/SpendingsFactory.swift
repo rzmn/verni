@@ -7,14 +7,12 @@ public protocol SpendingsFactory: Sendable {
 
 public final class DefaultSpendingsFactory: SpendingsFactory {
     private let di: AuthenticatedDomainLayerSession
-    private let haptic: HapticManager
 
-    public init(di: AuthenticatedDomainLayerSession, haptic: HapticManager) {
+    public init(di: AuthenticatedDomainLayerSession) {
         self.di = di
-        self.haptic = haptic
     }
 
     public func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView> {
-        await SpendingsModel(di: di, haptic: haptic)
+        await SpendingsModel(di: di)
     }
 }

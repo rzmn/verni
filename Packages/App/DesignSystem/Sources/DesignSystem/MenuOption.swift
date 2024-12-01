@@ -32,7 +32,7 @@ public struct MenuOption: View {
     
     public var body: some View {
         SwiftUI.Button.init(action: action) {
-            HStack {
+            HStack(spacing: 0) {
                 config.icon
                     .foregroundStyle(iconColor)
                     .frame(width: 24, height: 24)
@@ -41,12 +41,13 @@ public struct MenuOption: View {
                 Text(config.title)
                     .foregroundStyle(textColor)
                     .font(.medium(size: 15))
+                    .padding(.bottom, 1)
                 Spacer()
                 if let accessoryIcon = config.accessoryIcon {
                     accessoryIcon
                         .foregroundStyle(iconColor)
                         .frame(width: 24, height: 24)
-                        .padding(12)
+                        .padding(.trailing, 16)
                 }
             }
             .frame(height: 48)
@@ -89,9 +90,11 @@ public struct MenuOption: View {
         config: MenuOption.Config(
             style: .primary,
             icon: .chevronRight,
-            title: "LABEL"
+            title: "LABEL",
+            accessoryIcon: .chevronDown
         ),
         action: {}
     )
     .environment(ColorPalette.dark)
+    .loadCustomFonts()
 }

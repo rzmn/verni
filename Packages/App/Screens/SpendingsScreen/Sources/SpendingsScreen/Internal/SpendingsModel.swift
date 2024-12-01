@@ -11,7 +11,7 @@ internal import DesignSystem
 actor SpendingsModel {
     private let store: Store<SpendingsState, SpendingsAction>
 
-    init(di: AuthenticatedDomainLayerSession, haptic: HapticManager) async {
+    init(di: AuthenticatedDomainLayerSession) async {
         store = await Store(
             state: Self.initialState,
             reducer: Self.reducer

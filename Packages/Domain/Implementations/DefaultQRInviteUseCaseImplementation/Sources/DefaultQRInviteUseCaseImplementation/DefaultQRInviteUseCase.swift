@@ -17,7 +17,13 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
     private lazy var logoImage: CGImage? = {
         UIImage(named: "logo-mini", in: .module, with: nil)
             .flatMap { image in
-                CIImage(image: image)
+                let size = CGSize(width: 128, height: 128)
+                let renderer = UIGraphicsImageRenderer(size: size)
+                return CIImage(
+                    image: renderer.image { context in
+                        image.draw(in: CGRect(origin: .zero, size: size))
+                    }
+                )
             }
             .flatMap { image in
                 CIContext(options: nil)
@@ -51,7 +57,6 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
             .ifNotNil(value: logoImage, block: { builder, logoImage in
                 builder.logo(logoImage, position: .squareCenter(inset: 12))
             })
-            .quietZonePixelCount(4)
             .foregroundColor(tint.cgColor)
             .backgroundColor(background.cgColor)
             .background.cornerRadius(4)

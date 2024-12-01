@@ -395,6 +395,6 @@ import Base
 
         // then
 
-        #expect(await persistencyFactory.awake(host: host) == nil)
+        #expect(await (persistency as? SQLitePersistency)?.shouldInvalidate == true)
     }
 }

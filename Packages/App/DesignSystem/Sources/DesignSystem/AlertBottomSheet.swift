@@ -33,37 +33,38 @@ private struct AlertBottomSheet<Content: View>: View {
                 }
             } else {
                 Spacer()
-                    .frame(height: 24)
+                    .frame(height: 23)
             }
             if let image = config.image {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .foregroundStyle(colors.icon.primary.default)
-                    .padding(.top, 4)
+                    .padding(.top, 5)
                     .padding(.horizontal, 16)
+                    .padding(.bottom, 38)
             }
             Text(config.title)
                 .font(.bold(size: 20))
                 .foregroundStyle(colors.text.primary.default)
                 .multilineTextAlignment(.center)
-                .padding(.top, 10)
             Text(config.subtitle)
                 .font(.medium(size: 15))
                 .foregroundStyle(colors.text.secondary.default)
                 .multilineTextAlignment(.center)
-                .padding(.top, 12)
+                .padding(.top, 11)
+                .padding(.horizontal, 16)
             actions()
         }
         .background(colors.background.primary.default)
         .clipShape(.rect(cornerRadius: 24))
-        .padding([.leading, .trailing, .bottom], 8)
+        .padding(.horizontal, 8)
     }
 }
 
 public enum AlertBottomSheetPreset: Sendable, Equatable {
     case noConnection(onRetry: @MainActor @Sendable () -> Void, onClose: @MainActor @Sendable () -> Void)
-    case service(String, onClose: @MainActor @Sendable () -> Void)
+    case hint(title: String, subtitle: String, actionTitle: String, action: @MainActor @Sendable () -> Void)
     case blocker(title: String, subtitle: String, actionTitle: String, action: @MainActor @Sendable () -> Void)
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -74,8 +75,8 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
         switch self {
         case .noConnection:
             "noConnection"
-        case .service(let description, _):
-            "service_\(description)"
+        case .hint(let title, _, _, _):
+            "service_\(title)"
         case .blocker(let title, _, _, _):
             "blocker_\(title)"
         }
@@ -83,7 +84,7 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
     
     var canClose: Bool {
         switch self {
-        case .noConnection, .service:
+        case .noConnection, .hint:
             true
         case .blocker:
             false
@@ -112,30 +113,7 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
                 .padding([.leading, .trailing, .bottom], 16)
                 .padding(.top, 18)
             }
-        case .service(let description, let onClose):
-            AlertBottomSheet(
-                config: AlertBottomSheet.Config(
-                    image: nil,
-                    title: .sheetInternalErrorTitle,
-                    subtitle: .serviceMessageWarning
-                ),
-                onClose: nil
-            ) {
-                Text(description)
-                    .foregroundStyle(colors.text.negative.default)
-                    .font(.medium(size: 12))
-                    .padding(.top, 12)
-                Button(
-                    config: Button.Config(
-                        style: .secondary,
-                        text: .sheetClose
-                    ),
-                    action: onClose
-                )
-                .padding([.leading, .trailing, .bottom], 16)
-                .padding(.top, 18)
-            }
-        case .blocker(let title, let subtitle, let actionTitle, let action):
+        case .hint(let title, let subtitle, let actionTitle, let action), .blocker(let title, let subtitle, let actionTitle, let action):
             AlertBottomSheet(
                 config: AlertBottomSheet.Config(
                     image: nil,
@@ -309,7 +287,13 @@ extension View {
 #Preview {
     Color.gray
         .ignoresSafeArea()
-        .bottomSheet(preset: .constant(.blocker(title: "title", subtitle: "subtitle", actionTitle: "action", action: {})))
-        .environment(ColorPalette.light)
+        .bottomSheet(preset: .constant(.noConnection(onRetry: {}, onClose: {})))
+//        .bottomSheet(preset: .constant(.hint(
+//            title: .qrHintTitle,
+//            subtitle: .qrHintSubtitle,
+//            actionTitle: .sheetClose,
+//            action: {}
+//        )))
+        .environment(ColorPalette.dark)
         .loadCustomFonts()
 }

@@ -6,6 +6,7 @@ import AppBase
     private let qrUseCase: QRInviteUseCase
     private let repository: ProfileRepository
     private let userId: User.Identifier
+    private var shouldUseAlreadyLoadedProfile = false
     
     init(
         store: Store<ProfileState, ProfileAction>,
@@ -27,34 +28,12 @@ extension ProfileSideEffects: ActionHandler {
     
     func handle(_ action: ProfileAction) {
         switch action {
-        case .onEditProfileTap:
-            break
-        case .onAccountSettingsTap:
-            break
-        case .onNotificationsSettingsTap:
-            break
-        case .onFlipAvatarTap:
-            break
-        case .onLogoutTap:
-            break
-        case .onNotificationsTap:
-            break
-        case .onLogoutConfirmTap:
-            break
         case .onRefreshProfile:
             onRefreshProfile()
-        case .onQrImageReady:
-            break
-        case .profileUpdated:
-            break
-        case .onShowQrHintTap:
-            break
-        case .showQrHint:
-            break
-        case .unauthorized:
-            break
         case .onRequestQrImage(let size):
             requestQrImage(size: size)
+        default:
+            break
         }
     }
     
@@ -80,9 +59,13 @@ extension ProfileSideEffects: ActionHandler {
     }
     
     private func refreshProfile() async {
+        guard !shouldUseAlreadyLoadedProfile else {
+            return
+        }
         let profile: Profile
         do {
             profile = try await repository.refreshProfile()
+            shouldUseAlreadyLoadedProfile = true
             store.dispatch(.profileUpdated(profile))
         } catch {
             switch error {

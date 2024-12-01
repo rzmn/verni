@@ -11,7 +11,7 @@ internal import DesignSystem
 actor ProfileModel {
     private let store: Store<ProfileState, ProfileAction>
 
-    init(di: AuthenticatedDomainLayerSession, haptic: HapticManager) async {
+    init(di: AuthenticatedDomainLayerSession) async {
         let profile = await di.profileOfflineRepository.getProfile()
         store = await Store(
             state: modify(Self.initialState) {
@@ -44,10 +44,12 @@ actor ProfileModel {
                         id: "\(ProfileEvent.self)",
                         handleBlock: { action in
                             switch action {
-                            case .onLogoutConfirmTap:
+                            case .onLogoutTap:
                                 handler(.logout)
                             case .unauthorized(let reason):
                                 handler(.unauthorized(reason: reason))
+                            case .onShowQrHintTap:
+                                handler(.showQrHint)
                             default:
                                 break
                             }

@@ -42,13 +42,14 @@ private struct FriendshipKindSet: OptionSet {
 
     private let taskFactory: TaskFactory
     private let database: Connection
-    private let dbInvalidationHandler: () throws -> Void
     private let hostId: UserDto.Identifier
     private var refreshToken: String
+    private var onDeinit: (_ shouldInvalidate: Bool) -> Void
+    private(set) var shouldInvalidate = false
 
     init(
         database: Connection,
-        dbInvalidationHandler: @escaping () throws -> Void,
+        onDeinit: @escaping (_ shouldInvalidate: Bool) -> Void,
         hostId: UserDto.Identifier,
         refreshToken: String,
         logger: Logger,
@@ -59,7 +60,7 @@ private struct FriendshipKindSet: OptionSet {
         self.hostId = hostId
         self.refreshToken = refreshToken
         self.logger = logger
-        self.dbInvalidationHandler = dbInvalidationHandler
+        self.onDeinit = onDeinit
         self.taskFactory = taskFactory
         if storeInitialToken {
             do {
@@ -249,11 +250,7 @@ private struct FriendshipKindSet: OptionSet {
     func invalidate() {
         logI { "invalidating db..." }
         close()
-        do {
-            try dbInvalidationHandler()
-        } catch {
-            self.logE { "failed to invalidate db: \(error)" }
-        }
+        shouldInvalidate = true
     }
 }
 

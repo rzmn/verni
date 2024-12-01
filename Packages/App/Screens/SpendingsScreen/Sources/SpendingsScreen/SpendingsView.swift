@@ -14,23 +14,21 @@ public struct SpendingsView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                IconButton(
-                    config: IconButton.Config(
-                        style: .primary,
-                        icon: .search
-                    )
-                ) {
-                    store.dispatch(.onSearchTap)
-                }
-            }
-            .frame(height: 54)
-            .overlay {
-                Text(.spendingsTitle)
-                    .font(.medium(size: 15))
-                    .foregroundStyle(colors.text.primary.default)
-            }
+            NavigationBar(
+                config: NavigationBar.Config(
+                    rightItem: NavigationBar.Item(
+                        config: NavigationBar.ItemConfig(
+                            style: .primary,
+                            icon: .search
+                        ),
+                        action: {
+                            store.dispatch(.onSearchTap)
+                        }
+                    ),
+                    title: .spendingsTitle,
+                    style: .primary
+                )
+            )
             overallSection
             ForEach(items) { (item: SpendingsState.Item) in
                 SpendingsItem(

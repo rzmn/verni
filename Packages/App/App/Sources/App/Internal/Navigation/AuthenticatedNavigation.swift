@@ -85,10 +85,20 @@ struct AuthenticatedNavigation: View {
                 )
                 .bottomSheet(
                     preset: Binding(
+                        get: {
+                            store.localState?.bottomSheet
+                        },
+                        set: { newValue in
+                            store.dispatch(.updateBottomSheet(newValue))
+                        }
+                    )
+                )
+                .bottomSheet(
+                    preset: Binding(
                         get: { () -> AlertBottomSheetPreset? in
                             if let reason = state.unauthenticatedFailure {
                                 return .blocker(title: "unauthorized", subtitle: "\(reason)", actionTitle: "logout") {
-                                    store.dispatch(.logout(state.session.fallback))
+                                    store.dispatch(.logoutRequested)
                                 }
                             } else {
                                 return nil
@@ -125,7 +135,31 @@ struct AuthenticatedNavigation: View {
         state.session.profileScreen.instantiate { event in
             switch event {
             case .logout:
-                store.dispatch(.logout(state.session.fallback))
+                store.dispatch(
+                    .updateBottomSheet(
+                        .hint(
+                            title: "[debug] logout",
+                            subtitle: "[debug] sure?",
+                            actionTitle: "[debug] confirm",
+                            action: {
+                                store.dispatch(.logoutRequested)
+                            }
+                        )
+                    )
+                )
+            case .showQrHint:
+                store.dispatch(
+                    .updateBottomSheet(
+                        .hint(
+                            title: .qrHintTitle,
+                            subtitle: .qrHintSubtitle,
+                            actionTitle: .sheetClose,
+                            action: {
+                                store.dispatch(.updateBottomSheet(nil))
+                            }
+                        )
+                    )
+                )
             case .unauthorized(let reason):
                 store.dispatch(.unauthorized(reason: reason))
             }

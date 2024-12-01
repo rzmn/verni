@@ -4,16 +4,13 @@ import DI
 @MainActor final class AppSideEffects: Sendable {
     private unowned let store: Store<AppState, AppAction>
     private let di: AnonymousDomainLayerSession
-    private let haptic: HapticManager
 
     init(
         store: Store<AppState, AppAction>,
-        di: AnonymousDomainLayerSession,
-        haptic: HapticManager
+        di: AnonymousDomainLayerSession
     ) {
         self.store = store
         self.di = di
-        self.haptic = haptic
     }
 }
 
@@ -31,11 +28,13 @@ extension AppSideEffects: ActionHandler {
             launched()
         case .onAuthorized:
             onAuthorized()
-        case .logout:
-            logout()
+        case .logoutRequested:
+            if case .launched(let launched) = store.state, case .authenticated(let state) = launched {
+                self.logout(state.session)
+            }
         case .loggingIn:
             loggingIn()
-        case .selectTabAnonymous, .selectTabAuthenticated, .addExpense, .unauthorized:
+        default:
             break
         }
     }
@@ -47,7 +46,7 @@ extension AppSideEffects: ActionHandler {
     }
     
     private func doLaunch() async {
-        let session = await AnonymousPresentationLayerSession(di: di, haptic: haptic)
+        let session = await AnonymousPresentationLayerSession(di: di)
         do {
             store.dispatch(
                 .launched(
@@ -78,8 +77,14 @@ extension AppSideEffects: ActionHandler {
         // stub
     }
     
-    private func logout() {
-        // stub
+    private func logout(_ session: AuthenticatedPresentationLayerSession) {
+        Task.detached {
+            await session.logout()
+            let session = await AnonymousPresentationLayerSession(di: self.di)
+            Task { @MainActor in
+                self.store.dispatch(.loggedOut(session))
+            }
+        }
     }
     
     private func loggingIn() {

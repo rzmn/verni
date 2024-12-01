@@ -14,8 +14,7 @@ struct App: SwiftUI.App {
         // swiftlint:disable:next force_try
         di = try! DefaultDependenciesAssembly()
         provider = DefaultAppFactory(
-            di: di,
-            haptic: DefaultHapticManager()
+            di: di
         ).create()
     }
 
@@ -25,6 +24,8 @@ struct App: SwiftUI.App {
                 .environment(
                     AvatarView.Repository { id in
                         await self.di.appCommon.avatarsRepository.get(id: id)
+                    } getIfCachedBlock: { id in
+                        self.di.appCommon.avatarsRepository.getIfCached(id: id)
                     }
                 )
         }

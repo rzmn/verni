@@ -21,6 +21,7 @@ actor RefreshTokenManager {
         self.persistency = persistency
         self.authenticationLostSubject = authenticationLostSubject
         self.accessTokenValue = accessToken
+        print("[debug] init with access token: \(accessToken ?? "<nil>")")
     }
 }
 
@@ -32,11 +33,14 @@ extension RefreshTokenManager: TokenRefresher {
     func refreshTokens() async throws(RefreshTokenFailureReason) {
         let response: AuthTokenDto
         do {
+            let token =  await persistency.getRefreshToken()
+            print("[debug] refreshing with refresh token: \(token)")
             response = try await api.run(
                 method: Auth.Refresh(
-                    refreshToken: await persistency.getRefreshToken()
+                    refreshToken: token
                 )
             )
+            print("[debug] refresh token: \(response.refreshToken) access token: \(response.accessToken)")
         } catch {
             switch error {
             case .api(let apiErrorCode, _):

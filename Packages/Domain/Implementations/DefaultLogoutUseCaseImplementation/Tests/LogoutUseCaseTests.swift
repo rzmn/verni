@@ -2,9 +2,13 @@ import Testing
 import Domain
 import DataTransferObjects
 import Base
+import DataLayerDependencies
+import Api
+import PersistentStorage
 @testable import AsyncExtensions
 @testable import MockPersistentStorage
 @testable import DefaultLogoutUseCaseImplementation
+@testable import MockApiImplementation
 
 private actor PersistencyProvider {
     let persistency: PersistencyMock
@@ -22,6 +26,36 @@ private actor PersistencyProvider {
     }
 }
 
+private struct MockLongPoll: LongPoll {
+    func poll<Query: LongPollQuery>(for query: Query) async -> any AsyncBroadcast<Query.Update> {
+        fatalError()
+    }
+}
+
+private final class MockDataLayerSession: AuthenticatedDataLayerSession {
+    var api: any Api.ApiProtocol {
+        MockApi()
+    }
+    
+    var longPoll: any Api.LongPoll {
+        MockLongPoll()
+    }
+    
+    let persistency: any PersistentStorage.Persistency
+    
+    var authenticationLostHandler: any AsyncExtensions.AsyncBroadcast<Void> {
+        fatalError()
+    }
+    
+    init(persistency: any PersistentStorage.Persistency = PersistencyMock()) {
+        self.persistency = persistency
+    }
+    
+    func logout() async {
+        await persistency.invalidate()
+    }
+}
+
 @Suite(.timeLimit(.minutes(1))) struct LogoutUseCaseTests {
 
     @Test func testLogoutFromPublisher() async throws {
@@ -32,7 +66,7 @@ private actor PersistencyProvider {
         let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
-            persistency: provider.persistency,
+            session: MockDataLayerSession(persistency: provider.persistency),
             shouldLogout: subject,
             taskFactory: taskFactory,
             logger: .shared
@@ -65,7 +99,7 @@ private actor PersistencyProvider {
         let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
-            persistency: provider.persistency,
+            session: MockDataLayerSession(persistency: provider.persistency),
             shouldLogout: subject,
             taskFactory: taskFactory,
             logger: .shared

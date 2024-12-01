@@ -7,13 +7,12 @@ enum ProfileAction {
     case onAccountSettingsTap
     case onNotificationsSettingsTap
     case onFlipAvatarTap
-    case onShowQrHintTap
     case onLogoutTap
     case onNotificationsTap
-    case onLogoutConfirmTap
     case onRefreshProfile
     case profileUpdated(Profile)
-    case showQrHint(show: Bool)
+    
+    case onShowQrHintTap
     case onRequestQrImage(size: Int)
     case onQrImageReady(Data)
     

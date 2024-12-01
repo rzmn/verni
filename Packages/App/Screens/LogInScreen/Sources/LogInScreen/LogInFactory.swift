@@ -7,14 +7,12 @@ public protocol LogInFactory: Sendable {
 
 public final class DefaultLogInFactory: LogInFactory {
     private let di: AnonymousDomainLayerSession
-    private let haptic: HapticManager
 
-    public init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
+    public init(di: AnonymousDomainLayerSession) {
         self.di = di
-        self.haptic = haptic
     }
 
     public func create() async -> any ScreenProvider<LogInEvent, LogInView> {
-        await LogInModel(di: di, haptic: haptic)
+        await LogInModel(di: di)
     }
 }

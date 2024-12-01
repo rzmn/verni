@@ -7,14 +7,12 @@ public protocol ProfileFactory: Sendable {
 
 public final class DefaultProfileFactory: ProfileFactory {
     private let di: AuthenticatedDomainLayerSession
-    private let haptic: HapticManager
 
-    public init(di: AuthenticatedDomainLayerSession, haptic: HapticManager) {
+    public init(di: AuthenticatedDomainLayerSession) {
         self.di = di
-        self.haptic = haptic
     }
 
     public func create() async -> any ScreenProvider<ProfileEvent, ProfileView> {
-        await ProfileModel(di: di, haptic: haptic)
+        await ProfileModel(di: di)
     }
 }

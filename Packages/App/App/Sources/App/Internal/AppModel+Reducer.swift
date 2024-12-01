@@ -16,8 +16,10 @@ extension AppModel {
                 }
             case .onAuthorized(let session):
                 return .launched(.authenticated(authenticatedState(session: session)))
-            case .logout(let session):
+            case .loggedOut(let session):
                 return .launched(.anonymous(anonymousState(session: session)))
+            case .logoutRequested:
+                return state
             case .loggingIn(let loggingIn):
                 guard case .launched(let launched) = state else {
                     return state
@@ -53,6 +55,17 @@ extension AppModel {
                         return
                     }
                     authenticated.unauthenticatedFailure = reason
+                    $0 = .launched(.authenticated(authenticated))
+                }
+            case .updateBottomSheet(let sheet):
+                return modify(state) {
+                    guard case .launched(let launched) = $0 else {
+                        return
+                    }
+                    guard case .authenticated(var authenticated) = launched else {
+                        return
+                    }
+                    authenticated.bottomSheet = sheet
                     $0 = .launched(.authenticated(authenticated))
                 }
             }

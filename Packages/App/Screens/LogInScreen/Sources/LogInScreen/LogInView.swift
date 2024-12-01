@@ -120,9 +120,7 @@ public struct LogInView: View {
 #Preview {
     LogInView(
         store: Store(
-            state: modify(LogInModel.initialState) {
-                $0.bottomSheet = .service("service message", onClose: {})
-            },
+            state: LogInModel.initialState,
             reducer: LogInModel.reducer
         )
     )

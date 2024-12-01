@@ -25,7 +25,7 @@ import Base
 
         // when
 
-        let data = await repository.get(for: aid)
+        let data = repository.get(for: aid)
 
         // then
 
@@ -46,7 +46,7 @@ import Base
         // when
 
         await repository.store(data: avatar, for: aid)
-        let avatarFromRepository = await repository.get(for: aid)
+        let avatarFromRepository = repository.get(for: aid)
 
         // then
 

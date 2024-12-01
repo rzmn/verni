@@ -79,7 +79,7 @@ struct BottomBar: View {
                     }
             case .action(let image, _):
                 image
-                    .foregroundStyle(colors.icon.primary.default)
+                    .foregroundStyle(colors.icon.primary.staticLight)
                     .frame(width: itemSize, height: itemSize)
                     .background(colors.background.brand.static)
                     .clipShape(.rect(cornerRadius: itemSize / 2))

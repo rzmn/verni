@@ -53,8 +53,15 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             }
             return SQLitePersistency(
                 database: database,
-                dbInvalidationHandler: { [pathManager] in
-                    try pathManager.invalidate(owner: host)
+                onDeinit: { [pathManager] shouldInvalidate in
+                    guard shouldInvalidate else {
+                        return
+                    }
+                    do {
+                        try pathManager.invalidate(owner: host)
+                    } catch {
+                        self.logE { "failed to invalidate db: \(error)" }
+                    }
                 },
                 hostId: host,
                 refreshToken: token,
@@ -83,8 +90,15 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
         return SQLitePersistency(
             database: database,
-            dbInvalidationHandler: {
-                try FileManager.default.removeItem(at: dbUrl)
+            onDeinit: { [pathManager] shouldInvalidate in
+                guard shouldInvalidate else {
+                    return
+                }
+                do {
+                    try pathManager.invalidate(owner: host)
+                } catch {
+                    self.logE { "failed to invalidate db: \(error)" }
+                }
             },
             hostId: host,
             refreshToken: refreshToken,

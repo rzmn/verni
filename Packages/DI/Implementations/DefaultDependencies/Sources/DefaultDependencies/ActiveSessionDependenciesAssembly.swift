@@ -95,7 +95,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
             taskFactory: DefaultTaskFactory()
         )
         logoutUseCase = await DefaultLogoutUseCase(
-            persistency: dataLayer.persistency,
+            session: dataLayer,
             shouldLogout: logoutSubject,
             taskFactory: DefaultTaskFactory(),
             logger: .shared.with(prefix: "[logout] ")

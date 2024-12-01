@@ -1,4 +1,5 @@
 import DI
+internal import DesignSystem
 internal import Base
 
 struct LaunchingState: Equatable, Sendable {}
@@ -34,6 +35,7 @@ struct AuthenticatedState: Equatable, Sendable {
     @EquatableByAddress var session: AuthenticatedPresentationLayerSession
     var tabs: [Tab]
     var tab: TabItem
+    var bottomSheet: AlertBottomSheetPreset?
     var unauthenticatedFailure: String?
 }
 

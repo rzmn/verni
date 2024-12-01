@@ -8,10 +8,16 @@ internal import SpendingsScreen
     let fallback: AnonymousPresentationLayerSession
     let profileScreen: any ScreenProvider<ProfileEvent, ProfileView>
     let spendingsScreen: any ScreenProvider<SpendingsEvent, SpendingsView>
+    private let di: AuthenticatedDomainLayerSession
     
-    init(di: AuthenticatedDomainLayerSession, fallback: AnonymousPresentationLayerSession, haptic: HapticManager = DefaultHapticManager()) async {
+    init(di: AuthenticatedDomainLayerSession, fallback: AnonymousPresentationLayerSession) async {
         self.fallback = fallback
-        profileScreen = await DefaultProfileFactory(di: di, haptic: haptic).create()
-        spendingsScreen = await DefaultSpendingsFactory(di: di, haptic: haptic).create()
+        self.di = di
+        profileScreen = await DefaultProfileFactory(di: di).create()
+        spendingsScreen = await DefaultSpendingsFactory(di: di).create()
+    }
+    
+    func logout() async {
+        await di.logoutUseCase.logout()
     }
 }

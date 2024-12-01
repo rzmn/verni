@@ -8,15 +8,13 @@ internal import DesignSystem
 
 public final class DefaultAppFactory: AppFactory {
     private let di: AnonymousDomainLayerSession
-    private let haptic: HapticManager
 
-    public init(di: AnonymousDomainLayerSession, haptic: HapticManager) {
+    public init(di: AnonymousDomainLayerSession) {
         self.di = di
-        self.haptic = haptic
         CustomFonts.registerCustomFonts(class: DefaultAppFactory.self)
     }
 
     public func create() -> any ScreenProvider<Void, AppView> {
-        AppModel(di: di, haptic: haptic)
+        AppModel(di: di)
     }
 }

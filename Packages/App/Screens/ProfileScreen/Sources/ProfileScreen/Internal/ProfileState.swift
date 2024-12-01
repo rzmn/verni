@@ -9,5 +9,4 @@ struct ProfileState: Equatable, Sendable {
     var profile: Loadable<Profile, ProfileLoadingFailureReason>
     var avatarCardFlipCount: Int
     var qrCodeData: Data?
-    var qrHintVisible: Bool
 }

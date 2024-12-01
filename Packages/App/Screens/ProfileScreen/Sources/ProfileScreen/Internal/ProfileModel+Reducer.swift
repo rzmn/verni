@@ -18,8 +18,6 @@ extension ProfileModel {
                 return state
             case .onNotificationsTap:
                 return state
-            case .onLogoutConfirmTap:
-                return state
             case .onRefreshProfile:
                 return state
             case .onRequestQrImage:
@@ -36,10 +34,6 @@ extension ProfileModel {
                 return state
             case .unauthorized:
                 return state
-            case .showQrHint(let show):
-                return modify(state) {
-                    $0.qrHintVisible = show
-                }
             }
         }
     }

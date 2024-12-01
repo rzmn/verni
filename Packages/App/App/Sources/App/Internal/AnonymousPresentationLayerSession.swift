@@ -7,8 +7,8 @@ internal import LogInScreen
     let authWelcomeScreen: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView>
     let logInScreen: any ScreenProvider<LogInEvent, LogInView>
 
-    init(di: AnonymousDomainLayerSession, haptic: HapticManager) async {
-        authWelcomeScreen = await DefaultAuthWelcomeFactory(di: di, haptic: haptic).create()
-        logInScreen = await DefaultLogInFactory(di: di, haptic: haptic).create()
+    init(di: AnonymousDomainLayerSession) async {
+        authWelcomeScreen = await DefaultAuthWelcomeFactory(di: di).create()
+        logInScreen = await DefaultLogInFactory(di: di).create()
     }
 }

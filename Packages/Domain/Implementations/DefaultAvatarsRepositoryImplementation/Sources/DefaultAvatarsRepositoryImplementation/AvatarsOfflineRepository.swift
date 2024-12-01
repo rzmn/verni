@@ -30,13 +30,13 @@ public actor DefaultAvatarsOfflineRepository {
         }
     }
 
-    private func name(for id: Avatar.Identifier) -> String {
+    nonisolated private func name(for id: Avatar.Identifier) -> String {
         "\(Constants.prefix)\(id)"
     }
 }
 
 extension DefaultAvatarsOfflineRepository: AvatarsOfflineRepository {
-    public func get(for id: Avatar.Identifier) async -> Data? {
+    nonisolated public func get(for id: Avatar.Identifier) -> Data? {
         let id = name(for: id)
         do {
             return try Data(contentsOf: storageDir.appending(component: id))

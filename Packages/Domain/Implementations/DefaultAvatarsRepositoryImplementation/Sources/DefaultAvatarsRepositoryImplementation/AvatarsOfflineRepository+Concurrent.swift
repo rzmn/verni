@@ -8,7 +8,7 @@ extension AvatarsOfflineRepository {
         await withTaskGroup(of: Optional<(id: Avatar.Identifier, data: Data)>.self) { group in
             for id in ids {
                 group.addTask {
-                    let data = await get(for: id)
+                    let data = get(for: id)
                     if let data {
                         return (id: id, data: data)
                     } else {

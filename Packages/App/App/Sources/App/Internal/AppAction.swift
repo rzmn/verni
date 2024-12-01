@@ -1,4 +1,5 @@
 import DI
+internal import DesignSystem
 
 enum LaunchSession {
     case anonymous(AnonymousPresentationLayerSession)
@@ -7,13 +8,17 @@ enum LaunchSession {
 
 enum AppAction: Sendable {
     case launch
-    case logout(AnonymousPresentationLayerSession)
     case launched(LaunchSession)
+    
+    case logoutRequested
+    case loggedOut(AnonymousPresentationLayerSession)
+    
     case onAuthorized(AuthenticatedPresentationLayerSession)
 
     case addExpense
     case selectTabAnonymous(AnonymousState.Tab)
     case selectTabAuthenticated(AuthenticatedState.TabItem)
     case loggingIn(Bool)
+    case updateBottomSheet(AlertBottomSheetPreset?)
     case unauthorized(reason: String)
 }

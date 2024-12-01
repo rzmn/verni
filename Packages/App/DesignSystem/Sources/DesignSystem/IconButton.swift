@@ -24,7 +24,10 @@ public struct IconButton: View {
     
     public init(config: Config, action: @escaping () -> Void) {
         self.config = config
-        self.action = action
+        self.action = {
+            HapticEngine.mediumImpact.perform()
+            action()
+        }
     }
     
     public var body: some View {

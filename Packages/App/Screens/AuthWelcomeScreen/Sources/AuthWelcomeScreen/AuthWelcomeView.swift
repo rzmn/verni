@@ -12,11 +12,27 @@ public struct AuthWelcomeView: View {
     }
 
     public var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            NavigationBar(
+                config: NavigationBar.Config(
+                    leftItem: NavigationBar.Item(
+                        config: NavigationBar.ItemConfig(
+                            style: .primary,
+                            icon: .arrowLeft
+                        ),
+                        action: {
+                            assertionFailure("implement me")
+                        }
+                    ),
+                    title: .loginScreenTitle,
+                    style: .brand
+                )
+            )
             Image.logoHorizontal
                 .resizable()
                 .aspectRatio(373.0 / 208.0 /* ??? */, contentMode: .fill)
                 .scaledToFit()
+                .padding(.horizontal, 1)
                 .foregroundStyle(colors.background.primary.default)
             VStack {
                 titleSection
@@ -33,6 +49,7 @@ public struct AuthWelcomeView: View {
                     .fill(colors.background.primary.default)
                     .edgesIgnoringSafeArea([.bottom])
             )
+            .padding(.top, 1)
         }
         .background(
             colors.background.brand.static
@@ -45,7 +62,7 @@ public struct AuthWelcomeView: View {
             .foregroundStyle(colors.text.secondary.default)
             .font(.medium(size: 13))
             .multilineTextAlignment(.center)
-            .padding(.all, 16)
+            .padding(.vertical, 16)
     }
     
     private var signInOAuthSection: some View {
@@ -94,7 +111,6 @@ public struct AuthWelcomeView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
-        .padding(.bottom, 12)
     }
 }
 

@@ -19,17 +19,42 @@ public struct AvatarView: View {
     public typealias AvatarId = String
     
     @Observable @MainActor public class Repository: Sendable {
-        let get: (AvatarId) async -> Data?
+        private let get: (AvatarId) async -> Data?
+        private let getIfCached: (AvatarId) -> Data?
+        private var ramCache = [AvatarId: Data]()
         
-        public init(getBlock: @escaping (AvatarId) async -> Data?) {
+        public init(getBlock: @escaping (AvatarId) async -> Data?, getIfCachedBlock: @escaping (AvatarId) -> Data?) {
             get = getBlock
+            getIfCached = getIfCachedBlock
+        }
+        
+        func get(id: AvatarId) async -> Data? {
+            let data = await get(id)
+            if let data {
+                Task { @MainActor in
+                    self.ramCache[id] = data
+                }
+            }
+            return data
+        }
+        
+        func getIfCached(id: AvatarId) -> Data? {
+            if let data = ramCache[id] {
+                return data
+            }
+            if let data = getIfCached(id) {
+                ramCache[id] = data
+                return data
+            }
+            return nil
         }
         
         public static var preview: Repository {
-            Repository { _ in nil }
+            Repository(getBlock: {_ in nil}, getIfCachedBlock: { _ in nil })
         }
     }
     
+    @Environment(ColorPalette.self) var colors
     @Environment(Repository.self) var repository
     @State private var imageData: Data?
     @State private var task: Task<Void, Never>?
@@ -50,7 +75,7 @@ public struct AvatarView: View {
     }
     
     @ViewBuilder private var content: some View {
-        if let imageData {
+        if let imageData = imageData ?? avatar.flatMap(repository.getIfCached(id:)) {
             if let image = UIImage(data: imageData) {
                 GeometryReader { geometry in
                     Image(uiImage: image)
@@ -60,16 +85,16 @@ public struct AvatarView: View {
                         .clipped()
                 }
             } else {
-                failedToLoadStub
+                placeholder("[debug] placeholder for `failed to load`")
             }
         } else {
-            loadingStub
+            placeholder("[debug] placeholder for `loading`")
                 .onAppear {
                     guard let avatar else {
                         return
                     }
                     task = Task {
-                        guard let data = await repository.get(avatar) else {
+                        guard let data = await repository.get(id: avatar) else {
                             return
                         }
                         if Task.isCancelled {
@@ -83,19 +108,19 @@ public struct AvatarView: View {
                 }
         }
     }
-                      
-    @ViewBuilder var noAvatarStub: some View {
-        Image(uiImage: "🥷".image(fitSize: self.fitSize) ?? UIImage())
-            .frame(width: fitSize.width, height: fitSize.height)
+    
+    private func placeholder(_ text: String) -> some View {
+        VStack(spacing: 0) {
+            Spacer()
+            HStack(spacing: 0) {
+                Spacer()
+                Text(text)
+                    .font(.medium(size: 15))
+                    .foregroundStyle(colors.text.primary.default)
+                Spacer()
+            }
+            Spacer()
+        }
     }
     
-    @ViewBuilder var failedToLoadStub: some View {
-        Image(uiImage: "❌".image(fitSize: self.fitSize) ?? UIImage())
-            .frame(width: fitSize.width, height: fitSize.height)
-    }
-    
-    @ViewBuilder var loadingStub: some View {
-        Image(uiImage: "⌛".image(fitSize: self.fitSize) ?? UIImage())
-            .frame(width: fitSize.width, height: fitSize.height)
-    }
 }

@@ -76,7 +76,8 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
             api: apiFactory.create(),
             longPoll: apiFactory.longPoll(),
             persistency: persistency,
-            authenticationLostHandler: authenticationLostSubject
+            authenticationLostHandler: authenticationLostSubject,
+            sessionHost: sessionHost
         )
     }
 }

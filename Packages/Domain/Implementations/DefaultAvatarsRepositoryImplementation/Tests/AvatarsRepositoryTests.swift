@@ -10,11 +10,11 @@ import Base
 @testable import DefaultAvatarsRepositoryImplementation
 
 private actor MockOfflineRepository: AvatarsOfflineRepository, AvatarsOfflineMutableRepository {
-    var getCalls: [Avatar.Identifier] = []
+    nonisolated(unsafe) var getCalls: [Avatar.Identifier] = []
     var storeCalls: [(Data, Avatar.Identifier)] = []
-    var storage = [Avatar.Identifier: Data]()
+    nonisolated(unsafe) var storage = [Avatar.Identifier: Data]()
 
-    func get(for id: Avatar.Identifier) async -> Data? {
+    nonisolated(unsafe) func get(for id: Avatar.Identifier) -> Data? {
         getCalls.append(id)
         return storage[id]
     }

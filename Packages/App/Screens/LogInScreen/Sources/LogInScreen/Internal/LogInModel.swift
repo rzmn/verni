@@ -11,7 +11,7 @@ internal import DesignSystem
 actor LogInModel {
     private let store: Store<LogInState, LogInAction>
 
-    init(di: AnonymousDomainLayerSession, haptic: HapticManager) async {
+    init(di: AnonymousDomainLayerSession) async {
         store = await Store(
             state: Self.initialState,
             reducer: Self.reducer

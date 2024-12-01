@@ -30,6 +30,10 @@ public actor DefaultAvatarsRepository {
 }
 
 extension DefaultAvatarsRepository: AvatarsRepository {
+    nonisolated public func getIfCached(id: Avatar.Identifier) -> Data? {
+        offlineRepository.get(for: id)
+    }
+    
     func waitForScheduled(
         ids: [Avatar.Identifier],
         from loadingIds: [Avatar.Identifier: Task<Result<Data, GeneralError>, Never>]

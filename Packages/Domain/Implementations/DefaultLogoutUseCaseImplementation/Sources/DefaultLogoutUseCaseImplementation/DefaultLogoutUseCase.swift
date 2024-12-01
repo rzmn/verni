@@ -3,25 +3,26 @@ import PersistentStorage
 import AsyncExtensions
 import Base
 import Logging
+import DataLayerDependencies
 internal import ApiDomainConvenience
 internal import DataTransferObjects
 
 public actor DefaultLogoutUseCase {
     public let logger: Logger
     private let didLogoutBroadcast: AsyncSubject<LogoutReason>
-    private let persistency: Persistency
+    private let session: AuthenticatedDataLayerSession
     private let taskFactory: TaskFactory
     private var didLogoutSubscription: (any CancellableEventSource)?
     private var loggedOutHandler = LoggedOutHandler()
 
     public init(
-        persistency: Persistency,
+        session: AuthenticatedDataLayerSession,
         shouldLogout: any AsyncBroadcast<LogoutReason>,
         taskFactory: TaskFactory,
         logger: Logger
     ) async {
         self.didLogoutBroadcast = AsyncSubject(taskFactory: taskFactory)
-        self.persistency = persistency
+        self.session = session
         self.taskFactory = taskFactory
         self.logger = logger
         didLogoutSubscription = await shouldLogout.subscribe { [weak self] reason in
@@ -52,9 +53,7 @@ extension DefaultLogoutUseCase {
         guard await loggedOutHandler.allowLogout() else {
             return false
         }
-        taskFactory.task {
-            await self.persistency.invalidate()
-        }
+        await self.session.logout()
         return true
     }
 }

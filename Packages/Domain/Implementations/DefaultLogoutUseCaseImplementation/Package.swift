@@ -17,7 +17,9 @@ let package = Package(
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
+        .package(path: "../../../Data/DI/DataLayerDependencies"),
         .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
@@ -50,7 +52,9 @@ let package = Package(
                 "DataTransferObjects",
                 "PersistentStorage",
                 "DefaultLogoutUseCaseImplementation",
-                "MockPersistentStorage"
+                "MockPersistentStorage",
+                "DataLayerDependencies",
+                "MockApiImplementation"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),
