@@ -43,9 +43,12 @@ actor AppModel {
 
 extension AppModel: ScreenProvider {
     typealias Event = Void
+    typealias Args = Void
 
-    @MainActor func instantiate(handler: @escaping @MainActor (Event) -> Void) -> AppView {
-        AppView(store: store)
+    @MainActor func instantiate(handler: @escaping @MainActor (Event) -> Void) -> (Args) -> AppView {
+        return { _ in
+            AppView(store: self.store)
+        }
     }
 }
 

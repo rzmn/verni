@@ -2,7 +2,7 @@ import AppBase
 import DI
 
 public protocol LogInFactory: Sendable {
-    func create() async -> any ScreenProvider<LogInEvent, LogInView>
+    func create() async -> any ScreenProvider<LogInEvent, LogInView, BottomSheetTransition>
 }
 
 public final class DefaultLogInFactory: LogInFactory {
@@ -12,7 +12,7 @@ public final class DefaultLogInFactory: LogInFactory {
         self.di = di
     }
 
-    public func create() async -> any ScreenProvider<LogInEvent, LogInView> {
+    public func create() async -> any ScreenProvider<LogInEvent, LogInView, BottomSheetTransition> {
         await LogInModel(di: di)
     }
 }

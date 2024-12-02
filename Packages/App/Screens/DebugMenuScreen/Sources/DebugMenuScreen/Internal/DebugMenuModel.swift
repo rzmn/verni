@@ -20,27 +20,31 @@ internal import DesignSystem
 }
 
 @MainActor extension DebugMenuModel: ScreenProvider {
+    typealias Args = Void
+    
     func instantiate(
         handler: @escaping @MainActor (DebugMenuEvent) -> Void
-    ) -> DebugMenuView {
-        DebugMenuView(
-            store: modify(store) { store in
-                let store = store
-                store.append(
-                    handler: AnyActionHandler(
-                        id: "\(DebugMenuEvent.self)",
-                        handleBlock: { action in
-                            switch action {
-                            case .onTapBack where store.state.section == nil:
-                                handler(.dismiss)
-                            default:
-                                break
+    ) -> (Args) -> DebugMenuView {
+        return { _ in
+            DebugMenuView(
+                store: modify(self.store) { store in
+                    let store = store
+                    store.append(
+                        handler: AnyActionHandler(
+                            id: "\(DebugMenuEvent.self)",
+                            handleBlock: { action in
+                                switch action {
+                                case .onTapBack where store.state.section == nil:
+                                    handler(.dismiss)
+                                default:
+                                    break
+                                }
                             }
-                        }
-                    ),
-                    keepingUnique: true
-                )
-            }
-        )
+                        ),
+                        keepingUnique: true
+                    )
+                }
+            )
+        }
     }
 }

@@ -41,7 +41,6 @@ struct AuthenticatedState: Equatable, Sendable {
 
 struct AnonymousState: Equatable, Sendable {
     struct AuthState: Equatable {
-        var loggingIn: Bool
     }
     enum Tab: Equatable {
         case auth(AuthState)

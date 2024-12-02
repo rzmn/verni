@@ -3,7 +3,7 @@ import DI
 internal import DesignSystem
 
 @MainActor public protocol AppFactory: Sendable {
-    func create() -> any ScreenProvider<Void, AppView>
+    func create() -> any ScreenProvider<Void, AppView, Void>
 }
 
 public final class DefaultAppFactory: AppFactory {
@@ -14,7 +14,7 @@ public final class DefaultAppFactory: AppFactory {
         CustomFonts.registerCustomFonts(class: DefaultAppFactory.self)
     }
 
-    public func create() -> any ScreenProvider<Void, AppView> {
+    public func create() -> any ScreenProvider<Void, AppView, Void> {
         AppModel(di: di)
     }
 }

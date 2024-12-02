@@ -20,26 +20,30 @@ actor SpendingsModel {
 }
 
 @MainActor extension SpendingsModel: ScreenProvider {
+    typealias Args = Void
+    
     func instantiate(
         handler: @escaping @MainActor (SpendingsEvent) -> Void
-    ) -> SpendingsView {
-        SpendingsView(
-            store: modify(store) { store in
-                store.append(
-                    handler: AnyActionHandler(
-                        id: "\(SpendingsEvent.self)",
-                        handleBlock: { action in
-                            switch action {
-                            case .onUserTap(let user):
-                                handler(.onUserTap(user))
-                            default:
-                                break
+    ) -> (Args) -> SpendingsView {
+        return { _ in
+            SpendingsView(
+                store: modify(self.store) { store in
+                    store.append(
+                        handler: AnyActionHandler(
+                            id: "\(SpendingsEvent.self)",
+                            handleBlock: { action in
+                                switch action {
+                                case .onUserTap(let user):
+                                    handler(.onUserTap(user))
+                                default:
+                                    break
+                                }
                             }
-                        }
-                    ),
-                    keepingUnique: true
-                )
-            }
-        )
+                        ),
+                        keepingUnique: true
+                    )
+                }
+            )
+        }
     }
 }

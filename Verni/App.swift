@@ -8,7 +8,7 @@ import DI
 @main
 struct App: SwiftUI.App {
     private let di: AnonymousDomainLayerSession
-    private let provider: any ScreenProvider<Void, AppView>
+    private let provider: any ScreenProvider<Void, AppView, Void>
     
     init() {
         // swiftlint:disable:next force_try
@@ -20,7 +20,7 @@ struct App: SwiftUI.App {
 
     var body: some Scene {
         WindowGroup {
-            provider.instantiate { /* empty */ }
+            provider.instantiate()()
                 .environment(
                     AvatarView.Repository { id in
                         await self.di.appCommon.avatarsRepository.get(id: id)

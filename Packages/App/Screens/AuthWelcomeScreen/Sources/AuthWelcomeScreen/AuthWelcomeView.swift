@@ -6,9 +6,15 @@ public struct AuthWelcomeView: View {
     @ObservedObject var store: Store<AuthWelcomeState, AuthWelcomeAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
+    @Binding private var transitionProgress: CGFloat
+    @Binding private var destinationOffset: CGFloat?
+    @Binding private var sourceOffset: CGFloat?
 
-    init(store: Store<AuthWelcomeState, AuthWelcomeAction>) {
+    init(store: Store<AuthWelcomeState, AuthWelcomeAction>, transition: BottomSheetTransition) {
         self.store = store
+        _transitionProgress = transition.progress
+        _sourceOffset = transition.sourceOffset
+        _destinationOffset = transition.destinationOffset
     }
 
     public var body: some View {
@@ -20,9 +26,7 @@ public struct AuthWelcomeView: View {
                             style: .primary,
                             icon: .arrowLeft
                         ),
-                        action: {
-                            assertionFailure("implement me")
-                        }
+                        action: {}
                     ),
                     title: .loginScreenTitle,
                     style: .brand
@@ -34,11 +38,14 @@ public struct AuthWelcomeView: View {
                 .scaledToFit()
                 .padding(.horizontal, 1)
                 .foregroundStyle(colors.background.primary.default)
+                .modifier(TranslateEffect(offset:  -0.2 * transitionOffset))
             VStack {
                 titleSection
+                    .opacity(1 - transitionProgress)
                 Spacer()
                     .frame(height: 20)
                 signInOAuthSection
+                    .opacity(1 - transitionProgress)
                 Spacer()
                 bottomButtonsSection
             }
@@ -49,12 +56,26 @@ public struct AuthWelcomeView: View {
                     .fill(colors.background.primary.default)
                     .edgesIgnoringSafeArea([.bottom])
             )
-            .padding(.top, 1)
+            .overlay {
+                GeometryReader { geometry in
+                    Color.clear.onAppear {
+                        sourceOffset = geometry.frame(in: .global).minY
+                    }
+                }
+            }
+            .padding(.top, 1 + transitionOffset)
         }
         .background(
             colors.background.brand.static
                 .ignoresSafeArea()
         )
+    }
+    
+    private var transitionOffset: CGFloat {
+        guard let sourceOffset, let destinationOffset else {
+            return 0
+        }
+        return (destinationOffset - sourceOffset) * transitionProgress
     }
     
     private var titleSection: some View {
@@ -114,12 +135,50 @@ public struct AuthWelcomeView: View {
     }
 }
 
-#Preview {
-    AuthWelcomeView(
-        store: Store(
-            state: AuthWelcomeModel.initialState,
-            reducer: AuthWelcomeModel.reducer
-        )
-    )
-    .preview(packageClass: AuthWelcomeModel.self)
+struct TranslateEffect: GeometryEffect {
+    var offset: CGFloat
+
+    var animatableData: CGFloat {
+        get { offset }
+        set { offset = newValue }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        return ProjectionTransform(CGAffineTransform(translationX: 0, y: offset))
+    }
 }
+
+#if DEBUG
+
+private struct AuthWelcomePreview: View {
+    @State var transition: CGFloat = 0
+    @State var sourceOffset: CGFloat?
+    
+    var body: some View {
+        ZStack {
+            AuthWelcomeView(
+                store: Store(
+                    state: AuthWelcomeModel.initialState,
+                    reducer: AuthWelcomeModel.reducer
+                ),
+                transition: BottomSheetTransition(
+                    progress: $transition,
+                    sourceOffset: $sourceOffset,
+                    destinationOffset: .constant(102)
+                )
+            )
+            VStack {
+                Text("sourceOffset: \(sourceOffset ?? -1)")
+                    .foregroundStyle(.red)
+                Slider(value: $transition, in: 0...1)
+            }
+        }
+    }
+}
+
+#Preview {
+    AuthWelcomePreview()
+        .preview(packageClass: AuthWelcomeModel.self)
+}
+
+#endif

@@ -20,14 +20,6 @@ extension AppModel {
                 return .launched(.anonymous(anonymousState(session: session)))
             case .logoutRequested:
                 return state
-            case .loggingIn(let loggingIn):
-                guard case .launched(let launched) = state else {
-                    return state
-                }
-                guard case .anonymous(let anonymous) = launched else {
-                    return state
-                }
-                return .launched(.anonymous(anonymousState(session: anonymous.session, loggingIn: loggingIn)))
             case .selectTabAnonymous(let tab):
                 guard case .launched(let launched) = state else {
                     return state
@@ -72,8 +64,8 @@ extension AppModel {
         }
     }
     
-    @MainActor private static func anonymousState(session: AnonymousPresentationLayerSession, loggingIn: Bool = false) -> AnonymousState {
-        let authState = AnonymousState.AuthState(loggingIn: loggingIn)
+    @MainActor private static func anonymousState(session: AnonymousPresentationLayerSession) -> AnonymousState {
+        let authState = AnonymousState.AuthState()
         return AnonymousState(
             session: session,
             tabs: [

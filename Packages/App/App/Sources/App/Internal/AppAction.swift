@@ -18,7 +18,6 @@ enum AppAction: Sendable {
     case addExpense
     case selectTabAnonymous(AnonymousState.Tab)
     case selectTabAuthenticated(AuthenticatedState.TabItem)
-    case loggingIn(Bool)
     case updateBottomSheet(AlertBottomSheetPreset?)
     case unauthorized(reason: String)
 }

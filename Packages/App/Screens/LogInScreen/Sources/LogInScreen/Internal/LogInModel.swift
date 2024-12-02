@@ -28,26 +28,29 @@ actor LogInModel {
 @MainActor extension LogInModel: ScreenProvider {
     func instantiate(
         handler: @escaping @MainActor (LogInEvent) -> Void
-    ) -> LogInView {
-        LogInView(
-            store: modify(store) { store in
-                store.append(
-                    handler: AnyActionHandler(
-                        id: "\(LogInEvent.self)",
-                        handleBlock: { action in
-                            switch action {
-                            case .onTapBack:
-                                handler(.dismiss)
-                            case .loggedIn(let session):
-                                handler(.logIn(session))
-                            default:
-                                break
+    ) -> (BottomSheetTransition) -> LogInView {
+        return { transition in
+            LogInView(
+                store: modify(self.store) { store in
+                    store.append(
+                        handler: AnyActionHandler(
+                            id: "\(LogInEvent.self)",
+                            handleBlock: { action in
+                                switch action {
+                                case .onTapBack:
+                                    handler(.dismiss)
+                                case .loggedIn(let session):
+                                    handler(.logIn(session))
+                                default:
+                                    break
+                                }
                             }
-                        }
-                    ),
-                    keepingUnique: true
-                )
-            }
-        )
+                        ),
+                        keepingUnique: true
+                    )
+                },
+                transition: transition
+            )
+        }
     }
 }

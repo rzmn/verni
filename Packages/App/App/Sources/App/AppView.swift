@@ -36,7 +36,7 @@ public struct AppView: View {
                                 showingDebugMenu = false
                             }
                         }
-                    }
+                    }()
             }
     }
     

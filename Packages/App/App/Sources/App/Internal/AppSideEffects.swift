@@ -32,8 +32,6 @@ extension AppSideEffects: ActionHandler {
             if case .launched(let launched) = store.state, case .authenticated(let state) = launched {
                 self.logout(state.session)
             }
-        case .loggingIn:
-            loggingIn()
         default:
             break
         }
@@ -85,9 +83,5 @@ extension AppSideEffects: ActionHandler {
                 self.store.dispatch(.loggedOut(session))
             }
         }
-    }
-    
-    private func loggingIn() {
-        // stub
     }
 }

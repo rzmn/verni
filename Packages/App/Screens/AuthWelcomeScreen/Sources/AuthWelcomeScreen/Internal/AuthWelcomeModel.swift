@@ -22,26 +22,29 @@ actor AuthWelcomeModel {
 @MainActor extension AuthWelcomeModel: ScreenProvider {
     func instantiate(
         handler: @escaping @MainActor (AuthWelcomeEvent) -> Void
-    ) -> AuthWelcomeView {
-        AuthWelcomeView(
-            store: modify(store) { store in
-                store.append(
-                    handler: AnyActionHandler(
-                        id: "\(AuthWelcomeEvent.self)",
-                        handleBlock: { action in
-                            switch action {
-                            case .logInTapped:
-                                handler(.logIn)
-                            case .signUpTapped:
-                                handler(.signUp)
-                            case .signInWithGoogleTapped, .signInWithAppleTapped:
-                                break
+    ) -> (BottomSheetTransition) -> AuthWelcomeView {
+        return { transition in
+            AuthWelcomeView(
+                store: modify(self.store) { store in
+                    store.append(
+                        handler: AnyActionHandler(
+                            id: "\(AuthWelcomeEvent.self)",
+                            handleBlock: { action in
+                                switch action {
+                                case .logInTapped:
+                                    handler(.logIn)
+                                case .signUpTapped:
+                                    handler(.signUp)
+                                case .signInWithGoogleTapped, .signInWithAppleTapped:
+                                    break
+                                }
                             }
-                        }
-                    ),
-                    keepingUnique: true
-                )
-            }
-        )
+                        ),
+                        keepingUnique: true
+                    )
+                },
+                transition: transition
+            )
+        }
     }
 }

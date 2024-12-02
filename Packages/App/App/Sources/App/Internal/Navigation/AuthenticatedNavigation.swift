@@ -128,7 +128,7 @@ struct AuthenticatedNavigation: View {
             case .onUserTap:
                 break
             }
-        }
+        }()
     }
     
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {
@@ -163,6 +163,6 @@ struct AuthenticatedNavigation: View {
             case .unauthorized(let reason):
                 store.dispatch(.unauthorized(reason: reason))
             }
-        }
+        }()
     }
 }

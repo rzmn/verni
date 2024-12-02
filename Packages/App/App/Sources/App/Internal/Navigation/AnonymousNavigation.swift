@@ -37,6 +37,14 @@ private extension AnonymousState.Tab {
 struct AnonymousNavigation: View {
     @ObservedObject private var store: Store<AppState, AppAction>
     
+    @State private var authWelcomeSourceOffset: CGFloat?
+    @State private var authWelcomeDestinationOffset: CGFloat?
+    
+    @State private var loginSourceOffset: CGFloat?
+    @State private var loginDestinationOffset: CGFloat?
+    
+    @State private var toLoginScreenTransitionProgress: CGFloat = 0
+    
     init(store: Store<AppState, AppAction>) {
         self.store = store
     }
@@ -47,23 +55,6 @@ struct AnonymousNavigation: View {
         } else {
             EmptyView()
         }
-//            .bottomBar(
-//                config: BottomBarConfig(
-//                    items: store.localState.tabs
-//                        .map(\.barTab)
-//                        .map(BottomBarItem.tab)
-//                ),
-//                tab: Binding(
-//                    get: {
-//                        store.localState.tab.barTab
-//                    }, set: { newValue in
-//                        guard let tab = store.localState.tabs.first(where: { $0.id == newValue.id }) else {
-//                            return assertionFailure("unexpected tab selected")
-//                        }
-//                        store.dispatch(.selectTabAnonymous(tab))
-//                    }
-//                )
-//            )
     }
     
     @ViewBuilder private func tabs(state: AnonymousState) -> some View {
@@ -74,10 +65,10 @@ struct AnonymousNavigation: View {
     }
     
     @ViewBuilder private func authTab(state: AnonymousState, authState: AnonymousState.AuthState) -> some View {
-        if authState.loggingIn {
-            loginView(state: state)
-        } else {
+        ZStack {
             authWelcomeView(state: state)
+            loginView(state: state)
+                .opacity(toLoginScreenTransitionProgress)
         }
     }
     
@@ -85,7 +76,9 @@ struct AnonymousNavigation: View {
         state.session.logInScreen.instantiate { event in
             switch event {
             case .dismiss:
-                store.dispatch(.loggingIn(false))
+                withAnimation(.default) {
+                    toLoginScreenTransitionProgress = 0
+                }
             case .forgotPassword:
                 break
             case .logIn(let di):
@@ -100,17 +93,19 @@ struct AnonymousNavigation: View {
                     )
                 }
             }
-        }
+        }(BottomSheetTransition(progress: $toLoginScreenTransitionProgress, sourceOffset: $loginSourceOffset, destinationOffset: $authWelcomeDestinationOffset))
     }
     
     private func authWelcomeView(state: AnonymousState) -> some View {
         state.session.authWelcomeScreen.instantiate { event in
             switch event {
             case .logIn:
-                store.dispatch(.loggingIn(true))
+                withAnimation(.default) {
+                    toLoginScreenTransitionProgress = 1.0
+                }
             case .signUp:
                 break
             }
-        }
+        }(BottomSheetTransition(progress: $toLoginScreenTransitionProgress, sourceOffset: $authWelcomeDestinationOffset, destinationOffset: $loginSourceOffset))
     }
 }

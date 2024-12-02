@@ -86,6 +86,8 @@ private struct FlipOpacity: AnimatableModifier {
     }
 }
 
+#if DEBUG
+
 private struct FlipPreview: View {
     @State private var flipsCount: CGFloat = 0
     
@@ -107,3 +109,5 @@ private struct FlipPreview: View {
 #Preview {
     FlipPreview()
 }
+
+#endif
