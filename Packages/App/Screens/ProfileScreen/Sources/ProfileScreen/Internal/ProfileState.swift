@@ -7,6 +7,6 @@ struct ProfileState: Equatable, Sendable {
         case noInternet
     }
     var profile: Loadable<Profile, ProfileLoadingFailureReason>
-    var avatarCardFlipCount: Int
+    var avatarCardFlipCount: CGFloat
     var qrCodeData: Data?
 }

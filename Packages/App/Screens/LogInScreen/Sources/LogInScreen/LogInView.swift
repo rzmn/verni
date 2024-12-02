@@ -14,22 +14,22 @@ public struct LogInView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                IconButton(
-                    config: IconButton.Config(
-                        style: .primary,
-                        icon: .arrowLeft
-                    )
-                ) {
-                    store.dispatch(.onTapBack)
-                }
-                Spacer()
-            }
-            .overlay {
-                Text(.loginScreenTitle)
-                    .font(.medium(size: 15))
-                    .foregroundStyle(colors.text.primary.staticLight)
-            }
+            NavigationBar(
+                config: NavigationBar.Config(
+                    leftItem: NavigationBar.Item(
+                        config: NavigationBar.ItemConfig(
+                            style: .primary,
+                            icon: .arrowLeft
+                        ),
+                        action: {
+                            store.dispatch(.onTapBack)
+                        }
+                    ),
+                    title: .loginScreenTitle,
+                    style: .brand
+                )
+            )
+            .padding(.bottom, 2)
             VStack {
                 DesignSystem.TextField(
                     text: Binding(get: {
@@ -113,7 +113,6 @@ public struct LogInView: View {
             )
         }
         .frame(maxWidth: .infinity)
-        .padding(.bottom, 12)
     }
 }
 
