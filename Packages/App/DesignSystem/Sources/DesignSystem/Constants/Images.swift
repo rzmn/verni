@@ -104,5 +104,16 @@ extension Image {
     public static var question: Image {
         Image("question", bundle: .module)
     }
+    
+    public static var splashTop: Image {
+        Image("splash-top", bundle: .module)
+    }
+    
+    public static var splashBottom: Image {
+        Image("splash-bottom", bundle: .module)
+    }
+    
+    public static var logoHorizontalSmall: Image {
+        Image("logo-horizontal-small", bundle: .module)
+    }
 }
-

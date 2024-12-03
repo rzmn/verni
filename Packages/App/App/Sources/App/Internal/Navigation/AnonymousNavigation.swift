@@ -37,16 +37,16 @@ private extension AnonymousState.Tab {
 struct AnonymousNavigation: View {
     @ObservedObject private var store: Store<AppState, AppAction>
     
-    @State private var authWelcomeSourceOffset: CGFloat?
     @State private var authWelcomeDestinationOffset: CGFloat?
-    
     @State private var loginSourceOffset: CGFloat?
-    @State private var loginDestinationOffset: CGFloat?
     
     @State private var toLoginScreenTransitionProgress: CGFloat = 0
     
-    init(store: Store<AppState, AppAction>) {
+    @Binding private var fromSplashTransitionProgress: CGFloat
+    
+    init(store: Store<AppState, AppAction>, fromSplashTransitionProgress: Binding<CGFloat>) {
         self.store = store
+        _fromSplashTransitionProgress = fromSplashTransitionProgress
     }
     
     var body: some View {
@@ -106,6 +106,19 @@ struct AnonymousNavigation: View {
             case .signUp:
                 break
             }
-        }(BottomSheetTransition(progress: $toLoginScreenTransitionProgress, sourceOffset: $authWelcomeDestinationOffset, destinationOffset: $loginSourceOffset))
+        }(
+            TwoSideTransition(
+                from: BottomSheetTransition(
+                    progress: $fromSplashTransitionProgress,
+                    sourceOffset: .constant(0),
+                    destinationOffset: $authWelcomeDestinationOffset
+                ),
+                to: BottomSheetTransition(
+                    progress: $toLoginScreenTransitionProgress,
+                    sourceOffset: $authWelcomeDestinationOffset,
+                    destinationOffset: $loginSourceOffset
+                )
+            )
+        )
     }
 }

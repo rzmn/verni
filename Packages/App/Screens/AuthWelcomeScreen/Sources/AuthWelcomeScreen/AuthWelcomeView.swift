@@ -6,15 +6,28 @@ public struct AuthWelcomeView: View {
     @ObservedObject var store: Store<AuthWelcomeState, AuthWelcomeAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    @Binding private var transitionProgress: CGFloat
-    @Binding private var destinationOffset: CGFloat?
-    @Binding private var sourceOffset: CGFloat?
+        
+    @Binding private var dismissalTransitionProgress: CGFloat
+    @Binding private var dismissalDestinationOffset: CGFloat?
+    @Binding private var dismissalSourceOffset: CGFloat?
+    
+    @Binding private var appearTransitionProgress: CGFloat
+    @Binding private var appearDestinationOffset: CGFloat?
+    @Binding private var appearSourceOffset: CGFloat?
 
-    init(store: Store<AuthWelcomeState, AuthWelcomeAction>, transition: BottomSheetTransition) {
+    init(
+        store: Store<AuthWelcomeState, AuthWelcomeAction>,
+        transitionFrom: BottomSheetTransition,
+        transitionTo: BottomSheetTransition
+    ) {
         self.store = store
-        _transitionProgress = transition.progress
-        _sourceOffset = transition.sourceOffset
-        _destinationOffset = transition.destinationOffset
+        _appearTransitionProgress = transitionFrom.progress
+        _appearSourceOffset = transitionFrom.sourceOffset
+        _appearDestinationOffset = transitionFrom.destinationOffset
+        
+        _dismissalTransitionProgress = transitionTo.progress
+        _dismissalSourceOffset = transitionTo.sourceOffset
+        _dismissalDestinationOffset = transitionTo.destinationOffset
     }
 
     public var body: some View {
@@ -38,14 +51,15 @@ public struct AuthWelcomeView: View {
                 .scaledToFit()
                 .padding(.horizontal, 1)
                 .foregroundStyle(colors.background.primary.default)
-                .modifier(TranslateEffect(offset:  -0.2 * transitionOffset))
+                .modifier(TranslateEffect(offset: -0.2 * dismissalTransitionOffset))
+                .modifier(TranslateEffect(offset: -0.2 * appearTransitionOffset))
             VStack {
                 titleSection
-                    .opacity(1 - transitionProgress)
+                    .opacity(1 - dismissalTransitionProgress)
                 Spacer()
                     .frame(height: 20)
                 signInOAuthSection
-                    .opacity(1 - transitionProgress)
+                    .opacity(1 - dismissalTransitionProgress)
                 Spacer()
                 bottomButtonsSection
             }
@@ -59,11 +73,12 @@ public struct AuthWelcomeView: View {
             .overlay {
                 GeometryReader { geometry in
                     Color.clear.onAppear {
-                        sourceOffset = geometry.frame(in: .global).minY
+                        dismissalSourceOffset = geometry.frame(in: .global).minY
+                        appearDestinationOffset = geometry.frame(in: .global).minY
                     }
                 }
             }
-            .padding(.top, 1 + transitionOffset)
+            .padding(.top, 1 + dismissalTransitionOffset + appearTransitionOffset)
         }
         .background(
             colors.background.brand.static
@@ -71,11 +86,18 @@ public struct AuthWelcomeView: View {
         )
     }
     
-    private var transitionOffset: CGFloat {
-        guard let sourceOffset, let destinationOffset else {
+    private var dismissalTransitionOffset: CGFloat {
+        guard let dismissalSourceOffset, let dismissalDestinationOffset else {
             return 0
         }
-        return (destinationOffset - sourceOffset) * transitionProgress
+        return (dismissalDestinationOffset - dismissalSourceOffset) * dismissalTransitionProgress
+    }
+    
+    private var appearTransitionOffset: CGFloat {
+        guard let appearSourceOffset, let appearDestinationOffset else {
+            return 0
+        }
+        return (appearSourceOffset - appearDestinationOffset) * (1 - appearTransitionProgress)
     }
     
     private var titleSection: some View {
@@ -84,6 +106,7 @@ public struct AuthWelcomeView: View {
             .font(.medium(size: 13))
             .multilineTextAlignment(.center)
             .padding(.vertical, 16)
+            .opacity(appearTransitionProgress)
     }
     
     private var signInOAuthSection: some View {
@@ -107,6 +130,7 @@ public struct AuthWelcomeView: View {
             }
         }
         .padding(.horizontal, 16)
+        .opacity(appearTransitionProgress)
     }
     
     private var bottomButtonsSection: some View {
@@ -132,26 +156,16 @@ public struct AuthWelcomeView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
-    }
-}
-
-struct TranslateEffect: GeometryEffect {
-    var offset: CGFloat
-
-    var animatableData: CGFloat {
-        get { offset }
-        set { offset = newValue }
-    }
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        return ProjectionTransform(CGAffineTransform(translationX: 0, y: offset))
+        .opacity(appearTransitionProgress)
+        .modifier(TranslateEffect(offset: -0.4 * appearTransitionOffset))
     }
 }
 
 #if DEBUG
 
 private struct AuthWelcomePreview: View {
-    @State var transition: CGFloat = 0
+    @State var appearTransition: CGFloat = 0
+    @State var dismissTransition: CGFloat = 0
     @State var sourceOffset: CGFloat?
     
     var body: some View {
@@ -161,16 +175,23 @@ private struct AuthWelcomePreview: View {
                     state: AuthWelcomeModel.initialState,
                     reducer: AuthWelcomeModel.reducer
                 ),
-                transition: BottomSheetTransition(
-                    progress: $transition,
+                transitionFrom: BottomSheetTransition(
+                    progress: $appearTransition,
+                    sourceOffset: .constant(0),
+                    destinationOffset: $sourceOffset
+                ),
+                transitionTo: BottomSheetTransition(
+                    progress: $dismissTransition,
                     sourceOffset: $sourceOffset,
-                    destinationOffset: .constant(102)
+                    destinationOffset: .constant(0)
                 )
+                
             )
             VStack {
                 Text("sourceOffset: \(sourceOffset ?? -1)")
                     .foregroundStyle(.red)
-                Slider(value: $transition, in: 0...1)
+                Slider(value: $appearTransition, in: 0...1)
+                Slider(value: $dismissTransition, in: 0...1)
             }
         }
     }

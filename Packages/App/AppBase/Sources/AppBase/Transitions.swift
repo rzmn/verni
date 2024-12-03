@@ -4,7 +4,17 @@ public protocol Transition {
     var progress: Binding<CGFloat> { get }
 }
 
-public struct BottomSheetTransition {
+public struct TwoSideTransition<From: Transition, To: Transition> {
+    public let from: From
+    public let to: To
+    
+    public init(from: From, to: To) {
+        self.from = from
+        self.to = to
+    }
+}
+
+public struct BottomSheetTransition: Transition {
     public let progress: Binding<CGFloat>
     public let sourceOffset: Binding<CGFloat?>
     public let destinationOffset: Binding<CGFloat?>

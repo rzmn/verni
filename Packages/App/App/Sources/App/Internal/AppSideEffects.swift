@@ -39,30 +39,40 @@ extension AppSideEffects: ActionHandler {
 
     private func launch() {
         Task {
-            await doLaunch()
+            await doLaunchWithFakePause()
         }
     }
     
-    private func doLaunch() async {
+    private func doLaunchWithFakePause() async {
+        async let sleep: () = await Task.sleep(timeInterval: 1)
+        async let launch = await doLaunch()
+
+        let result = try? await (sleep, launch)
+        guard let result else {
+            return
+        }
+        let (_, action) = result
+        store.dispatch(action)
+    }
+    
+    private func doLaunch() async -> AppAction {
         let session = await AnonymousPresentationLayerSession(di: di)
         do {
-            store.dispatch(
-                .launched(
-                    .authenticated(
-                        await AuthenticatedPresentationLayerSession(
-                            di: try await di.authUseCase().awake(),
-                            fallback: session
-                        )
+            return .launched(
+                .authenticated(
+                    await AuthenticatedPresentationLayerSession(
+                        di: try await di.authUseCase().awake(),
+                        fallback: session
                     )
                 )
             )
         } catch {
             switch error {
             case .hasNoSession:
-                store.dispatch(.launched(.anonymous(session)))
+                return .launched(.anonymous(session))
             case .internalError(let error):
                 assertionFailure("log me \(error)")
-                store.dispatch(.launched(.anonymous(session)))
+                return .launched(.anonymous(session))
             }
         }
     }

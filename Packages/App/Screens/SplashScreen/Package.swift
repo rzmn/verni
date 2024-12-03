@@ -4,32 +4,34 @@
 import PackageDescription
 
 let package = Package(
-    name: "AppBase",
+    name: "SplashScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AppBase",
-            targets: ["AppBase"]
+            name: "SplashScreen",
+            targets: ["SplashScreen"]
         )
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
-        .package(path: "../../Infrastructure/Logging"),
-        .package(path: "../../Domain/Domain"),
+        .package(path: "../../AppBase"),
         .package(path: "../../DesignSystem"),
-        .package(url: "https://github.com/Ekhoo/Device.git", from: "3.7.0")
+        .package(path: "../../../DI/DI"),
+        .package(path: "../../../Domain/Domain"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Base")
     ],
     targets: [
         .target(
-            name: "AppBase",
+            name: "SplashScreen",
             dependencies: [
-                "Base",
-                "Logging",
-                "Domain",
                 "DesignSystem",
-                "Device"
+                "DI",
+                "Domain",
+                "Logging",
+                "Base",
+                "AppBase"
             ],
             swiftSettings: [
                 .enableExperimentalFeature("AccessLevelOnImport"),

@@ -2,7 +2,7 @@ import AppBase
 import DI
 
 public protocol AuthWelcomeFactory: Sendable {
-    func create() async -> any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, BottomSheetTransition>
+    func create() async -> any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, TwoSideTransition<BottomSheetTransition, BottomSheetTransition>>
 }
 
 public final class DefaultAuthWelcomeFactory: AuthWelcomeFactory {
@@ -12,7 +12,7 @@ public final class DefaultAuthWelcomeFactory: AuthWelcomeFactory {
         self.di = di
     }
 
-    public func create() async -> any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, BottomSheetTransition> {
+    public func create() async -> any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, TwoSideTransition<BottomSheetTransition, BottomSheetTransition>> {
         await AuthWelcomeModel(di: di)
     }
 }
