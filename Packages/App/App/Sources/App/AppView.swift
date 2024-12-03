@@ -75,12 +75,14 @@ public struct AppView: View {
         case .launched(let state):
             switch state {
             case .authenticated:
-                AuthenticatedNavigation(store: store)
+                AuthenticatedNavigation(store: store, appearTransitionProgress: $toContentTransitionProgress)
+                    .opacity(contentOpacity)
                     .onAppear {
-                        withAnimation {
+                        withAnimation(.default) {
                             fromSplashTransitionProgress = 1
                         } completion: {
-                            withAnimation {
+                            contentOpacity = 1
+                            withAnimation(.default) {
                                 toContentTransitionProgress = 1
                             } completion: {
                                 splashIsLocked = true

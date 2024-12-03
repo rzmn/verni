@@ -83,7 +83,7 @@ extension AppModel {
                 .addExpense,
                 .item(.profile),
             ],
-            tab: .profile
+            tab: .spendings
         )
     }
 }

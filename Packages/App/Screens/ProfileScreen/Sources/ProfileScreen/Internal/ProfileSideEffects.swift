@@ -1,5 +1,6 @@
 import Domain
 import AppBase
+import UIKit
 
 @MainActor final class ProfileSideEffects: Sendable {
     private unowned let store: Store<ProfileState, ProfileAction>
@@ -40,15 +41,15 @@ extension ProfileSideEffects: ActionHandler {
     private func requestQrImage(size: Int) {
         Task.detached {
             let data = try? await self.qrUseCase.generate(
-                background: .white,
+                background: .clear,
                 tint: .black,
                 size: size,
                 userId: self.userId
             )
-            guard let data else {
+            guard let data, let image = UIImage(data: data)?.withRenderingMode(.alwaysTemplate) else {
                 return
             }
-            await self.store.dispatch(.onQrImageReady(data))
+            await self.store.dispatch(.onQrImageReady(image))
         }
     }
     

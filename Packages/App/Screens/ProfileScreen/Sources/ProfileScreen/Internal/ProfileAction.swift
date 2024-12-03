@@ -1,5 +1,6 @@
 import Foundation
 import Domain
+import UIKit
 internal import DesignSystem
 
 enum ProfileAction {
@@ -14,7 +15,7 @@ enum ProfileAction {
     
     case onShowQrHintTap
     case onRequestQrImage(size: Int)
-    case onQrImageReady(Data)
+    case onQrImageReady(UIImage)
     
     case unauthorized(reason: String)
 }

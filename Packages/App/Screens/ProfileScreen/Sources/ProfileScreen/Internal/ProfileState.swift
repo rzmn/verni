@@ -1,5 +1,6 @@
 import Foundation
 import Domain
+import UIKit
 internal import DesignSystem
 
 struct ProfileState: Equatable, Sendable {
@@ -8,5 +9,5 @@ struct ProfileState: Equatable, Sendable {
     }
     var profile: Loadable<Profile, ProfileLoadingFailureReason>
     var avatarCardFlipCount: CGFloat
-    var qrCodeData: Data?
+    var qrCodeData: UIImage?
 }

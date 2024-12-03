@@ -162,7 +162,7 @@ extension ColorPalette {
                 case .dark:
                     .hex(0xFFFFFF)
                 case .light:
-                    .hex(0xFFFFFF)
+                    .hex(0x051125)
                 }
             }
             

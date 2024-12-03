@@ -44,9 +44,11 @@ private extension AuthenticatedState.TabItem {
 
 struct AuthenticatedNavigation: View {
     @ObservedObject private var store: Store<AppState, AppAction>
+    @Binding private var appearTransitionProgress: CGFloat
     
-    init(store: Store<AppState, AppAction>) {
+    init(store: Store<AppState, AppAction>, appearTransitionProgress: Binding<CGFloat>) {
         self.store = store
+        _appearTransitionProgress = appearTransitionProgress
     }
     
     var body: some View {
@@ -81,7 +83,8 @@ struct AuthenticatedNavigation: View {
                             }
                             store.dispatch(.selectTabAuthenticated(tab))
                         }
-                    )
+                    ),
+                    appearTransitionProgress: $appearTransitionProgress
                 )
                 .bottomSheet(
                     preset: Binding(
@@ -128,7 +131,7 @@ struct AuthenticatedNavigation: View {
             case .onUserTap:
                 break
             }
-        }()
+        }(BottomSheetTransition(progress: $appearTransitionProgress, sourceOffset: .constant(nil), destinationOffset: .constant(nil)))
     }
     
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {

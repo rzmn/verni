@@ -135,13 +135,12 @@ public struct ProfileView: View {
     }
     
     @ViewBuilder private var qrCodeCard: some View {
-        Color.white
+        colors.background.primary.alternative
             .overlay {
                 GeometryReader { geometry in
                     let side = CGFloat(qrCodeSide(geometry: geometry))
                     let image = store.state.qrCodeData
-                        .flatMap(UIImage.init(data:))
-                        .map(Image.init(uiImage:))
+                        .flatMap(Image.init(uiImage:))
                     if let image {
                         HStack(spacing: 0) {
                             Spacer()
@@ -150,6 +149,7 @@ public struct ProfileView: View {
                                 image
                                     .resizable()
                                     .aspectRatio(1, contentMode: .fit)
+                                    .foregroundStyle(colors.text.primary.alternative)
                                     .frame(width: side, height: side)
                                 Spacer()
                             }
@@ -265,6 +265,6 @@ public struct ProfileView: View {
             reducer: ProfileModel.reducer
         )
     )
-    .environment(ColorPalette.dark)
+    .environment(ColorPalette.light)
     .preview(packageClass: ProfileModel.self)
 }

@@ -69,7 +69,7 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
     
     private func cachePath(for userId: String) -> URL? {
         cacheDirectory?.appending(
-            component: "\(userId).svg"
+            component: "\(userId)_v2.svg"
         )
     }
     

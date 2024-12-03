@@ -7,9 +7,16 @@ public struct SpendingsView: View {
     @ObservedObject var store: Store<SpendingsState, SpendingsAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
+    
+    @Binding private var appearTransitionProgress: CGFloat
+    @Binding private var appearDestinationOffset: CGFloat?
+    @Binding private var appearSourceOffset: CGFloat?
 
-    init(store: Store<SpendingsState, SpendingsAction>) {
+    init(store: Store<SpendingsState, SpendingsAction>, transition: BottomSheetTransition) {
         self.store = store
+        _appearTransitionProgress = transition.progress
+        _appearSourceOffset = transition.sourceOffset
+        _appearDestinationOffset = transition.destinationOffset
     }
 
     public var body: some View {
@@ -29,7 +36,10 @@ public struct SpendingsView: View {
                     style: .primary
                 )
             )
+            .modifier(TranslateEffect(offset: -0.8 * appearTransitionOffset))
             overallSection
+                .padding(.top, appearTransitionOffset)
+                .opacity(appearTransitionProgress)
             ForEach(items) { (item: SpendingsState.Item) in
                 SpendingsItem(
                     config: SpendingsItem.Config(
@@ -40,9 +50,17 @@ public struct SpendingsView: View {
                     )
                 )
             }
+            .opacity(appearTransitionProgress)
             Spacer()
         }
-        .background(colors.background.secondary.default)
+        .background(
+            colors.background.secondary.default.opacity(appearTransitionProgress)
+                .ignoresSafeArea()
+        )
+    }
+    
+    private var appearTransitionOffset: CGFloat {
+        (1 - appearTransitionProgress) * UIScreen.main.bounds.height / 5
     }
     
     private var items: [SpendingsState.Item] {
@@ -74,30 +92,54 @@ public struct SpendingsView: View {
     }
 }
 
-#Preview {
-    SpendingsView(
-        store: Store(
-            state: SpendingsState(
-                previews: .loaded(
-                    [
-                        SpendingsState.Item(
-                            user: User(
-                                id: UUID().uuidString,
-                                status: .friend,
-                                displayName: "berchikk",
-                                avatar: nil
-                            ),
-                            balance: [
-                                .euro: 123
+#if DEBUG
+
+private struct SpendingsPreview: View {
+    @State var appearTransition: CGFloat = 0
+    @State var sourceOffset: CGFloat?
+    
+    var body: some View {
+        ZStack {
+            SpendingsView(
+                store:  Store(
+                    state: SpendingsState(
+                        previews: .loaded(
+                            [
+                                SpendingsState.Item(
+                                    user: User(
+                                        id: UUID().uuidString,
+                                        status: .friend,
+                                        displayName: "berchikk",
+                                        avatar: nil
+                                    ),
+                                    balance: [
+                                        .euro: 123
+                                    ]
+                                )
                             ]
                         )
-                    ]
+                    ),
+                    reducer: SpendingsModel.reducer
+                ),
+                transition: BottomSheetTransition(
+                    progress: $appearTransition,
+                    sourceOffset: .constant(0),
+                    destinationOffset: $sourceOffset
                 )
-            ),
-            reducer: SpendingsModel.reducer
-        )
-    )
-    .environment(ColorPalette.dark)
-    .environment(AvatarView.Repository.preview)
-    .preview(packageClass: SpendingsModel.self)
+                
+            )
+            VStack {
+                Text("sourceOffset: \(sourceOffset ?? -1)")
+                    .foregroundStyle(.red)
+                Slider(value: $appearTransition, in: 0...1)
+            }
+        }
+    }
 }
+
+#Preview {
+    SpendingsPreview()
+        .preview(packageClass: SpendingsModel.self)
+}
+
+#endif
