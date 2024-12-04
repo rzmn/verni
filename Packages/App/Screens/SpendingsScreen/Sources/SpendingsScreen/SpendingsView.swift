@@ -11,12 +11,20 @@ public struct SpendingsView: View {
     @Binding private var appearTransitionProgress: CGFloat
     @Binding private var appearDestinationOffset: CGFloat?
     @Binding private var appearSourceOffset: CGFloat?
+    
+    @Binding private var tabTransitionProgress: CGFloat
 
-    init(store: Store<SpendingsState, SpendingsAction>, transition: BottomSheetTransition) {
+    init(
+        store: Store<SpendingsState, SpendingsAction>,
+        transitions: SpendingsTransitions
+    ) {
         self.store = store
-        _appearTransitionProgress = transition.progress
-        _appearSourceOffset = transition.sourceOffset
-        _appearDestinationOffset = transition.destinationOffset
+        
+        _appearTransitionProgress = transitions.appear.progress
+        _appearSourceOffset = transitions.appear.sourceOffset
+        _appearDestinationOffset = transitions.appear.destinationOffset
+        
+        _tabTransitionProgress = transitions.tab.progress
     }
 
     public var body: some View {
@@ -36,10 +44,13 @@ public struct SpendingsView: View {
                     style: .primary
                 )
             )
-            .modifier(TranslateEffect(offset: -0.8 * appearTransitionOffset))
+            .modifier(VerticalTranslateEffect(offset: -0.8 * appearTransitionOffset))
+            .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
+            .opacity(tabTransitionOpacity)
             overallSection
                 .padding(.top, appearTransitionOffset)
-                .opacity(appearTransitionProgress)
+                .opacity(adjustedTransitionOpacity)
+                .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             ForEach(items) { (item: SpendingsState.Item) in
                 SpendingsItem(
                     config: SpendingsItem.Config(
@@ -50,13 +61,22 @@ public struct SpendingsView: View {
                     )
                 )
             }
-            .opacity(appearTransitionProgress)
+            .opacity(adjustedTransitionOpacity)
+            .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             Spacer()
         }
-        .background(
-            colors.background.secondary.default.opacity(appearTransitionProgress)
-                .ignoresSafeArea()
-        )
+    }
+    
+    private var adjustedTransitionOpacity: CGFloat {
+        tabTransitionOpacity * appearTransitionProgress
+    }
+    
+    private var tabTransitionOpacity: CGFloat {
+        1 - abs(tabTransitionProgress)
+    }
+    
+    private var tabTransitionOffset: CGFloat {
+        28 * tabTransitionProgress
     }
     
     private var appearTransitionOffset: CGFloat {
@@ -72,6 +92,7 @@ public struct SpendingsView: View {
             Image.chevronDown
                 .frame(width: 24, height: 24)
                 .padding(.leading, 16)
+                .foregroundStyle(colors.text.primary.alternative)
             VStack(alignment: .leading, spacing: 0) {
                 Text(.spendingsOverallTitle)
                     .font(.bold(size: 15))
@@ -95,7 +116,8 @@ public struct SpendingsView: View {
 #if DEBUG
 
 private struct SpendingsPreview: View {
-    @State var appearTransition: CGFloat = 0
+    @State var appearTransition: CGFloat = 1
+    @State var tabTransition: CGFloat = 0
     @State var sourceOffset: CGFloat?
     
     var body: some View {
@@ -121,10 +143,15 @@ private struct SpendingsPreview: View {
                     ),
                     reducer: SpendingsModel.reducer
                 ),
-                transition: BottomSheetTransition(
-                    progress: $appearTransition,
-                    sourceOffset: .constant(0),
-                    destinationOffset: $sourceOffset
+                transitions: SpendingsTransitions(
+                    appear: ModalTransition(
+                        progress: $appearTransition,
+                        sourceOffset: .constant(0),
+                        destinationOffset: $sourceOffset
+                    ),
+                    tab: TabTransition(
+                        progress: $tabTransition
+                    )
                 )
                 
             )
@@ -132,6 +159,7 @@ private struct SpendingsPreview: View {
                 Text("sourceOffset: \(sourceOffset ?? -1)")
                     .foregroundStyle(.red)
                 Slider(value: $appearTransition, in: 0...1)
+                Slider(value: $tabTransition, in: -1...1)
             }
         }
     }

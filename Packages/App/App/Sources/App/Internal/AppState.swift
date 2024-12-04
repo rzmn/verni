@@ -28,15 +28,53 @@ struct AuthenticatedState: Equatable, Sendable {
         case item(TabItem)
         case addExpense
     }
-    enum TabItem: Equatable {
+    enum TabItem: Equatable, Identifiable {
         case spendings
         case profile
+        
+        var id: String {
+            switch self {
+            case .spendings:
+                "spendings"
+            case .profile:
+                "profile"
+            }
+        }
+    }
+    enum TabPosition {
+        case exact
+        case toTheLeft
+        case toTheRight
     }
     @EquatableByAddress var session: AuthenticatedPresentationLayerSession
     var tabs: [Tab]
     var tab: TabItem
     var bottomSheet: AlertBottomSheetPreset?
     var unauthenticatedFailure: String?
+    
+    var tabItems: [TabItem] {
+        tabs.compactMap {
+            switch $0 {
+            case .addExpense:
+                return nil
+            case .item(let item):
+                return item
+            }
+        }
+    }
+    
+    func position(of tabItem: TabItem) -> TabPosition? {
+        guard let center = tabs.firstIndex(of: .item(tab)), let index = tabs.firstIndex(of: .item(tabItem)) else {
+            return nil
+        }
+        if center == index {
+            return .exact
+        } else if center < index {
+            return .toTheRight
+        } else {
+            return .toTheLeft
+        }
+    }
 }
 
 struct AnonymousState: Equatable, Sendable {

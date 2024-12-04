@@ -10,7 +10,7 @@ public struct SplashView: View {
     @Binding private var destinationOffset: CGFloat?
     @Binding private var sourceOffset: CGFloat?
 
-    init(transition: BottomSheetTransition) {
+    init(transition: ModalTransition) {
         _transitionProgress = transition.progress
         _sourceOffset = transition.sourceOffset
         _destinationOffset = transition.destinationOffset
@@ -31,12 +31,12 @@ public struct SplashView: View {
                             }
                     }
                 }
-                .modifier(TranslateEffect(offset: -transitionOffset))
+                .modifier(VerticalTranslateEffect(offset: -transitionOffset))
             Image.splashBottom
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(colors.background.primary.default)
-                .modifier(TranslateEffect(offset: transitionOffset * 2))
+                .modifier(VerticalTranslateEffect(offset: transitionOffset * 2))
         }
         .aspectRatio(402.0 / 778.0, contentMode: .fit)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -65,7 +65,7 @@ private struct SplashPreview: View {
     var body: some View {
         ZStack {
             SplashView(
-                transition: BottomSheetTransition(
+                transition: ModalTransition(
                     progress: $transition,
                     sourceOffset: $sourceOffset,
                     destinationOffset: .constant(0)

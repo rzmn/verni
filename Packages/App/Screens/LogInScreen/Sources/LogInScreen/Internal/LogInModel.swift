@@ -28,7 +28,7 @@ actor LogInModel {
 @MainActor extension LogInModel: ScreenProvider {
     func instantiate(
         handler: @escaping @MainActor (LogInEvent) -> Void
-    ) -> (BottomSheetTransition) -> LogInView {
+    ) -> (ModalTransition) -> LogInView {
         return { transition in
             LogInView(
                 store: modify(self.store) { store in

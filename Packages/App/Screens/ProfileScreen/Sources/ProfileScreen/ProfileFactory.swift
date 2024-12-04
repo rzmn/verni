@@ -2,7 +2,7 @@ import AppBase
 import DI
 
 public protocol ProfileFactory: Sendable {
-    func create() async -> any ScreenProvider<ProfileEvent, ProfileView, Void>
+    func create() async -> any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
 }
 
 public final class DefaultProfileFactory: ProfileFactory {
@@ -12,7 +12,7 @@ public final class DefaultProfileFactory: ProfileFactory {
         self.di = di
     }
 
-    public func create() async -> any ScreenProvider<ProfileEvent, ProfileView, Void> {
+    public func create() async -> any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions> {
         await ProfileModel(di: di)
     }
 }

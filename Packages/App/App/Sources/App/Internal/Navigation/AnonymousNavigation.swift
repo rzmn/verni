@@ -1,5 +1,6 @@
 import SwiftUI
 import AppBase
+internal import AuthWelcomeScreen
 internal import DesignSystem
 
 private extension Store<AppState, AppAction> {
@@ -93,7 +94,7 @@ struct AnonymousNavigation: View {
                     )
                 }
             }
-        }(BottomSheetTransition(progress: $toLoginScreenTransitionProgress, sourceOffset: $loginSourceOffset, destinationOffset: $authWelcomeDestinationOffset))
+        }(ModalTransition(progress: $toLoginScreenTransitionProgress, sourceOffset: $loginSourceOffset, destinationOffset: $authWelcomeDestinationOffset))
     }
     
     private func authWelcomeView(state: AnonymousState) -> some View {
@@ -107,13 +108,13 @@ struct AnonymousNavigation: View {
                 break
             }
         }(
-            TwoSideTransition(
-                from: BottomSheetTransition(
+            AuthWelcomeTransitions(
+                appear: ModalTransition(
                     progress: $fromSplashTransitionProgress,
                     sourceOffset: .constant(0),
                     destinationOffset: $authWelcomeDestinationOffset
                 ),
-                to: BottomSheetTransition(
+                dismiss: ModalTransition(
                     progress: $toLoginScreenTransitionProgress,
                     sourceOffset: $authWelcomeDestinationOffset,
                     destinationOffset: $loginSourceOffset

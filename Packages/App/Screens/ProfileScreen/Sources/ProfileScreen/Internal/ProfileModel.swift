@@ -34,12 +34,10 @@ actor ProfileModel {
 }
 
 @MainActor extension ProfileModel: ScreenProvider {
-    typealias Args = Void
-    
     func instantiate(
         handler: @escaping @MainActor (ProfileEvent) -> Void
-    ) -> (Args) -> ProfileView {
-        return { _ in
+    ) -> (ProfileTransitions) -> ProfileView {
+        return { transitions in
             ProfileView(
                 store: modify(self.store) { store in
                     store.append(
@@ -60,7 +58,8 @@ actor ProfileModel {
                         ),
                         keepingUnique: true
                     )
-                }
+                },
+                transitions: transitions
             )
         }
     }

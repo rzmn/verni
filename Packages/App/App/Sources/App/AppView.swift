@@ -60,7 +60,7 @@ public struct AppView: View {
     
     @ViewBuilder private var contentWithSplash: some View {
         ZStack {
-            DefaultSplashFactory().instantiate()(BottomSheetTransition(progress: $fromSplashTransitionProgress, sourceOffset: $splashDestinationOffset, destinationOffset: $authWelcomeSourceOffset))
+            DefaultSplashFactory().instantiate()(ModalTransition(progress: $fromSplashTransitionProgress, sourceOffset: $splashDestinationOffset, destinationOffset: $authWelcomeSourceOffset))
             .onAppear {
                 store.dispatch(.launch)
             }

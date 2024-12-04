@@ -22,7 +22,7 @@ actor AuthWelcomeModel {
 @MainActor extension AuthWelcomeModel: ScreenProvider {
     func instantiate(
         handler: @escaping @MainActor (AuthWelcomeEvent) -> Void
-    ) -> (TwoSideTransition<BottomSheetTransition, BottomSheetTransition>) -> AuthWelcomeView {
+    ) -> (AuthWelcomeTransitions) -> AuthWelcomeView {
         return { transition in
             AuthWelcomeView(
                 store: modify(self.store) { store in
@@ -43,8 +43,8 @@ actor AuthWelcomeModel {
                         keepingUnique: true
                     )
                 },
-                transitionFrom: transition.from,
-                transitionTo: transition.to
+                transitionFrom: transition.appear,
+                transitionTo: transition.dismiss
             )
         }
     }

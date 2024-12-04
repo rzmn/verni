@@ -17,8 +17,8 @@ public struct AuthWelcomeView: View {
 
     init(
         store: Store<AuthWelcomeState, AuthWelcomeAction>,
-        transitionFrom: BottomSheetTransition,
-        transitionTo: BottomSheetTransition
+        transitionFrom: ModalTransition,
+        transitionTo: ModalTransition
     ) {
         self.store = store
         _appearTransitionProgress = transitionFrom.progress
@@ -51,8 +51,8 @@ public struct AuthWelcomeView: View {
                 .scaledToFit()
                 .padding(.horizontal, 1)
                 .foregroundStyle(colors.background.primary.default)
-                .modifier(TranslateEffect(offset: -0.2 * dismissalTransitionOffset))
-                .modifier(TranslateEffect(offset: -0.2 * appearTransitionOffset))
+                .modifier(VerticalTranslateEffect(offset: -0.2 * dismissalTransitionOffset))
+                .modifier(VerticalTranslateEffect(offset: -0.2 * appearTransitionOffset))
             VStack {
                 titleSection
                     .opacity(1 - dismissalTransitionProgress)
@@ -157,7 +157,7 @@ public struct AuthWelcomeView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
         .opacity(appearTransitionProgress)
-        .modifier(TranslateEffect(offset: -0.4 * appearTransitionOffset))
+        .modifier(VerticalTranslateEffect(offset: -0.4 * appearTransitionOffset))
     }
 }
 
@@ -175,12 +175,12 @@ private struct AuthWelcomePreview: View {
                     state: AuthWelcomeModel.initialState,
                     reducer: AuthWelcomeModel.reducer
                 ),
-                transitionFrom: BottomSheetTransition(
+                transitionFrom: ModalTransition(
                     progress: $appearTransition,
                     sourceOffset: .constant(0),
                     destinationOffset: $sourceOffset
                 ),
-                transitionTo: BottomSheetTransition(
+                transitionTo: ModalTransition(
                     progress: $dismissTransition,
                     sourceOffset: $sourceOffset,
                     destinationOffset: .constant(0)

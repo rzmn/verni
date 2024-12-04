@@ -4,8 +4,8 @@ internal import AuthWelcomeScreen
 internal import LogInScreen
 
 @MainActor final class AnonymousPresentationLayerSession: Sendable {
-    let authWelcomeScreen: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, TwoSideTransition<BottomSheetTransition, BottomSheetTransition>>
-    let logInScreen: any ScreenProvider<LogInEvent, LogInView, BottomSheetTransition>
+    let authWelcomeScreen: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, AuthWelcomeTransitions>
+    let logInScreen: any ScreenProvider<LogInEvent, LogInView, ModalTransition>
 
     init(di: AnonymousDomainLayerSession) async {
         authWelcomeScreen = await DefaultAuthWelcomeFactory(di: di).create()

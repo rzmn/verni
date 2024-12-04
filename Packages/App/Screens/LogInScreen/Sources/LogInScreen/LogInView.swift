@@ -11,7 +11,7 @@ public struct LogInView: View {
     @Binding private var destinationOffset: CGFloat?
     @Binding private var sourceOffset: CGFloat?
 
-    init(store: Store<LogInState, LogInAction>, transition: BottomSheetTransition) {
+    init(store: Store<LogInState, LogInAction>, transition: ModalTransition) {
         self.store = store
         _transitionProgress = transition.progress
         _sourceOffset = transition.sourceOffset
@@ -143,7 +143,7 @@ private struct LogInPreview: View {
                     state: LogInModel.initialState,
                     reducer: LogInModel.reducer
                 ),
-                transition: BottomSheetTransition(
+                transition: ModalTransition(
                     progress: $transition,
                     sourceOffset: $sourceOffset,
                     destinationOffset: .constant(400)

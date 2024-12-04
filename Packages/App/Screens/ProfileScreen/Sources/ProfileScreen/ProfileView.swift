@@ -8,9 +8,12 @@ public struct ProfileView: View {
     @ObservedObject var store: Store<ProfileState, ProfileAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
+    
+    @Binding private var tabTransitionProgress: CGFloat
 
-    init(store: Store<ProfileState, ProfileAction>) {
+    init(store: Store<ProfileState, ProfileAction>, transitions: ProfileTransitions) {
         self.store = store
+        _tabTransitionProgress = transitions.tab.progress
     }
 
     public var body: some View {
@@ -40,6 +43,8 @@ public struct ProfileView: View {
                 )
             )
             .background(colors.background.secondary.default)
+            .opacity(tabTransitionOpacity)
+            .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             FlipView(
                 frontView: avatarCard.padding(.all, 2),
                 backView: qrCodeCard.padding(.all, 2),
@@ -65,11 +70,13 @@ public struct ProfileView: View {
                     )
             )
             .clipped()
+            .opacity(tabTransitionOpacity)
+            .animation(.default.speed(10), value: tabTransitionOpacity)
+            .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             menuOptions
                 .padding(.horizontal, 2)
 
         }
-        .background(colors.background.primary.default)
         .overlay {
             GeometryReader { geometry in
                 Color.clear
@@ -187,6 +194,14 @@ public struct ProfileView: View {
         CGSize(width: 371, height: 281)
     }
     
+    private var tabTransitionOpacity: CGFloat {
+        1 - abs(tabTransitionProgress)
+    }
+    
+    private var tabTransitionOffset: CGFloat {
+        28 * tabTransitionProgress
+    }
+    
     private func qrCodeSide(geometry: GeometryProxy) -> Int {
         Int(
             min(
@@ -241,30 +256,54 @@ public struct ProfileView: View {
             .padding(.top, 2)
             Spacer()
         }
+        .opacity(tabTransitionOpacity)
+        .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
+    }
+}
+
+#if DEBUG
+
+private struct ProfilePreview: View {
+    @State var tabTransition: CGFloat = 0
+    
+    var body: some View {
+        ZStack {
+            ProfileView(
+                store: Store(
+                    state: modify(ProfileModel.initialState) {
+                        $0.profile = .loaded(
+                            Profile(
+                                user: User(
+                                    id: "",
+                                    status: .currentUser,
+                                    displayName: "berchikk",
+                                    avatar: Avatar(id: "123")
+                                ),
+                                email: "email@verni.co",
+                                isEmailVerified: false
+                            )
+                        )
+                        $0.avatarCardFlipCount = 1
+                    },
+                    reducer: ProfileModel.reducer
+                ),
+                transitions: ProfileTransitions(
+                    tab: TabTransition(
+                        progress: $tabTransition
+                    )
+                )
+            )
+            .environment(ColorPalette.light)
+            VStack {
+                Slider(value: $tabTransition, in: -1...1)
+            }
+        }
     }
 }
 
 #Preview {
-    ProfileView(
-        store: Store(
-            state: modify(ProfileModel.initialState) {
-                $0.profile = .loaded(
-                    Profile(
-                        user: User(
-                            id: "",
-                            status: .currentUser,
-                            displayName: "berchikk",
-                            avatar: Avatar(id: "123")
-                        ),
-                        email: "email@verni.co",
-                        isEmailVerified: false
-                    )
-                )
-                $0.avatarCardFlipCount = 1
-            },
-            reducer: ProfileModel.reducer
-        )
-    )
-    .environment(ColorPalette.light)
-    .preview(packageClass: ProfileModel.self)
+    ProfilePreview()
+        .preview(packageClass: ProfileModel.self)
 }
+
+#endif

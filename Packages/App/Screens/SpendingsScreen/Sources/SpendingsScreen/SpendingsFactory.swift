@@ -2,7 +2,7 @@ import AppBase
 import DI
 
 public protocol SpendingsFactory: Sendable {
-    func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView, BottomSheetTransition>
+    func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions>
 }
 
 public final class DefaultSpendingsFactory: SpendingsFactory {
@@ -12,7 +12,7 @@ public final class DefaultSpendingsFactory: SpendingsFactory {
         self.di = di
     }
 
-    public func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView, BottomSheetTransition> {
+    public func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions> {
         await SpendingsModel(di: di)
     }
 }

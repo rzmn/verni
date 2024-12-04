@@ -1,20 +1,14 @@
 import SwiftUI
 
-public protocol Transition {
-    var progress: Binding<CGFloat> { get }
-}
-
-public struct TwoSideTransition<From: Transition, To: Transition> {
-    public let from: From
-    public let to: To
+public struct TabTransition {
+    public let progress: Binding<CGFloat>
     
-    public init(from: From, to: To) {
-        self.from = from
-        self.to = to
+    public init(progress: Binding<CGFloat>) {
+        self.progress = progress
     }
 }
 
-public struct BottomSheetTransition: Transition {
+public struct ModalTransition {
     public let progress: Binding<CGFloat>
     public let sourceOffset: Binding<CGFloat?>
     public let destinationOffset: Binding<CGFloat?>

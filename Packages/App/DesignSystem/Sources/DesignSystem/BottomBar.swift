@@ -72,6 +72,7 @@ struct BottomBar: View {
             SwiftUI.Button.init {
                 if case .tab(let tab) = item {
                     self.tab = tab
+                    HapticEngine.mediumImpact.perform()
                 }
             } label: {
                 switch item {

@@ -1,6 +1,8 @@
 import SwiftUI
 import AppBase
 internal import DesignSystem
+internal import SpendingsScreen
+internal import ProfileScreen
 
 private extension Store<AppState, AppAction> {
     var localState: AuthenticatedState? {
@@ -15,15 +17,6 @@ private extension Store<AppState, AppAction> {
 }
 
 private extension AuthenticatedState.TabItem {
-    var id: String {
-        switch self {
-        case .profile:
-            "profile"
-        case .spendings:
-            "spendings"
-        }
-    }
-    
     var barTab: BottomBarTab {
         switch self {
         case .profile:
@@ -42,13 +35,38 @@ private extension AuthenticatedState.TabItem {
     }
 }
 
+private extension AuthenticatedState.TabPosition {
+    var transitionValue: CGFloat {
+        switch self {
+        case .toTheLeft:
+            return +1
+        case .toTheRight:
+            return -1
+        default:
+            return 0
+        }
+    }
+}
+
+private extension Optional where Wrapped == AuthenticatedState.TabPosition {
+    var transitionValue: CGFloat {
+        flatMap { $0.transitionValue } ?? 0
+    }
+}
+
 struct AuthenticatedNavigation: View {
+    @Environment(ColorPalette.self) var colors
     @ObservedObject private var store: Store<AppState, AppAction>
     @Binding private var appearTransitionProgress: CGFloat
+    
+    @State private var spendingsTabTransitionProgress: CGFloat
+    @State private var profileTabTransitionProgress: CGFloat
     
     init(store: Store<AppState, AppAction>, appearTransitionProgress: Binding<CGFloat>) {
         self.store = store
         _appearTransitionProgress = appearTransitionProgress
+        spendingsTabTransitionProgress = (store.localState?.position(of: .spendings) as Optional).transitionValue
+        profileTabTransitionProgress = (store.localState?.position(of: .profile) as Optional).transitionValue
     }
     
     var body: some View {
@@ -82,6 +100,10 @@ struct AuthenticatedNavigation: View {
                                 return assertionFailure("unexpected tab selected")
                             }
                             store.dispatch(.selectTabAuthenticated(tab))
+                            withAnimation(.default.speed(3)) {
+                                spendingsTabTransitionProgress = (store.localState?.position(of: .spendings) as Optional).transitionValue
+                                profileTabTransitionProgress = (store.localState?.position(of: .profile) as Optional).transitionValue
+                            }
                         }
                     ),
                     appearTransitionProgress: $appearTransitionProgress
@@ -111,17 +133,30 @@ struct AuthenticatedNavigation: View {
                         set: { _ in }
                     )
                 )
+                .background(
+                    colors.background.secondary.default.opacity(appearTransitionProgress)
+                        .ignoresSafeArea()
+                )
         } else {
             EmptyView()
         }
     }
     
     @ViewBuilder private func tabs(state: AuthenticatedState) -> some View {
-        switch state.tab {
-        case .profile:
-            profileTab(state: state)
+        ZStack {
+            ForEach(state.tabItems.filter({ $0 != state.tab })) { item in
+                tab(for: item, state: state)
+            }
+            tab(for: state.tab, state: state)
+        }
+    }
+    
+    @ViewBuilder private func tab(for item: AuthenticatedState.TabItem, state: AuthenticatedState) -> some View {
+        switch item {
         case .spendings:
             spendingsTab(state: state)
+        case .profile:
+            profileTab(state: state)
         }
     }
     
@@ -131,7 +166,18 @@ struct AuthenticatedNavigation: View {
             case .onUserTap:
                 break
             }
-        }(BottomSheetTransition(progress: $appearTransitionProgress, sourceOffset: .constant(nil), destinationOffset: .constant(nil)))
+        }(
+            SpendingsTransitions(
+                appear: ModalTransition(
+                    progress: $appearTransitionProgress,
+                    sourceOffset: .constant(nil),
+                    destinationOffset: .constant(nil)
+                ),
+                tab: TabTransition(
+                    progress: $spendingsTabTransitionProgress
+                )
+            )
+        )
     }
     
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {
@@ -166,6 +212,12 @@ struct AuthenticatedNavigation: View {
             case .unauthorized(let reason):
                 store.dispatch(.unauthorized(reason: reason))
             }
-        }()
+        }(
+            ProfileTransitions(
+                tab: TabTransition(
+                    progress: $profileTabTransitionProgress
+                )
+            )
+        )
     }
 }

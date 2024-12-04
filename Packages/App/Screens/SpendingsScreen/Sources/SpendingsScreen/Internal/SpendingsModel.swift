@@ -22,8 +22,8 @@ actor SpendingsModel {
 @MainActor extension SpendingsModel: ScreenProvider {
     func instantiate(
         handler: @escaping @MainActor (SpendingsEvent) -> Void
-    ) -> (BottomSheetTransition) -> SpendingsView {
-        return { transition in
+    ) -> (SpendingsTransitions) -> SpendingsView {
+        return { transitions in
             SpendingsView(
                 store: modify(self.store) { store in
                     store.append(
@@ -41,7 +41,7 @@ actor SpendingsModel {
                         keepingUnique: true
                     )
                 },
-                transition: transition
+                transitions: transitions
             )
         }
     }

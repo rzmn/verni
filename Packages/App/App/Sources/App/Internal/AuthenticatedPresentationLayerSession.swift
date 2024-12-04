@@ -6,8 +6,8 @@ internal import SpendingsScreen
 
 @MainActor final class AuthenticatedPresentationLayerSession: Sendable {
     let fallback: AnonymousPresentationLayerSession
-    let profileScreen: any ScreenProvider<ProfileEvent, ProfileView, Void>
-    let spendingsScreen: any ScreenProvider<SpendingsEvent, SpendingsView, BottomSheetTransition>
+    let profileScreen: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
+    let spendingsScreen: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions>
     private let di: AuthenticatedDomainLayerSession
     
     init(di: AuthenticatedDomainLayerSession, fallback: AnonymousPresentationLayerSession) async {
