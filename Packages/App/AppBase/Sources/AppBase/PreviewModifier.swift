@@ -3,7 +3,12 @@ import DesignSystem
 
 extension View {
     public func preview(packageClass: AnyClass) -> some View {
-        modifier(PreviewModifier(packageClass: packageClass))
+        VStack(alignment: .center, spacing: 0) {
+            HStack(alignment: .center, spacing: 0) {
+                modifier(PreviewModifier(packageClass: packageClass))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
     }
 }
 
