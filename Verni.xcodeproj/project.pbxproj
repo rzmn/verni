@@ -10,13 +10,13 @@
 		610E9BE82C5F7551003D1A79 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE72C5F7551003D1A79 /* App */; };
 		613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1322CB2F26600C730EC /* Assets.xcassets */; };
 		613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 613AB13B2CB2F26600C730EC /* Tests.xctestplan */; };
-		613AB1422CB2F26600C730EC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1352CB2F26600C730EC /* LaunchScreen.storyboard */; };
 		613AB1442CB2F26600C730EC /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB1382CB2F26600C730EC /* App.swift */; };
 		613AB1452CB2F26600C730EC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB13A2CB2F26600C730EC /* SceneDelegate.swift */; };
 		614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614AC19D2C6802EE005B2CD5 /* NotificationService.swift */; };
 		614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		61D799C72C7CB04F00F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799C62C7CB04F00F99010 /* DefaultDependencies */; };
 		61D799CB2C7CB08500F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799CA2C7CB08500F99010 /* DefaultDependencies */; };
+		847DE54A2D01FCC9008BBAF8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,7 +72,6 @@
 		613AB1312CB2F26600C730EC /* Verni.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Verni.entitlements; sourceTree = "<group>"; };
 		613AB1322CB2F26600C730EC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		613AB1332CB2F26600C730EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		613AB1342CB2F26600C730EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		613AB1382CB2F26600C730EC /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		613AB13A2CB2F26600C730EC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		613AB13B2CB2F26600C730EC /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
@@ -101,6 +100,7 @@
 		84650DDC2CEF300100907DB0 /* AuthWelcomeScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthWelcomeScreen; sourceTree = "<group>"; };
 		846A50C62CFE0C6500A766EE /* SplashScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SplashScreen; sourceTree = "<group>"; };
 		8476A23C2CF2243E001CBF5A /* LogInScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LogInScreen; sourceTree = "<group>"; };
+		847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84E809102CF3695A00B5A32C /* ProfileScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ProfileScreen; sourceTree = "<group>"; };
 		84E809112CF4A2A700B5A32C /* SpendingsScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SpendingsScreen; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -210,7 +210,7 @@
 				613AB1312CB2F26600C730EC /* Verni.entitlements */,
 				613AB1322CB2F26600C730EC /* Assets.xcassets */,
 				613AB1332CB2F26600C730EC /* Info.plist */,
-				613AB1352CB2F26600C730EC /* LaunchScreen.storyboard */,
+				847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -410,9 +410,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				847DE54A2D01FCC9008BBAF8 /* LaunchScreen.storyboard in Resources */,
 				613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */,
 				613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */,
-				613AB1422CB2F26600C730EC /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,17 +473,6 @@
 			targetProxy = 614AC1A02C6802EE005B2CD5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		613AB1352CB2F26600C730EC /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				613AB1342CB2F26600C730EC /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		61414F902C2F02A200B2C027 /* Debug */ = {

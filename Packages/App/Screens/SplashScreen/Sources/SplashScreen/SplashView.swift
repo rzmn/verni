@@ -1,6 +1,7 @@
 import SwiftUI
 import AppBase
 import Domain
+import AVKit
 internal import DesignSystem
 
 public struct SplashView: View {
@@ -17,35 +18,94 @@ public struct SplashView: View {
     }
 
     public var body: some View {
-        VStack(spacing: -1) {
-            Image.splashTop
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .padding(.horizontal, 2)
-                .foregroundStyle(colors.background.primary.default)
-                .overlay {
-                    GeometryReader { geometry in
-                        Color.clear
-                            .onAppear {
-                                sourceOffset = geometry.size.height
-                            }
+        GeometryReader { geometry in
+            let top = CGSize(
+                width: [
+                    letterRelativeWidth,
+                    letterRelativePadding,
+                    letterRelativeWidth
+                ].reduce(0, +),
+                height: letterRelativeHeigth
+            )
+            let bottom = CGSize(
+                width: [
+                    letterRelativeWidth,
+                    letterRelativePadding,
+                    letterRelativeWidth
+                ].reduce(0, +),
+                height: [
+                    letterRelativeHeigth,
+                    letterRelativePadding,
+                    letterRelativeHeigth
+                ].reduce(0, +)
+            )
+            let all = CGSize(
+                width: top.width,
+                height: top.height + letterRelativePadding + bottom.height
+            )
+            let contentFrame = AVMakeRect(
+                aspectRatio: all,
+                insideRect: CGRect(
+                    origin: .zero,
+                    size: geometry.size
+                )
+            )
+            let xScale = contentFrame.width / all.width
+            let yScale = contentFrame.height / all.height
+            Group {
+                let topFrame = CGRect(
+                    x: contentFrame.minX + top.width / 2 * xScale,
+                    y: contentFrame.minY + top.height / 2 * yScale,
+                    width: top.width * xScale,
+                    height: top.height * yScale
+                )
+                let bottomFrame = CGRect(
+                    x: topFrame.minX,
+                    y: topFrame.maxY + top.height / 2 * yScale,
+                    width: bottom.width * xScale,
+                    height: bottom.height * yScale
+                )
+                Image.splashTop
+                    .resizable()
+                    .aspectRatio(topFrame.width / topFrame.height, contentMode: .fit)
+                    .position(x: topFrame.minX, y: topFrame.minY)
+                    .frame(width: topFrame.width, height: topFrame.height)
+                    .foregroundStyle(colors.background.primary.default)
+                    .overlay {
+                        GeometryReader { geometry in
+                            Color.clear
+                                .onAppear {
+                                    sourceOffset = geometry.size.height
+                                }
+                        }
                     }
-                }
-                .modifier(VerticalTranslateEffect(offset: -transitionOffset))
-            Image.splashBottom
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .foregroundStyle(colors.background.primary.default)
-                .modifier(VerticalTranslateEffect(offset: transitionOffset * 2))
+                    .modifier(VerticalTranslateEffect(offset: -transitionOffset))
+                Image.splashBottom
+                    .resizable()
+                    .aspectRatio(bottomFrame.width / bottomFrame.height, contentMode: .fit)
+                    .position(x: bottomFrame.minX, y: bottomFrame.minY)
+                    .frame(width: bottomFrame.width, height: bottomFrame.height)
+                    .foregroundStyle(colors.background.primary.default)
+                    .modifier(VerticalTranslateEffect(offset: transitionOffset * 2))
+            }
         }
-        .aspectRatio(402.0 / 778.0, contentMode: .fit)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.all, -2)
         .background(
             colors.background.primary.default
                 .opacity(transitionProgress)
         )
         .background(colors.background.brand.static)
+    }
+    
+    private var letterRelativeWidth: CGFloat {
+        187
+    }
+    
+    private var letterRelativeHeigth: CGFloat {
+        245
+    }
+    
+    private var letterRelativePadding: CGFloat {
+        1
     }
     
     private var transitionOffset: CGFloat {
