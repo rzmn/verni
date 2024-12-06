@@ -58,14 +58,12 @@ extension AppSideEffects: ActionHandler {
     private func doLaunch() async -> AppAction {
         let session = await AnonymousPresentationLayerSession(di: di)
         do {
-            return .launched(
-                .authenticated(
-                    await AuthenticatedPresentationLayerSession(
-                        di: try await di.authUseCase().awake(),
-                        fallback: session
-                    )
-                )
+            let session = await AuthenticatedPresentationLayerSession(
+                di: try await di.authUseCase().awake(),
+                fallback: session
             )
+            await session.warmup()
+            return .launched(.authenticated(session))
         } catch {
             switch error {
             case .hasNoSession:

@@ -39,51 +39,48 @@ struct ProfileCardView: View {
     
     
     @ViewBuilder private var avatarCard: some View {
-        AvatarView(
-            fitSize: cardFitSize,
-            avatar: store.state.profile.value?.user.avatar?.id
-        )
-        .aspectRatio(cardAspectRatio, contentMode: .fit)
-        .clipped()
-        .clipShape(.rect(cornerRadius: cornerRadius, style: .circular))
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .circular)
-                .foregroundStyle(
-                    .linearGradient(
-                        colors: [
-                            colors.background.brand.static,
-                            .green.opacity(0.4),
-                        ],
-                        startPoint: UnitPoint(x: 0.5, y: 1),
-                        endPoint: UnitPoint(x: 0.5, y: 97.0 / 281.0)
+        AvatarView(avatar: store.state.profile.value?.user.avatar?.id)
+            .aspectRatio(cardAspectRatio, contentMode: .fit)
+            .clipped()
+            .clipShape(.rect(cornerRadius: cornerRadius, style: .circular))
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .circular)
+                    .foregroundStyle(
+                        .linearGradient(
+                            colors: [
+                                colors.background.brand.static,
+                                .green.opacity(0.4),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 1),
+                            endPoint: UnitPoint(x: 0.5, y: 97.0 / 281.0)
+                        )
                     )
-                )
-        }
-        .overlay {
-            HStack {
-                if let profile = store.state.profile.value {
+            }
+            .overlay {
+                HStack {
+                    if let profile = store.state.profile.value {
+                        VStack {
+                            Spacer()
+                            Text(profile.user.displayName)
+                                .font(.medium(size: 28))
+                                .foregroundStyle(colors.text.primary.staticLight)
+                                .padding(.leading, 16)
+                                .padding(.bottom, 14)
+                        }
+                    }
+                    Spacer()
                     VStack {
                         Spacer()
-                        Text(profile.user.displayName)
-                            .font(.medium(size: 28))
-                            .foregroundStyle(colors.text.primary.staticLight)
-                            .padding(.leading, 16)
-                            .padding(.bottom, 14)
+                        IconButton(
+                            config: IconButton.Config(
+                                style: .primary,
+                                icon: .qrCode
+                            )
+                        ) {}.allowsHitTesting(false)
                     }
+                    .padding([.bottom, .trailing], 10)
                 }
-                Spacer()
-                VStack {
-                    Spacer()
-                    IconButton(
-                        config: IconButton.Config(
-                            style: .primary,
-                            icon: .qrCode
-                        )
-                    ) {}.allowsHitTesting(false)
-                }
-                .padding([.bottom, .trailing], 10)
             }
-        }
     }
     
     @ViewBuilder private var qrCodeCard: some View {

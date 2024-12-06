@@ -1,20 +1,6 @@
 import SwiftUI
 import UIKit
 
-private extension String {
-    func image(fitSize: CGSize?) -> UIImage? {
-        let size = fitSize ?? CGSize(width: 40, height: 40)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        UIColor.clear.set()
-        let rect = CGRect(origin: .zero, size: size)
-        UIRectFill(CGRect(origin: .zero, size: size))
-        (self as AnyObject).draw(in: rect, withAttributes: [.font: UIFont.systemFont(ofSize: size.width)])
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
-    }
-}
-
 public struct AvatarView: View {
     public typealias AvatarId = String
     
@@ -59,10 +45,8 @@ public struct AvatarView: View {
     @State private var imageData: Data?
     @State private var task: Task<Void, Never>?
     private let avatar: AvatarId?
-    private let fitSize: CGSize
     
-    public init(fitSize: CGSize, avatar: AvatarId?) {
-        self.fitSize = fitSize
+    public init(avatar: AvatarId?) {
         self.avatar = avatar
     }
     
@@ -81,7 +65,7 @@ public struct AvatarView: View {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: geometry.size.width)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
                 }
             } else {

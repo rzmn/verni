@@ -19,6 +19,5 @@ public final class DefaultSplashFactory: SplashFactory, ScreenProvider {
             SplashView(transition: transition)
         }
     }
-    
 }
 

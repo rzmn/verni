@@ -84,17 +84,23 @@ struct AnonymousNavigation: View {
                 break
             case .logIn(let di):
                 Task { @MainActor in
-                    store.dispatch(
-                        .onAuthorized(
-                            await AuthenticatedPresentationLayerSession(
-                                di: di,
-                                fallback: state.session
-                            )
-                        )
+                    let session = await AuthenticatedPresentationLayerSession(
+                        di: di,
+                        fallback: state.session
                     )
+                    await session.warmup()
+                    store.dispatch(.onAuthorized(session))
                 }
             }
-        }(ModalTransition(progress: $toLoginScreenTransitionProgress, sourceOffset: $loginSourceOffset, destinationOffset: $authWelcomeDestinationOffset))
+        }(loginTransitions)
+    }
+    
+    private var loginTransitions: ModalTransition {
+        ModalTransition(
+            progress: $toLoginScreenTransitionProgress,
+            sourceOffset: $loginSourceOffset,
+            destinationOffset: $authWelcomeDestinationOffset
+        )
     }
     
     private func authWelcomeView(state: AnonymousState) -> some View {
@@ -107,18 +113,20 @@ struct AnonymousNavigation: View {
             case .signUp:
                 break
             }
-        }(
-            AuthWelcomeTransitions(
-                appear: ModalTransition(
-                    progress: $fromSplashTransitionProgress,
-                    sourceOffset: .constant(0),
-                    destinationOffset: $authWelcomeDestinationOffset
-                ),
-                dismiss: ModalTransition(
-                    progress: $toLoginScreenTransitionProgress,
-                    sourceOffset: $authWelcomeDestinationOffset,
-                    destinationOffset: $loginSourceOffset
-                )
+        }(authWelcomeTransitions)
+    }
+    
+    private var authWelcomeTransitions: AuthWelcomeTransitions {
+        AuthWelcomeTransitions(
+            appear: ModalTransition(
+                progress: $fromSplashTransitionProgress,
+                sourceOffset: .constant(0),
+                destinationOffset: $authWelcomeDestinationOffset
+            ),
+            dismiss: ModalTransition(
+                progress: $toLoginScreenTransitionProgress,
+                sourceOffset: $authWelcomeDestinationOffset,
+                destinationOffset: $loginSourceOffset
             )
         )
     }

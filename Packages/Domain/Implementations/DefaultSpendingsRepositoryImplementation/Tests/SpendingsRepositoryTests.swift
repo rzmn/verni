@@ -57,7 +57,7 @@ private actor ApiProvider {
         await api.performIsolated { api in
             api.runMethodWithoutParamsBlock = { method in
                 await self.performIsolated { `self` in
-                    if let _ = method as? Spendings.GetCounterparties {
+                    if let _ = method as? Spendings.GetBalance {
                         self.getCounterpartiesCalledCount += 1
                     }
                 }

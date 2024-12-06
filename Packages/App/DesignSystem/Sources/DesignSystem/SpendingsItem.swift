@@ -52,12 +52,10 @@ public struct SpendingsItem: View {
     
     private var userPreview: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AvatarView(
-                fitSize: CGSize(width: 38, height: 38),
-                avatar: config.avatar
-            )
-            .clipShape(.rect(cornerRadius: 19))
-            .padding(.top, 12)
+            AvatarView(avatar: config.avatar)
+                .frame(width: 38, height: 38)
+                .clipShape(.rect(cornerRadius: 19))
+                .padding(.top, 12)
             Spacer()
             Text(config.name)
                 .font(.medium(size: 20))
@@ -120,7 +118,7 @@ public struct SpendingsItem: View {
         Spacer()
         SpendingsItem(
             config: SpendingsItem.Config(
-                avatar: nil,
+                avatar: "123",
                 name: "berchikk",
                 style: .negative,
                 amount: "23$"
@@ -129,6 +127,11 @@ public struct SpendingsItem: View {
         Spacer()
     }
     .background(.gray)
+    .environment(AvatarView.Repository(getBlock: { _ in
+        Data.stubAvatar
+    }, getIfCachedBlock: { _ in
+        Data.stubAvatar
+    }))
     .environment(ColorPalette.dark)
     .loadCustomFonts()
 }

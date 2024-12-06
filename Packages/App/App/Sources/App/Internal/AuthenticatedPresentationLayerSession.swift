@@ -17,6 +17,10 @@ internal import SpendingsScreen
         spendingsScreen = await DefaultSpendingsFactory(di: di).create()
     }
     
+    func warmup() async {
+        _ = try? await di.profileRepository.refreshProfile()
+    }
+    
     func logout() async {
         await di.logoutUseCase.logout()
     }

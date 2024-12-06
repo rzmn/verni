@@ -122,7 +122,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         logI { "refreshSpendingCounterparties start" }
         let counterparties: [SpendingsPreview]
         do {
-            counterparties = try await api.run(method: Spendings.GetCounterparties()).map(SpendingsPreview.init)
+            counterparties = try await api.run(method: Spendings.GetBalance()).map(SpendingsPreview.init)
         } catch {
             logI { "refreshSpendingCounterparties failed error: \(error)" }
             throw GeneralError(apiError: error)

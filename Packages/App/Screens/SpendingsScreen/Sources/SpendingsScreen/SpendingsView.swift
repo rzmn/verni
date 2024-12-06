@@ -56,14 +56,17 @@ public struct SpendingsView: View {
                     config: SpendingsItem.Config(
                         avatar: item.user.avatar?.id,
                         name: item.user.displayName,
-                        style: .negative,
-                        amount: ""
+                        style: item.isPositive ? .positive : .negative,
+                        amount: item.amount
                     )
                 )
             }
             .opacity(adjustedTransitionOpacity)
             .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             Spacer()
+        }
+        .onAppear {
+            store.dispatch(.onRefreshBalance)
         }
     }
     

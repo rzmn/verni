@@ -1,6 +1,6 @@
 import SwiftUI
-import AppBase
 import Domain
+import AppBase
 internal import DesignSystem
 internal import Base
 
