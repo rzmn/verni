@@ -32,7 +32,7 @@ import Base
 
         // then
 
-        #expect(await persistency.getRefreshToken() == refreshToken)
+        #expect(await persistency.refreshToken == refreshToken)
     }
 
     @Test func testUpdateRefreshToken() async throws {
@@ -47,11 +47,11 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
-        await persistency.update(refreshToken: newRefreshToken)
+        await persistency.update(value: newRefreshToken, for: Schemas.refreshToken.unkeyedIndex)
 
         // then
 
-        #expect(await persistency.getRefreshToken() == newRefreshToken)
+        #expect(await persistency.refreshToken == newRefreshToken)
     }
 
     @Test func testGetRefreshTokenFromAwake() async throws {
@@ -70,7 +70,7 @@ import Base
 
         // then
 
-        #expect(await awaken?.getRefreshToken() == refreshToken)
+        #expect(await awaken?.refreshToken == refreshToken)
     }
 
     @Test func testUpdatedTokenFromAwake() async throws {
@@ -85,13 +85,13 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
-        await persistency.update(refreshToken: newRefreshToken)
+        await persistency.update(value: newRefreshToken, for: Schemas.refreshToken.unkeyedIndex)
         await persistency.close()
         let awaken = await persistencyFactory.awake(host: host)
 
         // then
 
-        #expect(await awaken?.getRefreshToken() == newRefreshToken)
+        #expect(await awaken?.refreshToken == newRefreshToken)
     }
 
     @Test func testProfile() async throws {
@@ -115,11 +115,11 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host.id, refreshToken: refreshToken)
-        await persistency.update(profile: profile)
+        await persistency.update(value: profile, for: Schemas.profile.unkeyedIndex)
 
         // then
 
-        #expect(await persistency.getProfile() == profile)
+        #expect(await persistency[Schemas.profile.unkeyedIndex] == profile)
     }
 
     @Test func testNoProfile() async throws {
@@ -136,7 +136,7 @@ import Base
 
         // then
 
-        #expect(await persistency.getProfile() == nil)
+        #expect(await persistency[Schemas.profile.unkeyedIndex] == nil)
     }
 
     @Test func testUserId() async throws {
@@ -153,7 +153,7 @@ import Base
 
         // then
 
-        #expect(await persistency.userId() == host)
+        #expect(await persistency.userId == host)
     }
 
     @Test func testUsers() async throws {
@@ -178,12 +178,14 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host.id, refreshToken: refreshToken)
-        await persistency.update(users: [host, friend])
+        for user in [host, friend] {
+            await persistency.update(value: user, for: Schemas.users.index(for: user.id))
+        }
 
         // then
 
         for user in [host, friend] {
-            #expect(await persistency.user(id: user.id) == user)
+            #expect(await persistency[Schemas.users.index(for: user.id)] == user)
         }
     }
 
@@ -201,7 +203,7 @@ import Base
 
         // then
 
-        #expect(await persistency.user(id: UUID().uuidString) == nil)
+        #expect(await persistency[Schemas.users.index(for: UUID().uuidString)] == nil)
     }
 
     @Test func testFriends() async throws {
@@ -232,20 +234,20 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
-        await persistency.update(friends: friends, for: query)
+        await persistency.update(value: friends, for: Schemas.friends.index(for: query))
 
         // then
 
-        let friendsFromDb = await persistency.getFriends(set: query)
+        let friendsFromDb = await persistency[Schemas.friends.index(for: query)]
         #expect(friendsFromDb?.keys == friends.keys)
         for (key, value) in friends {
             #expect(value == friendsFromDb?[key])
         }
-        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.friends])) == nil)
-        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscriber])) == nil)
-        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscription])) == nil)
-        #expect(await persistency.getFriends(set: Set([.subscriber, .friends])) == nil)
-        #expect(await persistency.getFriends(set: Set([.subscription, .friends])) == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([FriendshipKindDto.friends]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([FriendshipKindDto.subscriber]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([FriendshipKindDto.subscription]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([.subscriber, .friends]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([.subscription, .friends]))] == nil)
     }
 
     @Test func testNoFriends() async throws {
@@ -262,12 +264,12 @@ import Base
 
         // then
 
-        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.friends])) == nil)
-        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscriber])) == nil)
-        #expect(await persistency.getFriends(set: Set([FriendshipKindDto.subscription])) == nil)
-        #expect(await persistency.getFriends(set: Set([.subscriber, .friends])) == nil)
-        #expect(await persistency.getFriends(set: Set([.subscription, .friends])) == nil)
-        #expect(await persistency.getFriends(set: Set(FriendshipKindDto.allCases)) == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([FriendshipKindDto.friends]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([FriendshipKindDto.subscriber]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([FriendshipKindDto.subscription]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([.subscriber, .friends]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set([.subscription, .friends]))] == nil)
+        #expect(await persistency[Schemas.friends.index(for: Set(FriendshipKindDto.allCases))] == nil)
     }
 
     @Test func testNoSpendingCounterparties() async throws {
@@ -284,7 +286,7 @@ import Base
 
         // then
 
-        #expect(await persistency.getSpendingCounterparties() == nil)
+        #expect(await persistency[Schemas.spendingCounterparties.unkeyedIndex] == nil)
     }
 
     @Test func testSpendingCounterparties() async throws {
@@ -302,11 +304,11 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
-        await persistency.updateSpendingCounterparties(counterparties)
+        await persistency.update(value: counterparties, for: Schemas.spendingCounterparties.unkeyedIndex)
 
         // then
 
-        #expect(await persistency.getSpendingCounterparties() == counterparties)
+        #expect(await persistency[Schemas.spendingCounterparties.unkeyedIndex] == counterparties)
     }
 
     @Test func testNoSpendingsHistory() async throws {
@@ -323,7 +325,7 @@ import Base
 
         // then
 
-        #expect(await persistency.getSpendingsHistory(counterparty: UUID().uuidString) == nil)
+        #expect(await persistency[Schemas.spendingsHistory.index(for: UUID().uuidString)] == nil)
     }
 
     @Test func testSpendingsHistory() async throws {
@@ -372,11 +374,11 @@ import Base
 
         let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
-        await persistency.updateSpendingsHistory(counterparty: counterparty, history: history)
+        await persistency.update(value: history, for: Schemas.spendingsHistory.index(for: counterparty))
 
         // then
 
-        #expect(await persistency.getSpendingsHistory(counterparty: counterparty) == history)
+        #expect(await persistency[Schemas.spendingsHistory.index(for: counterparty)] == history)
     }
 
     @Test func testInvalidate() async throws {

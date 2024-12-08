@@ -35,20 +35,26 @@ private actor PersistencyProvider {
     init() async {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
-            persistency.getFriendsWithKindBlock = { kind in
-                await self.performIsolated { `self` in
-                    self.getFriendsCalls.append(FriendshipKindSet(kind))
+            persistency.getBlock = { anyDescriptor in
+                guard let descriptor = anyDescriptor as? Schema<[FriendshipKindDto], [FriendshipKindDto: [UserDto]]>.Index else {
+                    fatalError()
                 }
-                return await self.friends[FriendshipKindSet(kind)]?.reduce(into: [:], { dict, kv in
+                await self.performIsolated { `self` in
+                    self.getFriendsCalls.append(FriendshipKindSet(Set(descriptor.key)))
+                }
+                return await self.friends[FriendshipKindSet(Set(descriptor.key))]?.reduce(into: [:], { dict, kv in
                     dict[FriendshipKindDto(domain: kv.key)] = kv.value.map(UserDto.init)
                 })
             }
-            persistency.updateFriendsForKindBlock = { friends, kind in
-                let kindToSet = FriendshipKindSet(kind)
+            persistency.updateBlock = { anyDescriptor, anyObject in
+                guard let descriptor = anyDescriptor as? Schema<[FriendshipKindDto], [FriendshipKindDto: [UserDto]]>.Index, let friends = anyObject as? [FriendshipKindDto: [UserDto]] else {
+                    fatalError()
+                }
+                let kindToSet = FriendshipKindSet(Set(descriptor.key))
                 let friendsToSet = friends.reduce(into: [:], { dict, kv in
                     dict[FriendshipKind(dto: kv.key)] = kv.value.map(User.init)
                 })
-                await self.performIsolated { `self` in
+                self.performIsolated { `self` in
                     self.updateFriendsCalls.append((kindToSet, friendsToSet))
                     self.friends[kindToSet] = friendsToSet
                 }

@@ -1,24 +1,53 @@
 import DataTransferObjects
 
 public protocol Persistency: Sendable {
-    func userId() async -> UserDto.Identifier
-
-    func getRefreshToken() async -> String
-    func update(refreshToken: String) async
-
-    func getProfile() async -> ProfileDto?
-    func update(profile: ProfileDto) async
-    func user(id: UserDto.Identifier) async -> UserDto?
-    func update(users: [UserDto]) async
-
-    func getSpendingCounterparties() async -> [BalanceDto]?
-    func updateSpendingCounterparties(_ counterparties: [BalanceDto]) async
-    func getSpendingsHistory(counterparty: UserDto.Identifier) async -> [IdentifiableExpenseDto]?
-    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableExpenseDto]) async
-
-    func getFriends(set: Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]?
-    func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async
-
+    subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
+        descriptor: Schema<Key, Value>.Index
+    ) -> Value? { get async }
+    
+    func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
+        value: Value,
+        for descriptor: Schema<Key, Value>.Index
+    ) async
+    
+    var userId: UserDto.Identifier { get async }
+    var refreshToken: String { get async }
     func close() async
     func invalidate() async
+}
+
+extension Schema where Key == [FriendshipKindDto] {
+    public func index(for set: Set<FriendshipKindDto>) -> Schema.Index {
+        index(
+            for: set.sorted { lhs, rhs in
+                lhs.rawValue < rhs.rawValue
+            }
+        )
+    }
+}
+
+public enum Schemas {
+    public static var refreshToken: Schema<Unkeyed, String> {
+        Schema(id: "refreshToken")
+    }
+    
+    public static var profile: Schema<Unkeyed, ProfileDto> {
+        Schema(id: "profile")
+    }
+    
+    public static var users: Schema<UserDto.Identifier, UserDto> {
+        Schema(id: "users")
+    }
+    
+    public static var spendingCounterparties: Schema<Unkeyed, [BalanceDto]> {
+        Schema(id: "spendingCounterparties")
+    }
+    
+    public static var spendingsHistory: Schema<UserDto.Identifier, [IdentifiableExpenseDto]> {
+        Schema(id: "spendingsHistory")
+    }
+    
+    public static var friends: Schema<[FriendshipKindDto], [FriendshipKindDto: [UserDto]]> {
+        Schema(id: "friends")
+    }
 }

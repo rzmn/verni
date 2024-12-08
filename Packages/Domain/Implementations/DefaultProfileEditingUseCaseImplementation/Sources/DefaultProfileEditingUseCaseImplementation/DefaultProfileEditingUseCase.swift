@@ -61,7 +61,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             let tokens = try await api.run(
                 method: Auth.UpdateEmail(email: email)
             )
-            await persistency.update(refreshToken: tokens.refreshToken)
+            await persistency.update(value: tokens.refreshToken, for: Schemas.refreshToken.unkeyedIndex)
             await profile.add { profile in
                 Profile(profile, email: email, isEmailVerified: false)
             }
@@ -75,7 +75,7 @@ extension DefaultProfileEditingUseCase: ProfileEditingUseCase {
             let tokens = try await api.run(
                 method: Auth.UpdatePassword(old: old, new: new)
             )
-            await persistency.update(refreshToken: tokens.refreshToken)
+            await persistency.update(value: tokens.refreshToken, for: Schemas.refreshToken.unkeyedIndex)
         } catch {
             throw PasswordUpdateError(apiError: error)
         }

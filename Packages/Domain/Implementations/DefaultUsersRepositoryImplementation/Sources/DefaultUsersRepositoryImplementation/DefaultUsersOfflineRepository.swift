@@ -14,12 +14,14 @@ public actor DefaultUsersOfflineRepository {
 
 extension DefaultUsersOfflineRepository: UsersOfflineRepository {
     public func getUser(id: User.Identifier) async -> User? {
-        await persistency.user(id: id).flatMap(User.init)
+        await persistency[Schemas.users.index(for: id)].flatMap(User.init)
     }
 }
 
 extension DefaultUsersOfflineRepository: UsersOfflineMutableRepository {
     public func update(users: [User]) async {
-        await persistency.update(users: users.map(UserDto.init))
+        for user in users {
+            await persistency.update(value: UserDto(domain: user), for: Schemas.users.index(for: user.id))
+        }
     }
 }

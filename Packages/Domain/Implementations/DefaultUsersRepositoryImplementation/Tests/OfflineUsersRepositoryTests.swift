@@ -11,24 +11,28 @@ import ApiDomainConvenience
 private actor PersistencyProvider {
     let persistency: PersistencyMock
     var getUserCalledCount: [UserDto.Identifier: Int] = [:]
-    var updateUsersCalls: [ [UserDto] ] = []
+    var updateUsersCalls: [UserDto] = []
     var users = [UserDto.Identifier: UserDto]()
 
     init() async {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
-            persistency.userWithIDBlock = { id in
-                await self.performIsolated { `self` in
-                    self.getUserCalledCount[id] = self.getUserCalledCount[id, default: 0] + 1
+            persistency.getBlock = { anyDescriptor in
+                guard let descriptor = anyDescriptor as? Schema<UserDto.Identifier, UserDto>.Index else {
+                    fatalError()
                 }
-                return await self.users[id]
-            }
-            persistency.updateUsersBlock = { users in
                 await self.performIsolated { `self` in
-                    self.updateUsersCalls.append(users)
-                    for user in users {
-                        self.users[user.id] = user
-                    }
+                    self.getUserCalledCount[descriptor.key] = self.getUserCalledCount[descriptor.key, default: 0] + 1
+                }
+                return await self.users[descriptor.key]
+            }
+            persistency.updateBlock = { anyDescriptor, anyObject in
+                guard let descriptor = anyDescriptor as? Schema<UserDto.Identifier, UserDto>.Index, let user = anyObject as? UserDto else {
+                    fatalError()
+                }
+                self.performIsolated { `self` in
+                    self.updateUsersCalls.append(user)
+                    self.users[descriptor.key] = user
                 }
             }
         }
@@ -76,7 +80,7 @@ private actor PersistencyProvider {
         // then
 
         #expect(userFromRepository == user)
-        #expect(await provider.updateUsersCalls == [[user].map(UserDto.init)])
+        #expect(await provider.updateUsersCalls == [UserDto(domain: user)])
         #expect(await provider.getUserCalledCount[user.id, default: 0] == 1)
     }
 }

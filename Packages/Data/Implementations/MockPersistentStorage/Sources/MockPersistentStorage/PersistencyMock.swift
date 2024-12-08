@@ -1,112 +1,55 @@
 import PersistentStorage
 import DataTransferObjects
 
+private struct AnyBox: @unchecked Sendable {
+    let value: Any?
+}
+
 actor PersistencyMock: Persistency {
+    subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
+        descriptor: Schema<Key, Value>.Index
+    ) -> Value? {
+        get async {
+            await getFunc(descriptor).value as? Value
+        }
+    }
+    
+    private nonisolated(unsafe) func getFunc(_ arg: AnyHashable) async -> AnyBox {
+        AnyBox(value: await getBlock?(arg))
+    }
+    
+    func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
+        value: Value,
+        for descriptor: Schema<Key, Value>.Index
+    ) async {
+        await updateBlock?(descriptor, value)
+    }
+    
+    var getBlock: (@Sendable (AnyHashable) async -> Any?)?
+    var updateBlock: ((AnyHashable, Any?) async -> Void)?
+    
     var userIdBlock: (@Sendable () async -> UserDto.Identifier)?
     var getRefreshTokenBlock: (@Sendable () async -> String)?
-    var updateRefreshTokenBlock: (@Sendable (String) async -> Void)?
-    var getProfileBlock: (@Sendable () async -> ProfileDto?)?
-    var updateProfileBlock: (@Sendable (ProfileDto) async -> Void)?
-    var userWithIDBlock: (@Sendable (UserDto.Identifier) async -> UserDto?)?
-    var updateUsersBlock: (@Sendable ([UserDto]) async -> Void)?
-    var getSpendingCounterpartiesBlock: (@Sendable () async -> [BalanceDto]?)?
-    var updateSpendingCounterpartiesBlock: (@Sendable ([BalanceDto]) async -> Void)?
-    var getSpendingsHistoryBlock: (@Sendable (UserDto.Identifier) async -> [IdentifiableExpenseDto]?)?
-    var updateSpendingsHistoryBlock: (@Sendable (UserDto.Identifier, [IdentifiableExpenseDto]) async -> Void)?
-    var getFriendsWithKindBlock: (@Sendable (Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]?)?
-    var updateFriendsForKindBlock: (@Sendable ([FriendshipKindDto: [UserDto]], Set<FriendshipKindDto>) async -> Void)?
+    
     var closeBlock: (@Sendable () async -> Void)?
     var invalidateBlock: (@Sendable () async -> Void)?
 
-    func userId() async -> UserDto.Identifier {
-        guard let userIdBlock else {
-            fatalError("not implemented")
+    var userId: UserDto.Identifier {
+        get async {
+            guard let userIdBlock else {
+                fatalError("not implemented")
+            }
+            return await userIdBlock()
         }
-        return await userIdBlock()
     }
 
-    func getRefreshToken() async -> String {
-        guard let getRefreshTokenBlock else {
-            fatalError("not implemented")
+    var refreshToken: String {
+        get async {
+            guard let getRefreshTokenBlock else {
+                fatalError("not implemented")
+            }
+            return await getRefreshTokenBlock()
         }
-        return await getRefreshTokenBlock()
-    }
-
-    func update(refreshToken: String) async {
-        guard let updateRefreshTokenBlock else {
-            fatalError("not implemented")
-        }
-        return await updateRefreshTokenBlock(refreshToken)
-    }
-
-    func getProfile() async -> ProfileDto? {
-        guard let getProfileBlock else {
-            fatalError("not implemented")
-        }
-        return await getProfileBlock()
-    }
-
-    func update(profile: ProfileDto) async {
-        guard let updateProfileBlock else {
-            fatalError("not implemented")
-        }
-        return await updateProfileBlock(profile)
-    }
-
-    func user(id: UserDto.Identifier) async -> UserDto? {
-        guard let userWithIDBlock else {
-            fatalError("not implemented")
-        }
-        return await userWithIDBlock(id)
-    }
-
-    func update(users: [UserDto]) async {
-        guard let updateUsersBlock else {
-            fatalError("not implemented")
-        }
-        return await updateUsersBlock(users)
-    }
-
-    func getSpendingCounterparties() async -> [BalanceDto]? {
-        guard let getSpendingCounterpartiesBlock else {
-            fatalError("not implemented")
-        }
-        return await getSpendingCounterpartiesBlock()
-    }
-
-    func updateSpendingCounterparties(_ counterparties: [BalanceDto]) async {
-        guard let updateSpendingCounterpartiesBlock else {
-            fatalError("not implemented")
-        }
-        return await updateSpendingCounterpartiesBlock(counterparties)
-    }
-
-    func getSpendingsHistory(counterparty: UserDto.Identifier) async -> [IdentifiableExpenseDto]? {
-        guard let getSpendingsHistoryBlock else {
-            fatalError("not implemented")
-        }
-        return await getSpendingsHistoryBlock(counterparty)
-    }
-
-    func updateSpendingsHistory(counterparty: UserDto.Identifier, history: [IdentifiableExpenseDto]) async {
-        guard let updateSpendingsHistoryBlock else {
-            fatalError("not implemented")
-        }
-        return await updateSpendingsHistoryBlock(counterparty, history)
-    }
-
-    func getFriends(set: Set<FriendshipKindDto>) async -> [FriendshipKindDto: [UserDto]]? {
-        guard let getFriendsWithKindBlock else {
-            fatalError("not implemented")
-        }
-        return await getFriendsWithKindBlock(set)
-    }
-
-    func update(friends: [FriendshipKindDto: [UserDto]], for set: Set<FriendshipKindDto>) async {
-        guard let updateFriendsForKindBlock else {
-            fatalError("not implemented")
-        }
-        return await updateFriendsForKindBlock(friends, set)
     }
 
     func close() async {

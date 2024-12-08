@@ -13,7 +13,7 @@ public struct DBPathManager: Sendable {
 
     private enum Constants {
         static let containerDirName = "db"
-        static let prefix = "s_v1_"
+        static let prefix = "s_v2_"
         static let dbFilename = "db.sqlite"
     }
 

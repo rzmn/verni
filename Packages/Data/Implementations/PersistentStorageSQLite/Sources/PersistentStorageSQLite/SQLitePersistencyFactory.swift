@@ -42,16 +42,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         logI { "found db url: \(dbUrl)" }
         do {
             let database = try Connection(dbUrl.absoluteString)
-            let token = try database.prepare(Schema.Tokens.table)
-                .first { row in
-                    try row.get(Schema.Tokens.Keys.id) == host
-                }?
-                .get(Schema.Tokens.Keys.token)
-            guard let token else {
-                logger.logE { "db does not have host/credentials info" }
-                return nil
-            }
-            return SQLitePersistency(
+            return try SQLitePersistency(
                 database: database,
                 onDeinit: { [pathManager] shouldInvalidate in
                     guard shouldInvalidate else {
@@ -64,7 +55,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                     }
                 },
                 hostId: host,
-                refreshToken: token,
+                refreshToken: nil,
                 logger: logger,
                 taskFactory: taskFactory
             )
@@ -88,7 +79,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             try FileManager.default.removeItem(at: dbUrl)
             throw error
         }
-        return SQLitePersistency(
+        return try SQLitePersistency(
             database: database,
             onDeinit: { [pathManager] shouldInvalidate in
                 guard shouldInvalidate else {
@@ -103,37 +94,21 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             hostId: host,
             refreshToken: refreshToken,
             logger: logger,
-            taskFactory: taskFactory,
-            storeInitialToken: true
+            taskFactory: taskFactory
         )
     }
 
     @StorageActor private func createTables(for database: Connection) throws {
-        try database.run(Schema.Tokens.table.create { table in
-            table.column(Schema.Tokens.Keys.id, primaryKey: true)
-            table.column(Schema.Tokens.Keys.token)
-        })
-        try database.run(Schema.Users.table.create { table in
-            table.column(Schema.Users.Keys.id, primaryKey: true)
-            table.column(Schema.Users.Keys.payload)
-        })
-        try database.run(Schema.Friends.table.create { table in
-            table.column(Schema.Friends.Keys.id, primaryKey: true)
-            table.column(Schema.Friends.Keys.payload)
-        })
-        try database.run(Schema.SpendingsHistory.table.create { table in
-            table.column(Schema.SpendingsHistory.Keys.id, primaryKey: true)
-            table.column(Schema.SpendingsHistory.Keys.payload)
-        })
-        try database.run(Schema.SpendingCounterparties.table.create { table in
-            table.column(Schema.SpendingCounterparties.Keys.id, primaryKey: true)
-            table.column(Schema.SpendingCounterparties.Keys.payload)
-        })
-        try database.run(Schema.Profile.table.create { table in
-            table.column(Schema.Profile.Keys.id, primaryKey: true)
-            table.column(Schema.Profile.Keys.payload)
-        })
+        try SQLitePersistency.createTable(for: Schemas.refreshToken, database: database)
+        try SQLitePersistency.createTable(for: Schemas.profile, database: database)
+        try SQLitePersistency.createTable(for: Schemas.users, database: database)
+        try SQLitePersistency.createTable(for: Schemas.spendingCounterparties, database: database)
+        try SQLitePersistency.createTable(for: Schemas.spendingsHistory, database: database)
+        try SQLitePersistency.createTable(for: Schemas.friends, database: database)
     }
+    
+
 }
+
 
 extension SQLitePersistencyFactory: Loggable {}

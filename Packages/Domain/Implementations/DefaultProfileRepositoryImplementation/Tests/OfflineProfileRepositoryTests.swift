@@ -12,27 +12,29 @@ private actor PersistencyProvider {
     let persistency: PersistencyMock
     var getProfileCalledCount = 0
     var updateProfileCalls: [ProfileDto] = []
-    var updateUsersCalls: [ [UserDto] ] = []
+    var updateUsersCalls: [UserDto] = []
     var profile: ProfileDto?
 
     init() async {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
-            persistency.getProfileBlock = {
+            persistency.getBlock = { anyDescriptor in
+                guard anyDescriptor as? Schema<Unkeyed, ProfileDto>.Index != nil else {
+                    fatalError()
+                }
                 await self.performIsolated { `self` in
                     self.getProfileCalledCount += 1
                 }
                 return await self.profile
             }
-            persistency.updateProfileBlock = { profile in
-                await self.performIsolated { `self` in
+            persistency.updateBlock = { anyDescriptor, anyObject in
+                if anyDescriptor as? Schema<Unkeyed, ProfileDto>.Index != nil, let profile = anyObject as? ProfileDto {
                     self.updateProfileCalls.append(profile)
                     self.profile = profile
-                }
-            }
-            persistency.updateUsersBlock = { users in
-                await self.performIsolated { `self` in
-                    self.updateUsersCalls.append(users)
+                } else if anyDescriptor as? Schema<UserDto.Identifier, UserDto>.Index != nil, let user = anyObject as? UserDto {
+                    self.updateUsersCalls.append(user)
+                } else {
+                    fatalError()
                 }
             }
         }
@@ -85,6 +87,6 @@ private actor PersistencyProvider {
         #expect(profileFromRepository == profile)
         #expect(await provider.updateProfileCalls == [profile].map(ProfileDto.init))
         #expect(await provider.getProfileCalledCount == 1)
-        #expect(await provider.updateUsersCalls == [[UserDto(domain: profile.user)]])
+        #expect(await provider.updateUsersCalls == [UserDto(domain: profile.user)])
     }
 }

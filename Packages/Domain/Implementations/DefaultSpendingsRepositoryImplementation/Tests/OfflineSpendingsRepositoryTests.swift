@@ -2,6 +2,7 @@ import Testing
 import Domain
 import Foundation
 import DataTransferObjects
+import PersistentStorage
 @testable import DefaultSpendingsRepositoryImplementation
 @testable import MockPersistentStorage
 
@@ -14,34 +15,38 @@ private actor PersistencyProvider {
     var getSpendingHistoryCalledCount: [UserDto.Identifier: Int] = [:]
     var updateSpendingHistoryCalls: [ (UserDto.Identifier, [IdentifiableExpenseDto]) ] = []
 
-    var counterparties: [BalanceDto]?
+    var balance: [BalanceDto]?
     var spendingHistory = [UserDto.Identifier: [IdentifiableExpenseDto]]()
 
     init() async {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
-            persistency.getSpendingCounterpartiesBlock = {
-                await self.performIsolated { `self` in
-                    self.getSpendingCounterpartiesCalledCount += 1
+            persistency.getBlock = { anyDescriptor in
+                if anyDescriptor as? Schema<Unkeyed, [BalanceDto]>.Index != nil {
+                    await self.performIsolated { `self` in
+                        self.getSpendingCounterpartiesCalledCount += 1
+                    }
+                    return await self.balance
+                } else if let descriptor = anyDescriptor as? Schema<UserDto.Identifier, [IdentifiableExpenseDto]>.Index {
+                    await self.performIsolated { `self` in
+                        self.getSpendingHistoryCalledCount[descriptor.key] = self.getSpendingHistoryCalledCount[descriptor.key, default: 0] + 1
+                    }
+                    return await self.spendingHistory[descriptor.key]
+                } else {
+                    fatalError()
                 }
-                return await self.counterparties
             }
-            persistency.updateSpendingCounterpartiesBlock = { counterparties in
-                await self.performIsolated { `self` in
-                    self.updateSpendingCounterpartiesCalls.append(counterparties)
-                    self.counterparties = counterparties
-                }
-            }
-            persistency.getSpendingsHistoryBlock = { id in
-                await self.performIsolated { `self` in
-                    self.getSpendingHistoryCalledCount[id] = self.getSpendingHistoryCalledCount[id, default: 0] + 1
-                }
-                return await self.spendingHistory[id]
-            }
-            persistency.updateSpendingsHistoryBlock = { id, history in
-                await self.performIsolated { `self` in
-                    self.updateSpendingHistoryCalls.append((id, history))
-                    self.spendingHistory[id] = history
+            persistency.updateBlock = { anyDescriptor, anyObject in
+                if let descriptor = anyDescriptor as? Schema<UserDto.Identifier, [IdentifiableExpenseDto]>.Index, let history = anyObject as? [IdentifiableExpenseDto] {
+                    self.performIsolated { `self` in
+                        self.updateSpendingHistoryCalls.append((descriptor.key, history))
+                        self.spendingHistory[descriptor.key] = history
+                    }
+                } else if anyDescriptor as? Schema<Unkeyed, [BalanceDto]>.Index != nil, let balance = anyObject as? [BalanceDto] {
+                    self.performIsolated { `self` in
+                        self.updateSpendingCounterpartiesCalls.append(balance)
+                        self.balance = balance
+                    }
                 }
             }
         }

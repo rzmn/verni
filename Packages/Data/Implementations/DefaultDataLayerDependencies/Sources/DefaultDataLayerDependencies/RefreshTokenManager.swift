@@ -33,7 +33,7 @@ extension RefreshTokenManager: TokenRefresher {
     func refreshTokens() async throws(RefreshTokenFailureReason) {
         let response: AuthTokenDto
         do {
-            let token =  await persistency.getRefreshToken()
+            let token =  await persistency.refreshToken
             print("[debug] refreshing with refresh token: \(token)")
             response = try await api.run(
                 method: Auth.Refresh(
@@ -59,6 +59,6 @@ extension RefreshTokenManager: TokenRefresher {
             }
         }
         accessTokenValue = response.accessToken
-        await persistency.update(refreshToken: response.refreshToken)
+        await persistency.update(value: response.refreshToken, for: Schemas.refreshToken.unkeyedIndex)
     }
 }

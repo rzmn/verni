@@ -58,7 +58,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         self.defaultDependencies = defaultDependencies
         self.logoutSubject = AsyncSubject<LogoutReason>(taskFactory: DefaultTaskFactory())
         self.dataLayer = dataLayer
-        userId = await dataLayer.persistency.userId()
+        userId = await dataLayer.persistency.userId
         let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(persistency: dataLayer.persistency)
         self.spendingsOfflineRepository = spendingsOfflineRepository
         let friendsOfflineRepository = DefaultFriendsOfflineRepository(persistency: dataLayer.persistency)
