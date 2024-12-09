@@ -8,27 +8,15 @@ internal import SQLite
 
 typealias Expression = SQLite.Expression
 
-@StorageActor class SQLitePersistency: Persistency {
+@StorageActor class SQLitePersistency {
     let logger: Logger
     
-    var refreshToken: String {
-        get async {
-            (inMemoryCache[Schemas.refreshToken.unkeyedIndex] as? String) ?? initialRefreshToken
-        }
-    }
-    
-    var userId: UserDto.Identifier {
-        get async {
-            hostId
-        }
-    }
-
     private let encoder = JSONEncoder()
     private let taskFactory: TaskFactory
     private let database: Connection
     private let hostId: UserDto.Identifier
     private var initialRefreshToken: String!
-    private var inMemoryCache = [AnyHashable: Any]()
+    private let inMemoryCache = InMemoryCache()
     private var onDeinit: (_ shouldInvalidate: Bool) -> Void
     private(set) var shouldInvalidate = false
 
@@ -39,7 +27,7 @@ typealias Expression = SQLite.Expression
         refreshToken: String?,
         logger: Logger,
         taskFactory: TaskFactory
-    ) throws {
+    ) async throws {
         self.database = database
         self.hostId = hostId
         self.logger = logger
@@ -48,60 +36,73 @@ typealias Expression = SQLite.Expression
         if let refreshToken {
             self.initialRefreshToken = refreshToken
             do {
-                try doUpdate(value: refreshToken, for: Schemas.refreshToken.unkeyedIndex)
+                try await doUpdate(value: refreshToken, for: Schema.refreshToken.unkeyed)
             } catch {
                 logE { "failed to insert token error: \(error)" }
             }
         } else {
-            guard let refreshToken = try doGet(descriptor: Schemas.refreshToken.unkeyedIndex) else {
-                throw SQLite.QueryError.unexpectedNullValue(name: "\(Schemas.refreshToken.id)")
+            guard let refreshToken = try await doGet(index: Schema.refreshToken.unkeyed) else {
+                throw SQLite.QueryError.unexpectedNullValue(name: "\(Schema.refreshToken.id)")
             }
             self.initialRefreshToken = refreshToken
         }
     }
+}
 
-    private static var identifierKey: String {
-        "id"
+extension SQLitePersistency: Persistency {
+    var refreshToken: String {
+        get async {
+            await inMemoryCache
+                .get(index: Schema.refreshToken.unkeyed)
+            ?? initialRefreshToken
+        }
     }
     
-    private static var valueKey: String {
-        "value"
+    var userId: UserDto.Identifier {
+        get async {
+            hostId
+        }
     }
     
     subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
-        descriptor: Schema<Key, Value>.Index
+        index: Descriptor<Key, Value>.Index
     ) -> Value? {
-        get {
+        get async {
             do {
-                return try doGet(descriptor: descriptor)
+                return try await doGet(index: index)
             } catch {
-                logE { "failed to perform get for \(descriptor)" }
+                logE { "failed to perform get for \(index)" }
                 return nil
             }
         }
     }
     
     private func doGet<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
-        descriptor: Schema<Key, Value>.Index
-    ) throws -> Value? {
-        let row = try database.prepare(Table(descriptor.schema.id))
+        index: Descriptor<Key, Value>.Index
+    ) async throws -> Value? {
+        if let value = await inMemoryCache.get(index: index) {
+            return value
+        }
+        let row = try database.prepare(Table(index.descriptor.id))
             .first { row in
                 let blob = try row.get(
-                    Expression<CodableBlob<Key>>(Self.identifierKey)
+                    Expression<CodableBlob<Key>>(Schema.identifierKey)
                 )
-                return blob.value == descriptor.key
+                return blob.value == index.key
             }
-        let value = try row?.get(Expression<CodableBlob<Value>>(Self.valueKey)).value
-        inMemoryCache[descriptor] = value
+        let value = try row?.get(Expression<CodableBlob<Value>>(Schema.valueKey)).value
+        if let value {
+            await inMemoryCache.update(value: value, for: index)
+        }
         return value
     }
     
     func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
         value: Value,
-        for descriptor: Schema<Key, Value>.Index
-    ) {
+        for descriptor: Descriptor<Key, Value>.Index
+    ) async {
         do {
-            try doUpdate(value: value, for: descriptor)
+            try await doUpdate(value: value, for: descriptor)
         } catch {
             return logE { "failed to perform upsert \(value) query for \(descriptor)" }
         }
@@ -109,27 +110,17 @@ typealias Expression = SQLite.Expression
     
     private func doUpdate<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
         value: Value,
-        for descriptor: Schema<Key, Value>.Index
-    ) throws {
+        for index: Descriptor<Key, Value>.Index
+    ) async throws {
         try database.run(
-            Table(descriptor.schema.id)
+            Table(index.descriptor.id)
                 .upsert(
-                    Expression(Self.identifierKey) <- CodableBlob(value: descriptor.key),
-                    Expression(Self.valueKey) <- CodableBlob(value: value),
-                    onConflictOf: Expression<CodableBlob<Key>>(Self.identifierKey)
+                    Expression(Schema.identifierKey) <- CodableBlob(value: index.key),
+                    Expression(Schema.valueKey) <- CodableBlob(value: value),
+                    onConflictOf: Expression<CodableBlob<Key>>(Schema.identifierKey)
                 )
         )
-        inMemoryCache[descriptor] = value
-    }
-    
-    static func createTable<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
-        for schema: Schema<Key, Value>,
-        database: Connection
-    ) throws {
-        try database.run(Table(schema.id).create { table in
-            table.column(Expression<CodableBlob<Key>>(identifierKey), primaryKey: true)
-            table.column(Expression<CodableBlob<Value>>(valueKey))
-        })
+        await inMemoryCache.update(value: value, for: index)
     }
 
     func close() {

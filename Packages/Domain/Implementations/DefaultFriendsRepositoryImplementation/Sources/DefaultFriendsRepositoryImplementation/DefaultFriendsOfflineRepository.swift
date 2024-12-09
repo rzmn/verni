@@ -13,7 +13,7 @@ public actor DefaultFriendsOfflineRepository {
 
 extension DefaultFriendsOfflineRepository: FriendsOfflineRepository {
     public func getFriends(set: FriendshipKindSet) async -> [FriendshipKind: [User]]? {
-        await persistency[Schemas.friends.index(for: Set(set.array.map(FriendshipKindDto.init)))].flatMap {
+        await persistency[Schema.friends.index(for: FriendshipKindSetDto(set.array.map(FriendshipKindDto.init)))].flatMap {
             $0.reduce(into: [:]) { dict, item in
                 dict[FriendshipKind(dto: item.key)] = item.value.map(User.init)
             }
@@ -29,7 +29,7 @@ extension DefaultFriendsOfflineRepository: FriendsOfflineMutableRepository {
             ) { dict, item in
                 dict[FriendshipKindDto(domain: item.key)] = item.value.map(UserDto.init)
             },
-            for: Schemas.friends.index(for: Set(set.array.map(FriendshipKindDto.init)))
+            for: Schema.friends.index(for: FriendshipKindSetDto(set.array.map(FriendshipKindDto.init)))
         )
     }
 }

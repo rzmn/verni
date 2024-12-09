@@ -1,29 +1,27 @@
-import Foundation
+import DataTransferObjects
 
-public struct Unkeyed: Codable, Hashable, Sendable {}
-
-public struct Schema<Key: Sendable & Codable & Hashable, Value: Sendable & Codable>: Sendable, Hashable {
-    public let id: String
-}
-
-extension Schema {
-    public struct Index: Sendable, Hashable {
-        public let schema: Schema
-        public let key: Key
-        
-        init(schema: Schema, key: Key) {
-            self.schema = schema
-            self.key = key
-        }
+public enum Schema {
+    public static var refreshToken: Descriptor<Unkeyed, String> {
+        Descriptor(id: "refreshToken")
     }
     
-    public func index(for key: Key) -> Index {
-        Index(schema: self, key: key)
+    public static var profile: Descriptor<Unkeyed, ProfileDto> {
+        Descriptor(id: "profile")
     }
-}
-
-extension Schema where Key == Unkeyed {
-    public var unkeyedIndex: Index {
-        Index(schema: self, key: Unkeyed())
+    
+    public static var users: Descriptor<UserDto.Identifier, UserDto> {
+        Descriptor(id: "users")
+    }
+    
+    public static var spendingCounterparties: Descriptor<Unkeyed, [BalanceDto]> {
+        Descriptor(id: "spendingCounterparties")
+    }
+    
+    public static var spendingsHistory: Descriptor<UserDto.Identifier, [IdentifiableExpenseDto]> {
+        Descriptor(id: "spendingsHistory")
+    }
+    
+    public static var friends: Descriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]> {
+        Descriptor(id: "friends")
     }
 }

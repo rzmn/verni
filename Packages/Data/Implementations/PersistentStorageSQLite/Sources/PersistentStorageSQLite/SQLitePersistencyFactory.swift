@@ -42,7 +42,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         logI { "found db url: \(dbUrl)" }
         do {
             let database = try Connection(dbUrl.absoluteString)
-            return try SQLitePersistency(
+            return try await SQLitePersistency(
                 database: database,
                 onDeinit: { [pathManager] shouldInvalidate in
                     guard shouldInvalidate else {
@@ -79,7 +79,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             try FileManager.default.removeItem(at: dbUrl)
             throw error
         }
-        return try SQLitePersistency(
+        return try await SQLitePersistency(
             database: database,
             onDeinit: { [pathManager] shouldInvalidate in
                 guard shouldInvalidate else {
@@ -99,15 +99,13 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     }
 
     @StorageActor private func createTables(for database: Connection) throws {
-        try SQLitePersistency.createTable(for: Schemas.refreshToken, database: database)
-        try SQLitePersistency.createTable(for: Schemas.profile, database: database)
-        try SQLitePersistency.createTable(for: Schemas.users, database: database)
-        try SQLitePersistency.createTable(for: Schemas.spendingCounterparties, database: database)
-        try SQLitePersistency.createTable(for: Schemas.spendingsHistory, database: database)
-        try SQLitePersistency.createTable(for: Schemas.friends, database: database)
+        try Schema.refreshToken.createTable(database: database)
+        try Schema.profile.createTable(database: database)
+        try Schema.users.createTable(database: database)
+        try Schema.spendingCounterparties.createTable(database: database)
+        try Schema.spendingsHistory.createTable(database: database)
+        try Schema.friends.createTable(database: database)
     }
-    
-
 }
 
 

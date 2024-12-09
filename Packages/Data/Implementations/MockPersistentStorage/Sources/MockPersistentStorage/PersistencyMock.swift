@@ -7,7 +7,7 @@ private struct AnyBox: @unchecked Sendable {
 
 actor PersistencyMock: Persistency {
     subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
-        descriptor: Schema<Key, Value>.Index
+        descriptor: Descriptor<Key, Value>.Index
     ) -> Value? {
         get async {
             await getFunc(descriptor).value as? Value
@@ -20,7 +20,7 @@ actor PersistencyMock: Persistency {
     
     func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
         value: Value,
-        for descriptor: Schema<Key, Value>.Index
+        for descriptor: Descriptor<Key, Value>.Index
     ) async {
         await updateBlock?(descriptor, value)
     }

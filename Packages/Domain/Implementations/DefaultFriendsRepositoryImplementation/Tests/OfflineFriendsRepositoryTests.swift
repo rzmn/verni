@@ -9,9 +9,9 @@ import ApiDomainConvenience
 @testable import MockPersistentStorage
 
 private extension FriendshipKindSet {
-    init(_ set: Set<FriendshipKindDto>) {
+    init(_ set: FriendshipKindSetDto) {
         var result: FriendshipKindSet = []
-        for element in set {
+        for element in set.array {
             switch element {
             case .friends:
                 result.insert(.friends)
@@ -36,21 +36,21 @@ private actor PersistencyProvider {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
             persistency.getBlock = { anyDescriptor in
-                guard let descriptor = anyDescriptor as? Schema<[FriendshipKindDto], [FriendshipKindDto: [UserDto]]>.Index else {
+                guard let descriptor = anyDescriptor as? Descriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]>.Index else {
                     fatalError()
                 }
                 await self.performIsolated { `self` in
-                    self.getFriendsCalls.append(FriendshipKindSet(Set(descriptor.key)))
+                    self.getFriendsCalls.append(FriendshipKindSet(descriptor.key))
                 }
-                return await self.friends[FriendshipKindSet(Set(descriptor.key))]?.reduce(into: [:], { dict, kv in
+                return await self.friends[FriendshipKindSet(descriptor.key)]?.reduce(into: [:], { dict, kv in
                     dict[FriendshipKindDto(domain: kv.key)] = kv.value.map(UserDto.init)
                 })
             }
             persistency.updateBlock = { anyDescriptor, anyObject in
-                guard let descriptor = anyDescriptor as? Schema<[FriendshipKindDto], [FriendshipKindDto: [UserDto]]>.Index, let friends = anyObject as? [FriendshipKindDto: [UserDto]] else {
+                guard let descriptor = anyDescriptor as? Descriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]>.Index, let friends = anyObject as? [FriendshipKindDto: [UserDto]] else {
                     fatalError()
                 }
-                let kindToSet = FriendshipKindSet(Set(descriptor.key))
+                let kindToSet = FriendshipKindSet(descriptor.key)
                 let friendsToSet = friends.reduce(into: [:], { dict, kv in
                     dict[FriendshipKind(dto: kv.key)] = kv.value.map(User.init)
                 })

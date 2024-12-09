@@ -22,12 +22,12 @@ private actor PersistencyProvider {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
             persistency.getBlock = { anyDescriptor in
-                if anyDescriptor as? Schema<Unkeyed, [BalanceDto]>.Index != nil {
+                if anyDescriptor as? Descriptor<Unkeyed, [BalanceDto]>.Index != nil {
                     await self.performIsolated { `self` in
                         self.getSpendingCounterpartiesCalledCount += 1
                     }
                     return await self.balance
-                } else if let descriptor = anyDescriptor as? Schema<UserDto.Identifier, [IdentifiableExpenseDto]>.Index {
+                } else if let descriptor = anyDescriptor as? Descriptor<UserDto.Identifier, [IdentifiableExpenseDto]>.Index {
                     await self.performIsolated { `self` in
                         self.getSpendingHistoryCalledCount[descriptor.key] = self.getSpendingHistoryCalledCount[descriptor.key, default: 0] + 1
                     }
@@ -37,12 +37,12 @@ private actor PersistencyProvider {
                 }
             }
             persistency.updateBlock = { anyDescriptor, anyObject in
-                if let descriptor = anyDescriptor as? Schema<UserDto.Identifier, [IdentifiableExpenseDto]>.Index, let history = anyObject as? [IdentifiableExpenseDto] {
+                if let descriptor = anyDescriptor as? Descriptor<UserDto.Identifier, [IdentifiableExpenseDto]>.Index, let history = anyObject as? [IdentifiableExpenseDto] {
                     self.performIsolated { `self` in
                         self.updateSpendingHistoryCalls.append((descriptor.key, history))
                         self.spendingHistory[descriptor.key] = history
                     }
-                } else if anyDescriptor as? Schema<Unkeyed, [BalanceDto]>.Index != nil, let balance = anyObject as? [BalanceDto] {
+                } else if anyDescriptor as? Descriptor<Unkeyed, [BalanceDto]>.Index != nil, let balance = anyObject as? [BalanceDto] {
                     self.performIsolated { `self` in
                         self.updateSpendingCounterpartiesCalls.append(balance)
                         self.balance = balance

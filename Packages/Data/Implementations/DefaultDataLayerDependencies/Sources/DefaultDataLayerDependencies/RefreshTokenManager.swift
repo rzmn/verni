@@ -59,6 +59,6 @@ extension RefreshTokenManager: TokenRefresher {
             }
         }
         accessTokenValue = response.accessToken
-        await persistency.update(value: response.refreshToken, for: Schemas.refreshToken.unkeyedIndex)
+        await persistency.update(value: response.refreshToken, for: Schema.refreshToken.unkeyed)
     }
 }

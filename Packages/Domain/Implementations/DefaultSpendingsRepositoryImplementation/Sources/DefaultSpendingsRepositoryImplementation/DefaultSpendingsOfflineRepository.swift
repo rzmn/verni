@@ -13,13 +13,13 @@ public actor DefaultSpendingsOfflineRepository {
 
 extension DefaultSpendingsOfflineRepository: SpendingsOfflineRepository {
     public func getSpendingCounterparties() async -> [SpendingsPreview]? {
-        await persistency[Schemas.spendingCounterparties.unkeyedIndex].flatMap {
+        await persistency[Schema.spendingCounterparties.unkeyed].flatMap {
             $0.map(SpendingsPreview.init)
         }
     }
 
     public func getSpendingsHistory(counterparty: User.Identifier) async -> [IdentifiableSpending]? {
-        await persistency[Schemas.spendingsHistory.index(for: counterparty)].flatMap {
+        await persistency[Schema.spendingsHistory.index(for: counterparty)].flatMap {
             $0.map(IdentifiableSpending.init)
         }
     }
@@ -27,13 +27,13 @@ extension DefaultSpendingsOfflineRepository: SpendingsOfflineRepository {
 
 extension DefaultSpendingsOfflineRepository: SpendingsOfflineMutableRepository {
     public func updateSpendingCounterparties(_ counterparties: [SpendingsPreview]) async {
-        await persistency.update(value: counterparties.map(BalanceDto.init), for: Schemas.spendingCounterparties.unkeyedIndex)
+        await persistency.update(value: counterparties.map(BalanceDto.init), for: Schema.spendingCounterparties.unkeyed)
     }
 
     public func updateSpendingsHistory(counterparty: User.Identifier, history: [IdentifiableSpending]) async {
         await persistency.update(
             value: history.map(IdentifiableExpenseDto.init),
-            for: Schemas.spendingsHistory.index(for: counterparty)
+            for: Schema.spendingsHistory.index(for: counterparty)
         )
     }
 }
