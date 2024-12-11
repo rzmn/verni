@@ -1,9 +1,9 @@
 import Logging
 import Foundation
 import PersistentStorage
-import Base
 import DataTransferObjects
 import AsyncExtensions
+internal import Base
 internal import SQLite
 
 typealias Expression = SQLite.Expression
@@ -13,16 +13,15 @@ typealias Expression = SQLite.Expression
     
     private let encoder = JSONEncoder()
     private let taskFactory: TaskFactory
-    private let database: Connection
+    private var database: Connection?
     private let hostId: UserDto.Identifier
     private var initialRefreshToken: String!
     private let inMemoryCache = InMemoryCache()
-    private var onDeinit: (_ shouldInvalidate: Bool) -> Void
-    private(set) var shouldInvalidate = false
+    private let invalidator: @StorageActor @Sendable () -> Void
 
     init(
         database: Connection,
-        onDeinit: @escaping (_ shouldInvalidate: Bool) -> Void,
+        invalidator: @escaping @StorageActor @Sendable () -> Void,
         hostId: UserDto.Identifier,
         refreshToken: String?,
         logger: Logger,
@@ -31,7 +30,7 @@ typealias Expression = SQLite.Expression
         self.database = database
         self.hostId = hostId
         self.logger = logger
-        self.onDeinit = onDeinit
+        self.invalidator = invalidator
         self.taskFactory = taskFactory
         if let refreshToken {
             self.initialRefreshToken = refreshToken
@@ -83,6 +82,9 @@ extension SQLitePersistency: Persistency {
         if let value = await inMemoryCache.get(index: index) {
             return value
         }
+        guard let database else {
+            return nil
+        }
         let row = try database.prepare(Table(index.descriptor.id))
             .first { row in
                 let blob = try row.get(
@@ -112,6 +114,9 @@ extension SQLitePersistency: Persistency {
         value: Value,
         for index: Descriptor<Key, Value>.Index
     ) async throws {
+        guard let database else {
+            return
+        }
         try database.run(
             Table(index.descriptor.id)
                 .upsert(
@@ -124,13 +129,13 @@ extension SQLitePersistency: Persistency {
     }
 
     func close() {
-        // empty
+        database = nil
     }
 
     func invalidate() {
         logI { "invalidating db..." }
         close()
-        shouldInvalidate = true
+        invalidator()
     }
 }
 

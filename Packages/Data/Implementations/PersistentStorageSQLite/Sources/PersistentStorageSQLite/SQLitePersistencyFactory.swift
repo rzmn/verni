@@ -2,21 +2,30 @@ import Foundation
 import Logging
 import PersistentStorage
 import DataTransferObjects
-import Base
 import AsyncExtensions
+internal import Base
 internal import SQLite
 
 public actor SQLitePersistencyFactory {
     public let logger: Logger
     let dbDirectory: URL
-    private let pathManager: DBPathManager
     private let taskFactory: TaskFactory
+    private let pathManager: PathManager
 
     public init(logger: Logger, dbDirectory: URL, taskFactory: TaskFactory) throws {
+        try self.init(
+            logger: logger,
+            dbDirectory: dbDirectory,
+            taskFactory: taskFactory,
+            pathManager: DefaultPathManager()
+        )
+    }
+    
+    init(logger: Logger, dbDirectory: URL, taskFactory: TaskFactory, pathManager: PathManager) throws {
         self.logger = logger
         self.dbDirectory = dbDirectory
         self.taskFactory = taskFactory
-        self.pathManager = try DBPathManager(container: dbDirectory)
+        self.pathManager = pathManager
     }
 }
 
@@ -27,32 +36,30 @@ extension SQLitePersistencyFactory: PersistencyFactory {
 
     @StorageActor private func doAwake(host: UserDto.Identifier) async -> Persistency? {
         logI { "awaking persistence..." }
-        let dbUrl: URL
+        let pathManager: any DbPathManager<SqliteDbPathManager.Item>
         do {
-            let dbs = try pathManager.dbs
-            guard let descriptor = dbs.first(where: { $0.owner == host }) else {
+            pathManager = try createDatabasePathManager()
+        } catch {
+            logE { "got error creating db path manager error: \(error)" }
+            return nil
+        }
+        let item: SqliteDbPathManager.Item
+        do {
+            guard let existed = try pathManager.items.first(where: { $0.id == host }) else {
                 logI { "has no persistence for host \(host)" }
                 return nil
             }
-            dbUrl = descriptor.dbUrl
+            item = existed
         } catch {
             logE { "got error searching for db path error: \(error)" }
             return nil
         }
-        logI { "found db url: \(dbUrl)" }
+        logI { "found item: \(item)" }
         do {
-            let database = try Connection(dbUrl.absoluteString)
             return try await SQLitePersistency(
-                database: database,
-                onDeinit: { [pathManager] shouldInvalidate in
-                    guard shouldInvalidate else {
-                        return
-                    }
-                    do {
-                        try pathManager.invalidate(owner: host)
-                    } catch {
-                        self.logE { "failed to invalidate db: \(error)" }
-                    }
+                database: try item.connection(),
+                invalidator: {
+                    pathManager.invalidate(id: host)
                 },
                 hostId: host,
                 refreshToken: nil,
@@ -71,30 +78,32 @@ extension SQLitePersistencyFactory: PersistencyFactory {
 
     @StorageActor private func doCreate(host: UserDto.Identifier, refreshToken: String) async throws -> Persistency {
         logI { "creating persistence..." }
-        let dbUrl = try pathManager.create(owner: host).dbUrl
-        let database = try Connection(dbUrl.path)
+        let pathManager = try createDatabasePathManager()
+        let database = try pathManager.create(id: host).connection()
         do {
             try createTables(for: database)
         } catch {
-            try FileManager.default.removeItem(at: dbUrl)
+            pathManager.invalidate(id: host)
             throw error
         }
         return try await SQLitePersistency(
             database: database,
-            onDeinit: { [pathManager] shouldInvalidate in
-                guard shouldInvalidate else {
-                    return
-                }
-                do {
-                    try pathManager.invalidate(owner: host)
-                } catch {
-                    self.logE { "failed to invalidate db: \(error)" }
-                }
+            invalidator: {
+                pathManager.invalidate(id: host)
             },
             hostId: host,
             refreshToken: refreshToken,
             logger: logger,
             taskFactory: taskFactory
+        )
+    }
+    
+    @StorageActor private func createDatabasePathManager() throws -> any DbPathManager<SqliteDbPathManager.Item> {
+        try SqliteDbPathManager(
+            logger: logger.with(prefix: "pathManager"),
+            containerDirectory: dbDirectory,
+            versionLabel: "v1",
+            pathManager: pathManager
         )
     }
 

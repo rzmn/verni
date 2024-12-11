@@ -96,6 +96,7 @@
 		61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDataLayerDependencies; sourceTree = "<group>"; };
 		61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultReceivingPushUseCaseImplementation; sourceTree = "<group>"; };
 		61D8456C2C7E69B200100E2E /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
+		84030B1D2D09616C0080F5B9 /* PathManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathManager.swift; sourceTree = "<group>"; };
 		844CD9B42CF0E68000092DD1 /* DebugMenuScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DebugMenuScreen; sourceTree = "<group>"; };
 		84650DDC2CEF300100907DB0 /* AuthWelcomeScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthWelcomeScreen; sourceTree = "<group>"; };
 		846A50C62CFE0C6500A766EE /* SplashScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SplashScreen; sourceTree = "<group>"; };
@@ -234,6 +235,7 @@
 				614AC19C2C6802EE005B2CD5 /* NotificationService */,
 				61414F7F2C2F02A100B2C027 /* Products */,
 				61B74FF22C3080D6001182A2 /* Frameworks */,
+				84030B1D2D09616C0080F5B9 /* PathManager.swift */,
 			);
 			sourceTree = "<group>";
 		};

@@ -380,23 +380,4 @@ import Base
 
         #expect(await persistency[Schema.spendingsHistory.index(for: counterparty)] == history)
     }
-
-    @Test func testInvalidate() async throws {
-
-        // given
-
-        let host = UUID().uuidString
-        let refreshToken = UUID().uuidString
-
-        // when
-
-        let persistency = try await persistencyFactory
-            .create(host: host, refreshToken: refreshToken)
-        await persistency.invalidate()
-        try await taskFactory.runUntilIdle()
-
-        // then
-
-        #expect(await (persistency as? SQLitePersistency)?.shouldInvalidate == true)
-    }
 }
