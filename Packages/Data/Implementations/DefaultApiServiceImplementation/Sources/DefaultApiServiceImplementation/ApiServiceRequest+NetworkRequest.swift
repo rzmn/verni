@@ -25,6 +25,12 @@ struct NetworkRequestAdapter<T: ApiServiceRequest>: NetworkRequest {
     }
 }
 
+extension NetworkRequestAdapter: CustomStringConvertible {
+    var description: String {
+        "\(request)"
+    }
+}
+
 extension NetworkRequestAdapter: NetworkRequestWithBody where T: ApiServiceRequestWithBody {
     typealias Body = T.Body
 

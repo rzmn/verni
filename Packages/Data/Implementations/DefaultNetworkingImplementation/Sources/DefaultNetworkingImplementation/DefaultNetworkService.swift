@@ -17,8 +17,7 @@ final class DefaultNetworkService: Sendable {
         self.logger = logger
         self.endpoint = endpoint
         self.session = session
-
-        logI { "initialized network service. endpoint: \(endpoint)" }
+        logI { "api endpoint: \(endpoint.path)" }
     }
 }
 
@@ -36,13 +35,13 @@ extension DefaultNetworkService: NetworkService {
             encoder: UrlRequestBuilderBodyEncoder(
                 encoder: encoder
             ),
-            logger: logger.with(prefix: "[\(url)] ")
+            logger: logger.with(prefix: "⚒️")
         ).build()
         logI { "\(request.path): built request: \(urlRequest)" }
         return try await RequestRunner(
             session: session,
             request: urlRequest,
-            logger: logger.with(prefix: "[\(url)] "),
+            logger: logger.with(prefix: "🏄"),
             backoff: ExponentialBackoff(
                 base: 0.5,
                 retryCount: 3,

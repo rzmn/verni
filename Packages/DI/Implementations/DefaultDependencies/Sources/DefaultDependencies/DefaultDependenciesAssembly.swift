@@ -63,7 +63,10 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
     public let appCommon: AppCommon
 
     public init() throws {
-        dataLayer = try DefaultAnonymousSession(taskFactory: taskFactory)
+        dataLayer = try DefaultAnonymousSession(
+            logger: .shared.with(prefix: "🥨"),
+            taskFactory: taskFactory
+        )
         guard let temporaryCacheDirectory = FileManager.default.urls(
             for: .cachesDirectory,
             in: .userDomainMask

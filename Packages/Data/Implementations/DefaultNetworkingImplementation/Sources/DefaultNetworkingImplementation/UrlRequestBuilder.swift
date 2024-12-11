@@ -22,7 +22,7 @@ extension UrlRequestBuilder {
         var urlRequest = URLRequest(url: url)
         request.headers.forEach { key, value in
             urlRequest.setValue(value, forHTTPHeaderField: key)
-            logD { "\(request.path): http header: (\(key): \(value))" }
+            logD { "\(url.path()): http header: (\(key): \(value))" }
         }
         urlRequest.httpMethod = request.httpMethod
         let httpBody = try encoder.encodeBody(from: request)

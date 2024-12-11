@@ -21,3 +21,9 @@ struct AnyApiServiceRequestWithBody<Body: Encodable & Sendable>: ApiServiceReque
         self.body = body
     }
 }
+
+extension AnyApiServiceRequestWithBody: CustomStringConvertible {
+    var description: String {
+        "\(request)"
+    }
+}

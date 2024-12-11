@@ -20,6 +20,7 @@ actor DefaultApiService {
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: DefaultApiServiceRequestRunnerFactory(
+                    logger: logger,
                     service: networkServiceFactory.create()
                 ),
                 taskFactory: taskFactory,
@@ -27,7 +28,7 @@ actor DefaultApiService {
             ),
             taskFactory: taskFactory
         )
-        logI { "initialized network service. has token refresher: \(tokenRefresher != nil)" }
+        logI { "created api, authorized=\(tokenRefresher != nil ? "true" : "false")" }
     }
 }
 

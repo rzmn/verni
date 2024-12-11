@@ -1,8 +1,9 @@
 extension Logger {
     public enum Severity: Int, Sendable, Comparable, CustomStringConvertible {
         case error = 0
-        case info = 1
-        case debug = 2
+        case warning = 1
+        case info = 2
+        case debug = 3
 
         public static func < (lhs: Severity, rhs: Severity) -> Bool {
             lhs.rawValue < rhs.rawValue
@@ -11,11 +12,13 @@ extension Logger {
         public var description: String {
             switch self {
             case .error:
-                return "e"
+                return "🔴"
+            case .warning:
+                return "🟡"
             case .info:
-                return "i"
+                return "⚪️"
             case .debug:
-                return "d"
+                return "⚫️"
             }
         }
     }

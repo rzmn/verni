@@ -1,6 +1,7 @@
 import DI
 import Domain
 import AsyncExtensions
+internal import Logging
 internal import Base
 internal import Api
 internal import ApiService
@@ -34,6 +35,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     private let updatableProfile  = ExternallyUpdatable<Domain.Profile>(
         taskFactory: DefaultTaskFactory()
     )
+    private let logger: Logger = .shared.with(prefix: "🍭")
     var appCommon: AppCommon {
         defaultDependencies.appCommon
     }
@@ -69,28 +71,28 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         self.usersOfflineRepository = usersOfflineRepository
         profileRepository = await DefaultProfileRepository(
             api: dataLayer.api,
-            logger: .shared.with(prefix: "[profile.repo] "),
+            logger: logger.with(prefix: "🪪"),
             offline: profileOfflineRepository,
             profile: updatableProfile,
             taskFactory: DefaultTaskFactory()
         )
         usersRepository = DefaultUsersRepository(
             api: dataLayer.api,
-            logger: .shared.with(prefix: "[users.repo] "),
+            logger: logger.with(prefix: "🎭"),
             offline: usersOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         spendingsRepository = await DefaultSpendingsRepository(
             api: dataLayer.api,
             longPoll: dataLayer.longPoll,
-            logger: .shared.with(prefix: "[spendings.repo] "),
+            logger: logger.with(prefix: "💸"),
             offline: spendingsOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
         friendListRepository = DefaultFriendsRepository(
             api: dataLayer.api,
             longPoll: dataLayer.longPoll,
-            logger: .shared.with(prefix: "[friends.repo] "),
+            logger: logger.with(prefix: "🤝"),
             offline: friendsOfflineRepository,
             taskFactory: DefaultTaskFactory()
         )
@@ -98,7 +100,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
             session: dataLayer,
             shouldLogout: logoutSubject,
             taskFactory: DefaultTaskFactory(),
-            logger: .shared.with(prefix: "[logout] ")
+            logger: logger.with(prefix: "🚪")
         )
     }
 
@@ -121,7 +123,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     func pushRegistrationUseCase() -> PushRegistrationUseCase {
         DefaultPushRegistrationUseCase(
             api: dataLayer.api,
-            logger: .shared.with(prefix: "[push] ")
+            logger: logger.with(prefix: "🔔")
         )
     }
 
@@ -139,7 +141,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
 
     func qrInviteUseCase() -> QRInviteUseCase {
         DefaultQRInviteUseCase(
-            logger: .shared.with(prefix: "[qr] "),
+            logger: logger.with(prefix: "🏙️"),
             urlById: { AppUrl.users(.show(id: $0)).url }
         )
     }
@@ -149,7 +151,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
             usersRepository: usersRepository,
             friendsRepository: friendListRepository,
             spendingsRepository: spendingsRepository,
-            logger: .shared.with(prefix: "[push.r] ")
+            logger: logger.with(prefix: "🔔")
         )
     }
 }

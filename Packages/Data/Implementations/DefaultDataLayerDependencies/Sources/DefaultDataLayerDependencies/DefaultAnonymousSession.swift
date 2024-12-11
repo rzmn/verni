@@ -4,6 +4,7 @@ import PersistentStorage
 import Foundation
 import AsyncExtensions
 import DataLayerDependencies
+import Logging
 internal import Base
 internal import DefaultNetworkingImplementation
 internal import DefaultApiServiceImplementation
@@ -20,7 +21,7 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
     public let authenticator: AuthenticatedDataLayerSessionFactory
     public let api: ApiProtocol
 
-    public init(taskFactory: TaskFactory) throws {
+    public init(logger: Logger, taskFactory: TaskFactory) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: Constants.appGroup
         ) else {
@@ -28,8 +29,8 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
         }
         let taskFactory = DefaultTaskFactory()
         let networkServiceFactory = DefaultNetworkServiceFactory(
-            logger: .shared.with(
-                prefix: "[net] "
+            logger: logger.with(
+                prefix: "↔️"
             ),
             session: .shared,
             endpoint: Endpoint(
@@ -37,8 +38,8 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
             )
         )
         let apiServiceFactory = DefaultApiServiceFactory(
-            logger: .shared.with(
-                prefix: "[api.s] "
+            logger: logger.with(
+                prefix: "⚡️"
             ),
             networkServiceFactory: networkServiceFactory,
             taskFactory: taskFactory
@@ -52,7 +53,7 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
             taskFactory: taskFactory,
             apiServiceFactory: apiServiceFactory,
             persistencyFactory: try SQLitePersistencyFactory(
-                logger: .shared.with(prefix: "[db] "),
+                logger: logger.with(prefix: "🗄️"),
                 dbDirectory: permanentCacheDirectory,
                 taskFactory: taskFactory
             )

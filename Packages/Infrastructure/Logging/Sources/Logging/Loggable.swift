@@ -35,6 +35,5 @@ private func log(_ logger: Logger, severity: Logger.Severity, _ messageBlock: ()
     guard severity <= logger.severity else {
         return
     }
-    let message = "[\(severity)] \(messageBlock())"
-    logger.logBlock(message.replacingOccurrences(of: "\n", with: " \\n "))
+    logger.logBlock(messageBlock().replacingOccurrences(of: "\n", with: " \\n "), severity)
 }

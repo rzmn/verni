@@ -100,7 +100,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     
     @StorageActor private func createDatabasePathManager() throws -> any DbPathManager<SqliteDbPathManager.Item> {
         try SqliteDbPathManager(
-            logger: logger.with(prefix: "pathManager"),
+            logger: logger.with(prefix: "📁"),
             containerDirectory: dbDirectory,
             versionLabel: "v1",
             pathManager: pathManager

@@ -20,7 +20,13 @@ internal import SQLite
         self.versionLabel = versionLabel
         self.containerDirectory = containerDirectory.appending(path: "sqlite_\(versionLabel)")
         self.pathManager = pathManager
-        try pathManager.createDirectory(at: self.containerDirectory)
+        do {
+            try pathManager.createDirectory(at: self.containerDirectory)
+        } catch {
+            logE { "failed to create db path manager, error: \(error)" }
+            throw error
+        }
+        logI { "created [version=\(versionLabel)] at \(containerDirectory)" }
     }
 }
 
@@ -46,7 +52,12 @@ extension SqliteDbPathManager: DbPathManager {
     func create(id: String) throws -> Item {
         invalidateIfNeeded()
         let directory = databaseDirectory(for: id)
-        try pathManager.createDirectory(at: directory)
+        do {
+            try pathManager.createDirectory(at: directory)
+        } catch {
+            logE { "failed to create directory for id \(id), error: \(error)" }
+            throw error
+        }
         return Item(
             id: id,
             databaseDirectory: directory
@@ -54,6 +65,7 @@ extension SqliteDbPathManager: DbPathManager {
     }
     
     func invalidate(id: String) {
+        logI { "id \(id) has been marked as in need of invalidation" }
         idsToInvalidate = modify(idsToInvalidate) {
             $0.insert(id)
         }
@@ -94,16 +106,20 @@ extension SqliteDbPathManager {
         "ids_to_invalidate"
     }
     
+    private var userDefaults: UserDefaults {
+        UserDefaults(suiteName: "sqlite_ud_\(versionLabel)") ?? .standard
+    }
+    
     private var idsToInvalidate: Set<String> {
         get {
-            UserDefaults.standard
+            userDefaults
                 .dictionary(forKey: idsToInvalidateKey)
                 .flatMap(\.keys)
                 .map(Set.init)
             ?? Set()
         }
         set {
-            UserDefaults.standard
+            userDefaults
                 .set(newValue.reduce(into: [:]) { dict, item in
                     dict[item] = true
                 }, forKey: idsToInvalidateKey)
@@ -121,10 +137,12 @@ extension SqliteDbPathManager {
     }
     
     private func invalidateIfNeeded() {
+        logD { "invalidating deferred dbs" }
         idsToInvalidate = idsToInvalidate
             .filter { item in
                 do {
                     try pathManager.removeItem(at: databaseDirectory(for: item))
+                    logI { "invalidated db for id \(item)" }
                     return false
                 } catch {
                     logE { "failed to invalidate db with id \(item), error: \(error)" }

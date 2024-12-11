@@ -30,32 +30,32 @@ extension RequestRunner {
     private func run(
         backoff: ExponentialBackoff
     ) async throws(NetworkServiceError) -> NetworkServiceResponse {
-        logI { "run request \(request) backoff \(backoff)" }
+        logD { "\(requestDescription) run request backoff \(backoff)" }
         let data: Data
         let response: URLResponse
         do {
             (data, response) = try await session.data(for: request)
-            logD { "got JSON: \(String(data: data, encoding: .utf8) ?? "nil")" }
+            logD { "\(requestDescription) got JSON: \(String(data: data, encoding: .utf8) ?? "nil")" }
         } catch {
             let serviceError = error.networkServiceError
-            logE { "failed to run data task error: \(error)" }
+            logE { "\(requestDescription) failed to run data task error: \(error)" }
             if case .noConnection = serviceError, backoff.shouldTryAgain {
-                logI { "backoff try \(backoff)" }
+                logI { "\(requestDescription) backoff try \(backoff)" }
                 do {
                     try await Task.sleep(timeInterval: backoff.waitTimeInterval)
                     return try await run(backoff: backoff.nextRetry())
                 } catch {
-                    logI { "backoff failed on try \(backoff) error: \(error)" }
+                    logI { "\(requestDescription) backoff failed on try \(backoff) error: \(error)" }
                     throw serviceError
                 }
             } else {
-                logI { "stopping backoff error: \(error)" }
+                logI { "\(requestDescription) stopping backoff error: \(error)" }
                 throw serviceError
             }
         }
         guard let httpResponse = response as? HTTPURLResponse else {
-            logE { "response is not an HTTPURLResponse. found: \(response)" }
-            throw .badResponse(InternalError.error("bad respose type: \(response)", underlying: nil))
+            logE { "\(requestDescription) response is not an HTTPURLResponse. found: \(response)" }
+            throw .badResponse(InternalError.error("\(requestDescription) bad respose type: \(response)", underlying: nil))
         }
         let code = HttpCode(
             code: httpResponse.statusCode
@@ -73,10 +73,14 @@ extension RequestRunner {
                 }
             }
         }
-        logI { "got http response" }
+        logI { "\(requestDescription) got http response" }
         return NetworkServiceResponse(
             code: code,
             data: data
         )
+    }
+    
+    private var requestDescription: String {
+        request.url?.path() ?? "\(request)"
     }
 }

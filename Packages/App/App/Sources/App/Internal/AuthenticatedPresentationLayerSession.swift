@@ -18,7 +18,9 @@ internal import SpendingsScreen
     }
     
     func warmup() async {
-        _ = try? await di.profileRepository.refreshProfile()
+        if await di.profileOfflineRepository.getProfile() == nil {
+            _ = try? await di.profileRepository.refreshProfile()
+        }
     }
     
     func logout() async {

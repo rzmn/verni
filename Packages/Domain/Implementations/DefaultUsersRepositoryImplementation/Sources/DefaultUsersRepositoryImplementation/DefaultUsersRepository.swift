@@ -42,7 +42,7 @@ extension DefaultUsersRepository: UsersRepository {
         taskFactory.detached {
             await self.offline.update(users: users)
         }
-        logI { "getUsers OK" }
+        logI { "getUsers ok" }
         return users
     }
 
@@ -62,7 +62,7 @@ extension DefaultUsersRepository: UsersRepository {
         taskFactory.detached {
             await self.offline.update(users: users)
         }
-        logI { "search users [q=\(query)] OK" }
+        logI { "search users [q=\(query)] ok" }
         return users
     }
 }

@@ -15,24 +15,31 @@ protocol ApiServiceRequestRunner {
 
 final class DefaultApiServiceRequestRunnerFactory: ApiServiceRequestRunnerFactory {
     private let service: NetworkService
+    private let logger: Logger
 
-    init(service: NetworkService) {
+    init(
+        logger: Logger,
+        service: NetworkService
+    ) {
+        self.logger = logger
         self.service = service
     }
 
     func create(accessToken: String?) -> any ApiServiceRequestRunner {
-        DefaultApiServiceRequestRunner(networkService: service, accessToken: accessToken)
+        DefaultApiServiceRequestRunner(logger: logger, networkService: service, accessToken: accessToken)
     }
 }
 
 actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
+    let logger: Logger
     private let accessToken: String?
     private let networkService: NetworkService
     private let decoder = JSONDecoder()
 
-    init(networkService: NetworkService, accessToken: String? = nil) {
+    init(logger: Logger, networkService: NetworkService, accessToken: String? = nil) {
         self.accessToken = accessToken
         self.networkService = networkService
+        self.logger = logger
     }
 
     func run<Response: Decodable & Sendable>(
