@@ -2,7 +2,7 @@ import Foundation
 import Testing
 import PersistentStorage
 import DataTransferObjects
-import Base
+@testable import Base
 @testable import AsyncExtensions
 @testable import PersistentStorageSQLite
 
@@ -379,5 +379,35 @@ import Base
         // then
 
         #expect(await persistency[Schema.spendingsHistory.index(for: counterparty)] == history)
+    }
+    
+    @Test func testFailedToCreateDatabaseFileManagerCreate() async throws {
+        
+        // given
+        
+        let expectedError = InternalError.error("create failed", underlying: nil)
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[test] "),
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: taskFactory,
+            pathManager: MockPathManager(
+                createDirectory: { _ in throw expectedError }
+            )
+        )
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        
+        // when
+        
+        do {
+            let _ = try await persistencyFactory
+                .create(host: host, refreshToken: refreshToken)
+            Issue.record()
+        } catch {
+            
+            // then
+            
+            #expect(expectedError.description == (error as? InternalError)?.description)
+        }
     }
 }
