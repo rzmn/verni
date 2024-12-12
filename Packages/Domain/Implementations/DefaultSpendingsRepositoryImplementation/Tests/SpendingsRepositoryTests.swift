@@ -48,10 +48,12 @@ private actor ApiProvider {
         api = MockApi()
         mockLongPoll = MockLongPoll(
             getCounterpartiesBroadcast: AsyncSubject(
-                taskFactory: taskFactory
+                taskFactory: taskFactory,
+                logger: .shared
             ),
             getSpendingsHistoryBroadcast: AsyncSubject(
-                taskFactory: taskFactory
+                taskFactory: taskFactory,
+                logger: .shared
             )
         )
         await api.performIsolated { api in

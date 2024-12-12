@@ -63,7 +63,7 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
         // given
 
         let taskFactory = TestTaskFactory()
-        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory)
+        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory, logger: .shared)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             session: MockDataLayerSession(persistency: provider.persistency),
@@ -96,7 +96,7 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
         // given
 
         let taskFactory = TestTaskFactory()
-        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory)
+        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory, logger: .shared)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             session: MockDataLayerSession(persistency: provider.persistency),

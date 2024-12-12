@@ -64,7 +64,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
             api: provider.api,
             logger: .shared,
             offline: offlineRepository,
-            profile: ExternallyUpdatable(taskFactory: taskFactory),
+            profile: ExternallyUpdatable(taskFactory: taskFactory, logger: .shared),
             taskFactory: taskFactory
         )
 

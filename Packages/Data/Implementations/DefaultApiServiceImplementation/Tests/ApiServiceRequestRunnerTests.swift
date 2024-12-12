@@ -15,6 +15,7 @@ import Networking
         let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
+            logger: .shared,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .success(.ok), data: try JSONEncoder().encode(MockResponse())))
             ),
@@ -37,6 +38,7 @@ import Networking
         let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
+            logger: .shared,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .success(.ok), data: Data()))
             ),
@@ -69,6 +71,7 @@ import Networking
         let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
+            logger: .shared,
             networkService: MockRequestService(
                 result: .failure(.noConnection(NSError(domain: "", code: -1)))
             ),
@@ -101,6 +104,7 @@ import Networking
         let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
+            logger: .shared,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .clientError(.unauthorized), data: Data()))
             ),
@@ -133,6 +137,7 @@ import Networking
         let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
+            logger: .shared,
             networkService: MockRequestService(
                 result: .failure(.badResponse(NSError(domain: "", code: -1)))
             ),
@@ -165,6 +170,7 @@ import Networking
         let request = MockRequest(label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
+            logger: .shared,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .clientError(.badRequest), data: Data()))
             ),

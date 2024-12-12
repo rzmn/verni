@@ -113,6 +113,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
@@ -165,6 +166,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: nil,
                     refreshTokensValue: .success("123"),
@@ -213,6 +215,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: nil
             ),
             taskFactory: taskFactory
@@ -257,6 +260,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
@@ -305,6 +309,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: nil,
                     refreshTokensValue: .failure(.expired(NSError(domain: "", code: -1))),
@@ -361,6 +366,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: nil,
                     refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
@@ -416,6 +422,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
                     label: "runner"
                 ),
                 taskFactory: taskFactory,
+                logger: .shared,
                 tokenRefresher: TokenRefresherMock(
                     accessTokenValue: "123",
                     refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),

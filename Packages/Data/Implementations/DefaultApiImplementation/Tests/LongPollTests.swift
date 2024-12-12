@@ -354,7 +354,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventId",
             method: "method"
         )
-        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory)
+        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory, logger: .shared)
 
         // when
 
@@ -386,7 +386,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventIdB",
             method: "method"
         )
-        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory)
+        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory, logger: .shared)
 
         // when
 

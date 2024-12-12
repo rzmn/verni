@@ -38,7 +38,7 @@ private actor ApiProvider {
         self.getFriendsResponse = getFriendsResponse
         self.getUsersResponse = getUsersResponse
         api = MockApi()
-        mockLongPoll = MockLongPoll(friendsBroadcast: AsyncSubject(taskFactory: taskFactory))
+        mockLongPoll = MockLongPoll(friendsBroadcast: AsyncSubject(taskFactory: taskFactory, logger: .shared))
         await api.performIsolated { api in
             api.runMethodWithParamsBlock = { method in
                 return await self.performIsolated { `self` in
