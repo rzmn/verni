@@ -5,16 +5,26 @@ import AppBase
 import Combine
 import AsyncExtensions
 import SwiftUI
+import Logging
 internal import Base
 internal import DesignSystem
 
 actor AuthWelcomeModel {
     private let store: Store<AuthWelcomeState, AuthWelcomeAction>
 
-    init(di: AnonymousDomainLayerSession) async {
+    init(di: AnonymousDomainLayerSession, logger: Logger) async {
         store = await Store(
             state: Self.initialState,
             reducer: Self.reducer
+        )
+        await store.append(
+            handler: AnyActionHandler(
+                id: "\(Logger.self)",
+                handleBlock: { action in
+                    logger.logI { "received action \(action)" }
+                }
+            ),
+            keepingUnique: true
         )
     }
 }

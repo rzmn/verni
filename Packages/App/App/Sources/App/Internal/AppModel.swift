@@ -1,9 +1,9 @@
 import Domain
 import DI
 import UIKit
-import Logging
 import AppBase
 import SwiftUI
+internal import Logging
 internal import Base
 internal import AuthWelcomeScreen
 internal import DesignSystem

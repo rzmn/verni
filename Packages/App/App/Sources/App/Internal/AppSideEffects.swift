@@ -20,7 +20,6 @@ extension AppSideEffects: ActionHandler {
     }
 
     func handle(_ action: AppAction) {
-        print("[\(Self.self)] got \(action)")
         switch action {
         case .launch:
             launch()

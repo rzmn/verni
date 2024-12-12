@@ -35,7 +35,7 @@ private extension AnonymousState.Tab {
     }
 }
 
-struct AnonymousNavigation: View {
+struct AnonymousScreensCoordinator: View {
     @ObservedObject private var store: Store<AppState, AppAction>
     
     @State private var authWelcomeDestinationOffset: CGFloat?

@@ -1,15 +1,18 @@
 import Api
 import Base
 import AsyncExtensions
+import Logging
 
 public actor DefaultLongPoll: LongPoll {
     private var notifiers = [String: Any]()
     private let api: DefaultApi
     private let taskFactory: TaskFactory
+    private let logger: Logger
 
-    init(api: DefaultApi, taskFactory: TaskFactory) {
+    init(api: DefaultApi, taskFactory: TaskFactory, logger: Logger) {
         self.api = api
         self.taskFactory = taskFactory
+        self.logger = logger
     }
 
     public func poll<Query: LongPollQuery>(
@@ -35,7 +38,7 @@ public actor DefaultLongPoll: LongPoll {
         if let existed {
             return existed
         }
-        let notifier = await LongPollUpdateNotifier(query: query, api: api, taskFactory: taskFactory)
+        let notifier = await LongPollUpdateNotifier(query: query, api: api, taskFactory: taskFactory, logger: logger)
         notifiers[query.eventId] = notifier
         return notifier
     }

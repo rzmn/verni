@@ -28,7 +28,7 @@ struct ProfileCardView: View {
                 Color.clear
                     .onAppear {
                         let side = qrCodeSide(geometry: geometry)
-                        if side > 0 {
+                        if side > 0, store.state.qrCodeData == nil {
                             store.dispatch(.onRequestQrImage(size: side * Int(UIScreen.main.scale)))
                         }
                     }

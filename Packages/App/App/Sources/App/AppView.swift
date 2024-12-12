@@ -75,7 +75,7 @@ public struct AppView: View {
         case .launched(let state):
             switch state {
             case .authenticated:
-                AuthenticatedNavigation(store: store, appearTransitionProgress: $toContentTransitionProgress)
+                AuthenticatedScreensCoordinator(store: store, appearTransitionProgress: $toContentTransitionProgress)
                     .opacity(contentOpacity)
                     .onAppear {
                         withAnimation(.default) {
@@ -90,7 +90,7 @@ public struct AppView: View {
                         }
                     }
             case .anonymous:
-                AnonymousNavigation(store: store, fromSplashTransitionProgress: $toContentTransitionProgress)
+                AnonymousScreensCoordinator(store: store, fromSplashTransitionProgress: $toContentTransitionProgress)
                     .opacity(contentOpacity)
                     .onAppear {
                         withAnimation(.default) {

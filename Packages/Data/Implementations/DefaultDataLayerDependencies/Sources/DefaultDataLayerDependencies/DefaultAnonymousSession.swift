@@ -46,14 +46,18 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
         )
         api = DefaultApiFactory(
             service: apiServiceFactory.create(tokenRefresher: nil),
-            taskFactory: taskFactory
+            taskFactory: taskFactory,
+            logger: logger
         ).create()
         authenticator = DefaultAuthenticatedSessionFactory(
             api: api,
             taskFactory: taskFactory,
+            logger: logger,
             apiServiceFactory: apiServiceFactory,
             persistencyFactory: try SQLitePersistencyFactory(
-                logger: logger.with(prefix: "🗄️"),
+                logger: logger.with(
+                    prefix: "🗄️"
+                ),
                 dbDirectory: permanentCacheDirectory,
                 taskFactory: taskFactory
             )

@@ -1,7 +1,7 @@
 import Api
 import Base
 import AsyncExtensions
-internal import Logging
+import Logging
 
 actor LongPollUpdateNotifier<Query: LongPollQuery> {
     var publisher: any AsyncBroadcast<Query.Update> {
@@ -15,10 +15,10 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> {
     private let taskFactory: TaskFactory
     private var isListening = false
 
-    init(query: Query, api: DefaultApi, taskFactory: TaskFactory) async where Query.Update: Decodable & Sendable {
+    init(query: Query, api: DefaultApi, taskFactory: TaskFactory, logger: Logger) async where Query.Update: Decodable & Sendable {
         self.poller = await Poller(query: query, api: api)
         self.taskFactory = taskFactory
-        self.broadcast = AsyncSubject(taskFactory: taskFactory)
+        self.broadcast = AsyncSubject(taskFactory: taskFactory, logger: logger)
         hasSubscribersSubscription = await broadcast.subscribersCount.countPublisher
             .subscribe { [weak self, taskFactory] subscribersCount in
                 taskFactory.task { [weak self] in

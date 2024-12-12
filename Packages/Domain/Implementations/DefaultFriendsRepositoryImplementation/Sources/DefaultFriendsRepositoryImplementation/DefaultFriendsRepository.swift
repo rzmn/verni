@@ -14,10 +14,11 @@ private struct BroadcastWithOnDemandLongPoll<T: Sendable, Q: LongPollQuery> {
         longPoll: LongPoll,
         taskFactory: TaskFactory,
         query: Q,
-        logger: Logger = .shared
+        logger: Logger
     ) async where Q.Update: Decodable {
         broadcast = AsyncSubject(
-            taskFactory: taskFactory
+            taskFactory: taskFactory,
+            logger: logger
         )
         subscription = await OnDemandLongPollSubscription(
             subscribersCount: broadcast.subscribersCount,
@@ -69,7 +70,8 @@ extension DefaultFriendsRepository: FriendsRepository {
             let subject = await BroadcastWithOnDemandLongPoll<[FriendshipKind: [User]], LongPollFriendsQuery>(
                 longPoll: longPoll,
                 taskFactory: taskFactory,
-                query: LongPollFriendsQuery()
+                query: LongPollFriendsQuery(),
+                logger: logger
             )
             await subject.start { _ in
                 self.taskFactory.task {

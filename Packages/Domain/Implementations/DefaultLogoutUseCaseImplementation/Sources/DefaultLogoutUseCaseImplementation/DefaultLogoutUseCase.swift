@@ -21,7 +21,10 @@ public actor DefaultLogoutUseCase {
         taskFactory: TaskFactory,
         logger: Logger
     ) async {
-        self.didLogoutBroadcast = AsyncSubject(taskFactory: taskFactory)
+        self.didLogoutBroadcast = AsyncSubject(
+            taskFactory: taskFactory,
+            logger: logger
+        )
         self.session = session
         self.taskFactory = taskFactory
         self.logger = logger

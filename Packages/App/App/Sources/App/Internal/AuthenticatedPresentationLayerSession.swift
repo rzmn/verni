@@ -1,6 +1,7 @@
 import DI
 import AppBase
 import Domain
+internal import Logging
 internal import ProfileScreen
 internal import SpendingsScreen
 
@@ -8,13 +9,25 @@ internal import SpendingsScreen
     let fallback: AnonymousPresentationLayerSession
     let profileScreen: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
     let spendingsScreen: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions>
+    private let logger: Logger
     private let di: AuthenticatedDomainLayerSession
     
     init(di: AuthenticatedDomainLayerSession, fallback: AnonymousPresentationLayerSession) async {
+        self.logger = .shared.with(prefix: "💅")
         self.fallback = fallback
         self.di = di
-        profileScreen = await DefaultProfileFactory(di: di).create()
-        spendingsScreen = await DefaultSpendingsFactory(di: di).create()
+        profileScreen = await DefaultProfileFactory(
+            di: di,
+            logger: logger.with(
+                prefix: "👤"
+            )
+        ).create()
+        spendingsScreen = await DefaultSpendingsFactory(
+            di: di,
+            logger: logger.with(
+                prefix: "💰"
+            )
+        ).create()
     }
     
     func warmup() async {

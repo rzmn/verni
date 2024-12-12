@@ -1,12 +1,13 @@
 import AsyncExtensions
+import Logging
 
 public actor ExternallyUpdatable<T: Sendable> {
     private var object: T?
     private var actions: [@Sendable (T) -> T] = []
     private let broadcast: AsyncSubject<T>
 
-    public init(taskFactory: TaskFactory) {
-        broadcast = AsyncSubject(taskFactory: taskFactory)
+    public init(taskFactory: TaskFactory, logger: Logger) {
+        broadcast = AsyncSubject(taskFactory: taskFactory, logger: logger)
     }
 }
 

@@ -20,10 +20,11 @@ private struct PrinterWithCurrentDate: Printer {
 
     // swiftlint:disable:next no_direct_standard_out_logs
     func print(_ message: String) {
-        // swiftlint:disable:next no_direct_standard_out_logs
 #if DEBUG
+        // swiftlint:disable:next no_direct_standard_out_logs
         Swift.print("[verni] \(formatter.string(from: Date())) \(message)")
 #else
+        // swiftlint:disable:next no_direct_standard_out_logs
         Swift.print("\(formatter.string(from: Date())) \(message)")
 #endif
         
@@ -43,10 +44,10 @@ public struct Logger: Sendable {
     private let prefix: String
     public var logBlock: (String, Severity) -> Void {
         return { message, severity in
-            // swiftlint:disable:next no_direct_standard_out_logs
 #if DEBUG
-            let prefix = prefix.count < 4 ? prefix + Array(repeating: "➖", count: 4 - prefix.count) : prefix
+            let prefix = prefix.count < 5 ? prefix + Array(repeating: "➖", count: 5 - prefix.count) : prefix
 #endif
+            // swiftlint:disable:next no_direct_standard_out_logs
             printer.print("\(severity) \(prefix)\(message)")
         }
     }

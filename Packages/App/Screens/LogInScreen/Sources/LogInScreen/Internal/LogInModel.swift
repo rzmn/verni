@@ -5,13 +5,14 @@ import AppBase
 import Combine
 import AsyncExtensions
 import SwiftUI
+import Logging
 internal import Base
 internal import DesignSystem
 
 actor LogInModel {
     private let store: Store<LogInState, LogInAction>
 
-    init(di: AnonymousDomainLayerSession) async {
+    init(di: AnonymousDomainLayerSession, logger: Logger) async {
         store = await Store(
             state: Self.initialState,
             reducer: Self.reducer
@@ -21,6 +22,15 @@ actor LogInModel {
                 store: store,
                 di: di
             ), keepingUnique: true
+        )
+        await store.append(
+            handler: AnyActionHandler(
+                id: "\(Logger.self)",
+                handleBlock: { action in
+                    logger.logI { "received action \(action)" }
+                }
+            ),
+            keepingUnique: true
         )
     }
 }

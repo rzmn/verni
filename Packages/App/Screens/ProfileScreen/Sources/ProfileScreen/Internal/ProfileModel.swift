@@ -5,13 +5,14 @@ import AppBase
 import Combine
 import AsyncExtensions
 import SwiftUI
+import Logging
 internal import Base
 internal import DesignSystem
 
 actor ProfileModel {
     private let store: Store<ProfileState, ProfileAction>
 
-    init(di: AuthenticatedDomainLayerSession) async {
+    init(di: AuthenticatedDomainLayerSession, logger: Logger) async {
         let profile = await di.profileOfflineRepository.getProfile()
         store = await Store(
             state: modify(Self.initialState) {
@@ -27,6 +28,15 @@ actor ProfileModel {
                 repository: di.profileRepository,
                 qrUseCase: di.qrInviteUseCase(),
                 userId: di.userId
+            ),
+            keepingUnique: true
+        )
+        await store.append(
+            handler: AnyActionHandler(
+                id: "\(Logger.self)",
+                handleBlock: { action in
+                    logger.logI { "received action \(action)" }
+                }
             ),
             keepingUnique: true
         )

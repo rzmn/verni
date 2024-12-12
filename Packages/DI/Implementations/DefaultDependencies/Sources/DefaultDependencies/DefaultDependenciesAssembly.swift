@@ -2,6 +2,7 @@ import DI
 import Domain
 import Foundation
 import AsyncExtensions
+internal import Logging
 internal import DataLayerDependencies
 internal import DefaultDataLayerDependencies
 internal import Base
@@ -63,8 +64,9 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
     public let appCommon: AppCommon
 
     public init() throws {
+        let logger = Logger.shared.with(prefix: "👷‍♀️")
         dataLayer = try DefaultAnonymousSession(
-            logger: .shared.with(prefix: "🥨"),
+            logger: logger,
             taskFactory: taskFactory
         )
         guard let temporaryCacheDirectory = FileManager.default.urls(
@@ -73,10 +75,12 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
         ).first else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }
-
+        let avatarsLogger = logger.with(
+            prefix: "🌄"
+        )
         let avatarsOfflineRepository = try DefaultAvatarsOfflineRepository(
             container: temporaryCacheDirectory,
-            logger: .shared.with(prefix: "[avatars.offline] ")
+            logger: avatarsLogger.with(prefix: "💾")
         )
         avatarsOfflineMutableRepository = avatarsOfflineRepository
         avatarsRepository = DefaultAvatarsRepository(
@@ -84,14 +88,16 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
             taskFactory: DefaultTaskFactory(),
             offlineRepository: avatarsOfflineRepository,
             offlineMutableRepository: avatarsOfflineRepository,
-            logger: .shared.with(prefix: "[avatars] ")
+            logger: avatarsLogger
         )
         appCommon = AppCommonDependencies(
             api: dataLayer.api,
             avatarsRepository: avatarsRepository,
             saveCredentialsUseCase: DefaultSaveCredendialsUseCase(
                 website: webcredentials,
-                logger: .shared.with(prefix: "[credentials.save] ")
+                logger: logger.with(
+                    prefix: "🔐"
+                )
             )
         )
     }

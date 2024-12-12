@@ -6,7 +6,7 @@ import Base
 import AsyncExtensions
 
 actor ApiServiceRequestRunnersManager: Loggable {
-    let logger: Logger = .shared
+    let logger: Logger
     private let tokenRefresher: TokenRefresher?
     private let runnerFactory: ApiServiceRequestRunnerFactory
     private let taskFactory: TaskFactory
@@ -20,10 +20,12 @@ actor ApiServiceRequestRunnersManager: Loggable {
     init(
         runnerFactory: ApiServiceRequestRunnerFactory,
         taskFactory: TaskFactory,
+        logger: Logger,
         tokenRefresher: TokenRefresher?
     ) {
         self.tokenRefresher = tokenRefresher
         self.taskFactory = taskFactory
+        self.logger = logger
         self.runnerFactory = runnerFactory
     }
 

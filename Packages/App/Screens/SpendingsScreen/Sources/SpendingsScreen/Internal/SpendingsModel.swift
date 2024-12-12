@@ -5,13 +5,14 @@ import AppBase
 import Combine
 import AsyncExtensions
 import SwiftUI
+import Logging
 internal import Base
 internal import DesignSystem
 
 actor SpendingsModel {
     private let store: Store<SpendingsState, SpendingsAction>
 
-    init(di: AuthenticatedDomainLayerSession) async {
+    init(di: AuthenticatedDomainLayerSession, logger: Logger) async {
         let spendings = await di.spendingsOfflineRepository.getSpendingCounterparties()
         let items = await withTaskGroup(of: Optional<SpendingsState.Item>.self, returning: [SpendingsState.Item].self) { group in
             spendings.flatMap { spendings in
@@ -47,6 +48,15 @@ actor SpendingsModel {
                 store: store,
                 spendingsRepository: di.spendingsRepository,
                 usersRepository: di.usersRepository
+            ),
+            keepingUnique: true
+        )
+        await store.append(
+            handler: AnyActionHandler(
+                id: "\(Logger.self)",
+                handleBlock: { action in
+                    logger.logI { "received action \(action)" }
+                }
             ),
             keepingUnique: true
         )

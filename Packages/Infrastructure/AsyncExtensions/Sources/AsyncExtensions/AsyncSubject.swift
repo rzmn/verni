@@ -26,7 +26,7 @@ public actor AsyncSubject<Element: Sendable> {
         if let subscribersCountTracking {
             countPublisher = subscribersCountTracking
         } else {
-            let tracking = AsyncSubject<Int>(taskFactory: taskFactory, logger: logger.with(prefix: "[sub] "))
+            let tracking = AsyncSubject<Int>(taskFactory: taskFactory, logger: logger, logTag: "🧮")
             subscribersCountTracking = tracking
             countPublisher = tracking
         }
@@ -36,8 +36,8 @@ public actor AsyncSubject<Element: Sendable> {
         )
     }()
 
-    public init(taskFactory: TaskFactory, logger: Logger = .shared) {
-        self.logger = logger
+    public init(taskFactory: TaskFactory, logger: Logger, logTag: String = "🌊") {
+        self.logger = logger.with(prefix: logTag)
         self.taskFactory = taskFactory
     }
 

@@ -20,10 +20,11 @@ actor DefaultApiService {
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: DefaultApiServiceRequestRunnerFactory(
-                    logger: logger,
+                    logger: logger.with(prefix: "💡"),
                     service: networkServiceFactory.create()
                 ),
                 taskFactory: taskFactory,
+                logger: logger.with(prefix: "🚥"),
                 tokenRefresher: tokenRefresher
             ),
             taskFactory: taskFactory

@@ -18,7 +18,7 @@ public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
         query: Q,
         logger: Logger = .shared
     ) async where Q.Update: Decodable {
-        self.logger = logger.with(prefix: "\(Q.self)")
+        self.logger = logger.with(prefix: "🕰️")
         self.subscribersCount = subscribersCount
         longPollPublisher = await longPoll.poll(for: query)
         self.taskFactory = taskFactory

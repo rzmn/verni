@@ -3,11 +3,13 @@ import DataTransferObjects
 import PersistentStorage
 import DataLayerDependencies
 import AsyncExtensions
+import Logging
 internal import ApiService
 internal import DefaultApiImplementation
 internal import Base
 
 final class DefaultAuthenticatedSessionFactory {
+    private let logger: Logger
     private let persistencyFactory: PersistencyFactory
     private let sessionHost: SessionHost
     private let apiServiceFactory: ApiServiceFactory
@@ -17,11 +19,13 @@ final class DefaultAuthenticatedSessionFactory {
     init(
         api: ApiProtocol,
         taskFactory: TaskFactory,
+        logger: Logger,
         apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory
     ) {
         self.api = api
         self.taskFactory = taskFactory
+        self.logger = logger
         self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
         self.sessionHost = SessionHost()
@@ -60,7 +64,10 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
         persistency: Persistency,
         accessToken: String?
     ) async -> AuthenticatedDataLayerSession {
-        let authenticationLostSubject = AsyncSubject<Void>(taskFactory: taskFactory)
+        let authenticationLostSubject = AsyncSubject<Void>(
+            taskFactory: taskFactory,
+            logger: logger
+        )
         let tokenRefresher = RefreshTokenManager(
             api: api,
             persistency: persistency,
@@ -70,7 +77,8 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
         let apiService = apiServiceFactory.create(tokenRefresher: tokenRefresher)
         let apiFactory = DefaultApiFactory(
             service: apiService,
-            taskFactory: taskFactory
+            taskFactory: taskFactory,
+            logger: logger
         )
         return DefaultAuthenticatedSession(
             api: apiFactory.create(),

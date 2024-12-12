@@ -54,7 +54,7 @@ private extension Optional where Wrapped == AuthenticatedState.TabPosition {
     }
 }
 
-struct AuthenticatedNavigation: View {
+struct AuthenticatedScreensCoordinator: View {
     @Environment(ColorPalette.self) var colors
     @ObservedObject private var store: Store<AppState, AppAction>
     @Binding private var appearTransitionProgress: CGFloat

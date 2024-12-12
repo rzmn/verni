@@ -14,10 +14,11 @@ private struct OnDemandLongPollBroadcast<T: Sendable, Q: LongPollQuery> {
         longPoll: LongPoll,
         taskFactory: TaskFactory,
         query: Q,
-        logger: Logger = .shared
+        logger: Logger
     ) async where Q.Update: Decodable {
         broadcast = AsyncSubject(
-            taskFactory: taskFactory
+            taskFactory: taskFactory,
+            logger: logger
         )
         subscription = await OnDemandLongPollSubscription(
             subscribersCount: broadcast.subscribersCount,
@@ -65,7 +66,8 @@ public actor DefaultSpendingsRepository {
         self.onDemandCounterpartiesSubscription = await OnDemandLongPollBroadcast(
             longPoll: longPoll,
             taskFactory: taskFactory,
-            query: LongPollCounterpartiesQuery()
+            query: LongPollCounterpartiesQuery(),
+            logger: logger
         )
         await onDemandCounterpartiesSubscription.start { [weak self] _ in
             guard let self else { return }
@@ -97,7 +99,8 @@ extension DefaultSpendingsRepository: SpendingsRepository {
             let subject = await OnDemandLongPollBroadcast<[IdentifiableSpending], LongPollSpendingsHistoryQuery>(
                 longPoll: longPoll,
                 taskFactory: taskFactory,
-                query: LongPollSpendingsHistoryQuery(uid: uid)
+                query: LongPollSpendingsHistoryQuery(uid: uid),
+                logger: logger
             )
             await subject.start { _ in
                 self.taskFactory.task {

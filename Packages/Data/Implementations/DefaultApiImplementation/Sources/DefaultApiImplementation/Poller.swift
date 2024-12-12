@@ -1,5 +1,5 @@
 import Api
-internal import Logging
+import Logging
 
 actor Poller<Query: LongPollQuery> {
     enum PollingTerminationEvent: Error, Sendable {

@@ -32,10 +32,8 @@ internal import DataLayerDependencies
 final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     private let dataLayer: AuthenticatedDataLayerSession
     private let logoutSubject: AsyncSubject<LogoutReason>
-    private let updatableProfile  = ExternallyUpdatable<Domain.Profile>(
-        taskFactory: DefaultTaskFactory()
-    )
-    private let logger: Logger = .shared.with(prefix: "🍭")
+    private let updatableProfile: ExternallyUpdatable<Domain.Profile>
+    private let logger: Logger
     var appCommon: AppCommon {
         defaultDependencies.appCommon
     }
@@ -57,8 +55,18 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         defaultDependencies: DefaultDependenciesAssembly,
         dataLayer: AuthenticatedDataLayerSession
     ) async {
+        self.logger = .shared.with(prefix: "👩🏿‍💻")
         self.defaultDependencies = defaultDependencies
-        self.logoutSubject = AsyncSubject<LogoutReason>(taskFactory: DefaultTaskFactory())
+        let profileLogger = logger.with(prefix: "🪪")
+        updatableProfile = ExternallyUpdatable<Domain.Profile>(
+            taskFactory: DefaultTaskFactory(),
+            logger: profileLogger
+        )
+        let logoutLogger = logger.with(prefix: "🚪")
+        self.logoutSubject = AsyncSubject<LogoutReason>(
+            taskFactory: DefaultTaskFactory(),
+            logger: logoutLogger
+        )
         self.dataLayer = dataLayer
         userId = await dataLayer.persistency.userId
         let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(persistency: dataLayer.persistency)
@@ -71,7 +79,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         self.usersOfflineRepository = usersOfflineRepository
         profileRepository = await DefaultProfileRepository(
             api: dataLayer.api,
-            logger: logger.with(prefix: "🪪"),
+            logger: profileLogger,
             offline: profileOfflineRepository,
             profile: updatableProfile,
             taskFactory: DefaultTaskFactory()
@@ -100,7 +108,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
             session: dataLayer,
             shouldLogout: logoutSubject,
             taskFactory: DefaultTaskFactory(),
-            logger: logger.with(prefix: "🚪")
+            logger: logoutLogger
         )
     }
 
