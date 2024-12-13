@@ -410,4 +410,77 @@ import DataTransferObjects
             #expect(expectedError.description == (error as? InternalError)?.description)
         }
     }
+    
+    @Test func testFailedToCreateDatabaseFileManagerAwake() async throws {
+        
+        // given
+        
+        let expectedError = InternalError.error("create failed", underlying: nil)
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[test] "),
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: taskFactory,
+            pathManager: MockPathManager(
+                createDirectory: { _ in throw expectedError }
+            )
+        )
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let _ = try await self.persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+        
+        // when
+        
+        let persistency = await persistencyFactory
+            .awake(host: host)
+            
+        // then
+            
+        #expect(persistency == nil)
+    }
+    
+    @Test func testAwakeNoHost() async throws {
+        
+        // given
+        
+        let host = UUID().uuidString
+        
+        // when
+        
+        let persistency = await persistencyFactory
+            .awake(host: host)
+            
+        // then
+            
+        #expect(persistency == nil)
+    }
+    
+    @Test func testAwakeCannotListExistedDbs() async throws {
+        
+        // given
+        
+        let expectedError = InternalError.error("list failed", underlying: nil)
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: .shared.with(prefix: "[test] "),
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: taskFactory,
+            pathManager: MockPathManager(
+                createDirectory: { _ in },
+                listDirectory: { _, _ in throw expectedError }
+            )
+        )
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let _ = try await self.persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+        
+        // when
+        
+        let persistency = await persistencyFactory
+            .awake(host: host)
+            
+        // then
+            
+        #expect(persistency == nil)
+    }
 }
