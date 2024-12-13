@@ -483,4 +483,25 @@ import DataTransferObjects
             
         #expect(persistency == nil)
     }
+    
+    
+    @Test func testNilAwakeAfterInvalidate() async throws {
+        
+        // given
+        
+        let host = UUID().uuidString
+        let refreshToken = UUID().uuidString
+        let persistency = try await self.persistencyFactory
+            .create(host: host, refreshToken: refreshToken)
+        
+        // when
+        
+        await persistency.invalidate()
+        let awaken = await persistencyFactory
+            .awake(host: host)
+            
+        // then
+            
+        #expect(awaken == nil)
+    }
 }
