@@ -19,17 +19,13 @@ let package = Package(
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
-        .package(path: "../../../Data/PersistentStorage")
+        .package(path: "../../../Data/PersistentStorage"),
     ],
     targets: [
         .target(
             name: "DefaultPushRegistrationUseCaseImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+            dependencies: [
+                "Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage",
             ]
         )
     ]

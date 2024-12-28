@@ -27,4 +27,8 @@ public struct UserDto: Codable, Sendable, Equatable {
     }
 }
 
-extension UserDto: CompactDescription {}
+extension UserDto: CustomStringConvertible {
+    public var description: String {
+        "<(\(displayName)) id:\(id) st:\(friendStatus.rawValue) av:\(avatarId ?? "<nil>")>"
+    }
+}

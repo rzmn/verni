@@ -12,10 +12,10 @@ enum ProfileAction {
     case onNotificationsTap
     case onRefreshProfile
     case profileUpdated(Profile)
-    
+
     case onShowQrHintTap
     case onRequestQrImage(size: Int)
     case onQrImageReady(UIImage)
-    
+
     case unauthorized(reason: String)
 }

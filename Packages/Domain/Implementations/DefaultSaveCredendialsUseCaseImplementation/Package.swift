@@ -18,7 +18,7 @@ let package = Package(
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
-        .package(path: "../../../Infrastructure/Logging")
+        .package(path: "../../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
@@ -27,13 +27,7 @@ let package = Package(
                 "Domain",
                 "Api",
                 "ApiDomainConvenience",
-                "Logging"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Logging",
             ]
         )
     ]

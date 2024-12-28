@@ -49,6 +49,8 @@ extension AppModel {
                     authenticated.unauthenticatedFailure = reason
                     $0 = .launched(.authenticated(authenticated))
                 }
+            case .logIn:
+                return state
             case .updateBottomSheet(let sheet):
                 return modify(state) {
                     guard case .launched(let launched) = $0 else {
@@ -63,7 +65,7 @@ extension AppModel {
             }
         }
     }
-    
+
     @MainActor private static func anonymousState(session: AnonymousPresentationLayerSession) -> AnonymousState {
         let authState = AnonymousState.AuthState()
         return AnonymousState(
@@ -74,14 +76,14 @@ extension AppModel {
             tab: .auth(authState)
         )
     }
-    
+
     @MainActor private static func authenticatedState(session: AuthenticatedPresentationLayerSession) -> AuthenticatedState {
         AuthenticatedState(
             session: session,
             tabs: [
                 .item(.spendings),
                 .addExpense,
-                .item(.profile),
+                .item(.profile)
             ],
             tab: .spendings
         )

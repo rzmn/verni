@@ -8,7 +8,7 @@ public struct ProfileView: View {
     @ObservedObject var store: Store<ProfileState, ProfileAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     @Binding private var tabTransitionProgress: CGFloat
 
     init(store: Store<ProfileState, ProfileAction>, transitions: ProfileTransitions) {
@@ -51,7 +51,7 @@ public struct ProfileView: View {
             store.dispatch(.onRefreshProfile)
         }
     }
-    
+
     private var navigationBar: some View {
         NavigationBar(
             config: NavigationBar.Config(
@@ -86,7 +86,7 @@ extension ProfileView {
     private var tabTransitionOpacity: CGFloat {
         1 - abs(tabTransitionProgress)
     }
-    
+
     private var tabTransitionOffset: CGFloat {
         28 * tabTransitionProgress
     }
@@ -96,7 +96,7 @@ extension ProfileView {
 
 private struct ProfilePreview: View {
     @State var tabTransition: CGFloat = 0
-    
+
     var body: some View {
         ZStack {
             ProfileView(

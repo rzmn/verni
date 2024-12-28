@@ -21,7 +21,7 @@ internal import DesignSystem
 
 @MainActor extension DebugMenuModel: ScreenProvider {
     typealias Args = Void
-    
+
     func instantiate(
         handler: @escaping @MainActor (DebugMenuEvent) -> Void
     ) -> (Args) -> DebugMenuView {

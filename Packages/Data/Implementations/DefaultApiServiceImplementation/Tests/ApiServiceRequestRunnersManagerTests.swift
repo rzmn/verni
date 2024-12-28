@@ -3,16 +3,26 @@ import ApiService
 import Foundation
 import Logging
 import Base
-@testable import AsyncExtensions
+import Infrastructure
+import TestInfrastructure
 @testable import DefaultApiServiceImplementation
 
 actor TokenRefresherMock: TokenRefresher, Loggable {
-    let logger: Logger = .shared
+    nonisolated var logger: Logger {
+        infrastructure.logger
+    }
+    private let infrastructure: InfrastructureLayer
     private var accessTokenValue: String?
     let refreshTokensValue: Result<String?, RefreshTokenFailureReason>
     let refreshTokensResponseTimeSec: UInt64
 
-    init(accessTokenValue: String?, refreshTokensValue: Result<String?, RefreshTokenFailureReason>, refreshTokensResponseTimeSec: UInt64) {
+    init(
+        infrastructure: InfrastructureLayer,
+        accessTokenValue: String?,
+        refreshTokensValue: Result<String?, RefreshTokenFailureReason>,
+        refreshTokensResponseTimeSec: UInt64
+    ) {
+        self.infrastructure = infrastructure
         self.accessTokenValue = accessTokenValue
         self.refreshTokensValue = refreshTokensValue
         self.refreshTokensResponseTimeSec = refreshTokensResponseTimeSec
@@ -47,7 +57,7 @@ actor WasFailedBasedOnLabelHandler {
 }
 
 struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable, Sendable {
-    let logger: Logger = .shared
+    let logger: Logger
     let runResult: Result<MockResponse, ApiServiceError>
     let runResponseTimeSec: UInt64
     let label: String
@@ -56,6 +66,7 @@ struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable, Senda
     func create(accessToken: String?) -> ApiServiceRequestRunner {
         logI { "create request \(label)" }
         return RequestRunnerMock(
+            logger: logger,
             runResult: runResult,
             runResponseTimeSec: runResponseTimeSec,
             label: label,
@@ -65,8 +76,7 @@ struct MockRequestRunnerFactory: ApiServiceRequestRunnerFactory, Loggable, Senda
 }
 
 struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
-
-    let logger: Logger = .shared
+    let logger: Logger
     let runResult: Result<MockResponse, ApiServiceError>
     let runResponseTimeSec: UInt64
     let label: String
@@ -98,29 +108,30 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 }
 
 @Suite struct ApiServiceRequestRunnersManagerTests {
-    let taskFactory = TestTaskFactory()
-
     @Test func testRequestsLimitNoRefresh() async throws {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .success(MockResponse()),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: TokenRefresherMock(
+                    infrastructure: infrastructure,
                     accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
                     refreshTokensResponseTimeSec: 4
                 )
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -136,12 +147,12 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
-        async let b: MockResponse = try runner.run(request: MockRequest(label: "2"))
-        async let c: MockResponse = try runner.run(request: MockRequest(label: "3"))
-        async let d: MockResponse = try runner.run(request: MockRequest(label: "4"))
-        async let e: MockResponse = try runner.run(request: MockRequest(label: "5"))
-        async let f: MockResponse = try runner.run(request: MockRequest(label: "6"))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "2"))
+        async let c: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "3"))
+        async let d: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "4"))
+        async let e: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "5"))
+        async let f: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "6"))
 
         let _: [MockResponse] = try await [
             a, b, c, d, e, f
@@ -157,23 +168,26 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .success(MockResponse()),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: TokenRefresherMock(
+                    infrastructure: infrastructure,
                     accessTokenValue: nil,
                     refreshTokensValue: .success("123"),
                     refreshTokensResponseTimeSec: 2
                 )
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -189,8 +203,8 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
-        async let b: MockResponse = try runner.run(request: MockRequest(label: "2"))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "2"))
 
         let _: [MockResponse] = try await [
             a, b
@@ -206,19 +220,21 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .success(MockResponse()),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: nil
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -234,8 +250,8 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
-        async let b: MockResponse = try runner.run(request: MockRequest(label: "2"))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "2"))
 
         let _: [MockResponse] = try await [
             a, b
@@ -251,23 +267,26 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .success(MockResponse()),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: TokenRefresherMock(
+                    infrastructure: infrastructure,
                     accessTokenValue: "123",
                     refreshTokensValue: .success("123"),
                     refreshTokensResponseTimeSec: 2
                 )
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -283,8 +302,8 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
-        async let b: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: MockRequest.accessTokenShouldFailLabel))
 
         let _: [MockResponse] = try await [
             a, b
@@ -300,23 +319,26 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .success(MockResponse()),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: TokenRefresherMock(
+                    infrastructure: infrastructure,
                     accessTokenValue: nil,
                     refreshTokensValue: .failure(.expired(NSError(domain: "", code: -1))),
                     refreshTokensResponseTimeSec: 2
                 )
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -332,8 +354,8 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: "1"))
-        async let b: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "1"))
+        async let b: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: MockRequest.accessTokenShouldFailLabel))
 
         do {
             let _: [MockResponse] = try await [
@@ -357,23 +379,26 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .failure(.noConnection(NSError(domain: "", code: -1))),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: TokenRefresherMock(
+                    infrastructure: infrastructure,
                     accessTokenValue: nil,
                     refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
                     refreshTokensResponseTimeSec: 2
                 )
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -389,7 +414,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: MockRequest.accessTokenShouldFailLabel))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: MockRequest.accessTokenShouldFailLabel))
 
         do {
             let _: [MockResponse] = try await [
@@ -413,23 +438,26 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let runner = MaxSimultaneousRequestsRestrictor(
             limit: 5,
             manager: ApiServiceRequestRunnersManager(
                 runnerFactory: MockRequestRunnerFactory(
+                    logger: infrastructure.logger,
                     runResult: .failure(.noConnection(NSError(domain: "", code: -1))),
                     runResponseTimeSec: 1,
                     label: "runner"
                 ),
-                taskFactory: taskFactory,
-                logger: .shared,
+                taskFactory: infrastructure.taskFactory,
+                logger: infrastructure.logger,
                 tokenRefresher: TokenRefresherMock(
+                    infrastructure: infrastructure,
                     accessTokenValue: "123",
                     refreshTokensValue: .failure(.noConnection(NSError(domain: "", code: -1))),
                     refreshTokensResponseTimeSec: 2
                 )
             ),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         var lowerTimeLimitReached = false
@@ -445,7 +473,7 @@ struct RequestRunnerMock: ApiServiceRequestRunner, Loggable {
 
         // when
 
-        async let a: MockResponse = try runner.run(request: MockRequest(label: "a"))
+        async let a: MockResponse = try runner.run(request: MockRequest(logger: infrastructure.logger, label: "a"))
 
         do {
             let _: [MockResponse] = try await [

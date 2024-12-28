@@ -55,16 +55,16 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         defaultDependencies: DefaultDependenciesAssembly,
         dataLayer: AuthenticatedDataLayerSession
     ) async {
-        self.logger = .shared.with(prefix: "👩🏿‍💻")
+        self.logger = defaultDependencies.infrastructure.logger.with(prefix: "👩🏿‍💻")
         self.defaultDependencies = defaultDependencies
         let profileLogger = logger.with(prefix: "🪪")
         updatableProfile = ExternallyUpdatable<Domain.Profile>(
-            taskFactory: DefaultTaskFactory(),
+            taskFactory: defaultDependencies.infrastructure.taskFactory,
             logger: profileLogger
         )
         let logoutLogger = logger.with(prefix: "🚪")
         self.logoutSubject = AsyncSubject<LogoutReason>(
-            taskFactory: DefaultTaskFactory(),
+            taskFactory: defaultDependencies.infrastructure.taskFactory,
             logger: logoutLogger
         )
         self.dataLayer = dataLayer
@@ -82,32 +82,32 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
             logger: profileLogger,
             offline: profileOfflineRepository,
             profile: updatableProfile,
-            taskFactory: DefaultTaskFactory()
+            taskFactory: defaultDependencies.infrastructure.taskFactory
         )
         usersRepository = DefaultUsersRepository(
             api: dataLayer.api,
             logger: logger.with(prefix: "🎭"),
             offline: usersOfflineRepository,
-            taskFactory: DefaultTaskFactory()
+            taskFactory: defaultDependencies.infrastructure.taskFactory
         )
         spendingsRepository = await DefaultSpendingsRepository(
             api: dataLayer.api,
             longPoll: dataLayer.longPoll,
             logger: logger.with(prefix: "💸"),
             offline: spendingsOfflineRepository,
-            taskFactory: DefaultTaskFactory()
+            taskFactory: defaultDependencies.infrastructure.taskFactory
         )
         friendListRepository = DefaultFriendsRepository(
             api: dataLayer.api,
             longPoll: dataLayer.longPoll,
             logger: logger.with(prefix: "🤝"),
             offline: friendsOfflineRepository,
-            taskFactory: DefaultTaskFactory()
+            taskFactory: defaultDependencies.infrastructure.taskFactory
         )
         logoutUseCase = await DefaultLogoutUseCase(
             session: dataLayer,
             shouldLogout: logoutSubject,
-            taskFactory: DefaultTaskFactory(),
+            taskFactory: defaultDependencies.infrastructure.taskFactory,
             logger: logoutLogger
         )
     }
@@ -122,7 +122,7 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         DefaultProfileEditingUseCase(
             api: dataLayer.api,
             persistency: dataLayer.persistency,
-            taskFactory: DefaultTaskFactory(),
+            taskFactory: defaultDependencies.infrastructure.taskFactory,
             avatarsRepository: defaultDependencies.avatarsOfflineMutableRepository,
             profile: updatableProfile
         )

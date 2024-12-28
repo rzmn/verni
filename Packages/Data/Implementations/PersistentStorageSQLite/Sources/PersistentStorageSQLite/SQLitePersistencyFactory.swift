@@ -1,31 +1,28 @@
+import AsyncExtensions
+internal import Base
+import DataTransferObjects
+import Filesystem
 import Foundation
 import Logging
 import PersistentStorage
-import DataTransferObjects
-import AsyncExtensions
-internal import Base
 internal import SQLite
 
 public actor SQLitePersistencyFactory {
     public let logger: Logger
     let dbDirectory: URL
     private let taskFactory: TaskFactory
-    private let pathManager: PathManager
+    private let fileManager: Filesystem.FileManager
 
-    public init(logger: Logger, dbDirectory: URL, taskFactory: TaskFactory) throws {
-        try self.init(
-            logger: logger,
-            dbDirectory: dbDirectory,
-            taskFactory: taskFactory,
-            pathManager: DefaultPathManager()
-        )
-    }
-    
-    init(logger: Logger, dbDirectory: URL, taskFactory: TaskFactory, pathManager: PathManager) throws {
-        self.logger = logger
+    public init(
+        logger: Logger,
+        dbDirectory: URL,
+        taskFactory: TaskFactory,
+        fileManager: Filesystem.FileManager
+    ) throws {
         self.dbDirectory = dbDirectory
+        self.logger = logger
         self.taskFactory = taskFactory
-        self.pathManager = pathManager
+        self.fileManager = fileManager
     }
 }
 
@@ -63,8 +60,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                 },
                 hostId: host,
                 refreshToken: nil,
-                logger: logger,
-                taskFactory: taskFactory
+                logger: logger
             )
         } catch {
             logE { "failed to create db from url due error: \(error)" }
@@ -72,16 +68,24 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
     }
 
-    public func create(host: UserDto.Identifier, refreshToken: String) async throws -> Persistency {
-        try await doCreate(host: host, refreshToken: refreshToken)
+    public func create<each D: Descriptor>(
+        host: UserDto.Identifier,
+        descriptors: DescriptorTuple<repeat each D>,
+        refreshToken: String
+    ) async throws -> Persistency {
+        try await doCreate(host: host, descriptors: descriptors, refreshToken: refreshToken)
     }
 
-    @StorageActor private func doCreate(host: UserDto.Identifier, refreshToken: String) async throws -> Persistency {
+    @StorageActor private func doCreate<each D: Descriptor>(
+        host: UserDto.Identifier,
+        descriptors: DescriptorTuple<repeat each D>,
+        refreshToken: String
+    ) async throws -> Persistency {
         logI { "creating persistence..." }
         let pathManager = try createDatabasePathManager()
         let database = try pathManager.create(id: host).connection()
         do {
-            try createTables(for: database)
+            try createTables(for: database, descriptors: descriptors)
         } catch {
             pathManager.invalidate(id: host)
             throw error
@@ -93,29 +97,38 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             },
             hostId: host,
             refreshToken: refreshToken,
-            logger: logger,
-            taskFactory: taskFactory
+            logger: logger
         )
     }
-    
-    @StorageActor private func createDatabasePathManager() throws -> any DbPathManager<SqliteDbPathManager.Item> {
+
+    @StorageActor private func createDatabasePathManager() throws -> any DbPathManager<
+        SqliteDbPathManager.Item
+    > {
         try SqliteDbPathManager(
             logger: logger.with(prefix: "📁"),
             containerDirectory: dbDirectory,
             versionLabel: "v1",
-            pathManager: pathManager
+            pathManager: fileManager
         )
     }
 
-    @StorageActor private func createTables(for database: Connection) throws {
-        try Schema.refreshToken.createTable(database: database)
-        try Schema.profile.createTable(database: database)
-        try Schema.users.createTable(database: database)
-        try Schema.spendingCounterparties.createTable(database: database)
-        try Schema.spendingsHistory.createTable(database: database)
-        try Schema.friends.createTable(database: database)
+    @StorageActor private func createTables<each D: Descriptor>(
+        for database: Connection,
+        descriptors: DescriptorTuple<repeat each D>
+    ) throws {
+        repeat try createTable(descriptor: each descriptors.content, database: database)
+    }
+
+    @StorageActor private func createTable<D: Descriptor>(
+        descriptor: D, database: Connection
+    ) throws {
+        try database.run(
+            Table(descriptor.id).create { table in
+                table.column(
+                    Expression<CodableBlob<D.Key>>(Schema.identifierKey), primaryKey: true)
+                table.column(Expression<CodableBlob<D.Value>>(Schema.valueKey))
+            })
     }
 }
-
 
 extension SQLitePersistencyFactory: Loggable {}

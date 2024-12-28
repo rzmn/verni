@@ -20,13 +20,7 @@ let package = Package(
     targets: [
         .target(
             name: "DataTransferObjects",
-            dependencies: ["Base"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
-            ]
+            dependencies: ["Base"]
         )
     ]
 )

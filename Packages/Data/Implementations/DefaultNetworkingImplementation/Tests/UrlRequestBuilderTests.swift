@@ -1,9 +1,11 @@
 import Testing
 import Foundation
 import Networking
+import TestInfrastructure
 @testable import DefaultNetworkingImplementation
 
 @Suite struct UrlRequestBuilderTests {
+    let infrastructure = TestInfrastructureLayer()
 
     @Test func testUrlRequestBuilderWithBody() throws {
 
@@ -29,7 +31,7 @@ import Networking
             encoder: UrlRequestBuilderBodyEncoder(
                 encoder: JSONEncoder()
             ),
-            logger: .shared
+            logger: infrastructure.logger
         )
 
         // when

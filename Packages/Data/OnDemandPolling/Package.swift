@@ -17,7 +17,8 @@ let package = Package(
     dependencies: [
         .package(path: "../Api"),
         .package(path: "../../Infrastructure/Base"),
-        .package(path: "../../Infrastructure/AsyncExtensions")
+        .package(path: "../../Infrastructure/AsyncExtensions"),
+        .package(path: "../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -25,13 +26,7 @@ let package = Package(
             dependencies: [
                 "Base",
                 "AsyncExtensions",
-                "Api"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Api",
             ]
         ),
         .testTarget(
@@ -40,14 +35,9 @@ let package = Package(
                 "Base",
                 "AsyncExtensions",
                 "Api",
-                "OnDemandPolling"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "OnDemandPolling",
+                "TestInfrastructure",
             ]
-        )
+        ),
     ]
 )

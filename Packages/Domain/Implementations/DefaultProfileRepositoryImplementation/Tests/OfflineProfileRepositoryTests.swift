@@ -19,7 +19,7 @@ private actor PersistencyProvider {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
             persistency.getBlock = { anyDescriptor in
-                guard anyDescriptor as? Descriptor<Unkeyed, ProfileDto>.Index != nil else {
+                guard anyDescriptor as? Index<AnyDescriptor<Unkeyed, ProfileDto>> != nil else {
                     fatalError()
                 }
                 await self.performIsolated { `self` in
@@ -28,10 +28,10 @@ private actor PersistencyProvider {
                 return await self.profile
             }
             persistency.updateBlock = { anyDescriptor, anyObject in
-                if anyDescriptor as? Descriptor<Unkeyed, ProfileDto>.Index != nil, let profile = anyObject as? ProfileDto {
+                if anyDescriptor as? Index<AnyDescriptor<Unkeyed, ProfileDto>> != nil, let profile = anyObject as? ProfileDto {
                     self.updateProfileCalls.append(profile)
                     self.profile = profile
-                } else if anyDescriptor as? Descriptor<UserDto.Identifier, UserDto>.Index != nil, let user = anyObject as? UserDto {
+                } else if anyDescriptor as? Index<AnyDescriptor<UserDto.Identifier, UserDto>> != nil, let user = anyObject as? UserDto {
                     self.updateUsersCalls.append(user)
                 } else {
                     fatalError()

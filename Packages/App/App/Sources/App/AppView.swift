@@ -10,15 +10,15 @@ public struct AppView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @ObservedObject private var store: Store<AppState, AppAction>
     @State private var showingDebugMenu = false
-    
+
     @State private var authWelcomeSourceOffset: CGFloat?
     @State private var splashDestinationOffset: CGFloat?
-    
+
     @State private var fromSplashTransitionProgress: CGFloat = 0
     @State private var toContentTransitionProgress: CGFloat = 0
-    
+
     @State private var contentOpacity: CGFloat = 0
-    
+
     @State private var splashIsLocked = false
 
     init(store: Store<AppState, AppAction>) {
@@ -36,7 +36,7 @@ public struct AppView: View {
             .environment(ColorPalette(scheme: colorScheme))
             .environment(PaddingsPalette.default)
     }
-    
+
     @ViewBuilder private var contentWithDebugMenu: some View {
         contentWithSplash
             .onShake {
@@ -57,7 +57,7 @@ public struct AppView: View {
                     }()
             }
     }
-    
+
     @ViewBuilder private var contentWithSplash: some View {
         ZStack {
             DefaultSplashFactory().instantiate()(ModalTransition(progress: $fromSplashTransitionProgress, sourceOffset: $splashDestinationOffset, destinationOffset: $authWelcomeSourceOffset))
@@ -67,7 +67,7 @@ public struct AppView: View {
             content
         }
     }
-    
+
     @ViewBuilder private var content: some View {
         switch store.state {
         case .launching:
@@ -108,4 +108,3 @@ public struct AppView: View {
         }
     }
 }
-

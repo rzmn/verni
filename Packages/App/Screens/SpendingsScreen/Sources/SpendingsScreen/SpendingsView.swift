@@ -7,11 +7,11 @@ public struct SpendingsView: View {
     @ObservedObject var store: Store<SpendingsState, SpendingsAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     @Binding private var appearTransitionProgress: CGFloat
     @Binding private var appearDestinationOffset: CGFloat?
     @Binding private var appearSourceOffset: CGFloat?
-    
+
     @Binding private var tabTransitionProgress: CGFloat
 
     init(
@@ -19,11 +19,11 @@ public struct SpendingsView: View {
         transitions: SpendingsTransitions
     ) {
         self.store = store
-        
+
         _appearTransitionProgress = transitions.appear.progress
         _appearSourceOffset = transitions.appear.sourceOffset
         _appearDestinationOffset = transitions.appear.destinationOffset
-        
+
         _tabTransitionProgress = transitions.tab.progress
     }
 
@@ -69,23 +69,23 @@ public struct SpendingsView: View {
             store.dispatch(.onRefreshBalance)
         }
     }
-    
+
     private var adjustedTransitionOpacity: CGFloat {
         tabTransitionOpacity * appearTransitionProgress
     }
-    
+
     private var tabTransitionOpacity: CGFloat {
         1 - abs(tabTransitionProgress)
     }
-    
+
     private var tabTransitionOffset: CGFloat {
         28 * tabTransitionProgress
     }
-    
+
     private var appearTransitionOffset: CGFloat {
         (1 - appearTransitionProgress) * UIScreen.main.bounds.height / 5
     }
-    
+
     private var items: [SpendingsState.Item] {
         store.state.previews.value ?? []
     }
@@ -122,11 +122,11 @@ private struct SpendingsPreview: View {
     @State var appearTransition: CGFloat = 1
     @State var tabTransition: CGFloat = 0
     @State var sourceOffset: CGFloat?
-    
+
     var body: some View {
         ZStack {
             SpendingsView(
-                store:  Store(
+                store: Store(
                     state: SpendingsState(
                         previews: .loaded(
                             [
@@ -156,7 +156,7 @@ private struct SpendingsPreview: View {
                         progress: $tabTransition
                     )
                 )
-                
+
             )
             VStack {
                 Text("sourceOffset: \(sourceOffset ?? -1)")

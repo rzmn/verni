@@ -2,18 +2,18 @@ import SwiftUI
 
 public struct SpendingsItem: View {
     @Environment(ColorPalette.self) var colors
-    
+
     public enum Style {
         case positive
         case negative
     }
-    
+
     public struct Config {
         let avatar: AvatarView.AvatarId?
         let name: String
         let style: Style
         let amount: String
-        
+
         public init(avatar: AvatarView.AvatarId?, name: String, style: Style, amount: String) {
             self.avatar = avatar
             self.name = name
@@ -22,11 +22,11 @@ public struct SpendingsItem: View {
         }
     }
     private let config: Config
-    
+
     public init(config: Config) {
         self.config = config
     }
-    
+
     public var body: some View {
         HStack(spacing: 0) {
             userPreview
@@ -34,13 +34,13 @@ public struct SpendingsItem: View {
             Spacer()
             spendingAmountPreview
                 .padding(.trailing, 12)
-            
+
         }
         .frame(height: 94)
         .background(colors.background.primary.default)
         .clipShape(.rect(cornerRadius: 24))
     }
-            
+
     private var accessoryText: LocalizedStringKey {
         switch config.style {
         case .positive:
@@ -49,7 +49,7 @@ public struct SpendingsItem: View {
             .spendingsNegativeBalance
         }
     }
-    
+
     private var userPreview: some View {
         VStack(alignment: .leading, spacing: 0) {
             AvatarView(avatar: config.avatar)
@@ -63,7 +63,7 @@ public struct SpendingsItem: View {
                 .padding(.bottom, 12)
         }
     }
-    
+
     private var spendingAmountPreview: some View {
         VStack(alignment: .trailing, spacing: 0) {
             Spacer()
@@ -84,7 +84,7 @@ public struct SpendingsItem: View {
             .padding(.bottom, 12)
         }
     }
-    
+
     private var accesoryIcon: Image {
         switch config.style {
         case .positive:
@@ -93,7 +93,7 @@ public struct SpendingsItem: View {
             .minus
         }
     }
-    
+
     private var accesoryIconBackground: Color {
         switch config.style {
         case .positive:
@@ -102,7 +102,7 @@ public struct SpendingsItem: View {
             colors.background.negative.default
         }
     }
-    
+
     private var accesoryIconForeground: Color {
         switch config.style {
         case .positive:

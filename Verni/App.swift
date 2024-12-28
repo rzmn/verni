@@ -9,7 +9,7 @@ import DI
 struct App: SwiftUI.App {
     private let di: AnonymousDomainLayerSession
     private let provider: any ScreenProvider<Void, AppView, Void>
-    
+
     init() {
         // swiftlint:disable:next force_try
         di = try! DefaultDependenciesAssembly()
@@ -31,4 +31,3 @@ struct App: SwiftUI.App {
         }
     }
 }
-

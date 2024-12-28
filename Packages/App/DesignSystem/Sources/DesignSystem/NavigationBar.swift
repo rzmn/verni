@@ -5,7 +5,7 @@ public struct NavigationBar: View {
     public struct Item {
         let config: ItemConfig
         let action: () -> Void
-        
+
         public init(config: ItemConfig, action: @escaping () -> Void) {
             self.config = config
             self.action = action
@@ -20,7 +20,7 @@ public struct NavigationBar: View {
         let rightItem: Item?
         let title: LocalizedStringKey
         let style: Style
-        
+
         public init(leftItem: Item? = nil, rightItem: Item? = nil, title: LocalizedStringKey, style: Style) {
             self.leftItem = leftItem
             self.rightItem = rightItem
@@ -28,15 +28,14 @@ public struct NavigationBar: View {
             self.style = style
         }
     }
-    
+
     @Environment(ColorPalette.self) var colors
     private let config: Config
-    
+
     public init(config: Config) {
         self.config = config
     }
-    
-    
+
     public var body: some View {
         HStack {
             if let item = config.leftItem {
@@ -64,7 +63,7 @@ public struct NavigationBar: View {
                 .foregroundStyle(foregroundColor)
         }
     }
-    
+
     private var foregroundColor: Color {
         switch config.style {
         case .brand:

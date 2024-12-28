@@ -6,7 +6,7 @@ enum LogInAction {
     case passwordTextChanged(String)
     case emailTextChanged(String)
     case onForgotPasswordTap
-    
+
     case onLogInTap
     case onLoggingInStarted
     case onLoggingInFailed

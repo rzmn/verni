@@ -6,11 +6,11 @@ public protocol HapticHandler {
 
 struct BlockHapticHandler: HapticHandler {
     private let performBlock: () -> Void
-    
+
     init(performBlock: @escaping () -> Void) {
         self.performBlock = performBlock
     }
-    
+
     func perform() {
         performBlock()
     }
@@ -22,37 +22,37 @@ struct BlockHapticHandler: HapticHandler {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }
-    
+
     public static var warning: HapticHandler {
         BlockHapticHandler {
             UINotificationFeedbackGenerator().notificationOccurred(.warning)
         }
     }
-    
+
     public static var success: HapticHandler {
         BlockHapticHandler {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
     }
-    
+
     public static var lightImpact: HapticHandler {
         BlockHapticHandler {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
     }
-    
+
     public static var mediumImpact: HapticHandler {
         BlockHapticHandler {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
-    
+
     public static var heavyImpact: HapticHandler {
         BlockHapticHandler {
             UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
     }
-    
+
     public static var selectionChanged: HapticHandler {
         BlockHapticHandler {
             UISelectionFeedbackGenerator().selectionChanged()

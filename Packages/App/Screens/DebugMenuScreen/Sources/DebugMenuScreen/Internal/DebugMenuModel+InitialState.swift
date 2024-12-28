@@ -7,7 +7,7 @@ extension DebugMenuModel {
             ]
         )
     }
-    
+
     static var initialDesignSystemState: DesignSystemState {
         DesignSystemState(
             sections: [

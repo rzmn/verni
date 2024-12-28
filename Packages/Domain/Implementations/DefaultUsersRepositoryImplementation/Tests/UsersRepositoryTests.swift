@@ -5,7 +5,7 @@ import DataTransferObjects
 import Foundation
 import DefaultUsersRepositoryImplementation
 import Base
-@testable import AsyncExtensions
+import TestInfrastructure
 @testable import MockApiImplementation
 
 private actor ApiProvider {
@@ -54,7 +54,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let user = UserDto(
             login: UUID().uuidString,
             friendStatus: .currentUser,
@@ -67,15 +67,15 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
         let offlineRepository = MockOfflineMutableRepository()
         let repository = DefaultUsersRepository(
             api: provider.api,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
 
         let response = try await repository.getUsers(ids: [user.id])
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
 
         // then
 
@@ -88,7 +88,7 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let user = UserDto(
             login: UUID().uuidString,
             friendStatus: .currentUser,
@@ -101,16 +101,16 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
         let offlineRepository = MockOfflineMutableRepository()
         let repository = DefaultUsersRepository(
             api: provider.api,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
         let searchQuery = "query"
 
         // when
 
         let response = try await repository.searchUsers(query: searchQuery)
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
 
         // then
 
@@ -123,20 +123,20 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let provider = await ApiProvider()
         let offlineRepository = MockOfflineMutableRepository()
         let repository = DefaultUsersRepository(
             api: provider.api,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
 
         let response = try await repository.getUsers(ids: [])
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
 
         // then
 
@@ -149,20 +149,20 @@ private actor MockOfflineMutableRepository: UsersOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let provider = await ApiProvider()
         let offlineRepository = MockOfflineMutableRepository()
         let repository = DefaultUsersRepository(
             api: provider.api,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
 
         let response = try await repository.searchUsers(query: "")
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
 
         // then
 

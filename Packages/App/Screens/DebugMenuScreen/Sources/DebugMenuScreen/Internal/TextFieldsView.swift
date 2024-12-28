@@ -4,12 +4,12 @@ internal import DesignSystem
 struct TextFieldsView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     @State var displayNameValue = "display name value"
     @State var displayNameValueEmpty = ""
     @State var passwordValue = "password"
     @State var passwordValueEmpty = ""
-    
+
     var body: some View {
         HStack {
             Spacer()

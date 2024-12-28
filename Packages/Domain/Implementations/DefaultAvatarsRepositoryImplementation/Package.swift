@@ -22,7 +22,8 @@ let package = Package(
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation")
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -34,13 +35,7 @@ let package = Package(
                 "DataTransferObjects",
                 "PersistentStorage",
                 "Base",
-                "Logging"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Logging",
             ]
         ),
         .testTarget(
@@ -54,14 +49,9 @@ let package = Package(
                 "DefaultAvatarsRepositoryImplementation",
                 "Base",
                 "Logging",
-                "MockApiImplementation"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "MockApiImplementation",
+                "TestInfrastructure"
             ]
-        )
+        ),
     ]
 )

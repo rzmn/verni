@@ -3,7 +3,9 @@ import DataTransferObjects
 import Domain
 import Foundation
 import Base
-@testable import AsyncExtensions
+import Logging
+import TestInfrastructure
+import AsyncExtensions
 @testable import Api
 @testable import DefaultSpendingsRepositoryImplementation
 @testable import MockApiImplementation
@@ -40,7 +42,8 @@ private actor ApiProvider {
         getCounterpartiesResponse: [BalanceDto] = [],
         getSpendingsHistoryResponse: [UserDto.Identifier: [IdentifiableExpenseDto]] = [:],
         getDealResponse: [ExpenseDto.Identifier: ExpenseDto] = [:],
-        taskFactory: TaskFactory
+        taskFactory: TaskFactory,
+        logger: Logger
     ) async {
         self.getCounterpartiesResponse = getCounterpartiesResponse
         self.getSpendingsHistoryResponse = getSpendingsHistoryResponse
@@ -49,11 +52,11 @@ private actor ApiProvider {
         mockLongPoll = MockLongPoll(
             getCounterpartiesBroadcast: AsyncSubject(
                 taskFactory: taskFactory,
-                logger: .shared
+                logger: logger
             ),
             getSpendingsHistoryBroadcast: AsyncSubject(
                 taskFactory: taskFactory,
-                logger: .shared
+                logger: logger
             )
         )
         await api.performIsolated { api in
@@ -105,7 +108,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let counterparties = [
             SpendingsPreview(
                 counterparty: UUID().uuidString,
@@ -116,15 +119,16 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         ]
         let apiProvider = await ApiProvider(
             getCounterpartiesResponse: counterparties.map(BalanceDto.init),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
@@ -133,7 +137,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             let cancellableStream = await repository.spendingCounterpartiesUpdated().subscribeWithStream()
             let stream = await cancellableStream.eventSource.stream
             let counterpartiesFromRepository = try await repository.refreshSpendingCounterparties()
-            taskFactory.task {
+            infrastructure.taskFactory.task {
                 for await counterpartiesFromPublisher in stream {
                     #expect(counterparties == counterpartiesFromPublisher)
                     confirmation()
@@ -141,7 +145,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             }
             #expect(counterpartiesFromRepository == counterparties)
             await cancellableStream.cancel()
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
         }
 
         // then
@@ -154,7 +158,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let counterparties = [
             SpendingsPreview(
                 counterparty: UUID().uuidString,
@@ -165,15 +169,16 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         ]
         let apiProvider = await ApiProvider(
             getCounterpartiesResponse: counterparties.map(BalanceDto.init),
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
@@ -183,11 +188,11 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
                 #expect(counterparties == counterpartiesFromPublisher)
                 confirmation()
             }
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await apiProvider.mockLongPoll.getCounterpartiesBroadcast.yield(
                 LongPollCounterpartiesQuery.Update(category: .counterparties)
             )
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await subscription.cancel()
         }
 
@@ -201,7 +206,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let counterparty = UUID().uuidString
         let history = [
             IdentifiableSpending(
@@ -219,15 +224,16 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         ]
         let apiProvider = await ApiProvider(
             getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableExpenseDto.init)],
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
@@ -236,7 +242,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             let cancellableStream = await repository.spendingsHistoryUpdated(for: counterparty).subscribeWithStream()
             let stream = await cancellableStream.eventSource.stream
             let historyFromRepository = try await repository.refreshSpendingsHistory(counterparty: counterparty)
-            taskFactory.task {
+            infrastructure.taskFactory.task {
                 for await spendingsHistoryFromPublisher in stream {
                     #expect(history == spendingsHistoryFromPublisher)
                     confirmation()
@@ -244,7 +250,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
             }
             #expect(historyFromRepository == history)
             await cancellableStream.cancel()
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
         }
 
         // then
@@ -257,7 +263,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let counterparty = UUID().uuidString
         let history = [
             IdentifiableSpending(
@@ -275,15 +281,16 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         ]
         let apiProvider = await ApiProvider(
             getSpendingsHistoryResponse: [counterparty: history.map(IdentifiableExpenseDto.init)],
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
@@ -293,13 +300,13 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
                 #expect(history == spendingsHistoryFromPublisher)
                 confirmation()
             }
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await apiProvider.mockLongPoll.getSpendingsHistoryBroadcast.yield(
                 LongPollSpendingsHistoryQuery.Update(
                     category: .spendings(uid: counterparty)
                 )
             )
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await subscription.cancel()
         }
 
@@ -313,7 +320,7 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let deal = IdentifiableSpending(
             spending: Spending(
                 date: Date(),
@@ -328,21 +335,22 @@ private actor MockOfflineMutableRepository: SpendingsOfflineMutableRepository {
         )
         let apiProvider = await ApiProvider(
             getDealResponse: [deal.id: ExpenseDto(domain: deal.spending)],
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
         let offlineRepository = MockOfflineMutableRepository()
         let repository = await DefaultSpendingsRepository(
             api: apiProvider.api,
             longPoll: apiProvider.mockLongPoll,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
 
         let dealFromRepository = try await repository.getSpending(id: deal.id)
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
 
         // then
 

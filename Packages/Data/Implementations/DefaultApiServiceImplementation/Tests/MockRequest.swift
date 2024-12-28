@@ -8,16 +8,17 @@ class MockRequest: ApiServiceRequest, Loggable, @unchecked Sendable {
         "accessTokenShouldFailLabel"
     }
 
-    let logger: Logger = .shared
+    let logger: Logger
     let label: String
 
     let path: String = ""
     let parameters: [String: String] = [:]
     let httpMethod: String = ""
 
-    init(label: String, headers: [String: String] = [:]) {
+    init(logger: Logger, label: String, headers: [String: String] = [:]) {
         self.label = label
         self.headers = headers
+        self.logger = logger
     }
 
     var headers: [String: String] = [:]

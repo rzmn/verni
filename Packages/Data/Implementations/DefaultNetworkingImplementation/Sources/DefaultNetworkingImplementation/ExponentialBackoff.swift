@@ -1,7 +1,7 @@
 import Foundation
 internal import Base
 
-struct ExponentialBackoff: CompactDescription, Sendable {
+struct ExponentialBackoff: Sendable {
     private let base: TimeInterval
     private let retryCount: Int
     private let maxRetryCount: Int
@@ -24,5 +24,11 @@ struct ExponentialBackoff: CompactDescription, Sendable {
 
     func nextRetry() -> Self {
         ExponentialBackoff(base: base, retryCount: retryCount + 1, maxRetryCount: maxRetryCount)
+    }
+}
+
+extension ExponentialBackoff: CustomStringConvertible {
+    var description: String {
+        "<(\(String(format: "%.2f", base)) * (\(String(format: "%.2f", multiplier)) ^ \(retryCount)), max: \(maxRetryCount)>"
     }
 }

@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import Networking
+import TestInfrastructure
 @testable import DefaultNetworkingImplementation
 
 @Suite struct UrlBuilderTests {
@@ -8,6 +9,7 @@ import Networking
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let requestPath = "/path"
         let endpoint = Endpoint(path: "https://url.com")
         let method = "method"
@@ -20,7 +22,7 @@ import Networking
 
         // when
 
-        let url = try UrlBuilder(endpoint: endpoint, request: request, logger: .shared).build()
+        let url = try UrlBuilder(endpoint: endpoint, request: request, logger: infrastructure.logger).build()
 
         // then
 
@@ -31,6 +33,7 @@ import Networking
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let requestPath = "/path"
         let endpoint = Endpoint(path: "https://url.com")
         let method = "method"
@@ -47,7 +50,7 @@ import Networking
 
         // when
 
-        let url = try UrlBuilder(endpoint: endpoint, request: request, logger: .shared).build()
+        let url = try UrlBuilder(endpoint: endpoint, request: request, logger: infrastructure.logger).build()
 
         // then
 
@@ -63,6 +66,7 @@ import Networking
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let requestPath = "\\broken%path"
         let endpoint = Endpoint(path: "https://url.com")
         let method = "method"
@@ -75,7 +79,7 @@ import Networking
 
         // when
 
-        let builder = UrlBuilder(endpoint: endpoint, request: request, logger: .shared)
+        let builder = UrlBuilder(endpoint: endpoint, request: request, logger: infrastructure.logger)
 
         // then
 

@@ -2,6 +2,7 @@ import Testing
 import Logging
 import Foundation
 import Base
+import TestInfrastructure
 @testable import AsyncExtensions
 @testable import DefaultAvatarsRepositoryImplementation
 
@@ -17,9 +18,10 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let repository = try DefaultAvatarsOfflineRepository(
             container: container,
-            logger: .shared
+            logger: infrastructure.logger
         )
         let aid = UUID().uuidString
 
@@ -36,9 +38,10 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let repository = try DefaultAvatarsOfflineRepository(
             container: container,
-            logger: .shared
+            logger: infrastructure.logger
         )
         let aid = UUID().uuidString
         let avatar = UUID().uuidString.data(using: .utf8)!
@@ -57,10 +60,10 @@ import Base
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let repository = try DefaultAvatarsOfflineRepository(
             container: container,
-            logger: .shared
+            logger: infrastructure.logger
         )
         let avatars = [
             UUID().uuidString: UUID().uuidString.data(using: .utf8)!,
@@ -73,7 +76,7 @@ import Base
         for avatar in avatars {
             await repository.store(data: avatar.value, for: avatar.key)
         }
-        let avatarsFromRepository = await repository.getConcurrent(taskFactory: taskFactory, ids: Array(avatars.keys))
+        let avatarsFromRepository = await repository.getConcurrent(taskFactory: infrastructure.taskFactory, ids: Array(avatars.keys))
 
         // then
 

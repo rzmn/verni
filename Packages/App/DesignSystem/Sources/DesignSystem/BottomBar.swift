@@ -4,7 +4,7 @@ public struct BottomBarTab: Equatable {
     public let id: String
     public let icon: Image
     public let selectedIcon: Image
-    
+
     public init(id: String, icon: Image, selectedIcon: Image) {
         self.id = id
         self.icon = icon
@@ -19,7 +19,7 @@ public enum BottomBarItem {
 
 public struct BottomBarConfig {
     let items: [BottomBarItem]
-    
+
     public init(items: [BottomBarItem]) {
         self.items = items
     }
@@ -31,7 +31,7 @@ struct BottomBar: View {
     private let items: [AnyIdentifiable<BottomBarItem>]
     private let config: BottomBarConfig
     @Binding var tab: BottomBarTab
-    
+
     init(config: BottomBarConfig, tab: Binding<BottomBarTab>) {
         items = config.items.enumerated().map { index, item in
             AnyIdentifiable(value: item, id: "\(index)")
@@ -39,7 +39,7 @@ struct BottomBar: View {
         self.config = config
         _tab = tab
     }
-    
+
     var body: some View {
         HStack {
             ForEach(items) { item in
@@ -65,7 +65,7 @@ struct BottomBar: View {
             .ignoresSafeArea(edges: .bottom)
         )
     }
-    
+
     @ViewBuilder private func itemView(_ item: BottomBarItem) -> some View {
         HStack {
             Spacer()
@@ -92,7 +92,7 @@ struct BottomBar: View {
             Spacer()
         }
     }
-    
+
     private var itemSize: CGFloat {
         54
     }
@@ -110,13 +110,13 @@ struct BottomBarModifier: ViewModifier {
     private let config: BottomBarConfig
     @Binding var tab: BottomBarTab
     @Binding var appearTransitionProgress: CGFloat
-    
+
     init(config: BottomBarConfig, tab: Binding<BottomBarTab>, appearTransitionProgress: Binding<CGFloat>) {
         self.config = config
         _tab = tab
         _appearTransitionProgress = appearTransitionProgress
     }
-    
+
     func body(content: Content) -> some View {
         VStack(spacing: -barContentHeight * 0.7) {
             content
@@ -141,7 +141,7 @@ extension View {
                 items: [
                     .tab(BottomBarTab(id: "home", icon: .homeBorder, selectedIcon: .homeFill)),
                     .action(.plus, {}),
-                    .tab(BottomBarTab(id: "user", icon: .userCircleBorder, selectedIcon: .userFill)),
+                    .tab(BottomBarTab(id: "user", icon: .userCircleBorder, selectedIcon: .userFill))
                 ]
             ),
             tab: .constant(BottomBarTab(id: "home", icon: .homeBorder, selectedIcon: .homeFill)),

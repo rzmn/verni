@@ -66,11 +66,11 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
     case noConnection(onRetry: @MainActor @Sendable () -> Void, onClose: @MainActor @Sendable () -> Void)
     case hint(title: String, subtitle: String, actionTitle: String, action: @MainActor @Sendable () -> Void)
     case blocker(title: String, subtitle: String, actionTitle: String, action: @MainActor @Sendable () -> Void)
-    
+
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.kind == rhs.kind
     }
-    
+
     private var kind: String {
         switch self {
         case .noConnection:
@@ -81,7 +81,7 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
             "blocker_\(title)"
         }
     }
-    
+
     var canClose: Bool {
         switch self {
         case .noConnection, .hint:
@@ -90,7 +90,7 @@ public enum AlertBottomSheetPreset: Sendable, Equatable {
             false
         }
     }
-    
+
     @MainActor @ViewBuilder func view(colors: ColorPalette) -> some View {
         switch self {
         case .noConnection(let onRetry, let onClose):
@@ -191,7 +191,7 @@ private struct AlertBottomSheetModifier: ViewModifier {
                 }
             }
     }
-    
+
     @ViewBuilder private func content(geometry: GeometryProxy, preset: AlertBottomSheetPreset) -> some View {
         let overallHeight = [
             geometry.safeAreaInsets.bottom,
@@ -216,7 +216,7 @@ private struct AlertBottomSheetModifier: ViewModifier {
                 appeared = true
             }
     }
-    
+
     private var dragGesture: some Gesture {
         DragGesture()
             .onChanged { gesture in
@@ -239,7 +239,7 @@ private struct AlertBottomSheetModifier: ViewModifier {
                 }
             }
     }
-    
+
     private func performTransitionAnimationWhenNeeded() {
         if shown {
             if !appeared && contentHeight != 0 {
@@ -251,14 +251,14 @@ private struct AlertBottomSheetModifier: ViewModifier {
             }
         }
     }
-    
+
     private func performAppearTransition() {
         withAnimation(animation) {
             shown = true
             offset = -contentHeight
         }
     }
-    
+
     private func performDismissTransition() {
         withAnimation(animation) {
             shown = false
@@ -270,7 +270,7 @@ private struct AlertBottomSheetModifier: ViewModifier {
             dragOffsetTranslationTrust = 0
         }
     }
-    
+
     private var animation: Animation {
         .snappy.speed(1.5)
     }

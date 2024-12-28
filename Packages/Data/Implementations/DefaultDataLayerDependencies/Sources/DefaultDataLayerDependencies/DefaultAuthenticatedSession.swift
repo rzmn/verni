@@ -24,7 +24,7 @@ final class DefaultAuthenticatedSession: AuthenticatedDataLayerSession {
         self.longPoll = longPoll
         self.sessionHost = sessionHost
     }
-    
+
     func logout() async {
         await persistency.invalidate()
         await sessionHost.sessionFinished()

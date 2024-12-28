@@ -4,15 +4,15 @@ internal import Device
 
 @MainActor public final class DynamicIsland {
     static let shared = DynamicIsland()
-    
+
     lazy var isAvailable = Device.hasDynamicIsland
     lazy var frame = CGRect(x: originX, y: originY, width: width, height: height)
-    
+
     private lazy var width = 124 * zoom
     private lazy var height = 36 * zoom
-    
+
     private lazy var originX = UIScreen.main.bounds.midX - width / 2
-    
+
     private lazy var originY: CGFloat = {
         let multipler: CGFloat
         switch Device.version() {
@@ -23,7 +23,7 @@ internal import Device
         }
         return multipler * zoom
     }()
-    
+
     private lazy var zoom: CGFloat = UIScreen.main.scale / UIScreen.main.nativeScale
 }
 

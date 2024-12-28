@@ -2,28 +2,25 @@ import Foundation
 import Testing
 import PersistentStorage
 import DataTransferObjects
+import TestInfrastructure
+import Filesystem
 @testable import Base
-@testable import AsyncExtensions
 @testable import PersistentStorageSQLite
 
 @Suite(.serialized) struct PersistentStorageSQLiteTests {
-    private let taskFactory = TestTaskFactory()
-    private let persistencyFactory: SQLitePersistencyFactory
-
-    init() throws {
-        persistencyFactory = try SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[test] "),
-            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
-            taskFactory: taskFactory
-        )
-    }
-
     @Test func testGetRefreshToken() async throws {
 
         // given
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -42,6 +39,13 @@ import DataTransferObjects
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let newRefreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -60,6 +64,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -80,6 +91,13 @@ import DataTransferObjects
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let newRefreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -110,6 +128,13 @@ import DataTransferObjects
             emailVerified: true
         )
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -128,6 +153,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -145,6 +177,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -173,6 +212,13 @@ import DataTransferObjects
             avatarId: nil
         )
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -195,6 +241,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -229,6 +282,13 @@ import DataTransferObjects
             .subscription: [subscription]
         ]
         let query = FriendshipKindSetDto(FriendshipKindDto.allCases)
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -256,6 +316,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -278,6 +345,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -299,6 +373,13 @@ import DataTransferObjects
             BalanceDto(counterparty: UUID().uuidString, currencies: ["USD": 16]),
             BalanceDto(counterparty: UUID().uuidString, currencies: ["RUB": -13])
         ]
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -317,6 +398,13 @@ import DataTransferObjects
 
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -369,6 +457,13 @@ import DataTransferObjects
                 )
             )
         ]
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
 
         // when
 
@@ -384,15 +479,19 @@ import DataTransferObjects
     @Test func testFailedToCreateDatabaseFileManagerCreate() async throws {
         
         // given
-        
-        let expectedError = InternalError.error("create failed", underlying: nil)
+
+        let infrastructure = modify(TestInfrastructureLayer()) {
+            var manager = $0.testFileManager
+            manager.createDirectoryBlock = { _ throws(CreateDirectoryError) in
+                throw .urlIsReferringToFile
+            }
+            $0.testFileManager = manager
+        }
         let persistencyFactory = try SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[test] "),
+            logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
-            taskFactory: taskFactory,
-            pathManager: MockPathManager(
-                createDirectory: { _ in throw expectedError }
-            )
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
         )
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
@@ -404,30 +503,40 @@ import DataTransferObjects
                 .create(host: host, refreshToken: refreshToken)
             Issue.record()
         } catch {
-            
+            guard let error = error as? CreateDirectoryError, case .urlIsReferringToFile = error else {
+                Issue.record("\(error)")
+                return
+            }
             // then
-            
-            #expect(expectedError.description == (error as? InternalError)?.description)
         }
     }
     
     @Test func testFailedToCreateDatabaseFileManagerAwake() async throws {
         
         // given
-        
-        let expectedError = InternalError.error("create failed", underlying: nil)
+
+        let infrastructure = TestInfrastructureLayer()
+        let infrastructureWithFailingCreateDirectory = modify(infrastructure) {
+            var manager = $0.testFileManager
+            manager.createDirectoryBlock = { _ throws(CreateDirectoryError) in
+                throw .urlIsReferringToFile
+            }
+            $0.testFileManager = manager
+        }
         let persistencyFactory = try SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[test] "),
+            logger: infrastructureWithFailingCreateDirectory.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
-            taskFactory: taskFactory,
-            pathManager: MockPathManager(
-                createDirectory: { _ in throw expectedError }
-            )
+            taskFactory: infrastructureWithFailingCreateDirectory.taskFactory,
+            fileManager: infrastructureWithFailingCreateDirectory.fileManager
         )
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
-        let _ = try await self.persistencyFactory
-            .create(host: host, refreshToken: refreshToken)
+        let _ = try await SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        ).create(host: host, refreshToken: refreshToken)
         
         // when
         
@@ -442,7 +551,14 @@ import DataTransferObjects
     @Test func testAwakeNoHost() async throws {
         
         // given
-        
+
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
         let host = UUID().uuidString
         
         // when
@@ -459,20 +575,28 @@ import DataTransferObjects
         
         // given
         
-        let expectedError = InternalError.error("list failed", underlying: nil)
+        let infrastructure = TestInfrastructureLayer()
+        let infrastructureWithFailingListDirectory = modify(infrastructure) {
+            var manager = $0.testFileManager
+            manager.listDirectoryBlock = { _, _ throws(ListDirectoryError) in
+                throw .noSuchDirectory
+            }
+            $0.testFileManager = manager
+        }
         let persistencyFactory = try SQLitePersistencyFactory(
-            logger: .shared.with(prefix: "[test] "),
+            logger: infrastructureWithFailingListDirectory.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
-            taskFactory: taskFactory,
-            pathManager: MockPathManager(
-                createDirectory: { _ in },
-                listDirectory: { _, _ in throw expectedError }
-            )
+            taskFactory: infrastructureWithFailingListDirectory.taskFactory,
+            fileManager: infrastructureWithFailingListDirectory.fileManager
         )
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
-        let _ = try await self.persistencyFactory
-            .create(host: host, refreshToken: refreshToken)
+        let _ = try await SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        ).create(host: host, refreshToken: refreshToken)
         
         // when
         
@@ -488,10 +612,17 @@ import DataTransferObjects
     @Test func testNilAwakeAfterInvalidate() async throws {
         
         // given
-        
+
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
-        let persistency = try await self.persistencyFactory
+        let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
         
         // when

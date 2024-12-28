@@ -10,7 +10,7 @@ internal import LogInScreen
     private let logger: Logger
 
     init(di: AnonymousDomainLayerSession) async {
-        self.logger = .shared.with(prefix: "💅🏿")
+        self.logger = di.appCommon.infrastructure.logger.with(prefix: "💅🏿")
         authWelcomeScreen = await DefaultAuthWelcomeFactory(
             di: di,
             logger: logger.with(

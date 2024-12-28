@@ -8,11 +8,11 @@ public enum TextContentType: Hashable {
 extension Font {
     static let mediumTextFontName = "JetBrainsMonoNL-Medium"
     static let boldTextFontName = "JetBrainsMonoNL-Bold"
-    
+
     public static func bold(size: CGFloat) -> Font {
         Font.custom(boldTextFontName, size: size)
     }
-    
+
     public static func medium(size: CGFloat) -> Font {
         Font.custom(mediumTextFontName, size: size)
     }

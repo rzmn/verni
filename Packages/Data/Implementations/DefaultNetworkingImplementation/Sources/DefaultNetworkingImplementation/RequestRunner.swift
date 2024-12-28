@@ -79,7 +79,7 @@ extension RequestRunner {
             data: data
         )
     }
-    
+
     private var requestDescription: String {
         request.url?.path() ?? "\(request)"
     }

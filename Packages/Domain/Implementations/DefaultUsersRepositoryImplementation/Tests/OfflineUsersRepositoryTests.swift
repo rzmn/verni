@@ -18,7 +18,7 @@ private actor PersistencyProvider {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
             persistency.getBlock = { anyDescriptor in
-                guard let descriptor = anyDescriptor as? Descriptor<UserDto.Identifier, UserDto>.Index else {
+                guard let descriptor = anyDescriptor as? Index<AnyDescriptor<UserDto.Identifier, UserDto>> else {
                     fatalError()
                 }
                 await self.performIsolated { `self` in
@@ -27,7 +27,7 @@ private actor PersistencyProvider {
                 return await self.users[descriptor.key]
             }
             persistency.updateBlock = { anyDescriptor, anyObject in
-                guard let descriptor = anyDescriptor as? Descriptor<UserDto.Identifier, UserDto>.Index, let user = anyObject as? UserDto else {
+                guard let descriptor = anyDescriptor as? Index<AnyDescriptor<UserDto.Identifier, UserDto>>, let user = anyObject as? UserDto else {
                     fatalError()
                 }
                 self.performIsolated { `self` in

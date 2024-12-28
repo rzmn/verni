@@ -34,7 +34,7 @@ public struct DesignSystemView: View {
                 .ignoresSafeArea()
         )
     }
-    
+
     private func titleFor(section: DesignSystemState.Section) -> LocalizedStringKey {
         switch section {
         case .button:

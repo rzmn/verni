@@ -15,22 +15,16 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../Infrastructure/Base")
     ],
     targets: [
         .target(
             name: "DesignSystem",
             dependencies: [
-                "Base",
+                "Base"
             ],
             resources: [
                 .process("Resources")
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
             ]
         )
     ]

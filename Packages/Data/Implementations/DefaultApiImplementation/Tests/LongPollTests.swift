@@ -2,7 +2,8 @@ import Testing
 import Foundation
 import ApiService
 import Base
-@testable import AsyncExtensions
+import TestInfrastructure
+import AsyncExtensions
 @testable import Api
 @testable import DefaultApiImplementation
 
@@ -43,8 +44,6 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 }
 
 @Suite struct LongPollTests {
-    private let taskFactory = TestTaskFactory()
-
     @Test func testLongPollSucceeded() async throws {
 
         // given
@@ -338,6 +337,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let api = DefaultApi(
             service: MockApiServiceForLongPoll(
                 type: MockLongPollQuery<MockLongPollQueryUpdate>.self,
@@ -354,7 +354,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventId",
             method: "method"
         )
-        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory, logger: .shared)
+        let longPoll = DefaultLongPoll(api: api, taskFactory: infrastructure.taskFactory, logger: infrastructure.logger)
 
         // when
 
@@ -370,6 +370,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let api = DefaultApi(
             service: MockApiServiceForLongPoll(
                 type: MockLongPollQuery<MockLongPollQueryUpdate>.self,
@@ -386,7 +387,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventIdB",
             method: "method"
         )
-        let longPoll = DefaultLongPoll(api: api, taskFactory: taskFactory, logger: .shared)
+        let longPoll = DefaultLongPoll(api: api, taskFactory: infrastructure.taskFactory, logger: infrastructure.logger)
 
         // when
 
@@ -402,6 +403,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let updates = [
             MockLongPollQueryUpdate(data: "data")
         ]
@@ -416,7 +418,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventId",
             method: "method"
         )
-        let poller = await Poller(query: query, api: api)
+        let poller = await Poller(query: query, api: api, logger: infrastructure.logger)
 
         // when
 
@@ -431,6 +433,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let updates = [
             MockLongPollQueryUpdate(data: "data")
         ]
@@ -445,7 +448,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventId",
             method: "method"
         )
-        let poller = await Poller(query: query, api: api)
+        let poller = await Poller(query: query, api: api, logger: infrastructure.logger)
 
         // when
 
@@ -460,6 +463,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let api = DefaultApi(
             service: MockApiServiceForLongPoll(
                 type: MockLongPollQuery<MockLongPollQueryUpdate>.self,
@@ -471,7 +475,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventId",
             method: "method"
         )
-        let poller = await Poller(query: query, api: api)
+        let poller = await Poller(query: query, api: api, logger: infrastructure.logger)
 
         // when
 
@@ -489,6 +493,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
         let api = DefaultApi(
             service: MockApiServiceForLongPoll(
                 type: MockLongPollQuery<MockLongPollQueryUpdate>.self,
@@ -500,7 +505,7 @@ struct MockApiServiceForLongPoll<Query: LongPollQuery>: ApiService {
             eventId: "eventId",
             method: "method"
         )
-        let poller = await Poller(query: query, api: api)
+        let poller = await Poller(query: query, api: api, logger: infrastructure.logger)
 
         // when
 

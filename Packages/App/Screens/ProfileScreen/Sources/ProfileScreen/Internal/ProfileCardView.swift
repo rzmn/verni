@@ -5,11 +5,11 @@ internal import DesignSystem
 struct ProfileCardView: View {
     @ObservedObject private var store: Store<ProfileState, ProfileAction>
     @Environment(ColorPalette.self) private var colors
-    
+
     init(store: Store<ProfileState, ProfileAction>) {
         self.store = store
     }
-    
+
     var body: some View {
         FlipView(
             frontView: avatarCard,
@@ -36,8 +36,7 @@ struct ProfileCardView: View {
         }
         .aspectRatio(cardAspectRatio, contentMode: .fit)
     }
-    
-    
+
     @ViewBuilder private var avatarCard: some View {
         AvatarView(avatar: store.state.profile.value?.user.avatar?.id)
             .aspectRatio(cardAspectRatio, contentMode: .fit)
@@ -49,7 +48,7 @@ struct ProfileCardView: View {
                         .linearGradient(
                             colors: [
                                 colors.background.brand.static,
-                                .green.opacity(0.4),
+                                .green.opacity(0.4)
                             ],
                             startPoint: UnitPoint(x: 0.5, y: 1),
                             endPoint: UnitPoint(x: 0.5, y: 97.0 / 281.0)
@@ -82,7 +81,7 @@ struct ProfileCardView: View {
                 }
             }
     }
-    
+
     @ViewBuilder private var qrCodeCard: some View {
         colors.background.primary.alternative
             .overlay {
@@ -133,15 +132,15 @@ extension ProfileCardView {
     private var cornerRadius: CGFloat {
         22
     }
-    
+
     private var cardAspectRatio: CGFloat {
         cardFitSize.width / cardFitSize.height
     }
-    
+
     private var cardFitSize: CGSize {
         CGSize(width: 371, height: 281)
     }
-    
+
     private func qrCodeSide(geometry: GeometryProxy) -> Int {
         Int(max(min(geometry.size.width, geometry.size.height) - 30 * 2, 88))
     }

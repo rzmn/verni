@@ -85,10 +85,19 @@
 		614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultPushRegistrationUseCaseImplementation; sourceTree = "<group>"; };
 		617AAB532C982D130087E4F5 /* AsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AsyncExtensions; sourceTree = "<group>"; };
 		617AAB542C9852DD0087E4F5 /* OnDemandPolling */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OnDemandPolling; sourceTree = "<group>"; };
+		617E5F3A2D1D7AB8001EC57F /* Infrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Infrastructure; sourceTree = "<group>"; };
+		617E5F3C2D1D7AB8001EC57F /* Filesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Filesystem; sourceTree = "<group>"; };
+		617E5F3D2D1D7AB8001EC57F /* DefaultAsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAsyncExtensions; sourceTree = "<group>"; };
+		617E5F3E2D1D7AB8001EC57F /* DefaultInfrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultInfrastructure; sourceTree = "<group>"; };
+		617E5F3F2D1D7AB8001EC57F /* FoundationFilesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FoundationFilesystem; sourceTree = "<group>"; };
+		617E5F412D1D7B0D001EC57F /* TestAsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestAsyncExtensions; sourceTree = "<group>"; };
+		617E5F422D1D7CC8001EC57F /* DefaultLogging */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultLogging; sourceTree = "<group>"; };
 		6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileRepositoryImplementation; sourceTree = "<group>"; };
 		6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultLogoutUseCaseImplementation; sourceTree = "<group>"; };
 		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
+		61901AAD2D1E394C00C84A38 /* TestInfrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestInfrastructure; sourceTree = "<group>"; };
+		61901AAE2D1E3B0800C84A38 /* TestFilesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestFilesystem; sourceTree = "<group>"; };
 		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
@@ -164,6 +173,9 @@
 		611CCD5D2C50AE3A00289D9E /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
+				617E5F3B2D1D7AB8001EC57F /* DI */,
+				617E5F402D1D7AB8001EC57F /* Implementations */,
+				617E5F3C2D1D7AB8001EC57F /* Filesystem */,
 				617AAB532C982D130087E4F5 /* AsyncExtensions */,
 				611CCD582C50AE3A00289D9E /* Base */,
 				611CCD5B2C50AE3A00289D9E /* Logging */,
@@ -254,6 +266,44 @@
 				614AC19F2C6802EE005B2CD5 /* Info.plist */,
 			);
 			path = NotificationService;
+			sourceTree = "<group>";
+		};
+		617E5F382D1D7AB8001EC57F /* xcode */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = xcode;
+			sourceTree = "<group>";
+		};
+		617E5F392D1D7AB8001EC57F /* .swiftpm */ = {
+			isa = PBXGroup;
+			children = (
+				617E5F382D1D7AB8001EC57F /* xcode */,
+			);
+			path = .swiftpm;
+			sourceTree = "<group>";
+		};
+		617E5F3B2D1D7AB8001EC57F /* DI */ = {
+			isa = PBXGroup;
+			children = (
+				617E5F392D1D7AB8001EC57F /* .swiftpm */,
+				617E5F3A2D1D7AB8001EC57F /* Infrastructure */,
+			);
+			path = DI;
+			sourceTree = "<group>";
+		};
+		617E5F402D1D7AB8001EC57F /* Implementations */ = {
+			isa = PBXGroup;
+			children = (
+				61901AAE2D1E3B0800C84A38 /* TestFilesystem */,
+				61901AAD2D1E394C00C84A38 /* TestInfrastructure */,
+				617E5F422D1D7CC8001EC57F /* DefaultLogging */,
+				617E5F412D1D7B0D001EC57F /* TestAsyncExtensions */,
+				617E5F3D2D1D7AB8001EC57F /* DefaultAsyncExtensions */,
+				617E5F3E2D1D7AB8001EC57F /* DefaultInfrastructure */,
+				617E5F3F2D1D7AB8001EC57F /* FoundationFilesystem */,
+			);
+			path = Implementations;
 			sourceTree = "<group>";
 		};
 		61A1D3962CA9556C006C496F /* Screens */ = {
@@ -350,7 +400,6 @@
 			buildConfigurationList = 614AC1A32C6802EE005B2CD5 /* Build configuration list for PBXNativeTarget "NotificationService" */;
 			buildPhases = (
 				614AC1972C6802EE005B2CD5 /* Sources */,
-				6147E7E42C9B23F800358A73 /* ShellScript */,
 				614AC1982C6802EE005B2CD5 /* Frameworks */,
 				614AC1992C6802EE005B2CD5 /* Resources */,
 			);
@@ -424,27 +473,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		6147E7E42C9B23F800358A73 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 12;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		61414F7A2C2F02A100B2C027 /* Sources */ = {

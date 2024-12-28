@@ -17,18 +17,12 @@ let package = Package(
     dependencies: [
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api")
+        .package(path: "../../../Data/Api"),
     ],
     targets: [
         .target(
             name: "DefaultProfileEditingUseCaseImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
-            ]
+            dependencies: ["Domain", "Api", "ApiDomainConvenience"]
         )
     ]
 )

@@ -9,31 +9,15 @@ public protocol Loggable {
 }
 
 public extension Loggable {
-    var logger: Logger {
-        .shared
-    }
-
     func logE(_ messageBlock: () -> String) {
-        Logging.log(logger, severity: .error, messageBlock)
+        logger.logE(messageBlock)
     }
 
     func logI(_ messageBlock: () -> String) {
-        Logging.log(logger, severity: .info, messageBlock)
+        logger.logI(messageBlock)
     }
 
     func logD(_ messageBlock: () -> String) {
-        Logging.log(logger, severity: .debug, messageBlock)
+        logger.logD(messageBlock)
     }
-}
-
-extension Logger: Loggable {
-    public var logger: Logger { self }
-}
-
-@inline(__always)
-private func log(_ logger: Logger, severity: Logger.Severity, _ messageBlock: () -> String) {
-    guard severity <= logger.severity else {
-        return
-    }
-    logger.logBlock(messageBlock().replacingOccurrences(of: "\n", with: " \\n "), severity)
 }

@@ -1,4 +1,5 @@
 import Domain
+import Infrastructure
 
 public protocol AppCommon: Sendable {
     var localEmailValidationUseCase: EmailValidationUseCase { get }
@@ -6,6 +7,8 @@ public protocol AppCommon: Sendable {
 
     var avatarsRepository: AvatarsRepository { get }
     var saveCredentialsUseCase: SaveCredendialsUseCase { get }
+
+    var infrastructure: InfrastructureLayer { get }
 }
 
 public protocol AppCommonCovertible: Sendable {

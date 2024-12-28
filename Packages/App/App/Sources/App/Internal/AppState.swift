@@ -31,7 +31,7 @@ struct AuthenticatedState: Equatable, Sendable {
     enum TabItem: Equatable, Identifiable {
         case spendings
         case profile
-        
+
         var id: String {
             switch self {
             case .spendings:
@@ -51,7 +51,7 @@ struct AuthenticatedState: Equatable, Sendable {
     var tab: TabItem
     var bottomSheet: AlertBottomSheetPreset?
     var unauthenticatedFailure: String?
-    
+
     var tabItems: [TabItem] {
         tabs.compactMap {
             switch $0 {
@@ -62,7 +62,7 @@ struct AuthenticatedState: Equatable, Sendable {
             }
         }
     }
-    
+
     func position(of tabItem: TabItem) -> TabPosition? {
         guard let center = tabs.firstIndex(of: .item(tab)), let index = tabs.firstIndex(of: .item(tabItem)) else {
             return nil

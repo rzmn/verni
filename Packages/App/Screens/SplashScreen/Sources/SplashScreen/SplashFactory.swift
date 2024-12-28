@@ -13,11 +13,10 @@ public final class DefaultSplashFactory: SplashFactory, ScreenProvider {
     public func create() async -> any ScreenProvider<Event, SplashView, ModalTransition> {
         self
     }
-    
+
     public func instantiate(handler: @escaping @MainActor (Event) -> Void) -> (ModalTransition) -> SplashView {
         return { transition in
             SplashView(transition: transition)
         }
     }
 }
-

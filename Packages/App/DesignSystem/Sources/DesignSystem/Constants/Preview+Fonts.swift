@@ -3,7 +3,7 @@ import SwiftUI
 
 extension Bundle {
     private class ClassForGettingBundle {}
-    
+
     static func forModule(class: AnyClass?) -> Bundle? {
         // The name of your local package bundle. This may change on every different version of Xcode.
         // It used to be "LocalPackages_<ModuleName>" for iOS. To find out what it is, print out  the path for
@@ -23,10 +23,10 @@ extension Bundle {
                 Bundle(for: `class`)
                     .resourceURL?
                     .deletingLastPathComponent()
-                    .deletingLastPathComponent(),
+                    .deletingLastPathComponent()
             ]
         }
-        
+
         let candidates = [
             [
                 // Bundle should be present here when the package is linked into an App.
@@ -35,7 +35,7 @@ extension Bundle {
                 Bundle.module.resourceURL,
                 Bundle.module.bundleURL,
                 // For command-line tools.
-                Bundle.main.bundleURL,
+                Bundle.main.bundleURL
             ],
             `class`.flatMap(urlsForClass) ?? [],
             urlsForClass(ClassForGettingBundle.self)

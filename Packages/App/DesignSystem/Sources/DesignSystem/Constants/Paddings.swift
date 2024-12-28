@@ -6,11 +6,11 @@ import Foundation
             16
         }
     }
-    
+
     public var corners: Corners {
         Corners()
     }
-    
+
     public static var `default`: PaddingsPalette {
         PaddingsPalette()
     }

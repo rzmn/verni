@@ -3,6 +3,7 @@ import ApiService
 import Foundation
 import Logging
 import Networking
+import TestInfrastructure
 @testable import MockNetworkingImplementation
 @testable import DefaultApiServiceImplementation
 
@@ -12,10 +13,11 @@ import Networking
 
         // given
 
-        let request = MockRequest(label: "r", headers: [:])
+        let infrastructure = TestInfrastructureLayer()
+        let request = MockRequest(logger: infrastructure.logger, label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
-            logger: .shared,
+            logger: infrastructure.logger,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .success(.ok), data: try JSONEncoder().encode(MockResponse())))
             ),
@@ -35,10 +37,11 @@ import Networking
 
         // given
 
-        let request = MockRequest(label: "r", headers: [:])
+        let infrastructure = TestInfrastructureLayer()
+        let request = MockRequest(logger: infrastructure.logger, label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
-            logger: .shared,
+            logger: infrastructure.logger,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .success(.ok), data: Data()))
             ),
@@ -68,10 +71,11 @@ import Networking
 
         // given
 
-        let request = MockRequest(label: "r", headers: [:])
+        let infrastructure = TestInfrastructureLayer()
+        let request = MockRequest(logger: infrastructure.logger, label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
-            logger: .shared,
+            logger: infrastructure.logger,
             networkService: MockRequestService(
                 result: .failure(.noConnection(NSError(domain: "", code: -1)))
             ),
@@ -101,10 +105,11 @@ import Networking
 
         // given
 
-        let request = MockRequest(label: "r", headers: [:])
+        let infrastructure = TestInfrastructureLayer()
+        let request = MockRequest(logger: infrastructure.logger, label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
-            logger: .shared,
+            logger: infrastructure.logger,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .clientError(.unauthorized), data: Data()))
             ),
@@ -134,10 +139,11 @@ import Networking
 
         // given
 
-        let request = MockRequest(label: "r", headers: [:])
+        let infrastructure = TestInfrastructureLayer()
+        let request = MockRequest(logger: infrastructure.logger, label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
-            logger: .shared,
+            logger: infrastructure.logger,
             networkService: MockRequestService(
                 result: .failure(.badResponse(NSError(domain: "", code: -1)))
             ),
@@ -167,10 +173,11 @@ import Networking
 
         // given
 
-        let request = MockRequest(label: "r", headers: [:])
+        let infrastructure = TestInfrastructureLayer()
+        let request = MockRequest(logger: infrastructure.logger, label: "r", headers: [:])
         let token = "123"
         let runner = DefaultApiServiceRequestRunner(
-            logger: .shared,
+            logger: infrastructure.logger,
             networkService: MockRequestService(
                 result: .success(NetworkServiceResponse(code: .clientError(.badRequest), data: Data()))
             ),

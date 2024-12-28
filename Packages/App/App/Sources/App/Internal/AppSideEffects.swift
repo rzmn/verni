@@ -31,6 +31,8 @@ extension AppSideEffects: ActionHandler {
             if case .launched(let launched) = store.state, case .authenticated(let state) = launched {
                 self.logout(state.session)
             }
+        case .logIn(let di, let state):
+            logIn(di: di, state: state)
         default:
             break
         }
@@ -41,7 +43,23 @@ extension AppSideEffects: ActionHandler {
             await doLaunchWithFakePause()
         }
     }
-    
+
+    private func logIn(di: AuthenticatedDomainLayerSession, state: AnonymousState) {
+        Task {
+            await doLogIn(di: di, state: state)
+        }
+    }
+
+    private func doLogIn(di: AuthenticatedDomainLayerSession, state: AnonymousState) async {
+        let session = await AuthenticatedPresentationLayerSession(
+            di: di,
+            fallback: state.session
+        )
+        await session.warmup()
+        store.dispatch(.onAuthorized(session))
+    }
+
+
     private func doLaunchWithFakePause() async {
         async let sleep: () = await Task.sleep(timeInterval: 1)
         async let launch = await doLaunch()
@@ -53,7 +71,7 @@ extension AppSideEffects: ActionHandler {
         let (_, action) = result
         store.dispatch(action)
     }
-    
+
     private func doLaunch() async -> AppAction {
         let session = await AnonymousPresentationLayerSession(di: di)
         do {
@@ -81,7 +99,7 @@ extension AppSideEffects: ActionHandler {
     private func onAuthorized() {
         // stub
     }
-    
+
     private func logout(_ session: AuthenticatedPresentationLayerSession) {
         Task.detached {
             await session.logout()

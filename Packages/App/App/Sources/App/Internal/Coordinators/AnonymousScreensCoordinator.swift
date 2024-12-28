@@ -22,7 +22,7 @@ private extension AnonymousState.Tab {
             return "auth"
         }
     }
-    
+
     var barTab: BottomBarTab {
         switch self {
         case .auth:
@@ -37,19 +37,19 @@ private extension AnonymousState.Tab {
 
 struct AnonymousScreensCoordinator: View {
     @ObservedObject private var store: Store<AppState, AppAction>
-    
+
     @State private var authWelcomeDestinationOffset: CGFloat?
     @State private var loginSourceOffset: CGFloat?
-    
+
     @State private var toLoginScreenTransitionProgress: CGFloat = 0
-    
+
     @Binding private var fromSplashTransitionProgress: CGFloat
-    
+
     init(store: Store<AppState, AppAction>, fromSplashTransitionProgress: Binding<CGFloat>) {
         self.store = store
         _fromSplashTransitionProgress = fromSplashTransitionProgress
     }
-    
+
     var body: some View {
         if let state = store.localState {
             tabs(state: state)
@@ -57,14 +57,14 @@ struct AnonymousScreensCoordinator: View {
             EmptyView()
         }
     }
-    
+
     @ViewBuilder private func tabs(state: AnonymousState) -> some View {
         switch state.tab {
         case .auth(let authState):
             authTab(state: state, authState: authState)
         }
     }
-    
+
     @ViewBuilder private func authTab(state: AnonymousState, authState: AnonymousState.AuthState) -> some View {
         ZStack {
             authWelcomeView(state: state)
@@ -72,7 +72,7 @@ struct AnonymousScreensCoordinator: View {
                 .opacity(toLoginScreenTransitionProgress)
         }
     }
-    
+
     private func loginView(state: AnonymousState) -> some View {
         state.session.logInScreen.instantiate { event in
             switch event {
@@ -83,18 +83,11 @@ struct AnonymousScreensCoordinator: View {
             case .forgotPassword:
                 break
             case .logIn(let di):
-                Task { @MainActor in
-                    let session = await AuthenticatedPresentationLayerSession(
-                        di: di,
-                        fallback: state.session
-                    )
-                    await session.warmup()
-                    store.dispatch(.onAuthorized(session))
-                }
+                store.dispatch(.logIn(di, state))
             }
         }(loginTransitions)
     }
-    
+
     private var loginTransitions: ModalTransition {
         ModalTransition(
             progress: $toLoginScreenTransitionProgress,
@@ -102,7 +95,7 @@ struct AnonymousScreensCoordinator: View {
             destinationOffset: $authWelcomeDestinationOffset
         )
     }
-    
+
     private func authWelcomeView(state: AnonymousState) -> some View {
         state.session.authWelcomeScreen.instantiate { event in
             switch event {
@@ -115,7 +108,7 @@ struct AnonymousScreensCoordinator: View {
             }
         }(authWelcomeTransitions)
     }
-    
+
     private var authWelcomeTransitions: AuthWelcomeTransitions {
         AuthWelcomeTransitions(
             appear: ModalTransition(

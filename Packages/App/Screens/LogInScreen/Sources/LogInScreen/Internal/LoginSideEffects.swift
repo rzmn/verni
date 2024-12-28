@@ -11,11 +11,11 @@ internal import Base
     private let emailValidationUseCase: EmailValidationUseCase
     private let passwordValidationUseCase: PasswordValidationUseCase
     private let saveCredentialsUseCase: SaveCredendialsUseCase
-    
+
     var id: String {
         "\(LoginSideEffects.self)"
     }
-    
+
     init(
         store: Store<LogInState, LogInAction>,
         di: AnonymousDomainLayerSession
@@ -26,7 +26,7 @@ internal import Base
         self.passwordValidationUseCase = di.appCommon.localPasswordValidationUseCase
         self.saveCredentialsUseCase = di.appCommon.saveCredentialsUseCase
     }
-    
+
     func handle(_ action: LogInAction) {
         switch action {
         case .onTapBack:
@@ -49,7 +49,7 @@ internal import Base
             break
         }
     }
-    
+
     private func logIn() {
         let state = store.state
         guard state.canSubmitCredentials else {
@@ -64,7 +64,7 @@ internal import Base
             await doLogIn(credentials: credentials)
         }
     }
-    
+
     private func doLogIn(credentials: Credentials) async {
         do {
             let session = try await authUseCase.login(

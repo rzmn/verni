@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../../PersistentStorage"),
         .package(path: "../../DataTransferObjects"),
-        .package(path: "../../../Infrastructure/Logging")
+        .package(path: "../../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
@@ -25,13 +25,7 @@ let package = Package(
             dependencies: [
                 "DataTransferObjects",
                 "Logging",
-                "PersistentStorage"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "PersistentStorage",
             ]
         )
     ]

@@ -5,7 +5,7 @@ extension SplashView {
     struct Geometry {
         let topFrame: CGRect
         let bottomFrame: CGRect
-        
+
         init(viewport: CGSize) {
             let letterRelativeWidth: CGFloat = 187
             let letterRelativeHeigth: CGFloat = 245

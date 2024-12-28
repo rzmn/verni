@@ -7,7 +7,7 @@ public struct VerticalTranslateEffect: GeometryEffect {
         get { offset }
         set { offset = newValue }
     }
-    
+
     public init(offset: CGFloat) {
         self.offset = offset
     }
@@ -24,7 +24,7 @@ public struct HorizontalTranslateEffect: GeometryEffect {
         get { offset }
         set { offset = newValue }
     }
-    
+
     public init(offset: CGFloat) {
         self.offset = offset
     }

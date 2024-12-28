@@ -20,34 +20,41 @@ let package = Package(
         .package(path: "../../../Domain/Implementations/DefaultAuthUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultUsersRepositoryImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultFriendsRepositoryImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultFriendInteractionsUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultFriendInteractionsUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultQRInviteUseCaseImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultSpendingInteractionsUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultSpendingInteractionsUseCaseImplementation"
+        ),
         .package(path: "../../../Domain/Implementations/DefaultSpendingsRepositoryImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultProfileEditingUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultProfileEditingUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultValidationUseCasesImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultAvatarsRepositoryImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultEmailConfirmationUseCaseImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultPushRegistrationUseCaseImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultSaveCredendialsUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultEmailConfirmationUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultPushRegistrationUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultSaveCredendialsUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultProfileRepositoryImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultLogoutUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultReceivingPushUseCaseImplementation"),
 
-        .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/DI/Infrastructure"),
+        .package(path: "../../../Infrastructure/Implementations/DefaultInfrastructure"),
 
         .package(path: "../../../Data/DI/DataLayerDependencies"),
-        .package(path: "../../../Data/Implementations/DefaultDataLayerDependencies")
+        .package(path: "../../../Data/Implementations/DefaultDataLayerDependencies"),
     ],
     targets: [
         .target(
             name: "DefaultDependencies",
             dependencies: [
                 "DI",
-                "Logging",
                 "Domain",
-                "Base",
+                "Infrastructure",
+                "DefaultInfrastructure",
                 "DataLayerDependencies",
                 "DefaultDataLayerDependencies",
                 "DefaultAuthUseCaseImplementation",
@@ -65,13 +72,7 @@ let package = Package(
                 "DefaultSaveCredendialsUseCaseImplementation",
                 "DefaultProfileRepositoryImplementation",
                 "DefaultLogoutUseCaseImplementation",
-                "DefaultReceivingPushUseCaseImplementation"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "DefaultReceivingPushUseCaseImplementation",
             ]
         )
     ]

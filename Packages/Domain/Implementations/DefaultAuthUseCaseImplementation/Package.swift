@@ -19,7 +19,7 @@ let package = Package(
         .package(path: "../../../DI/DI"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/DataTransferObjects"),
-        .package(path: "../../../Data/DI/DataLayerDependencies")
+        .package(path: "../../../Data/DI/DataLayerDependencies"),
     ],
     targets: [
         .target(
@@ -29,13 +29,7 @@ let package = Package(
                 "Api",
                 "DI",
                 "DataTransferObjects",
-                "DataLayerDependencies"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "DataLayerDependencies",
             ]
         )
     ]

@@ -5,11 +5,11 @@ internal import DesignSystem
 struct ProfileSettingsList: View {
     @ObservedObject private var store: Store<ProfileState, ProfileAction>
     @Environment(ColorPalette.self) private var colors
-    
+
     init(store: Store<ProfileState, ProfileAction>) {
         self.store = store
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             MenuOption(

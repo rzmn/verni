@@ -1,7 +1,7 @@
 import Domain
 import DesignSystem
 
-//extension Snackbar.Preset {
+// extension Snackbar.Preset {
 //    public static func generalError(_ error: GeneralError) -> Snackbar.Preset {
 //        switch error {
 //        case .noConnection:
@@ -12,4 +12,4 @@ import DesignSystem
 //            return .internalError("\(error)")
 //        }
 //    }
-//}
+// }

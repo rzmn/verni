@@ -19,7 +19,8 @@ let package = Package(
         .package(path: "../../DataTransferObjects"),
         .package(path: "../../ApiService"),
         .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../../../Infrastructure/Logging")
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -29,13 +30,7 @@ let package = Package(
                 "Api",
                 "Base",
                 "DataTransferObjects",
-                "Logging"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Logging",
             ]
         ),
         .testTarget(
@@ -45,14 +40,9 @@ let package = Package(
                 "ApiService",
                 "Api",
                 "Base",
-                "DataTransferObjects"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "DataTransferObjects",
+                "TestInfrastructure"
             ]
-        )
+        ),
     ]
 )

@@ -22,12 +22,6 @@ let package = Package(
             name: "AsyncExtensions",
             dependencies: [
                 "Logging"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
             ]
         )
     ]

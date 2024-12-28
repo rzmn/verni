@@ -18,7 +18,10 @@ let package = Package(
         .package(path: "../../PersistentStorage"),
         .package(path: "../../DataTransferObjects"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3")
+        .package(path: "../../../Infrastructure/Filesystem"),
+        .package(path: "../../../Infrastructure/DI/Infrastructure"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.15.3"),
     ],
     targets: [
         .target(
@@ -26,14 +29,10 @@ let package = Package(
             dependencies: [
                 "DataTransferObjects",
                 "Logging",
+                "Filesystem",
                 "PersistentStorage",
-                .product(name: "SQLite", package: "SQLite.swift")
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Infrastructure",
+                .product(name: "SQLite", package: "SQLite.swift"),
             ]
         ),
         .testTarget(
@@ -42,14 +41,9 @@ let package = Package(
                 "DataTransferObjects",
                 "Logging",
                 "PersistentStorage",
-                "PersistentStorageSQLite"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "PersistentStorageSQLite",
+                "TestInfrastructure",
             ]
-        )
+        ),
     ]
 )

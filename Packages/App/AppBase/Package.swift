@@ -19,7 +19,7 @@ let package = Package(
         .package(path: "../../Infrastructure/Logging"),
         .package(path: "../../Domain/Domain"),
         .package(path: "../../DesignSystem"),
-        .package(url: "https://github.com/Ekhoo/Device.git", from: "3.7.0")
+        .package(url: "https://github.com/Ekhoo/Device.git", from: "3.7.0"),
     ],
     targets: [
         .target(
@@ -29,13 +29,7 @@ let package = Package(
                 "Logging",
                 "Domain",
                 "DesignSystem",
-                "Device"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Device",
             ]
         )
     ]

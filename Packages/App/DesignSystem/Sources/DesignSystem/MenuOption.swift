@@ -2,18 +2,18 @@ import SwiftUI
 
 public struct MenuOption: View {
     @Environment(ColorPalette.self) var colors
-    
+
     public enum Style {
         case primary
         case destructive
     }
-    
+
     public struct Config {
         let style: Style
         let icon: Image
         let title: LocalizedStringKey
         let accessoryIcon: Image?
-        
+
         public init(style: Style, icon: Image, title: LocalizedStringKey, accessoryIcon: Image? = nil) {
             self.style = style
             self.icon = icon
@@ -21,15 +21,15 @@ public struct MenuOption: View {
             self.accessoryIcon = accessoryIcon
         }
     }
-    
+
     private let config: Config
     private let action: () -> Void
-    
+
     public init(config: Config, action: @escaping () -> Void) {
         self.config = config
         self.action = action
     }
-    
+
     public var body: some View {
         SwiftUI.Button.init(action: action) {
             HStack(spacing: 0) {
@@ -56,7 +56,7 @@ public struct MenuOption: View {
         .background(backgroundColor)
         .clipShape(.rect(cornerRadius: 24))
     }
-    
+
     private var iconColor: Color {
         switch config.style {
         case .primary:
@@ -65,7 +65,7 @@ public struct MenuOption: View {
             colors.icon.negative.default
         }
     }
-    
+
     private var textColor: Color {
         switch config.style {
         case .primary:
@@ -74,7 +74,7 @@ public struct MenuOption: View {
             colors.text.negative.default
         }
     }
-    
+
     private var backgroundColor: Color {
         switch config.style {
         case .primary:

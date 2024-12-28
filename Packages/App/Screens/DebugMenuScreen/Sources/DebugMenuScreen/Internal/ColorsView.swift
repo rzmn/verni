@@ -4,11 +4,11 @@ internal import DesignSystem
 private struct ColorItem: Identifiable, Hashable {
     let color: (ColorPalette) -> Color
     let name: String
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
-    
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
@@ -21,7 +21,7 @@ private struct ColorItem: Identifiable, Hashable {
 struct ColorsView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     private var colorItems: [ColorItem] {
         [
             ColorItem(color: \ColorPalette.text.primary.staticLight, name: "text/primary/staticLight"),
@@ -42,10 +42,10 @@ struct ColorsView: View {
             ColorItem(color: \ColorPalette.icon.secondary.default, name: "icon/secondary/default"),
             ColorItem(color: \ColorPalette.icon.tertiary.default, name: "icon/tertiary/default"),
             ColorItem(color: \ColorPalette.icon.negative.default, name: "icon/negative/default"),
-            ColorItem(color: \ColorPalette.icon.positive.default, name: "icon/positive/default"),
+            ColorItem(color: \ColorPalette.icon.positive.default, name: "icon/positive/default")
         ]
     }
-    
+
     var body: some View {
         VStack {
             Spacer()

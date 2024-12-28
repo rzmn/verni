@@ -6,7 +6,7 @@ import AppBase
     private let spendingsRepository: SpendingsRepository
     private let usersRepository: UsersRepository
     private var shouldUseAlreadyLoadedBalance = false
-    
+
     init(
         store: Store<SpendingsState, SpendingsAction>,
         spendingsRepository: SpendingsRepository,
@@ -22,7 +22,7 @@ extension SpendingsSideEffects: ActionHandler {
     var id: String {
         "\(SpendingsSideEffects.self)"
     }
-    
+
     func handle(_ action: SpendingsAction) {
         switch action {
         case .onSearchTap:
@@ -35,13 +35,13 @@ extension SpendingsSideEffects: ActionHandler {
             break
         }
     }
-    
+
     private func onRefreshBalance() {
         Task {
             await refreshBalance()
         }
     }
-    
+
     private func refreshBalance() async {
         guard !shouldUseAlreadyLoadedBalance else {
             return

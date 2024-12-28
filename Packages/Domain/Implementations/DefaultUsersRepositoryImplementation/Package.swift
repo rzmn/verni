@@ -23,7 +23,8 @@ let package = Package(
         .package(path: "../../../Infrastructure/Logging"),
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation")
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -35,13 +36,7 @@ let package = Package(
                 "DataTransferObjects",
                 "PersistentStorage",
                 "Logging",
-                "Base"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Base",
             ]
         ),
         .testTarget(
@@ -55,15 +50,10 @@ let package = Package(
                 "PersistentStorage",
                 "Logging",
                 "Base",
+                "TestInfrastructure",
                 "MockPersistentStorage",
-                "MockApiImplementation"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "MockApiImplementation",
             ]
-        )
+        ),
     ]
 )

@@ -8,7 +8,7 @@ import UIKit
     private let repository: ProfileRepository
     private let userId: User.Identifier
     private var shouldUseAlreadyLoadedProfile = false
-    
+
     init(
         store: Store<ProfileState, ProfileAction>,
         repository: ProfileRepository,
@@ -26,7 +26,7 @@ extension ProfileSideEffects: ActionHandler {
     var id: String {
         "\(ProfileSideEffects.self)"
     }
-    
+
     func handle(_ action: ProfileAction) {
         switch action {
         case .onRefreshProfile:
@@ -37,7 +37,7 @@ extension ProfileSideEffects: ActionHandler {
             break
         }
     }
-    
+
     private func requestQrImage(size: Int) {
         Task.detached {
             let data = try? await self.qrUseCase.generate(
@@ -52,13 +52,13 @@ extension ProfileSideEffects: ActionHandler {
             await self.store.dispatch(.onQrImageReady(image))
         }
     }
-    
+
     private func onRefreshProfile() {
         Task.detached {
             await self.refreshProfile()
         }
     }
-    
+
     private func refreshProfile() async {
         guard !shouldUseAlreadyLoadedProfile else {
             return

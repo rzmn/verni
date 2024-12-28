@@ -1,7 +1,7 @@
 import Foundation
 
 public enum InternalError: Error, CustomStringConvertible {
-    case error(String, underlying: Error?)
+    case error(String, underlying: Error? = nil)
 
     public var description: String {
         switch self {

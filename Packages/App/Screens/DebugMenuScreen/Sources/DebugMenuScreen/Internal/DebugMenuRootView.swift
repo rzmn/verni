@@ -58,7 +58,7 @@ struct DebugMenuRootView: View {
                 .ignoresSafeArea()
         )
     }
-    
+
     private func titleFor(section: DebugMenuState.Section) -> LocalizedStringKey {
         switch section {
         case .designSystem:

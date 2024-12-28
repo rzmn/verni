@@ -10,4 +10,8 @@ public struct CredentialsDto: Codable, Sendable {
     }
 }
 
-extension CredentialsDto: CompactDescription {}
+extension CredentialsDto: CustomStringConvertible {
+    public var description: String {
+        "<email:\(email) pwd:\(String(password.prefix(3)) + (password.count > 3 ? "..." : ""))>"
+    }
+}

@@ -16,23 +16,17 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
-        .package(path: "../../Domain")
+        .package(path: "../../Domain"),
     ],
     targets: [
         .target(
             name: "DefaultQRInviteUseCaseImplementation",
             dependencies: [
                 .product(name: "QRCode", package: "qrcode"),
-                "Domain"
+                "Domain",
             ],
             resources: [
                 .process("Resources")
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
             ]
         )
     ]

@@ -36,7 +36,7 @@ public struct LogInView: View {
             )
         )
     }
-    
+
     private var navigationBar: some View {
         NavigationBar(
             config: NavigationBar.Config(
@@ -64,14 +64,14 @@ public struct LogInView: View {
             }
         }
     }
-    
+
     private var transitionOffset: CGFloat {
         guard let sourceOffset, let destinationOffset else {
             return 0
         }
         return (destinationOffset - sourceOffset) * (1 - transitionProgress)
     }
-    
+
     private var content: some View {
         VStack {
             DesignSystem.TextField(
@@ -135,7 +135,7 @@ public struct LogInView: View {
 private struct LogInPreview: View {
     @State var transition: CGFloat = 0
     @State var sourceOffset: CGFloat?
-    
+
     var body: some View {
         ZStack {
             LogInView(

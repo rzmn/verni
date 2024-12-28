@@ -19,7 +19,7 @@ struct DesignSystemState: Equatable, Sendable {
         case fonts
         case haptic
         case popups
-        
+
         var id: Int {
             rawValue
         }
@@ -31,7 +31,7 @@ struct DesignSystemState: Equatable, Sendable {
 struct DebugMenuState: Equatable, Sendable {
     enum Section: Equatable, Sendable, Identifiable {
         case designSystem(DesignSystemState)
-        
+
         var id: String {
             switch self {
             case .designSystem:

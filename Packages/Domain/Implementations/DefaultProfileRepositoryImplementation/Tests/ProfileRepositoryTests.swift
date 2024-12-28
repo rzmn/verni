@@ -6,7 +6,7 @@ import Domain
 import Api
 import ApiDomainConvenience
 import Base
-@testable import AsyncExtensions
+import TestInfrastructure
 @testable import DefaultProfileRepositoryImplementation
 @testable import MockApiImplementation
 
@@ -45,7 +45,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let profile = Profile(
             user: User(
                 id: UUID().uuidString,
@@ -62,10 +62,10 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
         let offlineRepository = MockOfflineMutableRepository()
         let repository = await DefaultProfileRepository(
             api: provider.api,
-            logger: .shared,
+            logger: infrastructure.logger,
             offline: offlineRepository,
-            profile: ExternallyUpdatable(taskFactory: taskFactory, logger: .shared),
-            taskFactory: taskFactory
+            profile: ExternallyUpdatable(taskFactory: infrastructure.taskFactory, logger: infrastructure.logger),
+            taskFactory: infrastructure.taskFactory
         )
 
         // when
@@ -74,7 +74,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
             let cancellableStream = await repository.profileUpdated().subscribeWithStream()
             let stream = await cancellableStream.eventSource.stream
             let profileFromRepository = try await repository.refreshProfile()
-            taskFactory.task {
+            infrastructure.taskFactory.task {
                 for await profileFromPublisher in stream {
                     #expect(profile == profileFromPublisher)
                     confirmation()
@@ -82,7 +82,7 @@ private actor MockOfflineMutableRepository: ProfileOfflineMutableRepository {
             }
             #expect(profileFromRepository == profile)
             await cancellableStream.cancel()
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
         }
 
         // then

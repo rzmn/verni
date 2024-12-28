@@ -2,23 +2,20 @@ import Networking
 import Testing
 import Foundation
 import Base
-@testable import AsyncExtensions
+import TestInfrastructure
+import AsyncExtensions
 @testable import DefaultNetworkingImplementation
 
 @Suite(.serialized) struct RequestRunnerTests {
     static let maxRetryCount = 1
     let backoff = ExponentialBackoff(base: 1, retryCount: 0, maxRetryCount: maxRetryCount)
-    let taskFactory: TestTaskFactory
-
-    init() async {
-        taskFactory = TestTaskFactory()
-        await URLProtocolMock.setTaskFactory(taskFactory)
-    }
 
     @Test @MainActor func testSuccess() async throws {
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
+        await URLProtocolMock.setTaskFactory(infrastructure.taskFactory)
         let url = URL(string: "url.com")!
         let data = "{\"k\": \"v\"}".data(using: .utf8)!
         let expectedResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
@@ -35,7 +32,7 @@ import Base
         let runner = RequestRunner(
             session: mockedSession,
             request: URLRequest(url: url),
-            logger: .shared,
+            logger: infrastructure.logger,
             backoff: backoff
         )
         let response = try await runner.run()
@@ -51,6 +48,8 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
+        await URLProtocolMock.setTaskFactory(infrastructure.taskFactory)
         let url = URL(string: "url.com")!
         let data = "{\"k\": \"v\"}".data(using: .utf8)!
         let expectedResponse = URLResponse(url: url, mimeType: "", expectedContentLength: 0, textEncodingName: nil)
@@ -67,7 +66,7 @@ import Base
         let runner = RequestRunner(
             session: mockedSession,
             request: URLRequest(url: url),
-            logger: .shared,
+            logger: infrastructure.logger,
             backoff: backoff
         )
         let apiError: NetworkServiceError
@@ -92,6 +91,8 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
+        await URLProtocolMock.setTaskFactory(infrastructure.taskFactory)
         let url = URL(string: "url.com")!
         let error = NSError(domain: NSURLErrorDomain, code: URLError.Code.networkConnectionLost.rawValue)
 
@@ -107,7 +108,7 @@ import Base
         let runner = RequestRunner(
             session: mockedSession,
             request: URLRequest(url: url),
-            logger: .shared,
+            logger: infrastructure.logger,
             backoff: backoff
         )
         let apiError: NetworkServiceError
@@ -132,6 +133,8 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
+        await URLProtocolMock.setTaskFactory(infrastructure.taskFactory)
         let url = URL(string: "url.com")!
         let error = NSError(domain: "fake domain", code: -2222)
 
@@ -147,7 +150,7 @@ import Base
         let runner = RequestRunner(
             session: mockedSession,
             request: URLRequest(url: url),
-            logger: .shared,
+            logger: infrastructure.logger,
             backoff: backoff
         )
         let apiError: NetworkServiceError
@@ -172,6 +175,8 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
+        await URLProtocolMock.setTaskFactory(infrastructure.taskFactory)
         let url = URL(string: "url.com")!
         let error = NSError(domain: NSURLErrorDomain, code: -2222)
 
@@ -187,7 +192,7 @@ import Base
         let runner = RequestRunner(
             session: mockedSession,
             request: URLRequest(url: url),
-            logger: .shared,
+            logger: infrastructure.logger,
             backoff: backoff
         )
         let apiError: NetworkServiceError
@@ -212,6 +217,8 @@ import Base
 
         // given
 
+        let infrastructure = TestInfrastructureLayer()
+        await URLProtocolMock.setTaskFactory(infrastructure.taskFactory)
         let url = URL(string: "url.com")!
         let data = "{\"k\": \"v\"}".data(using: .utf8)!
         let expectedResponse = HTTPURLResponse(url: url, statusCode: 500, httpVersion: nil, headerFields: nil)
@@ -228,7 +235,7 @@ import Base
         let runner = RequestRunner(
             session: mockedSession,
             request: URLRequest(url: url),
-            logger: .shared,
+            logger: infrastructure.logger,
             backoff: backoff
         )
         let response = try await runner.run()

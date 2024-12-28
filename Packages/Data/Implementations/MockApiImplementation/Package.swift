@@ -19,7 +19,7 @@ let package = Package(
         .package(path: "../../DataTransferObjects"),
         .package(path: "../../ApiService"),
         .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../../../Infrastructure/Logging")
+        .package(path: "../../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
@@ -29,13 +29,7 @@ let package = Package(
                 "Api",
                 "Base",
                 "DataTransferObjects",
-                "Logging"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Logging",
             ]
         )
     ]

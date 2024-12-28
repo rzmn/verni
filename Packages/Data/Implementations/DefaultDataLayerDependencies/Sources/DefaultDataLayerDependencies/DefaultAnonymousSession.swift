@@ -5,6 +5,7 @@ import Foundation
 import AsyncExtensions
 import DataLayerDependencies
 import Logging
+import Infrastructure
 internal import Base
 internal import DefaultNetworkingImplementation
 internal import DefaultApiServiceImplementation
@@ -21,13 +22,12 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
     public let authenticator: AuthenticatedDataLayerSessionFactory
     public let api: ApiProtocol
 
-    public init(logger: Logger, taskFactory: TaskFactory) throws {
+    public init(logger: Logger, infrastructure: InfrastructureLayer) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: Constants.appGroup
         ) else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }
-        let taskFactory = DefaultTaskFactory()
         let networkServiceFactory = DefaultNetworkServiceFactory(
             logger: logger.with(
                 prefix: "↔️"
@@ -42,16 +42,16 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
                 prefix: "⚡️"
             ),
             networkServiceFactory: networkServiceFactory,
-            taskFactory: taskFactory
+            taskFactory: infrastructure.taskFactory
         )
         api = DefaultApiFactory(
             service: apiServiceFactory.create(tokenRefresher: nil),
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             logger: logger
         ).create()
         authenticator = DefaultAuthenticatedSessionFactory(
             api: api,
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             logger: logger,
             apiServiceFactory: apiServiceFactory,
             persistencyFactory: try SQLitePersistencyFactory(
@@ -59,7 +59,8 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
                     prefix: "🗄️"
                 ),
                 dbDirectory: permanentCacheDirectory,
-                taskFactory: taskFactory
+                taskFactory: infrastructure.taskFactory,
+                fileManager: infrastructure.fileManager
             )
         )
     }

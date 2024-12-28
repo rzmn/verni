@@ -5,7 +5,8 @@ import Base
 import DataLayerDependencies
 import Api
 import PersistentStorage
-@testable import AsyncExtensions
+import AsyncExtensions
+import TestInfrastructure
 @testable import MockPersistentStorage
 @testable import DefaultLogoutUseCaseImplementation
 @testable import MockApiImplementation
@@ -62,14 +63,14 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
 
         // given
 
-        let taskFactory = TestTaskFactory()
-        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory, logger: .shared)
+        let infrastructure = TestInfrastructureLayer()
+        let subject = AsyncSubject<LogoutReason>(taskFactory: infrastructure.taskFactory, logger: infrastructure.logger)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             session: MockDataLayerSession(persistency: provider.persistency),
             shouldLogout: subject,
-            taskFactory: taskFactory,
-            logger: .shared
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
         let reason = LogoutReason.refreshTokenFailed
 
@@ -82,7 +83,7 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
                 confirmation()
             }
             await subject.yield(reason)
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await subscription.cancel()
         }
 
@@ -95,14 +96,14 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
 
         // given
 
-        let taskFactory = TestTaskFactory()
-        let subject = AsyncSubject<LogoutReason>(taskFactory: taskFactory, logger: .shared)
+        let infrastructure = TestInfrastructureLayer()
+        let subject = AsyncSubject<LogoutReason>(taskFactory: infrastructure.taskFactory, logger: infrastructure.logger)
         let provider = await PersistencyProvider()
         let useCase = await DefaultLogoutUseCase(
             session: MockDataLayerSession(persistency: provider.persistency),
             shouldLogout: subject,
-            taskFactory: taskFactory,
-            logger: .shared
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger
         )
 
         // when
@@ -112,7 +113,7 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
 
         // then
 
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
         #expect(await provider.invalidateCalledCount == 1)
     }
 }

@@ -9,6 +9,6 @@ public protocol AuthenticatedDataLayerSession: Sendable {
     var persistency: Persistency { get }
 
     var authenticationLostHandler: any AsyncBroadcast<Void> { get }
-    
+
     func logout() async
 }

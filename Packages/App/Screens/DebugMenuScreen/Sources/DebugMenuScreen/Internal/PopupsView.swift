@@ -5,9 +5,9 @@ internal import DesignSystem
 struct PopupsView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     @State private var bottomSheet: AlertBottomSheetPreset?
-    
+
     var body: some View {
         HStack {
             Spacer()
@@ -40,17 +40,17 @@ struct PopupsView: View {
 class MotionManager: ObservableObject {
 
     private var motionManager: CMMotionManager
-    
+
     struct Data {
         var x: Double
         var y: Double
         var z: Double
-        
+
         static var zero: Data {
             Data(x: 0, y: 0, z: 0)
         }
     }
-    
+
     @Published var current: Data?
     @Published var initial: Data?
     @Published var delta: Data = .zero
@@ -81,29 +81,29 @@ class MotionManager: ObservableObject {
 
 private struct ContentView: View {
     @ObservedObject var motion: MotionManager
-    
+
     private var dx: Double {
         motion.delta.x * multiplicator
     }
-    
+
     private var dy: Double {
         motion.delta.y * multiplicator
     }
-    
+
     private var dz: Double {
         motion.delta.z * multiplicator
     }
-    
+
     private var multiplicator: Double {
         1
     }
-    
+
     init(motion: MotionManager) {
         self.motion = motion
     }
-    
+
     var body: some View {
-        ZStack{
+        ZStack {
             Image.noConnection.resizable().scaledToFit()
                 .frame(width: 316, height: 417)
                 .overlay(
@@ -113,7 +113,7 @@ private struct ContentView: View {
 //                        .colorInvert()
                         .blur(radius: 50)
                         .offset(x: -dx / 1.5 * 100, y: -dy / 1.5 * 100)
-                    
+
                 )
                 .clipped()
             VStack {
@@ -130,7 +130,7 @@ private struct ContentView: View {
 //                .offset(x: 20, y: -70)
 //                .frame(width: 160, height: 160)
 //                .offset(x: ValueTranslation.width / 30, y: ValueTranslation.height / 30)
-            
+
         }
         .frame(width: 316, height: 417)
         .background(.black)

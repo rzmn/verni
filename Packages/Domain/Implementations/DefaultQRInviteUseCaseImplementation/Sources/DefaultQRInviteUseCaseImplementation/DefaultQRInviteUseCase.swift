@@ -3,7 +3,7 @@ import Domain
 import Logging
 internal import QRCode
 
-private extension QRCode.Builder {    
+private extension QRCode.Builder {
     func ifNotNil<T>(value: T?, block: (QRCode.Builder, T) -> QRCode.Builder) -> QRCode.Builder {
         guard let value else {
             return self
@@ -20,7 +20,7 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
                 let size = CGSize(width: 128, height: 128)
                 let renderer = UIGraphicsImageRenderer(size: size)
                 return CIImage(
-                    image: renderer.image { context in
+                    image: renderer.image { _ in
                         image.draw(in: CGRect(origin: .zero, size: size))
                     }
                 )
@@ -38,16 +38,16 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
     }
     public let logger: Logger
     private let urlById: (String) -> String
-    
+
     public init(logger: Logger, urlById: @escaping (String) -> String) {
         self.logger = logger
         self.urlById = urlById
     }
-    
+
     @MainActor public func generate(background: UIColor, tint: UIColor, size: Int, userId: String) async throws -> Data {
         try await doGenerate(background: background, tint: tint, size: size, userId: userId)
     }
-    
+
     private func doGenerate(background: UIColor, tint: UIColor, size: Int, userId: String) throws -> Data {
         if let cached = getCached(for: userId) {
             return cached
@@ -66,13 +66,13 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
         cache(data: pngData, for: userId)
         return pngData
     }
-    
+
     private func cachePath(for userId: String) -> URL? {
         cacheDirectory?.appending(
             component: "\(userId)_v2.svg"
         )
     }
-    
+
     private func getCached(for userId: String) -> Data? {
         if let cached = cachedData[userId] {
             return cached
@@ -90,7 +90,7 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
         cache(data: data, for: userId)
         return data
     }
-    
+
     private func cache(data: Data, for userId: String) {
         cachedData[userId] = data
         guard let filepath = cachePath(for: userId) else {

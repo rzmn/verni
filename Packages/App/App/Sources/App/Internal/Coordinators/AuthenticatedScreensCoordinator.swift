@@ -58,17 +58,17 @@ struct AuthenticatedScreensCoordinator: View {
     @Environment(ColorPalette.self) var colors
     @ObservedObject private var store: Store<AppState, AppAction>
     @Binding private var appearTransitionProgress: CGFloat
-    
+
     @State private var spendingsTabTransitionProgress: CGFloat
     @State private var profileTabTransitionProgress: CGFloat
-    
+
     init(store: Store<AppState, AppAction>, appearTransitionProgress: Binding<CGFloat>) {
         self.store = store
         _appearTransitionProgress = appearTransitionProgress
         spendingsTabTransitionProgress = (store.localState?.position(of: .spendings) as Optional).transitionValue
         profileTabTransitionProgress = (store.localState?.position(of: .profile) as Optional).transitionValue
     }
-    
+
     var body: some View {
         if let state = store.localState {
             tabs(state: state)
@@ -128,7 +128,7 @@ struct AuthenticatedScreensCoordinator: View {
                             } else {
                                 return nil
                             }
-                            
+
                         },
                         set: { _ in }
                     )
@@ -141,7 +141,7 @@ struct AuthenticatedScreensCoordinator: View {
             EmptyView()
         }
     }
-    
+
     @ViewBuilder private func tabs(state: AuthenticatedState) -> some View {
         ZStack {
             ForEach(state.tabItems.filter({ $0 != state.tab })) { item in
@@ -150,7 +150,7 @@ struct AuthenticatedScreensCoordinator: View {
             tab(for: state.tab, state: state)
         }
     }
-    
+
     @ViewBuilder private func tab(for item: AuthenticatedState.TabItem, state: AuthenticatedState) -> some View {
         switch item {
         case .spendings:
@@ -159,7 +159,7 @@ struct AuthenticatedScreensCoordinator: View {
             profileTab(state: state)
         }
     }
-    
+
     @ViewBuilder private func spendingsTab(state: AuthenticatedState) -> some View {
         state.session.spendingsScreen.instantiate { event in
             switch event {
@@ -179,7 +179,7 @@ struct AuthenticatedScreensCoordinator: View {
             )
         )
     }
-    
+
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {
         state.session.profileScreen.instantiate { event in
             switch event {

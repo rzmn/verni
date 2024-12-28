@@ -15,7 +15,7 @@ public struct TextField: View {
         let placeholder: LocalizedStringKey
         let hint: LocalizedStringKey?
         let content: Content
-        
+
         public init(placeholder: LocalizedStringKey, hint: LocalizedStringKey? = nil, content: Content = .unspecified) {
             self.placeholder = placeholder
             self.hint = hint
@@ -30,13 +30,13 @@ public struct TextField: View {
     private var placeholderId: String {
         "placeholderId"
     }
-    
+
     public init(text: Binding<String>, config: Config) {
         _text = text
         self.config = config
         self.placeholderIsOnFocus = text.wrappedValue.isEmpty
     }
-    
+
     public var body: some View {
         VStack(spacing: 0) {
             textFieldWithPlaceholder
@@ -52,7 +52,7 @@ public struct TextField: View {
         }
         .frame(height: config.hint == nil ? 54 : 74)
     }
-    
+
     @ViewBuilder private var textFieldWithPlaceholder: some View {
         textField
             .overlay {
@@ -69,7 +69,7 @@ public struct TextField: View {
                 }
             }
     }
-    
+
     @FocusState private var inFocus: Bool
     @State private var showSecureFieldContent = false
     private var textField: some View {
@@ -94,14 +94,14 @@ public struct TextField: View {
                                 .foregroundStyle(Color.clear)
                                 .focused($inFocus)
                                 .padding(.trailing, -2)
-                            
+
                         )
                         .background(
                             Text(
                                 showSecureFieldContent
                                     ? textFieldBinding.wrappedValue
                                     : textFieldBinding.wrappedValue.map({ _ in "*" }).joined()
-                                
+
                             )
                             .contentTransition(.numericText(countsDown: !showSecureFieldContent))
                             .font(Font.medium(size: 15))
@@ -149,7 +149,7 @@ public struct TextField: View {
             inFocus = true
         }
     }
-    
+
     func textFieldWithStyle(_ content: some View) -> some View {
         content
             .font(Font.medium(size: 15))
@@ -159,7 +159,7 @@ public struct TextField: View {
             .textInputAutocapitalization(TextInputAutocapitalization(autocapitalization))
             .keyboardType(keyboardType)
     }
-    
+
     private var textFieldBinding: Binding<String> {
         Binding(get: {
             text
@@ -172,14 +172,14 @@ public struct TextField: View {
             text = newValue
         })
     }
-    
+
     private func placeholder(isOnFocus: Bool) -> some View {
         Text(config.placeholder)
             .font(Font.medium(size: isOnFocus ? 15 : 12))
             .foregroundStyle(colors.text.secondary.default)
             .padding(.top, isOnFocus ? 0 : 8)
     }
-    
+
     private var contentType: UITextContentType? {
         switch config.content {
         case .email:
@@ -194,7 +194,7 @@ public struct TextField: View {
             .none
         }
     }
-    
+
     private var autocapitalization: UITextAutocapitalizationType {
         switch config.content {
         case .password, .newPassword, .email, .numberPad, .displayName, .oneTimeCode:
@@ -203,7 +203,7 @@ public struct TextField: View {
             .sentences
         }
     }
-    
+
     private var keyboardType: UIKeyboardType {
         switch config.content {
         case .email:
@@ -216,7 +216,7 @@ public struct TextField: View {
             .default
         }
     }
-    
+
     private var autocorrectionDisabled: Bool {
         switch config.content {
         case .email, .password, .newPassword, .numberPad, .displayName, .oneTimeCode:
@@ -225,7 +225,7 @@ public struct TextField: View {
             false
         }
     }
-    
+
     var isSecureField: Bool {
         switch config.content {
         case .password, .newPassword:

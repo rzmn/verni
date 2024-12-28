@@ -54,6 +54,15 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
     ) async throws -> AuthenticatedDataLayerSession {
         let persistency = try await persistencyFactory.create(
             host: token.id,
+            descriptors: DescriptorTuple(
+                content:
+                    Schema.refreshToken,
+                    Schema.profile,
+                    Schema.users,
+                    Schema.spendingCounterparties,
+                    Schema.spendingsHistory,
+                    Schema.friends
+            ),
             refreshToken: token.refreshToken
         )
         await sessionHost.sessionStarted(host: token.id)

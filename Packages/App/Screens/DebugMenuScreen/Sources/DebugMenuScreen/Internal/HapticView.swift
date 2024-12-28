@@ -4,12 +4,12 @@ internal import DesignSystem
 struct HapticView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     var body: some View {
         HStack {
             Spacer()
             VStack {
-                Spacer()                
+                Spacer()
                 DesignSystem.Button(
                     config: DesignSystem.Button.Config(style: .secondary, text: "success"),
                     action: HapticEngine.success.perform

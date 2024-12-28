@@ -10,13 +10,14 @@ actor LongPollUpdateNotifier<Query: LongPollQuery> {
     private let broadcast: AsyncSubject<Query.Update>
     private var hasSubscribersSubscription: BlockAsyncSubscription<Int>?
 
-    let logger: Logger = .shared.with(prefix: "[lp] ")
+    let logger: Logger
     private let poller: Poller<Query>
     private let taskFactory: TaskFactory
     private var isListening = false
 
     init(query: Query, api: DefaultApi, taskFactory: TaskFactory, logger: Logger) async where Query.Update: Decodable & Sendable {
-        self.poller = await Poller(query: query, api: api)
+        self.logger = logger.with(prefix: "[lp] ")
+        self.poller = await Poller(query: query, api: api, logger: logger)
         self.taskFactory = taskFactory
         self.broadcast = AsyncSubject(taskFactory: taskFactory, logger: logger)
         hasSubscribersSubscription = await broadcast.subscribersCount.countPublisher

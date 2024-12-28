@@ -20,13 +20,7 @@ let package = Package(
     targets: [
         .target(
             name: "Api",
-            dependencies: ["DataTransferObjects"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
-            ]
+            dependencies: ["DataTransferObjects"]
         )
     ]
 )

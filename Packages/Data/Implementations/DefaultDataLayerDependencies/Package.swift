@@ -26,7 +26,7 @@ let package = Package(
         .package(path: "../DefaultNetworkingImplementation"),
         .package(path: "../DefaultApiServiceImplementation"),
         .package(path: "../PersistentStorageSQLite"),
-        .package(path: "../DefaultApiImplementation")
+        .package(path: "../DefaultApiImplementation"),
     ],
     targets: [
         .target(
@@ -43,13 +43,7 @@ let package = Package(
                 "AsyncExtensions",
                 "Base",
                 "ApiService",
-                "Networking"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Networking",
             ]
         )
     ]

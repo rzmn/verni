@@ -1,7 +1,8 @@
 import Testing
 import OnDemandPolling
 import Api
-@testable import AsyncExtensions
+import AsyncExtensions
+import TestInfrastructure
 
 private struct MockLongPoll: LongPoll {
     let friendsBroadcast: AsyncSubject<LongPollFriendsQuery.Update>
@@ -21,19 +22,19 @@ private struct MockLongPoll: LongPoll {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let broadcast = AsyncSubject<LongPollFriendsQuery.Update>(
-            taskFactory: taskFactory,
-            logger: .shared.with(prefix: "[events.pub]")
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger.with(prefix: "[events.pub]")
         )
         let update = LongPollFriendsQuery.Update(category: .friends)
         let longPoll = MockLongPoll(friendsBroadcast: broadcast)
         let onDemandSubscription = await OnDemandLongPollSubscription(
             subscribersCount: await broadcast.subscribersCount,
             longPoll: longPoll,
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             query: LongPollFriendsQuery(),
-            logger: .shared.with(prefix: "[lp] ")
+            logger: infrastructure.logger.with(prefix: "[lp] ")
         )
 
         // when
@@ -42,7 +43,7 @@ private struct MockLongPoll: LongPoll {
             Issue.record("should not get updates there")
         }
         await broadcast.yield(update)
-        try await taskFactory.runUntilIdle()
+        try await infrastructure.testTaskFactory.runUntilIdle()
 
         // then
     }
@@ -51,10 +52,10 @@ private struct MockLongPoll: LongPoll {
 
         // given
 
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let broadcast = AsyncSubject<LongPollFriendsQuery.Update>(
-            taskFactory: taskFactory,
-            logger: .shared.with(prefix: "[events.pub]")
+            taskFactory: infrastructure.taskFactory,
+            logger: infrastructure.logger.with(prefix: "[events.pub]")
         )
         let query = LongPollFriendsQuery()
         let update = LongPollFriendsQuery.Update(category: .friends)
@@ -62,9 +63,9 @@ private struct MockLongPoll: LongPoll {
         let onDemandSubscription = await OnDemandLongPollSubscription(
             subscribersCount: await broadcast.subscribersCount,
             longPoll: longPoll,
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             query: LongPollFriendsQuery(),
-            logger: .shared.with(prefix: "[lp] ")
+            logger: infrastructure.logger.with(prefix: "[lp] ")
         )
 
         // when
@@ -78,10 +79,10 @@ private struct MockLongPoll: LongPoll {
             let subscription = await publisher.subscribe { _ in
                 // ignore
             }
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await broadcast.yield(update)
             await subscription.cancel()
-            try await taskFactory.runUntilIdle()
+            try await infrastructure.testTaskFactory.runUntilIdle()
             await broadcast.yield(update)
         }
 

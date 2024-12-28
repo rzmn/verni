@@ -5,9 +5,9 @@ import SwiftUI
         case dark
         case light
     }
-    
+
     private(set) var theme: Theme
-    
+
     public convenience init(scheme: ColorScheme) {
         self.init(
             theme: {
@@ -22,15 +22,15 @@ import SwiftUI
             }()
         )
     }
-    
+
     private init(theme: Theme) {
         self.theme = theme
     }
-    
+
     public static var dark: ColorPalette {
         ColorPalette(theme: .dark)
     }
-    
+
     public static var light: ColorPalette {
         ColorPalette(theme: .light)
     }
@@ -48,10 +48,10 @@ private extension Color {
 extension ColorPalette {
     public struct Text {
         let theme: Theme
-        
+
         public struct Primary {
             let theme: Theme
-            
+
             public var staticLight: Color {
                 switch theme {
                 case .dark:
@@ -60,7 +60,7 @@ extension ColorPalette {
                     .hex(0xFFFFFF)
                 }
             }
-            
+
             public var alternative: Color {
                 switch theme {
                 case .dark:
@@ -69,7 +69,7 @@ extension ColorPalette {
                     .hex(0xFFFFFF)
                 }
             }
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -79,10 +79,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Secondary {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -91,7 +91,7 @@ extension ColorPalette {
                     .hex(0x69707C)
                 }
             }
-            
+
             public var alternative: Color {
                 switch theme {
                 case .dark:
@@ -101,10 +101,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Tertiary {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -114,10 +114,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Negative {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -127,24 +127,24 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public var primary: Primary {
             Primary(theme: theme)
         }
-        
+
         public var secondary: Secondary {
             Secondary(theme: theme)
         }
-        
+
         public var tertiary: Tertiary {
             Tertiary(theme: theme)
         }
-        
+
         public var negative: Negative {
             Negative(theme: theme)
         }
     }
-    
+
     public var text: Text {
         Text(theme: theme)
     }
@@ -153,10 +153,10 @@ extension ColorPalette {
 extension ColorPalette {
     public struct Background {
         let theme: Theme
-        
+
         public struct Primary {
             let theme: Theme
-            
+
             public var alternative: Color {
                 switch theme {
                 case .dark:
@@ -165,7 +165,7 @@ extension ColorPalette {
                     .hex(0x051125)
                 }
             }
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -175,10 +175,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Brand {
             let theme: Theme
-            
+
             public var `static`: Color {
                 switch theme {
                 case .dark:
@@ -188,10 +188,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Secondary {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -200,7 +200,7 @@ extension ColorPalette {
                     .hex(0xEBECEE)
                 }
             }
-            
+
             public var alternative: Color {
                 switch theme {
                 case .dark:
@@ -210,10 +210,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Negative {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -223,10 +223,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Positive {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -236,28 +236,28 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public var primary: Primary {
             Primary(theme: theme)
         }
-        
+
         public var secondary: Secondary {
             Secondary(theme: theme)
         }
-        
+
         public var brand: Brand {
             Brand(theme: theme)
         }
-        
+
         public var negative: Negative {
             Negative(theme: theme)
         }
-        
+
         public var positive: Positive {
             Positive(theme: theme)
         }
     }
-    
+
     public var background: Background {
         Background(theme: theme)
     }
@@ -266,10 +266,10 @@ extension ColorPalette {
 extension ColorPalette {
     public struct Icon {
         let theme: Theme
-        
+
         public struct Primary {
             let theme: Theme
-            
+
             public var staticLight: Color {
                 switch theme {
                 case .dark:
@@ -278,7 +278,7 @@ extension ColorPalette {
                     .hex(0xFFFFFF)
                 }
             }
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -288,10 +288,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Secondary {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -301,10 +301,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Negative {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -314,10 +314,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Positive {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -327,10 +327,10 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public struct Tertiary {
             let theme: Theme
-            
+
             public var `default`: Color {
                 switch theme {
                 case .dark:
@@ -340,28 +340,28 @@ extension ColorPalette {
                 }
             }
         }
-        
+
         public var primary: Primary {
             Primary(theme: theme)
         }
-        
+
         public var secondary: Secondary {
             Secondary(theme: theme)
         }
-        
+
         public var tertiary: Tertiary {
             Tertiary(theme: theme)
         }
-        
+
         public var negative: Negative {
             Negative(theme: theme)
         }
-        
+
         public var positive: Positive {
             Positive(theme: theme)
         }
     }
-    
+
     public var icon: Icon {
         Icon(theme: theme)
     }

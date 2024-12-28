@@ -16,7 +16,7 @@ public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
         longPoll: LongPoll,
         taskFactory: TaskFactory,
         query: Q,
-        logger: Logger = .shared
+        logger: Logger
     ) async where Q.Update: Decodable {
         self.logger = logger.with(prefix: "🕰️")
         self.subscribersCount = subscribersCount

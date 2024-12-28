@@ -22,12 +22,6 @@ let package = Package(
             name: "DI",
             dependencies: [
                 "Domain"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
             ]
         )
     ]

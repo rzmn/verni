@@ -2,6 +2,7 @@ import DI
 import Domain
 import Foundation
 import AsyncExtensions
+internal import DefaultInfrastructure
 internal import Logging
 internal import DataLayerDependencies
 internal import DefaultDataLayerDependencies
@@ -58,16 +59,16 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
     private let dataLayer: AnonymousDataLayerSession
     private let avatarsRepository: AvatarsRepository
     private let webcredentials = "https://verni.app"
-    private let taskFactory = DefaultTaskFactory()
-
-    let avatarsOfflineMutableRepository: AvatarsOfflineMutableRepository
     public let appCommon: AppCommon
 
+    let infrastructure = DefaultInfrastructureLayer()
+    let avatarsOfflineMutableRepository: AvatarsOfflineMutableRepository
+
     public init() throws {
-        let logger = Logger.shared.with(prefix: "👷‍♀️")
+        let logger = infrastructure.logger.with(prefix: "👷‍♀️")
         dataLayer = try DefaultAnonymousSession(
             logger: logger,
-            taskFactory: taskFactory
+            infrastructure: infrastructure
         )
         guard let temporaryCacheDirectory = FileManager.default.urls(
             for: .cachesDirectory,
@@ -85,7 +86,7 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
         avatarsOfflineMutableRepository = avatarsOfflineRepository
         avatarsRepository = DefaultAvatarsRepository(
             api: dataLayer.api,
-            taskFactory: DefaultTaskFactory(),
+            taskFactory: infrastructure.taskFactory,
             offlineRepository: avatarsOfflineRepository,
             offlineMutableRepository: avatarsOfflineRepository,
             logger: avatarsLogger
@@ -98,14 +99,15 @@ public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sen
                 logger: logger.with(
                     prefix: "🔐"
                 )
-            )
+            ),
+            infrastructure: infrastructure
         )
     }
 
     public func authUseCase() -> any AuthUseCase<AuthenticatedDomainLayerSession> {
         AuthUseCaseAdapter(
             impl: DefaultAuthUseCase(
-                taskFactory: DefaultTaskFactory(),
+                taskFactory: infrastructure.taskFactory,
                 dataLayer: dataLayer
             ), dependencies: self
         )

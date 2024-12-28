@@ -6,31 +6,31 @@ private struct AnyBox: @unchecked Sendable {
 }
 
 actor PersistencyMock: Persistency {
-    subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
-        descriptor: Descriptor<Key, Value>.Index
-    ) -> Value? {
+    subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
+        index: Index<D>
+    ) -> Value? where D.Key == Key, D.Value == Value {
         get async {
-            await getFunc(descriptor).value as? Value
+            await getFunc(index).value as? Value
         }
     }
-    
+
     private nonisolated(unsafe) func getFunc(_ arg: AnyHashable) async -> AnyBox {
         AnyBox(value: await getBlock?(arg))
     }
-    
-    func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable>(
+
+    func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
         value: Value,
-        for descriptor: Descriptor<Key, Value>.Index
-    ) async {
-        await updateBlock?(descriptor, value)
+        for index: Index<D>
+    ) async where D.Key == Key, D.Value == Value {
+        await updateBlock?(index, value)
     }
-    
+
     var getBlock: (@Sendable (AnyHashable) async -> Any?)?
     var updateBlock: ((AnyHashable, Any?) async -> Void)?
-    
+
     var userIdBlock: (@Sendable () async -> UserDto.Identifier)?
     var getRefreshTokenBlock: (@Sendable () async -> String)?
-    
+
     var closeBlock: (@Sendable () async -> Void)?
     var invalidateBlock: (@Sendable () async -> Void)?
 

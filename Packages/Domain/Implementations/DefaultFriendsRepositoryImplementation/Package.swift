@@ -22,7 +22,8 @@ let package = Package(
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation")
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -33,13 +34,7 @@ let package = Package(
                 "ApiDomainConvenience",
                 "DataTransferObjects",
                 "PersistentStorage",
-                "OnDemandPolling"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "OnDemandPolling",
             ]
         ),
         .testTarget(
@@ -52,14 +47,9 @@ let package = Package(
                 "PersistentStorage",
                 "DefaultFriendsRepositoryImplementation",
                 "MockPersistentStorage",
-                "MockApiImplementation"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "MockApiImplementation",
+                "TestInfrastructure",
             ]
-        )
+        ),
     ]
 )

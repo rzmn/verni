@@ -7,13 +7,14 @@ actor Poller<Query: LongPollQuery> {
         case canceled
         case internalError
     }
-
+    let logger: Logger
     private let query: Query
     private let api: DefaultApi
 
-    init(query: Query, api: DefaultApi) async {
+    init(query: Query, api: DefaultApi, logger: Logger) async {
         self.query = query
         self.api = api
+        self.logger = logger
     }
 
     func poll() async -> Result<[Query.Update], PollingTerminationEvent> {

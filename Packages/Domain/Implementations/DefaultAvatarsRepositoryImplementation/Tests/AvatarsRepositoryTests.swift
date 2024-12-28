@@ -5,7 +5,8 @@ import Domain
 import Api
 import DataTransferObjects
 import Base
-@testable import AsyncExtensions
+import AsyncExtensions
+import TestInfrastructure
 @testable import MockApiImplementation
 @testable import DefaultAvatarsRepositoryImplementation
 
@@ -64,15 +65,15 @@ private actor ApiProvider {
             UUID().uuidString: UUID().uuidString.data(using: .utf8)!,
             UUID().uuidString: UUID().uuidString.data(using: .utf8)!
         ]
+        let infrastructure = TestInfrastructureLayer()
         let provider = await ApiProvider(getResponse: avatars)
         let offlineRepository = MockOfflineRepository()
-        let taskFactory = TestTaskFactory()
         let repository = DefaultAvatarsRepository(
             api: provider.api,
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             offlineRepository: offlineRepository,
             offlineMutableRepository: offlineRepository,
-            logger: .shared
+            logger: infrastructure.logger
         )
 
         // when
@@ -99,13 +100,13 @@ private actor ApiProvider {
         ]
         let provider = await ApiProvider(getResponse: avatars)
         let offlineRepository = MockOfflineRepository()
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let repository = DefaultAvatarsRepository(
             api: provider.api,
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             offlineRepository: offlineRepository,
             offlineMutableRepository: offlineRepository,
-            logger: .shared
+            logger: infrastructure.logger
         )
         let allAvatars = [avatars.keys, cachedAvatars.keys].flatMap { $0 }
 
@@ -134,13 +135,13 @@ private actor ApiProvider {
         ]
         let provider = await ApiProvider(getResponse: avatars)
         let offlineRepository = MockOfflineRepository()
-        let taskFactory = TestTaskFactory()
+        let infrastructure = TestInfrastructureLayer()
         let repository = DefaultAvatarsRepository(
             api: provider.api,
-            taskFactory: taskFactory,
+            taskFactory: infrastructure.taskFactory,
             offlineRepository: offlineRepository,
             offlineMutableRepository: offlineRepository,
-            logger: .shared
+            logger: infrastructure.logger
         )
 
         // when

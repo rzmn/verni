@@ -20,13 +20,7 @@ let package = Package(
     targets: [
         .target(
             name: "PersistentStorage",
-            dependencies: ["DataTransferObjects"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
-            ]
+            dependencies: ["DataTransferObjects"]
         )
     ]
 )

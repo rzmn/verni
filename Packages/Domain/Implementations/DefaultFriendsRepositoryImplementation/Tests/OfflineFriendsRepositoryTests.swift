@@ -36,7 +36,7 @@ private actor PersistencyProvider {
         persistency = PersistencyMock()
         await persistency.performIsolated { persistency in
             persistency.getBlock = { anyDescriptor in
-                guard let descriptor = anyDescriptor as? Descriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]>.Index else {
+                guard let descriptor = anyDescriptor as? Index<AnyDescriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]>> else {
                     fatalError()
                 }
                 await self.performIsolated { `self` in
@@ -47,7 +47,7 @@ private actor PersistencyProvider {
                 })
             }
             persistency.updateBlock = { anyDescriptor, anyObject in
-                guard let descriptor = anyDescriptor as? Descriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]>.Index, let friends = anyObject as? [FriendshipKindDto: [UserDto]] else {
+                guard let descriptor = anyDescriptor as? Index<AnyDescriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]>>, let friends = anyObject as? [FriendshipKindDto: [UserDto]] else {
                     fatalError()
                 }
                 let kindToSet = FriendshipKindSet(descriptor.key)

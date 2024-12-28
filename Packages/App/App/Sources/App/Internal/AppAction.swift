@@ -9,10 +9,12 @@ enum LaunchSession {
 enum AppAction: Sendable {
     case launch
     case launched(LaunchSession)
-    
+
     case logoutRequested
     case loggedOut(AnonymousPresentationLayerSession)
-    
+
+    case logIn(AuthenticatedDomainLayerSession, AnonymousState)
+
     case onAuthorized(AuthenticatedPresentationLayerSession)
 
     case addExpense

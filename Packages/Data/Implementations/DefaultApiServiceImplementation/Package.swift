@@ -16,10 +16,11 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Networking"),
-        .package(path: "../../Logging"),
         .package(path: "../../ApiService"),
-        .package(path: "../../Base"),
-        .package(path: "../MockNetworkingImplementation")
+        .package(path: "../MockNetworkingImplementation"),
+        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -28,13 +29,7 @@ let package = Package(
                 "Logging",
                 "Networking",
                 "ApiService",
-                "Base"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Base",
             ]
         ),
         .testTarget(
@@ -43,14 +38,9 @@ let package = Package(
                 "DefaultApiServiceImplementation",
                 "ApiService",
                 "Logging",
-                "MockNetworkingImplementation"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "MockNetworkingImplementation",
+                "TestInfrastructure",
             ]
-        )
+        ),
     ]
 )

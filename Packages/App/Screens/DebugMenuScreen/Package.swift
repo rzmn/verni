@@ -20,7 +20,7 @@ let package = Package(
         .package(path: "../../../DI/DI"),
         .package(path: "../../../Domain/Domain"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base")
+        .package(path: "../../../Infrastructure/Base"),
     ],
     targets: [
         .target(
@@ -31,13 +31,7 @@ let package = Package(
                 "Domain",
                 "Logging",
                 "Base",
-                "AppBase"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "AppBase",
             ]
         )
     ]

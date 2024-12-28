@@ -21,7 +21,7 @@ let package = Package(
         .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base")
+        .package(path: "../../../Infrastructure/Base"),
     ],
     targets: [
         .target(
@@ -33,24 +33,14 @@ let package = Package(
                 "DataTransferObjects",
                 "PersistentStorage",
                 "Logging",
-                "Base"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Base",
             ]
         ),
         .testTarget(
             name: "DefaultReceivingPushUseCaseImplementationTests",
-            dependencies: ["DefaultReceivingPushUseCaseImplementation", "Domain", "Api", "Logging", "Base"],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+            dependencies: [
+                "DefaultReceivingPushUseCaseImplementation", "Domain", "Api", "Logging", "Base",
             ]
-        )
+        ),
     ]
 )

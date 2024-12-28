@@ -16,13 +16,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Networking",
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
-            ]
+            name: "Networking"
         )
     ]
 )

@@ -14,7 +14,7 @@ extension View {
 
 private struct PreviewModifier: ViewModifier {
     let packageClass: AnyClass
-    
+
     func body(content: Content) -> some View {
         content
             .environment(ColorPalette.dark)

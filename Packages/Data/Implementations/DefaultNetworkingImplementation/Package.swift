@@ -16,8 +16,10 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Networking"),
-        .package(path: "../../Logging"),
-        .package(path: "../../Base")
+        .package(path: "../../../Infrastructure/Filesystem"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
@@ -25,13 +27,8 @@ let package = Package(
             dependencies: [
                 "Logging",
                 "Networking",
-                "Base"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Filesystem",
+                "Base",
             ]
         ),
         .testTarget(
@@ -39,15 +36,11 @@ let package = Package(
             dependencies: [
                 "Logging",
                 "Networking",
+                "Filesystem",
                 "Base",
-                "DefaultNetworkingImplementation"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "DefaultNetworkingImplementation",
+                "TestInfrastructure",
             ]
-        )
+        ),
     ]
 )

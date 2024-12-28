@@ -51,7 +51,7 @@ public struct SplashView: View {
         )
         .background(colors.background.brand.static)
     }
-    
+
     private var transitionOffset: CGFloat {
         guard let sourceOffset else {
             return 0
@@ -65,7 +65,7 @@ public struct SplashView: View {
 private struct SplashPreview: View {
     @State var transition: CGFloat = 0
     @State var sourceOffset: CGFloat?
-    
+
     var body: some View {
         ZStack {
             SplashView(

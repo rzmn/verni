@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../../DataTransferObjects"),
         .package(path: "../../Api"),
-        .package(path: "../../PersistentStorage")
+        .package(path: "../../PersistentStorage"),
     ],
     targets: [
         .target(
@@ -25,13 +25,7 @@ let package = Package(
             dependencies: [
                 "DataTransferObjects",
                 "PersistentStorage",
-                "Api"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "Api",
             ]
         )
     ]

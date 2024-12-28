@@ -3,7 +3,7 @@ internal import DesignSystem
 
 private struct ConfigForPreview: Identifiable {
     let config: DesignSystem.Button.Config
-    
+
     var id: String {
         "\(config)"
     }
@@ -12,7 +12,7 @@ private struct ConfigForPreview: Identifiable {
 struct ButtonsView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     var body: some View {
         HStack {
             Spacer()
@@ -24,7 +24,7 @@ struct ButtonsView: View {
                         DesignSystem.Button.Config(style: style, text: "LABEL", icon: icon)
                     }
                 }.map(ConfigForPreview.init)
-                
+
                 ForEach(configs) { identifiableWrapper in
                     Button(config: identifiableWrapper.config, action: {})
                 }

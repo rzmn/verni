@@ -8,17 +8,16 @@ private struct TextItem: Hashable, Identifiable {
     var id: String { name }
 }
 
-
 struct FontsView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-    
+
     var body: some View {
         VStack {
             Spacer()
             ForEach([
                 TextItem(contentType: .button, name: "button"),
-                TextItem(contentType: .text, name: "text"),
+                TextItem(contentType: .text, name: "text")
             ]) { item in
                 Text(item.name)
                     .fontStyle(item.contentType)

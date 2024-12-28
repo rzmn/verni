@@ -26,7 +26,7 @@ let package = Package(
         .package(path: "../../DI/DI"),
         .package(path: "../../Domain/Domain"),
         .package(path: "../../Infrastructure/Logging"),
-        .package(path: "../../Infrastructure/Base")
+        .package(path: "../../Infrastructure/Base"),
     ],
     targets: [
         .target(
@@ -43,13 +43,7 @@ let package = Package(
                 "LogInScreen",
                 "SpendingsScreen",
                 "ProfileScreen",
-                "SplashScreen"
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("AccessLevelOnImport"),
-                .unsafeFlags([
-                    "-warnings-as-errors"
-                ], .when(configuration: .debug))
+                "SplashScreen",
             ]
         )
     ]

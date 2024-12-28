@@ -3,33 +3,33 @@ import SwiftUI
 
 public struct Button: View {
     @Environment(ColorPalette.self) var palette
-    
+
     public enum Style {
         case primary
         case secondary
         case tertiary
     }
-    
+
     public enum Icon {
         case left(Image)
         case right(Image)
     }
-    
+
     public struct Config {
         public let style: Style
         public let text: LocalizedStringKey
         public let icon: Icon?
-        
+
         public init(style: Style, text: LocalizedStringKey, icon: Icon? = nil) {
             self.style = style
             self.text = text
             self.icon = icon
         }
     }
-    
+
     private let config: Config
     private let action: () -> Void
-    
+
     public init(config: Config, action: @escaping () -> Void) {
         self.config = config
         self.action = {
@@ -37,7 +37,7 @@ public struct Button: View {
             action()
         }
     }
-    
+
     public var body: some View {
         SwiftUI.Button(action: action) {
             buttonWithIcon
@@ -46,7 +46,7 @@ public struct Button: View {
         .frame(maxWidth: .infinity)
         .frame(height: height)
     }
-    
+
     @ViewBuilder private var buttonWithIcon: some View {
         if let icon = config.icon {
             HStack(spacing: -overlap) {
@@ -64,9 +64,9 @@ public struct Button: View {
         } else {
             button
         }
-        
+
     }
-    
+
     @ViewBuilder private var backgroundShape: some View {
         if let icon = config.icon {
             let rectInset: UIEdgeInsets = {
@@ -102,7 +102,7 @@ public struct Button: View {
             backgroundColor.clipShape(.rect(cornerRadius: cornerRadius))
         }
     }
-    
+
     private var button: some View {
         HStack {
             Spacer()
@@ -113,19 +113,19 @@ public struct Button: View {
         }
         .frame(height: height)
     }
-    
+
     private var height: CGFloat {
         54
     }
-    
+
     private var overlap: CGFloat {
         10
     }
-    
+
     private var cornerRadius: CGFloat {
         16
     }
-    
+
     private var backgroundColor: Color {
         switch config.style {
         case .primary:
@@ -136,7 +136,7 @@ public struct Button: View {
             .clear
         }
     }
-    
+
     private var textColor: Color {
         switch config.style {
         case .primary:
@@ -147,7 +147,7 @@ public struct Button: View {
             palette.text.primary.default
         }
     }
-    
+
     private var iconColor: Color {
         switch config.style {
         case .primary:
@@ -172,4 +172,3 @@ public struct Button: View {
     .environment(PaddingsPalette.default)
     .loadCustomFonts()
 }
-

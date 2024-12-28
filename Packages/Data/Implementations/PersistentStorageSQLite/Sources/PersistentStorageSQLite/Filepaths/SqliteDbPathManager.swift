@@ -1,20 +1,21 @@
 import Foundation
 import Logging
+import Filesystem
 internal import Base
 internal import SQLite
 
 @StorageActor final class SqliteDbPathManager: Sendable {
     let logger: Logger
-    
-    private let pathManager: PathManager
+
+    private let pathManager: Filesystem.FileManager
     private let versionLabel: String
     private let containerDirectory: URL
-    
+
     init(
         logger: Logger,
         containerDirectory: URL,
         versionLabel: String,
-        pathManager: PathManager
+        pathManager: Filesystem.FileManager
     ) throws {
         self.logger = logger
         self.versionLabel = versionLabel
@@ -34,12 +35,12 @@ extension SqliteDbPathManager: DbPathManager {
     struct Item: Sendable {
         let id: String
         private let databaseDirectory: URL
-        
+
         init(id: String, databaseDirectory: URL) {
             self.id = id
             self.databaseDirectory = databaseDirectory
         }
-        
+
         func connection() throws -> Connection {
             try Connection(
                 databaseDirectory
@@ -48,7 +49,7 @@ extension SqliteDbPathManager: DbPathManager {
             )
         }
     }
-    
+
     func create(id: String) throws -> Item {
         invalidateIfNeeded()
         let directory = databaseDirectory(for: id)
@@ -63,14 +64,14 @@ extension SqliteDbPathManager: DbPathManager {
             databaseDirectory: directory
         )
     }
-    
+
     func invalidate(id: String) {
         logI { "id \(id) has been marked as in need of invalidation" }
         idsToInvalidate = modify(idsToInvalidate) {
             $0.insert(id)
         }
     }
-    
+
     var items: [Item] {
         get throws {
             invalidateIfNeeded()
@@ -105,11 +106,11 @@ extension SqliteDbPathManager {
     private var idsToInvalidateKey: String {
         "ids_to_invalidate"
     }
-    
+
     private var userDefaults: UserDefaults {
         UserDefaults(suiteName: "sqlite_ud_\(versionLabel)") ?? .standard
     }
-    
+
     private var idsToInvalidate: Set<String> {
         get {
             userDefaults
@@ -125,17 +126,17 @@ extension SqliteDbPathManager {
                 }, forKey: idsToInvalidateKey)
         }
     }
-    
+
     private var databaseDirectoryPrefix: String {
         "id_"
     }
-    
+
     private func databaseDirectory(for id: String) -> URL {
         containerDirectory.appendingPathComponent(
             "\(databaseDirectoryPrefix)\(id)"
         )
     }
-    
+
     private func invalidateIfNeeded() {
         logD { "invalidating deferred dbs" }
         idsToInvalidate = idsToInvalidate

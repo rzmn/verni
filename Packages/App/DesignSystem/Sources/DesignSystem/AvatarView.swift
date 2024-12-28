@@ -3,17 +3,17 @@ import UIKit
 
 public struct AvatarView: View {
     public typealias AvatarId = String
-    
+
     @Observable @MainActor public class Repository: Sendable {
         private let get: (AvatarId) async -> Data?
         private let getIfCached: (AvatarId) -> Data?
         private var ramCache = [AvatarId: Data]()
-        
+
         public init(getBlock: @escaping (AvatarId) async -> Data?, getIfCachedBlock: @escaping (AvatarId) -> Data?) {
             get = getBlock
             getIfCached = getIfCachedBlock
         }
-        
+
         func get(id: AvatarId) async -> Data? {
             let data = await get(id)
             if let data {
@@ -23,7 +23,7 @@ public struct AvatarView: View {
             }
             return data
         }
-        
+
         func getIfCached(id: AvatarId) -> Data? {
             if let data = ramCache[id] {
                 return data
@@ -34,22 +34,22 @@ public struct AvatarView: View {
             }
             return nil
         }
-        
+
         public static var preview: Repository {
             Repository(getBlock: {_ in nil}, getIfCachedBlock: { _ in nil })
         }
     }
-    
+
     @Environment(ColorPalette.self) var colors
     @Environment(Repository.self) var repository
     @State private var imageData: Data?
     @State private var task: Task<Void, Never>?
     private let avatar: AvatarId?
-    
+
     public init(avatar: AvatarId?) {
         self.avatar = avatar
     }
-    
+
     public var body: some View {
         content
             .onDisappear {
@@ -57,7 +57,7 @@ public struct AvatarView: View {
                 task = nil
             }
     }
-    
+
     @ViewBuilder private var content: some View {
         if let imageData = imageData ?? avatar.flatMap(repository.getIfCached(id:)) {
             if let image = UIImage(data: imageData) {
@@ -92,7 +92,7 @@ public struct AvatarView: View {
                 }
         }
     }
-    
+
     private func placeholder(_ text: String) -> some View {
         VStack(spacing: 0) {
             Spacer()
@@ -106,5 +106,5 @@ public struct AvatarView: View {
             Spacer()
         }
     }
-    
+
 }
