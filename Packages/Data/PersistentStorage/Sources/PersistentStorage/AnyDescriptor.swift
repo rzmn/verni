@@ -20,9 +20,10 @@ extension Descriptor {
 
 public struct Unkeyed: Codable, Hashable, Sendable {}
 
-public struct AnyDescriptor<Key: Sendable & Codable & Hashable, Value: Sendable & Codable>:
-    Descriptor
-{
+public struct AnyDescriptor<
+    Key: Sendable & Codable & Hashable,
+    Value: Sendable & Codable
+>: Descriptor {
     public let id: String
 }
 
