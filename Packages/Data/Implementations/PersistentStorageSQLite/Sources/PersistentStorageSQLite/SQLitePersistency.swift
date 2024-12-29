@@ -11,9 +11,9 @@ typealias Expression = SQLite.Expression
 
 @StorageActor class SQLitePersistency {
     let logger: Logger
+    private(set) var database: Connection?
 
     private let encoder = JSONEncoder()
-    private var database: Connection?
     private let hostId: UserDto.Identifier
     private var currentRefreshToken: String!
     private let inMemoryCache = InMemoryCache()

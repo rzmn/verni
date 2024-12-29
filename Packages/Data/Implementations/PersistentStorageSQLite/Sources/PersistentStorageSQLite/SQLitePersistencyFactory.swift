@@ -55,15 +55,16 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         do {
             return try await SQLitePersistency(
                 database: try item.connection(),
-                invalidator: {
-                    pathManager.invalidate(id: host)
-                },
+                invalidator: invalidator(
+                    for: host,
+                    pathManager: pathManager
+                ),
                 hostId: host,
                 refreshToken: nil,
                 logger: logger
             )
         } catch {
-            logE { "failed to create db from url due error: \(error)" }
+            logE { "failed to create persistency from url due error: \(error)" }
             return nil
         }
     }
@@ -92,9 +93,10 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
         return try await SQLitePersistency(
             database: database,
-            invalidator: {
-                pathManager.invalidate(id: host)
-            },
+            invalidator: invalidator(
+                for: host,
+                pathManager: pathManager
+            ),
             hostId: host,
             refreshToken: refreshToken,
             logger: logger
@@ -129,6 +131,15 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                 table.column(Expression<CodableBlob<D.Value>>(Schema.valueKey))
             }
         )
+    }
+
+    @StorageActor private func invalidator(
+        for host: UserDto.Identifier,
+        pathManager: any DbPathManager<SqliteDbPathManager.Item>
+    ) -> @StorageActor @Sendable () -> Void {
+        return {
+            pathManager.invalidate(id: host)
+        }
     }
 }
 

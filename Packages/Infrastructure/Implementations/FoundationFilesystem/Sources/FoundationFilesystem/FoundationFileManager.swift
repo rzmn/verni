@@ -13,12 +13,13 @@ public struct FoundationFileManager {
 }
 
 extension FoundationFileManager: FileManager {
-    public func createDirectory(at url: URL) throws(CreateDirectoryError) {
+    @discardableResult
+    public func createDirectory(at url: URL) throws(CreateDirectoryError) -> Bool {
         var isDirectory = ObjCBool(true)
         let exists = fileManager.fileExists(atPath: url.path(), isDirectory: &isDirectory)
         guard !exists else {
             if isDirectory.boolValue {
-                return
+                return false
             } else {
                 throw .urlIsReferringToFile
             }
@@ -28,6 +29,7 @@ extension FoundationFileManager: FileManager {
                 at: url,
                 withIntermediateDirectories: true
             )
+            return true
         } catch {
             throw .internal(error)
         }

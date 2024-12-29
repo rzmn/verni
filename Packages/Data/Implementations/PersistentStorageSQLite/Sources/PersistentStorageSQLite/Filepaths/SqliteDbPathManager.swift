@@ -54,7 +54,10 @@ extension SqliteDbPathManager: DbPathManager {
         invalidateIfNeeded()
         let directory = databaseDirectory(for: id)
         do {
-            try pathManager.createDirectory(at: directory)
+            let created = try pathManager.createDirectory(at: directory)
+            guard created else {
+                throw InternalError.error("database already exists", underlying: nil)
+            }
         } catch {
             logE { "failed to create directory for id \(id), error: \(error)" }
             throw error
@@ -104,11 +107,11 @@ extension SqliteDbPathManager: Loggable {}
 
 extension SqliteDbPathManager {
     private var idsToInvalidateKey: String {
-        "ids_to_invalidate"
+        "db_ids_to_invalidate_\(versionLabel)"
     }
 
     private var userDefaults: UserDefaults {
-        UserDefaults(suiteName: "sqlite_ud_\(versionLabel)") ?? .standard
+        .standard
     }
 
     private var idsToInvalidate: Set<String> {
@@ -117,7 +120,7 @@ extension SqliteDbPathManager {
                 .dictionary(forKey: idsToInvalidateKey)
                 .flatMap(\.keys)
                 .map(Set.init)
-            ?? Set()
+                .emptyIfNil
         }
         set {
             userDefaults

@@ -16,10 +16,11 @@ import Foundation
         // when
 
         do {
-            try manager.createDirectory(at: directory)
+            let created = try manager.createDirectory(at: directory)
 
             // then
 
+            #expect(created)
         } catch {
             Issue.record("\(error)")
         }
@@ -37,11 +38,12 @@ import Foundation
         // when
 
         do {
-            try manager.createDirectory(at: directory)
-            try manager.createDirectory(at: directory)
+            let created = try manager.createDirectory(at: directory)
+            let createdSecondTime try manager.createDirectory(at: directory)
 
             // then
 
+            #expect(created && !createdSecondTime)
         } catch {
             Issue.record("\(error)")
         }

@@ -1,9 +1,10 @@
 import Foundation
 
 public protocol FileManager: Sendable {
+    @discardableResult
     func createDirectory(
         at url: URL
-    ) throws(CreateDirectoryError)
+    ) throws(CreateDirectoryError) -> Bool
 
     func createFile(
         at url: URL,

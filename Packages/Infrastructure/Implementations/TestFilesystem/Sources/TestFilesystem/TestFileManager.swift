@@ -3,7 +3,7 @@ import Foundation
 internal import Base
 
 public struct TestFileManagerOverAnother<Impl: Filesystem.FileManager> {
-    public var createDirectoryBlock: (@Sendable (URL) throws(CreateDirectoryError) -> Void)?
+    public var createDirectoryBlock: (@Sendable (URL) throws(CreateDirectoryError) -> Bool)?
     public var createFileWithDataBlock: (@Sendable (URL, Data?) throws(CreateFileError) -> Void)?
     public var listDirectoryBlock: (@Sendable (URL, DirectoryMask) throws(ListDirectoryError) -> [URL])?
     public var removeItemBlock: (@Sendable (URL) throws(RemoveItemError) -> Void)?
@@ -17,7 +17,7 @@ public struct TestFileManagerOverAnother<Impl: Filesystem.FileManager> {
 }
 
 extension TestFileManagerOverAnother: Filesystem.FileManager {
-    public func createDirectory(at url: URL) throws(CreateDirectoryError) {
+    public func createDirectory(at url: URL) throws(CreateDirectoryError) -> Bool {
         guard let createDirectoryBlock else {
             return try impl.createDirectory(at: url)
         }
