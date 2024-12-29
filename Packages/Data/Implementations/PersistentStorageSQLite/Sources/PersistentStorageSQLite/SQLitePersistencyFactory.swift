@@ -127,7 +127,8 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                 table.column(
                     Expression<CodableBlob<D.Key>>(Schema.identifierKey), primaryKey: true)
                 table.column(Expression<CodableBlob<D.Value>>(Schema.valueKey))
-            })
+            }
+        )
     }
 }
 

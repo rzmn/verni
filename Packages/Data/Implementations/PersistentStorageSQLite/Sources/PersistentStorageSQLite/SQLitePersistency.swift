@@ -15,7 +15,7 @@ typealias Expression = SQLite.Expression
     private let encoder = JSONEncoder()
     private var database: Connection?
     private let hostId: UserDto.Identifier
-    private var initialRefreshToken: String!
+    private var currentRefreshToken: String!
     private let inMemoryCache = InMemoryCache()
     private let invalidator: @StorageActor @Sendable () -> Void
 
@@ -31,17 +31,13 @@ typealias Expression = SQLite.Expression
         self.logger = logger
         self.invalidator = invalidator
         if let refreshToken {
-            self.initialRefreshToken = refreshToken
-            do {
-                try await doUpdate(value: refreshToken, for: Schema.refreshToken.unkeyed)
-            } catch {
-                logE { "failed to insert token error: \(error)" }
-            }
+            self.currentRefreshToken = refreshToken
+            try await doUpdate(value: refreshToken, for: Schema.refreshToken.unkeyed)
         } else {
             guard let refreshToken = try await doGet(index: Schema.refreshToken.unkeyed) else {
                 throw SQLite.QueryError.unexpectedNullValue(name: "\(Schema.refreshToken.id)")
             }
-            self.initialRefreshToken = refreshToken
+            self.currentRefreshToken = refreshToken
         }
     }
 }
@@ -49,7 +45,7 @@ typealias Expression = SQLite.Expression
 extension SQLitePersistency: Persistency {
     var refreshToken: String {
         get async {
-            await inMemoryCache[Schema.refreshToken.unkeyed] ?? initialRefreshToken
+            currentRefreshToken
         }
     }
 
@@ -126,6 +122,9 @@ extension SQLitePersistency: Persistency {
                 )
         )
         await inMemoryCache.update(value: value, for: index)
+        if index.descriptor.id == Schema.refreshToken.id, let token = value as? String {
+            currentRefreshToken = token
+        }
     }
 
     func close() {

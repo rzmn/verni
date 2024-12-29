@@ -4,6 +4,7 @@ import PersistentStorage
 import DataTransferObjects
 import TestInfrastructure
 import Filesystem
+import SQLite
 @testable import Base
 @testable import PersistentStorageSQLite
 
@@ -607,8 +608,46 @@ import Filesystem
             
         #expect(persistency == nil)
     }
-    
-    
+
+    @Test func testUpdateNonExistentDescriptor() async throws {
+
+        // given
+
+        struct SomeDescriptor: Descriptor {
+            struct SomeStruct: Hashable, Codable {}
+            typealias Key = SomeStruct
+            typealias Value = SomeStruct
+            let id: String = "id"
+        }
+        let descriptor = SomeDescriptor()
+        let index = descriptor.index(for: SomeDescriptor.SomeStruct())
+        let value = SomeDescriptor.SomeStruct()
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .currentUser,
+            displayName: "some name",
+            avatarId: nil
+        )
+        let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: refreshToken)
+        await persistency.update(value: value, for: index)
+
+        // then
+
+        #expect(await persistency[index] == nil)
+    }
+
     @Test func testNilAwakeAfterInvalidate() async throws {
         
         // given
@@ -634,5 +673,190 @@ import Filesystem
         // then
             
         #expect(awaken == nil)
+    }
+
+    @Test func testCreateFailedFailedToCreateTables() async throws {
+
+        // given
+
+        struct SomeDescriptor: Descriptor {
+            struct SomeStruct: Hashable, Codable {}
+            typealias Key = SomeStruct
+            typealias Value = SomeStruct
+            let id: String = "sqlite_xxx"
+        }
+        let descriptor = SomeDescriptor()
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .currentUser,
+            displayName: "some name",
+            avatarId: nil
+        )
+        let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
+
+        // when
+
+        do {
+            let _ = try await persistencyFactory
+                .create(
+                    host: host.id,
+                    descriptors: DescriptorTuple(content: descriptor),
+                    refreshToken: refreshToken
+                )
+            Issue.record()
+        } catch {
+            // then
+        }
+    }
+
+    @Test func testCreateFailedFailedInsertRefreshToken() async throws {
+
+        // given
+
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .currentUser,
+            displayName: "some name",
+            avatarId: nil
+        )
+        let infrastructure = TestInfrastructureLayer()
+        let connection = try Connection()
+
+        // when
+
+        do {
+            let _ = try await SQLitePersistency(
+                database: connection,
+                invalidator: {},
+                hostId: host.id,
+                refreshToken: nil,
+                logger: infrastructure.logger
+            )
+            Issue.record()
+        } catch {
+            print("[debug] error: \(error)")
+        }
+    }
+
+    @Test func testCreateFailedNoRefreshToken() async throws {
+
+        // given
+
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .currentUser,
+            displayName: "some name",
+            avatarId: nil
+        )
+        let infrastructure = TestInfrastructureLayer()
+        let connection = try Connection()
+        typealias Expression = SQLite.Expression
+        try connection.run(
+            Table(Schema.refreshToken.id).create { table in
+                table.column(
+                    Expression<CodableBlob<Unkeyed>>(Schema.identifierKey), primaryKey: true)
+                table.column(Expression<CodableBlob<String>>(Schema.valueKey))
+            }
+        )
+
+        // when
+
+        do {
+            let _ = try await SQLitePersistency(
+                database: connection,
+                invalidator: {},
+                hostId: host.id,
+                refreshToken: nil,
+                logger: infrastructure.logger
+            )
+            Issue.record()
+        } catch {
+            print("[debug] error: \(error)")
+        }
+    }
+
+    @Test func testGetWhenUpdatedButAlreadyClosed() async throws {
+
+        // given
+
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .currentUser,
+            displayName: "some name",
+            avatarId: nil
+        )
+        let profile = ProfileDto(
+            user: host,
+            email: "a@b.com",
+            emailVerified: true
+        )
+        let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: refreshToken)
+        await persistency.update(value: profile, for: Schema.profile.unkeyed)
+        await persistency.close()
+        let newProfile = ProfileDto(
+            user: host,
+            email: "a@b.com",
+            emailVerified: true
+        )
+        await persistency.update(value: newProfile, for: Schema.profile.unkeyed)
+
+        // then
+
+        #expect(await persistency[Schema.profile.unkeyed] == profile)
+    }
+
+    @Test func testUpdateWhenAlreadyClosed() async throws {
+
+        // given
+
+        let host = UserDto(
+            login: UUID().uuidString,
+            friendStatus: .currentUser,
+            displayName: "some name",
+            avatarId: nil
+        )
+        let profile = ProfileDto(
+            user: host,
+            email: "a@b.com",
+            emailVerified: true
+        )
+        let refreshToken = UUID().uuidString
+        let infrastructure = TestInfrastructureLayer()
+        let persistencyFactory = try SQLitePersistencyFactory(
+            logger: infrastructure.logger,
+            dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
+
+        // when
+
+        let persistency = try await persistencyFactory
+            .create(host: host.id, refreshToken: refreshToken)
+        await persistency.close()
+        await persistency.update(value: profile, for: Schema.profile.unkeyed)
+
+        // then
+
+        #expect(await persistency[Schema.profile.unkeyed] == nil)
     }
 }
