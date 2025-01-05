@@ -1,5 +1,7 @@
+import Foundation
+
 public protocol ApiService: Sendable {
-    func run<Response: Decodable & Sendable>(
+    func run(
         request: some ApiServiceRequest
-    ) async throws(ApiServiceError) -> Response
+    ) async throws(ApiServiceError) -> Data
 }

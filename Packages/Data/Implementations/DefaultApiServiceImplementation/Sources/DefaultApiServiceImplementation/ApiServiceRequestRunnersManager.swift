@@ -29,9 +29,9 @@ actor ApiServiceRequestRunnersManager: Loggable {
         self.runnerFactory = runnerFactory
     }
 
-    func run<Response: Decodable & Sendable>(
+    func run(
         request: some ApiServiceRequest
-    ) async throws(ApiServiceError) -> Response {
+    ) async throws(ApiServiceError) -> Data {
         try await run(request: request, status: .regular)
     }
 }
@@ -39,10 +39,10 @@ actor ApiServiceRequestRunnersManager: Loggable {
 // MARK: - Private
 
 extension ApiServiceRequestRunnersManager {
-    private func run<Response: Decodable & Sendable>(
+    private func run(
         request: some ApiServiceRequest,
         status: RequestStatus
-    ) async throws(ApiServiceError) -> Response {
+    ) async throws(ApiServiceError) -> Data {
         guard let tokenRefresher else {
             return try await runnerFactory
                 .create(accessToken: nil)
@@ -107,15 +107,15 @@ extension ApiServiceRequestRunnersManager {
         }
     }
 
-    private func run<Response: Decodable & Sendable>(
+    private func run(
         with accessToken: String,
         tokenRefresher: TokenRefresher,
         request: some ApiServiceRequest,
         status: RequestStatus
-    ) async throws(ApiServiceError) -> Response {
+    ) async throws(ApiServiceError) -> Data {
         switch status {
         case .regular:
-            let result: Result<Response, ApiServiceError>
+            let result: Result<Data, ApiServiceError>
             do {
                 result = .success(
                     try await runnerFactory
@@ -130,7 +130,7 @@ extension ApiServiceRequestRunnersManager {
                 return result
             case .failure(let error):
                 switch error {
-                case .decodingFailed, .internalError, .noConnection:
+                case .internalError, .noConnection:
                     throw error
                 case .unauthorized:
                     refreshTokenTask = taskFactory.task {

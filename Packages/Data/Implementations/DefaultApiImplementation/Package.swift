@@ -21,6 +21,9 @@ let package = Package(
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Infrastructure/Logging"),
         .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
+        .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.6.0"),
+        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.7.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
     ],
     targets: [
         .target(
@@ -31,7 +34,9 @@ let package = Package(
                 "Base",
                 "DataTransferObjects",
                 "Logging",
-            ]
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+            ],
+            plugins: [.plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator")]
         ),
         .testTarget(
             name: "DefaultApiImplementationTests",

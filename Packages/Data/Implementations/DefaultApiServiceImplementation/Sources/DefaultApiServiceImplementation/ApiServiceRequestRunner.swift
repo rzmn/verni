@@ -8,9 +8,9 @@ protocol ApiServiceRequestRunnerFactory: Sendable {
 }
 
 protocol ApiServiceRequestRunner {
-    func run<Response: Decodable & Sendable>(
+    func run(
         request: some ApiServiceRequest
-    ) async throws(ApiServiceError) -> Response
+    ) async throws(ApiServiceError) -> Data
 }
 
 final class DefaultApiServiceRequestRunnerFactory: ApiServiceRequestRunnerFactory {
@@ -34,7 +34,6 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
     let logger: Logger
     private let accessToken: String?
     private let networkService: NetworkService
-    private let decoder = JSONDecoder()
 
     init(logger: Logger, networkService: NetworkService, accessToken: String? = nil) {
         self.accessToken = accessToken
@@ -42,9 +41,9 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
         self.logger = logger
     }
 
-    func run<Response: Decodable & Sendable>(
+    func run(
         request: some ApiServiceRequest
-    ) async throws(ApiServiceError) -> Response {
+    ) async throws(ApiServiceError) -> Data {
         logI { "\(request): starting request" }
         var request = request
         if let accessToken, request.headers["Authorization"] == nil {
@@ -69,20 +68,7 @@ actor DefaultApiServiceRequestRunner: ApiServiceRequestRunner {
             logI { "\(request): got unauthorized, try to refresh token" }
             throw .unauthorized
         }
-        let apiServiceResponse: Response
-        do {
-            apiServiceResponse = try decoder.decode(Response.self, from: networkServiceResponse.data)
-        } catch {
-            logE { "\(request): request succeeded but decoding failed due error: \(error)" }
-            if networkServiceResponse.code.success {
-                logE { "\(request): recognized decoding failure as a decoding error" }
-                throw .decodingFailed(error)
-            } else {
-                logE { "\(request): recognized decoding failure as a unknown output" }
-                throw .internalError(error)
-            }
-        }
-        return apiServiceResponse
+        return networkServiceResponse.data
     }
 }
 

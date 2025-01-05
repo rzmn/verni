@@ -1,4 +1,6 @@
+import OpenAPIRuntime
+
 public protocol ApiFactory: Sendable {
-    func create() -> ApiProtocol
+    func create() -> APIProtocol
     func longPoll() -> LongPoll
 }

@@ -1,6 +1,5 @@
 public enum ApiServiceError: Error, Sendable {
     case noConnection(Error)
-    case decodingFailed(Error)
     case internalError(Error)
     case unauthorized
 }
@@ -10,8 +9,6 @@ extension ApiServiceError: CustomStringConvertible {
         switch self {
         case .noConnection:
             return "no connection"
-        case .decodingFailed(let error):
-            return "decoding failed due error: \(error)"
         case .internalError(let error):
             return "internal error: \(error)"
         case .unauthorized:

@@ -10,6 +10,5 @@ public protocol ApiServiceRequest: Sendable {
 }
 
 public protocol ApiServiceRequestWithBody: ApiServiceRequest {
-    associatedtype Body: Encodable
-    var body: Body { get }
+    var body: Data { get }
 }

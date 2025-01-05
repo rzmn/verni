@@ -23,11 +23,11 @@ actor MaxSimultaneousRequestsRestrictor {
         self.manager = manager
     }
 
-    func run<Response: Decodable & Sendable>(
+    func run(
         request: some ApiServiceRequest
-    ) async throws(ApiServiceError) -> Response {
+    ) async throws(ApiServiceError) -> Data {
         await ensureLimit()
-        let result: Result<Response, ApiServiceError>
+        let result: Result<Data, ApiServiceError>
         do {
             result = .success(try await manager.run(request: request))
         } catch {
