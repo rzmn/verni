@@ -1,5 +1,4 @@
 import Domain
-import DataTransferObjects
 
 extension User.FriendStatus {
     public init(dto: UserDto.FriendStatus) {

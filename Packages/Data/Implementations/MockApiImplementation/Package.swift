@@ -16,8 +16,6 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Api"),
-        .package(path: "../../DataTransferObjects"),
-        .package(path: "../../ApiService"),
         .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Infrastructure/Logging"),
     ],
@@ -25,10 +23,8 @@ let package = Package(
         .target(
             name: "MockApiImplementation",
             dependencies: [
-                "ApiService",
                 "Api",
                 "Base",
-                "DataTransferObjects",
                 "Logging",
             ]
         )

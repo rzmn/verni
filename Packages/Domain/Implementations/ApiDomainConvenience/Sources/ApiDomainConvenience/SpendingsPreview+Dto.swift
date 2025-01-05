@@ -1,7 +1,6 @@
 import Foundation
 import Domain
 import Api
-import DataTransferObjects
 
 extension SpendingsPreview {
     public init(dto: BalanceDto) {

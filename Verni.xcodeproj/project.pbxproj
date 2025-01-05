@@ -49,16 +49,11 @@
 		61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileEditingUseCaseImplementation; sourceTree = "<group>"; };
 		611CCD4A2C50AE3A00289D9E /* DefaultDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDependencies; sourceTree = "<group>"; };
 		611CCD4B2C50AE3A00289D9E /* DI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DI; sourceTree = "<group>"; };
-		611CCD502C50AE3A00289D9E /* DataTransferObjects */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataTransferObjects; sourceTree = "<group>"; };
 		611CCD522C50AE3A00289D9E /* PersistentStorage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorage; sourceTree = "<group>"; };
 		611CCD542C50AE3A00289D9E /* App */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = App; sourceTree = "<group>"; };
 		611CCD552C50AE3A00289D9E /* DesignSystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesignSystem; sourceTree = "<group>"; };
-		611CCD572C50AE3A00289D9E /* ApiService */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ApiService; sourceTree = "<group>"; };
 		611CCD582C50AE3A00289D9E /* Base */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Base; sourceTree = "<group>"; };
-		611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiServiceImplementation; sourceTree = "<group>"; };
-		611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultNetworkingImplementation; sourceTree = "<group>"; };
 		611CCD5B2C50AE3A00289D9E /* Logging */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Logging; sourceTree = "<group>"; };
-		611CCD5C2C50AE3A00289D9E /* Networking */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Networking; sourceTree = "<group>"; };
 		611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ApiDomainConvenience; sourceTree = "<group>"; };
 		611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAuthUseCaseImplementation; sourceTree = "<group>"; };
 		611CCD602C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultFriendInteractionsUseCaseImplementation; sourceTree = "<group>"; };
@@ -78,7 +73,6 @@
 		61414F7E2C2F02A100B2C027 /* Verni.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Verni.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6143A7D52C9076930030AAF1 /* MockPersistentStorage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockPersistentStorage; sourceTree = "<group>"; };
 		6143A7F32C90CBF90030AAF1 /* MockApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockApiImplementation; sourceTree = "<group>"; };
-		6143A7F42C9162800030AAF1 /* MockNetworkingImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockNetworkingImplementation; sourceTree = "<group>"; };
 		614AC19B2C6802EE005B2CD5 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		614AC19D2C6802EE005B2CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		614AC19F2C6802EE005B2CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -150,10 +144,7 @@
 				61D11BE72CA020A90058B77A /* DI */,
 				61C90BF52C84B0E6006A44C0 /* Implementations */,
 				617AAB542C9852DD0087E4F5 /* OnDemandPolling */,
-				611CCD572C50AE3A00289D9E /* ApiService */,
-				611CCD5C2C50AE3A00289D9E /* Networking */,
 				61BBB1242C50D3CE00E3D4F3 /* Api */,
-				611CCD502C50AE3A00289D9E /* DataTransferObjects */,
 				611CCD522C50AE3A00289D9E /* PersistentStorage */,
 			);
 			path = Data;
@@ -342,9 +333,6 @@
 			isa = PBXGroup;
 			children = (
 				61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */,
-				6143A7F42C9162800030AAF1 /* MockNetworkingImplementation */,
-				611CCD5A2C50AE3A00289D9E /* DefaultNetworkingImplementation */,
-				611CCD592C50AE3A00289D9E /* DefaultApiServiceImplementation */,
 				6143A7F32C90CBF90030AAF1 /* MockApiImplementation */,
 				6143A7D52C9076930030AAF1 /* MockPersistentStorage */,
 				611CCD852C50B1D400289D9E /* PersistentStorageSQLite */,

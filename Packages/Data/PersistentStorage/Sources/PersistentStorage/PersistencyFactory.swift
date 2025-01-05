@@ -1,5 +1,3 @@
-import DataTransferObjects
-
 public struct DescriptorTuple<each D: Descriptor>: Sendable {
     public let content: (repeat each D)
 
@@ -9,9 +7,9 @@ public struct DescriptorTuple<each D: Descriptor>: Sendable {
 }
 
 public protocol PersistencyFactory: Sendable {
-    func awake(host: UserDto.Identifier) async -> Persistency?
+    func awake(host: HostId) async -> Persistency?
     func create<each D: Descriptor>(
-        host: UserDto.Identifier,
+        host: HostId,
         descriptors: DescriptorTuple<repeat each D>,
         refreshToken: String
     ) async throws -> Persistency

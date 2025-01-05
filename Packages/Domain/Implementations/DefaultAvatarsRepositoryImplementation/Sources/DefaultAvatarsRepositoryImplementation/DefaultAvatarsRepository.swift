@@ -4,7 +4,6 @@ import Foundation
 import Base
 import Logging
 import AsyncExtensions
-internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 public actor DefaultAvatarsRepository {

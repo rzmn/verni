@@ -1,5 +1,4 @@
 import Domain
-import DataTransferObjects
 import UIKit
 
 extension User {

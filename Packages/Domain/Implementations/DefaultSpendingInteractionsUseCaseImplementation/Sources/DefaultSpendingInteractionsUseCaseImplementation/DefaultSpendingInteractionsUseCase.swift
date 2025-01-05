@@ -1,7 +1,6 @@
 import Domain
 import Api
 import Foundation
-import DataTransferObjects
 internal import ApiDomainConvenience
 
 public actor DefaultSpendingInteractionsUseCase {

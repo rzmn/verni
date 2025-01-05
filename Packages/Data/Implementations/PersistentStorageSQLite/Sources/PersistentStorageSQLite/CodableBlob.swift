@@ -1,5 +1,4 @@
 import Foundation
-import DataTransferObjects
 internal import SQLite
 
 struct CodableBlob<T: Codable>: Value {

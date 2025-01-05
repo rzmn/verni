@@ -2,29 +2,28 @@ import AsyncExtensions
 import Api
 import Logging
 
-public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
+public actor OnDemandLongPollSubscription<T: Sendable> {
     public let logger: Logger
     private let taskFactory: TaskFactory
     private let subscribersCount: SubscribersCount<T>
-    private let longPollPublisher: any AsyncBroadcast<Q.Update>
+    private let longPollPublisher: any AsyncBroadcast<RemoteUpdate>
 
     private var subsctiptionsCountSubscription: (any CancellableEventSource)?
     private var longPollSubscription: (any CancellableEventSource)?
 
     public init(
         subscribersCount: SubscribersCount<T>,
-        longPoll: LongPoll,
+        service: RemoteUpdatesService,
         taskFactory: TaskFactory,
-        query: Q,
         logger: Logger
-    ) async where Q.Update: Decodable {
+    ) async{
         self.logger = logger.with(prefix: "🕰️")
         self.subscribersCount = subscribersCount
-        longPollPublisher = await longPoll.poll(for: query)
+        longPollPublisher = await service.subscribe()
         self.taskFactory = taskFactory
     }
 
-    public func start(onLongPoll: @escaping @Sendable (Q.Update) -> Void) async {
+    public func start(onUpdate: @escaping @Sendable (RemoteUpdate) -> Void) async {
         logI { "start polling" }
         subsctiptionsCountSubscription = await subscribersCount.countPublisher
             .subscribe { [weak self, taskFactory] subscriptionsCount in
@@ -32,14 +31,14 @@ public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
                 logI { "subscriptions count updated: \(subscriptionsCount)" }
                 taskFactory.task { [weak self] in
                     guard let self else { return }
-                    await subscriptionsCountUpdated(subscriptionsCount, onLongPoll: onLongPoll)
+                    await subscriptionsCountUpdated(subscriptionsCount, onUpdate: onUpdate)
                 }
             }
     }
 
     private func subscriptionsCountUpdated(
         _ subscriptionsCount: Int,
-        onLongPoll: @escaping @Sendable (Q.Update) -> Void
+        onUpdate: @escaping @Sendable (RemoteUpdate) -> Void
     ) async {
         logI { "subscriptions count updated: \(subscriptionsCount)" }
         let hadSubsriptions = longPollSubscription != nil
@@ -58,7 +57,7 @@ public actor OnDemandLongPollSubscription<T: Sendable, Q: LongPollQuery> {
         await longPollSubscription?.cancel()
         if hasSubscriptions {
             longPollSubscription = await longPollPublisher.subscribe { update in
-                onLongPoll(update)
+                onUpdate(update)
             }
         } else {
             longPollSubscription = nil

@@ -1,16 +1,15 @@
 import Foundation
-import DataTransferObjects
 
 actor SessionHost {
     private enum Constants {
         static let host = "host"
     }
 
-    var active: UserDto.Identifier? {
+    var active: String? {
         UserDefaults.standard.string(forKey: Constants.host)
     }
 
-    func sessionStarted(host: UserDto.Identifier) {
+    func sessionStarted(host: String) {
         UserDefaults.standard.set(host, forKey: Constants.host)
     }
 

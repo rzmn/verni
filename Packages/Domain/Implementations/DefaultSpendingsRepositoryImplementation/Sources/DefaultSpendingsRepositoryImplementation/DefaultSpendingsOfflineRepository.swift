@@ -1,7 +1,6 @@
 import Domain
 import PersistentStorage
 internal import ApiDomainConvenience
-internal import DataTransferObjects
 
 public actor DefaultSpendingsOfflineRepository {
     private let persistency: Persistency

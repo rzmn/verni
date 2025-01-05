@@ -16,15 +16,10 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../DI/DataLayerDependencies"),
-        .package(path: "../../DataTransferObjects"),
         .package(path: "../../Api"),
         .package(path: "../../PersistentStorage"),
-        .package(path: "../../ApiService"),
-        .package(path: "../../Networking"),
         .package(path: "../../../Infrastructure/AsyncExtensions"),
         .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../DefaultNetworkingImplementation"),
-        .package(path: "../DefaultApiServiceImplementation"),
         .package(path: "../PersistentStorageSQLite"),
         .package(path: "../DefaultApiImplementation"),
     ],
@@ -33,17 +28,12 @@ let package = Package(
             name: "DefaultDataLayerDependencies",
             dependencies: [
                 "DataLayerDependencies",
-                "DataTransferObjects",
                 "PersistentStorage",
                 "Api",
-                "DefaultNetworkingImplementation",
-                "DefaultApiServiceImplementation",
                 "PersistentStorageSQLite",
                 "DefaultApiImplementation",
                 "AsyncExtensions",
                 "Base",
-                "ApiService",
-                "Networking",
             ]
         )
     ]

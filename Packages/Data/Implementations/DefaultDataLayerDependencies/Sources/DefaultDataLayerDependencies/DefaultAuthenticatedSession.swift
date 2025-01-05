@@ -1,19 +1,18 @@
 import Api
-import DataTransferObjects
 import PersistentStorage
 import DataLayerDependencies
 import AsyncExtensions
 
 final class DefaultAuthenticatedSession: AuthenticatedDataLayerSession {
-    let api: ApiProtocol
-    let longPoll: LongPoll
+    let api: APIProtocol
+    let remoteUpdates: RemoteUpdatesService
     let persistency: Persistency
     let authenticationLostHandler: any AsyncBroadcast<Void>
     private let sessionHost: SessionHost
 
     init(
-        api: ApiProtocol,
-        longPoll: LongPoll,
+        api: APIProtocol,
+        remoteUpdates: RemoteUpdatesService,
         persistency: Persistency,
         authenticationLostHandler: any AsyncBroadcast<Void>,
         sessionHost: SessionHost
@@ -21,7 +20,7 @@ final class DefaultAuthenticatedSession: AuthenticatedDataLayerSession {
         self.api = api
         self.persistency = persistency
         self.authenticationLostHandler = authenticationLostHandler
-        self.longPoll = longPoll
+        self.remoteUpdates = remoteUpdates
         self.sessionHost = sessionHost
     }
 

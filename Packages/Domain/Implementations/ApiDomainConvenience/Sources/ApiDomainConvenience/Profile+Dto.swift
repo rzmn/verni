@@ -1,5 +1,4 @@
 import Domain
-import DataTransferObjects
 
 extension Profile {
     public init(dto: ProfileDto) {

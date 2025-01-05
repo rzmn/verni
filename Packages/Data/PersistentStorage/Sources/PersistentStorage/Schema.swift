@@ -1,4 +1,4 @@
-import DataTransferObjects
+import Api
 
 public enum Schema {
     public static var identifierKey: String {
@@ -13,23 +13,11 @@ public enum Schema {
         AnyDescriptor(id: "refreshToken")
     }
 
-    public static var profile: AnyDescriptor<Unkeyed, ProfileDto> {
+    public static var profile: AnyDescriptor<Unkeyed, Components.Schemas.Profile> {
         AnyDescriptor(id: "profile")
     }
 
-    public static var users: AnyDescriptor<UserDto.Identifier, UserDto> {
+    public static var users: AnyDescriptor<String, Components.Schemas.User> {
         AnyDescriptor(id: "users")
-    }
-
-    public static var spendingCounterparties: AnyDescriptor<Unkeyed, [BalanceDto]> {
-        AnyDescriptor(id: "spendingCounterparties")
-    }
-
-    public static var spendingsHistory: AnyDescriptor<UserDto.Identifier, [IdentifiableExpenseDto]> {
-        AnyDescriptor(id: "spendingsHistory")
-    }
-
-    public static var friends: AnyDescriptor<FriendshipKindSetDto, [FriendshipKindDto: [UserDto]]> {
-        AnyDescriptor(id: "friends")
     }
 }

@@ -1,7 +1,6 @@
 import Foundation
 import PersistentStorage
 import Domain
-internal import DataTransferObjects
 internal import ApiDomainConvenience
 
 public actor DefaultUsersOfflineRepository {

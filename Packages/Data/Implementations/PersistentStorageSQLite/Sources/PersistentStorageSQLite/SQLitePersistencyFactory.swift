@@ -1,6 +1,5 @@
 import AsyncExtensions
 internal import Base
-import DataTransferObjects
 import Filesystem
 import Foundation
 import Logging
@@ -27,11 +26,11 @@ public actor SQLitePersistencyFactory {
 }
 
 extension SQLitePersistencyFactory: PersistencyFactory {
-    public func awake(host: UserDto.Identifier) async -> Persistency? {
+    public func awake(host: HostId) async -> Persistency? {
         await doAwake(host: host)
     }
 
-    @StorageActor private func doAwake(host: UserDto.Identifier) async -> Persistency? {
+    @StorageActor private func doAwake(host: HostId) async -> Persistency? {
         logI { "awaking persistence..." }
         let pathManager: any DbPathManager<SqliteDbPathManager.Item>
         do {
@@ -70,7 +69,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     }
 
     public func create<each D: Descriptor>(
-        host: UserDto.Identifier,
+        host: HostId,
         descriptors: DescriptorTuple<repeat each D>,
         refreshToken: String
     ) async throws -> Persistency {
@@ -78,7 +77,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     }
 
     @StorageActor private func doCreate<each D: Descriptor>(
-        host: UserDto.Identifier,
+        host: HostId,
         descriptors: DescriptorTuple<repeat each D>,
         refreshToken: String
     ) async throws -> Persistency {
@@ -134,7 +133,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     }
 
     @StorageActor private func invalidator(
-        for host: UserDto.Identifier,
+        for host: HostId,
         pathManager: any DbPathManager<SqliteDbPathManager.Item>
     ) -> @StorageActor @Sendable () -> Void {
         return {

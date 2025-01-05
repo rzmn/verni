@@ -15,7 +15,6 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../DataTransferObjects"),
         .package(path: "../../Api"),
         .package(path: "../../PersistentStorage"),
     ],
@@ -23,7 +22,6 @@ let package = Package(
         .target(
             name: "DataLayerDependencies",
             dependencies: [
-                "DataTransferObjects",
                 "PersistentStorage",
                 "Api",
             ]

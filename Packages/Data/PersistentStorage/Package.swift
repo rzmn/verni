@@ -15,12 +15,14 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../DataTransferObjects")
+        .package(path: "../Api"),
     ],
     targets: [
         .target(
             name: "PersistentStorage",
-            dependencies: ["DataTransferObjects"]
+            dependencies: [
+                "Api"
+            ]
         )
     ]
 )

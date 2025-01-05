@@ -1,6 +1,5 @@
 import Domain
 import Api
-import DataTransferObjects
 
 extension Currency {
     public init(dto: CurrencyDto) {

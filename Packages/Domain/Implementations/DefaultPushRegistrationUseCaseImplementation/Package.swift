@@ -18,14 +18,16 @@ let package = Package(
         .package(path: "../ApiDomainConvenience"),
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
     ],
     targets: [
         .target(
             name: "DefaultPushRegistrationUseCaseImplementation",
             dependencies: [
-                "Domain", "Api", "ApiDomainConvenience", "DataTransferObjects", "PersistentStorage",
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "PersistentStorage",
             ]
         )
     ]

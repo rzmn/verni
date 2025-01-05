@@ -1,5 +1,4 @@
 import Domain
-import DataTransferObjects
 
 extension FriendshipKindDto {
     public init(domain: FriendshipKind) {

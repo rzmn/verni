@@ -1,7 +1,6 @@
 import Testing
 import Domain
 import Foundation
-import DataTransferObjects
 import PersistentStorage
 @testable import DefaultSpendingsRepositoryImplementation
 @testable import MockPersistentStorage

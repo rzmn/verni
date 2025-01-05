@@ -1,7 +1,6 @@
 import Api
 import Domain
 import Foundation
-import DataTransferObjects
 
 extension IdentifiableSpending {
     public init(dto: IdentifiableExpenseDto) {

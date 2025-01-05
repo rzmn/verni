@@ -2,17 +2,17 @@ import Foundation
 import PersistentStorage
 import Api
 import AsyncExtensions
-import DataTransferObjects
-internal import ApiService
+internal import Base
+internal import DefaultApiImplementation
 
 actor RefreshTokenManager {
-    private let api: ApiProtocol
+    private let api: APIProtocol
     private let persistency: Persistency
     private var accessTokenValue: String?
     private let authenticationLostSubject: AsyncSubject<Void>
 
     init(
-        api: ApiProtocol,
+        api: APIProtocol,
         persistency: Persistency,
         authenticationLostSubject: AsyncSubject<Void>,
         accessToken: String?
@@ -24,38 +24,44 @@ actor RefreshTokenManager {
     }
 }
 
-extension RefreshTokenManager: TokenRefresher {
+extension RefreshTokenManager: RefreshTokenRepository {
     func accessToken() async -> String? {
         accessTokenValue
     }
 
     func refreshTokens() async throws(RefreshTokenFailureReason) {
-        let response: AuthTokenDto
+        let response: Operations.RefreshSession.Output
         do {
-            let token =  await persistency.refreshToken
-            response = try await api.run(
-                method: Auth.Refresh(
-                    refreshToken: token
+            response = try await api.refreshSession(
+                body: .json(
+                    .init(
+                        refreshToken: await persistency.refreshToken
+                    )
                 )
             )
         } catch {
-            switch error {
-            case .api(let apiErrorCode, _):
-                await authenticationLostSubject.yield(())
-                switch apiErrorCode {
-                case .tokenExpired:
-                    throw .expired(error)
-                default:
-                    throw .internalError(error)
-                }
-            case .noConnection(let error):
+            if let error = error as? URLError, error.code == .notConnectedToInternet {
                 throw .noConnection(error)
-            case .internalError(let error):
+            } else {
                 await authenticationLostSubject.yield(())
                 throw .internalError(error)
             }
         }
-        accessTokenValue = response.accessToken
-        await persistency.update(value: response.refreshToken, for: Schema.refreshToken.unkeyed)
+        let session: Components.Schemas.Session
+        switch response {
+        case .ok(let sessionFromApi):
+            switch sessionFromApi.body {
+            case .json(let payload):
+                session = payload.response
+            }
+        case .unauthorized(let error):
+            await authenticationLostSubject.yield(())
+            throw .expired(ErrorContext(context: error))
+        case .conflict, .internalServerError, .undocumented:
+            await authenticationLostSubject.yield(())
+            throw .internalError(ErrorContext(context: response))
+        }
+        accessTokenValue = session.accessToken
+        await persistency.update(value: session.refreshToken, for: Schema.refreshToken.unkeyed)
     }
 }

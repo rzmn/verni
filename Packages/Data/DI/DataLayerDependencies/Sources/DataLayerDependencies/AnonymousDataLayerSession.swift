@@ -1,8 +1,7 @@
 import Api
-import DataTransferObjects
 import PersistentStorage
 
 public protocol AnonymousDataLayerSession: Sendable {
-    var api: ApiProtocol { get }
+    var api: APIProtocol { get }
     var authenticator: AuthenticatedDataLayerSessionFactory { get }
 }

@@ -1,6 +1,5 @@
 import AsyncExtensions
 internal import Base
-import DataTransferObjects
 import Foundation
 import Infrastructure
 import Logging
@@ -14,7 +13,7 @@ typealias Expression = SQLite.Expression
     private(set) var database: Connection?
 
     private let encoder = JSONEncoder()
-    private let hostId: UserDto.Identifier
+    private let hostId: HostId
     private var currentRefreshToken: String!
     private let inMemoryCache = InMemoryCache()
     private let invalidator: @StorageActor @Sendable () -> Void
@@ -22,7 +21,7 @@ typealias Expression = SQLite.Expression
     init(
         database: Connection,
         invalidator: @escaping @StorageActor @Sendable () -> Void,
-        hostId: UserDto.Identifier,
+        hostId: HostId,
         refreshToken: String?,
         logger: Logger
     ) async throws {
@@ -49,7 +48,7 @@ extension SQLitePersistency: Persistency {
         }
     }
 
-    var userId: UserDto.Identifier {
+    var userId: HostId {
         get async {
             hostId
         }

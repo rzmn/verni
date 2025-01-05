@@ -71,7 +71,9 @@ extension RetryingMiddleware: ClientMiddleware {
             logI { "attempt \(attempt)" }
             let (response, responseBody): (HTTPResponse, HTTPBody?)
             if signals.contains(.errorThrown) {
-                do { (response, responseBody) = try await next(request, body, baseURL) } catch {
+                do {
+                    (response, responseBody) = try await next(request, body, baseURL)
+                } catch {
                     if attempt == maxAttemptCount {
                         throw error
                     } else {
@@ -84,11 +86,11 @@ extension RetryingMiddleware: ClientMiddleware {
                 (response, responseBody) = try await next(request, body, baseURL)
             }
             if signals.contains(response.status.code) && attempt < maxAttemptCount {
-                logE { "retrying with code \(response.status.code)" }
+                logI { "retrying with code \(response.status.code)" }
                 try await willRetry()
                 continue
             } else {
-                logE { "returning the received response, either because of success or ran out of attempts." }
+                logI { "returning the received response, either because of success or ran out of attempts." }
                 return (response, responseBody)
             }
         }
@@ -108,6 +110,7 @@ extension Set where Element == RetryingMiddleware.RetryableSignal {
                 break
             }
         }
+        return false
     }
 }
 

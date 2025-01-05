@@ -16,7 +16,6 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../PersistentStorage"),
-        .package(path: "../../DataTransferObjects"),
         .package(path: "../../../Infrastructure/Logging"),
         .package(path: "../../../Infrastructure/Filesystem"),
         .package(path: "../../../Infrastructure/DI/Infrastructure"),
@@ -27,7 +26,6 @@ let package = Package(
         .target(
             name: "PersistentStorageSQLite",
             dependencies: [
-                "DataTransferObjects",
                 "Logging",
                 "Filesystem",
                 "PersistentStorage",
@@ -38,7 +36,6 @@ let package = Package(
         .testTarget(
             name: "PersistentStorageSQLiteTests",
             dependencies: [
-                "DataTransferObjects",
                 "Logging",
                 "PersistentStorage",
                 "PersistentStorageSQLite",

@@ -1,10 +1,8 @@
 import Api
-import DataTransferObjects
 import PersistentStorage
 import DataLayerDependencies
 import AsyncExtensions
 import Logging
-internal import ApiService
 internal import DefaultApiImplementation
 internal import Base
 
@@ -12,21 +10,18 @@ final class DefaultAuthenticatedSessionFactory {
     private let logger: Logger
     private let persistencyFactory: PersistencyFactory
     private let sessionHost: SessionHost
-    private let apiServiceFactory: ApiServiceFactory
     private let taskFactory: TaskFactory
-    private let api: ApiProtocol
+    private let api: APIProtocol
 
     init(
-        api: ApiProtocol,
+        api: APIProtocol,
         taskFactory: TaskFactory,
         logger: Logger,
-        apiServiceFactory: ApiServiceFactory,
         persistencyFactory: PersistencyFactory
     ) {
         self.api = api
         self.taskFactory = taskFactory
         self.logger = logger
-        self.apiServiceFactory = apiServiceFactory
         self.persistencyFactory = persistencyFactory
         self.sessionHost = SessionHost()
     }
@@ -50,7 +45,7 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
     }
 
     func createAuthorizedSession(
-        token: AuthTokenDto
+        token: Components.Schemas.Session
     ) async throws -> AuthenticatedDataLayerSession {
         let persistency = try await persistencyFactory.create(
             host: token.id,
@@ -58,10 +53,7 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
                 content:
                     Schema.refreshToken,
                     Schema.profile,
-                    Schema.users,
-                    Schema.spendingCounterparties,
-                    Schema.spendingsHistory,
-                    Schema.friends
+                    Schema.users
             ),
             refreshToken: token.refreshToken
         )
@@ -83,15 +75,15 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
             authenticationLostSubject: authenticationLostSubject,
             accessToken: accessToken
         )
-        let apiService = apiServiceFactory.create(tokenRefresher: tokenRefresher)
         let apiFactory = DefaultApiFactory(
-            service: apiService,
+            url: Constants.apiEndpoint,
             taskFactory: taskFactory,
-            logger: logger
+            logger: logger,
+            tokenRepository: tokenRefresher
         )
         return DefaultAuthenticatedSession(
             api: apiFactory.create(),
-            longPoll: apiFactory.longPoll(),
+            remoteUpdates: apiFactory.remoteUpdates(),
             persistency: persistency,
             authenticationLostHandler: authenticationLostSubject,
             sessionHost: sessionHost

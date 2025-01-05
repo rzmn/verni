@@ -17,12 +17,14 @@ let package = Package(
     dependencies: [
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/DataTransferObjects"),
     ],
     targets: [
         .target(
             name: "ApiDomainConvenience",
-            dependencies: ["Domain", "Api", "DataTransferObjects"]
+            dependencies: [
+                "Domain",
+                "Api",
+            ]
         )
     ]
 )

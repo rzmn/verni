@@ -3,11 +3,10 @@ import HTTPTypes
 import Logging
 import Foundation
 import AsyncExtensions
-import ApiService
 import Base
 
 actor RefreshTokenMiddleware {
-    let refresher: TokenRefresher
+    let tokenRepository: RefreshTokenRepository
     let taskFactory: TaskFactory
     let logger: Logger
 
@@ -26,13 +25,14 @@ actor RefreshTokenMiddleware {
     }
 
     init(
-        refresher: TokenRefresher,
+        tokenRepository: RefreshTokenRepository,
         taskFactory: TaskFactory,
         logger: Logger
     ) {
-        self.refresher = refresher
+        self.tokenRepository = tokenRepository
         self.taskFactory = taskFactory
         self.logger = logger
+        self.state = .initial
     }
 }
 
@@ -64,7 +64,7 @@ extension RefreshTokenMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         switch state {
         case .initial:
-            if let token = await refresher.accessToken() {
+            if let token = await tokenRepository.accessToken() {
                 state = .authenticated(token: token)
                 return try await intercept(
                     request,
@@ -105,7 +105,13 @@ extension RefreshTokenMiddleware: ClientMiddleware {
                         next: next
                     )
                 } else {
-                    return (response, body)
+                    return try await next(
+                        modify(request) {
+                            $0.headerFields[.authorization] = "Bearer \(token)"
+                        },
+                        body,
+                        baseURL
+                    )
                 }
             } catch {
                 throw error
@@ -144,8 +150,8 @@ extension RefreshTokenMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         func refresh() async -> State {
             do {
-                try await refresher.refreshTokens()
-                if let token = await refresher.accessToken() {
+                try await tokenRepository.refreshTokens()
+                if let token = await tokenRepository.accessToken() {
                     return .authenticated(token: token)
                 } else {
                     return .unauthorized(reason: "missing token data after refresh")

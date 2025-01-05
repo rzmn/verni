@@ -19,7 +19,6 @@ let package = Package(
         .package(path: "../../Domain"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/OnDemandPolling"),
-        .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
         .package(path: "../../../Data/Implementations/MockApiImplementation"),
@@ -32,7 +31,6 @@ let package = Package(
                 "Domain",
                 "Api",
                 "ApiDomainConvenience",
-                "DataTransferObjects",
                 "PersistentStorage",
                 "OnDemandPolling",
             ]
@@ -43,7 +41,6 @@ let package = Package(
                 "Domain",
                 "Api",
                 "ApiDomainConvenience",
-                "DataTransferObjects",
                 "PersistentStorage",
                 "DefaultSpendingsRepositoryImplementation",
                 "MockPersistentStorage",

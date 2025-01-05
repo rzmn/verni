@@ -5,7 +5,6 @@ import Base
 import Logging
 import DataLayerDependencies
 internal import ApiDomainConvenience
-internal import DataTransferObjects
 
 public actor DefaultLogoutUseCase {
     public let logger: Logger

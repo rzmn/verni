@@ -3,7 +3,6 @@ import Base
 import TestInfrastructure
 import Filesystem
 import Foundation
-import DataTransferObjects
 import SQLite
 import PersistentStorage
 @testable import PersistentStorageSQLite

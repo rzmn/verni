@@ -1,7 +1,6 @@
 import Testing
 import Api
 import Domain
-import DataTransferObjects
 import Foundation
 import DefaultUsersRepositoryImplementation
 import Base

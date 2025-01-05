@@ -1,5 +1,4 @@
 import Api
-import DataTransferObjects
 import PersistentStorage
 
 public enum DataLayerAwakeError: Error, Sendable {
@@ -11,6 +10,6 @@ public protocol AuthenticatedDataLayerSessionFactory: Sendable {
     func awakeAuthorizedSession() async throws(DataLayerAwakeError) -> AuthenticatedDataLayerSession
 
     func createAuthorizedSession(
-        token: AuthTokenDto
+        token: Components.Schemas.Session
     ) async throws -> AuthenticatedDataLayerSession
 }

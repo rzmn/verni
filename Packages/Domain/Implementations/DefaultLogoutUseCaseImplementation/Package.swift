@@ -20,7 +20,6 @@ let package = Package(
         .package(path: "../../../Data/DI/DataLayerDependencies"),
         .package(path: "../../../Data/Api"),
         .package(path: "../../../Data/Implementations/MockApiImplementation"),
-        .package(path: "../../../Data/DataTransferObjects"),
         .package(path: "../../../Data/PersistentStorage"),
         .package(path: "../../../Data/Implementations/MockPersistentStorage"),
         .package(path: "../../../Infrastructure/Logging"),
@@ -33,7 +32,6 @@ let package = Package(
                 "Domain",
                 "Api",
                 "ApiDomainConvenience",
-                "DataTransferObjects",
                 "PersistentStorage",
                 "Logging",
             ]
@@ -44,7 +42,6 @@ let package = Package(
                 "Domain",
                 "Api",
                 "ApiDomainConvenience",
-                "DataTransferObjects",
                 "PersistentStorage",
                 "DefaultLogoutUseCaseImplementation",
                 "MockPersistentStorage",

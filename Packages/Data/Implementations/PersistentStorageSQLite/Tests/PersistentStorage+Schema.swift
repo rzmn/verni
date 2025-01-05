@@ -1,5 +1,4 @@
 import PersistentStorage
-import DataTransferObjects
 
 extension PersistencyFactory {
     func create(

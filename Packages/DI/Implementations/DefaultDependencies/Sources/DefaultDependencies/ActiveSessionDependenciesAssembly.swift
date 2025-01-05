@@ -4,14 +4,10 @@ import AsyncExtensions
 internal import Logging
 internal import Base
 internal import Api
-internal import ApiService
 internal import DefaultApiImplementation
-internal import Networking
 internal import PersistentStorage
 internal import PersistentStorageSQLite
 internal import DefaultAuthUseCaseImplementation
-internal import DefaultApiServiceImplementation
-internal import DefaultNetworkingImplementation
 internal import DefaultUsersRepositoryImplementation
 internal import DefaultFriendsRepositoryImplementation
 internal import DefaultFriendInteractionsUseCaseImplementation

@@ -16,14 +16,12 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../PersistentStorage"),
-        .package(path: "../../DataTransferObjects"),
         .package(path: "../../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
             name: "MockPersistentStorage",
             dependencies: [
-                "DataTransferObjects",
                 "Logging",
                 "PersistentStorage",
             ]

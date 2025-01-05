@@ -1224,3 +1224,18 @@ components:
         - alreadyConfirmed
         - incorrectCredentials
         - privacyViolation
+    SpendingGroupsUpdate:
+      type: object
+      description: Spending groups update
+      properties:
+        update:
+          type: object
+          properties:
+            spendingGroups:
+              type: array
+              items:
+                $ref: "#/components/schemas/SpendingsGroup"
+          required:
+            - spendingGroups
+      required:
+        - update
