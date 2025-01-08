@@ -6,14 +6,14 @@ import AsyncExtensions
 final class DefaultAuthenticatedSession: AuthenticatedDataLayerSession {
     let api: APIProtocol
     let remoteUpdates: RemoteUpdatesService
-    let persistency: Persistency
+    let persistency: UserStorage
     let authenticationLostHandler: any AsyncBroadcast<Void>
     private let sessionHost: SessionHost
 
     init(
         api: APIProtocol,
         remoteUpdates: RemoteUpdatesService,
-        persistency: Persistency,
+        persistency: UserStorage,
         authenticationLostHandler: any AsyncBroadcast<Void>,
         sessionHost: SessionHost
     ) {

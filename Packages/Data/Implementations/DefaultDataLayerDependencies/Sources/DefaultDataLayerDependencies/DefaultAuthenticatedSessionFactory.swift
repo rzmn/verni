@@ -8,7 +8,7 @@ internal import Base
 
 final class DefaultAuthenticatedSessionFactory {
     private let logger: Logger
-    private let persistencyFactory: PersistencyFactory
+    private let persistencyFactory: StorageFactory
     private let sessionHost: SessionHost
     private let taskFactory: TaskFactory
     private let api: APIProtocol
@@ -17,7 +17,7 @@ final class DefaultAuthenticatedSessionFactory {
         api: APIProtocol,
         taskFactory: TaskFactory,
         logger: Logger,
-        persistencyFactory: PersistencyFactory
+        persistencyFactory: StorageFactory
     ) {
         self.api = api
         self.taskFactory = taskFactory
@@ -60,7 +60,7 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
     }
 
     private func buildSession(
-        persistency: Persistency,
+        persistency: UserStorage,
         accessToken: String?
     ) async -> AuthenticatedDataLayerSession {
         let authenticationLostSubject = AsyncSubject<Void>(

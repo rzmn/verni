@@ -16,6 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../Domain"),
+        .package(path: "../../../Infrastructure/Base"),
         .package(path: "../../../Data/Api"),
     ],
     targets: [
@@ -23,6 +24,7 @@ let package = Package(
             name: "ApiDomainConvenience",
             dependencies: [
                 "Domain",
+                "Base",
                 "Api",
             ]
         )

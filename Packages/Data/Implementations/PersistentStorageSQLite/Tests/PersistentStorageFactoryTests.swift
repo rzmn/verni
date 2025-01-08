@@ -20,7 +20,7 @@ struct PersistentStorageFactoryTests {
             }
             $0.testFileManager = manager
         }
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -56,7 +56,7 @@ struct PersistentStorageFactoryTests {
             }
             $0.testFileManager = manager
         }
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructureWithFailingCreateDirectory.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructureWithFailingCreateDirectory.taskFactory,
@@ -64,7 +64,7 @@ struct PersistentStorageFactoryTests {
         )
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
-        let _ = try await SQLitePersistencyFactory(
+        let _ = try await SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -86,7 +86,7 @@ struct PersistentStorageFactoryTests {
         // given
 
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -116,7 +116,7 @@ struct PersistentStorageFactoryTests {
             }
             $0.testFileManager = manager
         }
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructureWithFailingListDirectory.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructureWithFailingListDirectory.taskFactory,
@@ -124,7 +124,7 @@ struct PersistentStorageFactoryTests {
         )
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
-        let _ = try await SQLitePersistencyFactory(
+        let _ = try await SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -162,7 +162,7 @@ struct PersistentStorageFactoryTests {
         )
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -185,7 +185,7 @@ struct PersistentStorageFactoryTests {
         // given
 
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -212,7 +212,7 @@ struct PersistentStorageFactoryTests {
         // given
 
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -254,7 +254,7 @@ struct PersistentStorageFactoryTests {
         )
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -292,7 +292,7 @@ struct PersistentStorageFactoryTests {
         // when
 
         do {
-            let _ = try await SQLitePersistency(
+            let _ = try await SQLiteUserStorage(
                 database: connection,
                 invalidator: {},
                 hostId: host.id,
@@ -329,7 +329,7 @@ struct PersistentStorageFactoryTests {
         // when
 
         do {
-            let _ = try await SQLitePersistency(
+            let _ = try await SQLiteUserStorage(
                 database: connection,
                 invalidator: {},
                 hostId: host.id,
@@ -348,7 +348,7 @@ struct PersistentStorageFactoryTests {
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -359,7 +359,7 @@ struct PersistentStorageFactoryTests {
 
         let persistency = try await persistencyFactory
             .create(host: host, refreshToken: refreshToken)
-        if let connection = (persistency as? SQLitePersistency)?.database {
+        if let connection = (persistency as? SQLiteUserStorage)?.database {
             try connection.run(
                 Table(Schema.refreshToken.id)
                     .delete()
@@ -393,7 +393,7 @@ struct PersistentStorageFactoryTests {
         )
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -435,7 +435,7 @@ struct PersistentStorageFactoryTests {
         )
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,

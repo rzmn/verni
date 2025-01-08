@@ -1,12 +1,13 @@
 import AsyncExtensions
-internal import Base
 import Filesystem
 import Foundation
 import Logging
 import PersistentStorage
+import Api
+internal import Base
 internal import SQLite
 
-public actor SQLitePersistencyFactory {
+public actor SQLiteStorageFactory {
     public let logger: Logger
     let dbDirectory: URL
     private let taskFactory: TaskFactory
@@ -25,12 +26,52 @@ public actor SQLitePersistencyFactory {
     }
 }
 
-extension SQLitePersistencyFactory: PersistencyFactory {
-    public func awake(host: HostId) async -> Persistency? {
+extension SQLiteStorageFactory: StorageFactory {
+    nonisolated public func sandbox() throws -> SandboxStorage {
+        MustInitSandboxStorage { [unowned self] in
+            try await doProvideSandbox()
+        }
+    }
+    
+    @StorageActor private func doProvideSandbox() async throws -> SandboxStorage {
+        logI { "providing sandbox storage..." }
+        let pathManager = try createDatabasePathManager()
+        logI { "looking for existed storage" }
+        let item: SqliteDbPathManager.Item
+        let connection: Connection
+        if let existed = try pathManager.items.first(where: { $0.id == .localStorage }) {
+            logI { "found storage" }
+            item = existed
+            connection = try item.connection()
+            logI { "created connection" }
+        } else {
+            item = try pathManager.create(id: .localStorage)
+            logI { "created storage" }
+            do {
+                connection = try item.connection()
+                try createTablesForSandbox(database: connection)
+                logI { "storage successfully prepared" }
+            } catch {
+                logI { "failed to prepage storage, invalidating, error: \(error)" }
+                pathManager.invalidate(id: .localStorage)
+                throw error
+            }
+        }
+        return try SQLiteSandboxStorage(
+            logger: logger,
+            database: try item.connection(),
+            invalidator: invalidator(
+                for: .localStorage,
+                pathManager: pathManager
+            )
+        )
+    }
+    
+    public func awake(host: HostId) async -> UserStorage? {
         await doAwake(host: host)
     }
 
-    @StorageActor private func doAwake(host: HostId) async -> Persistency? {
+    @StorageActor private func doAwake(host: HostId) async -> UserStorage? {
         logI { "awaking persistence..." }
         let pathManager: any DbPathManager<SqliteDbPathManager.Item>
         do {
@@ -52,7 +93,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
         logI { "found item: \(item)" }
         do {
-            return try await SQLitePersistency(
+            return try await SQLiteUserStorage(
                 database: try item.connection(),
                 invalidator: invalidator(
                     for: host,
@@ -72,7 +113,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         host: HostId,
         refreshToken: String,
         operations: [PersistentStorage.Operation]
-    ) async throws -> Persistency {
+    ) async throws -> UserStorage {
         try await doCreate(host: host, refreshToken: refreshToken, operations: operations)
     }
 
@@ -80,24 +121,24 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         host: HostId,
         refreshToken: String,
         operations: [Operation]
-    ) async throws -> Persistency {
+    ) async throws -> UserStorage {
         logI { "creating persistence..." }
         let pathManager = try createDatabasePathManager()
         let database = try pathManager.create(id: host).connection()
         do {
-            try createTables(for: database)
+            try createTablesForUser(database: database)
         } catch {
             pathManager.invalidate(id: host)
             throw error
         }
-        return try await SQLitePersistency(
+        return try await SQLiteUserStorage(
             database: database,
             invalidator: invalidator(
                 for: host,
                 pathManager: pathManager
             ),
             hostId: host,
-            initialData: SQLitePersistency.InitialData(
+            initialData: SQLiteUserStorage.InitialData(
                 refreshToken: refreshToken,
                 operations: operations
             ),
@@ -115,9 +156,26 @@ extension SQLitePersistencyFactory: PersistencyFactory {
             pathManager: fileManager
         )
     }
+    
+    @StorageActor private func createTablesForSandbox(
+        database: Connection
+    ) throws {
+        let operations = Schema.operations
+        try database.run(
+            Table(operations.tableName).create { table in
+                table.column(
+                    Expression<CodableBlob<String>>(operations.identifierKey),
+                    primaryKey: true
+                )
+                table.column(
+                    Expression<CodableBlob<Components.Schemas.Operation>>(operations.valueKey)
+                )
+            }
+        )
+    }
 
-    @StorageActor private func createTables(
-        for database: Connection
+    @StorageActor private func createTablesForUser(
+        database: Connection
     ) throws {
         let operations = Schema.operations
         try database.run(
@@ -139,7 +197,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                     primaryKey: true
                 )
                 table.column(
-                    Expression<CodableBlob<PersistentStorage.Operation>>(refreshToken.valueKey)
+                    Expression<CodableBlob<String>>(refreshToken.valueKey)
                 )
             }
         )
@@ -151,7 +209,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                     primaryKey: true
                 )
                 table.column(
-                    Expression<CodableBlob<PersistentStorage.Operation>>(deviceId.valueKey)
+                    Expression<CodableBlob<String>>(deviceId.valueKey)
                 )
             }
         )
@@ -167,4 +225,4 @@ extension SQLitePersistencyFactory: PersistencyFactory {
     }
 }
 
-extension SQLitePersistencyFactory: Loggable {}
+extension SQLiteStorageFactory: Loggable {}

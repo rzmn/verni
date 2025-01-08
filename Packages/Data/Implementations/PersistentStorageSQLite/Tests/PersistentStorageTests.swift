@@ -15,7 +15,7 @@ import SQLite
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -40,7 +40,7 @@ import SQLite
         let refreshToken = UUID().uuidString
         let newRefreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -65,7 +65,7 @@ import SQLite
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -92,7 +92,7 @@ import SQLite
         let refreshToken = UUID().uuidString
         let newRefreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -129,7 +129,7 @@ import SQLite
         )
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -154,7 +154,7 @@ import SQLite
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -178,7 +178,7 @@ import SQLite
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -213,7 +213,7 @@ import SQLite
         )
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,
@@ -242,7 +242,7 @@ import SQLite
         let host = UUID().uuidString
         let refreshToken = UUID().uuidString
         let infrastructure = TestInfrastructureLayer()
-        let persistencyFactory = try SQLitePersistencyFactory(
+        let persistencyFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger,
             dbDirectory: FileManager.default.temporaryDirectory.appending(component: UUID().uuidString),
             taskFactory: infrastructure.taskFactory,

@@ -16,6 +16,7 @@ struct Constants {
 }
 
 public final class DefaultAnonymousSession: AnonymousDataLayerSession {
+    public let storage: SandboxStorage
     public let authenticator: AuthenticatedDataLayerSessionFactory
     public let api: APIProtocol
 
@@ -31,18 +32,20 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
             logger: logger,
             tokenRepository: nil
         ).create()
+        let storageFactory = try SQLiteStorageFactory(
+            logger: logger.with(
+                prefix: "🗄️"
+            ),
+            dbDirectory: permanentCacheDirectory,
+            taskFactory: infrastructure.taskFactory,
+            fileManager: infrastructure.fileManager
+        )
+        storage = try storageFactory.sandbox()
         authenticator = DefaultAuthenticatedSessionFactory(
             api: api,
             taskFactory: infrastructure.taskFactory,
             logger: logger,
-            persistencyFactory: try SQLitePersistencyFactory(
-                logger: logger.with(
-                    prefix: "🗄️"
-                ),
-                dbDirectory: permanentCacheDirectory,
-                taskFactory: infrastructure.taskFactory,
-                fileManager: infrastructure.fileManager
-            )
+            persistencyFactory: storageFactory
         )
     }
 }

@@ -5,9 +5,9 @@ import Api
 internal import ApiDomainConvenience
 
 public actor DefaultUsersOfflineRepository {
-    private let persistency: Persistency
+    private let persistency: UserStorage
 
-    public init(persistency: Persistency) {
+    public init(persistency: UserStorage) {
         self.persistency = persistency
     }
 }

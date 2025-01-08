@@ -1,10 +1,10 @@
 import PersistentStorage
 
-extension PersistencyFactory {
+extension StorageFactory {
     func create(
         host: UserDto.Identifier,
         refreshToken: String
-    ) async throws -> Persistency {
+    ) async throws -> UserStorage {
         return try await create(
             host: host,
             descriptors: DescriptorTuple(

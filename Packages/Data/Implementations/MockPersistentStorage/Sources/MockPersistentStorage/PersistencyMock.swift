@@ -4,7 +4,7 @@ private struct AnyBox: @unchecked Sendable {
     let value: Any?
 }
 
-actor PersistencyMock: Persistency {
+actor PersistencyMock: UserStorage {
     subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
         index: Index<D>
     ) -> Value? where D.Key == Key, D.Value == Value {

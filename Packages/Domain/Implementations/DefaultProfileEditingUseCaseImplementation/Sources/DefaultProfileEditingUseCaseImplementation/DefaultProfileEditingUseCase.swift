@@ -8,14 +8,14 @@ internal import ApiDomainConvenience
 
 public actor DefaultProfileEditingUseCase {
     private let api: ApiProtocol
-    private let persistency: Persistency
+    private let persistency: UserStorage
     private let profile: ExternallyUpdatable<Domain.Profile>
     private let taskFactory: TaskFactory
     private let avatarsRepository: AvatarsOfflineMutableRepository
 
     public init(
         api: ApiProtocol,
-        persistency: Persistency,
+        persistency: UserStorage,
         taskFactory: TaskFactory,
         avatarsRepository: AvatarsOfflineMutableRepository,
         profile: ExternallyUpdatable<Domain.Profile>

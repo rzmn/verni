@@ -5,20 +5,20 @@ import Base
 import Foundation
 import Logging
 import DataLayerDependencies
-import Infrastructure
 import Api
 internal import ApiDomainConvenience
 
 actor Engine {
-    private let infrastructure: InfrastructureLayer
     private let data: AnonymousDataLayerSession
 
-    init(infrastructure: InfrastructureLayer) {
-        self.infrastructure = infrastructure
+    init(
+        data: AnonymousDataLayerSession
+    ) {
+        self.data = data
     }
 
     func start() {
-
+        
     }
 
     func push(operation: Components.Schemas.Operation) async {
@@ -26,7 +26,6 @@ actor Engine {
     }
 
     func push(operations: [Components.Schemas.Operation]) async {
-        infrastructure.
     }
 }
 

@@ -7,13 +7,13 @@ internal import DefaultApiImplementation
 
 actor RefreshTokenManager {
     private let api: APIProtocol
-    private let persistency: Persistency
+    private let persistency: UserStorage
     private var accessTokenValue: String?
     private let authenticationLostSubject: AsyncSubject<Void>
 
     init(
         api: APIProtocol,
-        persistency: Persistency,
+        persistency: UserStorage,
         authenticationLostSubject: AsyncSubject<Void>,
         accessToken: String?
     ) {

@@ -41,13 +41,13 @@ private final class MockDataLayerSession: AuthenticatedDataLayerSession {
         MockLongPoll()
     }
     
-    let persistency: any PersistentStorage.Persistency
+    let persistency: any PersistentStorage.UserStorage
     
     var authenticationLostHandler: any AsyncExtensions.AsyncBroadcast<Void> {
         fatalError()
     }
     
-    init(persistency: any PersistentStorage.Persistency = PersistencyMock()) {
+    init(persistency: any PersistentStorage.UserStorage = PersistencyMock()) {
         self.persistency = persistency
     }
     

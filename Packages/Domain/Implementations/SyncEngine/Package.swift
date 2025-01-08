@@ -31,6 +31,7 @@ let package = Package(
             dependencies: [
                 "Domain",
                 "Api",
+                "DataLayerDependencies",
                 "ApiDomainConvenience",
                 "PersistentStorage",
                 "Logging",
