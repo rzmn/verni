@@ -8,8 +8,6 @@ struct Push: Decodable {
 }
 
 enum PushPayload {
-    case friendRequestHasBeenAccepted(FriendRequestHasBeenAccepted)
-    case gotFriendRequest(GotFriendRequest)
     case newExpenseReceived(NewExpenseReceived)
 }
 
@@ -21,7 +19,6 @@ extension PushPayload: Decodable {
 
     enum NotificationType: Int, Codable {
         case friendRequestHasBeenAccepted = 0
-        case gotFriendRequest = 1
         case newExpenseReceived = 2
     }
 
@@ -29,14 +26,6 @@ extension PushPayload: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(NotificationType.self, forKey: .type)
         switch type {
-        case .friendRequestHasBeenAccepted:
-            self = .friendRequestHasBeenAccepted(
-                try container.decode(FriendRequestHasBeenAccepted.self, forKey: .payload)
-            )
-        case .gotFriendRequest:
-            self = .gotFriendRequest(
-                try container.decode(GotFriendRequest.self, forKey: .payload)
-            )
         case .newExpenseReceived:
             self = .newExpenseReceived(
                 try container.decode(NewExpenseReceived.self, forKey: .payload)

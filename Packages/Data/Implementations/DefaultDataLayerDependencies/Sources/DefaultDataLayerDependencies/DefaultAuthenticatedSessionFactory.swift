@@ -45,17 +45,15 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
     }
 
     func createAuthorizedSession(
-        token: Components.Schemas.Session
+        session token: Components.Schemas.Session,
+        operations: [Components.Schemas.Operation]
     ) async throws -> AuthenticatedDataLayerSession {
         let persistency = try await persistencyFactory.create(
             host: token.id,
-            descriptors: DescriptorTuple(
-                content:
-                    Schema.refreshToken,
-                    Schema.profile,
-                    Schema.users
-            ),
-            refreshToken: token.refreshToken
+            refreshToken: token.refreshToken,
+            operations: operations.map {
+                Operation(kind: .pendingConfirm, payload: $0)
+            }
         )
         await sessionHost.sessionStarted(host: token.id)
         return await buildSession(persistency: persistency, accessToken: token.accessToken)

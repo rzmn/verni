@@ -3,13 +3,13 @@ import Api
 import Domain
 
 extension Decimal {
-    public init(dto: CostDto) {
+    public init(dto: Int64) {
         self = Decimal(dto) / 100
     }
 }
 
-extension CostDto {
-    public init(cost: Cost) {
+extension Int64 {
+    public init(cost: Amount) {
         self = Int64((NSDecimalNumber(decimal: cost).doubleValue * 100))
     }
 }

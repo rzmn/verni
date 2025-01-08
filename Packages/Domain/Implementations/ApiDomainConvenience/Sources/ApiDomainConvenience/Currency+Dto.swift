@@ -2,7 +2,7 @@ import Domain
 import Api
 
 extension Currency {
-    public init(dto: CurrencyDto) {
+    public init(dto: String) {
         switch dto {
         case "RUB":
             self = .russianRuble

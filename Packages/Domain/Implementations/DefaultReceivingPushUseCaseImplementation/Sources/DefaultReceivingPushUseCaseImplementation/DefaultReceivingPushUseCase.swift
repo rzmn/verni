@@ -8,20 +8,17 @@ public actor DefaultReceivingPushUseCase {
     public let logger: Logger
 
     private let usersRepository: UsersRepository
-    private let friendsRepository: FriendsRepository
     private let spendingsRepository: SpendingsRepository
 
     private let decoder = JSONDecoder()
 
     public init(
         usersRepository: UsersRepository,
-        friendsRepository: FriendsRepository,
         spendingsRepository: SpendingsRepository,
         logger: Logger
     ) {
         self.logger = logger
         self.usersRepository = usersRepository
-        self.friendsRepository = friendsRepository
         self.spendingsRepository = spendingsRepository
     }
 }
@@ -50,53 +47,9 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
             throw .internalError(InternalError.error("failed to convert push data to typed data", underlying: error))
         }
         switch payload {
-        case .friendRequestHasBeenAccepted(let payload):
-            return try await handle(payload: payload)
-        case .gotFriendRequest(let payload):
-            return try await handle(payload: payload)
         case .newExpenseReceived(let payload):
             return try await handle(payload: payload)
         }
-    }
-
-    private func handle(
-        payload: PushPayload.FriendRequestHasBeenAccepted
-    ) async throws(ProcessPushError) -> PushContent {
-        Task {
-            try? await friendsRepository.refreshFriends(ofKind: .all)
-        }
-        let user: User
-        do {
-            user = try await usersRepository.getUser(id: payload.target)
-        } catch {
-            logE { "failed to get info error: \(error)" }
-            throw .internalError(InternalError.error("failed to get user info", underlying: error))
-        }
-        return PushContent(
-            title: "friendRequestHasBeenAccepted",
-            subtitle: "subtitle!!",
-            body: "from: \(user.displayName)"
-        )
-    }
-
-    private func handle(
-        payload: PushPayload.GotFriendRequest
-    ) async throws(ProcessPushError) -> PushContent {
-        Task {
-            try? await friendsRepository.refreshFriends(ofKind: .all)
-        }
-        let user: User
-        do {
-            user = try await usersRepository.getUser(id: payload.sender)
-        } catch {
-            logE { "failed to get info error: \(error)" }
-            throw .internalError(InternalError.error("failed to get user info", underlying: error))
-        }
-        return PushContent(
-            title: "gotFriendRequest",
-            subtitle: "subtitle!!",
-            body: "from: \(user.displayName)"
-        )
     }
 
     private func handle(

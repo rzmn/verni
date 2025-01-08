@@ -9,11 +9,7 @@ internal import PersistentStorage
 internal import PersistentStorageSQLite
 internal import DefaultAuthUseCaseImplementation
 internal import DefaultUsersRepositoryImplementation
-internal import DefaultFriendsRepositoryImplementation
-internal import DefaultFriendInteractionsUseCaseImplementation
 internal import DefaultQRInviteUseCaseImplementation
-internal import DefaultSpendingInteractionsUseCaseImplementation
-internal import DefaultSpendingsRepositoryImplementation
 internal import DefaultProfileEditingUseCaseImplementation
 internal import DefaultValidationUseCasesImplementation
 internal import DefaultAvatarsRepositoryImplementation
@@ -36,10 +32,6 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     let defaultDependencies: DefaultDependenciesAssembly
     let profileRepository: ProfileRepository
     let usersRepository: UsersRepository
-    let spendingsRepository: SpendingsRepository
-    let friendListRepository: FriendsRepository
-    let spendingsOfflineRepository: SpendingsOfflineRepository
-    let friendsOfflineRepository: FriendsOfflineRepository
     let profileOfflineRepository: ProfileOfflineRepository
     let usersOfflineRepository: UsersOfflineRepository
 
@@ -65,10 +57,6 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         )
         self.dataLayer = dataLayer
         userId = await dataLayer.persistency.userId
-        let spendingsOfflineRepository = DefaultSpendingsOfflineRepository(persistency: dataLayer.persistency)
-        self.spendingsOfflineRepository = spendingsOfflineRepository
-        let friendsOfflineRepository = DefaultFriendsOfflineRepository(persistency: dataLayer.persistency)
-        self.friendsOfflineRepository = friendsOfflineRepository
         let profileOfflineRepository = DefaultProfileOfflineRepository(persistency: dataLayer.persistency)
         self.profileOfflineRepository = profileOfflineRepository
         let usersOfflineRepository = DefaultUsersOfflineRepository(persistency: dataLayer.persistency)
@@ -86,31 +74,11 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
             offline: usersOfflineRepository,
             taskFactory: defaultDependencies.infrastructure.taskFactory
         )
-        spendingsRepository = await DefaultSpendingsRepository(
-            api: dataLayer.api,
-            longPoll: dataLayer.longPoll,
-            logger: logger.with(prefix: "💸"),
-            offline: spendingsOfflineRepository,
-            taskFactory: defaultDependencies.infrastructure.taskFactory
-        )
-        friendListRepository = DefaultFriendsRepository(
-            api: dataLayer.api,
-            longPoll: dataLayer.longPoll,
-            logger: logger.with(prefix: "🤝"),
-            offline: friendsOfflineRepository,
-            taskFactory: defaultDependencies.infrastructure.taskFactory
-        )
         logoutUseCase = await DefaultLogoutUseCase(
             session: dataLayer,
             shouldLogout: logoutSubject,
             taskFactory: defaultDependencies.infrastructure.taskFactory,
             logger: logoutLogger
-        )
-    }
-
-    func spendingInteractionsUseCase() -> SpendingInteractionsUseCase {
-        DefaultSpendingInteractionsUseCase(
-            api: dataLayer.api
         )
     }
 
@@ -131,12 +99,6 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
         )
     }
 
-    func friendInterationsUseCase() -> FriendInteractionsUseCase {
-        DefaultFriendInteractionsUseCase(
-            api: dataLayer.api
-        )
-    }
-
     func emailConfirmationUseCase() -> EmailConfirmationUseCase {
         DefaultEmailConfirmationUseCase(
             api: dataLayer.api
@@ -153,7 +115,6 @@ final class ActiveSessionDependenciesAssembly: AuthenticatedDomainLayerSession {
     func receivingPushUseCase() -> ReceivingPushUseCase {
         DefaultReceivingPushUseCase(
             usersRepository: usersRepository,
-            friendsRepository: friendListRepository,
             spendingsRepository: spendingsRepository,
             logger: logger.with(prefix: "🔔")
         )

@@ -4,6 +4,7 @@ import Logging
 import Foundation
 import AsyncExtensions
 import Base
+import Api
 
 actor RefreshTokenMiddleware {
     let tokenRepository: RefreshTokenRepository
@@ -159,7 +160,7 @@ extension RefreshTokenMiddleware: ClientMiddleware {
             } catch {
                 switch error {
                 case .noConnection:
-                    return .refreshFailed(requestId: requestID, error: URLError(.notConnectedToInternet))
+                    return .refreshFailed(requestId: requestID, error: URLError.noConnection)
                 case .expired(let error):
                     return .unauthorized(reason: "token expired: \(error)")
                 case .internalError(let error):

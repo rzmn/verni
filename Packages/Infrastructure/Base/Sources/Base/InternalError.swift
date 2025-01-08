@@ -8,6 +8,14 @@ public struct ErrorContext<T: Sendable>: Sendable, Error {
     }
 }
 
+public struct UndocumentedBehaviour<T: Sendable>: Sendable, Error {
+    public let context: T
+
+    public init(context: T) {
+        self.context = context
+    }
+}
+
 public enum InternalError: Error, CustomStringConvertible {
     case error(String, underlying: Error? = nil)
 

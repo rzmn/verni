@@ -1,21 +1,21 @@
 import PersistentStorage
 
 actor InMemoryCache: Sendable {
-    private var storage = [AnyHashable: Any]()
+    private(set) var operations: [Operation]
+    private(set) var refreshToken: String
+    private(set) var deviceId: String
 
-    subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
-        index: Index<D>
-    ) -> Value? where D.Key == Key, D.Value == Value {
-        guard let cached = storage[index] else {
-            return nil
-        }
-        return cached as? Value
+    init(refreshToken: String, deviceId: String, operations: [Operation]) {
+        self.refreshToken = refreshToken
+        self.operations = operations
+        self.deviceId = deviceId
     }
 
-    func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
-        value: Value,
-        for index: Index<D>
-    ) async where D.Key == Key, D.Value == Value {
-        storage[index] = value
+    func update(operations: [Operation]) async {
+        self.operations = operations
+    }
+
+    func update(refreshToken: String) async {
+        self.refreshToken = refreshToken
     }
 }

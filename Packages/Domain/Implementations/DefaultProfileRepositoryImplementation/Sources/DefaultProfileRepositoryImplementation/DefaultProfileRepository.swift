@@ -7,14 +7,14 @@ internal import ApiDomainConvenience
 
 public actor DefaultProfileRepository {
     public let logger: Logger
-    private let api: ApiProtocol
+    private let api: APIProtocol
     private let offline: ProfileOfflineMutableRepository
     private let profile: ExternallyUpdatable<Domain.Profile>
     private let taskFactory: TaskFactory
     private let subscription: BlockAsyncSubscription<Domain.Profile>
 
     public init(
-        api: ApiProtocol,
+        api: APIProtocol,
         logger: Logger,
         offline: ProfileOfflineMutableRepository,
         profile: ExternallyUpdatable<Domain.Profile>,
@@ -40,13 +40,30 @@ extension DefaultProfileRepository: ProfileRepository {
 
     public func refreshProfile() async throws(GeneralError) -> Domain.Profile {
         logI { "refresh" }
-        let profile: Domain.Profile
+        let response: Operations.GetProfile.Output
         do {
-            profile = Profile(dto: try await api.run(method: Profile.GetInfo()))
+            response = try await api.getProfile()
         } catch {
-            logI { "refresh failed error: \(error)" }
-            throw GeneralError(apiError: error)
+            throw GeneralError(error)
         }
+        let profileDto: Components.Schemas.Profile
+        switch response {
+        case .ok(let success):
+            switch success.body {
+            case .json(let payload):
+                profileDto = payload.response
+            }
+        case .unauthorized(let apiError):
+            throw GeneralError(apiError)
+        case .conflict(let apiError):
+            throw GeneralError(apiError)
+        case .internalServerError(let apiError):
+            throw GeneralError(apiError)
+        case .undocumented(statusCode: let statusCode, let body):
+            logE { "got undocumented response on getProfile: \(statusCode) \(body)" }
+            throw GeneralError(UndocumentedBehaviour(context: (statusCode, body)))
+        }
+        let profile = Profile(dto: profileDto)
         await self.profile.update(profile)
         logI { "refresh ok" }
         return profile

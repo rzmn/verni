@@ -85,7 +85,17 @@ paths:
                 title: loginSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/Session"
+                    type: object
+                    properties:
+                      session:
+                        $ref: "#/components/schemas/Session"
+                      operations:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Operation"
+                    required:
+                      - session
+                      - operations
                 required:
                   - response
         "409":
@@ -377,276 +387,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /profile/getInfo:
-    get:
-      operationId: getProfile
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Current user profile.
-          content:
-            application/json:
-              schema:
-                title: getProfileSucceededResponse
-                properties:
-                  response:
-                    $ref: "#/components/schemas/Profile"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Conflict - corresponding user is not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /users/create:
-    post:
-      operationId: createUser
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: Signup Request
-              type: object
-              properties:
-                user:
-                  $ref: "#/components/schemas/UserPayload"
-              required:
-                - user
-      responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                title: createUserSucceededResponse
-                description: Created user info.
-                properties:
-                  response:
-                    $ref: "#/components/schemas/User"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "422":
-          description: Unprocessable Entity - payload format is wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /users/setAvatar:
-    put:
-      operationId: setAvatar
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dataBase64:
-                  type: string
-                userId:
-                  type: string
-                  nullable: true
-              required:
-                - dataBase64
-      responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                title: setAvatarSucceededResponse
-                description: User with updated avatar.
-                properties:
-                  response:
-                    $ref: "#/components/schemas/User"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: Not allowed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Conflict - corresponding user is not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "422":
-          description: Unprocessable Entity - image is wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /users/setDisplayName:
-    put:
-      operationId: setDisplayName
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              description: User with updated display name.
-              properties:
-                userId:
-                  type: string
-                  nullable: true
-                displayName:
-                  type: string
-              required:
-                - displayName
-      responses:
-        "200":
-          description: User with updated display name.
-          content:
-            application/json:
-              schema:
-                title: setDisplayNameSucceededResponse
-                properties:
-                  response:
-                    $ref: "#/components/schemas/User"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: Not allowed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Conflict - corresponding user is not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "422":
-          description: Unprocessable Entity - name format is wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /users/get:
-    get:
-      operationId: getUsers
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-        - name: ids
-          required: true
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-      responses:
-        "200":
-          description: Infos associated with provided ids.
-          content:
-            application/json:
-              schema:
-                title: getUsersSucceededResponse
-                properties:
-                  response:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/User"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
   /users/search:
     get:
       operationId: searchUsers
@@ -767,122 +507,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /spendings/createGroup:
-    post:
-      operationId: createSpendingsGroup
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: Signup Request
-              type: object
-              properties:
-                payload:
-                  $ref: "#/components/schemas/SpendingsGroupPayload"
-              required:
-                - payload
-      responses:
-        "200":
-          description: Created spendings group.
-          content:
-            application/json:
-              schema:
-                title: createSpendingsGroupSucceededResponse
-                properties:
-                  response:
-                    $ref: "#/components/schemas/SpendingsGroup"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Conflict - some of corresponding users are not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /spendings/add:
-    post:
-      operationId: addSpending
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: Signup Request
-              type: object
-              properties:
-                groupId:
-                  type: string
-                payload:
-                  $ref: "#/components/schemas/SpendingPayload"
-              required:
-                - groupId
-                - payload
-      responses:
-        "200":
-          description: Created spending associated with provided group.
-          content:
-            application/json:
-              schema:
-                title: addSpendingSucceededResponse
-                properties:
-                  response:
-                    $ref: "#/components/schemas/Spending"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: Not allowed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "422":
-          description: Unprocessable Entity - name format is wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /spendings/getGroups:
+  /operations/pull:
     get:
-      operationId: getSpendingGroups
+      operationId: pullOperations
       parameters:
         - name: Authorization
           in: header
@@ -890,18 +517,23 @@ paths:
           required: true
           schema:
             type: string
+        - name: deviceId
+          required: true
+          in: query
+          schema:
+            type: string
       responses:
         "200":
-          description: List of spending groups associated with current user.
+          description: Operations list to be applied.
           content:
             application/json:
               schema:
-                title: getSpendingGroupsSucceededResponse
+                title: pullOperationsSucceededResponse
                 properties:
                   response:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SpendingsGroup"
+                      $ref: "#/components/schemas/Operation"
                 required:
                   - response
         "401":
@@ -916,9 +548,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /spendings/accept:
-    put:
-      operationId: acceptSpendingGroupInvite
+  /operations/push:
+    post:
+      operationId: pushOperations
       parameters:
         - name: Authorization
           in: header
@@ -931,23 +563,24 @@ paths:
         content:
           application/json:
             schema:
-              description: Signup Request
               type: object
               properties:
-                groupId:
+                deviceId:
                   type: string
-              required:
-                - groupId
+                operations:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Operation"
       responses:
         "200":
-          description: Invite has been accepted.
+          description: Operation list has been pushed.
           content:
             application/json:
               schema:
-                title: acceptSpendingGroupInviteSucceededResponse
+                title: pushOperationsSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/SpendingsGroup"
+                    $ref: "#/components/schemas/Empty"
                 required:
                   - response
         "401":
@@ -956,14 +589,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: Not allowed
+        "500":
+          description: Something went wrong.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Conflict - already accepted
+  /operations/confirm:
+    get:
+      operationId: confirmOperations
+      parameters:
+        - name: Authorization
+          in: header
+          description: "Bearer Token"
+          required: true
+          schema:
+            type: string
+        - name: deviceId
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: ids
+          required: true
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Operation list has been confirmed.
+          content:
+            application/json:
+              schema:
+                title: pushOperationsCodeSucceededResponse
+                properties:
+                  response:
+                    $ref: "#/components/schemas/Empty"
+                required:
+                  - response
+        "401":
+          description: Unauthenticated
           content:
             application/json:
               schema:
@@ -982,13 +649,17 @@ components:
       properties:
         email:
           type: string
-          description: Users email.
+          description: User email.
         password:
           type: string
-          description: Users password.
+          description: User password.
+        deviceId:
+          type: string
+          description: User device identifier.
       required:
         - email
         - password
+        - deviceId
     Session:
       type: object
       description: User Session.
@@ -1006,19 +677,6 @@ components:
         - id
         - accessToken
         - refreshToken
-    Image:
-      type: object
-      description: Image.
-      properties:
-        id:
-          type: string
-          description: Image identifier.
-        base64:
-          type: string
-          description: base64 string representation of the image.
-      required:
-        - id
-        - base64
     User:
       type: object
       description: User.
@@ -1040,147 +698,19 @@ components:
         - id
         - ownerId
         - displayName
-    UserPayload:
+    Image:
       type: object
-      description: Users payload.
-      properties:
-        displayName:
-          type: string
-          description: Display name.
-        avatarBase64Data:
-          type: string
-          nullable: true
-          description: Avatar data.
-      required:
-        - displayName
-    Profile:
-      type: object
-      description: User Profile.
-      properties:
-        user:
-          $ref: "#/components/schemas/User"
-        email:
-          type: string
-          description: Users email.
-        emailVerified:
-          type: boolean
-          description: Is users email verified.
-      required:
-        - id
-        - displayName
-    SpendingsGroup:
-      type: object
+      description: Image.
       properties:
         id:
           type: string
-          description: Spending group's identifier.
-        name:
+          description: Image identifier.
+        base64:
           type: string
-          nullable: true
-          description: Spending group's display name.
-        createdAt:
-          type: integer
-          description: Spending's group creation unix timestamp.
-        participants:
-          type: array
-          items:
-            $ref: "#/components/schemas/SpendingsGroupParticipant"
-        spendings:
-          type: array
-          items:
-            $ref: "#/components/schemas/Spending"
+          description: base64 string representation of the image.
       required:
         - id
-        - participants
-        - spendings
-        - status
-        - createdAt
-    SpendingsGroupPayload:
-      type: object
-      properties:
-        name:
-          type: string
-          nullable: true
-          description: Spending group's display name.
-        userIds:
-          type: array
-          items:
-            type: string
-        createdAt:
-          type: integer
-          description: Spending's group creation unix timestamp.
-        spendings:
-          type: array
-          items:
-            $ref: "#/components/schemas/SpendingPayload"
-      required:
-        - userIds
-        - spendings
-    SpendingsGroupParticipant:
-      type: object
-      properties:
-        userId:
-          type: string
-          description: Participant's identifier.
-        status:
-          $ref: "#/components/schemas/SpendingsGroupParticipantStatus"
-      required:
-        - userId
-        - status
-    SpendingsGroupParticipantStatus:
-      type: string
-      enum:
-        - invited
-        - member
-        - declined
-    Spending:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Spending's identifier.
-        payload:
-          $ref: "#/components/schemas/SpendingPayload"
-      required:
-        - id
-        - payload
-    SpendingPayload:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Spending's display name.
-        currency:
-          type: string
-          description: Spending's currency 3-letter code. (ISO 4217)
-        createdAt:
-          type: integer
-          description: Spending's creation unix timestamp.
-        amount:
-          type: integer
-          description: Spending's total amount multiplied by 100 (123 amount for currency code USD means $1.23.
-        shares:
-          type: array
-          items:
-            $ref: "#/components/schemas/SpendingShare"
-      required:
-        - name
-        - currency
-        - createdAt
-        - amount
-        - shares
-    SpendingShare:
-      type: object
-      properties:
-        participantId:
-          type: string
-          description: Participants User Identifier.
-        amount:
-          type: integer
-          description: Participant's owed Amount of money.
-      required:
-        - participantId
-        - amount
+        - base64
     Empty:
       type: object
       additionalProperties: true
@@ -1224,18 +754,100 @@ components:
         - alreadyConfirmed
         - incorrectCredentials
         - privacyViolation
-    SpendingGroupsUpdate:
+    CreateUserOperation:
       type: object
-      description: Spending groups update
+      description: Create user operation
       properties:
-        update:
+        operationId:
+          type: string
+        createdAt:
+          type: integer
+        createUser:
           type: object
           properties:
-            spendingGroups:
-              type: array
-              items:
-                $ref: "#/components/schemas/SpendingsGroup"
+            userId:
+              type: string
+            ownerId:
+              type: string
+              nullable: true
+            displayName:
+              type: string
           required:
-            - spendingGroups
+            - userId
+            - displayName
       required:
-        - update
+        - operationId
+        - createdAt
+        - createUser
+    BindUserOperation:
+      type: object
+      description: Bind user operation
+      properties:
+        operationId:
+          type: string
+        createdAt:
+          type: integer
+        bindUser:
+          type: object
+          properties:
+            oldId:
+              type: string
+            newId:
+              type: string
+          required:
+            - oldId
+            - newId
+      required:
+        - operationId
+        - createdAt
+        - bindUser
+    UpdateAvatarOperation:
+      type: object
+      description: Update avatar operation
+      properties:
+        operationId:
+          type: string
+        createdAt:
+          type: integer
+        updateAvatar:
+          type: object
+          properties:
+            userId:
+              type: string
+            base64Data:
+              type: string
+          required:
+            - userId
+            - base64Data
+      required:
+        - operationId
+        - createdAt
+        - updateAvatar
+    UpdateDisplayNameOperation:
+      type: object
+      description: Update display name operation
+      properties:
+        operationId:
+          type: string
+        createdAt:
+          type: integer
+        updateDisplayName:
+          type: object
+          properties:
+            userId:
+              type: string
+            displayName:
+              type: string
+          required:
+            - userId
+            - displayName
+      required:
+        - operationId
+        - createdAt
+        - updateDisplayName
+    Operation:
+      oneOf:
+        - $ref: "#/components/schemas/UpdateDisplayNameOperation"
+        - $ref: "#/components/schemas/UpdateAvatarOperation"
+        - $ref: "#/components/schemas/BindUserOperation"
+        - $ref: "#/components/schemas/CreateUserOperation"

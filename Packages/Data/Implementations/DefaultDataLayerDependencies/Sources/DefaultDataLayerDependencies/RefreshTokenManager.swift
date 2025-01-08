@@ -40,7 +40,7 @@ extension RefreshTokenManager: RefreshTokenRepository {
                 )
             )
         } catch {
-            if let error = error as? URLError, error.code == .notConnectedToInternet {
+            if let error = error.noConnection {
                 throw .noConnection(error)
             } else {
                 await authenticationLostSubject.yield(())
@@ -62,6 +62,11 @@ extension RefreshTokenManager: RefreshTokenRepository {
             throw .internalError(ErrorContext(context: response))
         }
         accessTokenValue = session.accessToken
-        await persistency.update(value: session.refreshToken, for: Schema.refreshToken.unkeyed)
+        do {
+            try await persistency.update(refreshToken: session.refreshToken)
+        } catch {
+            await authenticationLostSubject.yield(())
+            throw .internalError(error)
+        }
     }
 }

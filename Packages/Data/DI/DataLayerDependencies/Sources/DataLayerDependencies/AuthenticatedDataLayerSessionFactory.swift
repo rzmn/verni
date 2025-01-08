@@ -10,6 +10,7 @@ public protocol AuthenticatedDataLayerSessionFactory: Sendable {
     func awakeAuthorizedSession() async throws(DataLayerAwakeError) -> AuthenticatedDataLayerSession
 
     func createAuthorizedSession(
-        token: Components.Schemas.Session
+        session: Components.Schemas.Session,
+        operations: [Components.Schemas.Operation]
     ) async throws -> AuthenticatedDataLayerSession
 }

@@ -15,14 +15,6 @@
     {
       "parallelizable" : false,
       "target" : {
-        "containerPath" : "container:Packages\/Domain\/Implementations\/DefaultFriendsRepositoryImplementation",
-        "identifier" : "DefaultFriendsRepositoryImplementationTests",
-        "name" : "DefaultFriendsRepositoryImplementationTests"
-      }
-    },
-    {
-      "parallelizable" : false,
-      "target" : {
         "containerPath" : "container:Packages\/Data\/Implementations\/PersistentStorageSQLite",
         "identifier" : "PersistentStorageSQLiteTests",
         "name" : "PersistentStorageSQLiteTests"

@@ -59,7 +59,7 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                     pathManager: pathManager
                 ),
                 hostId: host,
-                refreshToken: nil,
+                initialData: nil,
                 logger: logger
             )
         } catch {
@@ -68,24 +68,24 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         }
     }
 
-    public func create<each D: Descriptor>(
+    public func create(
         host: HostId,
-        descriptors: DescriptorTuple<repeat each D>,
-        refreshToken: String
+        refreshToken: String,
+        operations: [PersistentStorage.Operation]
     ) async throws -> Persistency {
-        try await doCreate(host: host, descriptors: descriptors, refreshToken: refreshToken)
+        try await doCreate(host: host, refreshToken: refreshToken, operations: operations)
     }
 
-    @StorageActor private func doCreate<each D: Descriptor>(
+    @StorageActor private func doCreate(
         host: HostId,
-        descriptors: DescriptorTuple<repeat each D>,
-        refreshToken: String
+        refreshToken: String,
+        operations: [Operation]
     ) async throws -> Persistency {
         logI { "creating persistence..." }
         let pathManager = try createDatabasePathManager()
         let database = try pathManager.create(id: host).connection()
         do {
-            try createTables(for: database, descriptors: descriptors)
+            try createTables(for: database)
         } catch {
             pathManager.invalidate(id: host)
             throw error
@@ -97,7 +97,10 @@ extension SQLitePersistencyFactory: PersistencyFactory {
                 pathManager: pathManager
             ),
             hostId: host,
-            refreshToken: refreshToken,
+            initialData: SQLitePersistency.InitialData(
+                refreshToken: refreshToken,
+                operations: operations
+            ),
             logger: logger
         )
     }
@@ -113,21 +116,43 @@ extension SQLitePersistencyFactory: PersistencyFactory {
         )
     }
 
-    @StorageActor private func createTables<each D: Descriptor>(
-        for database: Connection,
-        descriptors: DescriptorTuple<repeat each D>
+    @StorageActor private func createTables(
+        for database: Connection
     ) throws {
-        repeat try createTable(descriptor: each descriptors.content, database: database)
-    }
-
-    @StorageActor private func createTable<D: Descriptor>(
-        descriptor: D, database: Connection
-    ) throws {
+        let operations = Schema.operations
         try database.run(
-            Table(descriptor.id).create { table in
+            Table(operations.tableName).create { table in
                 table.column(
-                    Expression<CodableBlob<D.Key>>(Schema.identifierKey), primaryKey: true)
-                table.column(Expression<CodableBlob<D.Value>>(Schema.valueKey))
+                    Expression<CodableBlob<String>>(operations.identifierKey),
+                    primaryKey: true
+                )
+                table.column(
+                    Expression<CodableBlob<PersistentStorage.Operation>>(operations.valueKey)
+                )
+            }
+        )
+        let refreshToken = Schema.refreshToken
+        try database.run(
+            Table(refreshToken.tableName).create { table in
+                table.column(
+                    Expression<CodableBlob<String>>(refreshToken.identifierKey),
+                    primaryKey: true
+                )
+                table.column(
+                    Expression<CodableBlob<PersistentStorage.Operation>>(refreshToken.valueKey)
+                )
+            }
+        )
+        let deviceId = Schema.deviceId
+        try database.run(
+            Table(deviceId.tableName).create { table in
+                table.column(
+                    Expression<CodableBlob<String>>(deviceId.identifierKey),
+                    primaryKey: true
+                )
+                table.column(
+                    Expression<CodableBlob<PersistentStorage.Operation>>(deviceId.valueKey)
+                )
             }
         )
     }

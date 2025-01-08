@@ -6,10 +6,8 @@ public protocol AuthenticatedDomainLayerSession: AppCommonCovertible {
     var profileRepository: any ProfileRepository { get }
     var usersRepository: UsersRepository { get }
     var spendingsRepository: SpendingsRepository { get }
-    var friendListRepository: FriendsRepository { get }
 
     var spendingsOfflineRepository: SpendingsOfflineRepository { get }
-    var friendsOfflineRepository: FriendsOfflineRepository { get }
     var profileOfflineRepository: ProfileOfflineRepository { get }
     var usersOfflineRepository: UsersOfflineRepository { get }
 
@@ -18,7 +16,6 @@ public protocol AuthenticatedDomainLayerSession: AppCommonCovertible {
     func spendingInteractionsUseCase() -> SpendingInteractionsUseCase
     func profileEditingUseCase() -> ProfileEditingUseCase
     func pushRegistrationUseCase() -> PushRegistrationUseCase
-    func friendInterationsUseCase() -> FriendInteractionsUseCase
     func emailConfirmationUseCase() -> EmailConfirmationUseCase
     func receivingPushUseCase() -> ReceivingPushUseCase
     func qrInviteUseCase() -> QRInviteUseCase

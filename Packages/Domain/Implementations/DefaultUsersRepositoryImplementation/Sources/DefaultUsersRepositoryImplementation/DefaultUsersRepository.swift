@@ -7,12 +7,12 @@ internal import ApiDomainConvenience
 
 public actor DefaultUsersRepository {
     public let logger: Logger
-    private let api: ApiProtocol
+    private let api: APIProtocol
     private let offline: UsersOfflineMutableRepository
     private let taskFactory: TaskFactory
 
     public init(
-        api: ApiProtocol,
+        api: APIProtocol,
         logger: Logger,
         offline: UsersOfflineMutableRepository,
         taskFactory: TaskFactory
@@ -31,13 +31,30 @@ extension DefaultUsersRepository: UsersRepository {
             logI { "get users query is empty, returning immediatly" }
             return []
         }
-        let users: [User]
+        let response: Operations.GetUsers.Output
         do {
-            users = try await api.run(method: Users.Get(ids: ids)).map(User.init)
+            response = try await api.getUsers(
+                .init(query: .init(ids: ids))
+            )
         } catch {
-            logI { "getUsers failed error: \(error)" }
-            throw GeneralError(apiError: error)
+            throw GeneralError(error)
         }
+        let userDtos: [Components.Schemas.User]
+        switch response {
+        case .ok(let success):
+            switch success.body {
+            case .json(let payload):
+                userDtos = payload.response
+            }
+        case .unauthorized(let apiError):
+            throw GeneralError(apiError)
+        case .internalServerError(let apiError):
+            throw GeneralError(apiError)
+        case .undocumented(statusCode: let statusCode, let body):
+            logE { "got undocumented response on getUsers: \(statusCode) \(body)" }
+            throw GeneralError(UndocumentedBehaviour(context: (statusCode, body)))
+        }
+        let users = userDtos.map(User.init(dto:))
         taskFactory.detached {
             await self.offline.update(users: users)
         }
@@ -46,22 +63,39 @@ extension DefaultUsersRepository: UsersRepository {
     }
 
     public func searchUsers(query: String) async throws(GeneralError) -> [User] {
-        logI { "search users [q=\(query)]" }
+        logI { "searchUsers [\(query)]" }
         if query.isEmpty {
             logI { "search users query is empty, returning immediatly" }
             return []
         }
-        let users: [User]
+        let response: Operations.SearchUsers.Output
         do {
-            users = try await api.run(method: Users.Search(query: query)).map(User.init)
+            response = try await api.searchUsers(
+                .init(query: .init(query: query))
+            )
         } catch {
-            logI { "search users [q=\(query)] failed error: \(error)" }
-            throw GeneralError(apiError: error)
+            throw GeneralError(error)
         }
+        let userDtos: [Components.Schemas.User]
+        switch response {
+        case .ok(let success):
+            switch success.body {
+            case .json(let payload):
+                userDtos = payload.response
+            }
+        case .unauthorized(let apiError):
+            throw GeneralError(apiError)
+        case .internalServerError(let apiError):
+            throw GeneralError(apiError)
+        case .undocumented(statusCode: let statusCode, let body):
+            logE { "got undocumented response on searchUsers: \(statusCode) \(body)" }
+            throw GeneralError(UndocumentedBehaviour(context: (statusCode, body)))
+        }
+        let users = userDtos.map(User.init(dto:))
         taskFactory.detached {
             await self.offline.update(users: users)
         }
-        logI { "search users [q=\(query)] ok" }
+        logI { "getUsers ok" }
         return users
     }
 }

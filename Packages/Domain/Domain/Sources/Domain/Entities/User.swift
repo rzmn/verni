@@ -1,34 +1,19 @@
 public struct User: Equatable, Sendable {
-    public let id: Identifier
-    public let status: FriendStatus
-    public let displayName: String
-    public let avatar: Avatar?
+    public var id: Identifier
+    public var ownerId: Identifier
+    public var displayName: String
+    public var avatar: Avatar.Identifier?
 
     public init(
         id: Identifier,
-        status: FriendStatus,
+        ownerId: Identifier,
         displayName: String,
-        avatar: Avatar?
+        avatar: Avatar.Identifier?
     ) {
         self.id = id
-        self.status = status
         self.displayName = displayName
         self.avatar = avatar
-    }
-
-    public init(
-        _ user: User,
-        id: Identifier? = nil,
-        status: FriendStatus? = nil,
-        displayName: String? = nil,
-        avatar: Avatar?? = nil
-    ) {
-        self.init(
-            id: id ?? user.id,
-            status: status ?? user.status,
-            displayName: displayName ?? user.displayName,
-            avatar: avatar == nil ? user.avatar : avatar?.map { $0 }
-        )
+        self.ownerId = ownerId
     }
 }
 

@@ -56,11 +56,7 @@
 		611CCD5B2C50AE3A00289D9E /* Logging */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Logging; sourceTree = "<group>"; };
 		611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ApiDomainConvenience; sourceTree = "<group>"; };
 		611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAuthUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD602C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultFriendInteractionsUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD612C50AE3A00289D9E /* DefaultFriendsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultFriendsRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD622C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultQRInviteUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD632C50AE3A00289D9E /* DefaultSpendingInteractionsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSpendingInteractionsUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD642C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSpendingsRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultUsersRepositoryImplementation; sourceTree = "<group>"; };
 		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
 		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
@@ -92,6 +88,7 @@
 		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
 		61901AAD2D1E394C00C84A38 /* TestInfrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestInfrastructure; sourceTree = "<group>"; };
 		61901AAE2D1E3B0800C84A38 /* TestFilesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestFilesystem; sourceTree = "<group>"; };
+		619CE8242D2E3C0000B70C30 /* SyncEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SyncEngine; sourceTree = "<group>"; };
 		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
 		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
 		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
@@ -177,6 +174,7 @@
 		611CCD662C50AE3A00289D9E /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				619CE8242D2E3C0000B70C30 /* SyncEngine */,
 				61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */,
 				6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */,
 				6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */,
@@ -188,11 +186,7 @@
 				61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */,
 				611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */,
 				611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */,
-				611CCD602C50AE3A00289D9E /* DefaultFriendInteractionsUseCaseImplementation */,
-				611CCD612C50AE3A00289D9E /* DefaultFriendsRepositoryImplementation */,
 				611CCD622C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation */,
-				611CCD632C50AE3A00289D9E /* DefaultSpendingInteractionsUseCaseImplementation */,
-				611CCD642C50AE3A00289D9E /* DefaultSpendingsRepositoryImplementation */,
 				611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */,
 			);
 			path = Implementations;

@@ -4,15 +4,20 @@ import PersistentStorage
 import DI
 import AsyncExtensions
 import DataLayerDependencies
+import Logging
+import Base
 
 public actor DefaultAuthUseCase {
+    public let logger: Logger
     private let taskFactory: TaskFactory
     private let dataLayer: AnonymousDataLayerSession
 
     public init(
         taskFactory: TaskFactory,
-        dataLayer: AnonymousDataLayerSession
+        dataLayer: AnonymousDataLayerSession,
+        logger: Logger
     ) {
+        self.logger = logger
         self.taskFactory = taskFactory
         self.dataLayer = dataLayer
     }
@@ -37,22 +42,39 @@ extension DefaultAuthUseCase: AuthUseCase {
     public func login(
         credentials: Credentials
     ) async throws(LoginError) -> any AuthenticatedDataLayerSession {
-        let token: AuthTokenDto
+        let response: Operations.Login.Output
         do {
-            token = try await dataLayer.api.run(
-                method: Auth.Login(
-                    credentials: CredentialsDto(
-                        email: credentials.email,
-                        password: credentials.password
+            response = try await dataLayer.api.login(
+                body: .json(
+                    .init(
+                        credentials: .init(
+                            email: credentials.email,
+                            password: credentials.password
+                        )
                     )
                 )
             )
         } catch {
-            throw LoginError(apiError: error)
+            throw LoginError(error)
+        }
+        let session: Components.Schemas.Session
+        switch response {
+        case .ok(let success):
+            switch success.body {
+            case .json(let payload):
+                session = payload.response
+            }
+        case .conflict(let apiError):
+            throw LoginError(apiError)
+        case .internalServerError(let apiError):
+            throw LoginError(apiError)
+        case .undocumented(statusCode: let statusCode, let body):
+            logE { "got undocumented response on login: \(statusCode) \(body)" }
+            throw LoginError(UndocumentedBehaviour(context: (statusCode, body)))
         }
         do {
             return try await dataLayer.authenticator
-                .createAuthorizedSession(token: token)
+                .createAuthorizedSession(session: session)
         } catch {
             throw .other(error)
         }
@@ -61,24 +83,45 @@ extension DefaultAuthUseCase: AuthUseCase {
     public func signup(
         credentials: Credentials
     ) async throws(SignupError) -> any AuthenticatedDataLayerSession {
-        let token: AuthTokenDto
+        let response: Operations.Signup.Output
         do {
-            token = try await dataLayer.api.run(
-                method: Auth.Signup(
-                    credentials: CredentialsDto(
-                        email: credentials.email,
-                        password: credentials.password
+            response = try await dataLayer.api.signup(
+                body: .json(
+                    .init(
+                        credentials: .init(
+                            email: credentials.email,
+                            password: credentials.password
+                        )
                     )
                 )
             )
         } catch {
-            throw SignupError(apiError: error)
+            throw SignupError(error)
+        }
+        let session: Components.Schemas.Session
+        switch response {
+        case .ok(let success):
+            switch success.body {
+            case .json(let payload):
+                session = payload.response
+            }
+        case .conflict(let apiError):
+            throw SignupError(apiError)
+        case .unprocessableContent(let apiError):
+            throw SignupError(apiError)
+        case .internalServerError(let apiError):
+            throw SignupError(apiError)
+        case .undocumented(statusCode: let statusCode, let body):
+            logE { "got undocumented response on signup: \(statusCode) \(body)" }
+            throw SignupError(UndocumentedBehaviour(context: (statusCode, body)))
         }
         do {
             return try await dataLayer.authenticator
-                .createAuthorizedSession(token: token)
+                .createAuthorizedSession(session: session)
         } catch {
             throw .other(error)
         }
     }
 }
+
+extension DefaultAuthUseCase: Loggable {}

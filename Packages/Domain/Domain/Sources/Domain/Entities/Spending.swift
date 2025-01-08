@@ -1,6 +1,6 @@
 import Foundation
 
-public typealias Cost = Decimal
+public typealias Amount = Decimal
 
 fileprivate extension Date {
     var byRoudingSeconds: Date {
@@ -9,28 +9,44 @@ fileprivate extension Date {
 }
 
 public struct Spending: Equatable, Sendable {
-    public let date: Date
-    public let details: String
-    public let cost: Cost
-    public let currency: Currency
-    public let participants: [User.Identifier: Cost]
+    public let id: Identifier
+    public let payload: Payload
 
-    public init(date: Date, details: String, cost: Cost, currency: Currency, participants: [User.Identifier: Cost]) {
-        self.date = date.byRoudingSeconds
-        self.details = details
-        self.cost = cost
-        self.currency = currency
-        self.participants = participants
+    public struct Share: Equatable, Sendable {
+        public let userId: User.Identifier
+        public let amount: Amount
+
+        public init(userId: User.Identifier, amount: Amount) {
+            self.userId = userId
+            self.amount = amount
+        }
     }
-}
 
-public struct IdentifiableSpending: Equatable, Sendable {
-    public let spending: Spending
-    public let id: Spending.Identifier
+    public struct Payload: Equatable, Sendable {
+        public let name: String
+        public let currency: Currency
+        public let createdAt: TimeInterval
+        public let amount: Amount
+        public let shares: [Share]
 
-    public init(spending: Spending, id: Spending.Identifier) {
-        self.spending = spending
+        public init(
+            name: String,
+            currency: Currency,
+            createdAt: TimeInterval,
+            amount: Amount,
+            shares: [Share]
+        ) {
+            self.name = name
+            self.currency = currency
+            self.createdAt = createdAt
+            self.amount = amount
+            self.shares = shares
+        }
+    }
+
+    public init(id: Identifier, payload: Payload) {
         self.id = id
+        self.payload = payload
     }
 }
 

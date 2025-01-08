@@ -12,9 +12,6 @@ extension PersistencyFactory {
                     Schema.refreshToken,
                     Schema.profile,
                     Schema.users,
-                    Schema.spendingCounterparties,
-                    Schema.spendingsHistory,
-                    Schema.friends
             ),
             refreshToken: refreshToken
         )

@@ -1,27 +1,24 @@
 import Domain
-import UIKit
+import Api
 
 extension User {
-    public init(dto: UserDto) {
-        let data = dto.avatarId.flatMap {
-            Avatar(id: $0)
-        }
+    public init(dto: Components.Schemas.User) {
         self = User(
             id: dto.id,
-            status: User.FriendStatus(dto: dto.friendStatus),
+            ownerId: dto.ownerId,
             displayName: dto.displayName,
-            avatar: data
+            avatar: dto.avatarId
         )
     }
 }
 
-extension UserDto {
+extension Components.Schemas.User {
     public init(domain user: User) {
-        self = UserDto(
-            login: user.id,
-            friendStatus: FriendStatus(domain: user.status),
+        self = Components.Schemas.User(
+            id: user.id,
+            ownerId: user.ownerId,
             displayName: user.displayName,
-            avatarId: user.avatar?.id
+            avatarId: user.avatar
         )
     }
 }

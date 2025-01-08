@@ -7,7 +7,8 @@ import AsyncExtensions
 internal import ApiDomainConvenience
 
 public actor DefaultAvatarsRepository {
-    private let api: ApiProtocol
+    public let logger: Logger
+    private let api: APIProtocol
     private let offlineRepository: AvatarsOfflineRepository
     private let offlineMutableRepository: AvatarsOfflineMutableRepository
     private let taskFactory: TaskFactory
@@ -15,7 +16,7 @@ public actor DefaultAvatarsRepository {
     private var loadingIds = [Avatar.Identifier: Task<Result<Data, GeneralError>, Never>]()
 
     public init(
-        api: ApiProtocol,
+        api: APIProtocol,
         taskFactory: TaskFactory,
         offlineRepository: AvatarsOfflineRepository,
         offlineMutableRepository: AvatarsOfflineMutableRepository,
@@ -25,6 +26,7 @@ public actor DefaultAvatarsRepository {
         self.offlineRepository = offlineRepository
         self.offlineMutableRepository = offlineMutableRepository
         self.taskFactory = taskFactory
+        self.logger = logger
     }
 }
 
@@ -64,12 +66,12 @@ extension DefaultAvatarsRepository: AvatarsRepository {
     }
 
     func schedule(ids: [Avatar.Identifier]) {
-        let fetchTask = taskFactory.task { [api] in
-            try await api.run(method: Avatars.Get(ids: ids))
+        let fetchTask = taskFactory.task { [self] in
+            try await doFetch(ids: ids)
         }
         ids.forEach { [offlineMutableRepository] id in
             loadingIds[id] = taskFactory.task {
-                let fetchResult: Avatars.Get.Response
+                let fetchResult: [Avatar.Identifier: Avatar]
                 do {
                     fetchResult = try await fetchTask.value
                 } catch {
@@ -92,6 +94,33 @@ extension DefaultAvatarsRepository: AvatarsRepository {
                 }
             }
         }
+    }
+
+    private func doFetch(
+        ids: [Avatar.Identifier]
+    ) async throws(GeneralError) -> [Avatar.Identifier: Avatar] {
+        let response: Operations.GetAvatars.Output
+        do {
+            response = try await api.getAvatars(
+                .init(query: .init(ids: ids))
+            )
+        } catch {
+            throw GeneralError(error)
+        }
+        let avatarDtos: [String: Components.Schemas.Image]
+        switch response {
+        case .ok(let success):
+            switch success.body {
+            case .json(let payload):
+                avatarDtos = payload.response.additionalProperties
+            }
+        case .internalServerError(let apiError):
+            throw GeneralError(apiError)
+        case .undocumented(statusCode: let statusCode, let body):
+            logE { "got undocumented response on getAvatars: \(statusCode) \(body)" }
+            throw GeneralError(UndocumentedBehaviour(context: (statusCode, body)))
+        }
+        return avatarDtos.mapValues(Avatar.init(dto:))
     }
 
     public func get(ids: [Avatar.Identifier]) async -> [Avatar.Identifier: Data] {
@@ -125,3 +154,5 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         }
     }
 }
+
+extension DefaultAvatarsRepository: Loggable {}
