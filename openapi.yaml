@@ -589,6 +589,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Collision - different operations with same id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Something went wrong.
           content:
@@ -698,6 +704,19 @@ components:
         - id
         - ownerId
         - displayName
+    SpendingShare:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: User Identifier.
+        amount:
+          type: integer
+          format: int64
+          description: Participant's owed amount of money.
+      required:
+        - userId
+        - amount
     Image:
       type: object
       description: Image.
@@ -755,38 +774,25 @@ components:
         - incorrectCredentials
         - privacyViolation
     CreateUserOperation:
-      type: object
       description: Create user operation
+      type: object
       properties:
-        operationId:
-          type: string
-        createdAt:
-          type: integer
         createUser:
           type: object
           properties:
             userId:
               type: string
-            ownerId:
-              type: string
-              nullable: true
             displayName:
               type: string
           required:
             - userId
             - displayName
       required:
-        - operationId
-        - createdAt
         - createUser
     BindUserOperation:
-      type: object
       description: Bind user operation
+      type: object
       properties:
-        operationId:
-          type: string
-        createdAt:
-          type: integer
         bindUser:
           type: object
           properties:
@@ -798,39 +804,27 @@ components:
             - oldId
             - newId
       required:
-        - operationId
-        - createdAt
         - bindUser
     UpdateAvatarOperation:
-      type: object
       description: Update avatar operation
+      type: object
       properties:
-        operationId:
-          type: string
-        createdAt:
-          type: integer
         updateAvatar:
           type: object
           properties:
             userId:
               type: string
-            base64Data:
+            imageId:
               type: string
           required:
             - userId
-            - base64Data
+            - imageId
       required:
-        - operationId
-        - createdAt
         - updateAvatar
     UpdateDisplayNameOperation:
-      type: object
       description: Update display name operation
+      type: object
       properties:
-        operationId:
-          type: string
-        createdAt:
-          type: integer
         updateDisplayName:
           type: object
           properties:
@@ -842,12 +836,115 @@ components:
             - userId
             - displayName
       required:
+        - updateDisplayName
+    CreateSpendingGroupOperation:
+      description: Create spending group operation
+      type: object
+      properties:
+        createSpendingGroup:
+          type: object
+          properties:
+            groupId:
+              type: string
+            participants:
+              type: array
+              items:
+                type: string
+            displayName:
+              type: string
+              nullable: true
+          required:
+            - groupId
+            - participants
+      required:
+        - createSpendingGroup
+    DeleteSpendingGroupOperation:
+      description: Delete spending group operation
+      type: object
+      properties:
+        deleteSpendingGroup:
+          type: object
+          properties:
+            groupId:
+              type: string
+          required:
+            - groupId
+      required:
+        - deleteSpendingGroup
+    CreateSpendingOperation:
+      description: Create spending operation
+      type: object
+      properties:
+        createSpending:
+          type: object
+          properties:
+            spendingId:
+              type: string
+            groupId:
+              type: string
+            name:
+              type: string
+              description: Spending display name.
+            currency:
+              type: string
+              description: Spending's currency 3-letter code. (ISO 4217)
+            amount:
+              type: integer
+              format: int64
+              description: Spending's total amount multiplied by 100 (123 amount for currency code USD means $1.23)
+            shares:
+              type: array
+              items:
+                $ref: "#/components/schemas/SpendingShare"
+          required:
+            - spendingId
+            - groupId
+            - name
+            - currency
+            - amount
+            - shares
+      required:
+        - createSpending
+    DeleteSpendingOperation:
+      description: Delete spending operation
+      type: object
+      properties:
+        deleteSpending:
+          type: object
+          properties:
+            spendingId:
+              type: string
+            groupId:
+              type: string
+          required:
+            - spendingId
+            - groupId
+      required:
+        - deleteSpending
+    BaseOperation:
+      type: object
+      description: Common properties for any operation
+      properties:
+        operationId:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        authorId:
+          type: string
+      required:
         - operationId
         - createdAt
-        - updateDisplayName
+        - authorId
     Operation:
-      oneOf:
-        - $ref: "#/components/schemas/UpdateDisplayNameOperation"
-        - $ref: "#/components/schemas/UpdateAvatarOperation"
-        - $ref: "#/components/schemas/BindUserOperation"
-        - $ref: "#/components/schemas/CreateUserOperation"
+      allOf:
+        - $ref: "#/components/schemas/BaseOperation"
+        - oneOf:
+            - $ref: "#/components/schemas/CreateUserOperation"
+            - $ref: "#/components/schemas/BindUserOperation"
+            - $ref: "#/components/schemas/UpdateAvatarOperation"
+            - $ref: "#/components/schemas/UpdateDisplayNameOperation"
+            - $ref: "#/components/schemas/CreateSpendingGroupOperation"
+            - $ref: "#/components/schemas/DeleteSpendingGroupOperation"
+            - $ref: "#/components/schemas/CreateSpendingOperation"
+            - $ref: "#/components/schemas/DeleteSpendingOperation"

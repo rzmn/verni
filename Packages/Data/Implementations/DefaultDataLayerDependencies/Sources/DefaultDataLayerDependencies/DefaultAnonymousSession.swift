@@ -19,6 +19,7 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
     public let storage: SandboxStorage
     public let authenticator: AuthenticatedDataLayerSessionFactory
     public let api: APIProtocol
+    public let infrastructure: InfrastructureLayer
 
     public init(logger: Logger, infrastructure: InfrastructureLayer) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
@@ -26,6 +27,7 @@ public final class DefaultAnonymousSession: AnonymousDataLayerSession {
         ) else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }
+        self.infrastructure = infrastructure
         api = DefaultApiFactory(
             url: Constants.apiEndpoint,
             taskFactory: infrastructure.taskFactory,

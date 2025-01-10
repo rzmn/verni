@@ -68,7 +68,9 @@ extension SQLiteSandboxStorage: SandboxStorage {
         guard let database = connection.database else {
             return
         }
-        try database.update(operations: operations)
+        try database.update(
+            operations: operations
+        )
         self.operations = operations.merged(with: self.operations).all
     }
     

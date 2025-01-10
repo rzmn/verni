@@ -253,25 +253,9 @@
 			path = NotificationService;
 			sourceTree = "<group>";
 		};
-		617E5F382D1D7AB8001EC57F /* xcode */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = xcode;
-			sourceTree = "<group>";
-		};
-		617E5F392D1D7AB8001EC57F /* .swiftpm */ = {
-			isa = PBXGroup;
-			children = (
-				617E5F382D1D7AB8001EC57F /* xcode */,
-			);
-			path = .swiftpm;
-			sourceTree = "<group>";
-		};
 		617E5F3B2D1D7AB8001EC57F /* DI */ = {
 			isa = PBXGroup;
 			children = (
-				617E5F392D1D7AB8001EC57F /* .swiftpm */,
 				617E5F3A2D1D7AB8001EC57F /* Infrastructure */,
 			);
 			path = DI;

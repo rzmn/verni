@@ -18,7 +18,7 @@ internal import SQLite
     }
 }
 
-extension SQLiteConnectionHolder: Storage {
+extension SQLiteConnectionHolder: Storage {    
     func close() {
         database = nil
     }

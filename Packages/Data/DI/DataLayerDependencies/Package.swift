@@ -17,11 +17,13 @@ let package = Package(
     dependencies: [
         .package(path: "../../Api"),
         .package(path: "../../PersistentStorage"),
+        .package(path: "../../../Infrastructure/DI/Infrastructure"),
     ],
     targets: [
         .target(
             name: "DataLayerDependencies",
             dependencies: [
+                "Infrastructure",
                 "PersistentStorage",
                 "Api",
             ]

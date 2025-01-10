@@ -39,13 +39,13 @@ extension SQLiteStorageFactory: StorageFactory {
         logI { "looking for existed storage" }
         let item: SqliteDbPathManager.Item
         let connection: Connection
-        if let existed = try pathManager.items.first(where: { $0.id == .localStorage }) {
+        if let existed = try pathManager.items.first(where: { $0.id == .sandbox }) {
             logI { "found storage" }
             item = existed
             connection = try item.connection()
             logI { "created connection" }
         } else {
-            item = try pathManager.create(id: .localStorage)
+            item = try pathManager.create(id: .sandbox)
             logI { "created storage" }
             do {
                 connection = try item.connection()
@@ -53,7 +53,7 @@ extension SQLiteStorageFactory: StorageFactory {
                 logI { "storage successfully prepared" }
             } catch {
                 logI { "failed to prepage storage, invalidating, error: \(error)" }
-                pathManager.invalidate(id: .localStorage)
+                pathManager.invalidate(id: .sandbox)
                 throw error
             }
         }
@@ -61,7 +61,7 @@ extension SQLiteStorageFactory: StorageFactory {
             logger: logger,
             database: try item.connection(),
             invalidator: invalidator(
-                for: .localStorage,
+                for: .sandbox,
                 pathManager: pathManager
             )
         )

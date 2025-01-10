@@ -1,46 +1,18 @@
 import Foundation
 
-public struct LocalOnlySpendingsGroup: Sendable, Equatable {
-    public let id: SpendingsGroup.Identifier
-    public let name: String?
-    public let participants: [User.Identifier]
-    public let createdAt: TimeInterval
-    public let spendings: [Spending.Payload]
-
-    public init(
-        id: SpendingsGroup.Identifier,
-        name: String?,
-        participants: [User.Identifier],
-        createdAt: TimeInterval,
-        spendings: [Spending.Payload]
-    ) {
-        self.id = id
-        self.name = name
-        self.participants = participants
-        self.createdAt = createdAt
-        self.spendings = spendings
-    }
-}
-
 public struct SpendingsGroup: Sendable, Equatable {
     public let id: Identifier
     public let name: String?
     public let createdAt: TimeInterval
-    public let participants: [Participant]
-    public let spendings: [Spending]
 
     public init(
         id: Identifier,
         name: String?,
-        createdAt: TimeInterval,
-        participants: [Participant],
-        spendings: [Spending]
+        createdAt: TimeInterval
     ) {
         self.id = id
         self.name = name
         self.createdAt = createdAt
-        self.participants = participants
-        self.spendings = spendings
     }
 }
 
