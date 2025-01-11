@@ -573,14 +573,16 @@ paths:
                     $ref: "#/components/schemas/Operation"
       responses:
         "200":
-          description: Operation list has been pushed.
+          description: Operations list to be applied.
           content:
             application/json:
               schema:
                 title: pushOperationsSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/Empty"
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Operation"
                 required:
                   - response
         "401":

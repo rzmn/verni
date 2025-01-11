@@ -4,40 +4,35 @@
 import PackageDescription
 
 let package = Package(
-    name: "OnDemandPolling",
+    name: "SandboxSyncEngine",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "OnDemandPolling",
-            targets: ["OnDemandPolling"]
+            name: "SandboxSyncEngine",
+            targets: ["SandboxSyncEngine"]
         )
     ],
     dependencies: [
         .package(path: "../Api"),
+        .package(path: "../PersistentStorage"),
+        .package(path: "../SyncEngine"),
         .package(path: "../../Infrastructure/Base"),
+        .package(path: "../../Infrastructure/Logging"),
         .package(path: "../../Infrastructure/AsyncExtensions"),
-        .package(path: "../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
-            name: "OnDemandPolling",
+            name: "SandboxSyncEngine",
             dependencies: [
-                "Base",
-                "AsyncExtensions",
                 "Api",
-            ]
-        ),
-        .testTarget(
-            name: "OnDemandPollingTests",
-            dependencies: [
+                "SyncEngine",
+                "PersistentStorage",
                 "Base",
+                "Logging",
                 "AsyncExtensions",
-                "Api",
-                "OnDemandPolling",
-                "TestInfrastructure",
             ]
-        ),
+        )
     ]
 )

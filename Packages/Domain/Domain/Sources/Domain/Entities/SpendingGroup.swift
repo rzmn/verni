@@ -1,14 +1,14 @@
 import Foundation
 
-public struct SpendingsGroup: Sendable, Equatable {
+public struct SpendingGroup: Sendable, Equatable {
     public let id: Identifier
     public let name: String?
-    public let createdAt: TimeInterval
+    public let createdAt: MsSince1970
 
     public init(
         id: Identifier,
         name: String?,
-        createdAt: TimeInterval
+        createdAt: MsSince1970
     ) {
         self.id = id
         self.name = name
@@ -16,7 +16,7 @@ public struct SpendingsGroup: Sendable, Equatable {
     }
 }
 
-extension SpendingsGroup {
+extension SpendingGroup {
     public struct Participant: Sendable, Equatable {
         public let userId: User.Identifier
         public let status: Status
@@ -28,7 +28,7 @@ extension SpendingsGroup {
     }
 }
 
-extension SpendingsGroup.Participant {
+extension SpendingGroup.Participant {
     public enum Status: Sendable, Equatable {
         case invited
         case member
@@ -36,6 +36,6 @@ extension SpendingsGroup.Participant {
     }
 }
 
-extension SpendingsGroup {
+extension SpendingGroup {
     public typealias Identifier = String
 }

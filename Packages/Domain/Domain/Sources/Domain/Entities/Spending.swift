@@ -1,6 +1,7 @@
 import Foundation
 
 public typealias Amount = Decimal
+public typealias MsSince1970 = Int64
 
 fileprivate extension Date {
     var byRoudingSeconds: Date {
@@ -25,14 +26,14 @@ public struct Spending: Equatable, Sendable {
     public struct Payload: Equatable, Sendable {
         public let name: String
         public let currency: Currency
-        public let createdAt: TimeInterval
+        public let createdAt: MsSince1970
         public let amount: Amount
         public let shares: [Share]
 
         public init(
             name: String,
             currency: Currency,
-            createdAt: TimeInterval,
+            createdAt: MsSince1970,
             amount: Amount,
             shares: [Share]
         ) {

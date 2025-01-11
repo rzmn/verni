@@ -9,7 +9,7 @@ extension Decimal {
 }
 
 extension Int64 {
-    public init(cost: Amount) {
-        self = Int64((NSDecimalNumber(decimal: cost).doubleValue * 100))
+    public init(amount: Amount) {
+        self = Int64((NSDecimalNumber(decimal: amount).doubleValue * 100))
     }
 }

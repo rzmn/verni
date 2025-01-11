@@ -1,5 +1,4 @@
 import Domain
-import Foundation
 import Base
 
 struct LastWriteWinsCRDT<Entity> {
@@ -11,7 +10,7 @@ struct LastWriteWinsCRDT<Entity> {
         }
         let kind: Kind
         let id: String
-        let timestamp: TimeInterval
+        let timestamp: MsSince1970
     }
     private let initial: Entity?
     private let history: [(entity: Entity?, operation: Operation)]

@@ -1,5 +1,4 @@
 import Domain
-import Foundation
 import Base
 
 struct OrderedSequenceCRDT<Element: Comparable> {
@@ -10,7 +9,7 @@ struct OrderedSequenceCRDT<Element: Comparable> {
         }
         let kind: Kind
         let id: String
-        let timestamp: TimeInterval
+        let timestamp: MsSince1970
         
         func apply(elements: inout [Element]) {
             switch kind {

@@ -74,7 +74,6 @@
 		614AC19F2C6802EE005B2CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultPushRegistrationUseCaseImplementation; sourceTree = "<group>"; };
 		617AAB532C982D130087E4F5 /* AsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AsyncExtensions; sourceTree = "<group>"; };
-		617AAB542C9852DD0087E4F5 /* OnDemandPolling */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OnDemandPolling; sourceTree = "<group>"; };
 		617E5F3A2D1D7AB8001EC57F /* Infrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Infrastructure; sourceTree = "<group>"; };
 		617E5F3C2D1D7AB8001EC57F /* Filesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Filesystem; sourceTree = "<group>"; };
 		617E5F3D2D1D7AB8001EC57F /* DefaultAsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAsyncExtensions; sourceTree = "<group>"; };
@@ -101,6 +100,8 @@
 		846A50C62CFE0C6500A766EE /* SplashScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SplashScreen; sourceTree = "<group>"; };
 		8476A23C2CF2243E001CBF5A /* LogInScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LogInScreen; sourceTree = "<group>"; };
 		847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		84B9FB612D32D95B00C58639 /* RemoteSyncEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RemoteSyncEngine; sourceTree = "<group>"; };
+		84B9FB622D32EE6B00C58639 /* SandboxSyncEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SandboxSyncEngine; sourceTree = "<group>"; };
 		84E809102CF3695A00B5A32C /* ProfileScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ProfileScreen; sourceTree = "<group>"; };
 		84E809112CF4A2A700B5A32C /* SpendingsScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SpendingsScreen; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -140,9 +141,9 @@
 			children = (
 				61D11BE72CA020A90058B77A /* DI */,
 				61C90BF52C84B0E6006A44C0 /* Implementations */,
-				617AAB542C9852DD0087E4F5 /* OnDemandPolling */,
 				61BBB1242C50D3CE00E3D4F3 /* Api */,
 				611CCD522C50AE3A00289D9E /* PersistentStorage */,
+				619CE8242D2E3C0000B70C30 /* SyncEngine */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -174,7 +175,6 @@
 		611CCD662C50AE3A00289D9E /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
-				619CE8242D2E3C0000B70C30 /* SyncEngine */,
 				61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */,
 				6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */,
 				6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */,
@@ -310,6 +310,8 @@
 		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				84B9FB622D32EE6B00C58639 /* SandboxSyncEngine */,
+				84B9FB612D32D95B00C58639 /* RemoteSyncEngine */,
 				61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */,
 				6143A7F32C90CBF90030AAF1 /* MockApiImplementation */,
 				6143A7D52C9076930030AAF1 /* MockPersistentStorage */,
