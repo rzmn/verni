@@ -9,7 +9,7 @@ find "${SCRIPT_DIR}/../Packages" \
     -name "Package.swift" \
     -exec "${SCRIPT_DIR}/package_swift_autogen.sh" {} \;
 
-OPENAPI_AUTOGEN_LINK="${SCRIPT_DIR}/../Packages/Data/Api/Sources/Api/openapi.yaml"
+OPENAPI_AUTOGEN_LINK="${SCRIPT_DIR}/../Packages/Data/Api/Interface/Api/Sources/openapi.yaml"
 rm -f "${OPENAPI_AUTOGEN_LINK}"
 
 ln -s \

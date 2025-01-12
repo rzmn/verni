@@ -1,10 +1,6 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
-func interface(_ packageName: String) -> String {
-    let layerRoot = "../.."
-    return "\(layerRoot)/\(packageName)/Interface/\(packageName)"
-}
 let package = Package(
     name: "InfrastructureLayer",
     platforms: [
@@ -17,18 +13,19 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: interface("Filesystem")),
-        .package(path: interface("AsyncExtensions")),
-        .package(path: interface("Logging")),
+        .local(.currentLayer(.interface("Filesystem"))),
+        .local(.currentLayer(.interface("AsyncExtensions"))),
+        .local(.currentLayer(.interface("Logging"))),
     ],
     targets: [
         .target(
             name: "InfrastructureLayer",
             dependencies: [
                 "Filesystem",
-                "Logging",
                 "AsyncExtensions",
-            ]
+                "Logging",
+            ],
+            path: "Sources"
         )
     ]
 )
@@ -42,17 +39,28 @@ extension Package.Dependency {
 
     enum LocalPackage {
         case currentLayer(TargetType)
+        case infrastructure(TargetType)
+        case data(TargetType)
+
+        var targetType: TargetType {
+            switch self {
+            case .currentLayer(let targetType), .infrastructure(let targetType), .data(let targetType):
+                return targetType
+            }
+        }
     }
 
     static func local(_ localPackage: LocalPackage) -> Package.Dependency {
         let root: String
-        let type: TargetType
         switch localPackage {
         case .currentLayer(let targetType):
             root = "../../../"
-            type = targetType
+        case .infrastructure(let targetType):
+            root = "../../../" + "../Infrastructure"
+        case .data(let targetType):
+            root = "../../../" + "../Data"
         }
-        switch type {
+        switch localPackage.targetType {
         case .interface(let interface):
             return .package(path: "\(root)/\(interface)/Interface/\(interface)")
         case .implementation(let interface, let implementation):

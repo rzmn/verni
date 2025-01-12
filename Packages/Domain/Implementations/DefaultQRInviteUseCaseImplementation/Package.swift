@@ -39,17 +39,28 @@ extension Package.Dependency {
 
     enum LocalPackage {
         case currentLayer(TargetType)
+        case infrastructure(TargetType)
+        case data(TargetType)
+
+        var targetType: TargetType {
+            switch self {
+            case .currentLayer(let targetType), .infrastructure(let targetType), .data(let targetType):
+                return targetType
+            }
+        }
     }
 
     static func local(_ localPackage: LocalPackage) -> Package.Dependency {
         let root: String
-        let type: TargetType
         switch localPackage {
         case .currentLayer(let targetType):
             root = "../../"
-            type = targetType
+        case .infrastructure(let targetType):
+            root = "../../" + "../Infrastructure"
+        case .data(let targetType):
+            root = "../../" + "../Data"
         }
-        switch type {
+        switch localPackage.targetType {
         case .interface(let interface):
             return .package(path: "\(root)/\(interface)/Interface/\(interface)")
         case .implementation(let interface, let implementation):

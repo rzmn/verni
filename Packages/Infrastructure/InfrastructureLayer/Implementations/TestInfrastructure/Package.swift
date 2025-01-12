@@ -13,28 +13,29 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../DI/Infrastructure"),
-        .package(path: "../../Filesystem"),
-        .package(path: "../../Logging"),
-        .package(path: "../../Base"),
-        .package(path: "../FoundationFilesystem"),
-        .package(path: "../TestFilesystem"),
-        .package(path: "../TestAsyncExtensions"),
-        .package(path: "../DefaultLogging"),
+        .local(.currentLayer(.interface("InfrastructureLayer"))),
+        .local(.currentLayer(.interface("Filesystem"))),
+        .local(.currentLayer(.interface("Logging"))),
+        .local(.currentLayer(.interface("AsyncExtensions"))),
+        .local(.currentLayer(.implementation(interface: "Filesystem", implementation: "FoundationFilesystem"))),
+        .local(.currentLayer(.implementation(interface: "Filesystem", implementation: "TestFilesystem"))),
+        .local(.currentLayer(.implementation(interface: "Logging", implementation: "DefaultLogging"))),
+        .local(.currentLayer(.implementation(interface: "AsyncExtensions", implementation: "TestAsyncExtensions"))),
     ],
     targets: [
         .target(
             name: "TestInfrastructure",
             dependencies: [
-                "FoundationFilesystem",
-                "TestFilesystem",
-                "TestAsyncExtensions",
-                "DefaultLogging",
-                "Infrastructure",
+                "InfrastructureLayer",
                 "Filesystem",
                 "Logging",
-                "Base",
-            ]
+                "AsyncExtensions",
+                "FoundationFilesystem",
+                "TestFilesystem",
+                "DefaultLogging",
+                "TestAsyncExtensions",
+            ],
+            path: "Sources"
         )
     ]
 )
@@ -48,17 +49,28 @@ extension Package.Dependency {
 
     enum LocalPackage {
         case currentLayer(TargetType)
+        case infrastructure(TargetType)
+        case data(TargetType)
+
+        var targetType: TargetType {
+            switch self {
+            case .currentLayer(let targetType), .infrastructure(let targetType), .data(let targetType):
+                return targetType
+            }
+        }
     }
 
     static func local(_ localPackage: LocalPackage) -> Package.Dependency {
         let root: String
-        let type: TargetType
         switch localPackage {
         case .currentLayer(let targetType):
             root = "../../../"
-            type = targetType
+        case .infrastructure(let targetType):
+            root = "../../../" + "../Infrastructure"
+        case .data(let targetType):
+            root = "../../../" + "../Data"
         }
-        switch type {
+        switch localPackage.targetType {
         case .interface(let interface):
             return .package(path: "\(root)/\(interface)/Interface/\(interface)")
         case .implementation(let interface, let implementation):
