@@ -34,8 +34,8 @@ done
 
 LAYERS_RELATIVE_TO_PACKAGE="${LAYERS_RELATIVE_TO_PACKAGE::-3}"
 
-sed -i.bak '/autogen_script_content/,$d' ${PACKAGE_FILE}
-sed -i.bak '/^$/d' ${PACKAGE_FILE}
+sed -i '' '/autogen_script_content/,$d' ${PACKAGE_FILE}
+sed -i '' '/^$/d' ${PACKAGE_FILE}
 
 TEMP_FILE=$(mktemp)
 sed "s|CURRENT_LAYER_ROOT|${LAYERS_RELATIVE_TO_PACKAGE}|g" "${SCRIPT_DIR}/LocalPackages.swift" >> "${TEMP_FILE}"

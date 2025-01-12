@@ -35,7 +35,7 @@ extension Package.Dependency {
         let type: TargetType
         switch localPackage {
         case .currentLayer(let targetType):
-            root = ""
+            root = "../../"
             type = targetType
         }
         switch type {
