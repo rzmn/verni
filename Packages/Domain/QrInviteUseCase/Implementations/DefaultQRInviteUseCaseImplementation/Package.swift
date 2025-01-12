@@ -2,32 +2,31 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "DefaultQRInviteUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "DefaultQRInviteUseCaseImplementation",
+            targets: ["DefaultQRInviteUseCaseImplementation"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.currentLayer(.interface("QrInviteUseCase"))),
+        .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "DefaultQRInviteUseCaseImplementation",
             dependencies: [
-                "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
+                "QrInviteUseCase",
+                .product(name: "QRCode", package: "qrcode"),
             ],
-            path: "Sources"
+            path: "Sources",
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

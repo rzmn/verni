@@ -2,30 +2,24 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "DefaultValidationUseCasesImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "DefaultValidationUseCasesImplementation",
+            targets: ["DefaultValidationUseCasesImplementation"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.currentLayer(.interface("CredentialsFormatValidationUseCase")))
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "DefaultValidationUseCasesImplementation",
             dependencies: [
-                "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
+                "CredentialsFormatValidationUseCase"
             ],
             path: "Sources"
         )

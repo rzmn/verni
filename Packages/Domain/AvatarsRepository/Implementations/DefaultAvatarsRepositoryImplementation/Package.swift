@@ -2,33 +2,52 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "DefaultAvatarsRepositoryImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "DefaultAvatarsRepositoryImplementation",
+            targets: ["DefaultAvatarsRepositoryImplementation"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .package(path: "../ApiDomainConvenience"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/PersistentStorage"),
+        .package(path: "../../../Infrastructure/Base"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Data/Implementations/MockApiImplementation"),
+        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "DefaultAvatarsRepositoryImplementation",
             dependencies: [
+                "Domain",
                 "Api",
+                "ApiDomainConvenience",
                 "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
-            ],
-            path: "Sources"
-        )
+                "Base",
+                "Logging",
+            ]
+        ),
+        .testTarget(
+            name: "DefaultAvatarsRepositoryImplementationTests",
+            dependencies: [
+                "Domain",
+                "Api",
+                "ApiDomainConvenience",
+                "PersistentStorage",
+                "DefaultAvatarsRepositoryImplementation",
+                "Base",
+                "Logging",
+                "MockApiImplementation",
+                "TestInfrastructure"
+            ]
+        ),
     ]
 )
 

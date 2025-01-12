@@ -2,32 +2,31 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "DefaultAuthUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "DefaultAuthUseCaseImplementation",
+            targets: ["DefaultAuthUseCaseImplementation"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .package(path: "../../Domain"),
+        .package(path: "../../../DI/DI"),
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Data/DI/DataLayerDependencies"),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "DefaultAuthUseCaseImplementation",
             dependencies: [
+                "Domain",
                 "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
-            ],
-            path: "Sources"
+                "DI",
+                "DataLayerDependencies",
+            ]
         )
     ]
 )

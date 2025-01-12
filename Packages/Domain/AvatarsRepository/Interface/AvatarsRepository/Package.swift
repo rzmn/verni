@@ -2,30 +2,24 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "AvatarsRepository",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "AvatarsRepository",
+            targets: ["AvatarsRepository"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.currentLayer(.interface("Entities"))),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "AvatarsRepository",
             dependencies: [
-                "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
+                "Entities",
             ],
             path: "Sources"
         )

@@ -2,32 +2,31 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "DefaultSaveCredendialsUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "DefaultSaveCredendialsUseCaseImplementation",
+            targets: ["DefaultSaveCredendialsUseCaseImplementation"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .package(path: "../ApiDomainConvenience"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
+        .package(path: "../../../Infrastructure/Logging"),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "DefaultSaveCredendialsUseCaseImplementation",
             dependencies: [
+                "Domain",
                 "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
-            ],
-            path: "Sources"
+                "ApiDomainConvenience",
+                "Logging",
+            ]
         )
     ]
 )

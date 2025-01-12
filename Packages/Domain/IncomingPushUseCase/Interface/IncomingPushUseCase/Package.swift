@@ -1,31 +1,28 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "DataLayer",
+    name: "IncomingPushUseCase",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "IncomingPushUseCase",
+            targets: ["IncomingPushUseCase"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.infrastructure(.interface("AsyncExtensions"))),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "IncomingPushUseCase",
             dependencies: [
-                "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
+                "Entities",
+                "AsyncExtensions",
             ],
             path: "Sources"
         )
@@ -46,7 +43,8 @@ extension Package.Dependency {
 
         var targetType: TargetType {
             switch self {
-            case .currentLayer(let targetType), .infrastructure(let targetType), .data(let targetType):
+            case .currentLayer(let targetType), .infrastructure(let targetType),
+                .data(let targetType):
                 return targetType
             }
         }

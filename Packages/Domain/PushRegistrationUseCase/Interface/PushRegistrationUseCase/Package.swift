@@ -2,30 +2,26 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "PushRegistrationUseCase",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "PushRegistrationUseCase",
+            targets: ["PushRegistrationUseCase"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.infrastructure(.interface("AsyncExtensions"))),
     ],
     targets: [
         .target(
-            name: "DataLayer",
+            name: "PushRegistrationUseCase",
             dependencies: [
-                "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
+                "Entities",
+                "AsyncExtensions",
             ],
             path: "Sources"
         )

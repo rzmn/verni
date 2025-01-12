@@ -2,32 +2,25 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DataLayer",
+    name: "DefaultEmailConfirmationUseCaseImplementation",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DataLayer",
-            targets: ["DataLayer"]
+            name: "DefaultEmailConfirmationUseCaseImplementation",
+            targets: ["DefaultEmailConfirmationUseCaseImplementation"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("PersistentStorage"))),
-        .local(.currentLayer(.interface("SyncEngine"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .package(path: "../ApiDomainConvenience"),
+        .package(path: "../../Domain"),
+        .package(path: "../../../Data/Api"),
     ],
     targets: [
         .target(
-            name: "DataLayer",
-            dependencies: [
-                "Api",
-                "PersistentStorage",
-                "SyncEngine",
-                "InfrastructureLayer"
-            ],
-            path: "Sources"
+            name: "DefaultEmailConfirmationUseCaseImplementation",
+            dependencies: ["Domain", "Api", "ApiDomainConvenience"]
         )
     ]
 )
