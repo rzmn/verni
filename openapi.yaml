@@ -34,7 +34,7 @@ paths:
                 title: signupSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/Session"
+                    $ref: "#/components/schemas/StartupData"
                 required:
                   - response
         "409":
@@ -85,17 +85,7 @@ paths:
                 title: loginSucceededResponse
                 properties:
                   response:
-                    type: object
-                    properties:
-                      session:
-                        $ref: "#/components/schemas/Session"
-                      operations:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Operation"
-                    required:
-                      - session
-                      - operations
+                    $ref: "#/components/schemas/StartupData"
                 required:
                   - response
         "409":
@@ -685,6 +675,16 @@ components:
         - id
         - accessToken
         - refreshToken
+    StartupData:
+      type: object
+      description: All data required to startup a user session
+      properties:
+        session:
+          $ref: "#/components/schemas/Session"
+        operations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Operation"
     User:
       type: object
       description: User.

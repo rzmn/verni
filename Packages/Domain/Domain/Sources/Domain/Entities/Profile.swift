@@ -1,14 +1,14 @@
 public struct Profile: Equatable, Sendable {
-    public var user: User
+    public var userId: User.Identifier
     public var email: String
     public var isEmailVerified: Bool
 
     public init(
-        user: User,
+        userId: User.Identifier,
         email: String,
         isEmailVerified: Bool
     ) {
-        self.user = user
+        self.userId = userId
         self.email = email
         self.isEmailVerified = isEmailVerified
     }

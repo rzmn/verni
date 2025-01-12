@@ -1,3 +1,7 @@
+import AsyncExtensions
+
 public protocol ProfileRepository: Sendable {
-    var profile: Profile? { get async }
+    var updates: any AsyncBroadcast<Profile> { get }
+    
+    var profile: Profile { get async }
 }
