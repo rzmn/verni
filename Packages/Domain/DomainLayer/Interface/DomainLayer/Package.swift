@@ -2,14 +2,14 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DI",
+    name: "DomainLayer",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DI",
-            targets: ["DI"]
+            name: "DomainLayer",
+            targets: ["DomainLayer"]
         )
     ],
     dependencies: [
@@ -17,7 +17,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "DI",
+            name: "DomainLayer",
             dependencies: [
                 "Domain"
             ]
@@ -49,11 +49,11 @@ extension Package.Dependency {
         let root: String
         switch localPackage {
         case .currentLayer(let targetType):
-            root = "../"
+            root = "../../../"
         case .infrastructure(let targetType):
-            root = "../" + "../Infrastructure"
+            root = "../../../" + "../Infrastructure"
         case .data(let targetType):
-            root = "../" + "../Data"
+            root = "../../../" + "../Data"
         }
         switch localPackage.targetType {
         case .interface(let interface):

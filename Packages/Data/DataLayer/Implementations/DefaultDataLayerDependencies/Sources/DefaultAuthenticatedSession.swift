@@ -1,31 +1,33 @@
 import Api
 import PersistentStorage
-import DataLayerDependencies
+import DataLayer
+import SyncEngine
+import InfrastructureLayer
 import AsyncExtensions
 
 final class DefaultAuthenticatedSession: AuthenticatedDataLayerSession {
     let api: APIProtocol
-    let remoteUpdates: RemoteUpdatesService
-    let persistency: UserStorage
+    let storage: UserStorage
+    let sync: Engine
     let authenticationLostHandler: any AsyncBroadcast<Void>
     private let sessionHost: SessionHost
 
     init(
         api: APIProtocol,
-        remoteUpdates: RemoteUpdatesService,
-        persistency: UserStorage,
+        storage: UserStorage,
+        sync: Engine,
         authenticationLostHandler: any AsyncBroadcast<Void>,
         sessionHost: SessionHost
     ) {
         self.api = api
-        self.persistency = persistency
+        self.storage = storage
+        self.sync = sync
         self.authenticationLostHandler = authenticationLostHandler
-        self.remoteUpdates = remoteUpdates
         self.sessionHost = sessionHost
     }
 
     func logout() async {
-        await persistency.invalidate()
+        await storage.invalidate()
         await sessionHost.sessionFinished()
     }
 }

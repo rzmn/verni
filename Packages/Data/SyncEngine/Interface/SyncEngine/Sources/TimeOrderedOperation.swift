@@ -1,8 +1,6 @@
-import Domain
-
 protocol TimeOrderedOperation {
     var id: String { get }
-    var timestamp: MsSince1970 { get }
+    var timestamp: Int64 { get }
     
     func earlier(than operation: any TimeOrderedOperation) -> Bool
     func earlier(than operation: Self) -> Bool

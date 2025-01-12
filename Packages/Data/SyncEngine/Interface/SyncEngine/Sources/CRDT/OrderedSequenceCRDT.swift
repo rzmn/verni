@@ -8,7 +8,7 @@ struct OrderedSequenceCRDT<Element: Comparable> {
         }
         let kind: Kind
         let id: String
-        let timestamp: MsSince1970
+        let timestamp: Int64
         
         func apply(elements: inout [Element]) {
             switch kind {

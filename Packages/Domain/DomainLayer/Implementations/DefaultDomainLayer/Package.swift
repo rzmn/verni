@@ -2,14 +2,14 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "DefaultDependencies",
+    name: "DefaultDomainLayer",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultDependencies",
-            targets: ["DefaultDependencies"]
+            name: "DefaultDomainLayer",
+            targets: ["DefaultDomainLayer"]
         )
     ],
     dependencies: [
@@ -18,12 +18,16 @@ let package = Package(
         .package(path: "../../../Domain/Implementations/DefaultAuthUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultUsersRepositoryImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultQRInviteUseCaseImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultProfileEditingUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultProfileEditingUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultValidationUseCasesImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultAvatarsRepositoryImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultEmailConfirmationUseCaseImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultPushRegistrationUseCaseImplementation"),
-        .package(path: "../../../Domain/Implementations/DefaultSaveCredendialsUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultEmailConfirmationUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultPushRegistrationUseCaseImplementation"),
+        .package(
+            path: "../../../Domain/Implementations/DefaultSaveCredendialsUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultProfileRepositoryImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultLogoutUseCaseImplementation"),
         .package(path: "../../../Domain/Implementations/DefaultReceivingPushUseCaseImplementation"),
@@ -34,7 +38,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "DefaultDependencies",
+            name: "DefaultDomainLayer",
             dependencies: [
                 "DI",
                 "Domain",
@@ -83,11 +87,11 @@ extension Package.Dependency {
         let root: String
         switch localPackage {
         case .currentLayer(let targetType):
-            root = "../../"
+            root = "../../../"
         case .infrastructure(let targetType):
-            root = "../../" + "../Infrastructure"
+            root = "../../../" + "../Infrastructure"
         case .data(let targetType):
-            root = "../../" + "../Data"
+            root = "../../../" + "../Data"
         }
         switch localPackage.targetType {
         case .interface(let interface):

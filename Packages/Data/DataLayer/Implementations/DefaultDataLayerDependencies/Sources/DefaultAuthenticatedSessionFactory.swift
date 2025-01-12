@@ -1,10 +1,11 @@
 import Api
 import PersistentStorage
-import DataLayerDependencies
+import DataLayer
 import AsyncExtensions
 import Logging
+internal import RemoteSyncEngine
 internal import DefaultApiImplementation
-internal import Base
+internal import Convenience
 
 final class DefaultAuthenticatedSessionFactory {
     private let logger: Logger
@@ -79,10 +80,17 @@ extension DefaultAuthenticatedSessionFactory: AuthenticatedDataLayerSessionFacto
             logger: logger,
             tokenRepository: tokenRefresher
         )
+        let api = apiFactory.create()
         return DefaultAuthenticatedSession(
-            api: apiFactory.create(),
-            remoteUpdates: apiFactory.remoteUpdates(),
-            persistency: persistency,
+            api: api,
+            storage: persistency,
+            sync: await RemoteSyncEngineFactory(
+                api: api,
+                storage: persistency,
+                taskFactory: taskFactory,
+                logger: logger
+                    .with(prefix: "🔄")
+            ).create(),
             authenticationLostHandler: authenticationLostSubject,
             sessionHost: sessionHost
         )

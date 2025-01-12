@@ -1,7 +1,6 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
-
 let package = Package(
     name: "IncomingPushUseCase",
     platforms: [
@@ -43,8 +42,7 @@ extension Package.Dependency {
 
         var targetType: TargetType {
             switch self {
-            case .currentLayer(let targetType), .infrastructure(let targetType),
-                .data(let targetType):
+            case .currentLayer(let targetType), .infrastructure(let targetType), .data(let targetType):
                 return targetType
             }
         }

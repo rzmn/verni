@@ -55,11 +55,11 @@ extension Package.Dependency {
         let root: String
         switch localPackage {
         case .currentLayer(let targetType):
-            root = "../../"
+            root = "../../../"
         case .infrastructure(let targetType):
-            root = "../../" + "../Infrastructure"
+            root = "../../../" + "../Infrastructure"
         case .data(let targetType):
-            root = "../../" + "../Data"
+            root = "../../../" + "../Data"
         }
         switch localPackage.targetType {
         case .interface(let interface):

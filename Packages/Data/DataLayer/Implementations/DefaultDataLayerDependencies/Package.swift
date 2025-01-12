@@ -16,6 +16,7 @@ let package = Package(
         .local(.currentLayer(.interface("Api"))),
         .local(.currentLayer(.interface("PersistentStorage"))),
         .local(.currentLayer(.interface("SyncEngine"))),
+        .local(.currentLayer(.interface("DataLayer"))),
         .local(.currentLayer(.implementation(interface: "PersistentStorage", implementation: "PersistentStorageSQLite"))),
         .local(.currentLayer(.implementation(interface: "Api", implementation: "DefaultApiImplementation"))),
         .local(.currentLayer(.implementation(interface: "SyncEngine", implementation: "RemoteSyncEngine"))),
@@ -28,6 +29,7 @@ let package = Package(
             name: "DefaultDataLayerDependencies",
             dependencies: [
                 "Api",
+                "DataLayer",
                 "PersistentStorage",
                 "SyncEngine",
                 "PersistentStorageSQLite",

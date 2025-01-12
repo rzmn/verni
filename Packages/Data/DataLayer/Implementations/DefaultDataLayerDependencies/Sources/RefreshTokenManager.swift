@@ -2,7 +2,7 @@ import Foundation
 import PersistentStorage
 import Api
 import AsyncExtensions
-internal import Base
+internal import Convenience
 internal import DefaultApiImplementation
 
 actor RefreshTokenManager {

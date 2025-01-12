@@ -9,7 +9,7 @@ struct LastWriteWinsCRDT<Entity> {
         }
         let kind: Kind
         let id: String
-        let timestamp: MsSince1970
+        let timestamp: Int64
     }
     private let initial: Entity?
     private let history: [(entity: Entity?, operation: Operation)]
