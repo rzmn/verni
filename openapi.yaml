@@ -174,7 +174,7 @@ paths:
                 title: updateEmailSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/Session"
+                    $ref: "#/components/schemas/StartupData"
                 required:
                   - response
         "401":
@@ -234,7 +234,7 @@ paths:
                 title: updatePasswordSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/Session"
+                    $ref: "#/components/schemas/StartupData"
                 required:
                   - response
         "401":
@@ -685,6 +685,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Operation"
+      required:
+        - session
+        - operations
     User:
       type: object
       description: User.
@@ -775,6 +778,32 @@ components:
         - alreadyConfirmed
         - incorrectCredentials
         - privacyViolation
+    UpdateEmailOperation:
+      description: Update email operation
+      type: object
+      properties:
+        updateEmail:
+          type: object
+          properties:
+            email:
+              type: string
+          required:
+            - email
+      required:
+        - updateEmail
+    VerifyEmailOperation:
+      description: Verify email operation
+      type: object
+      properties:
+        verifyEmail:
+          type: object
+          properties:
+            verified:
+              type: boolean
+          required:
+            - verified
+      required:
+        - verifyEmail
     CreateUserOperation:
       description: Create user operation
       type: object
@@ -950,3 +979,5 @@ components:
             - $ref: "#/components/schemas/DeleteSpendingGroupOperation"
             - $ref: "#/components/schemas/CreateSpendingOperation"
             - $ref: "#/components/schemas/DeleteSpendingOperation"
+            - $ref: "#/components/schemas/UpdateEmailOperation"
+            - $ref: "#/components/schemas/VerifyEmailOperation"
