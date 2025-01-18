@@ -13,19 +13,15 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Infrastructure/Logging"),
+        .local(.currentLayer(.interface("SaveCredendialsUseCase"))),
+        .local(.infrastructure(.interface("Logging")))
     ],
     targets: [
         .target(
             name: "DefaultSaveCredendialsUseCaseImplementation",
             dependencies: [
-                "Domain",
-                "Api",
-                "ApiDomainConvenience",
-                "Logging",
+                "SaveCredendialsUseCase",
+                "Logging"
             ]
         )
     ]

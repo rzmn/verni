@@ -13,14 +13,22 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
+        .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.data(.interface("Api"))),
+        .local(.infrastructure(.interface("Convenience"))),
+        .local(.infrastructure(.interface("Logging"))),
     ],
     targets: [
         .target(
             name: "DefaultEmailConfirmationUseCaseImplementation",
-            dependencies: ["Domain", "Api", "ApiDomainConvenience"]
+            dependencies: [
+                "EmailConfirmationUseCase",
+                "Entities",
+                "Api",
+                "Convenience",
+                "Logging"
+            ]
         )
     ]
 )

@@ -1,13 +1,13 @@
-import Domain
+import PushRegistrationUseCase
 import Api
 import UIKit
 import Logging
 
 public actor DefaultPushRegistrationUseCase {
-    private let api: ApiProtocol
+    private let api: APIProtocol
     public let logger: Logger
 
-    public init(api: ApiProtocol, logger: Logger) {
+    public init(api: APIProtocol, logger: Logger) {
         self.api = api
         self.logger = logger
     }
@@ -31,8 +31,30 @@ extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
 
     public func registerForPush(token tokenData: Data) async {
         let token = tokenData.map { String(format: "%02.2hhx", $0) }.joined()
-        let method = Auth.RegisterForPushNotifications(token: token)
-        try? await api.run(method: method)
+        do {
+            let response = try await api.registerForPushNotifications(
+                .init(
+                    body: .json(
+                        .init(
+                            token: token
+                        )
+                    )
+                )
+            )
+            switch response {
+            case .ok:
+                logE { "register for push notifications succeeded" }
+            case .unauthorized(let payload):
+                logE { "failed to register for push notifications response: \(payload)" }
+            case .internalServerError(let payload):
+                logE { "failed to register for push notifications response: \(payload)" }
+            case .undocumented(statusCode: let statusCode, let body):
+                logE { "failed to register for push notifications, undocumented response: \(body) code: \(statusCode)" }
+            }
+        } catch {
+            logE { "failed to register for push notifications error: \(error)" }
+        }
+        
     }
 }
 

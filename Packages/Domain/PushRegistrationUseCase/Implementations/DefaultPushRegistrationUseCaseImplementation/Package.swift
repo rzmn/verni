@@ -13,19 +13,17 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/PersistentStorage"),
+        .local(.currentLayer(.interface("PushRegistrationUseCase"))),
+        .local(.data(.interface("Api"))),
+        .local(.infrastructure(.interface("Logging")))
     ],
     targets: [
         .target(
             name: "DefaultPushRegistrationUseCaseImplementation",
             dependencies: [
-                "Domain",
-                "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
+                "PushRegistrationUseCase",
+                "Logging",
+                "Api"
             ]
         )
     ]
