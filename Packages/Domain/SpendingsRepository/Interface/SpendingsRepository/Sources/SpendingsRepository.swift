@@ -23,13 +23,27 @@ public enum DeleteSpendingError: Error {
     case groupNotFound
     case spendingNotFound
     case notAllowed
+    case `internal`(Error)
+}
+
+public enum SpendingsUpdate: Sendable {
+    case spendingGroupsUpdated([SpendingGroup.Identifier])
+    case spendingGroupUpdated(SpendingGroup, participants: [SpendingGroup.Participant])
+    case spendingsListUpdated(SpendingGroup.Identifier, [Spending.Identifier])
+    case spendingUpdated(Spending.Identifier, Spending)
 }
 
 public protocol SpendingsRepository: Sendable {
+    var updates: any AsyncBroadcast<[SpendingsUpdate]> { get }
+    
+    subscript(spending: Spending.Identifier) -> Spending? { get async }
+    subscript(group groupId: SpendingGroup.Identifier) -> (group: SpendingGroup, participants: [SpendingGroup.Participant])? { get async }
+    subscript(spendingsIn group: SpendingGroup.Identifier) -> [Spending]? { get async }
+    
     func createGroup(
         participants: [User.Identifier],
         displayName: String?
-    ) async throws(CreateSpendingGroupError)
+    ) async throws(CreateSpendingGroupError) -> SpendingGroup.Identifier
     
     func deleteGroup(
         id: SpendingGroup.Identifier
@@ -41,7 +55,7 @@ public protocol SpendingsRepository: Sendable {
         currency: Currency,
         amount: Amount,
         shares: [Spending.Share]
-    ) async throws(CreateSpendingError)
+    ) async throws(CreateSpendingError) -> Spending.Identifier
     
     func deleteSpending(
         groupId: SpendingGroup.Identifier,

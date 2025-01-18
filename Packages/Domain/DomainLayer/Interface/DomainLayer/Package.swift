@@ -13,13 +13,39 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../Domain/Domain")
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("AvatarsRepository"))),
+        .local(.currentLayer(.interface("UsersRepository"))),
+        .local(.currentLayer(.interface("SpendingsRepository"))),
+        .local(.currentLayer(.interface("ProfileRepository"))),
+        .local(.currentLayer(.interface("AuthUseCase"))),
+        .local(.currentLayer(.interface("SaveCredendialsUseCase"))),
+        .local(.currentLayer(.interface("QrInviteUseCase"))),
+        .local(.currentLayer(.interface("PushRegistrationUseCase"))),
+        .local(.currentLayer(.interface("LogoutUseCase"))),
+        .local(.currentLayer(.interface("IncomingPushUseCase"))),
+        .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
+        .local(.currentLayer(.interface("CredentialsFormatValidationUseCase"))),
+        .local(.infrastructure(.interface("InfrastructureLayer")))
     ],
     targets: [
         .target(
             name: "DomainLayer",
             dependencies: [
-                "Domain"
+                "Entities",
+                "AvatarsRepository",
+                "UsersRepository",
+                "SpendingsRepository",
+                "ProfileRepository",
+                "AuthUseCase",
+                "SaveCredendialsUseCase",
+                "QrInviteUseCase",
+                "PushRegistrationUseCase",
+                "LogoutUseCase",
+                "IncomingPushUseCase",
+                "EmailConfirmationUseCase",
+                "CredentialsFormatValidationUseCase",
+                "InfrastructureLayer"
             ]
         )
     ]

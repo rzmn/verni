@@ -1,86 +1,74 @@
 import Foundation
 import Logging
 import Filesystem
+import PersistentStorage
 internal import SQLite
 internal import Convenience
 
-@StorageActor final class SqliteDbPathManager: Sendable {
+@StorageActor struct SqliteDbPathManager: Sendable {
     let logger: Logger
 
-    private let pathManager: Filesystem.FileManager
-    private let versionLabel: String
-    private let containerDirectory: URL
+    private let environment: Environment
+    private let idsToInvalidate: IdsHolder
 
-    init(
-        logger: Logger,
-        containerDirectory: URL,
-        versionLabel: String,
-        pathManager: Filesystem.FileManager
-    ) throws {
+    nonisolated init(logger: Logger, environment: Environment) throws {
         self.logger = logger
-        self.versionLabel = versionLabel
-        self.containerDirectory = containerDirectory.appending(path: "sqlite_\(versionLabel)")
-        self.pathManager = pathManager
-        do {
-            try pathManager.createDirectory(at: self.containerDirectory)
-        } catch {
-            logE { "failed to create db path manager, error: \(error)" }
-            throw error
-        }
-        logI { "created [version=\(versionLabel)] at \(containerDirectory)" }
+        self.environment = environment
+        self.idsToInvalidate = IdsHolder(versionLabel: environment.versionLabel)
     }
 }
 
 extension SqliteDbPathManager: DbPathManager {
-    struct Item: Sendable {
-        let id: String
-        private let databaseDirectory: URL
-
-        init(id: String, databaseDirectory: URL) {
-            self.id = id
-            self.databaseDirectory = databaseDirectory
-        }
-
-        func connection() throws -> Connection {
-            try Connection(
-                databaseDirectory
-                    .appending(path: "db.sqlite")
-                    .absoluteString
-            )
-        }
-    }
-
-    func create(id: String) throws -> Item {
+    func create(hostId: HostId, refreshToken: String, operations: [Operation]) async throws -> UserStorage {
         invalidateIfNeeded()
-        let directory = databaseDirectory(for: id)
+        let directory = databaseDirectory(for: hostId)
         do {
-            let created = try pathManager.createDirectory(at: directory)
+            let created = try environment.fileManager.createDirectory(at: directory)
             guard created else {
                 throw InternalError.error("database already exists", underlying: nil)
             }
         } catch {
-            logE { "failed to create directory for id \(id), error: \(error)" }
+            logE { "failed to create directory for id \(hostId), error: \(error)" }
             throw error
         }
-        return Item(
-            id: id,
-            databaseDirectory: directory
+        let connection = try Connection(
+            directory
+                .appending(path: "db.sqlite")
+                .absoluteString
+        )
+        do {
+            try connection.createTablesForUser()
+        } catch {
+            invalidator(for: hostId)()
+            throw error
+        }
+        return try await SQLiteUserStorage(
+            database: connection,
+            invalidator: invalidator(for: hostId),
+            hostId: hostId,
+            initialData: SQLiteUserStorage.InitialData(
+                refreshToken: refreshToken,
+                operations: operations
+            ),
+            logger: logger
         )
     }
-
-    func invalidate(id: String) {
-        logI { "id \(id) has been marked as in need of invalidation" }
-        idsToInvalidate = modify(idsToInvalidate) {
-            $0.insert(id)
+    
+    func invalidator(for hostId: HostId) -> @StorageActor @Sendable () -> Void {
+        return {
+            logI { "id \(hostId) has been marked as in need of invalidation" }
+            idsToInvalidate.value = modify(idsToInvalidate.value) {
+                $0.insert(hostId)
+            }
         }
     }
 
-    var items: [Item] {
+    var items: [UserStoragePreview] {
         get throws {
             invalidateIfNeeded()
-            let idsToSkip = idsToInvalidate
-            return try pathManager
-                .listDirectory(at: containerDirectory, mask: .directory)
+            let idsToSkip = idsToInvalidate.value
+            return try environment.fileManager
+                .listDirectory(at: environment.containerDirectory, mask: .directory)
                 .compactMap { url in
                     let directoryName = url.lastPathComponent
                     guard directoryName.starts(with: databaseDirectoryPrefix) else {
@@ -92,11 +80,42 @@ extension SqliteDbPathManager: DbPathManager {
                     guard !idsToSkip.contains(id) else {
                         return nil
                     }
-                    return Item(
-                        id: id,
-                        databaseDirectory: url
-                    )
+                    return Item(hostId: id, manager: self, logger: logger)
                 }
+        }
+    }
+}
+
+extension SqliteDbPathManager {
+    struct Item: Sendable, UserStoragePreview {
+        let hostId: HostId
+        let invalidator: @StorageActor @Sendable () -> Void
+        let logger: Logger
+        private let databaseDirectory: URL
+
+        @StorageActor init(
+            hostId: HostId,
+            manager: SqliteDbPathManager,
+            logger: Logger
+        ) {
+            self.hostId = hostId
+            self.databaseDirectory = manager.databaseDirectory(for: hostId)
+            self.invalidator = manager.invalidator(for: hostId)
+            self.logger = logger
+        }
+        
+        @StorageActor func awake() async throws -> any UserStorage {
+            return try await SQLiteUserStorage(
+                database: try Connection(
+                    databaseDirectory
+                        .appending(path: "db.sqlite")
+                        .absoluteString
+                ),
+                invalidator: invalidator,
+                hostId: hostId,
+                initialData: nil,
+                logger: logger
+            )
         }
     }
 }
@@ -106,46 +125,56 @@ extension SqliteDbPathManager: Loggable {}
 // MARK: - Private
 
 extension SqliteDbPathManager {
-    private var idsToInvalidateKey: String {
-        "db_ids_to_invalidate_\(versionLabel)"
-    }
-
-    private var userDefaults: UserDefaults {
-        .standard
-    }
-
-    private var idsToInvalidate: Set<String> {
-        get {
-            userDefaults
-                .dictionary(forKey: idsToInvalidateKey)
-                .flatMap(\.keys)
-                .map(Set.init)
-                .emptyIfNil
+    final class IdsHolder: Sendable {
+        private let versionLabel: String
+        
+        private var idsToInvalidateKey: String {
+            "db_ids_to_invalidate_\(versionLabel)"
         }
-        set {
-            userDefaults
-                .set(newValue.reduce(into: [:]) { dict, item in
-                    dict[item] = true
-                }, forKey: idsToInvalidateKey)
+
+        private var userDefaults: UserDefaults {
+            .standard
+        }
+        
+        var value: Set<String> {
+            get {
+                userDefaults
+                    .dictionary(forKey: idsToInvalidateKey)
+                    .flatMap(\.keys)
+                    .map(Set.init)
+                    .emptyIfNil
+            }
+            set {
+                userDefaults
+                    .set(newValue.reduce(into: [:]) { dict, item in
+                        dict[item] = true
+                    }, forKey: idsToInvalidateKey)
+            }
+        }
+        
+        init(versionLabel: String) {
+            self.versionLabel = versionLabel
         }
     }
+}
 
+extension SqliteDbPathManager {
     private var databaseDirectoryPrefix: String {
         "id_"
     }
 
     private func databaseDirectory(for id: String) -> URL {
-        containerDirectory.appendingPathComponent(
+        environment.containerDirectory.appendingPathComponent(
             "\(databaseDirectoryPrefix)\(id)"
         )
     }
 
     private func invalidateIfNeeded() {
         logD { "invalidating deferred dbs" }
-        idsToInvalidate = idsToInvalidate
+        idsToInvalidate.value = idsToInvalidate.value
             .filter { item in
                 do {
-                    try pathManager.removeItem(at: databaseDirectory(for: item))
+                    try environment.fileManager.removeItem(at: databaseDirectory(for: item))
                     logI { "invalidated db for id \(item)" }
                     return false
                 } catch {

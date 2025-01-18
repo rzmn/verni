@@ -8,7 +8,7 @@ public enum EmailUpdateError: Error, Sendable {
 }
 
 public enum PasswordUpdateError: Error, Sendable {
-    case validationError
+    case wrongFormat
     case incorrectOldPassword
     case other(GeneralError)
 }

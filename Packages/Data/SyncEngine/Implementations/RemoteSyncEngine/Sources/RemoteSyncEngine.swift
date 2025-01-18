@@ -68,6 +68,12 @@ extension RemoteSyncEngine: Engine {
     private func stop() {
         assertionFailure("not implemented")
     }
+    
+    var operations: [Components.Schemas.Operation] {
+        get async {
+            await storage.operations.map(\.payload)
+        }
+    }
 
     func push(operations: [Components.Schemas.Operation]) async throws {
         try await storage
@@ -80,6 +86,19 @@ extension RemoteSyncEngine: Engine {
                 }
             )
         await sync()
+    }
+    
+    func pulled(operations: [Components.Schemas.Operation]) async throws {
+        try await storage
+            .update(
+                operations: operations.map {
+                    Operation(
+                        kind: .pendingConfirm,
+                        payload: $0
+                    )
+                }
+            )
+        await confirm()
     }
     
     private func sync() async {

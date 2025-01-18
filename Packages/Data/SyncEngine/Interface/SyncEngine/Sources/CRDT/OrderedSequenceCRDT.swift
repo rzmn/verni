@@ -1,14 +1,20 @@
 internal import Convenience
 
-struct OrderedSequenceCRDT<Element: Comparable> {
-    struct Operation: TimeOrderedOperation {
-        enum Kind {
+public struct OrderedSequenceCRDT<Element: Comparable & Sendable>: Sendable {
+    public struct Operation: TimeOrderedOperation {
+        public enum Kind: Sendable {
             case insert(Element)
             case delete(Element)
         }
-        let kind: Kind
-        let id: String
-        let timestamp: Int64
+        public let kind: Kind
+        public let id: String
+        public let timestamp: Int64
+        
+        public init(kind: Kind, id: String, timestamp: Int64) {
+            self.kind = kind
+            self.id = id
+            self.timestamp = timestamp
+        }
         
         func apply(elements: inout [Element]) {
             switch kind {
@@ -26,22 +32,25 @@ struct OrderedSequenceCRDT<Element: Comparable> {
     private let initial: [Element]
     private let history: [(elements: [Element], operation: Operation)]
 
-    init(initial: [Element], history: [(elements: [Element], operation: Operation)] = []) {
+    public init(
+        initial: [Element],
+        history: [(elements: [Element], operation: Operation)] = []
+    ) {
         self.initial = initial
         self.history = history
     }
 }
 
 extension OrderedSequenceCRDT {
-    var elements: [Element] {
+    public var elements: [Element] {
         history.last?.elements ?? initial
     }
     
-    func byInserting(operation: Operation) -> OrderedSequenceCRDT {
+    public func byInserting(operation: Operation) -> OrderedSequenceCRDT {
         byInserting(operations: [operation])
     }
 
-    func byInserting(operations: [Operation]) -> OrderedSequenceCRDT {
+    public func byInserting(operations: [Operation]) -> OrderedSequenceCRDT {
         let operations = (history.map(\.operation) + operations)
             .reduce(
                 into: [:]

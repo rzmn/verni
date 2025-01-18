@@ -1,4 +1,5 @@
 import PersistentStorage
+import Api
 
 struct OperationsMergeResult<Element: BaseOperationConvertible> {
     let inserted: [Element]

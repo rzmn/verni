@@ -15,7 +15,7 @@ public struct Operation: Sendable, Hashable, Equatable, Codable {
     }
 }
 
-public protocol BaseOperationConvertible {
+public protocol BaseOperationConvertible: Sendable {
     var base: Components.Schemas.BaseOperation { get }
 }
 

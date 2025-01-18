@@ -97,6 +97,7 @@ extension RefreshTokenMiddleware: ClientMiddleware {
             do {
                 let (response, body) = try await next(request, body, baseURL)
                 if response.status == .unauthorized {
+                    response.headerFields
                     return try await refreshAndReshedule(
                         request,
                         body: body,

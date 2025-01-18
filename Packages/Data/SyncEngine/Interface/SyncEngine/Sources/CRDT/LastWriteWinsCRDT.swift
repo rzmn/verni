@@ -1,35 +1,44 @@
 internal import Convenience
 
-struct LastWriteWinsCRDT<Entity> {
-    struct Operation: TimeOrderedOperation {
-        enum Kind {
-            case mutate((Entity) -> Entity)
+public struct LastWriteWinsCRDT<Entity: Sendable>: Sendable {
+    public struct Operation: TimeOrderedOperation {
+        public enum Kind: Sendable {
+            case mutate(@Sendable (Entity) -> Entity)
             case create(Entity)
             case delete
         }
-        let kind: Kind
-        let id: String
-        let timestamp: Int64
+        public let kind: Kind
+        public let id: String
+        public let timestamp: Int64
+        
+        public init(kind: Kind, id: String, timestamp: Int64) {
+            self.kind = kind
+            self.id = id
+            self.timestamp = timestamp
+        }
     }
     private let initial: Entity?
     private let history: [(entity: Entity?, operation: Operation)]
 
-    init(initial: Entity?, history: [(entity: Entity?, operation: Operation)] = []) {
+    public init(
+        initial: Entity?,
+        history: [(entity: Entity?, operation: Operation)] = []
+    ) {
         self.initial = initial
         self.history = history
     }
 }
 
 extension LastWriteWinsCRDT {
-    var value: Entity? {
+    public var value: Entity? {
         history.last?.entity ?? initial
     }
 
-    func byInserting(operation: Operation) -> Self {
+    public func byInserting(operation: Operation) -> Self {
         byInserting(operations: [operation])
     }
 
-    func byInserting(operations: [Operation]) -> Self {
+    public func byInserting(operations: [Operation]) -> Self {
         let operations = (history.map(\.operation) + operations)
             .reduce(
                 into: [:]

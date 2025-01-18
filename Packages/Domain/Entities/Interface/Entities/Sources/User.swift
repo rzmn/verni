@@ -8,22 +8,36 @@ public struct UserPayload: Sendable, Equatable {
     }
 }
 
+public enum AnyUser: Sendable, Equatable {
+    case sandbox(SandboxUser)
+    case regular(User)
+    
+    public var payload: UserPayload {
+        switch self {
+        case .sandbox(let user):
+            user.payload
+        case .regular(let user):
+            user.payload
+        }
+    }
+}
+
 public struct SandboxUser: Sendable, Equatable {
     public var id: User.Identifier
     public var ownerId: User.Identifier
     public var payload: UserPayload
-    public var bindedTo: User.Identifier?
+    public var boundTo: User.Identifier?
     
     public init(
         id: User.Identifier,
         ownerId: User.Identifier,
         payload: UserPayload,
-        bindedTo: User.Identifier?
+        boundTo: User.Identifier?
     ) {
         self.id = id
         self.ownerId = ownerId
         self.payload = payload
-        self.bindedTo = bindedTo
+        self.boundTo = boundTo
     }
 }
 

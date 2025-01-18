@@ -1,4 +1,4 @@
-protocol TimeOrderedOperation {
+protocol TimeOrderedOperation: Sendable {
     var id: String { get }
     var timestamp: Int64 { get }
     

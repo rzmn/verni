@@ -1,4 +1,5 @@
 import Foundation
+import Entities
 
 public enum SendEmailConfirmationCodeError: Error, Sendable {
     case notDelivered

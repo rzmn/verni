@@ -1,11 +1,9 @@
 import Foundation
 import PersistentStorage
 
-@StorageActor protocol DbPathManager<Item>: Sendable {
-    associatedtype Item: Sendable
+@StorageActor protocol DbPathManager: Sendable {
+    func create(hostId: HostId, refreshToken: String, operations: [Operation]) async throws -> UserStorage
+    func invalidator(for hostId: HostId) -> @StorageActor @Sendable () -> Void
 
-    func create(id: HostId) throws -> Item
-    func invalidate(id: HostId)
-
-    var items: [Item] { get throws }
+    var items: [UserStoragePreview] { get throws }
 }

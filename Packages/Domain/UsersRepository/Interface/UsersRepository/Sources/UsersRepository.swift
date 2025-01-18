@@ -3,32 +3,39 @@ import Entities
 
 public enum BindUserError: Error {
     case notAllowed
+    case alreadyBound(to: User.Identifier)
     case userNotFound(User.Identifier)
     case `internal`(Error)
 }
 
 public enum UpdateDisplayNameError: Error {
     case notAllowed
+    case userNotFound(User.Identifier)
     case tooShort
     case `internal`(Error)
 }
 
 public enum UpdateAvatarError: Error {
     case notAllowed
+    case userNotFound(User.Identifier)
     case invalidImageData
     case `internal`(Error)
 }
 
-public protocol UsersRepository: Sendable {
-    var remote: UsersRemoteDataSource { get async }
-    var updates: any AsyncBroadcast<[User.Identifier: User]> { get }
+public enum CreateUserError: Error {
+    case nameTooShort
+    case `internal`(Error)
+}
 
-    subscript(id: User.Identifier) -> User? { get async }
-    subscript(query: String) -> [User] { get async }
+public protocol UsersRepository: Sendable {
+    var updates: any AsyncBroadcast<[User.Identifier: AnyUser]> { get }
+
+    subscript(id: User.Identifier) -> AnyUser? { get async }
+    subscript(query: String) -> [AnyUser] { get async }
 
     func createUser(
         displayName: String
-    ) async -> User
+    ) async throws(CreateUserError) -> User.Identifier
 
     func bind(
         localUserId: User.Identifier,
@@ -42,6 +49,6 @@ public protocol UsersRepository: Sendable {
     
     func updateAvatar(
         userId: User.Identifier,
-        base64Data: String
+        imageId: Avatar.Identifier
     ) async throws(UpdateAvatarError)
 }
