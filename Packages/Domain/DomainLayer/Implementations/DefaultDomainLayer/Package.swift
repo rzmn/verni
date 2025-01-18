@@ -27,6 +27,17 @@ let package = Package(
         .local(.currentLayer(.interface("IncomingPushUseCase"))),
         .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
         .local(.currentLayer(.interface("CredentialsFormatValidationUseCase"))),
+        .local(.currentLayer(.implementation(interface: "AuthUseCase", implementation: "DefaultAuthUseCaseImplementation"))),
+        .local(.currentLayer(.implementation(interface: "AvatarsRepository", implementation: "DefaultAvatarsRepositoryImplementation"))),
+        .local(.currentLayer(.implementation(interface: "CredentialsFormatValidationUseCase", implementation: "DefaultValidationUseCasesImplementation"))),
+        .local(.currentLayer(.implementation(interface: "EmailConfirmationUseCase", implementation: "DefaultEmailConfirmationUseCaseImplementation"))),
+        .local(.currentLayer(.implementation(interface: "LogoutUseCase", implementation: "DefaultLogoutUseCaseImplementation"))),
+        .local(.currentLayer(.implementation(interface: "ProfileRepository", implementation: "DefaultProfileRepository"))),
+        .local(.currentLayer(.implementation(interface: "PushRegistrationUseCase", implementation: "DefaultPushRegistrationUseCaseImplementation"))),
+        .local(.currentLayer(.implementation(interface: "QrInviteUseCase", implementation: "DefaultQRInviteUseCaseImplementation"))),
+        .local(.currentLayer(.implementation(interface: "SaveCredendialsUseCase", implementation: "DefaultSaveCredendialsUseCaseImplementation"))),
+        .local(.currentLayer(.implementation(interface: "SpendingsRepository", implementation: "DefaultSpendingsRepository"))),
+        .local(.currentLayer(.implementation(interface: "UsersRepository", implementation: "DefaultUsersRepository"))),
         .local(.infrastructure(.interface("InfrastructureLayer")))
     ],
     targets: [
@@ -47,6 +58,17 @@ let package = Package(
                 "IncomingPushUseCase",
                 "EmailConfirmationUseCase",
                 "CredentialsFormatValidationUseCase",
+                "DefaultAuthUseCaseImplementation",
+                "DefaultAvatarsRepositoryImplementation",
+                "DefaultValidationUseCasesImplementation",
+                "DefaultEmailConfirmationUseCaseImplementation",
+                "DefaultLogoutUseCaseImplementation",
+                "DefaultProfileRepository",
+                "DefaultPushRegistrationUseCaseImplementation",
+                "DefaultQRInviteUseCaseImplementation",
+                "DefaultSaveCredendialsUseCaseImplementation",
+                "DefaultSpendingsRepository",
+                "DefaultUsersRepository",
                 "InfrastructureLayer"
             ]
         )
