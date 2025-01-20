@@ -1,22 +1,22 @@
 {
-  "originHash" : "27117b5eed2b23586cc1943b393ddc211c2206513aefa0485ec86f4d9969f6a7",
+  "originHash" : "474a8e8415c8d7e9d91ced2c3c7bd8b71d6e0f8938483d665ad69401b92a059d",
   "pins" : [
     {
       "identity" : "openapikit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/OpenAPIKit",
       "state" : {
-        "revision" : "5b5ee49624dda5b3e3b85aff184f44a007862fb7",
-        "version" : "3.3.0"
+        "revision" : "749ceba9a6e91d40081f27996fd91fd3de9a8dfe",
+        "version" : "3.4.0"
       }
     },
     {
-      "identity" : "sqlite.swift",
+      "identity" : "qrcode",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/stephencelis/SQLite.swift.git",
+      "location" : "https://github.com/dagronf/qrcode.git",
       "state" : {
-        "revision" : "a95fc6df17d108bd99210db5e8a9bac90fe984b8",
-        "version" : "0.15.3"
+        "revision" : "e7bcd89a987cf43bc64e414f3e26cb8eded8ae1e",
+        "version" : "20.5.0"
       }
     },
     {
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-openapi-generator",
       "state" : {
-        "revision" : "ad7f0e73246f5083733dbc025097fcdf0fbee2a1",
-        "version" : "1.6.0"
+        "revision" : "84b693f9d0559dc488e691edb4837bafbce2aaea",
+        "version" : "1.7.0"
       }
     },
     {
@@ -78,17 +78,26 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-openapi-runtime",
       "state" : {
-        "revision" : "5e119a3d52dde0229312ed586be99c666c6b6f64",
-        "version" : "1.7.0"
+        "revision" : "23146bc8710ac5e57abb693113f02dc274cf39b6",
+        "version" : "1.8.0"
       }
     },
     {
-      "identity" : "swift-openapi-urlsession",
+      "identity" : "swift-qrcode-generator",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-openapi-urlsession",
+      "location" : "https://github.com/dagronf/swift-qrcode-generator",
       "state" : {
-        "revision" : "9bf4c712ad7989d6a91dbe68748b8829a50837e4",
-        "version" : "1.0.2"
+        "revision" : "2b1980b825f08a81ccc762b0c4d17fcde9d5e953",
+        "version" : "2.0.2"
+      }
+    },
+    {
+      "identity" : "swiftimagereadwrite",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dagronf/SwiftImageReadWrite",
+      "state" : {
+        "revision" : "42ace2412279f18bc264bc306e96b51c36e12a33",
+        "version" : "1.9.2"
       }
     },
     {

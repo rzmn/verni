@@ -952,6 +952,24 @@ components:
             - groupId
       required:
         - deleteSpending
+    UploadImageOperation:
+      description: Upload image operation
+      type: object
+      properties:
+        uploadImage:
+          type: object
+          properties:
+            imageId:
+              type: string
+              description: image identifier
+            base64:
+              type: string
+              description: base64 string representation of the image.
+          required:
+            - imageId
+            - base64
+      required:
+        - uploadImage
     BaseOperation:
       type: object
       description: Common properties for any operation
@@ -981,3 +999,4 @@ components:
             - $ref: "#/components/schemas/DeleteSpendingOperation"
             - $ref: "#/components/schemas/UpdateEmailOperation"
             - $ref: "#/components/schemas/VerifyEmailOperation"
+            - $ref: "#/components/schemas/UploadImageOperation"
