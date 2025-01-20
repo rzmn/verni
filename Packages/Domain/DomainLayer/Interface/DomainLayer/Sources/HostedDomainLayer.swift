@@ -8,7 +8,7 @@ import IncomingPushUseCase
 import EmailConfirmationUseCase
 import QrInviteUseCase
 
-public protocol HostedDomainLayer: Sendable, AppCommonCovertible {
+public protocol HostedDomainLayer: SharedDomainLayerCovertible {
     var userId: User.Identifier { get }
 
     var profileRepository: ProfileRepository { get }

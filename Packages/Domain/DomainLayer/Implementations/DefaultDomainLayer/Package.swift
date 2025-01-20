@@ -38,7 +38,9 @@ let package = Package(
         .local(.currentLayer(.implementation(interface: "SaveCredendialsUseCase", implementation: "DefaultSaveCredendialsUseCaseImplementation"))),
         .local(.currentLayer(.implementation(interface: "SpendingsRepository", implementation: "DefaultSpendingsRepository"))),
         .local(.currentLayer(.implementation(interface: "UsersRepository", implementation: "DefaultUsersRepository"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.data(.interface("DataLayer"))),
+        .local(.infrastructure(.interface("InfrastructureLayer"))),
+        .local(.infrastructure(.interface("AsyncExtensions")))
     ],
     targets: [
         .target(
@@ -69,6 +71,7 @@ let package = Package(
                 "DefaultSaveCredendialsUseCaseImplementation",
                 "DefaultSpendingsRepository",
                 "DefaultUsersRepository",
+                "DataLayer",
                 "InfrastructureLayer"
             ]
         )

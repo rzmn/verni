@@ -1,157 +1,132 @@
-import Domain
+import Entities
 import Api
+import AvatarsRepository
 import Foundation
-import Base
 import Logging
 import AsyncExtensions
-internal import ApiDomainConvenience
+import SyncEngine
+import InfrastructureLayer
+internal import Convenience
 
-public actor DefaultAvatarsRepository {
+public actor DefaultAvatarsRepository: Sendable {
     public let logger: Logger
-    private let api: APIProtocol
-    private let offlineRepository: AvatarsOfflineRepository
-    private let offlineMutableRepository: AvatarsOfflineMutableRepository
-    private let taskFactory: TaskFactory
-
-    private var loadingIds = [Avatar.Identifier: Task<Result<Data, GeneralError>, Never>]()
-
+    private let updatesSubject: AsyncSubject<[Image.Identifier: Image]>
+    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.Operation]>?
+    private let infrastructure: InfrastructureLayer
+    private let sync: Engine
+    private let reducer: Reducer
+    private let userId: User.Identifier
+    private var state: State
+    
     public init(
-        api: APIProtocol,
-        taskFactory: TaskFactory,
-        offlineRepository: AvatarsOfflineRepository,
-        offlineMutableRepository: AvatarsOfflineMutableRepository,
+        reducer: @escaping Reducer = DefaultReducer(
+            uploadImageReducer: UploadImageReducer
+        ),
+        userId: User.Identifier,
+        sync: Engine,
+        infrastructure: InfrastructureLayer,
         logger: Logger
-    ) {
-        self.api = api
-        self.offlineRepository = offlineRepository
-        self.offlineMutableRepository = offlineMutableRepository
-        self.taskFactory = taskFactory
+    ) async {
         self.logger = logger
+        self.state = State(images: [:])
+        self.reducer = reducer
+        self.infrastructure = infrastructure
+        self.sync = sync
+        self.userId = userId
+        updatesSubject = AsyncSubject(
+            taskFactory: infrastructure.taskFactory,
+            logger: logger.with(
+                prefix: "🆕"
+            )
+        )
+        for operation in await sync.operations {
+            state = reducer(operation, state)
+        }
+        remoteUpdatesSubscription = await sync.updates.subscribe { [weak self] operations in
+            Task { [weak self] in
+                await self?.received(operations: operations)
+            }
+        }
+    }
+    
+    private func received(operation: Components.Schemas.Operation) {
+        received(operations: [operation])
+    }
+    
+    private func received(operations: [Components.Schemas.Operation]) {
+        let oldState = state
+        for operation in operations {
+            state = reducer(operation, state)
+        }
+        let updates = state.images.reduce(into: [:] as [Image.Identifier: Image]) { dict, kv in
+            let (userId, user) = kv
+            guard let value = user.value else {
+                return
+            }
+            guard oldState.images[userId]?.value != value else {
+                return
+            }
+            dict[userId] = value
+        }
+        guard !updates.isEmpty else {
+            return
+        }
+        infrastructure.taskFactory.detached { [weak self] in
+            await self?.updatesSubject.yield(updates)
+        }
     }
 }
 
 extension DefaultAvatarsRepository: AvatarsRepository {
-    nonisolated public func getIfCached(id: Avatar.Identifier) -> Data? {
-        offlineRepository.get(for: id)
+    private var isImageIdReserved: (Image.Identifier) -> Bool {
+        state.images.keys.contains
     }
-
-    func waitForScheduled(
-        ids: [Avatar.Identifier],
-        from loadingIds: [Avatar.Identifier: Task<Result<Data, GeneralError>, Never>]
-    ) async -> [Avatar.Identifier: Data] {
-        await withTaskGroup(of: Optional<(id: Avatar.Identifier, data: Data)>.self) { group in
-            for id in ids {
-                guard let task = loadingIds[id] else {
-                    continue
-                }
-                group.addTask {
-                    let result = await task.value
-                    switch result {
-                    case .success(let data):
-                        return (id: id, data: data)
-                    case .failure:
-                        return nil
-                    }
-                }
-            }
-            var loaded = [Avatar.Identifier: Data]()
-            for await value in group {
-                guard let value else {
-                    continue
-                }
-                loaded[value.id] = value.data
-            }
-            return loaded
+    
+    private var isOperationIdReserved: (SpendingGroup.Identifier) -> Bool {
+        get async {
+            Set(await sync.operations.map(\.value1.operationId)).contains
         }
     }
-
-    func schedule(ids: [Avatar.Identifier]) {
-        let fetchTask = taskFactory.task { [self] in
-            try await doFetch(ids: ids)
-        }
-        ids.forEach { [offlineMutableRepository] id in
-            loadingIds[id] = taskFactory.task {
-                let fetchResult: [Avatar.Identifier: Avatar]
-                do {
-                    fetchResult = try await fetchTask.value
-                } catch {
-                    if let error = error as? GeneralError {
-                        return .failure(error)
-                    } else {
-                        assertionFailure()
-                        return .failure(.other(error))
-                    }
-                }
-                if let avatar = fetchResult[id] {
-                    if let data = Data(base64Encoded: avatar.base64) {
-                        await offlineMutableRepository.store(data: data, for: id)
-                        return .success(data)
-                    } else {
-                        return .failure(.other(AvatarsRepositoryError.hasNoData))
-                    }
-                } else {
-                    return .failure(.other(AvatarsRepositoryError.idDoesNotExist))
-                }
-            }
+    
+    public nonisolated var updates: any AsyncBroadcast<[Image.Identifier: Image]> {
+        updatesSubject
+    }
+    
+    public subscript(id: Image.Identifier) -> Image? {
+        get async {
+            state.images[id]?.value
         }
     }
-
-    private func doFetch(
-        ids: [Avatar.Identifier]
-    ) async throws(GeneralError) -> [Avatar.Identifier: Avatar] {
-        let response: Operations.GetAvatars.Output
-        do {
-            response = try await api.getAvatars(
-                .init(query: .init(ids: ids))
+    
+    public func upload(image data: Image.Base64Data) async throws(UploadImageError) -> Image.Identifier {
+        let imageId = infrastructure.nextId(
+            isBlacklisted: isImageIdReserved
+        )
+        let operation = await Components.Schemas.Operation(
+            value1: Components.Schemas.BaseOperation(
+                operationId: infrastructure.nextId(
+                    isBlacklisted: isOperationIdReserved
+                ),
+                createdAt: infrastructure.timeMs,
+                authorId: userId
+            ),
+            value2: .UploadImageOperation(
+                .init(
+                    uploadImage: .init(
+                        imageId: imageId,
+                        base64: data
+                    )
+                )
             )
+        )
+        do {
+            try await sync.push(operation: operation)
         } catch {
-            throw GeneralError(error)
+            logE { "createUser: push failed error: \(error)" }
+            throw .internal(error)
         }
-        let avatarDtos: [String: Components.Schemas.Image]
-        switch response {
-        case .ok(let success):
-            switch success.body {
-            case .json(let payload):
-                avatarDtos = payload.response.additionalProperties
-            }
-        case .internalServerError(let apiError):
-            throw GeneralError(apiError)
-        case .undocumented(statusCode: let statusCode, let body):
-            logE { "got undocumented response on getAvatars: \(statusCode) \(body)" }
-            throw GeneralError(UndocumentedBehaviour(context: (statusCode, body)))
-        }
-        return avatarDtos.mapValues(Avatar.init(dto:))
-    }
-
-    public func get(ids: [Avatar.Identifier]) async -> [Avatar.Identifier: Data] {
-        let cached = await offlineRepository.getConcurrent(taskFactory: taskFactory, ids: ids)
-        let alreadyRequested = await waitForScheduled(
-            ids: ids.filter { cached[$0] == nil },
-            from: loadingIds
-        )
-        let idsToLoad = ids.filter {
-            cached[$0] == nil && alreadyRequested[$0] == nil
-        }
-        guard !idsToLoad.isEmpty else {
-            return alreadyRequested.reduce(into: cached) { dict, element in
-                let (key, value) = element
-                dict[key] = value
-            }
-        }
-        schedule(ids: idsToLoad)
-        let loaded = await waitForScheduled(
-            ids: idsToLoad,
-            from: loadingIds
-        )
-        return loaded.reduce(
-            into: alreadyRequested.reduce(into: cached) { dict, element in
-                let (key, value) = element
-                dict[key] = value
-            }
-        ) { dict, element in
-            let (key, value) = element
-            dict[key] = value
-        }
+        received(operation: operation)
+        return imageId
     }
 }
 

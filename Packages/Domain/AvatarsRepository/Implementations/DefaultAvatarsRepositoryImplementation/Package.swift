@@ -13,39 +13,38 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
-        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("AvatarsRepository"))),
+        .local(.data(.interface("Api"))),
+        .local(.data(.interface("SyncEngine"))),
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.interface("Filesystem"))),
+        .local(.infrastructure(.interface("Convenience"))),
+        .local(.infrastructure(.interface("InfrastructureLayer")))
     ],
     targets: [
         .target(
             name: "DefaultAvatarsRepositoryImplementation",
             dependencies: [
-                "Domain",
+                "Entities",
+                "AvatarsRepository",
                 "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
-                "Base",
+                "SyncEngine",
                 "Logging",
+                "Convenience",
+                "Filesystem",
+                "InfrastructureLayer"
             ]
         ),
         .testTarget(
             name: "DefaultAvatarsRepositoryImplementationTests",
             dependencies: [
-                "Domain",
-                "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
                 "DefaultAvatarsRepositoryImplementation",
-                "Base",
-                "Logging",
-                "MockApiImplementation",
-                "TestInfrastructure"
+                "Entities",
+                "AvatarsRepository",
+                "Api",
+                "SyncEngine",
+                "Logging"
             ]
         ),
     ]

@@ -13,19 +13,19 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../Domain"),
-        .package(path: "../../../DI/DI"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/DI/DataLayerDependencies"),
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("AuthUseCase"))),
+        .local(.data(.interface("DataLayer"))),
+        .local(.data(.interface("Api"))),
     ],
     targets: [
         .target(
             name: "DefaultAuthUseCaseImplementation",
             dependencies: [
-                "Domain",
-                "Api",
-                "DI",
-                "DataLayerDependencies",
+                "Entities",
+                "AuthUseCase",
+                "DataLayer",
+                "Api"
             ]
         )
     ]

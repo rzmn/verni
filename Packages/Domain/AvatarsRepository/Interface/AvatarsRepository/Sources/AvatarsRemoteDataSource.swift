@@ -1,16 +1,15 @@
-import Foundation
 import Entities
 
 public protocol AvatarsRemoteDataSource {
     func fetch(
-        ids: [Avatar.Identifier]
-    ) async -> [Avatar.Identifier: Data]
+        ids: [Image.Identifier]
+    ) async -> [Image.Identifier: Image]
 }
 
 extension AvatarsRemoteDataSource {
     public func fetch(
-        id: Avatar.Identifier
-    ) async -> Data? {
+        id: Image.Identifier
+    ) async -> Image? {
         await fetch(ids: [id])[id]
     }
 }

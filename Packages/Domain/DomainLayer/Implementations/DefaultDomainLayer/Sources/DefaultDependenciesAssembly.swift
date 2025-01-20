@@ -1,5 +1,3 @@
-import DI
-import Domain
 import Foundation
 import AsyncExtensions
 internal import DefaultInfrastructure
@@ -10,50 +8,6 @@ internal import Base
 internal import DefaultAuthUseCaseImplementation
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
-
-private actor AuthUseCaseAdapter: AuthUseCase {
-    private let impl: any AuthUseCase
-    private let awakeHook: () async throws(AwakeError) -> any AuthenticatedDomainLayerSession
-    private let loginHook: (Credentials) async throws(LoginError) -> any AuthenticatedDomainLayerSession
-    private let signupHook: (Credentials) async throws(SignupError) -> any AuthenticatedDomainLayerSession
-
-    init<Impl: AuthUseCase>(
-        impl: Impl,
-        dependencies: DefaultDependenciesAssembly
-    ) where Impl.AuthorizedSession == any AuthenticatedDataLayerSession {
-        self.impl = impl
-        awakeHook = { () async throws(AwakeError) -> any AuthenticatedDomainLayerSession in
-            await ActiveSessionDependenciesAssembly(
-                defaultDependencies: dependencies,
-                dataLayer: try await impl.awake()
-            )
-        }
-        loginHook = { credentials async throws(LoginError) -> any AuthenticatedDomainLayerSession in
-            await ActiveSessionDependenciesAssembly(
-                defaultDependencies: dependencies,
-                dataLayer: try await impl.login(credentials: credentials)
-            )
-        }
-        signupHook = { credentials async throws(SignupError) -> any AuthenticatedDomainLayerSession in
-            await ActiveSessionDependenciesAssembly(
-                defaultDependencies: dependencies,
-                dataLayer: try await impl.signup(credentials: credentials)
-            )
-        }
-    }
-
-    func awake() async throws(AwakeError) -> any AuthenticatedDomainLayerSession {
-        try await awakeHook()
-    }
-
-    func login(credentials: Credentials) async throws(LoginError) -> any AuthenticatedDomainLayerSession {
-        try await loginHook(credentials)
-    }
-
-    func signup(credentials: Credentials) async throws(SignupError) -> any AuthenticatedDomainLayerSession {
-        try await signupHook(credentials)
-    }
-}
 
 public final class DefaultDependenciesAssembly: AnonymousDomainLayerSession, Sendable {
     private let dataLayer: AnonymousDataLayerSession

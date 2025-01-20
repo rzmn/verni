@@ -13,39 +13,28 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/DI/DataLayerDependencies"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
-        .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("LogoutUseCase"))),
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.interface("AsyncExtensions")))
     ],
     targets: [
         .target(
             name: "DefaultLogoutUseCaseImplementation",
             dependencies: [
-                "Domain",
-                "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
+                "Entities",
+                "LogoutUseCase",
                 "Logging",
+                "AsyncExtensions"
             ]
         ),
         .testTarget(
             name: "DefaultLogoutUseCaseImplementationTests",
             dependencies: [
-                "Domain",
-                "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
-                "DefaultLogoutUseCaseImplementation",
-                "MockPersistentStorage",
-                "DataLayerDependencies",
-                "MockApiImplementation",
-                "TestInfrastructure",
+                "Entities",
+                "LogoutUseCase",
+                "Logging",
+                "AsyncExtensions"
             ]
         ),
     ]

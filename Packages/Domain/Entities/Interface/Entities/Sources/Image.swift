@@ -1,4 +1,4 @@
-public struct Avatar: Equatable, Sendable {
+public struct Image: Equatable, Sendable {
     public let id: Identifier
     public let base64: Base64Data
 
@@ -8,7 +8,7 @@ public struct Avatar: Equatable, Sendable {
     }
 }
 
-extension Avatar {
+extension Image {
     public typealias Identifier = String
     public typealias Base64Data = String
 }

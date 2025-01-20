@@ -1,21 +1,16 @@
-import Domain
-import PersistentStorage
+import LogoutUseCase
+import Entities
 import AsyncExtensions
-import Base
 import Logging
-import DataLayerDependencies
-internal import ApiDomainConvenience
 
 public actor DefaultLogoutUseCase {
     public let logger: Logger
     private let didLogoutBroadcast: AsyncSubject<LogoutReason>
-    private let session: AuthenticatedDataLayerSession
     private let taskFactory: TaskFactory
     private var didLogoutSubscription: (any CancellableEventSource)?
     private var loggedOutHandler = LoggedOutHandler()
 
     public init(
-        session: AuthenticatedDataLayerSession,
         shouldLogout: any AsyncBroadcast<LogoutReason>,
         taskFactory: TaskFactory,
         logger: Logger
@@ -24,7 +19,6 @@ public actor DefaultLogoutUseCase {
             taskFactory: taskFactory,
             logger: logger
         )
-        self.session = session
         self.taskFactory = taskFactory
         self.logger = logger
         didLogoutSubscription = await shouldLogout.subscribe { [weak self] reason in

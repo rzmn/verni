@@ -18,7 +18,6 @@ public enum UpdateDisplayNameError: Error {
 public enum UpdateAvatarError: Error {
     case notAllowed
     case userNotFound(User.Identifier)
-    case invalidImageData
     case `internal`(Error)
 }
 
@@ -41,14 +40,14 @@ public protocol UsersRepository: Sendable {
         localUserId: User.Identifier,
         to remoteUserId: User.Identifier
     ) async throws(BindUserError)
-    
+
     func updateDisplayName(
         userId: User.Identifier,
         displayName: String
     ) async throws(UpdateDisplayNameError)
-    
+
     func updateAvatar(
         userId: User.Identifier,
-        imageId: Avatar.Identifier
+        imageId: Image.Identifier
     ) async throws(UpdateAvatarError)
 }

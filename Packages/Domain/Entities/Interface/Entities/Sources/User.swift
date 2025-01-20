@@ -1,8 +1,8 @@
 public struct UserPayload: Sendable, Equatable {
     public var displayName: String
-    public var avatar: Avatar.Identifier?
+    public var avatar: Image.Identifier?
     
-    public init(displayName: String, avatar: Avatar.Identifier?) {
+    public init(displayName: String, avatar: Image.Identifier?) {
         self.displayName = displayName
         self.avatar = avatar
     }

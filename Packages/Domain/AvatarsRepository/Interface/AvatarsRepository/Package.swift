@@ -14,12 +14,14 @@ let package = Package(
     ],
     dependencies: [
         .local(.currentLayer(.interface("Entities"))),
+        .local(.infrastructure(.interface("AsyncExtensions")))
     ],
     targets: [
         .target(
             name: "AvatarsRepository",
             dependencies: [
                 "Entities",
+                "AsyncExtensions"
             ],
             path: "Sources"
         )
