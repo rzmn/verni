@@ -7,7 +7,7 @@ public enum UploadImageError: Error {
     case `internal`(Error)
 }
 
-public protocol AvatarsRepository {
+public protocol AvatarsRepository: Sendable {
     var updates: any AsyncBroadcast<[Image.Identifier: Image]> { get }
 
     subscript(

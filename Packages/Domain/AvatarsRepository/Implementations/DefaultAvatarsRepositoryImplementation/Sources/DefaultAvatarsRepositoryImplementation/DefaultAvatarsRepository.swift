@@ -19,9 +19,24 @@ public actor DefaultAvatarsRepository: Sendable {
     private var state: State
     
     public init(
-        reducer: @escaping Reducer = DefaultReducer(
-            uploadImageReducer: UploadImageReducer
-        ),
+        userId: User.Identifier,
+        sync: Engine,
+        infrastructure: InfrastructureLayer,
+        logger: Logger
+    ) async {
+        await self.init(
+            reducer: DefaultReducer(
+                uploadImageReducer: UploadImageReducer
+            ),
+            userId: userId,
+            sync: sync,
+            infrastructure: infrastructure,
+            logger: logger
+        )
+    }
+    
+    init(
+        reducer: @escaping Reducer,
         userId: User.Identifier,
         sync: Engine,
         infrastructure: InfrastructureLayer,

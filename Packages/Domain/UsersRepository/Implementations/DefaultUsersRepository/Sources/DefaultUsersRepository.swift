@@ -1,31 +1,46 @@
+import Api
 import AsyncExtensions
-import UsersRepository
+internal import Convenience
 import Entities
 import InfrastructureLayer
-import Api
 import Logging
 import PersistentStorage
 import SyncEngine
-internal import Convenience
+import UsersRepository
 
-actor DefaultUsersRepository: Sendable {
-    let logger: Logger
+public actor DefaultUsersRepository: Sendable {
+    public let logger: Logger
     private let infrastructure: InfrastructureLayer
     private let reducer: Reducer
     private var state: State
     private let sync: Engine
     private let userId: User.Identifier
-    
+
     private let updatesSubject: AsyncSubject<[User.Identifier: AnyUser]>
     private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.Operation]>?
+
+    public init(
+        userId: User.Identifier,
+        sync: Engine,
+        infrastructure: InfrastructureLayer,
+        logger: Logger
+    ) async {
+        await self.init(
+            reducer: DefaultReducer(
+                createUserReducer: CreateUserReducer,
+                updateDisplayNameReducer: UpdateDisplayNameReducer,
+                updateAvatarReducer: UpdateAvatarReducer,
+                bindUserReducer: BindUserReducer
+            ),
+            userId: userId,
+            sync: sync,
+            infrastructure: infrastructure,
+            logger: logger
+        )
+    }
     
     init(
-        reducer: @escaping Reducer = DefaultReducer(
-            createUserReducer: CreateUserReducer,
-            updateDisplayNameReducer: UpdateDisplayNameReducer,
-            updateAvatarReducer: UpdateAvatarReducer,
-            bindUserReducer: BindUserReducer
-        ),
+        reducer: @escaping Reducer,
         userId: User.Identifier,
         sync: Engine,
         infrastructure: InfrastructureLayer,
@@ -52,11 +67,11 @@ actor DefaultUsersRepository: Sendable {
             }
         }
     }
-    
+
     private func received(operation: Components.Schemas.Operation) {
         received(operations: [operation])
     }
-    
+
     private func received(operations: [Components.Schemas.Operation]) {
         let oldState = state
         for operation in operations {
@@ -85,32 +100,32 @@ extension DefaultUsersRepository: UsersRepository {
     private var isUserIdReserved: (User.Identifier) -> Bool {
         state.users.keys.contains
     }
-    
+
     private var isOperationIdReserved: (SpendingGroup.Identifier) -> Bool {
         get async {
             Set(await sync.operations.map(\.value1.operationId)).contains
         }
     }
-    
-    nonisolated var updates: any AsyncBroadcast<[User.Identifier: AnyUser]> {
+
+    public nonisolated var updates: any AsyncBroadcast<[User.Identifier: AnyUser]> {
         updatesSubject
     }
-    
-    subscript(id: User.Identifier) -> AnyUser? {
+
+    public subscript(id: User.Identifier) -> AnyUser? {
         get async {
             state.users[id]?.value
         }
     }
-    
-    subscript(query: String) -> [AnyUser] {
+
+    public subscript(query: String) -> [AnyUser] {
         get async {
             state.users.values.compactMap(\.value).filter {
                 $0.payload.displayName.contains(query)
             }
         }
     }
-    
-    func createUser(
+
+    public func createUser(
         displayName: String
     ) async throws(CreateUserError) -> User.Identifier {
         let userId = infrastructure.nextId(
@@ -142,8 +157,8 @@ extension DefaultUsersRepository: UsersRepository {
         received(operation: operation)
         return userId
     }
-    
-    func bind(
+
+    public func bind(
         localUserId: User.Identifier,
         to remoteUserId: User.Identifier
     ) async throws(BindUserError) {
@@ -187,8 +202,8 @@ extension DefaultUsersRepository: UsersRepository {
         }
         return received(operation: operation)
     }
-    
-    func updateDisplayName(
+
+    public func updateDisplayName(
         userId: User.Identifier,
         displayName: String
     ) async throws(UpdateDisplayNameError) {
@@ -230,10 +245,10 @@ extension DefaultUsersRepository: UsersRepository {
         }
         return received(operation: operation)
     }
-    
-    func updateAvatar(
+
+    public func updateAvatar(
         userId: User.Identifier,
-        imageId: Avatar.Identifier
+        imageId: Image.Identifier
     ) async throws(UpdateAvatarError) {
         guard let anyUser = await self[userId] else {
             throw .userNotFound(userId)

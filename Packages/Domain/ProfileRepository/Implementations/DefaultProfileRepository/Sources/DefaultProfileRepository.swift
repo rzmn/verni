@@ -8,8 +8,8 @@ import SyncEngine
 import PersistentStorage
 internal import Convenience
 
-actor DefaultProfileRepository: Sendable {
-    let logger: Logger
+public actor DefaultProfileRepository: Sendable {
+    public let logger: Logger
     
     private let api: APIProtocol
     private let sync: Engine
@@ -20,11 +20,28 @@ actor DefaultProfileRepository: Sendable {
     private var state: State
     private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.Operation]>?
     
+    public init(
+        infrastructure: InfrastructureLayer,
+        userId: User.Identifier,
+        api: APIProtocol,
+        sync: Engine,
+        logger: Logger
+    ) async {
+        await self.init(
+            reducer: DefaultReducer(
+                verifyEmailReducer: VerifyEmailReducer,
+                updateEmailReducer: UpdateEmailReducer
+            ),
+            infrastructure: infrastructure,
+            userId: userId,
+            api: api,
+            sync: sync,
+            logger: logger
+        )
+    }
+    
     init(
-        reducer: @escaping Reducer = DefaultReducer(
-            verifyEmailReducer: VerifyEmailReducer,
-            updateEmailReducer: UpdateEmailReducer
-        ),
+        reducer: @escaping Reducer,
         infrastructure: InfrastructureLayer,
         userId: User.Identifier,
         api: APIProtocol,
@@ -80,11 +97,11 @@ actor DefaultProfileRepository: Sendable {
 }
 
 extension DefaultProfileRepository: ProfileRepository {
-    nonisolated var updates: any AsyncBroadcast<Profile> {
+    public nonisolated var updates: any AsyncBroadcast<Profile> {
         updatesSubject
     }
     
-    var profile: Profile {
+    public var profile: Profile {
         get async {
             state.profile.value ?? Profile(
                 userId: userId,
@@ -93,7 +110,7 @@ extension DefaultProfileRepository: ProfileRepository {
         }
     }
     
-    func updateEmail(_ email: String) async throws(EmailUpdateError) {
+    public func updateEmail(_ email: String) async throws(EmailUpdateError) {
         let response: Operations.UpdateEmail.Output
         do {
             response = try await api.updateEmail(
@@ -135,14 +152,14 @@ extension DefaultProfileRepository: ProfileRepository {
             throw .other(.other(ErrorContext(context: body)))
         }
         do {
-            try await handle(startupData: startupData)
+            try await sync.pulled(operations: startupData.operations)
         } catch {
             logE { "updateEmail: failed to handle startup data error: \(error)" }
             throw .other(.other(error))
         }
     }
     
-    func updatePassword(old: String, new: String) async throws(PasswordUpdateError) {
+    public func updatePassword(old: String, new: String) async throws(PasswordUpdateError) {
         let response: Operations.UpdatePassword.Output
         do {
             response = try await api.updatePassword(
@@ -185,25 +202,11 @@ extension DefaultProfileRepository: ProfileRepository {
             throw .other(.other(ErrorContext(context: body)))
         }
         do {
-            try await handle(startupData: startupData)
+            try await sync.pulled(operations: startupData.operations)
         } catch {
             logE { "updateEmail: failed to handle startup data error: \(error)" }
             throw .other(.other(error))
         }
-    }
-    
-    private func handle(startupData: Components.Schemas.StartupData) async throws {
-        try await storage.update(
-            refreshToken: startupData.session.refreshToken
-        )
-        try await storage.update(
-            operations: startupData.operations.map {
-                Operation(
-                    kind: .pendingConfirm,
-                    payload: $0
-                )
-            }
-        )
     }
 }
 

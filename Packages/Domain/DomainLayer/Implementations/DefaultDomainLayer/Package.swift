@@ -27,7 +27,6 @@ let package = Package(
         .local(.currentLayer(.interface("IncomingPushUseCase"))),
         .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
         .local(.currentLayer(.interface("CredentialsFormatValidationUseCase"))),
-        .local(.currentLayer(.implementation(interface: "AuthUseCase", implementation: "DefaultAuthUseCaseImplementation"))),
         .local(.currentLayer(.implementation(interface: "AvatarsRepository", implementation: "DefaultAvatarsRepositoryImplementation"))),
         .local(.currentLayer(.implementation(interface: "CredentialsFormatValidationUseCase", implementation: "DefaultValidationUseCasesImplementation"))),
         .local(.currentLayer(.implementation(interface: "EmailConfirmationUseCase", implementation: "DefaultEmailConfirmationUseCaseImplementation"))),
@@ -39,8 +38,10 @@ let package = Package(
         .local(.currentLayer(.implementation(interface: "SpendingsRepository", implementation: "DefaultSpendingsRepository"))),
         .local(.currentLayer(.implementation(interface: "UsersRepository", implementation: "DefaultUsersRepository"))),
         .local(.data(.interface("DataLayer"))),
+        .local(.data(.implementation(interface: "DataLayer", implementation: "DefaultDataLayer"))),
         .local(.infrastructure(.interface("InfrastructureLayer"))),
-        .local(.infrastructure(.interface("AsyncExtensions")))
+        .local(.infrastructure(.interface("AsyncExtensions"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "DefaultInfrastructure"))),
     ],
     targets: [
         .target(
@@ -60,7 +61,6 @@ let package = Package(
                 "IncomingPushUseCase",
                 "EmailConfirmationUseCase",
                 "CredentialsFormatValidationUseCase",
-                "DefaultAuthUseCaseImplementation",
                 "DefaultAvatarsRepositoryImplementation",
                 "DefaultValidationUseCasesImplementation",
                 "DefaultEmailConfirmationUseCaseImplementation",
@@ -72,7 +72,9 @@ let package = Package(
                 "DefaultSpendingsRepository",
                 "DefaultUsersRepository",
                 "DataLayer",
-                "InfrastructureLayer"
+                "DefaultDataLayer",
+                "InfrastructureLayer",
+                "DefaultInfrastructure"
             ]
         )
     ]

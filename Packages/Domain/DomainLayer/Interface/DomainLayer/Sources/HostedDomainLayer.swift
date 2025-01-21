@@ -19,6 +19,6 @@ public protocol HostedDomainLayer: SharedDomainLayerCovertible {
 
     func pushRegistrationUseCase() -> PushRegistrationUseCase
     func emailConfirmationUseCase() -> EmailConfirmationUseCase
-    func receivingPushUseCase() -> ReceivingPushUseCase
+//    func receivingPushUseCase() -> ReceivingPushUseCase
     func qrInviteUseCase() -> QRInviteUseCase
 }

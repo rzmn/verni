@@ -1,6 +1,7 @@
 import Entities
 import Api
-import Base
+import AuthUseCase
+internal import Convenience
 
 extension SignupError {
     public init(_ apiError: ApiErrorConvertible) {

@@ -8,7 +8,7 @@ public protocol SharedDomainLayer: Sendable {
     var localEmailValidationUseCase: EmailValidationUseCase { get }
     var localPasswordValidationUseCase: PasswordValidationUseCase { get }
 
-    var avatarsRepository: AvatarsRepository { get async }
+    var avatarsRepository: AvatarsRepository { get }
     var saveCredentialsUseCase: SaveCredendialsUseCase { get }
 
     var infrastructure: InfrastructureLayer { get }
@@ -26,8 +26,8 @@ extension SharedDomainLayerCovertible {
         shared.localPasswordValidationUseCase
     }
     public var avatarsRepository: AvatarsRepository {
-        get async {
-            await shared.avatarsRepository
+        get {
+            shared.avatarsRepository
         }
     }
     public var saveCredentialsUseCase: SaveCredendialsUseCase {

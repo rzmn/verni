@@ -3,10 +3,18 @@ import Api
 typealias Reducer = (Components.Schemas.Operation, State) -> State
 
 func DefaultReducer(
-    createUserReducer: @escaping (Components.Schemas.BaseOperation, Components.Schemas.CreateUserOperation, State) -> State,
-    updateDisplayNameReducer: @escaping (Components.Schemas.BaseOperation, Components.Schemas.UpdateDisplayNameOperation, State) -> State,
-    updateAvatarReducer: @escaping (Components.Schemas.BaseOperation, Components.Schemas.UpdateAvatarOperation, State) -> State,
-    bindUserReducer: @escaping (Components.Schemas.BaseOperation, Components.Schemas.BindUserOperation, State) -> State
+    createUserReducer: @escaping (
+        Components.Schemas.BaseOperation, Components.Schemas.CreateUserOperation, State
+    ) -> State,
+    updateDisplayNameReducer: @escaping (
+        Components.Schemas.BaseOperation, Components.Schemas.UpdateDisplayNameOperation, State
+    ) -> State,
+    updateAvatarReducer: @escaping (
+        Components.Schemas.BaseOperation, Components.Schemas.UpdateAvatarOperation, State
+    ) -> State,
+    bindUserReducer: @escaping (
+        Components.Schemas.BaseOperation, Components.Schemas.BindUserOperation, State
+    ) -> State
 ) -> Reducer {
     return { operation, state in
         switch operation.value2 {
@@ -23,4 +31,3 @@ func DefaultReducer(
         }
     }
 }
-

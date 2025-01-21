@@ -1,57 +1,74 @@
 import AuthUseCase
+import DomainLayer
 import Entities
 import Api
 import DataLayer
 import AsyncExtensions
+import Logging
+import LogoutUseCase
+internal import Convenience
 
-public actor DefaultAuthUseCase {
-    public struct Session {
-        let session: DataSession
-        let logoutSubject: AsyncSubject<Void>
-    }
-    
+actor DefaultAuthUseCase {
     public let logger: Logger
-    private let taskFactory: TaskFactory
-    private let dataLayer: DataLayer
+    private let sharedDomain: DefaultSharedDomainLayer
+    private let sessionHost: SessionHost
 
-    public init(
-        taskFactory: TaskFactory,
-        dataLayer: DataLayer,
+    init(
+        sharedDomain: DefaultSharedDomainLayer,
         logger: Logger
     ) {
+        self.sharedDomain = sharedDomain
+        sessionHost = SessionHost()
         self.logger = logger
-        self.taskFactory = taskFactory
-        self.dataLayer = dataLayer
     }
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
-    public func awake() async throws(AwakeError) -> any AuthenticatedDataLayerSession {
-        let dataLayer: AuthenticatedDataLayerSession
-        do {
-            dataLayer = try await self.dataLayer.authenticator.awakeAuthorizedSession()
-        } catch {
-            switch error {
-            case .hasNoSession:
-                throw .hasNoSession
-            case .internalError(let error):
-                throw .internalError(error)
-            }
+    public func awake() async throws(AwakeError) -> any HostedDomainLayer {
+        guard let hostId = await sessionHost.activeSession else {
+            throw .hasNoSession
         }
-        return dataLayer
+        let preview = await sharedDomain.data.available
+            .first { $0.hostId == hostId }
+        guard let preview else {
+            await sessionHost.performIsolated { sessionHost in
+                sessionHost.activeSession = nil
+            }
+            throw .hasNoSession
+        }
+        let logoutSubject = AsyncSubject<Void>(
+            taskFactory: sharedDomain.infrastructure.taskFactory,
+            logger: sharedDomain.infrastructure.logger
+        )
+        let session: DataSession
+        do {
+            session = try await preview.awake(
+                loggedOutHandler: logoutSubject
+            )
+        } catch {
+            throw .internalError(error)
+        }
+        return await DefaultHostedDomainLayer(
+            sharedDomain: sharedDomain,
+            logoutSubject: logoutSubject,
+            sessionHost: sessionHost,
+            dataSession: session,
+            userId: hostId
+        )
     }
 
     public func login(
         credentials: Credentials
-    ) async throws(LoginError) -> any AuthenticatedDataLayerSession {
+    ) async throws(LoginError) -> any HostedDomainLayer {
         let response: Operations.Login.Output
         do {
-            response = try await dataLayer.api.login(
+            response = try await sharedDomain.data.sandbox.api.login(
                 body: .json(
                     .init(
                         credentials: .init(
                             email: credentials.email,
-                            password: credentials.password
+                            password: credentials.password,
+                            deviceId: await sessionHost.deviceId
                         )
                     )
                 )
@@ -59,12 +76,12 @@ extension DefaultAuthUseCase: AuthUseCase {
         } catch {
             throw LoginError(error)
         }
-        let session: Components.Schemas.Session
+        let startupData: Components.Schemas.StartupData
         switch response {
         case .ok(let success):
             switch success.body {
             case .json(let payload):
-                session = payload.response
+                startupData = payload.response
             }
         case .conflict(let apiError):
             throw LoginError(apiError)
@@ -74,27 +91,27 @@ extension DefaultAuthUseCase: AuthUseCase {
             logE { "got undocumented response on login: \(statusCode) \(body)" }
             throw LoginError(UndocumentedBehaviour(context: (statusCode, body)))
         }
+        let session: HostedDomainLayer
         do {
-            return try await dataLayer.create(
-                startupData: response.,
-                loggedOutHandler: <#T##AsyncSubject<Void>#>
-            )
+            session = try await acquire(startupData: startupData)
         } catch {
             throw .other(error)
         }
+        return session
     }
 
     public func signup(
         credentials: Credentials
-    ) async throws(SignupError) -> any AuthenticatedDataLayerSession {
+    ) async throws(SignupError) -> any HostedDomainLayer {
         let response: Operations.Signup.Output
         do {
-            response = try await dataLayer.api.signup(
+            response = try await sharedDomain.data.sandbox.api.signup(
                 body: .json(
                     .init(
                         credentials: .init(
                             email: credentials.email,
-                            password: credentials.password
+                            password: credentials.password,
+                            deviceId: await sessionHost.deviceId
                         )
                     )
                 )
@@ -102,12 +119,12 @@ extension DefaultAuthUseCase: AuthUseCase {
         } catch {
             throw SignupError(error)
         }
-        let session: Components.Schemas.Session
+        let startupData: Components.Schemas.StartupData
         switch response {
         case .ok(let success):
             switch success.body {
             case .json(let payload):
-                session = payload.response
+                startupData = payload.response
             }
         case .conflict(let apiError):
             throw SignupError(apiError)
@@ -119,12 +136,34 @@ extension DefaultAuthUseCase: AuthUseCase {
             logE { "got undocumented response on signup: \(statusCode) \(body)" }
             throw SignupError(UndocumentedBehaviour(context: (statusCode, body)))
         }
+        let session: HostedDomainLayer
         do {
-            return try await dataLayer.authenticator
-                .createAuthorizedSession(session: session)
+            session = try await acquire(startupData: startupData)
         } catch {
             throw .other(error)
         }
+        return session
+    }
+    
+    private func acquire(startupData: Components.Schemas.StartupData) async throws -> HostedDomainLayer {
+        let logoutSubject = AsyncSubject<Void>(
+            taskFactory: sharedDomain.infrastructure.taskFactory,
+            logger: sharedDomain.infrastructure.logger
+        )
+        let session = try await sharedDomain.data.create(
+            startupData: startupData,
+            loggedOutHandler: logoutSubject
+        )
+        await sessionHost.performIsolated { sessionHost in
+            sessionHost.activeSession = startupData.session.id
+        }
+        return await DefaultHostedDomainLayer(
+            sharedDomain: sharedDomain,
+            logoutSubject: logoutSubject,
+            sessionHost: sessionHost,
+            dataSession: session,
+            userId: startupData.session.id
+        )
     }
 }
 
