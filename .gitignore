@@ -14,6 +14,9 @@ xcuserdata/
 *.dSYM
 *.bak
 .DS_Store
+Package.resolved
+.swiftpm
+
 
 ## Playgrounds
 timeline.xctimeline

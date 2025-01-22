@@ -47,7 +47,7 @@ final class DefaultHostedDomainLayer: Sendable {
             taskFactory: sharedDomain.infrastructure.taskFactory,
             logoutPerformer: sessionHost,
             logger: logger.with(
-                scope: .profile
+                scope: .logout
             )
         )
         self.profileRepository = await DefaultProfileRepository(
