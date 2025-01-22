@@ -3,6 +3,7 @@ import Entities
 import Api
 import Foundation
 import Logging
+internal import EntitiesApiConvenience
 internal import Convenience
 
 public actor DefaultEmailConfirmationUseCase {
@@ -26,22 +27,19 @@ extension DefaultEmailConfirmationUseCase: EmailConfirmationUseCase {
         do {
             response = try await api.sendEmailConfirmationCode()
         } catch {
-            if let noConnection = error.noConnection {
-                throw .other(.noConnection(noConnection))
-            } else {
-                throw .other(.other(error))
-            }
+            throw SendEmailConfirmationCodeError(error: error)
         }
-        switch response {
-        case .ok:
-            return
-        case .unauthorized(let payload):
-            throw .other(.notAuthorized(ErrorContext(context: payload)))
-        case .internalServerError(let payload):
-            throw .other(.other(ErrorContext(context: payload)))
-        case .undocumented(statusCode: let statusCode, let body):
-            logE { "failed to send confirmation code - undocumented response: \(body), code: \(statusCode)" }
-            throw .other(.other(ErrorContext(context: body)))
+        do {
+            try response.get()
+        } catch {
+            switch error {
+            case .expected(let error):
+                logW { "send email confirmation code finished with error: \(error)" }
+                throw SendEmailConfirmationCodeError(error: error)
+            case .undocumented(let statusCode, let payload):
+                logE { "send email confirmation code undocumented response code: \(statusCode), payload: \(payload)" }
+                throw SendEmailConfirmationCodeError(error: error)
+            }
         }
     }
 
@@ -58,22 +56,19 @@ extension DefaultEmailConfirmationUseCase: EmailConfirmationUseCase {
                 )
             )
         } catch {
-            if let noConnection = error.noConnection {
-                throw .other(.noConnection(error))
-            } else {
-                throw .other(.other(error))
-            }
+            throw EmailConfirmationError(error: error)
         }
-        switch response {
-        case .ok:
-            return
-        case .conflict(let payload):
-            throw .codeIsWrong
-        case .internalServerError(let payload):
-            throw .other(.other(ErrorContext(context: payload)))
-        case .undocumented(statusCode: let statusCode, let body):
-            logE { "failed to send confirmation code - undocumented response: \(body), code: \(statusCode)" }
-            throw .other(.other(ErrorContext(context: body)))
+        do {
+            try response.get()
+        } catch {
+            switch error {
+            case .expected(let error):
+                logW { "confirm email finished with error: \(error)" }
+                throw EmailConfirmationError(error: error)
+            case .undocumented(let statusCode, let payload):
+                logE { "confirm email undocumented response code: \(statusCode), payload: \(payload)" }
+                throw EmailConfirmationError(error: error)
+            }
         }
     }
 }

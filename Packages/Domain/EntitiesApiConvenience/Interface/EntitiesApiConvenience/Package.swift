@@ -1,51 +1,33 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "DefaultProfileRepositoryImplementation",
+    name: "EntitiesApiConvenience",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultProfileRepositoryImplementation",
-            targets: ["DefaultProfileRepositoryImplementation"]
+            name: "EntitiesApiConvenience",
+            targets: ["EntitiesApiConvenience"]
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Infrastructure/Base"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockPersistentStorage"),
-        .package(path: "../../../Data/Implementations/MockApiImplementation"),
-        .package(path: "../../../Infrastructure/Implementations/TestInfrastructure"),
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.data(.interface("Api"))),
+        .local(.infrastructure(.interface("Convenience")))
     ],
     targets: [
         .target(
-            name: "DefaultProfileRepositoryImplementation",
+            name: "EntitiesApiConvenience",
             dependencies: [
-                "Domain",
+                "Entities",
                 "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
-            ]
-        ),
-        .testTarget(
-            name: "DefaultProfileRepositoryImplementationTests",
-            dependencies: [
-                "Domain",
-                "Api",
-                "Base",
-                "ApiDomainConvenience",
-                "PersistentStorage",
-                "DefaultProfileRepositoryImplementation",
-                "MockPersistentStorage",
-                "MockApiImplementation",
-                "TestInfrastructure"
-            ]
-        ),
+                "Convenience"
+            ],
+            path: "Sources"
+        )
     ]
 )
 
@@ -63,7 +45,8 @@ extension Package.Dependency {
 
         var targetType: TargetType {
             switch self {
-            case .currentLayer(let targetType), .infrastructure(let targetType), .data(let targetType):
+            case .currentLayer(let targetType), .infrastructure(let targetType),
+                .data(let targetType):
                 return targetType
             }
         }
@@ -73,11 +56,11 @@ extension Package.Dependency {
         let root: String
         switch localPackage {
         case .currentLayer(let targetType):
-            root = "../../"
+            root = "../../../"
         case .infrastructure(let targetType):
-            root = "../../" + "../Infrastructure"
+            root = "../../../" + "../Infrastructure"
         case .data(let targetType):
-            root = "../../" + "../Data"
+            root = "../../../" + "../Data"
         }
         switch localPackage.targetType {
         case .interface(let interface):

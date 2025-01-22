@@ -2,6 +2,7 @@ import PushRegistrationUseCase
 import Api
 import UIKit
 import Logging
+internal import EntitiesApiConvenience
 
 public actor DefaultPushRegistrationUseCase {
     private let api: APIProtocol
@@ -31,8 +32,9 @@ extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
 
     public func registerForPush(token tokenData: Data) async {
         let token = tokenData.map { String(format: "%02.2hhx", $0) }.joined()
+        let response: Operations.RegisterForPushNotifications.Output
         do {
-            let response = try await api.registerForPushNotifications(
+            response = try await api.registerForPushNotifications(
                 .init(
                     body: .json(
                         .init(
@@ -41,18 +43,13 @@ extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
                     )
                 )
             )
-            switch response {
-            case .ok:
-                logE { "register for push notifications succeeded" }
-            case .unauthorized(let payload):
-                logE { "failed to register for push notifications response: \(payload)" }
-            case .internalServerError(let payload):
-                logE { "failed to register for push notifications response: \(payload)" }
-            case .undocumented(statusCode: let statusCode, let body):
-                logE { "failed to register for push notifications, undocumented response: \(body) code: \(statusCode)" }
-            }
         } catch {
-            logE { "failed to register for push notifications error: \(error)" }
+            return logE { "failed to register for push notifications network error: \(error)" }
+        }
+        do {
+            try response.get()
+        } catch {
+            return logE { "failed to register for push notifications error: \(error)" }
         }
         
     }

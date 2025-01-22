@@ -43,18 +43,17 @@ extension DefaultRemoteDataSource: AvatarsRemoteDataSource {
             return [:]
         }
         let images: [String: Components.Schemas.Image]
-        switch response {
-        case .ok(let success):
-            switch success.body {
-            case .json(let payload):
-                images = payload.response.additionalProperties
+        do {
+            images = try response.get()
+        } catch {
+            switch error {
+            case .expected(let error):
+                logW { "get avatars finished with error: \(error)" }
+                return [:]
+            case .undocumented(let statusCode, let payload):
+                logE { "get avatars undocumented response code: \(statusCode), payload: \(payload)" }
+                return [:]
             }
-        case .internalServerError(let apiError):
-            logE { "got internal error getAvatars: \(apiError)" }
-            return [:]
-        case .undocumented(statusCode: let statusCode, let body):
-            logE { "got undocumented response on getAvatars: \(statusCode) \(body)" }
-            return [:]
         }
         let result = images.mapValues { image in
             Image(id: image.id, base64: image.base64)

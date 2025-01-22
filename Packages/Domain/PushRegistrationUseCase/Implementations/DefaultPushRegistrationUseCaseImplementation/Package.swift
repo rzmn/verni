@@ -14,6 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .local(.currentLayer(.interface("PushRegistrationUseCase"))),
+        .local(.currentLayer(.interface("EntitiesApiConvenience"))),
+        .local(.currentLayer(.interface("Entities"))),
         .local(.data(.interface("Api"))),
         .local(.infrastructure(.interface("Logging")))
     ],
@@ -21,6 +23,8 @@ let package = Package(
         .target(
             name: "DefaultPushRegistrationUseCaseImplementation",
             dependencies: [
+                "EntitiesApiConvenience",
+                "Entities",
                 "PushRegistrationUseCase",
                 "Logging",
                 "Api"

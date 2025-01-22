@@ -47,6 +47,10 @@ extension Logger: Logging.Logger {
     public func logE(_ messageBlock: () -> String) {
         log(self, severity: .error, messageBlock)
     }
+    
+    public func logW(_ messageBlock: () -> String) {
+        log(self, severity: .warning, messageBlock)
+    }
 
     public func logI(_ messageBlock: () -> String) {
         log(self, severity: .info, messageBlock)

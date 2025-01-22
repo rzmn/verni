@@ -22,8 +22,11 @@ public struct DefaultInfrastructureLayer: InfrastructureLayer {
     public init() {
         self.fileManager = FoundationFileManager()
         self.taskFactory = DefaultTaskFactory()
-        self.logger = DefaultLogging.Logger(
-            severity: isDebug ? .debug : .info
-        )
+        let severity: DefaultLogging.Logger.Severity = isDebug ? .debug : .info
+        self.logger = DefaultLogging.Logger(severity: severity)
+        
+        logI { "initialized logger with severity \(severity)" }
     }
 }
+
+extension DefaultInfrastructureLayer: Loggable {}

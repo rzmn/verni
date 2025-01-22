@@ -123,33 +123,20 @@ extension DefaultProfileRepository: ProfileRepository {
                 )
             )
         } catch {
-            if let noConnection = error.noConnection {
-                throw .other(.noConnection(noConnection))
-            } else {
-                throw .other(.other(error))
-            }
+            throw EmailUpdateError(error: error)
         }
         let startupData: Components.Schemas.StartupData
-        switch response {
-        case .ok(let payload):
-            switch payload.body {
-            case .json(let body):
-                startupData = body.response
+        do {
+            startupData = try response.get()
+        } catch {
+            switch error {
+            case .expected(let error):
+                logW { "update email finished with error: \(error)" }
+                throw EmailUpdateError(error: error)
+            case .undocumented(let statusCode, let payload):
+                logE { "update email undocumented response code: \(statusCode), payload: \(payload)" }
+                throw EmailUpdateError(error: error)
             }
-        case .unauthorized(let payload):
-            throw .other(.notAuthorized(ErrorContext(context: payload)))
-        case .conflict(let payload):
-            logI { "updateEmail failed due conflict: \(payload)" }
-            throw .alreadyTaken
-        case .unprocessableContent(let payload):
-            logI { "updateEmail failed due format check fail: \(payload)" }
-            throw .wrongFormat
-        case .internalServerError(let payload):
-            logE { "updateEmail: internal error: \(payload)" }
-            throw .other(.other(ErrorContext(context: payload)))
-        case .undocumented(let statusCode, let body):
-            logE { "updateEmail: undocumented response: code \(statusCode) body: \(body)" }
-            throw .other(.other(ErrorContext(context: body)))
         }
         do {
             try await sync.pulled(operations: startupData.operations)
@@ -173,33 +160,20 @@ extension DefaultProfileRepository: ProfileRepository {
                 )
             )
         } catch {
-            if let noConnection = error.noConnection {
-                throw .other(.noConnection(noConnection))
-            } else {
-                throw .other(.other(error))
-            }
+            throw PasswordUpdateError(error: error)
         }
         let startupData: Components.Schemas.StartupData
-        switch response {
-        case .ok(let payload):
-            switch payload.body {
-            case .json(let body):
-                startupData = body.response
+        do {
+            startupData = try response.get()
+        } catch {
+            switch error {
+            case .expected(let error):
+                logW { "update password finished with error: \(error)" }
+                throw PasswordUpdateError(error: error)
+            case .undocumented(let statusCode, let payload):
+                logE { "update password undocumented response code: \(statusCode), payload: \(payload)" }
+                throw PasswordUpdateError(error: error)
             }
-        case .unauthorized(let payload):
-            throw .other(.notAuthorized(ErrorContext(context: payload)))
-        case .conflict(let payload):
-            logI { "updatePassword failed due conflict: \(payload)" }
-            throw .incorrectOldPassword
-        case .unprocessableContent(let payload):
-            logI { "updatePassword failed due format check fail: \(payload)" }
-            throw .wrongFormat
-        case .internalServerError(let payload):
-            logE { "updatePassword: internal error: \(payload)" }
-            throw .other(.other(ErrorContext(context: payload)))
-        case .undocumented(let statusCode, let body):
-            logE { "updatePassword: undocumented response: code \(statusCode) body: \(body)" }
-            throw .other(.other(ErrorContext(context: body)))
         }
         do {
             try await sync.pulled(operations: startupData.operations)

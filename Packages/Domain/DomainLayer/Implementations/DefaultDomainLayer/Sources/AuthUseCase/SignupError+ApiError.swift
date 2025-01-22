@@ -4,8 +4,8 @@ import AuthUseCase
 internal import Convenience
 
 extension SignupError {
-    public init(_ apiError: ApiErrorConvertible) {
-        switch apiError.apiError.reason {
+    init(_ apiError: Components.Schemas._Error) {
+        switch apiError.reason {
         case .alreadyTaken:
             self = .alreadyTaken(ErrorContext(context: apiError))
         case .wrongFormat:
@@ -15,7 +15,7 @@ extension SignupError {
         }
     }
 
-    public init(_ error: Error) {
+    init(_ error: Error) {
         if let error = error.noConnection {
             self = .noConnection(error)
         } else {

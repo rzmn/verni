@@ -9,6 +9,7 @@ import DataLayer
 import QrInviteUseCase
 import EmailConfirmationUseCase
 import PushRegistrationUseCase
+import Logging
 internal import DefaultLogoutUseCaseImplementation
 internal import DefaultProfileRepository
 internal import DefaultUsersRepository
@@ -24,6 +25,7 @@ final class DefaultHostedDomainLayer: Sendable {
     let usersRepository: UsersRepository
     let spendingsRepository: SpendingsRepository
     let logoutUseCase: LogoutUseCase
+    let logger: Logger
 
     private let dataSession: DataSession
     private let sharedDomain: DefaultSharedDomainLayer
@@ -38,14 +40,14 @@ final class DefaultHostedDomainLayer: Sendable {
         self.sharedDomain = sharedDomain
         self.dataSession = dataSession
         self.userId = userId
-        
-        let logger = sharedDomain.infrastructure.logger
+        self.logger = sharedDomain.infrastructure.logger
+            .with(scope: .domainLayer(.hosted))
         self.logoutUseCase = await DefaultLogoutUseCase(
             shouldLogout: logoutSubject,
             taskFactory: sharedDomain.infrastructure.taskFactory,
             logoutPerformer: sessionHost,
             logger: logger.with(
-                prefix: "🚪"
+                scope: .profile
             )
         )
         self.profileRepository = await DefaultProfileRepository(
@@ -54,7 +56,7 @@ final class DefaultHostedDomainLayer: Sendable {
             api: dataSession.api,
             sync: dataSession.sync,
             logger: logger.with(
-                prefix: "🆔"
+                scope: .profile
             )
         )
         self.usersRepository = await DefaultUsersRepository(
@@ -62,7 +64,7 @@ final class DefaultHostedDomainLayer: Sendable {
             sync: dataSession.sync,
             infrastructure: sharedDomain.infrastructure,
             logger: logger.with(
-                prefix: "🪪"
+                scope: .users
             )
         )
         self.spendingsRepository = await DefaultSpendingsRepository(
@@ -70,34 +72,35 @@ final class DefaultHostedDomainLayer: Sendable {
             sync: dataSession.sync,
             infrastructure: sharedDomain.infrastructure,
             logger: logger.with(
-                prefix: "💸"
+                scope: .spendings
             )
         )
     }
-    
 }
+
+extension DefaultHostedDomainLayer: Loggable {}
 
 extension DefaultHostedDomainLayer: HostedDomainLayer {
     func pushRegistrationUseCase() -> PushRegistrationUseCase {
         DefaultPushRegistrationUseCase(
             api: dataSession.api,
-            logger: shared.infrastructure.logger
-                .with(prefix: "🔔")
+            logger: logger
+                .with(scope: .pushNotifications)
         )
     }
     
     func emailConfirmationUseCase() -> EmailConfirmationUseCase {
         DefaultEmailConfirmationUseCase(
             api: dataSession.api,
-            logger: shared.infrastructure.logger
-                .with(prefix: "📧")
+            logger: logger
+                .with(scope: .emailConfirmation)
         )
     }
     
     func qrInviteUseCase() -> QRInviteUseCase {
         DefaultQRInviteUseCase(
-            logger: shared.infrastructure.logger
-                .with(prefix: "🌃")
+            logger: logger
+                .with(scope: .qrCode)
         ) { userId in
             AppUrl.users(.show(id: userId)).url
         }

@@ -9,7 +9,7 @@ import LogoutUseCase
 internal import Convenience
 
 actor DefaultAuthUseCase {
-    public let logger: Logger
+    let logger: Logger
     private let sharedDomain: DefaultSharedDomainLayer
     private let sessionHost: SessionHost
 
@@ -18,19 +18,21 @@ actor DefaultAuthUseCase {
         logger: Logger
     ) {
         self.sharedDomain = sharedDomain
-        sessionHost = SessionHost()
+        self.sessionHost = SessionHost()
         self.logger = logger
     }
 }
 
 extension DefaultAuthUseCase: AuthUseCase {
-    public func awake() async throws(AwakeError) -> any HostedDomainLayer {
+    func awake() async throws(AwakeError) -> any HostedDomainLayer {
         guard let hostId = await sessionHost.activeSession else {
+            logI { "no session host found" }
             throw .hasNoSession
         }
         let preview = await sharedDomain.data.available
             .first { $0.hostId == hostId }
         guard let preview else {
+            logI { "session host \(hostId) found with no session, invalidating host" }
             await sessionHost.performIsolated { sessionHost in
                 sessionHost.activeSession = nil
             }
@@ -46,6 +48,7 @@ extension DefaultAuthUseCase: AuthUseCase {
                 loggedOutHandler: logoutSubject
             )
         } catch {
+            logE { "failed to awake existed session, host: \(hostId), error: \(error)" }
             throw .internalError(error)
         }
         return await DefaultHostedDomainLayer(
@@ -57,7 +60,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         )
     }
 
-    public func login(
+    func login(
         credentials: Credentials
     ) async throws(LoginError) -> any HostedDomainLayer {
         let response: Operations.Login.Output
@@ -77,19 +80,17 @@ extension DefaultAuthUseCase: AuthUseCase {
             throw LoginError(error)
         }
         let startupData: Components.Schemas.StartupData
-        switch response {
-        case .ok(let success):
-            switch success.body {
-            case .json(let payload):
-                startupData = payload.response
+        do {
+            startupData = try response.get()
+        } catch {
+            switch error {
+            case .expected(let payload):
+                logW { "login finished with error: \(payload)" }
+                throw LoginError(payload)
+            case .undocumented(let statusCode, let payload):
+                logE { "login undocumented response code: \(statusCode), payload: \(payload)" }
+                throw LoginError(error)
             }
-        case .conflict(let apiError):
-            throw LoginError(apiError)
-        case .internalServerError(let apiError):
-            throw LoginError(apiError)
-        case .undocumented(statusCode: let statusCode, let body):
-            logE { "got undocumented response on login: \(statusCode) \(body)" }
-            throw LoginError(UndocumentedBehaviour(context: (statusCode, body)))
         }
         let session: HostedDomainLayer
         do {
@@ -100,7 +101,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         return session
     }
 
-    public func signup(
+    func signup(
         credentials: Credentials
     ) async throws(SignupError) -> any HostedDomainLayer {
         let response: Operations.Signup.Output
@@ -120,21 +121,17 @@ extension DefaultAuthUseCase: AuthUseCase {
             throw SignupError(error)
         }
         let startupData: Components.Schemas.StartupData
-        switch response {
-        case .ok(let success):
-            switch success.body {
-            case .json(let payload):
-                startupData = payload.response
+        do {
+            startupData = try response.get()
+        } catch {
+            switch error {
+            case .expected(let payload):
+                logW { "signup finished with error: \(payload)" }
+                throw SignupError(payload)
+            case .undocumented(let statusCode, let payload):
+                logE { "signup undocumented response code: \(statusCode), payload: \(payload)" }
+                throw SignupError(error)
             }
-        case .conflict(let apiError):
-            throw SignupError(apiError)
-        case .unprocessableContent(let apiError):
-            throw SignupError(apiError)
-        case .internalServerError(let apiError):
-            throw SignupError(apiError)
-        case .undocumented(statusCode: let statusCode, let body):
-            logE { "got undocumented response on signup: \(statusCode) \(body)" }
-            throw SignupError(UndocumentedBehaviour(context: (statusCode, body)))
         }
         let session: HostedDomainLayer
         do {

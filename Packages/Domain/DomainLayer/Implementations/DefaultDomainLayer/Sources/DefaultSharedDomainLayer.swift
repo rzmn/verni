@@ -5,6 +5,7 @@ import AsyncExtensions
 import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
 import AvatarsRepository
+import Logging
 internal import DefaultDataLayer
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultValidationUseCasesImplementation
@@ -18,18 +19,24 @@ final class DefaultSharedDomainLayer: SharedDomainLayer {
     let avatarsRepository: AvatarsRepository
     
     let data: DataLayer
+    let logger: Logger
     
     init(infrastructure: InfrastructureLayer) async throws {
         data = try DefaultDataLayer(
-            logger: infrastructure.logger,
+            logger: infrastructure.logger.with(
+                scope: .dataLayer
+            ),
             infrastructure: infrastructure
         )
-        let logger = infrastructure.logger
         self.infrastructure = infrastructure
+        
+        self.logger = infrastructure.logger
+            .with(scope: .domainLayer(.shared))
+        
         self.saveCredentialsUseCase = DefaultSaveCredendialsUseCase(
             website: "https://verni.app",
             logger: logger.with(
-                prefix: "🔐"
+                scope: .saveCredentials
             )
         )
         self.localEmailValidationUseCase = LocalValidationUseCases()
@@ -39,8 +46,11 @@ final class DefaultSharedDomainLayer: SharedDomainLayer {
             sync: data.sandbox.sync,
             infrastructure: infrastructure,
             logger: logger.with(
-                prefix: "🧑‍🎨"
+                scope: .images
             )
         )
+        logI { "initialized" }
     }
 }
+
+extension DefaultSharedDomainLayer: Loggable {}

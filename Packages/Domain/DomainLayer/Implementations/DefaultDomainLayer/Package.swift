@@ -17,9 +17,9 @@ let package = Package(
         .local(.currentLayer(.interface("Entities"))),
         .local(.currentLayer(.interface("AvatarsRepository"))),
         .local(.currentLayer(.interface("UsersRepository"))),
+        .local(.currentLayer(.interface("AuthUseCase"))),
         .local(.currentLayer(.interface("SpendingsRepository"))),
         .local(.currentLayer(.interface("ProfileRepository"))),
-        .local(.currentLayer(.interface("AuthUseCase"))),
         .local(.currentLayer(.interface("SaveCredendialsUseCase"))),
         .local(.currentLayer(.interface("QrInviteUseCase"))),
         .local(.currentLayer(.interface("PushRegistrationUseCase"))),
@@ -53,9 +53,9 @@ let package = Package(
                 "UsersRepository",
                 "SpendingsRepository",
                 "ProfileRepository",
-                "AuthUseCase",
                 "SaveCredendialsUseCase",
                 "QrInviteUseCase",
+                "AuthUseCase",
                 "PushRegistrationUseCase",
                 "LogoutUseCase",
                 "IncomingPushUseCase",
@@ -74,7 +74,8 @@ let package = Package(
                 "DataLayer",
                 "DefaultDataLayer",
                 "InfrastructureLayer",
-                "DefaultInfrastructure"
+                "DefaultInfrastructure",
+                "AsyncExtensions"
             ]
         )
     ]

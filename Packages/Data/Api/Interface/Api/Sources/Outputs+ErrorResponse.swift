@@ -1,75 +1,258 @@
-public protocol ApiErrorConvertible: Sendable {
-    var apiError: Components.Schemas._Error { get }
+import OpenAPIRuntime
+
+public enum ApiError: Error {
+    case expected(Components.Schemas._Error)
+    case undocumented(statusCode: Int, OpenAPIRuntime.UndocumentedPayload)
 }
 
-extension Operations.Signup.Output.Conflict: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+public protocol ApiResult: Sendable {
+    associatedtype Output: Sendable
+    
+    @discardableResult
+    func get() throws(ApiError) -> Output
+}
+
+extension Operations.Signup.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.StartupData {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .conflict(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .unprocessableContent(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.Signup.Output.UnprocessableContent: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.Login.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.StartupData {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .conflict(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.Signup.Output.InternalServerError: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.SearchUsers.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> [Components.Schemas.User] {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .unauthorized(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.Login.Output.Conflict: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.GetAvatars.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> [String: Components.Schemas.Image] {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response.additionalProperties
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.Login.Output.InternalServerError: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.UpdateEmail.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.StartupData {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .conflict(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .unauthorized(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .unprocessableContent(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.SearchUsers.Output.Unauthorized: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.UpdatePassword.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.StartupData {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .conflict(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .unauthorized(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .unprocessableContent(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.SearchUsers.Output.InternalServerError: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.RegisterForPushNotifications.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.Empty {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .unauthorized(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }
 
-extension Operations.GetAvatars.Output.InternalServerError: ApiErrorConvertible {
-    public var apiError: Components.Schemas._Error {
-        switch body {
-        case .json(let payload):
-            return payload.error
+extension Operations.SendEmailConfirmationCode.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.Empty {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .unauthorized(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
+        }
+    }
+}
+
+extension Operations.ConfirmEmail.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> Components.Schemas.Empty {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .conflict(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
         }
     }
 }

@@ -1,5 +1,5 @@
 {
-  "originHash" : "474a8e8415c8d7e9d91ced2c3c7bd8b71d6e0f8938483d665ad69401b92a059d",
+  "originHash" : "423b261e16a4661e6eb905132518fe5f2d827474aed2ef941bfc0ba0b8bd65df",
   "pins" : [
     {
       "identity" : "openapikit",
@@ -11,12 +11,12 @@
       }
     },
     {
-      "identity" : "qrcode",
+      "identity" : "sqlite.swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dagronf/qrcode.git",
+      "location" : "https://github.com/stephencelis/SQLite.swift.git",
       "state" : {
-        "revision" : "e7bcd89a987cf43bc64e414f3e26cb8eded8ae1e",
-        "version" : "20.5.0"
+        "revision" : "a95fc6df17d108bd99210db5e8a9bac90fe984b8",
+        "version" : "0.15.3"
       }
     },
     {
@@ -83,21 +83,12 @@
       }
     },
     {
-      "identity" : "swift-qrcode-generator",
+      "identity" : "swift-openapi-urlsession",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dagronf/swift-qrcode-generator",
+      "location" : "https://github.com/apple/swift-openapi-urlsession",
       "state" : {
-        "revision" : "2b1980b825f08a81ccc762b0c4d17fcde9d5e953",
-        "version" : "2.0.2"
-      }
-    },
-    {
-      "identity" : "swiftimagereadwrite",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dagronf/SwiftImageReadWrite",
-      "state" : {
-        "revision" : "42ace2412279f18bc264bc306e96b51c36e12a33",
-        "version" : "1.9.2"
+        "revision" : "9bf4c712ad7989d6a91dbe68748b8829a50837e4",
+        "version" : "1.0.2"
       }
     },
     {

@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
         .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("EntitiesApiConvenience"))),
         .local(.data(.interface("Api"))),
         .local(.infrastructure(.interface("Convenience"))),
         .local(.infrastructure(.interface("Logging"))),
@@ -24,6 +25,7 @@ let package = Package(
             name: "DefaultEmailConfirmationUseCaseImplementation",
             dependencies: [
                 "EmailConfirmationUseCase",
+                "EntitiesApiConvenience",
                 "Entities",
                 "Api",
                 "Convenience",

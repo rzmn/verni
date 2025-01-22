@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .local(.currentLayer(.interface("UsersRepository"))),
         .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("EntitiesApiConvenience"))),
         .local(.data(.interface("Api"))),
         .local(.data(.interface("SyncEngine"))),
         .local(.data(.interface("DataLayer"))),
@@ -34,6 +35,7 @@ let package = Package(
                 "Entities",
                 "SyncEngine",
                 "AsyncExtensions",
+                "EntitiesApiConvenience"
             ],
             path: "Sources"
         )
