@@ -1,6 +1,7 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
     name: "LogInScreen",
     platforms: [
@@ -13,23 +14,21 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../AppBase"),
-        .package(path: "../../DesignSystem"),
-        .package(path: "../../../DI/DI"),
-        .package(path: "../../../Domain/Domain"),
-        .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .local(.currentLayer(.interface("AppBase"))),
+        .local(.currentLayer(.interface("DesignSystem"))),
+        .local(.domain(.interface("Entities"))),
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
         .target(
             name: "LogInScreen",
             dependencies: [
-                "DesignSystem",
-                "DI",
-                "Domain",
-                "Logging",
-                "Base",
                 "AppBase",
+                "DesignSystem",
+                "Entities",
+                "Logging",
+                "Convenience",
             ],
             path: "Sources"
         )

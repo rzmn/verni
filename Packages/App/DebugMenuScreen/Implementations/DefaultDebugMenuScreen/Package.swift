@@ -3,17 +3,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "AuthWelcomeScreen",
+    name: "DefaultDebugMenuScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AuthWelcomeScreen",
-            targets: ["AuthWelcomeScreen"]
+            name: "DefaultDebugMenuScreen",
+            targets: ["DefaultDebugMenuScreen"]
         )
     ],
     dependencies: [
+        .local(.currentLayer(.interface("DebugMenuScreen"))),
         .local(.currentLayer(.interface("AppBase"))),
         .local(.currentLayer(.interface("DesignSystem"))),
         .local(.domain(.interface("Entities"))),
@@ -22,8 +23,9 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AuthWelcomeScreen",
+            name: "DefaultDebugMenuScreen",
             dependencies: [
+                "DebugMenuScreen",
                 "AppBase",
                 "DesignSystem",
                 "Entities",
