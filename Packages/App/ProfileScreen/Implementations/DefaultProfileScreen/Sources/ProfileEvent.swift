@@ -1,4 +1,4 @@
-import Entities
+import DI
 
 public enum ProfileEvent: Sendable {
     case logout

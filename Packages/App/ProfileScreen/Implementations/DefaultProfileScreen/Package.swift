@@ -1,33 +1,37 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "ProfileScreen",
+    name: "DefaultProfileScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "ProfileScreen",
-            targets: ["ProfileScreen"]
+            name: "DefaultProfileScreen",
+            targets: ["DefaultProfileScreen"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AppBase"))),
-        .local(.currentLayer(.interface("DesignSystem"))),
-        .local(.domain(.interface("Entities"))),
-        .local(.infrastructure(.interface("Logging"))),
-        .local(.infrastructure(.interface("Convenience")))
+        .package(path: "../../AppBase"),
+        .package(path: "../../DesignSystem"),
+        .package(path: "../../../DI/DI"),
+        .package(path: "../../../Domain/Domain"),
+        .package(path: "../../../Infrastructure/Logging"),
+        .package(path: "../../../Infrastructure/Base"),
     ],
     targets: [
         .target(
-            name: "ProfileScreen",
+            name: "DefaultProfileScreen",
             dependencies: [
-                "AppBase",
                 "DesignSystem",
-                "Entities",
+                "DI",
+                "Domain",
                 "Logging",
-                "Convenience"
+                "Base",
+                "AppBase",
+                "ProfileScreen"
             ],
             path: "Sources"
         )

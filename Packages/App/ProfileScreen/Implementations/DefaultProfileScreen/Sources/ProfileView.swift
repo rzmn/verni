@@ -1,8 +1,8 @@
 import SwiftUI
-import Entities
+import Domain
 import AppBase
-internal import Convenience
 internal import DesignSystem
+internal import Base
 
 public struct ProfileView: View {
     @ObservedObject var store: Store<ProfileState, ProfileAction>
@@ -11,7 +11,7 @@ public struct ProfileView: View {
 
     @Binding private var tabTransitionProgress: CGFloat
 
-    public init(store: Store<ProfileState, ProfileAction>, transitions: ProfileTransitions) {
+    init(store: Store<ProfileState, ProfileAction>, transitions: ProfileTransitions) {
         self.store = store
         _tabTransitionProgress = transitions.tab.progress
     }
@@ -101,22 +101,22 @@ private struct ProfilePreview: View {
         ZStack {
             ProfileView(
                 store: Store(
-                    state: ProfileState(
-                        profile: Profile(
-                            userId: "",
-                            email: .undefined
-                        ),
-                        profileInfo: User(
-                            id: "",
-                            payload: UserPayload(
-                                displayName: "name",
-                                avatar: nil
+                    state: modify(ProfileModel.initialState) {
+                        $0.profile = .loaded(
+                            Profile(
+                                user: User(
+                                    id: "",
+                                    status: .currentUser,
+                                    displayName: "berchikk",
+                                    avatar: Avatar(id: "123")
+                                ),
+                                email: "email@verni.co",
+                                isEmailVerified: false
                             )
-                        ),
-                        avatarCardFlipCount: 0,
-                        qrCodeData: nil
-                    ),
-                    reducer: { state, _ in state }
+                        )
+                        $0.avatarCardFlipCount = 0
+                    },
+                    reducer: ProfileModel.reducer
                 ),
                 transitions: ProfileTransitions(
                     tab: TabTransition(
@@ -134,7 +134,7 @@ private struct ProfilePreview: View {
 
 #Preview {
     ProfilePreview()
-        .preview(packageClass: ClassToIdentifyBundle.self)
+        .preview(packageClass: ProfileModel.self)
 }
 
 #endif
