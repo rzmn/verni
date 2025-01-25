@@ -1,7 +1,9 @@
 import DesignSystem
 internal import Convenience
 
-public struct LaunchingState: Equatable, Sendable {}
+public struct LaunchingState: Equatable, Sendable {
+    var session: AnySharedAppSession
+}
 
 public enum LaunchedState: Equatable, Sendable {
     case authenticated(AuthenticatedState)
@@ -103,5 +105,21 @@ public enum AppState: Equatable, Sendable {
             return nil
         }
         return state
+    }
+}
+
+extension AppState: SharedAppSessionConvertible {
+    public var shared: SharedAppSession {
+        switch self {
+        case .launching(let state):
+            return state.session.value
+        case .launched(let state):
+            switch state {
+            case .authenticated(let state):
+                return state.session.value.shared
+            case .anonymous(let state):
+                return state.session.value.shared
+            }
+        }
     }
 }

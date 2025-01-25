@@ -1,10 +1,6 @@
 import AppBase
-import DI
+import App
 internal import DesignSystem
-
-@MainActor public protocol AppFactory: Sendable {
-    func create() -> any ScreenProvider<Void, AppView, Void>
-}
 
 public final class DefaultAppFactory: AppFactory {
     private let di: AnonymousDomainLayerSession

@@ -3,7 +3,7 @@ import AuthWelcomeScreen
 import LogInScreen
 import DomainLayer
 
-@MainActor public protocol SandboxAppSession: Sendable, AnyObject {
+@MainActor public protocol SandboxAppSession: SharedAppSessionConvertible, AnyObject {
     var auth: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, AuthWelcomeTransitions> { get }
     var logIn: any ScreenProvider<LogInEvent, LogInView, ModalTransition> { get }
     

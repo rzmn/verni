@@ -161,7 +161,7 @@ struct AuthenticatedScreensCoordinator: View {
     }
 
     @ViewBuilder private func spendingsTab(state: AuthenticatedState) -> some View {
-        state.session.spendingsScreen.instantiate { event in
+        state.session.spendings.instantiate { event in
             switch event {
             case .onUserTap:
                 break
@@ -181,7 +181,7 @@ struct AuthenticatedScreensCoordinator: View {
     }
 
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {
-        state.session.profileScreen.instantiate { event in
+        state.session.profile.instantiate { event in
             switch event {
             case .logout:
                 store.dispatch(

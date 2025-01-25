@@ -42,22 +42,26 @@ public struct AppView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingDebugMenu) {
-                DefaultDebugMenuFactory()
-                    .create()
-                    .instantiate { event in
-                        switch event {
-                        case .dismiss:
-                            withAnimation {
-                                showingDebugMenu = false
-                            }
+                store.state.shared.debug.instantiate { event in
+                    switch event {
+                    case .dismiss:
+                        withAnimation {
+                            showingDebugMenu = false
                         }
-                    }()
+                    }
+                }()
             }
     }
 
     @ViewBuilder private var contentWithSplash: some View {
         ZStack {
-            DefaultSplashFactory().instantiate()(ModalTransition(progress: $fromSplashTransitionProgress, sourceOffset: $splashDestinationOffset, destinationOffset: $authWelcomeSourceOffset))
+            store.state.shared.splash.instantiate()(
+                ModalTransition(
+                    progress: $fromSplashTransitionProgress,
+                    sourceOffset: $splashDestinationOffset,
+                    destinationOffset: $authWelcomeSourceOffset
+                )
+            )
             .onAppear {
                 store.dispatch(.launch)
             }

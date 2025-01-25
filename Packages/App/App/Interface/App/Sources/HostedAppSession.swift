@@ -2,10 +2,16 @@ import AppBase
 import ProfileScreen
 import SpendingsScreen
 
-@MainActor public protocol HostedAppSession: Sendable, AnyObject {
+@MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
     var profile: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions> { get }
     var spendings: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions> { get }
+}
+
+extension HostedAppSession {
+    public var shared: SharedAppSession {
+        sandbox.shared
+    }
 }
 
 @dynamicMemberLookup
