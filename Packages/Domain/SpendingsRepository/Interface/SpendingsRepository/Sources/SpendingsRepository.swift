@@ -39,6 +39,7 @@ public protocol SpendingsRepository: Sendable {
     subscript(spending: Spending.Identifier) -> Spending? { get async }
     subscript(group groupId: SpendingGroup.Identifier) -> (group: SpendingGroup, participants: [SpendingGroup.Participant])? { get async }
     subscript(spendingsIn group: SpendingGroup.Identifier) -> [Spending]? { get async }
+    var groups: [SpendingGroup.Identifier] { get async }
     
     func createGroup(
         participants: [User.Identifier],

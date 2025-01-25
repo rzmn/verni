@@ -11,11 +11,9 @@ extension SpendingsModel {
                 return state
             case .onUserTap:
                 return state
-            case .onRefreshBalance:
-                return state
             case .balanceUpdated(let balance):
                 return modify(state) {
-                    $0.previews = .loaded(balance)
+                    $0.previews = balance
                 }
             }
         }

@@ -1,21 +1,41 @@
 import AppBase
-import DI
+import LogInScreen
+import AuthUseCase
+import CredentialsFormatValidationUseCase
+import SaveCredendialsUseCase
+import DomainLayer
 import Logging
 
-public protocol LogInFactory: Sendable {
-    func create() async -> any ScreenProvider<LogInEvent, LogInView, ModalTransition>
-}
-
-public final class DefaultLogInFactory: LogInFactory {
-    private let di: AnonymousDomainLayerSession
+public final class DefaultLogInFactory {
+    private let authUseCase: any AuthUseCase<HostedDomainLayer>
+    private let emailValidationUseCase: EmailValidationUseCase
+    private let passwordValidationUseCase: PasswordValidationUseCase
+    private let saveCredentialsUseCase: SaveCredendialsUseCase
     private let logger: Logger
 
-    public init(di: AnonymousDomainLayerSession, logger: Logger) {
-        self.di = di
+    public init(
+        authUseCase: any AuthUseCase<HostedDomainLayer>,
+        emailValidationUseCase: EmailValidationUseCase,
+        passwordValidationUseCase: PasswordValidationUseCase,
+        saveCredentialsUseCase: SaveCredendialsUseCase,
+        logger: Logger
+    ) {
+        self.authUseCase = authUseCase
+        self.emailValidationUseCase = emailValidationUseCase
+        self.passwordValidationUseCase = passwordValidationUseCase
+        self.saveCredentialsUseCase = saveCredentialsUseCase
         self.logger = logger
     }
+}
 
+extension DefaultLogInFactory: LogInFactory {
     public func create() async -> any ScreenProvider<LogInEvent, LogInView, ModalTransition> {
-        await LogInModel(di: di, logger: logger)
+        await LogInModel(
+            authUseCase: authUseCase,
+            emailValidationUseCase: emailValidationUseCase,
+            passwordValidationUseCase: passwordValidationUseCase,
+            saveCredentialsUseCase: saveCredentialsUseCase,
+            logger: logger
+        )
     }
 }

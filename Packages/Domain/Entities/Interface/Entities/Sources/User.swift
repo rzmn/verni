@@ -20,6 +20,15 @@ public enum AnyUser: Sendable, Equatable {
             user.payload
         }
     }
+    
+    public var id: User.Identifier {
+        switch self {
+        case .sandbox(let user):
+            user.id
+        case .regular(let user):
+            user.id
+        }
+    }
 }
 
 public struct SandboxUser: Sendable, Equatable {

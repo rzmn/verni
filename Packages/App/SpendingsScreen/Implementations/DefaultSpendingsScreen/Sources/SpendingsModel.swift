@@ -23,33 +23,33 @@ actor SpendingsModel {
     ) async {
         self.spendingsRepository = spendingsRepository
         self.usersRepository = usersRepository
-        let spendings = await di.spendingsOfflineRepository.getSpendingCounterparties()
-        let items = await withTaskGroup(of: Optional<SpendingsState.Item>.self, returning: [SpendingsState.Item].self) { group in
-            spendings.flatMap { spendings in
-                for spending in spendings {
-                    group.addTask {
-                        let user = try? await di.usersRepository.getUser(id: spending.counterparty)
-                        return user.flatMap {
-                            SpendingsState.Item(
-                                user: $0,
-                                balance: spending.balance
-                            )
-                        }
+        let items = await spendingsRepository.groups
+            .asyncCompactMap {
+                await spendingsRepository[group: $0]
+            }
+            .asyncCompactMap { (group, participants) -> SpendingsState.Item? in
+                let users = await participants.asyncCompactMap { participant -> (participant: SpendingGroup.Participant, user: AnyUser)? in
+                    guard let user = await usersRepository[participant.userId] else {
+                        return nil
                     }
+                    return (participant, user)
                 }
-            }
-            return await group.reduce(into: [SpendingsState.Item]()) { result, spending in
-                guard let spending else {
-                    return
+                guard users.count == 2 else {
+                    logger.logW { "skipping group \(group) due to wrong participants count \(participants)" }
+                    return nil
                 }
-                result.append(spending)
+                guard let counterparty = users.first(where: { $0.user.id == "" }) else {
+                    logger.logW { "counterparty not found in \(users.map(\.user))" }
+                    return nil
+                }
+                return SpendingsState.Item(
+                    user: counterparty.user,
+                    balance: [:]
+                )
             }
-        }
         store = await Store(
             state: modify(Self.initialState) {
-                if spendings != nil {
-                    $0.previews = .loaded(items)
-                }
+                $0.previews = items
             },
             reducer: Self.reducer
         )

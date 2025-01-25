@@ -1,7 +1,6 @@
 import SwiftUI
 import AppBase
-internal import DesignSystem
-internal import Base
+import DesignSystem
 
 public struct LogInView: View {
     @ObservedObject var store: Store<LogInState, LogInAction>
@@ -11,7 +10,7 @@ public struct LogInView: View {
     @Binding private var destinationOffset: CGFloat?
     @Binding private var sourceOffset: CGFloat?
 
-    init(store: Store<LogInState, LogInAction>, transition: ModalTransition) {
+    public init(store: Store<LogInState, LogInAction>, transition: ModalTransition) {
         self.store = store
         _transitionProgress = transition.progress
         _sourceOffset = transition.sourceOffset
@@ -140,8 +139,13 @@ private struct LogInPreview: View {
         ZStack {
             LogInView(
                 store: Store(
-                    state: LogInModel.initialState,
-                    reducer: LogInModel.reducer
+                    state: LogInState(
+                        email: "e@mail.co",
+                        password: "12345678",
+                        canSubmitCredentials: true,
+                        bottomSheet: nil
+                    ),
+                    reducer: { state, _ in state }
                 ),
                 transition: ModalTransition(
                     progress: $transition,
@@ -158,9 +162,11 @@ private struct LogInPreview: View {
     }
 }
 
+class ClassToIdentifyBundle {}
+
 #Preview {
     LogInPreview()
-        .preview(packageClass: LogInModel.self)
+        .preview(packageClass: ClassToIdentifyBundle.self)
 }
 
 #endif

@@ -1,9 +1,5 @@
 import AppBase
-import DI
-
-@MainActor public protocol DebugMenuFactory: Sendable {
-    func create() -> any ScreenProvider<DebugMenuEvent, DebugMenuView, Void>
-}
+import DebugMenuScreen
 
 @MainActor public final class DefaultDebugMenuFactory: DebugMenuFactory {
 

@@ -1,10 +1,7 @@
 import SwiftUI
-import DI
 import AppBase
-internal import Base
-internal import DesignSystem
-internal import DebugMenuScreen
-internal import SplashScreen
+import DesignSystem
+internal import Convenience
 
 public struct AppView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
@@ -21,7 +18,7 @@ public struct AppView: View {
 
     @State private var splashIsLocked = false
 
-    init(store: Store<AppState, AppAction>) {
+    public init(store: Store<AppState, AppAction>) {
         self.store = store
     }
 

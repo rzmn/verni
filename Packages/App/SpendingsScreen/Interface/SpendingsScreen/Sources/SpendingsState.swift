@@ -2,23 +2,24 @@ import Foundation
 import Entities
 
 public struct SpendingsState: Equatable, Sendable {
-    public enum PreviewsLoadingFailureReason: Sendable, Equatable {
-        case noInternet
-    }
-
     public struct Item: Sendable, Equatable, Identifiable {
-        let user: User
-        let balance: [Currency: Amount]
+        public var user: AnyUser
+        public var balance: [Currency: Amount]
 
         public var id: String {
             user.id
         }
+        
+        public init(user: AnyUser, balance: [Currency: Amount]) {
+            self.user = user
+            self.balance = balance
+        }
 
-        var isPositive: Bool {
+        public var isPositive: Bool {
             (balance.first?.value ?? 0) > 0
         }
 
-        var amount: String {
+        public var amount: String {
             balance.map { (currency, value) in
                 let value = abs(value)
                 switch currency {
@@ -35,9 +36,9 @@ public struct SpendingsState: Equatable, Sendable {
         }
     }
 
-    public var previews: Loadable<[Item], PreviewsLoadingFailureReason>
+    public var previews: [Item]
     
-    public init(previews: Loadable<[Item], PreviewsLoadingFailureReason>) {
+    public init(previews: [Item]) {
         self.previews = previews
     }
 }

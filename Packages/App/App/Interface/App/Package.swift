@@ -13,33 +13,33 @@ let package = Package(
         )
     ],
     dependencies: [
+        .local(.currentLayer(.interface("AuthWelcomeScreen"))),
+        .local(.currentLayer(.interface("DebugMenuScreen"))),
+        .local(.currentLayer(.interface("SpendingsScreen"))),
+        .local(.currentLayer(.interface("ProfileScreen"))),
+        .local(.currentLayer(.interface("LogInScreen"))),
+        .local(.currentLayer(.interface("SplashScreen"))),
+        .local(.currentLayer(.interface("DesignSystem"))),
+        .local(.currentLayer(.interface("AppBase"))),
         .local(.domain(.interface("DomainLayer"))),
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
-        .package(path: "../DesignSystem"),
-        .package(path: "../AppBase"),
-        .package(path: "../Screens/AuthWelcomeScreen"),
-        .package(path: "../Screens/DebugMenuScreen"),
-        .package(path: "../Screens/SpendingsScreen"),
-        .package(path: "../Screens/ProfileScreen"),
-        .package(path: "../Screens/LogInScreen"),
-        .package(path: "../Screens/SplashScreen"),
     ],
     targets: [
         .target(
             name: "App",
             dependencies: [
-                "DomainLayer",
-                "Logging",
-                "Convenience",
-                "DesignSystem",
-                "AppBase",
                 "AuthWelcomeScreen",
                 "DebugMenuScreen",
-                "LogInScreen",
                 "SpendingsScreen",
                 "ProfileScreen",
+                "LogInScreen",
                 "SplashScreen",
+                "DesignSystem",
+                "AppBase",
+                "DomainLayer",
+                "Logging",
+                "Convenience"
             ],
             path: "Sources"
         )

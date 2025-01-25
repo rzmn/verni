@@ -7,7 +7,7 @@ public struct DebugMenuView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
 
-    init(store: Store<DebugMenuState, DebugMenuAction>) {
+    public init(store: Store<DebugMenuState, DebugMenuAction>) {
         self.store = store
     }
 
@@ -22,13 +22,8 @@ public struct DebugMenuView: View {
             DebugMenuRootView(store: store)
                 .navigationDestination(for: StackMember.self) { stackMember in
                     switch stackMember {
-                    case .designSystem:
-                        if case .designSystem(let state) = store.state.section {
-                            DesignSystemView(store: store, state: state)
-                        } else {
-                            let _ = assertionFailure()
-                            DesignSystemView(store: store, state: DebugMenuModel.initialDesignSystemState)
-                        }
+                    case .designSystem(let state):
+                        DesignSystemView(store: store, state: state)
                     case .buttons:
                         ButtonsView()
                     case .textFields:
@@ -48,12 +43,29 @@ public struct DebugMenuView: View {
     }
 }
 
+class ClassToIdentifyBundle {}
+
 #Preview {
     DebugMenuView(
         store: Store(
-            state: DebugMenuModel.reducer(DebugMenuModel.initialState, .debugMenuSectionTapped(.designSystem(DebugMenuModel.initialDesignSystemState))),
-            reducer: DebugMenuModel.reducer
+            state: DebugMenuState(
+                navigation: [],
+                sections: [
+                    .designSystem(
+                        DesignSystemState(
+                            sections: [
+                                .button,
+                                .colors,
+                                .fonts
+                            ],
+                            section: nil
+                        )
+                    )
+                ],
+                section: nil
+            ),
+            reducer: { state, _ in state }
         )
     )
-    .preview(packageClass: DebugMenuModel.self)
+    .preview(packageClass: ClassToIdentifyBundle.self)
 }

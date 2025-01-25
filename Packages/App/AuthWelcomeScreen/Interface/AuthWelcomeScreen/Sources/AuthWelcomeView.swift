@@ -15,7 +15,7 @@ public struct AuthWelcomeView: View {
     @Binding private var appearDestinationOffset: CGFloat?
     @Binding private var appearSourceOffset: CGFloat?
 
-    init(
+    public init(
         store: Store<AuthWelcomeState, AuthWelcomeAction>,
         transitionFrom: ModalTransition,
         transitionTo: ModalTransition
@@ -172,8 +172,8 @@ private struct AuthWelcomePreview: View {
         ZStack {
             AuthWelcomeView(
                 store: Store(
-                    state: AuthWelcomeModel.initialState,
-                    reducer: AuthWelcomeModel.reducer
+                    state: AuthWelcomeState(),
+                    reducer: { state, _ in state }
                 ),
                 transitionFrom: ModalTransition(
                     progress: $appearTransition,
@@ -197,9 +197,11 @@ private struct AuthWelcomePreview: View {
     }
 }
 
+class ClassToIdentifyBundle {}
+
 #Preview {
     AuthWelcomePreview()
-        .preview(packageClass: AuthWelcomeModel.self)
+        .preview(packageClass: ClassToIdentifyBundle.self)
 }
 
 #endif

@@ -4,10 +4,10 @@ import UIKit
 internal import DesignSystem
 
 public struct ProfileState: Equatable, Sendable {
-    var profile: Profile
-    var profileInfo: User
-    var avatarCardFlipCount: CGFloat
-    var qrCodeData: UIImage?
+    public var profile: Profile
+    public var profileInfo: User
+    public var avatarCardFlipCount: CGFloat
+    public var qrCodeData: UIImage?
     
     public init(
         profile: Profile,

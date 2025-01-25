@@ -18,6 +18,8 @@ let package = Package(
         .local(.currentLayer(.interface("AppBase"))),
         .local(.currentLayer(.interface("DesignSystem"))),
         .local(.domain(.interface("Entities"))),
+        .local(.domain(.interface("SaveCredendialsUseCase"))),
+        .local(.domain(.interface("CredentialsFormatValidationUseCase"))),
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
@@ -25,6 +27,8 @@ let package = Package(
         .target(
             name: "DefaultLogInScreen",
             dependencies: [
+                "CredentialsFormatValidationUseCase",
+                "SaveCredendialsUseCase",
                 "LogInScreen",
                 "AppBase",
                 "DesignSystem",

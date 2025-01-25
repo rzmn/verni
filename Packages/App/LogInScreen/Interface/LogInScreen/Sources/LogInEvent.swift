@@ -1,7 +1,7 @@
-import DI
+import DomainLayer
 
 public enum LogInEvent: Sendable {
     case dismiss
     case forgotPassword
-    case logIn(AuthenticatedDomainLayerSession)
+    case logIn(HostedDomainLayer)
 }

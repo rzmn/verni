@@ -165,6 +165,12 @@ public actor DefaultSpendingsRepository: Sendable {
 }
 
 extension DefaultSpendingsRepository: SpendingsRepository {
+    public var groups: [SpendingGroup.Identifier] {
+        get async {
+            state.spendingGroupsOrder.elements
+        }
+    }
+    
     public nonisolated var updates: any AsyncBroadcast<[SpendingsUpdate]> {
         updatesSubject
     }

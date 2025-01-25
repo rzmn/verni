@@ -47,9 +47,6 @@ public struct ProfileView: View {
 
         }
         .background(colors.background.primary.default.opacity(tabTransitionOpacity))
-        .onAppear {
-            store.dispatch(.onRefreshProfile)
-        }
     }
 
     private var navigationBar: some View {

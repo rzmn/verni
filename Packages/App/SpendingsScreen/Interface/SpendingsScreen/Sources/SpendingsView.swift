@@ -7,26 +7,26 @@ public struct SpendingsView: View {
     @ObservedObject var store: Store<SpendingsState, SpendingsAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-
+    
     @Binding private var appearTransitionProgress: CGFloat
     @Binding private var appearDestinationOffset: CGFloat?
     @Binding private var appearSourceOffset: CGFloat?
-
+    
     @Binding private var tabTransitionProgress: CGFloat
-
+    
     public init(
         store: Store<SpendingsState, SpendingsAction>,
         transitions: SpendingsTransitions
     ) {
         self.store = store
-
+        
         _appearTransitionProgress = transitions.appear.progress
         _appearSourceOffset = transitions.appear.sourceOffset
         _appearDestinationOffset = transitions.appear.destinationOffset
-
+        
         _tabTransitionProgress = transitions.tab.progress
     }
-
+    
     public var body: some View {
         VStack(spacing: 0) {
             NavigationBar(
@@ -65,31 +65,28 @@ public struct SpendingsView: View {
             .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             Spacer()
         }
-        .onAppear {
-            store.dispatch(.onRefreshBalance)
-        }
     }
-
+    
     private var adjustedTransitionOpacity: CGFloat {
         tabTransitionOpacity * appearTransitionProgress
     }
-
+    
     private var tabTransitionOpacity: CGFloat {
         1 - abs(tabTransitionProgress)
     }
-
+    
     private var tabTransitionOffset: CGFloat {
         28 * tabTransitionProgress
     }
-
+    
     private var appearTransitionOffset: CGFloat {
         (1 - appearTransitionProgress) * UIScreen.main.bounds.height / 5
     }
-
+    
     private var items: [SpendingsState.Item] {
-        store.state.previews.value ?? []
+        store.state.previews
     }
-
+    
     private var overallSection: some View {
         HStack(spacing: 0) {
             Image.chevronDown
@@ -102,7 +99,7 @@ public struct SpendingsView: View {
                     .foregroundStyle(colors.text.primary.alternative)
                     .padding(.top, 20)
                 Spacer()
-                Text(.spendingsPeopleInvolved(count: store.state.previews.value?.count ?? 0))
+                Text(.spendingsPeopleInvolved(count: store.state.previews.count))
                     .font(.medium(size: 15))
                     .foregroundStyle(colors.text.secondary.alternative)
                     .padding(.bottom, 20)
@@ -122,28 +119,28 @@ private struct SpendingsPreview: View {
     @State var appearTransition: CGFloat = 1
     @State var tabTransition: CGFloat = 0
     @State var sourceOffset: CGFloat?
-
+    
     var body: some View {
         ZStack {
             SpendingsView(
                 store: Store(
                     state: SpendingsState(
-                        previews: .loaded(
-                            [
-                                SpendingsState.Item(
-                                    user: User(
+                        previews: [
+                            SpendingsState.Item(
+                                user: .regular(
+                                    User(
                                         id: UUID().uuidString,
                                         payload: UserPayload(
                                             displayName: "displayName",
                                             avatar: nil
                                         )
-                                    ),
-                                    balance: [
-                                        .euro: 123
-                                    ]
-                                )
-                            ]
-                        )
+                                    )
+                                ),
+                                balance: [
+                                    .euro: 123
+                                ]
+                            )
+                        ]
                     ),
                     reducer: { state, _ in state }
                 ),
@@ -157,7 +154,7 @@ private struct SpendingsPreview: View {
                         progress: $tabTransition
                     )
                 )
-
+                
             )
             VStack {
                 Text("sourceOffset: \(sourceOffset ?? -1)")

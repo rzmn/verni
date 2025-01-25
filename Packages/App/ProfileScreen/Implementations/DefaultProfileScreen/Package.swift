@@ -14,24 +14,29 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../../AppBase"),
-        .package(path: "../../DesignSystem"),
-        .package(path: "../../../DI/DI"),
-        .package(path: "../../../Domain/Domain"),
-        .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .local(.currentLayer(.interface("ProfileScreen"))),
+        .local(.currentLayer(.interface("AppBase"))),
+        .local(.currentLayer(.interface("DesignSystem"))),
+        .local(.domain(.interface("Entities"))),
+        .local(.domain(.interface("ProfileRepository"))),
+        .local(.domain(.interface("UsersRepository"))),
+        .local(.domain(.interface("QrInviteUseCase"))),
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.interface("Convenience")))
     ],
     targets: [
         .target(
             name: "DefaultProfileScreen",
             dependencies: [
-                "DesignSystem",
-                "DI",
-                "Domain",
-                "Logging",
-                "Base",
+                "ProfileScreen",
                 "AppBase",
-                "ProfileScreen"
+                "DesignSystem",
+                "Entities",
+                "ProfileRepository",
+                "UsersRepository",
+                "Logging",
+                "Convenience",
+                "QrInviteUseCase"
             ],
             path: "Sources"
         )
