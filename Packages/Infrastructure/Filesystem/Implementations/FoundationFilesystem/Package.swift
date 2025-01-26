@@ -15,11 +15,13 @@ let package = Package(
     dependencies: [
         .local(.currentLayer(.interface("Filesystem"))),
         .local(.currentLayer(.interface("Convenience"))),
+        .local(.currentLayer(.interface("Logging")))
     ],
     targets: [
         .target(
             name: "FoundationFilesystem",
             dependencies: [
+                "Logging",
                 "Filesystem",
                 "Convenience"
             ],

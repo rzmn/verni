@@ -3,437 +3,149 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		610E9BE82C5F7551003D1A79 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = 610E9BE72C5F7551003D1A79 /* App */; };
-		613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 613AB1322CB2F26600C730EC /* Assets.xcassets */; };
-		613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 613AB13B2CB2F26600C730EC /* Tests.xctestplan */; };
-		613AB1442CB2F26600C730EC /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB1382CB2F26600C730EC /* App.swift */; };
-		613AB1452CB2F26600C730EC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613AB13A2CB2F26600C730EC /* SceneDelegate.swift */; };
-		614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614AC19D2C6802EE005B2CD5 /* NotificationService.swift */; };
-		614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		61D799C72C7CB04F00F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799C62C7CB04F00F99010 /* DefaultDependencies */; };
-		61D799CB2C7CB08500F99010 /* DefaultDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 61D799CA2C7CB08500F99010 /* DefaultDependencies */; };
-		847DE54A2D01FCC9008BBAF8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */; };
+		8473AE792D46420700DB8168 /* DefaultDataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 847DC95D2D46217500AF3C99 /* DefaultDataLayer */; };
+		8473AE7A2D46420700DB8168 /* DefaultDomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 847DC9602D46218900AF3C99 /* DefaultDomainLayer */; };
+		84CD19B42D463F41004F0107 /* DefaultInfrastructureLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19B32D463F41004F0107 /* DefaultInfrastructureLayer */; };
+		84CD19B72D463F51004F0107 /* DefaultDataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19B62D463F51004F0107 /* DefaultDataLayer */; };
+		84CD19BA2D463F66004F0107 /* DefaultDomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19B92D463F66004F0107 /* DefaultDomainLayer */; };
+		84CD19BD2D463F76004F0107 /* DefaultAppLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19BC2D463F76004F0107 /* DefaultAppLayer */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		614AC1A02C6802EE005B2CD5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 61414F762C2F02A100B2C027 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 614AC19A2C6802EE005B2CD5;
-			remoteInfo = NotificationService;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		614AC1A62C6802EE005B2CD5 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				614AC1A22C6802EE005B2CD5 /* NotificationService.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		61088A962C5E70DE005FFFC2 /* AppBase */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AppBase; sourceTree = "<group>"; };
-		61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultValidationUseCasesImplementation; sourceTree = "<group>"; };
-		61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileEditingUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD4A2C50AE3A00289D9E /* DefaultDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDependencies; sourceTree = "<group>"; };
-		611CCD4B2C50AE3A00289D9E /* DI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DI; sourceTree = "<group>"; };
-		611CCD522C50AE3A00289D9E /* PersistentStorage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorage; sourceTree = "<group>"; };
-		611CCD542C50AE3A00289D9E /* App */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = App; sourceTree = "<group>"; };
-		611CCD552C50AE3A00289D9E /* DesignSystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesignSystem; sourceTree = "<group>"; };
-		611CCD582C50AE3A00289D9E /* Base */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Base; sourceTree = "<group>"; };
-		611CCD5B2C50AE3A00289D9E /* Logging */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Logging; sourceTree = "<group>"; };
-		611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ApiDomainConvenience; sourceTree = "<group>"; };
-		611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAuthUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD622C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultQRInviteUseCaseImplementation; sourceTree = "<group>"; };
-		611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultUsersRepositoryImplementation; sourceTree = "<group>"; };
-		611CCD672C50AE3A00289D9E /* Domain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Domain; sourceTree = "<group>"; };
-		611CCD852C50B1D400289D9E /* PersistentStorageSQLite */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PersistentStorageSQLite; sourceTree = "<group>"; };
-		613AB1312CB2F26600C730EC /* Verni.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Verni.entitlements; sourceTree = "<group>"; };
-		613AB1322CB2F26600C730EC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		613AB1332CB2F26600C730EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		613AB1382CB2F26600C730EC /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		613AB13A2CB2F26600C730EC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		613AB13B2CB2F26600C730EC /* Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tests.xctestplan; sourceTree = "<group>"; };
-		61414F7E2C2F02A100B2C027 /* Verni.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Verni.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6143A7D52C9076930030AAF1 /* MockPersistentStorage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockPersistentStorage; sourceTree = "<group>"; };
-		6143A7F32C90CBF90030AAF1 /* MockApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MockApiImplementation; sourceTree = "<group>"; };
-		614AC19B2C6802EE005B2CD5 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		614AC19D2C6802EE005B2CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		614AC19F2C6802EE005B2CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultPushRegistrationUseCaseImplementation; sourceTree = "<group>"; };
-		617AAB532C982D130087E4F5 /* AsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AsyncExtensions; sourceTree = "<group>"; };
-		617E5F3A2D1D7AB8001EC57F /* Infrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Infrastructure; sourceTree = "<group>"; };
-		617E5F3C2D1D7AB8001EC57F /* Filesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Filesystem; sourceTree = "<group>"; };
-		617E5F3D2D1D7AB8001EC57F /* DefaultAsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAsyncExtensions; sourceTree = "<group>"; };
-		617E5F3E2D1D7AB8001EC57F /* DefaultInfrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultInfrastructure; sourceTree = "<group>"; };
-		617E5F3F2D1D7AB8001EC57F /* FoundationFilesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FoundationFilesystem; sourceTree = "<group>"; };
-		617E5F412D1D7B0D001EC57F /* TestAsyncExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestAsyncExtensions; sourceTree = "<group>"; };
-		617E5F422D1D7CC8001EC57F /* DefaultLogging */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultLogging; sourceTree = "<group>"; };
-		6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultProfileRepositoryImplementation; sourceTree = "<group>"; };
-		6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultLogoutUseCaseImplementation; sourceTree = "<group>"; };
-		618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultAvatarsRepositoryImplementation; sourceTree = "<group>"; };
-		618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultEmailConfirmationUseCaseImplementation; sourceTree = "<group>"; };
-		61901AAD2D1E394C00C84A38 /* TestInfrastructure */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestInfrastructure; sourceTree = "<group>"; };
-		61901AAE2D1E3B0800C84A38 /* TestFilesystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TestFilesystem; sourceTree = "<group>"; };
-		619CE8242D2E3C0000B70C30 /* SyncEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SyncEngine; sourceTree = "<group>"; };
-		61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultSaveCredendialsUseCaseImplementation; sourceTree = "<group>"; };
-		61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultApiImplementation; sourceTree = "<group>"; };
-		61BBB1242C50D3CE00E3D4F3 /* Api */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Api; sourceTree = "<group>"; };
-		61D11BE82CA020CB0058B77A /* DataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DataLayerDependencies; sourceTree = "<group>"; };
-		61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultDataLayerDependencies; sourceTree = "<group>"; };
-		61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DefaultReceivingPushUseCaseImplementation; sourceTree = "<group>"; };
-		61D8456C2C7E69B200100E2E /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
-		844CD9B42CF0E68000092DD1 /* DebugMenuScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DebugMenuScreen; sourceTree = "<group>"; };
-		84650DDC2CEF300100907DB0 /* AuthWelcomeScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AuthWelcomeScreen; sourceTree = "<group>"; };
-		846A50C62CFE0C6500A766EE /* SplashScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SplashScreen; sourceTree = "<group>"; };
-		8476A23C2CF2243E001CBF5A /* LogInScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LogInScreen; sourceTree = "<group>"; };
-		847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		84B9FB612D32D95B00C58639 /* RemoteSyncEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RemoteSyncEngine; sourceTree = "<group>"; };
-		84B9FB622D32EE6B00C58639 /* SandboxSyncEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SandboxSyncEngine; sourceTree = "<group>"; };
-		84E809102CF3695A00B5A32C /* ProfileScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ProfileScreen; sourceTree = "<group>"; };
-		84E809112CF4A2A700B5A32C /* SpendingsScreen */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SpendingsScreen; sourceTree = "<group>"; };
+		848C211E2D461F8C00931669 /* Verni.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Verni.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFrameworksBuildPhase section */
-		61414F7B2C2F02A100B2C027 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				610E9BE82C5F7551003D1A79 /* App in Frameworks */,
-				61D799C72C7CB04F00F99010 /* DefaultDependencies in Frameworks */,
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		841721132D46445400C043E7 /* Exceptions for "Verni" folder in "Verni" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			target = 848C211D2D461F8C00931669 /* Verni */;
 		};
-		614AC1982C6802EE005B2CD5 /* Frameworks */ = {
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		848C21202D461F8C00931669 /* Verni */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				841721132D46445400C043E7 /* Exceptions for "Verni" folder in "Verni" target */,
+			);
+			path = Verni;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		848C211B2D461F8C00931669 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61D799CB2C7CB08500F99010 /* DefaultDependencies in Frameworks */,
+				8473AE7A2D46420700DB8168 /* DefaultDomainLayer in Frameworks */,
+				8473AE792D46420700DB8168 /* DefaultDataLayer in Frameworks */,
+				84CD19BD2D463F76004F0107 /* DefaultAppLayer in Frameworks */,
+				84CD19B42D463F41004F0107 /* DefaultInfrastructureLayer in Frameworks */,
+				84CD19B72D463F51004F0107 /* DefaultDataLayer in Frameworks */,
+				84CD19BA2D463F66004F0107 /* DefaultDomainLayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		611CCD4C2C50AE3A00289D9E /* DI */ = {
+		848C21152D461F8C00931669 = {
 			isa = PBXGroup;
 			children = (
-				61C90BF62C84B28A006A44C0 /* Implementations */,
-				611CCD4B2C50AE3A00289D9E /* DI */,
-			);
-			path = DI;
-			sourceTree = "<group>";
-		};
-		611CCD532C50AE3A00289D9E /* Data */ = {
-			isa = PBXGroup;
-			children = (
-				61D11BE72CA020A90058B77A /* DI */,
-				61C90BF52C84B0E6006A44C0 /* Implementations */,
-				61BBB1242C50D3CE00E3D4F3 /* Api */,
-				611CCD522C50AE3A00289D9E /* PersistentStorage */,
-				619CE8242D2E3C0000B70C30 /* SyncEngine */,
-			);
-			path = Data;
-			sourceTree = "<group>";
-		};
-		611CCD562C50AE3A00289D9E /* App */ = {
-			isa = PBXGroup;
-			children = (
-				61A1D3962CA9556C006C496F /* Screens */,
-				61088A962C5E70DE005FFFC2 /* AppBase */,
-				611CCD542C50AE3A00289D9E /* App */,
-				611CCD552C50AE3A00289D9E /* DesignSystem */,
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
-		611CCD5D2C50AE3A00289D9E /* Infrastructure */ = {
-			isa = PBXGroup;
-			children = (
-				617E5F3B2D1D7AB8001EC57F /* DI */,
-				617E5F402D1D7AB8001EC57F /* Implementations */,
-				617E5F3C2D1D7AB8001EC57F /* Filesystem */,
-				617AAB532C982D130087E4F5 /* AsyncExtensions */,
-				611CCD582C50AE3A00289D9E /* Base */,
-				611CCD5B2C50AE3A00289D9E /* Logging */,
-			);
-			path = Infrastructure;
-			sourceTree = "<group>";
-		};
-		611CCD662C50AE3A00289D9E /* Implementations */ = {
-			isa = PBXGroup;
-			children = (
-				61D799CC2C7CBE1400F99010 /* DefaultReceivingPushUseCaseImplementation */,
-				6184E5B02C7A150500E5D6C1 /* DefaultLogoutUseCaseImplementation */,
-				6184E5AF2C79D9DC00E5D6C1 /* DefaultProfileRepositoryImplementation */,
-				61A7488A2C6B8F6200ADF9FF /* DefaultSaveCredendialsUseCaseImplementation */,
-				614AC1A72C68145A005B2CD5 /* DefaultPushRegistrationUseCaseImplementation */,
-				618EDBE92C6603A400CE47E4 /* DefaultEmailConfirmationUseCaseImplementation */,
-				618ED7652C64045400CE47E4 /* DefaultAvatarsRepositoryImplementation */,
-				61088A9A2C5EB6FD005FFFC2 /* DefaultProfileEditingUseCaseImplementation */,
-				61088A982C5EACC6005FFFC2 /* DefaultValidationUseCasesImplementation */,
-				611CCD5E2C50AE3A00289D9E /* ApiDomainConvenience */,
-				611CCD5F2C50AE3A00289D9E /* DefaultAuthUseCaseImplementation */,
-				611CCD622C50AE3A00289D9E /* DefaultQRInviteUseCaseImplementation */,
-				611CCD652C50AE3A00289D9E /* DefaultUsersRepositoryImplementation */,
-			);
-			path = Implementations;
-			sourceTree = "<group>";
-		};
-		611CCD682C50AE3A00289D9E /* Domain */ = {
-			isa = PBXGroup;
-			children = (
-				611CCD662C50AE3A00289D9E /* Implementations */,
-				611CCD672C50AE3A00289D9E /* Domain */,
-			);
-			path = Domain;
-			sourceTree = "<group>";
-		};
-		613AB1372CB2F26600C730EC /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				613AB1312CB2F26600C730EC /* Verni.entitlements */,
-				613AB1322CB2F26600C730EC /* Assets.xcassets */,
-				613AB1332CB2F26600C730EC /* Info.plist */,
-				847DE5492D01FCC9008BBAF8 /* LaunchScreen.storyboard */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		613AB13C2CB2F26600C730EC /* Verni */ = {
-			isa = PBXGroup;
-			children = (
-				613AB1372CB2F26600C730EC /* Resources */,
-				613AB1382CB2F26600C730EC /* App.swift */,
-				613AB13A2CB2F26600C730EC /* SceneDelegate.swift */,
-				613AB13B2CB2F26600C730EC /* Tests.xctestplan */,
-			);
-			path = Verni;
-			sourceTree = "<group>";
-		};
-		61414F752C2F02A100B2C027 = {
-			isa = PBXGroup;
-			children = (
-				613AB13C2CB2F26600C730EC /* Verni */,
-				61B74FDF2C305ECA001182A2 /* Packages */,
-				614AC19C2C6802EE005B2CD5 /* NotificationService */,
-				61414F7F2C2F02A100B2C027 /* Products */,
-				61B74FF22C3080D6001182A2 /* Frameworks */,
+				848C21202D461F8C00931669 /* Verni */,
+				848C211F2D461F8C00931669 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		61414F7F2C2F02A100B2C027 /* Products */ = {
+		848C211F2D461F8C00931669 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				61414F7E2C2F02A100B2C027 /* Verni.app */,
-				614AC19B2C6802EE005B2CD5 /* NotificationService.appex */,
+				848C211E2D461F8C00931669 /* Verni.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		614AC19C2C6802EE005B2CD5 /* NotificationService */ = {
-			isa = PBXGroup;
-			children = (
-				61D8456C2C7E69B200100E2E /* NotificationService.entitlements */,
-				614AC19D2C6802EE005B2CD5 /* NotificationService.swift */,
-				614AC19F2C6802EE005B2CD5 /* Info.plist */,
-			);
-			path = NotificationService;
-			sourceTree = "<group>";
-		};
-		617E5F3B2D1D7AB8001EC57F /* DI */ = {
-			isa = PBXGroup;
-			children = (
-				617E5F3A2D1D7AB8001EC57F /* Infrastructure */,
-			);
-			path = DI;
-			sourceTree = "<group>";
-		};
-		617E5F402D1D7AB8001EC57F /* Implementations */ = {
-			isa = PBXGroup;
-			children = (
-				61901AAE2D1E3B0800C84A38 /* TestFilesystem */,
-				61901AAD2D1E394C00C84A38 /* TestInfrastructure */,
-				617E5F422D1D7CC8001EC57F /* DefaultLogging */,
-				617E5F412D1D7B0D001EC57F /* TestAsyncExtensions */,
-				617E5F3D2D1D7AB8001EC57F /* DefaultAsyncExtensions */,
-				617E5F3E2D1D7AB8001EC57F /* DefaultInfrastructure */,
-				617E5F3F2D1D7AB8001EC57F /* FoundationFilesystem */,
-			);
-			path = Implementations;
-			sourceTree = "<group>";
-		};
-		61A1D3962CA9556C006C496F /* Screens */ = {
-			isa = PBXGroup;
-			children = (
-				846A50C62CFE0C6500A766EE /* SplashScreen */,
-				84E809112CF4A2A700B5A32C /* SpendingsScreen */,
-				84E809102CF3695A00B5A32C /* ProfileScreen */,
-				8476A23C2CF2243E001CBF5A /* LogInScreen */,
-				844CD9B42CF0E68000092DD1 /* DebugMenuScreen */,
-				84650DDC2CEF300100907DB0 /* AuthWelcomeScreen */,
-			);
-			path = Screens;
-			sourceTree = "<group>";
-		};
-		61B74FDF2C305ECA001182A2 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				611CCD562C50AE3A00289D9E /* App */,
-				611CCD532C50AE3A00289D9E /* Data */,
-				611CCD4C2C50AE3A00289D9E /* DI */,
-				611CCD682C50AE3A00289D9E /* Domain */,
-				611CCD5D2C50AE3A00289D9E /* Infrastructure */,
-			);
-			path = Packages;
-			sourceTree = "<group>";
-		};
-		61B74FF22C3080D6001182A2 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		61C90BF52C84B0E6006A44C0 /* Implementations */ = {
-			isa = PBXGroup;
-			children = (
-				84B9FB622D32EE6B00C58639 /* SandboxSyncEngine */,
-				84B9FB612D32D95B00C58639 /* RemoteSyncEngine */,
-				61D11BE92CA0224F0058B77A /* DefaultDataLayerDependencies */,
-				6143A7F32C90CBF90030AAF1 /* MockApiImplementation */,
-				6143A7D52C9076930030AAF1 /* MockPersistentStorage */,
-				611CCD852C50B1D400289D9E /* PersistentStorageSQLite */,
-				61BBB1232C50D3CE00E3D4F3 /* DefaultApiImplementation */,
-			);
-			path = Implementations;
-			sourceTree = "<group>";
-		};
-		61C90BF62C84B28A006A44C0 /* Implementations */ = {
-			isa = PBXGroup;
-			children = (
-				611CCD4A2C50AE3A00289D9E /* DefaultDependencies */,
-			);
-			path = Implementations;
-			sourceTree = "<group>";
-		};
-		61D11BE72CA020A90058B77A /* DI */ = {
-			isa = PBXGroup;
-			children = (
-				61D11BE82CA020CB0058B77A /* DataLayerDependencies */,
-			);
-			path = DI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		61414F7D2C2F02A100B2C027 /* Verni */ = {
+		848C211D2D461F8C00931669 /* Verni */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Verni" */;
+			buildConfigurationList = 848C21422D461F8C00931669 /* Build configuration list for PBXNativeTarget "Verni" */;
 			buildPhases = (
-				61414F7A2C2F02A100B2C027 /* Sources */,
-				61414F7B2C2F02A100B2C027 /* Frameworks */,
-				61414F7C2C2F02A100B2C027 /* Resources */,
-				614AC1A62C6802EE005B2CD5 /* Embed Foundation Extensions */,
+				848C211A2D461F8C00931669 /* Sources */,
+				848C211B2D461F8C00931669 /* Frameworks */,
+				848C211C2D461F8C00931669 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				614AC1A12C6802EE005B2CD5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				848C21202D461F8C00931669 /* Verni */,
 			);
 			name = Verni;
 			packageProductDependencies = (
-				610E9BE72C5F7551003D1A79 /* App */,
-				61D799C62C7CB04F00F99010 /* DefaultDependencies */,
+				847DC95D2D46217500AF3C99 /* DefaultDataLayer */,
+				847DC9602D46218900AF3C99 /* DefaultDomainLayer */,
+				84CD19B32D463F41004F0107 /* DefaultInfrastructureLayer */,
+				84CD19B62D463F51004F0107 /* DefaultDataLayer */,
+				84CD19B92D463F66004F0107 /* DefaultDomainLayer */,
+				84CD19BC2D463F76004F0107 /* DefaultAppLayer */,
 			);
-			productName = SharedExpenses;
-			productReference = 61414F7E2C2F02A100B2C027 /* Verni.app */;
+			productName = Verni;
+			productReference = 848C211E2D461F8C00931669 /* Verni.app */;
 			productType = "com.apple.product-type.application";
-		};
-		614AC19A2C6802EE005B2CD5 /* NotificationService */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 614AC1A32C6802EE005B2CD5 /* Build configuration list for PBXNativeTarget "NotificationService" */;
-			buildPhases = (
-				614AC1972C6802EE005B2CD5 /* Sources */,
-				614AC1982C6802EE005B2CD5 /* Frameworks */,
-				614AC1992C6802EE005B2CD5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = NotificationService;
-			packageProductDependencies = (
-				61D799CA2C7CB08500F99010 /* DefaultDependencies */,
-			);
-			productName = NotificationService;
-			productReference = 614AC19B2C6802EE005B2CD5 /* NotificationService.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		61414F762C2F02A100B2C027 /* Project object */ = {
+		848C21162D461F8C00931669 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
-					61414F7D2C2F02A100B2C027 = {
-						CreatedOnToolsVersion = 15.4;
-					};
-					614AC19A2C6802EE005B2CD5 = {
-						CreatedOnToolsVersion = 15.4;
+					848C211D2D461F8C00931669 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
-			buildConfigurationList = 61414F792C2F02A100B2C027 /* Build configuration list for PBXProject "Verni" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = 848C21192D461F8C00931669 /* Build configuration list for PBXProject "Verni" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 61414F752C2F02A100B2C027;
+			mainGroup = 848C21152D461F8C00931669;
+			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				84CD19B22D463F41004F0107 /* XCLocalSwiftPackageReference "Packages/Infrastructure/InfrastructureLayer/Implementations/DefaultInfrastructureLayer" */,
+				84CD19B52D463F51004F0107 /* XCLocalSwiftPackageReference "Packages/Data/DataLayer/Implementations/DefaultDataLayer" */,
+				84CD19B82D463F66004F0107 /* XCLocalSwiftPackageReference "Packages/Domain/DomainLayer/Implementations/DefaultDomainLayer" */,
+				84CD19BB2D463F76004F0107 /* XCLocalSwiftPackageReference "Packages/App/AppLayer/Implementations/DefaultAppLayer" */,
 			);
-			productRefGroup = 61414F7F2C2F02A100B2C027 /* Products */;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 848C211F2D461F8C00931669 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				61414F7D2C2F02A100B2C027 /* Verni */,
-				614AC19A2C6802EE005B2CD5 /* NotificationService */,
+				848C211D2D461F8C00931669 /* Verni */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		61414F7C2C2F02A100B2C027 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				847DE54A2D01FCC9008BBAF8 /* LaunchScreen.storyboard in Resources */,
-				613AB13F2CB2F26600C730EC /* Assets.xcassets in Resources */,
-				613AB1402CB2F26600C730EC /* Tests.xctestplan in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		614AC1992C6802EE005B2CD5 /* Resources */ = {
+		848C211C2D461F8C00931669 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -443,35 +155,17 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		61414F7A2C2F02A100B2C027 /* Sources */ = {
+		848C211A2D461F8C00931669 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				613AB1442CB2F26600C730EC /* App.swift in Sources */,
-				613AB1452CB2F26600C730EC /* SceneDelegate.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		614AC1972C6802EE005B2CD5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				614AC19E2C6802EE005B2CD5 /* NotificationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		614AC1A12C6802EE005B2CD5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 614AC19A2C6802EE005B2CD5 /* NotificationService */;
-			targetProxy = 614AC1A02C6802EE005B2CD5 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
-		61414F902C2F02A200B2C027 /* Debug */ = {
+		848C21402D461F8C00931669 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -508,7 +202,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -523,7 +217,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -534,7 +228,7 @@
 			};
 			name = Debug;
 		};
-		61414F912C2F02A200B2C027 /* Release */ = {
+		848C21412D461F8C00931669 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -571,7 +265,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -580,7 +274,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -590,136 +284,64 @@
 			};
 			name = Release;
 		};
-		61414F932C2F02A200B2C027 /* Debug */ = {
+		848C21432D461F8C00931669 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Verni/Resources/Verni.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = Verni/Verni.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Verni/Preview Content\"";
 				DEVELOPMENT_TEAM = NPZKGHFT2A;
-				ENABLE_DEBUG_DYLIB = NO;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Verni/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Verni;
-				INFOPLIST_KEY_NSCameraUsageDescription = "For Adding Friends Via QR Code";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Set Avatar Image";
+				INFOPLIST_FILE = Verni/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.dev.verni;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		61414F942C2F02A200B2C027 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Verni/Resources/Verni.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
-				DEVELOPMENT_TEAM = NPZKGHFT2A;
-				ENABLE_DEBUG_DYLIB = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Verni/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Verni;
-				INFOPLIST_KEY_NSCameraUsageDescription = "For Adding Friends Via QR Code";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Set Avatar Image";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		614AC1A42C6802EE005B2CD5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
-				DEVELOPMENT_TEAM = NPZKGHFT2A;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NotificationService/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app.NotificationService;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		614AC1A52C6802EE005B2CD5 /* Release */ = {
+		848C21442D461F8C00931669 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Verni/Verni.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Verni/Preview Content\"";
 				DEVELOPMENT_TEAM = NPZKGHFT2A;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NotificationService/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_FILE = Verni/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.accountydev.app.NotificationService;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.dev.verni;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -729,49 +351,71 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		61414F792C2F02A100B2C027 /* Build configuration list for PBXProject "Verni" */ = {
+		848C21192D461F8C00931669 /* Build configuration list for PBXProject "Verni" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				61414F902C2F02A200B2C027 /* Debug */,
-				61414F912C2F02A200B2C027 /* Release */,
+				848C21402D461F8C00931669 /* Debug */,
+				848C21412D461F8C00931669 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		61414F922C2F02A200B2C027 /* Build configuration list for PBXNativeTarget "Verni" */ = {
+		848C21422D461F8C00931669 /* Build configuration list for PBXNativeTarget "Verni" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				61414F932C2F02A200B2C027 /* Debug */,
-				61414F942C2F02A200B2C027 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		614AC1A32C6802EE005B2CD5 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				614AC1A42C6802EE005B2CD5 /* Debug */,
-				614AC1A52C6802EE005B2CD5 /* Release */,
+				848C21432D461F8C00931669 /* Debug */,
+				848C21442D461F8C00931669 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		84CD19B22D463F41004F0107 /* XCLocalSwiftPackageReference "Packages/Infrastructure/InfrastructureLayer/Implementations/DefaultInfrastructureLayer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Infrastructure/InfrastructureLayer/Implementations/DefaultInfrastructureLayer;
+		};
+		84CD19B52D463F51004F0107 /* XCLocalSwiftPackageReference "Packages/Data/DataLayer/Implementations/DefaultDataLayer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Data/DataLayer/Implementations/DefaultDataLayer;
+		};
+		84CD19B82D463F66004F0107 /* XCLocalSwiftPackageReference "Packages/Domain/DomainLayer/Implementations/DefaultDomainLayer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Domain/DomainLayer/Implementations/DefaultDomainLayer;
+		};
+		84CD19BB2D463F76004F0107 /* XCLocalSwiftPackageReference "Packages/App/AppLayer/Implementations/DefaultAppLayer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/App/AppLayer/Implementations/DefaultAppLayer;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		610E9BE72C5F7551003D1A79 /* App */ = {
+		847DC95D2D46217500AF3C99 /* DefaultDataLayer */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = App;
+			productName = DefaultDataLayer;
 		};
-		61D799C62C7CB04F00F99010 /* DefaultDependencies */ = {
+		847DC9602D46218900AF3C99 /* DefaultDomainLayer */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = DefaultDependencies;
+			productName = DefaultDomainLayer;
 		};
-		61D799CA2C7CB08500F99010 /* DefaultDependencies */ = {
+		84CD19B32D463F41004F0107 /* DefaultInfrastructureLayer */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = DefaultDependencies;
+			productName = DefaultInfrastructureLayer;
+		};
+		84CD19B62D463F51004F0107 /* DefaultDataLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultDataLayer;
+		};
+		84CD19B92D463F66004F0107 /* DefaultDomainLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultDomainLayer;
+		};
+		84CD19BC2D463F76004F0107 /* DefaultAppLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultAppLayer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 61414F762C2F02A100B2C027 /* Project object */;
+	rootObject = 848C21162D461F8C00931669 /* Project object */;
 }

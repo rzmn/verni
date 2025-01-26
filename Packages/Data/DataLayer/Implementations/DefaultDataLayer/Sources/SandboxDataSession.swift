@@ -23,20 +23,22 @@ public final class SandboxDataSession: DataSession {
 
     nonisolated public init(
         storageFactory: StorageFactory,
-        logger: Logger,
         infrastructure: InfrastructureLayer
     ) {
+        let logger = infrastructure.logger
+            .with(scope: .dataLayer(.sandbox))
         api = DefaultApiFactory(
             url: Constants.apiEndpoint,
             taskFactory: infrastructure.taskFactory,
-            logger: logger,
+            logger: logger
+                .with(scope: .api),
             tokenRepository: nil
         ).create()
         let syncEngineFactory = SandboxSyncEngineFactory(
             storage: storageFactory.sandbox,
             taskFactory: infrastructure.taskFactory,
             logger: logger.with(
-                prefix: "🔄"
+                scope: .sync
             )
         )
         self.syncEngineFactory = syncEngineFactory

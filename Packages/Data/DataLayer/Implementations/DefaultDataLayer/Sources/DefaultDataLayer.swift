@@ -5,6 +5,7 @@ import Logging
 import Foundation
 import AsyncExtensions
 import Api
+internal import LoggingExtensions
 internal import Convenience
 internal import DefaultApiImplementation
 internal import RemoteSyncEngine
@@ -15,21 +16,20 @@ public final class DefaultDataLayer: Sendable {
     public let sandbox: DataSession
     
     private let storageFactory: StorageFactory
-    private let taskFactory: TaskFactory
+    private let infrastructure: InfrastructureLayer
     
-    public init(
-        logger: Logger,
-        infrastructure: InfrastructureLayer
-    ) throws {
+    public init(infrastructure: InfrastructureLayer) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: Constants.appGroup
         ) else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }
-        self.logger = logger
+        self.infrastructure = infrastructure
+        self.logger = infrastructure.logger
+            .with(scope: .dataLayer(.shared))
         storageFactory = try SQLiteStorageFactory(
-            logger: logger.with(
-                prefix: "🗄️"
+            logger: infrastructure.logger.with(
+                scope: .database
             ),
             dbDirectory: permanentCacheDirectory,
             taskFactory: infrastructure.taskFactory,
@@ -37,10 +37,8 @@ public final class DefaultDataLayer: Sendable {
         )
         sandbox = SandboxDataSession(
             storageFactory: storageFactory,
-            logger: logger,
             infrastructure: infrastructure
         )
-        self.taskFactory = infrastructure.taskFactory
     }
 }
 
@@ -71,7 +69,8 @@ extension DefaultDataLayer: DataLayer {
             let apiFactory = DefaultApiFactory(
                 url: Constants.apiEndpoint,
                 taskFactory: taskFactory,
-                logger: logger,
+                logger: logger
+                    .with(scope: .api),
                 tokenRepository: RefreshTokenManager(
                     api: sandboxSession.api,
                     persistency: storage,
@@ -84,9 +83,8 @@ extension DefaultDataLayer: DataLayer {
                 api: api,
                 storage: storage,
                 taskFactory: taskFactory,
-                logger: logger.with(
-                    prefix: "🔄"
-                )
+                logger: logger
+                    .with(scope: .sync)
             )
             return HostedDataSession(
                 api: api,
@@ -103,8 +101,9 @@ extension DefaultDataLayer: DataLayer {
                         Preview(
                             storagePreview: $0,
                             sandboxSession: sandbox,
-                            taskFactory: taskFactory,
-                            logger: logger
+                            taskFactory: infrastructure.taskFactory,
+                            logger: infrastructure.logger
+                                .with(scope: .dataLayer(.hosted))
                         )
                     }
             } catch {
@@ -118,6 +117,8 @@ extension DefaultDataLayer: DataLayer {
         startupData: Components.Schemas.StartupData,
         loggedOutHandler: AsyncSubject<Void>
     ) async throws -> DataSession {
+        let logger = infrastructure.logger
+            .with(scope: .dataLayer(.hosted))
         let storage = try await storageFactory.create(
             host: startupData.session.id,
             refreshToken: startupData.session.refreshToken,
@@ -127,8 +128,9 @@ extension DefaultDataLayer: DataLayer {
         )
         let apiFactory = DefaultApiFactory(
             url: Constants.apiEndpoint,
-            taskFactory: taskFactory,
-            logger: logger,
+            taskFactory: infrastructure.taskFactory,
+            logger: logger
+                .with(scope: .api),
             tokenRepository: RefreshTokenManager(
                 api: sandbox.api,
                 persistency: storage,
@@ -140,10 +142,9 @@ extension DefaultDataLayer: DataLayer {
         let syncFactory = RemoteSyncEngineFactory(
             api: api,
             storage: storage,
-            taskFactory: taskFactory,
-            logger: logger.with(
-                prefix: "🔄"
-            )
+            taskFactory: infrastructure.taskFactory,
+            logger: logger
+                .with(scope: .sync)
         )
         return HostedDataSession(
             api: api,

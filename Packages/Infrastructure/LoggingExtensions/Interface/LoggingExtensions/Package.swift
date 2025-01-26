@@ -1,31 +1,26 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "AuthWelcomeScreen",
+    name: "LoggingExtensions",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AuthWelcomeScreen",
-            targets: ["AuthWelcomeScreen"]
+            name: "LoggingExtensions",
+            targets: ["LoggingExtensions"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AppBase"))),
-        .local(.currentLayer(.interface("DesignSystem"))),
-        .local(.domain(.interface("Entities"))),
-        .local(.infrastructure(.interface("Convenience"))),
+        .local(.currentLayer(.interface("Logging")))
     ],
     targets: [
         .target(
-            name: "AuthWelcomeScreen",
+            name: "LoggingExtensions",
             dependencies: [
-                "AppBase",
-                "DesignSystem",
-                "Entities",
-                "Convenience",
+                "Logging"
             ],
             path: "Sources"
         )

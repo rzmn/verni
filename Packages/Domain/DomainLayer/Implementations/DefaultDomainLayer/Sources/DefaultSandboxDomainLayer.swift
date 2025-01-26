@@ -4,20 +4,35 @@ import UsersRepository
 import SpendingsRepository
 import DataLayer
 import Logging
-internal import DefaultDataLayer
+import InfrastructureLayer
 internal import DefaultUsersRepository
 internal import DefaultSpendingsRepository
 
-final class DefaultSandboxDomainLayer: SandboxDomainLayer {
-    let logger: Logger
-    let usersRepository: UsersRepository
-    let spendingsRepository: SpendingsRepository
+public final class DefaultSandboxDomainLayer: SandboxDomainLayer {
+    public let logger: Logger
+    public let usersRepository: UsersRepository
+    public let spendingsRepository: SpendingsRepository
     private let defaultSharedDomainLayer: DefaultSharedDomainLayer
-    var shared: SharedDomainLayer {
+    public var shared: SharedDomainLayer {
         defaultSharedDomainLayer
     }
     
-    init(shared: DefaultSharedDomainLayer) async {
+    public init(
+        infrastructure: InfrastructureLayer,
+        data: DataLayer
+    ) async {
+        let shared: DefaultSharedDomainLayer
+        do {
+            shared = try await DefaultSharedDomainLayer(
+                infrastructure: infrastructure,
+                data: data
+            )
+        } catch {
+            let message = "failed to init shared domain layer error: \(error)"
+            infrastructure.logger.logE { message }
+            fatalError(message)
+        }
+        
         self.defaultSharedDomainLayer = shared
         self.logger = shared.infrastructure.logger
             .with(scope: .domainLayer(.sandbox))
@@ -38,7 +53,7 @@ final class DefaultSandboxDomainLayer: SandboxDomainLayer {
         logI { "initialized" }
     }
     
-    func authUseCase() -> any AuthUseCase<HostedDomainLayer> {
+    public func authUseCase() -> any AuthUseCase<HostedDomainLayer> {
         DefaultAuthUseCase(
             sharedDomain: defaultSharedDomainLayer,
             logger: logger

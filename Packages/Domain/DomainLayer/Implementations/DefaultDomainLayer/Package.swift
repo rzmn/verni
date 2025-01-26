@@ -38,15 +38,15 @@ let package = Package(
         .local(.currentLayer(.implementation(interface: "SpendingsRepository", implementation: "DefaultSpendingsRepository"))),
         .local(.currentLayer(.implementation(interface: "UsersRepository", implementation: "DefaultUsersRepository"))),
         .local(.data(.interface("DataLayer"))),
-        .local(.data(.implementation(interface: "DataLayer", implementation: "DefaultDataLayer"))),
         .local(.infrastructure(.interface("InfrastructureLayer"))),
         .local(.infrastructure(.interface("AsyncExtensions"))),
-        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "DefaultInfrastructure"))),
+        .local(.infrastructure(.interface("LoggingExtensions"))),
     ],
     targets: [
         .target(
             name: "DefaultDomainLayer",
             dependencies: [
+                "LoggingExtensions",
                 "DomainLayer",
                 "Entities",
                 "AvatarsRepository",
@@ -72,9 +72,7 @@ let package = Package(
                 "DefaultSpendingsRepository",
                 "DefaultUsersRepository",
                 "DataLayer",
-                "DefaultDataLayer",
                 "InfrastructureLayer",
-                "DefaultInfrastructure",
                 "AsyncExtensions"
             ]
         )

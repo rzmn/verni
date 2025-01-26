@@ -6,7 +6,6 @@ import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
 import AvatarsRepository
 import Logging
-internal import DefaultDataLayer
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultValidationUseCasesImplementation
 internal import DefaultSaveCredendialsUseCaseImplementation
@@ -21,14 +20,12 @@ final class DefaultSharedDomainLayer: SharedDomainLayer {
     let data: DataLayer
     let logger: Logger
     
-    init(infrastructure: InfrastructureLayer) async throws {
-        data = try DefaultDataLayer(
-            logger: infrastructure.logger.with(
-                scope: .dataLayer
-            ),
-            infrastructure: infrastructure
-        )
+    init(
+        infrastructure: InfrastructureLayer,
+        data: DataLayer
+    ) async throws {
         self.infrastructure = infrastructure
+        self.data = data
         
         self.logger = infrastructure.logger
             .with(scope: .domainLayer(.shared))

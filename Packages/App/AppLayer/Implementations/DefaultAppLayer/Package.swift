@@ -1,30 +1,73 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "AuthWelcomeScreen",
+    name: "DefaultAppLayer",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AuthWelcomeScreen",
-            targets: ["AuthWelcomeScreen"]
+            name: "DefaultAppLayer",
+            targets: ["DefaultAppLayer"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AppBase"))),
+        .local(.currentLayer(.interface("AppLayer"))),
         .local(.currentLayer(.interface("DesignSystem"))),
-        .local(.domain(.interface("Entities"))),
+        .local(.currentLayer(.interface("AppBase"))),
+        .local(.currentLayer(.interface("AuthWelcomeScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "AuthWelcomeScreen", implementation: "DefaultAuthWelcomeScreen"))),
+        .local(.currentLayer(.interface("DebugMenuScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "DebugMenuScreen", implementation: "DefaultDebugMenuScreen"))),
+        .local(.currentLayer(.interface("SpendingsScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "SpendingsScreen", implementation: "DefaultSpendingsScreen"))),
+        .local(.currentLayer(.interface("ProfileScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(interface: "ProfileScreen", implementation: "DefaultProfileScreen"))
+        ),
+        .local(.currentLayer(.interface("LogInScreen"))),
+        .local(.currentLayer(.interface("SplashScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(interface: "SplashScreen", implementation: "DefaultSplashScreen"))),
+        .local(.domain(.interface("DomainLayer"))),
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.interface("LoggingExtensions"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
         .target(
-            name: "AuthWelcomeScreen",
+            name: "DefaultAppLayer",
             dependencies: [
-                "AppBase",
+                "AppLayer",
+                "LoggingExtensions",
                 "DesignSystem",
-                "Entities",
+                "AppBase",
+                "AuthWelcomeScreen",
+                "DefaultAuthWelcomeScreen",
+                "DebugMenuScreen",
+                "DefaultDebugMenuScreen",
+                "SpendingsScreen",
+                "DefaultSpendingsScreen",
+                "ProfileScreen",
+                "DefaultProfileScreen",
+                "LogInScreen",
+                "SplashScreen",
+                "DefaultSplashScreen",
+                "DomainLayer",
+                "Logging",
                 "Convenience",
             ],
             path: "Sources"

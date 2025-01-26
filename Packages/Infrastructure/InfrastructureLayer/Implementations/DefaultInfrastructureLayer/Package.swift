@@ -1,31 +1,46 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "AuthWelcomeScreen",
+    name: "DefaultInfrastructureLayer",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AuthWelcomeScreen",
-            targets: ["AuthWelcomeScreen"]
+            name: "DefaultInfrastructureLayer",
+            targets: ["DefaultInfrastructureLayer"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AppBase"))),
-        .local(.currentLayer(.interface("DesignSystem"))),
-        .local(.domain(.interface("Entities"))),
-        .local(.infrastructure(.interface("Convenience"))),
+        .local(.currentLayer(.interface("InfrastructureLayer"))),
+        .local(.currentLayer(.interface("Filesystem"))),
+        .local(.currentLayer(.interface("Logging"))),
+        .local(.currentLayer(.interface("AsyncExtensions"))),
+        .local(
+            .currentLayer(
+                .implementation(interface: "Filesystem", implementation: "FoundationFilesystem"))),
+        .local(
+            .currentLayer(.implementation(interface: "Logging", implementation: "DefaultLogging"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "AsyncExtensions", implementation: "DefaultAsyncExtensions"))),
+        .local(.currentLayer(.interface("LoggingExtensions")))
     ],
     targets: [
         .target(
-            name: "AuthWelcomeScreen",
+            name: "DefaultInfrastructureLayer",
             dependencies: [
-                "AppBase",
-                "DesignSystem",
-                "Entities",
-                "Convenience",
+                "InfrastructureLayer",
+                "LoggingExtensions",
+                "Filesystem",
+                "Logging",
+                "AsyncExtensions",
+                "FoundationFilesystem",
+                "DefaultLogging",
+                "DefaultAsyncExtensions",
             ],
             path: "Sources"
         )

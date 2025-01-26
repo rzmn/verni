@@ -1,30 +1,45 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "AuthWelcomeScreen",
+    name: "AppLayer",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AuthWelcomeScreen",
-            targets: ["AuthWelcomeScreen"]
+            name: "AppLayer",
+            targets: ["AppLayer"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AppBase"))),
+        .local(.currentLayer(.interface("AuthWelcomeScreen"))),
+        .local(.currentLayer(.interface("DebugMenuScreen"))),
+        .local(.currentLayer(.interface("SpendingsScreen"))),
+        .local(.currentLayer(.interface("ProfileScreen"))),
+        .local(.currentLayer(.interface("LogInScreen"))),
+        .local(.currentLayer(.interface("SplashScreen"))),
         .local(.currentLayer(.interface("DesignSystem"))),
-        .local(.domain(.interface("Entities"))),
+        .local(.currentLayer(.interface("AppBase"))),
+        .local(.domain(.interface("DomainLayer"))),
+        .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
         .target(
-            name: "AuthWelcomeScreen",
+            name: "AppLayer",
             dependencies: [
-                "AppBase",
+                "AuthWelcomeScreen",
+                "DebugMenuScreen",
+                "SpendingsScreen",
+                "ProfileScreen",
+                "LogInScreen",
+                "SplashScreen",
                 "DesignSystem",
-                "Entities",
+                "AppBase",
+                "DomainLayer",
+                "Logging",
                 "Convenience",
             ],
             path: "Sources"

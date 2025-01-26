@@ -22,6 +22,7 @@ let package = Package(
         .local(.currentLayer(.implementation(interface: "SyncEngine", implementation: "RemoteSyncEngine"))),
         .local(.currentLayer(.implementation(interface: "SyncEngine", implementation: "SandboxSyncEngine"))),
         .local(.infrastructure(.interface("InfrastructureLayer"))),
+        .local(.infrastructure(.interface("LoggingExtensions"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
@@ -30,6 +31,7 @@ let package = Package(
             dependencies: [
                 "Api",
                 "DataLayer",
+                "LoggingExtensions",
                 "PersistentStorage",
                 "SyncEngine",
                 "PersistentStorageSQLite",

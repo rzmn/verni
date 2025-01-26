@@ -15,6 +15,7 @@ public struct Logger: Sendable {
             printer: PrinterWithCurrentDate(),
             prefix: ""
         )
+        logI { "initialized logger with severity \(severity)" }
     }
 
     init(

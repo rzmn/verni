@@ -10,6 +10,7 @@ import QrInviteUseCase
 import EmailConfirmationUseCase
 import PushRegistrationUseCase
 import Logging
+internal import LoggingExtensions
 internal import DefaultLogoutUseCaseImplementation
 internal import DefaultProfileRepository
 internal import DefaultUsersRepository
