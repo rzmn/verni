@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import TestLogging
 @testable import FoundationFilesystem
 
 @Suite struct CreateFileTests {
@@ -11,7 +12,7 @@ import Foundation
 
         let file = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
 
         // when
 
@@ -32,7 +33,7 @@ import Foundation
 
         let file = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
 
         // when
 
@@ -59,7 +60,7 @@ import Foundation
 
         let directory = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         try! manager.createDirectory(at: directory)
 
         // when
@@ -87,7 +88,7 @@ import Foundation
             .appending(component: UUID().uuidString)
         try! Foundation.FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0])
         let file = directory.appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
 
         // when
 

@@ -8,3 +8,4 @@ public protocol Logger: Sendable {
 
     func with(prefix: String) -> Self
 }
+

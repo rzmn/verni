@@ -1,39 +1,28 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "FoundationFilesystem",
+    name: "TestLogging",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "FoundationFilesystem",
-            targets: ["FoundationFilesystem"]
+            name: "TestLogging",
+            targets: ["TestLogging"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Filesystem"))),
-        .local(.currentLayer(.interface("Convenience"))),
-        .local(.currentLayer(.interface("Logging"))),
-        .local(.currentLayer(.implementation(interface: "Logging", implementation: "TestLogging")))
+        .local(.currentLayer(.interface("Logging")))
     ],
     targets: [
         .target(
-            name: "FoundationFilesystem",
+            name: "TestLogging",
             dependencies: [
-                "Logging",
-                "Filesystem",
-                "Convenience"
+                "Logging"
             ],
             path: "Sources"
-        ),
-        .testTarget(
-            name: "FoundationFilesystemTests",
-            dependencies: [
-                "FoundationFilesystem",
-                "TestLogging"
-            ]
         )
     ]
 )

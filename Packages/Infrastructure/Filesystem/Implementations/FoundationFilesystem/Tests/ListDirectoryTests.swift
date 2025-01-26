@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import Filesystem
+import TestLogging
 @testable import FoundationFilesystem
 
 @Suite struct ListDirectoryTests {
@@ -54,7 +55,7 @@ import Filesystem
 
         // given
 
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         let directory = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
 
@@ -81,7 +82,7 @@ import Filesystem
 
         // given
 
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         let directory = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
         try! manager.createFile(at: directory)
@@ -109,7 +110,7 @@ import Filesystem
 
         // given
 
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         let directory = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
         try! Foundation.FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0])
@@ -144,7 +145,7 @@ import Filesystem
     ) -> SampleDirectoryWithContent {
         let directory = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         try! manager.createDirectory(at: directory)
         let file = directory.appending(component: UUID().uuidString)
         let subdirectory = directory.appending(component: UUID().uuidString)

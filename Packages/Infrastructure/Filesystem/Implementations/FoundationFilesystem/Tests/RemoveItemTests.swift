@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import TestLogging
 @testable import FoundationFilesystem
 
 @Suite struct RemoveItemTests {
@@ -11,7 +12,7 @@ import Foundation
 
         let file = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         try! manager.createFile(at: file)
 
         // when
@@ -33,7 +34,7 @@ import Foundation
 
         let directory = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         try! manager.createDirectory(at: directory)
 
         // when
@@ -55,7 +56,7 @@ import Foundation
 
         let file = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
 
         // when
 
@@ -78,7 +79,7 @@ import Foundation
             .appending(component: UUID().uuidString)
         try! Foundation.FileManager.default.createDirectory(at: file, withIntermediateDirectories: true, attributes: [.posixPermissions: 0])
 
-        let manager = FoundationFileManager()
+        let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
 
         // when
 
