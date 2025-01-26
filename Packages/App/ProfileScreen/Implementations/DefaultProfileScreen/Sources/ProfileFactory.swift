@@ -6,15 +6,15 @@ import QrInviteUseCase
 import Logging
 
 public final class DefaultProfileFactory {
-    private let profileRepository: @Sendable () async -> ProfileRepository
-    private let usersRepository: @Sendable () async -> UsersRepository
-    private let qrInviteUseCase: @Sendable () async -> QRInviteUseCase
+    private let profileRepository: ProfileRepository
+    private let usersRepository: UsersRepository
+    private let qrInviteUseCase: QRInviteUseCase
     private let logger: Logger
 
     public init(
-        profileRepository: @Sendable @escaping () async -> ProfileRepository,
-        usersRepository: @Sendable @escaping () async -> UsersRepository,
-        qrInviteUseCase: @Sendable @escaping () async -> QRInviteUseCase,
+        profileRepository: ProfileRepository,
+        usersRepository: UsersRepository,
+        qrInviteUseCase: QRInviteUseCase,
         logger: Logger
     ) {
         self.profileRepository = profileRepository
@@ -27,9 +27,9 @@ public final class DefaultProfileFactory {
 extension DefaultProfileFactory: ProfileFactory {
     public func create() async -> any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions> {
         await ProfileModel(
-            profileRepository: await profileRepository(),
-            usersRepository: await usersRepository(),
-            qrInviteUseCase: await qrInviteUseCase(),
+            profileRepository: profileRepository,
+            usersRepository: usersRepository,
+            qrInviteUseCase: qrInviteUseCase,
             logger: logger
         )
     }

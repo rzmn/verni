@@ -2,15 +2,15 @@ import SwiftUI
 import AppBase
 import DesignSystem
 
-public struct LogInView: View {
-    @ObservedObject var store: Store<LogInState, LogInAction>
+public struct LogInView<Session: Sendable>: View {
+    @ObservedObject var store: Store<LogInState, LogInAction<Session>>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
     @Binding private var transitionProgress: CGFloat
     @Binding private var destinationOffset: CGFloat?
     @Binding private var sourceOffset: CGFloat?
 
-    public init(store: Store<LogInState, LogInAction>, transition: ModalTransition) {
+    public init(store: Store<LogInState, LogInAction<Session>>, transition: ModalTransition) {
         self.store = store
         _transitionProgress = transition.progress
         _sourceOffset = transition.sourceOffset
@@ -137,7 +137,7 @@ private struct LogInPreview: View {
 
     var body: some View {
         ZStack {
-            LogInView(
+            LogInView<Int>(
                 store: Store(
                     state: LogInState(
                         email: "e@mail.co",

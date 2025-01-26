@@ -1,19 +1,21 @@
+import App
 import AppBase
 import LogInScreen
 import AuthUseCase
 import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
 import DomainLayer
-import Logging
+internal import Logging
 
-public final class DefaultLogInFactory {
+final class DefaultLogInFactory {
+    @MainActor var sandbox: SandboxAppSession!
     private let authUseCase: any AuthUseCase<HostedDomainLayer>
     private let emailValidationUseCase: EmailValidationUseCase
     private let passwordValidationUseCase: PasswordValidationUseCase
     private let saveCredentialsUseCase: SaveCredendialsUseCase
     private let logger: Logger
 
-    public init(
+    init(
         authUseCase: any AuthUseCase<HostedDomainLayer>,
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
@@ -29,8 +31,9 @@ public final class DefaultLogInFactory {
 }
 
 extension DefaultLogInFactory: LogInFactory {
-    public func create() async -> any ScreenProvider<LogInEvent, LogInView, ModalTransition> {
+    public func create() async -> any ScreenProvider<LogInEvent<AnyHostedAppSession>, LogInView<AnyHostedAppSession>, ModalTransition> {
         await LogInModel(
+            session: sandbox,
             authUseCase: authUseCase,
             emailValidationUseCase: emailValidationUseCase,
             passwordValidationUseCase: passwordValidationUseCase,

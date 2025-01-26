@@ -2,7 +2,11 @@ import DesignSystem
 internal import Convenience
 
 public struct LaunchingState: Equatable, Sendable {
-    var session: AnySharedAppSession
+    public var session: AnySharedAppSession
+    
+    public init(session: AnySharedAppSession) {
+        self.session = session
+    }
 }
 
 public enum LaunchedState: Equatable, Sendable {
@@ -47,13 +51,13 @@ public struct AuthenticatedState: Equatable, Sendable {
         case toTheLeft
         case toTheRight
     }
-    var session: AnyHostedAppSession
-    var tabs: [Tab]
-    var tab: TabItem
-    var bottomSheet: AlertBottomSheetPreset?
-    var unauthenticatedFailure: String?
+    public var session: AnyHostedAppSession
+    public var tabs: [Tab]
+    public var tab: TabItem
+    public var bottomSheet: AlertBottomSheetPreset?
+    public var unauthenticatedFailure: String?
 
-    var tabItems: [TabItem] {
+    public var tabItems: [TabItem] {
         tabs.compactMap {
             switch $0 {
             case .addExpense:
@@ -76,17 +80,42 @@ public struct AuthenticatedState: Equatable, Sendable {
             return .toTheLeft
         }
     }
+    
+    public init(
+        session: AnyHostedAppSession,
+        tabs: [Tab],
+        tab: TabItem,
+        bottomSheet: AlertBottomSheetPreset?,
+        unauthenticatedFailure: String?
+    ) {
+        self.session = session
+        self.tabs = tabs
+        self.tab = tab
+        self.bottomSheet = bottomSheet
+        self.unauthenticatedFailure = unauthenticatedFailure
+    }
 }
 
 public struct AnonymousState: Equatable, Sendable {
     public struct AuthState: Equatable, Sendable {
+        public init() {}
     }
     public enum Tab: Equatable, Sendable {
         case auth(AuthState)
     }
-    var session: AnySandboxAppSession
+    public var session: AnySandboxAppSession
     public var tabs: [Tab]
     public var tab: Tab
+    
+    public init(
+        session: AnySandboxAppSession,
+        tabs: [Tab],
+        tab: Tab
+    ) {
+        self.session = session
+        self.tabs = tabs
+        self.tab = tab
+    }
 }
 
 public enum AppState: Equatable, Sendable {

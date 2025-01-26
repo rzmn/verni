@@ -82,8 +82,8 @@ struct AnonymousScreensCoordinator: View {
                 }
             case .forgotPassword:
                 break
-            case .logIn(let domain):
-                store.dispatch(.logIn(state.session.value.create(domain: domain), state))
+            case .logIn(let session):
+                store.dispatch(.logIn(session, state))
             }
         }(loginTransitions)
     }

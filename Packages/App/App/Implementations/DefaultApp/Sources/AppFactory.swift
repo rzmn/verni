@@ -1,16 +1,19 @@
 import AppBase
 import App
+import DomainLayer
 internal import DesignSystem
 
 public final class DefaultAppFactory: AppFactory {
-    private let di: AnonymousDomainLayerSession
+    private let domain: @Sendable () async -> SandboxDomainLayer
 
-    public init(di: AnonymousDomainLayerSession) {
-        self.di = di
+    public init(
+        domain: @Sendable @escaping () async -> SandboxDomainLayer
+    ) {
+        self.domain = domain
         CustomFonts.registerCustomFonts(class: DefaultAppFactory.self)
     }
 
     public func create() -> any ScreenProvider<Void, AppView, Void> {
-        AppModel(di: di)
+        AppModel(domain: domain)
     }
 }

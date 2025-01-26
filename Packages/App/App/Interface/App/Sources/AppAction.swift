@@ -1,8 +1,8 @@
 import DesignSystem
 
 public enum LaunchSession: Sendable {
-    case anonymous(SandboxAppSession)
-    case authenticated(HostedAppSession)
+    case anonymous(AnySandboxAppSession)
+    case authenticated(AnyHostedAppSession)
 }
 
 public enum AppAction: Sendable {
@@ -10,11 +10,11 @@ public enum AppAction: Sendable {
     case launched(LaunchSession)
 
     case logoutRequested
-    case loggedOut(SandboxAppSession)
+    case loggedOut(AnySandboxAppSession)
 
-    case logIn(HostedAppSession, AnonymousState)
+    case logIn(AnyHostedAppSession, AnonymousState)
 
-    case onAuthorized(HostedAppSession)
+    case onAuthorized(AnyHostedAppSession)
 
     case addExpense
     case selectTabAnonymous(AnonymousState.Tab)

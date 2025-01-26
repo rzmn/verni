@@ -1,16 +1,19 @@
 import AppBase
-import DI
+import Entities
+import App
+import DomainLayer
 
 @MainActor final class AppSideEffects: Sendable {
     private unowned let store: Store<AppState, AppAction>
-    private let di: AnonymousDomainLayerSession
+    private let domain: @Sendable () async -> SandboxDomainLayer
+    private var launchTriggered = false
 
     init(
         store: Store<AppState, AppAction>,
-        di: AnonymousDomainLayerSession
+        domain: @Sendable @escaping () async -> SandboxDomainLayer
     ) {
         self.store = store
-        self.di = di
+        self.domain = domain
     }
 }
 
@@ -31,38 +34,30 @@ extension AppSideEffects: ActionHandler {
             if case .launched(let launched) = store.state, case .authenticated(let state) = launched {
                 self.logout(state.session)
             }
-        case .logIn(let di, let state):
-            logIn(di: di, state: state)
+        case .logIn(let session, let state):
+            store.dispatch(.onAuthorized(session))
         default:
             break
         }
     }
 
     private func launch() {
+        guard !launchTriggered else {
+            return
+        }
+        launchTriggered = true
+        guard case .launching(let state) = store.state else {
+            return
+        }
         Task {
-            await doLaunchWithFakePause()
+            await doLaunchWithFakePause(session: state.session)
         }
     }
 
-    private func logIn(di: AuthenticatedDomainLayerSession, state: AnonymousState) {
-        Task {
-            await doLogIn(di: di, state: state)
-        }
-    }
 
-    private func doLogIn(di: AuthenticatedDomainLayerSession, state: AnonymousState) async {
-        let session = await AuthenticatedPresentationLayerSession(
-            di: di,
-            fallback: state.session
-        )
-        await session.warmup()
-        store.dispatch(.onAuthorized(session))
-    }
-
-
-    private func doLaunchWithFakePause() async {
+    private func doLaunchWithFakePause(session: AnySharedAppSession) async {
         async let sleep: () = await Task.sleep(timeInterval: 1)
-        async let launch = await doLaunch()
+        async let launch = await doLaunch(session: session)
 
         let result = try? await (sleep, launch)
         guard let result else {
@@ -72,22 +67,30 @@ extension AppSideEffects: ActionHandler {
         store.dispatch(action)
     }
 
-    private func doLaunch() async -> AppAction {
-        let session = await AnonymousPresentationLayerSession(di: di)
+    private func doLaunch(session: AnySharedAppSession) async -> AppAction {
+        let sandboxDomain = await domain()
+        let sandbox = await DefaultSandboxAppSession(
+            shared: session.value,
+            session: sandboxDomain
+        )
         do {
-            let session = await AuthenticatedPresentationLayerSession(
-                di: try await di.authUseCase().awake(),
-                fallback: session
+            return await .launched(
+                .authenticated(
+                    AnyHostedAppSession(
+                        value: DefaultHostedAppSession(
+                            sandbox: sandbox,
+                            session: try sandboxDomain.authUseCase().awake()
+                        )
+                    )
+                )
             )
-            await session.warmup()
-            return .launched(.authenticated(session))
         } catch {
             switch error {
             case .hasNoSession:
-                return .launched(.anonymous(session))
+                return .launched(.anonymous(AnySandboxAppSession(value: sandbox)))
             case .internalError(let error):
                 assertionFailure("log me \(error)")
-                return .launched(.anonymous(session))
+                return .launched(.anonymous(AnySandboxAppSession(value: sandbox)))
             }
         }
     }
@@ -100,12 +103,11 @@ extension AppSideEffects: ActionHandler {
         // stub
     }
 
-    private func logout(_ session: AuthenticatedPresentationLayerSession) {
+    private func logout(_ session: AnyHostedAppSession) {
         Task.detached {
-            await session.logout()
-            let session = await AnonymousPresentationLayerSession(di: self.di)
+            await session.value.logout()
             Task { @MainActor in
-                self.store.dispatch(.loggedOut(session))
+                self.store.dispatch(.loggedOut(AnySandboxAppSession(value: session.value.sandbox)))
             }
         }
     }

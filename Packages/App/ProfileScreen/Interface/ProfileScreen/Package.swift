@@ -16,7 +16,6 @@ let package = Package(
         .local(.currentLayer(.interface("AppBase"))),
         .local(.currentLayer(.interface("DesignSystem"))),
         .local(.domain(.interface("Entities"))),
-        .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience")))
     ],
     targets: [
@@ -26,7 +25,6 @@ let package = Package(
                 "AppBase",
                 "DesignSystem",
                 "Entities",
-                "Logging",
                 "Convenience"
             ],
             path: "Sources"

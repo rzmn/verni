@@ -16,7 +16,7 @@ extension DefaultSplashFactory: SplashFactory {
 extension DefaultSplashFactory: ScreenProvider {
     public typealias Event = Void
     
-    public func create() async -> any ScreenProvider<Event, SplashView, ModalTransition> {
+    public func create() -> any ScreenProvider<Event, SplashView, ModalTransition> {
         self
     }
 }

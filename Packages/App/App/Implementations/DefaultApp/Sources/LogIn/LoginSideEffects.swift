@@ -1,16 +1,18 @@
 import Entities
+import App
 import SwiftUICore
 import AppBase
-import DomainLayer
 import LogInScreen
 import AuthUseCase
 import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
+import DomainLayer
 internal import DesignSystem
 internal import Convenience
 
 @MainActor final class LoginSideEffects: ActionHandler {
-    private unowned let store: Store<LogInState, LogInAction>
+    private unowned let store: Store<LogInState, LogInAction<AnyHostedAppSession>>
+    private unowned let session: SandboxAppSession
     private let authUseCase: any AuthUseCase<HostedDomainLayer>
     private let emailValidationUseCase: EmailValidationUseCase
     private let passwordValidationUseCase: PasswordValidationUseCase
@@ -21,20 +23,22 @@ internal import Convenience
     }
 
     init(
-        store: Store<LogInState, LogInAction>,
+        store: Store<LogInState, LogInAction<AnyHostedAppSession>>,
+        session: SandboxAppSession,
         authUseCase: any AuthUseCase<HostedDomainLayer>,
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
         saveCredentialsUseCase: SaveCredendialsUseCase
     ) {
         self.store = store
+        self.session = session
         self.authUseCase = authUseCase
         self.emailValidationUseCase = emailValidationUseCase
         self.passwordValidationUseCase = passwordValidationUseCase
         self.saveCredentialsUseCase = saveCredentialsUseCase
     }
 
-    func handle(_ action: LogInAction) {
+    func handle(_ action: LogInAction<AnyHostedAppSession>) {
         switch action {
         case .onTapBack:
             break
@@ -74,13 +78,16 @@ internal import Convenience
 
     private func doLogIn(credentials: Credentials) async {
         do {
-            let session = try await authUseCase.login(
-                credentials: credentials
+            let session = await DefaultHostedAppSession(
+                sandbox: session,
+                session: try await authUseCase.login(
+                    credentials: credentials
+                )
             )
             Task {
                 await saveCredentialsUseCase.save(email: credentials.email, password: credentials.password)
             }
-            store.dispatch(.loggedIn(session))
+            store.dispatch(.loggedIn(AnyHostedAppSession(value: session)))
         } catch {
             switch error {
             case .noConnection:

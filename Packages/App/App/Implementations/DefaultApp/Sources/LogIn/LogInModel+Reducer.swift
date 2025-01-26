@@ -1,8 +1,9 @@
 import LogInScreen
+import App
 internal import Convenience
 
 extension LogInModel {
-    static var reducer: @MainActor (LogInState, LogInAction) -> LogInState {
+    static var reducer: @Sendable (LogInState, LogInAction<AnyHostedAppSession>) -> LogInState {
         return { state, action in
             switch action {
             case .onTapBack:

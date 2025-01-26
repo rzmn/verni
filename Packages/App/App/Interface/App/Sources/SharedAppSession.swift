@@ -23,7 +23,11 @@ public struct AnySharedAppSession: Equatable, Sendable {
         lhs.value === rhs.value
     }
 
-    let value: SharedAppSession
+    public let value: SharedAppSession
+    
+    public init(value: SharedAppSession) {
+        self.value = value
+    }
 
     public subscript<T>(dynamicMember keyPath: KeyPath<SharedAppSession, T>) -> T {
         value[keyPath: keyPath]

@@ -1,5 +1,5 @@
-import DI
-internal import Base
+import App
+internal import Convenience
 
 extension AppModel {
     static var reducer: @MainActor @Sendable (AppState, AppAction) -> AppState {
@@ -66,7 +66,7 @@ extension AppModel {
         }
     }
 
-    @MainActor private static func anonymousState(session: AnonymousPresentationLayerSession) -> AnonymousState {
+    @MainActor private static func anonymousState(session: AnySandboxAppSession) -> AnonymousState {
         let authState = AnonymousState.AuthState()
         return AnonymousState(
             session: session,
@@ -77,7 +77,7 @@ extension AppModel {
         )
     }
 
-    @MainActor private static func authenticatedState(session: AuthenticatedPresentationLayerSession) -> AuthenticatedState {
+    @MainActor private static func authenticatedState(session: AnyHostedAppSession) -> AuthenticatedState {
         AuthenticatedState(
             session: session,
             tabs: [
@@ -85,7 +85,9 @@ extension AppModel {
                 .addExpense,
                 .item(.profile)
             ],
-            tab: .spendings
+            tab: .spendings,
+            bottomSheet: nil,
+            unauthenticatedFailure: nil
         )
     }
 }

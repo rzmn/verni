@@ -5,13 +5,13 @@ import SpendingsRepository
 import UsersRepository
 
 public final class DefaultSpendingsFactory {
-    private let spendingsRepository: @Sendable () async -> SpendingsRepository
-    private let usersRepository: @Sendable () async -> UsersRepository
+    private let spendingsRepository: SpendingsRepository
+    private let usersRepository: UsersRepository
     private let logger: Logger
 
     public init(
-        spendingsRepository: @Sendable @escaping () async -> SpendingsRepository,
-        usersRepository: @Sendable @escaping () async -> UsersRepository,
+        spendingsRepository: SpendingsRepository,
+        usersRepository: UsersRepository,
         logger: Logger
     ) {
         self.spendingsRepository = spendingsRepository
@@ -23,8 +23,8 @@ public final class DefaultSpendingsFactory {
 extension DefaultSpendingsFactory: SpendingsFactory {
     public func create() async -> any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions> {
         await SpendingsModel(
-            spendingsRepository: await spendingsRepository(),
-            usersRepository: await usersRepository(),
+            spendingsRepository: spendingsRepository,
+            usersRepository: usersRepository,
             logger: logger
         )
     }

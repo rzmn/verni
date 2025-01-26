@@ -5,9 +5,7 @@ import DomainLayer
 
 @MainActor public protocol SandboxAppSession: SharedAppSessionConvertible, AnyObject {
     var auth: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, AuthWelcomeTransitions> { get }
-    var logIn: any ScreenProvider<LogInEvent, LogInView, ModalTransition> { get }
-    
-    func create(domain: HostedDomainLayer) -> HostedAppSession
+    var logIn: any ScreenProvider<LogInEvent<AnyHostedAppSession>, LogInView<AnyHostedAppSession>, ModalTransition> { get }
 }
 
 @dynamicMemberLookup
@@ -16,7 +14,11 @@ public struct AnySandboxAppSession: Equatable, Sendable {
         lhs.value === rhs.value
     }
     
-    let value: SandboxAppSession
+    public let value: SandboxAppSession
+    
+    public init(value: SandboxAppSession) {
+        self.value = value
+    }
     
     public subscript<T>(dynamicMember keyPath: KeyPath<SandboxAppSession, T>) -> T {
         value[keyPath: keyPath]

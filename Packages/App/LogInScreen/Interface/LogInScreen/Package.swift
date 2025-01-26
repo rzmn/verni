@@ -17,19 +17,15 @@ let package = Package(
         .local(.currentLayer(.interface("AppBase"))),
         .local(.currentLayer(.interface("DesignSystem"))),
         .local(.domain(.interface("Entities"))),
-        .local(.domain(.interface("DomainLayer"))),
-        .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
         .target(
             name: "LogInScreen",
             dependencies: [
-                "DomainLayer",
                 "AppBase",
                 "DesignSystem",
                 "Entities",
-                "Logging",
                 "Convenience",
             ],
             path: "Sources"

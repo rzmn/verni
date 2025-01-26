@@ -1,8 +1,7 @@
 import Entities
-import DomainLayer
 import DesignSystem
 
-public enum LogInAction: Sendable {
+public enum LogInAction<Session: Sendable>: Sendable {
     case onTapBack
     case passwordTextChanged(String)
     case emailTextChanged(String)
@@ -12,5 +11,5 @@ public enum LogInAction: Sendable {
     case onLoggingInStarted
     case onLoggingInFailed
     case onUpdateBottomSheet(AlertBottomSheetPreset?)
-    case loggedIn(HostedDomainLayer)
+    case loggedIn(Session)
 }

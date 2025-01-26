@@ -1,23 +1,24 @@
+import App
 import UIKit
 import Entities
-import DomainLayer
 import AppBase
 import Combine
 import AsyncExtensions
 import SwiftUI
-import Logging
 import LogInScreen
 import AuthUseCase
 import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
 import DomainLayer
+internal import Logging
 internal import Convenience
 internal import DesignSystem
 
 actor LogInModel {
-    private let store: Store<LogInState, LogInAction>
+    private let store: Store<LogInState, LogInAction<AnyHostedAppSession>>
 
     init(
+        session: SandboxAppSession,
         authUseCase: any AuthUseCase<HostedDomainLayer>,
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
@@ -31,6 +32,7 @@ actor LogInModel {
         await store.append(
             handler: LoginSideEffects(
                 store: store,
+                session: session,
                 authUseCase: authUseCase,
                 emailValidationUseCase: emailValidationUseCase,
                 passwordValidationUseCase: passwordValidationUseCase,
@@ -51,14 +53,14 @@ actor LogInModel {
 
 @MainActor extension LogInModel: ScreenProvider {
     func instantiate(
-        handler: @escaping @MainActor (LogInEvent) -> Void
-    ) -> (ModalTransition) -> LogInView {
+        handler: @escaping @MainActor (LogInEvent<AnyHostedAppSession>) -> Void
+    ) -> (ModalTransition) -> LogInView<AnyHostedAppSession> {
         return { transition in
             LogInView(
                 store: modify(self.store) { store in
                     store.append(
                         handler: AnyActionHandler(
-                            id: "\(LogInEvent.self)",
+                            id: "\(LogInEvent<AnyHostedAppSession>.self)",
                             handleBlock: { action in
                                 switch action {
                                 case .onTapBack:

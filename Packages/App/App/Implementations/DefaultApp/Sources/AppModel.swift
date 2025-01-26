@@ -1,16 +1,17 @@
-import Domain
-import DI
+import Entities
 import UIKit
 import AppBase
 import SwiftUI
+import App
+import DomainLayer
+import AuthWelcomeScreen
 internal import Logging
-internal import Base
-internal import AuthWelcomeScreen
+internal import Convenience
 internal import DesignSystem
 
 actor AppModel {
     private var pendingPushToken: Data?
-    private var currentSession: AuthenticatedDomainLayerSession? {
+    private var currentSession: HostedDomainLayer? {
         didSet {
             if let currentSession, let pendingPushToken {
                 self.pendingPushToken = nil
@@ -23,10 +24,10 @@ actor AppModel {
         }
     }
     private let store: Store<AppState, AppAction>
-    private let di: AnonymousDomainLayerSession
 
-    @MainActor init(di: AnonymousDomainLayerSession) {
-        self.di = di
+    @MainActor init(
+        domain: @Sendable @escaping () async -> SandboxDomainLayer
+    ) {
         store = Store(
             state: AppModel.initialState,
             reducer: AppModel.reducer
@@ -34,7 +35,7 @@ actor AppModel {
         store.append(
             handler: AppSideEffects(
                 store: store,
-                di: di
+                domain: domain
             ),
             keepingUnique: true
         )
