@@ -67,7 +67,7 @@ extension RetryingMiddleware: ClientMiddleware {
                 try await Task.sleep(timeInterval: interval * pow(base, Double(attempt)))
             }
         }
-        for attempt in 0 ..< maxAttemptCount {
+        for attempt in 1 ... maxAttemptCount {
             logI { "attempt \(attempt)" }
             let (response, responseBody): (HTTPResponse, HTTPBody?)
             if signals.contains(.errorThrown) {
