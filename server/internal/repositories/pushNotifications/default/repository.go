@@ -1,6 +1,7 @@
 package defaultRepository
 
 import (
+	"fmt"
 	"verni/internal/db"
 	"verni/internal/repositories"
 	"verni/internal/repositories/pushNotifications"
@@ -19,87 +20,88 @@ type defaultRepository struct {
 	logger logging.Service
 }
 
-func (c *defaultRepository) StorePushToken(uid pushNotifications.UserId, token string) repositories.Transaction {
+func (c *defaultRepository) StorePushToken(user pushNotifications.UserId, device pushNotifications.DeviceId, token string) repositories.Transaction {
 	const op = "repositories.pushNotifications.postgresRepository.StorePushToken"
-	currentToken, err := c.GetPushToken(uid)
+	currentToken, err := c.GetPushToken(user, device)
 	return repositories.Transaction{
 		Perform: func() error {
 			if err != nil {
-				c.logger.LogInfo("%s: failed to get current token info err: %v", op, err)
+				err := fmt.Errorf("getting token info: %w", err)
+				c.logger.LogInfo("%s: %v", op, err)
 				return err
 			}
-			return c.storePushToken(uid, token)
+			return c.storePushToken(user, device, token)
 		},
 		Rollback: func() error {
 			if err != nil {
-				c.logger.LogInfo("%s: failed to get current token info err: %v", op, err)
+				err := fmt.Errorf("getting token info for rollback: %w", err)
+				c.logger.LogInfo("%s: %v", op, err)
 				return err
 			}
 			if currentToken == nil {
-				return c.removePushToken(uid)
+				return c.removePushToken(user, device)
 			} else {
-				return c.storePushToken(uid, *currentToken)
+				return c.storePushToken(user, device, *currentToken)
 			}
 		},
 	}
 }
 
-func (c *defaultRepository) storePushToken(uid pushNotifications.UserId, token string) error {
+func (c *defaultRepository) storePushToken(user pushNotifications.UserId, device pushNotifications.DeviceId, token string) error {
 	const op = "repositories.pushNotifications.postgresRepository.storePushToken"
-	c.logger.LogInfo("%s: start[uid=%v]", op, uid)
+	c.logger.LogInfo("%s: start[uid=%v]", op, user)
 	query := `
-INSERT INTO pushTokens(id, token) VALUES ($1, $2)
-ON CONFLICT (id) DO UPDATE SET token = $2;
+INSERT INTO pushTokens(userId, deviceId, token) VALUES ($1, $2, $3)
+ON CONFLICT (id) DO UPDATE SET token = $3;
 `
-	_, err := c.db.Exec(query, string(uid), token)
+	_, err := c.db.Exec(query, string(user), string(device), token)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to perform query err: %v", op, err)
 		return err
 	}
-	c.logger.LogInfo("%s: success[uid=%v]", op, uid)
+	c.logger.LogInfo("%s: success[uid=%v]", op, user)
 	return nil
 }
 
-func (c *defaultRepository) removePushToken(uid pushNotifications.UserId) error {
+func (c *defaultRepository) removePushToken(user pushNotifications.UserId, device pushNotifications.DeviceId) error {
 	const op = "repositories.pushNotifications.postgresRepository.removePushToken"
-	c.logger.LogInfo("%s: start[uid=%v]", op, uid)
-	query := `DELETE FROM pushTokens WHERE id = $1;`
-	_, err := c.db.Exec(query, string(uid))
+	c.logger.LogInfo("%s: start[uid=%v]", op, user)
+	query := `DELETE FROM pushTokens WHERE userId = $1 AND deviceId = $2;`
+	_, err := c.db.Exec(query, string(user), string(device))
 	if err != nil {
 		c.logger.LogInfo("%s: failed to perform query err: %v", op, err)
 		return err
 	}
-	c.logger.LogInfo("%s: success[uid=%v]", op, uid)
+	c.logger.LogInfo("%s: success[uid=%v]", op, user)
 	return nil
 }
 
-func (c *defaultRepository) GetPushToken(uid pushNotifications.UserId) (*string, error) {
+func (c *defaultRepository) GetPushToken(user pushNotifications.UserId, device pushNotifications.DeviceId) (*string, error) {
 	const op = "repositories.pushNotifications.postgresRepository.GetPushToken"
-	c.logger.LogInfo("%s: start[uid=%v]", op, uid)
-	query := `SELECT token FROM pushTokens WHERE id = $1;`
-	rows, err := c.db.Query(query, string(uid))
+	c.logger.LogInfo("%s: start[uid=%v]", op, user)
+	query := `SELECT token FROM pushTokens WHERE userId = $1 AND deviceId = $2;`
+	rows, err := c.db.Query(query, string(user), string(device))
 	if err != nil {
-		c.logger.LogInfo("%s: failed to perform query err: %v", op, err)
+		err := fmt.Errorf("getting push token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
 		return nil, err
 	}
 	defer rows.Close()
 	if rows.Next() {
 		var token string
 		if err := rows.Scan(&token); err != nil {
-			c.logger.LogInfo("%s: failed to perform scan err: %v", op, err)
+			err := fmt.Errorf("scanning row for push token: %w", err)
+			c.logger.LogInfo("%s: %v", op, err)
 			return nil, err
 		}
 		if err := rows.Err(); err != nil {
-			c.logger.LogInfo("%s: found rows err: %v", op, err)
+			err := fmt.Errorf("checking rows for push token: %w", err)
+			c.logger.LogInfo("%s: %v", op, err)
 			return nil, err
 		}
-		c.logger.LogInfo("%s: success[uid=%v]", op, uid)
+		c.logger.LogInfo("%s: success[uid=%v]", op, user)
 		return &token, nil
 	}
-	if err := rows.Err(); err != nil {
-		c.logger.LogInfo("%s: found rows err: %v", op, err)
-		return nil, err
-	}
-	c.logger.LogInfo("%s: success[uid=%v]", op, uid)
+	c.logger.LogInfo("%s: success[uid=%v]", op, user)
 	return nil, nil
 }
