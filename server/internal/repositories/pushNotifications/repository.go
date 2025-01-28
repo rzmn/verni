@@ -5,8 +5,9 @@ import (
 )
 
 type UserId string
+type DeviceId string
 
 type Repository interface {
-	StorePushToken(uid UserId, token string) repositories.Transaction
-	GetPushToken(uid UserId) (*string, error)
+	StorePushToken(user UserId, device DeviceId, token string) repositories.Transaction
+	GetPushToken(user UserId, device DeviceId) (*string, error)
 }

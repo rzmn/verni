@@ -1,9 +1,9 @@
 package defaultController
 
 import (
+	"errors"
+	"fmt"
 	"strings"
-
-	"verni/internal/common"
 
 	"verni/internal/services/formatValidation"
 	"verni/internal/services/jwt"
@@ -49,95 +49,118 @@ type defaultController struct {
 	logger                  logging.Service
 }
 
-func (c *defaultController) Signup(email string, password string) (auth.Session, *common.CodeBasedError[auth.SignupErrorCode]) {
+func (c *defaultController) Signup(device auth.DeviceId, email string, password auth.Password) (auth.Session, error) {
 	const op = "auth.defaultController.Signup"
 	c.logger.LogInfo("%s: start", op)
 	if err := c.formatValidationService.ValidateEmailFormat(email); err != nil {
 		c.logger.LogInfo("%s: wrong email format err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorWrongFormat, err.Error())
+		return auth.Session{}, fmt.Errorf("validating email format: %w", auth.BadFormat)
 	}
-	if err := c.formatValidationService.ValidatePasswordFormat(password); err != nil {
+	if err := c.formatValidationService.ValidatePasswordFormat(string(password)); err != nil {
 		c.logger.LogInfo("%s: wrong password format err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorWrongFormat, err.Error())
+		return auth.Session{}, fmt.Errorf("validating password format: %w", auth.BadFormat)
 	}
 	uidAccosiatedWithEmail, err := c.authRepository.GetUserIdByEmail(email)
 	if err != nil {
-		c.logger.LogInfo("%s: getting uid by credentials from db failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorInternal, err.Error())
+		err := fmt.Errorf("getting uid by credentials from db: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
 	if uidAccosiatedWithEmail != nil {
 		c.logger.LogInfo("%s: already has an uid accosiated with credentials", op)
-		return auth.Session{}, common.NewError(auth.SignupErrorAlreadyTaken)
+		return auth.Session{}, fmt.Errorf("checking if credentials are already taken: %w", auth.AlreadyTaken)
 	}
-	uid := uuid.New().String()
-	accessToken, jwtErr := c.jwtService.IssueAccessToken(jwt.Subject(uid))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing access token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorInternal, jwtErr.Error())
+	subject := jwt.Subject{
+		User:   jwt.UserId(uuid.New().String()),
+		Device: jwt.DeviceId(device),
 	}
-	refreshToken, jwtErr := c.jwtService.IssueRefreshToken(jwt.Subject(uid))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing refresh token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorInternal, jwtErr.Error())
+	accessToken, err := c.jwtService.IssueAccessToken(subject)
+	if err != nil {
+		err := fmt.Errorf("issuing access token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	createUserTransaction := c.usersRepository.StoreUser(usersRepository.User{
-		Id:          usersRepository.UserId(uid),
-		DisplayName: strings.Split(email, "@")[0],
-		AvatarId:    nil,
-	})
+	refreshToken, err := c.jwtService.IssueRefreshToken(subject)
+	if err != nil {
+		err := fmt.Errorf("issuing refresh token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
+	}
+	createUserTransaction := c.usersRepository.CreateUser(
+		usersRepository.UserId(subject.User),
+		strings.Split(email, "@")[0],
+	)
 	if err := createUserTransaction.Perform(); err != nil {
-		c.logger.LogInfo("storing user meta to db failed err: %v", err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorInternal, err.Error())
+		err := fmt.Errorf("creating user: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	transaction := c.authRepository.CreateUser(authRepository.UserId(uid), email, password, string(refreshToken))
-	if err := transaction.Perform(); err != nil {
+	createProfileTransaction := c.authRepository.CreateUser(
+		authRepository.UserId(subject.User),
+		email,
+		string(password),
+		string(refreshToken),
+	)
+	if err := createProfileTransaction.Perform(); err != nil {
 		createUserTransaction.Rollback()
-		c.logger.LogInfo("storing credentials to db failed err: %v", err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.SignupErrorInternal, err.Error())
+		err := fmt.Errorf("creating profile: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
 	c.logger.LogInfo("%s: success", op)
 	return auth.Session{
-		Id:           auth.UserId(uid),
+		Id:           auth.UserId(subject.User),
 		AccessToken:  string(accessToken),
 		RefreshToken: string(refreshToken),
 	}, nil
 }
 
-func (c *defaultController) Login(email string, password string) (auth.Session, *common.CodeBasedError[auth.LoginErrorCode]) {
+func (c *defaultController) Login(device auth.DeviceId, email string, password auth.Password) (auth.Session, error) {
 	const op = "auth.defaultController.Login"
 	c.logger.LogInfo("%s: start", op)
-	valid, err := c.authRepository.CheckCredentials(email, password)
+	valid, err := c.authRepository.CheckCredentials(email, string(password))
 	if err != nil {
 		c.logger.LogInfo("%s: credentials check failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.LoginErrorInternal, err.Error())
+		return auth.Session{}, fmt.Errorf("checking credentials matched: %w", err)
 	}
 	if !valid {
 		c.logger.LogInfo("%s: credentials are wrong", op)
-		return auth.Session{}, common.NewError(auth.LoginErrorWrongCredentials)
+		return auth.Session{}, fmt.Errorf("checking credentials matched: %w", auth.WrongCredentials)
 	}
 	uid, err := c.authRepository.GetUserIdByEmail(email)
 	if err != nil {
 		c.logger.LogInfo("%s: getting uid by credentials in db failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.LoginErrorInternal, err.Error())
+		return auth.Session{}, fmt.Errorf("getting user by email: %w", err)
 	}
 	if uid == nil {
 		c.logger.LogInfo("%s: no uid accosiated with credentials", op)
-		return auth.Session{}, common.NewErrorWithDescription(auth.LoginErrorInternal, "no uid accosiated with credentials")
+		return auth.Session{}, fmt.Errorf("getting user by email: %w", auth.NoSuchEntity)
 	}
-	accessToken, jwtErr := c.jwtService.IssueAccessToken(jwt.Subject(*uid))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing access token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.LoginErrorInternal, jwtErr.Error())
+	subject := jwt.Subject{
+		User:   jwt.UserId(*uid),
+		Device: jwt.DeviceId(device),
 	}
-	refreshToken, jwtErr := c.jwtService.IssueRefreshToken(jwt.Subject(*uid))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing refresh token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.LoginErrorInternal, jwtErr.Error())
+	accessToken, err := c.jwtService.IssueAccessToken(subject)
+	if err != nil {
+		err := fmt.Errorf("issuing access token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	transaction := c.authRepository.UpdateRefreshToken(*uid, string(refreshToken))
+	refreshToken, err := c.jwtService.IssueRefreshToken(subject)
+	if err != nil {
+		err := fmt.Errorf("issuing refresh token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
+	}
+	transaction := c.authRepository.UpdateRefreshToken(
+		authRepository.UserId(subject.User),
+		authRepository.DeviceId(subject.Device),
+		string(refreshToken),
+	)
 	if err := transaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: storing refresh token to db failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.LoginErrorInternal, err.Error())
+		err := fmt.Errorf("storing refresh token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
 	c.logger.LogInfo("%s: success", op)
 	return auth.Session{
@@ -147,210 +170,204 @@ func (c *defaultController) Login(email string, password string) (auth.Session, 
 	}, nil
 }
 
-func (c *defaultController) Refresh(refreshToken string) (auth.Session, *common.CodeBasedError[auth.RefreshErrorCode]) {
+func (c *defaultController) Refresh(refreshToken string) (auth.Session, error) {
 	const op = "auth.defaultController.Refresh"
 	c.logger.LogInfo("%s: start", op)
 	if err := c.jwtService.ValidateRefreshToken(jwt.RefreshToken(refreshToken)); err != nil {
 		c.logger.LogInfo("%s: token validation failed err: %v", op, err)
-		switch err.Code {
-		case jwt.CodeTokenExpired:
-			return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorTokenExpired, err.Error())
-		case jwt.CodeTokenInvalid:
-			return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorTokenIsWrong, err.Error())
-		default:
-			return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorInternal, err.Error())
+		if errors.Is(err, jwt.TokenExpired) {
+			return auth.Session{}, fmt.Errorf("validating refresh token: %w", auth.TokenExpired)
+		} else if errors.Is(err, jwt.BadToken) {
+			return auth.Session{}, fmt.Errorf("validating refresh token: %w", auth.BadFormat)
+		} else {
+			return auth.Session{}, fmt.Errorf("validating refresh token: %w", err)
 		}
 	}
-	uid, err := c.jwtService.GetRefreshTokenSubject(jwt.RefreshToken(refreshToken))
+	subject, err := c.jwtService.GetRefreshTokenSubject(jwt.RefreshToken(refreshToken))
 	if err != nil {
-		c.logger.LogInfo("%s: cannot get refresh token subject err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorInternal, err.Error())
+		err := fmt.Errorf("getting refresh token subject: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	user, errGetFromDb := c.authRepository.GetUserInfo(authRepository.UserId(uid))
-	if errGetFromDb != nil {
-		c.logger.LogInfo("%s: cannot get user data from db err: %v", op, errGetFromDb)
-		return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorInternal, errGetFromDb.Error())
+	valid, err := c.authRepository.CheckRefreshToken(
+		authRepository.UserId(subject.User),
+		authRepository.DeviceId(subject.Device),
+		refreshToken,
+	)
+	if err != nil {
+		err := fmt.Errorf("checking refresh token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	if user.RefreshToken != refreshToken {
+	if !valid {
 		c.logger.LogInfo("%s: existed refresh token does not match with provided token", op)
-		return auth.Session{}, common.NewError(auth.RefreshErrorTokenIsWrong)
+		return auth.Session{}, fmt.Errorf("checking refresh token: %w", auth.WrongCredentials)
 	}
-	newAccessToken, err := c.jwtService.IssueAccessToken(jwt.Subject(uid))
+	newAccessToken, err := c.jwtService.IssueAccessToken(subject)
 	if err != nil {
-		c.logger.LogInfo("%s: issuing access token failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorInternal, err.Error())
+		err := fmt.Errorf("issuing access token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	newRefreshToken, err := c.jwtService.IssueRefreshToken(jwt.Subject(uid))
+	newRefreshToken, err := c.jwtService.IssueRefreshToken(subject)
 	if err != nil {
-		c.logger.LogInfo("%s: issuing refresh token failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorInternal, err.Error())
+		err := fmt.Errorf("issuing refresh token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
-	transaction := c.authRepository.UpdateRefreshToken(authRepository.UserId(uid), string(newRefreshToken))
+	transaction := c.authRepository.UpdateRefreshToken(
+		authRepository.UserId(subject.User),
+		authRepository.DeviceId(subject.Device),
+		refreshToken,
+	)
 	if err := transaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: storing refresh token to db failed err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.RefreshErrorInternal, err.Error())
+		err := fmt.Errorf("storing new refresh token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
 	}
 	c.logger.LogInfo("%s: success", op)
 	return auth.Session{
-		Id:           auth.UserId(uid),
+		Id:           auth.UserId(subject.User),
 		AccessToken:  string(newAccessToken),
 		RefreshToken: string(newRefreshToken),
 	}, nil
 }
 
-func (c *defaultController) CheckToken(accessToken string) (auth.UserId, *common.CodeBasedError[auth.CheckTokenErrorCode]) {
+func (c *defaultController) CheckToken(accessToken string) (auth.UserDevice, error) {
 	const op = "auth.defaultController.CheckToken"
 	c.logger.LogInfo("%s: start", op)
 	if err := c.jwtService.ValidateAccessToken(jwt.AccessToken(accessToken)); err != nil {
 		c.logger.LogInfo("%s: failed to validate token %v", op, err)
-		switch err.Code {
-		case jwt.CodeTokenExpired:
-			return "", common.NewErrorWithDescription(auth.CheckTokenErrorTokenExpired, err.Error())
-		case jwt.CodeTokenInvalid:
-			return "", common.NewErrorWithDescription(auth.CheckTokenErrorTokenIsWrong, err.Error())
-		default:
-			c.logger.LogError("%s: jwt token validation failed %v", op, err)
-			return "", common.NewErrorWithDescription(auth.CheckTokenErrorInternal, err.Error())
+		if errors.Is(err, jwt.TokenExpired) {
+			return auth.UserDevice{}, fmt.Errorf("validating access token: %w", auth.TokenExpired)
+		} else if errors.Is(err, jwt.BadToken) {
+			return auth.UserDevice{}, fmt.Errorf("validating access token: %w", auth.BadFormat)
+		} else {
+			return auth.UserDevice{}, fmt.Errorf("validating access token: %w", err)
 		}
 	}
-	subject, getSubjectError := c.jwtService.GetAccessTokenSubject(jwt.AccessToken(accessToken))
-	if getSubjectError != nil {
-		c.logger.LogError("%s: jwt token get subject failed %v", op, getSubjectError)
-		return "", common.NewErrorWithDescription(auth.CheckTokenErrorInternal, getSubjectError.Error())
-	}
-	exists, err := c.authRepository.IsUserExists(authRepository.UserId(subject))
+	subject, err := c.jwtService.GetAccessTokenSubject(jwt.AccessToken(accessToken))
 	if err != nil {
-		c.logger.LogError("%s: valid token with invalid subject - %v", op, err)
-		return "", common.NewErrorWithDescription(auth.CheckTokenErrorInternal, getSubjectError.Error())
+		err := fmt.Errorf("getting access token subject: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.UserDevice{}, err
+	}
+	exists, err := c.authRepository.IsSessionExists(
+		authRepository.UserId(subject.User),
+		authRepository.DeviceId(subject.Device),
+	)
+	if err != nil {
+		err := fmt.Errorf("checking session existence: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.UserDevice{}, err
 	}
 	if !exists {
-		c.logger.LogError("%s: associated user is not exists", op)
-		return "", common.NewError(auth.CheckTokenErrorTokenOwnedByUnknownUser)
+		c.logger.LogInfo("%s: no session accosiated with access token", op)
+		return auth.UserDevice{}, fmt.Errorf("getting session by subject: %w", auth.NoSuchEntity)
 	}
 	c.logger.LogInfo("%s: access token ok", op)
-	return auth.UserId(subject), nil
+	return auth.UserDevice{
+		User:   auth.UserId(subject.User),
+		Device: auth.UserId(subject.Device),
+	}, nil
 }
 
-func (c *defaultController) Logout(id auth.UserId) *common.CodeBasedError[auth.LogoutErrorCode] {
-	const op = "auth.defaultController.Logout"
-	c.logger.LogInfo("%s: start[id=%s]", op, id)
-	refreshToken, jwtErr := c.jwtService.IssueRefreshToken(jwt.Subject(id))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing refresh token failed err: %v", op, jwtErr)
-		return common.NewErrorWithDescription(auth.LogoutErrorInternal, jwtErr.Error())
-	}
-	updateTokenTransaction := c.authRepository.UpdateRefreshToken(authRepository.UserId(id), string(refreshToken))
-	if err := updateTokenTransaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: storing refresh token to db failed err: %v", op, err)
-		return common.NewErrorWithDescription(auth.LogoutErrorInternal, err.Error())
-	}
-	c.logger.LogInfo("%s: success[id=%s]", op, id)
-	return nil
-}
-
-func (c *defaultController) UpdateEmail(email string, id auth.UserId) (auth.Session, *common.CodeBasedError[auth.UpdateEmailErrorCode]) {
+func (c *defaultController) UpdateEmail(email string, user auth.UserId, device auth.DeviceId) error {
 	const op = "auth.defaultController.UpdateEmail"
-	c.logger.LogInfo("%s: start[id=%s]", op, id)
+	c.logger.LogInfo("%s: start[id=%s]", op, user)
 	if err := c.formatValidationService.ValidateEmailFormat(email); err != nil {
 		c.logger.LogInfo("%s: wrong email format err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdateEmailErrorWrongFormat, err.Error())
+		return fmt.Errorf("validating email format: %w", auth.BadFormat)
 	}
 	uidForNewEmail, err := c.authRepository.GetUserIdByEmail(email)
 	if err != nil {
-		c.logger.LogInfo("%s: cannot check email existence in db err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdateEmailErrorInternal, err.Error())
+		err := fmt.Errorf("getting uid by email from db: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	if uidForNewEmail != nil {
 		c.logger.LogInfo("%s: email is already taken", op)
-		return auth.Session{}, common.NewError(auth.UpdateEmailErrorAlreadyTaken)
+		return fmt.Errorf("checking if email is already taken: %w", auth.AlreadyTaken)
 	}
-	accessToken, jwtErr := c.jwtService.IssueAccessToken(jwt.Subject(id))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing access token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdateEmailErrorInternal, jwtErr.Error())
-	}
-	refreshToken, jwtErr := c.jwtService.IssueRefreshToken(jwt.Subject(id))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing refresh token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdateEmailErrorInternal, jwtErr.Error())
-	}
-	updateEmailTransaction := c.authRepository.UpdateEmail(authRepository.UserId(id), email)
+	updateEmailTransaction := c.authRepository.UpdateEmail(authRepository.UserId(user), email)
 	if err := updateEmailTransaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: cannot update email in db err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdateEmailErrorInternal, err.Error())
+		err := fmt.Errorf("updating email: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
-	updateTokenTransaction := c.authRepository.UpdateRefreshToken(authRepository.UserId(id), string(refreshToken))
-	if err := updateTokenTransaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: storing refresh token to db failed err: %v", op, err)
+	exclusiveSessionTransaction := c.authRepository.ExclusiveSession(
+		authRepository.UserId(user),
+		authRepository.DeviceId(device),
+	)
+	if err := exclusiveSessionTransaction.Perform(); err != nil {
 		updateEmailTransaction.Rollback()
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdateEmailErrorInternal, err.Error())
+		err := fmt.Errorf("making an exclusive session: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
-	c.logger.LogInfo("%s: success[id=%s]", op, id)
-	return auth.Session{
-		Id:           id,
-		AccessToken:  string(accessToken),
-		RefreshToken: string(refreshToken),
-	}, nil
+	c.logger.LogInfo("%s: success[id=%s]", op, user)
+	return nil
 }
 
-func (c *defaultController) UpdatePassword(oldPassword string, newPassword string, id auth.UserId) (auth.Session, *common.CodeBasedError[auth.UpdatePasswordErrorCode]) {
+func (c *defaultController) UpdatePassword(oldPassword auth.Password, newPassword auth.Password, user auth.UserId, device auth.DeviceId) error {
 	const op = "auth.defaultController.UpdatePassword"
-	c.logger.LogInfo("%s: start[id=%s]", op, id)
-	if err := c.formatValidationService.ValidatePasswordFormat(newPassword); err != nil {
+	c.logger.LogInfo("%s: start[id=%s]", op, user)
+	if err := c.formatValidationService.ValidatePasswordFormat(string(newPassword)); err != nil {
 		c.logger.LogInfo("%s: wrong password format err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorWrongFormat, err.Error())
+		return fmt.Errorf("validating password format: %w", auth.BadFormat)
 	}
-	account, err := c.authRepository.GetUserInfo(authRepository.UserId(id))
+	account, err := c.authRepository.GetUserInfo(authRepository.UserId(user))
 	if err != nil {
-		c.logger.LogInfo("%s: cannot get credentials for id in db err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorInternal, err.Error())
+		err := fmt.Errorf("getting profile info: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
-	passed, err := c.authRepository.CheckCredentials(account.Email, oldPassword)
+	passed, err := c.authRepository.CheckCredentials(account.Email, string(oldPassword))
 	if err != nil {
-		c.logger.LogInfo("%s: cannot check password for id in db err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorInternal, err.Error())
+		err := fmt.Errorf("checking password matches: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	if !passed {
 		c.logger.LogInfo("%s: old password is wrong", op)
-		return auth.Session{}, common.NewError(auth.UpdatePasswordErrorOldPasswordIsWrong)
+		return fmt.Errorf("checking password matches: %w", auth.WrongCredentials)
 	}
-	accessToken, jwtErr := c.jwtService.IssueAccessToken(jwt.Subject(id))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing access token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorInternal, jwtErr.Error())
-	}
-	refreshToken, jwtErr := c.jwtService.IssueRefreshToken(jwt.Subject(id))
-	if jwtErr != nil {
-		c.logger.LogInfo("%s: issuing refresh token failed err: %v", op, jwtErr)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorInternal, jwtErr.Error())
-	}
-	updatePasswordTransaction := c.authRepository.UpdatePassword(authRepository.UserId(id), newPassword)
+	updatePasswordTransaction := c.authRepository.UpdatePassword(
+		authRepository.UserId(user),
+		string(newPassword),
+	)
 	if err := updatePasswordTransaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: cannot update password in db err: %v", op, err)
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorInternal, err.Error())
+		err := fmt.Errorf("updating password: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
-	updateTokenTransaction := c.authRepository.UpdateRefreshToken(authRepository.UserId(id), string(refreshToken))
-	if err := updateTokenTransaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: storing refresh token to db failed err: %v", op, err)
+	exclusiveSessionTransaction := c.authRepository.ExclusiveSession(
+		authRepository.UserId(user),
+		authRepository.DeviceId(device),
+	)
+	if err := exclusiveSessionTransaction.Perform(); err != nil {
 		updatePasswordTransaction.Rollback()
-		return auth.Session{}, common.NewErrorWithDescription(auth.UpdatePasswordErrorInternal, err.Error())
+		err := fmt.Errorf("making an exclusive session: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
-	c.logger.LogInfo("%s: success[id=%s]", op, id)
-	return auth.Session{
-		Id:           id,
-		AccessToken:  string(accessToken),
-		RefreshToken: string(refreshToken),
-	}, nil
+	c.logger.LogInfo("%s: success[id=%s]", op, user)
+	return nil
 }
 
-func (c *defaultController) RegisterForPushNotifications(pushToken string, id auth.UserId) *common.CodeBasedError[auth.RegisterForPushNotificationsErrorCode] {
+func (c *defaultController) RegisterForPushNotifications(pushToken string, user auth.UserId, device auth.DeviceId) error {
 	const op = "auth.defaultController.ConfirmEmail"
-	c.logger.LogInfo("%s: start[id=%s]", op, id)
-	storeTransaction := c.pushTokensRepository.StorePushToken(pushNotificationsRepository.UserId(id), pushToken)
+	c.logger.LogInfo("%s: start[id=%s]", op, user)
+	storeTransaction := c.pushTokensRepository.StorePushToken(
+		pushNotificationsRepository.UserId(user),
+		pushNotificationsRepository.DeviceId(device),
+		pushToken,
+	)
 	if err := storeTransaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: cannot store push token in db err: %v", op, err)
-		return common.NewErrorWithDescription(auth.RegisterForPushNotificationsErrorInternal, err.Error())
+		err := fmt.Errorf("storing push token: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
-	c.logger.LogInfo("%s: success[id=%s]", op, id)
+	c.logger.LogInfo("%s: success[id=%s]", op, user)
 	return nil
 }

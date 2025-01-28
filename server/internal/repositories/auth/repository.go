@@ -5,11 +5,11 @@ import (
 )
 
 type UserId string
+type DeviceId string
 type UserInfo struct {
 	UserId        UserId
 	Email         string
 	PasswordHash  string
-	RefreshToken  string
 	EmailVerified bool
 }
 
@@ -20,11 +20,17 @@ type Repository interface {
 
 	IsUserExists(user UserId) (bool, error)
 
+	IsSessionExists(user UserId, device DeviceId) (bool, error)
+
+	ExclusiveSession(user UserId, device DeviceId) repositories.Transaction
+
 	CheckCredentials(email string, password string) (bool, error)
 
 	GetUserIdByEmail(email string) (*UserId, error)
 
-	UpdateRefreshToken(user UserId, token string) repositories.Transaction
+	UpdateRefreshToken(user UserId, device DeviceId, token string) repositories.Transaction
+
+	CheckRefreshToken(user UserId, device DeviceId, token string) (bool, error)
 
 	UpdatePassword(user UserId, newPassword string) repositories.Transaction
 

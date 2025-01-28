@@ -14,13 +14,18 @@ type Session struct {
 	RefreshToken string
 }
 
+type UserDevice struct {
+	User   UserId
+	Device UserId
+}
+
 var (
 	WrongCredentials = errors.New("wrong credentials")
 	AlreadyTaken     = errors.New("already taken")
 	NotDelivered     = errors.New("not delivered")
 	TokenExpired     = errors.New("token expired")
 	BadFormat        = errors.New("bad format")
-	NoSuchUser       = errors.New("no such user")
+	NoSuchEntity     = errors.New("no such entity")
 )
 
 type Controller interface {
@@ -30,13 +35,11 @@ type Controller interface {
 
 	Refresh(refreshToken string) (Session, error)
 
-	CheckToken(accessToken string) (UserId, error)
+	CheckToken(accessToken string) (UserDevice, error)
 
-	Logout(user UserId) error
+	UpdateEmail(email string, user UserId, device DeviceId) error
 
-	UpdateEmail(email string, user UserId) (Session, error)
+	UpdatePassword(old Password, new Password, user UserId, device DeviceId) error
 
-	UpdatePassword(old Password, new Password, user UserId) (Session, error)
-
-	RegisterForPushNotifications(token string, user UserId) error
+	RegisterForPushNotifications(token string, user UserId, device DeviceId) error
 }
