@@ -1,0 +1,1214 @@
+openapi: 3.0.3
+info:
+  title: Verni
+  version: 0.0.1
+servers:
+- url: /
+paths:
+  /auth/signup:
+    put:
+      operationId: signup
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signup_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signupSucceededResponse'
+          description: Created user session.
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict - email is already taken.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity - credentials format is wrong.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /auth/login:
+    put:
+      operationId: login
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginSucceededResponse'
+          description: Logged in user session. Another sessions have been invalidated.
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict - credentials are wrong.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /auth/refresh:
+    put:
+      operationId: refreshSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/refreshSession_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/refreshSucceededResponse'
+          description: Refreshed user session. Another sessions have been invalidated.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized - provided token is expired.
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict - provided token is wrong.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /auth/updateEmail:
+    put:
+      operationId: updateEmail
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateEmail_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateEmailSucceededResponse'
+          description: Active user session associated with new email. Another sessions
+            have been invalidated.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict - email is already taken.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity - email format is wrong.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /auth/updatePassword:
+    put:
+      operationId: updatePassword
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updatePassword_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updatePasswordSucceededResponse'
+          description: Active user session associated with new password. Another sessions
+            have been invalidated.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict - old password is wrong.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity - password format is wrong.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /auth/registerForPushNotifications:
+    put:
+      operationId: registerForPushNotifications
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/registerForPushNotifications_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/registerForPushNotificationsSucceededResponse'
+          description: Token has been registered.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /auth/logout:
+    delete:
+      operationId: logout
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/logoutSucceededResponse'
+          description: Active session has been invalidated.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /avatars/get:
+    get:
+      operationId: getAvatars
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAvatarsSucceededResponse'
+          description: Avatars associated with provided user ids.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /users/search:
+    get:
+      operationId: searchUsers
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: query
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/searchUsersSucceededResponse'
+          description: User infos matching provided search query.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /verification/confirmEmail:
+    put:
+      operationId: confirmEmail
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/confirmEmail_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/confirmEmailSucceededResponse'
+          description: Current user email has been confirmed.
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Confirmation code is wrong.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /verification/sendEmailConfirmationCode:
+    put:
+      operationId: sendEmailConfirmationCode
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sendEmailConfirmationCodeSucceededResponse'
+          description: Email confirmation code has been sent.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /operations/pull:
+    get:
+      operationId: pullOperations
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: deviceId
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pullOperationsSucceededResponse'
+          description: Operations list to be applied.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /operations/push:
+    post:
+      operationId: pushOperations
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/pushOperations_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pushOperationsSucceededResponse'
+          description: Operations list to be applied.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Collision - different operations with same id.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+  /operations/confirm:
+    get:
+      operationId: confirmOperations
+      parameters:
+      - description: Bearer Token
+        explode: false
+        in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: deviceId
+        required: true
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pushOperationsCodeSucceededResponse'
+          description: Operation list has been confirmed.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Something went wrong.
+components:
+  schemas:
+    Credentials:
+      description: User Credentials.
+      properties:
+        email:
+          description: User email.
+          type: string
+        password:
+          description: User password.
+          type: string
+        deviceId:
+          description: User device identifier.
+          type: string
+      required:
+      - deviceId
+      - email
+      - password
+      type: object
+    Session:
+      description: User Session.
+      example:
+        id: id
+        accessToken: accessToken
+        refreshToken: refreshToken
+      properties:
+        id:
+          description: User Identifier.
+          type: string
+        accessToken:
+          description: Users access token.
+          type: string
+        refreshToken:
+          description: Users refresh token.
+          type: string
+      required:
+      - accessToken
+      - id
+      - refreshToken
+      type: object
+    StartupData:
+      description: All data required to startup a user session
+      example:
+        operations:
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+        session:
+          id: id
+          accessToken: accessToken
+          refreshToken: refreshToken
+      properties:
+        session:
+          $ref: '#/components/schemas/Session'
+        operations:
+          items:
+            $ref: '#/components/schemas/Operation'
+          type: array
+      required:
+      - operations
+      - session
+      type: object
+    User:
+      description: User.
+      example:
+        avatarId: avatarId
+        displayName: displayName
+        id: id
+        ownerId: ownerId
+      properties:
+        id:
+          description: User Identifier.
+          type: string
+        ownerId:
+          description: Users owner Identifier.
+          type: string
+        displayName:
+          description: Display name.
+          type: string
+        avatarId:
+          description: Avatar Identifier.
+          nullable: true
+          type: string
+      required:
+      - displayName
+      - id
+      - ownerId
+      type: object
+    SpendingShare:
+      properties:
+        userId:
+          description: User Identifier.
+          type: string
+        amount:
+          description: Participant's owed amount of money.
+          format: int64
+          type: integer
+      required:
+      - amount
+      - userId
+      type: object
+    Image:
+      description: Image.
+      example:
+        base64: base64
+        id: id
+      properties:
+        id:
+          description: Image identifier.
+          type: string
+        base64:
+          description: base64 string representation of the image.
+          type: string
+      required:
+      - base64
+      - id
+      type: object
+    Empty:
+      additionalProperties: true
+      type: object
+    Error:
+      description: Error
+      example:
+        reason: wrongFormat
+        description: description
+      properties:
+        reason:
+          $ref: '#/components/schemas/ErrorReason'
+        description:
+          nullable: true
+          type: string
+      required:
+      - reason
+      type: object
+    ErrorResponse:
+      description: Error
+      example:
+        error:
+          reason: wrongFormat
+          description: description
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+      required:
+      - error
+      type: object
+    ErrorReason:
+      enum:
+      - wrongFormat
+      - alreadyTaken
+      - tokenExpired
+      - wrongAccessToken
+      - internal
+      - noSuchUser
+      - noSuchRequest
+      - alreadySend
+      - haveIncomingRequest
+      - alreadyFriends
+      - notAFriend
+      - badRequest
+      - expenseNotFound
+      - isNotYourExpense
+      - notDelivered
+      - alreadyConfirmed
+      - incorrectCredentials
+      - privacyViolation
+      type: string
+    UpdateEmailOperation:
+      description: Update email operation
+      properties:
+        updateEmail:
+          $ref: '#/components/schemas/updateEmail_request'
+      required:
+      - updateEmail
+      type: object
+    VerifyEmailOperation:
+      description: Verify email operation
+      properties:
+        verifyEmail:
+          $ref: '#/components/schemas/VerifyEmailOperation_verifyEmail'
+      required:
+      - verifyEmail
+      type: object
+    CreateUserOperation:
+      description: Create user operation
+      properties:
+        createUser:
+          $ref: '#/components/schemas/CreateUserOperation_createUser'
+      required:
+      - createUser
+      type: object
+    BindUserOperation:
+      description: Bind user operation
+      properties:
+        bindUser:
+          $ref: '#/components/schemas/BindUserOperation_bindUser'
+      required:
+      - bindUser
+      type: object
+    UpdateAvatarOperation:
+      description: Update avatar operation
+      properties:
+        updateAvatar:
+          $ref: '#/components/schemas/UpdateAvatarOperation_updateAvatar'
+      required:
+      - updateAvatar
+      type: object
+    UpdateDisplayNameOperation:
+      description: Update display name operation
+      properties:
+        updateDisplayName:
+          $ref: '#/components/schemas/CreateUserOperation_createUser'
+      required:
+      - updateDisplayName
+      type: object
+    CreateSpendingGroupOperation:
+      description: Create spending group operation
+      properties:
+        createSpendingGroup:
+          $ref: '#/components/schemas/CreateSpendingGroupOperation_createSpendingGroup'
+      required:
+      - createSpendingGroup
+      type: object
+    DeleteSpendingGroupOperation:
+      description: Delete spending group operation
+      properties:
+        deleteSpendingGroup:
+          $ref: '#/components/schemas/DeleteSpendingGroupOperation_deleteSpendingGroup'
+      required:
+      - deleteSpendingGroup
+      type: object
+    CreateSpendingOperation:
+      description: Create spending operation
+      properties:
+        createSpending:
+          $ref: '#/components/schemas/CreateSpendingOperation_createSpending'
+      required:
+      - createSpending
+      type: object
+    DeleteSpendingOperation:
+      description: Delete spending operation
+      properties:
+        deleteSpending:
+          $ref: '#/components/schemas/DeleteSpendingOperation_deleteSpending'
+      required:
+      - deleteSpending
+      type: object
+    BaseOperation:
+      description: Common properties for any operation
+      properties:
+        operationId:
+          type: string
+        createdAt:
+          format: int64
+          type: integer
+        authorId:
+          type: string
+      required:
+      - authorId
+      - createdAt
+      - operationId
+      type: object
+    Operation:
+      allOf:
+      - $ref: '#/components/schemas/BaseOperation'
+      - oneOf:
+        - $ref: '#/components/schemas/CreateUserOperation'
+        - $ref: '#/components/schemas/BindUserOperation'
+        - $ref: '#/components/schemas/UpdateAvatarOperation'
+        - $ref: '#/components/schemas/UpdateDisplayNameOperation'
+        - $ref: '#/components/schemas/CreateSpendingGroupOperation'
+        - $ref: '#/components/schemas/DeleteSpendingGroupOperation'
+        - $ref: '#/components/schemas/CreateSpendingOperation'
+        - $ref: '#/components/schemas/DeleteSpendingOperation'
+        - $ref: '#/components/schemas/UpdateEmailOperation'
+        - $ref: '#/components/schemas/VerifyEmailOperation'
+      example:
+        createdAt: 0
+        operationId: operationId
+        authorId: authorId
+    signup_request:
+      description: Signup Request
+      properties:
+        credentials:
+          $ref: '#/components/schemas/Credentials'
+      required:
+      - credentials
+      type: object
+    signupSucceededResponse:
+      example:
+        response:
+          operations:
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          session:
+            id: id
+            accessToken: accessToken
+            refreshToken: refreshToken
+      properties:
+        response:
+          $ref: '#/components/schemas/StartupData'
+      required:
+      - response
+      title: signupSucceededResponse
+    login_request:
+      properties:
+        credentials:
+          $ref: '#/components/schemas/Credentials'
+      required:
+      - credentials
+      type: object
+    loginSucceededResponse:
+      example:
+        response:
+          operations:
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          session:
+            id: id
+            accessToken: accessToken
+            refreshToken: refreshToken
+      properties:
+        response:
+          $ref: '#/components/schemas/StartupData'
+      required:
+      - response
+      title: loginSucceededResponse
+    refreshSession_request:
+      properties:
+        refreshToken:
+          type: string
+      required:
+      - refreshToken
+      type: object
+    refreshSucceededResponse:
+      example:
+        response:
+          id: id
+          accessToken: accessToken
+          refreshToken: refreshToken
+      properties:
+        response:
+          $ref: '#/components/schemas/Session'
+      required:
+      - response
+      title: refreshSucceededResponse
+    updateEmail_request:
+      properties:
+        email:
+          type: string
+      required:
+      - email
+      type: object
+    updateEmailSucceededResponse:
+      example:
+        response:
+          operations:
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          session:
+            id: id
+            accessToken: accessToken
+            refreshToken: refreshToken
+      properties:
+        response:
+          $ref: '#/components/schemas/StartupData'
+      required:
+      - response
+      title: updateEmailSucceededResponse
+    updatePassword_request:
+      properties:
+        old:
+          type: string
+        new:
+          type: string
+      required:
+      - new
+      - old
+      type: object
+    updatePasswordSucceededResponse:
+      example:
+        response:
+          operations:
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          - createdAt: 0
+            operationId: operationId
+            authorId: authorId
+          session:
+            id: id
+            accessToken: accessToken
+            refreshToken: refreshToken
+      properties:
+        response:
+          $ref: '#/components/schemas/StartupData'
+      required:
+      - response
+      title: updatePasswordSucceededResponse
+    registerForPushNotifications_request:
+      properties:
+        token:
+          type: string
+      required:
+      - token
+      type: object
+    registerForPushNotificationsSucceededResponse:
+      example:
+        response:
+          key: ""
+      properties:
+        response:
+          additionalProperties: true
+          type: object
+      required:
+      - response
+      title: registerForPushNotificationsSucceededResponse
+    logoutSucceededResponse:
+      example:
+        response:
+          key: ""
+      properties:
+        response:
+          additionalProperties: true
+          type: object
+      required:
+      - response
+      title: logoutSucceededResponse
+    getAvatarsSucceededResponse:
+      example:
+        response:
+          key:
+            base64: base64
+            id: id
+      properties:
+        response:
+          additionalProperties:
+            $ref: '#/components/schemas/Image'
+          type: object
+      required:
+      - response
+      title: getAvatarsSucceededResponse
+    searchUsersSucceededResponse:
+      example:
+        response:
+        - avatarId: avatarId
+          displayName: displayName
+          id: id
+          ownerId: ownerId
+        - avatarId: avatarId
+          displayName: displayName
+          id: id
+          ownerId: ownerId
+      properties:
+        response:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+      required:
+      - response
+      title: searchUsersSucceededResponse
+    confirmEmail_request:
+      properties:
+        code:
+          type: string
+      required:
+      - code
+      type: object
+    confirmEmailSucceededResponse:
+      example:
+        response:
+          key: ""
+      properties:
+        response:
+          additionalProperties: true
+          type: object
+      required:
+      - response
+      title: confirmEmailSucceededResponse
+    sendEmailConfirmationCodeSucceededResponse:
+      example:
+        response:
+          key: ""
+      properties:
+        response:
+          additionalProperties: true
+          type: object
+      required:
+      - response
+      title: sendEmailConfirmationCodeSucceededResponse
+    pullOperationsSucceededResponse:
+      example:
+        response:
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+      properties:
+        response:
+          items:
+            $ref: '#/components/schemas/Operation'
+          type: array
+      required:
+      - response
+      title: pullOperationsSucceededResponse
+    pushOperations_request:
+      properties:
+        deviceId:
+          type: string
+        operations:
+          items:
+            $ref: '#/components/schemas/Operation'
+          type: array
+      type: object
+    pushOperationsSucceededResponse:
+      example:
+        response:
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+      properties:
+        response:
+          items:
+            $ref: '#/components/schemas/Operation'
+          type: array
+      required:
+      - response
+      title: pushOperationsSucceededResponse
+    pushOperationsCodeSucceededResponse:
+      example:
+        response:
+          key: ""
+      properties:
+        response:
+          additionalProperties: true
+          type: object
+      required:
+      - response
+      title: pushOperationsCodeSucceededResponse
+    VerifyEmailOperation_verifyEmail:
+      properties:
+        verified:
+          type: boolean
+      required:
+      - verified
+      type: object
+    CreateUserOperation_createUser:
+      properties:
+        userId:
+          type: string
+        displayName:
+          type: string
+      required:
+      - displayName
+      - userId
+      type: object
+    BindUserOperation_bindUser:
+      properties:
+        oldId:
+          type: string
+        newId:
+          type: string
+      required:
+      - newId
+      - oldId
+      type: object
+    UpdateAvatarOperation_updateAvatar:
+      properties:
+        userId:
+          type: string
+        imageId:
+          type: string
+      required:
+      - imageId
+      - userId
+      type: object
+    CreateSpendingGroupOperation_createSpendingGroup:
+      properties:
+        groupId:
+          type: string
+        participants:
+          items:
+            type: string
+          type: array
+        displayName:
+          nullable: true
+          type: string
+      required:
+      - groupId
+      - participants
+      type: object
+    DeleteSpendingGroupOperation_deleteSpendingGroup:
+      properties:
+        groupId:
+          type: string
+      required:
+      - groupId
+      type: object
+    CreateSpendingOperation_createSpending:
+      properties:
+        spendingId:
+          type: string
+        groupId:
+          type: string
+        name:
+          description: Spending display name.
+          type: string
+        currency:
+          description: Spending's currency 3-letter code. (ISO 4217)
+          type: string
+        amount:
+          description: Spending's total amount multiplied by 100 (123 amount for currency
+            code USD means $1.23)
+          format: int64
+          type: integer
+        shares:
+          items:
+            $ref: '#/components/schemas/SpendingShare'
+          type: array
+      required:
+      - amount
+      - currency
+      - groupId
+      - name
+      - shares
+      - spendingId
+      type: object
+    DeleteSpendingOperation_deleteSpending:
+      properties:
+        spendingId:
+          type: string
+        groupId:
+          type: string
+      required:
+      - groupId
+      - spendingId
+      type: object

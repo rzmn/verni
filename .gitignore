@@ -16,7 +16,8 @@ xcuserdata/
 .DS_Store
 Package.resolved
 .swiftpm
-
+server/node_modules
+server/main
 
 ## Playgrounds
 timeline.xctimeline
