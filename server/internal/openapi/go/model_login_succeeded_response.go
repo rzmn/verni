@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type LoginSucceededResponse struct {
-
 	Response StartupData `json:"response"`
 }
 

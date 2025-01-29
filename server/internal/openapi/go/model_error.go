@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // Error - Error
 type Error struct {
-
 	Reason ErrorReason `json:"reason"`
 
 	Description *string `json:"description,omitempty"`

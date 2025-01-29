@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type BindUserOperationBindUser struct {
-
 	OldId string `json:"oldId"`
 
 	NewId string `json:"newId"`

@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // ErrorResponse - Error
 type ErrorResponse struct {
-
 	Error Error `json:"error"`
 }
 

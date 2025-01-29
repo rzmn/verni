@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type SendEmailConfirmationCodeSucceededResponse struct {
-
 	Response map[string]interface{} `json:"response"`
 }
 

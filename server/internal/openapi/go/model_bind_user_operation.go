@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // BindUserOperation - Bind user operation
 type BindUserOperation struct {
-
 	BindUser BindUserOperationBindUser `json:"bindUser"`
 }
 

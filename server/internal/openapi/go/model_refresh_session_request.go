@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type RefreshSessionRequest struct {
-
 	RefreshToken string `json:"refreshToken"`
 }
 

@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 // Session - User Session.
 type Session struct {
 
@@ -29,8 +26,8 @@ type Session struct {
 // AssertSessionRequired checks if the required fields are not zero-ed
 func AssertSessionRequired(obj Session) error {
 	elements := map[string]interface{}{
-		"id": obj.Id,
-		"accessToken": obj.AccessToken,
+		"id":           obj.Id,
+		"accessToken":  obj.AccessToken,
 		"refreshToken": obj.RefreshToken,
 	}
 	for name, el := range elements {

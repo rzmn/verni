@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // CreateUserOperation - Create user operation
 type CreateUserOperation struct {
-
 	CreateUser CreateUserOperationCreateUser `json:"createUser"`
 }
 

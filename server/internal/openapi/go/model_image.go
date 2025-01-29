@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 // Image - Image.
 type Image struct {
 
@@ -26,7 +23,7 @@ type Image struct {
 // AssertImageRequired checks if the required fields are not zero-ed
 func AssertImageRequired(obj Image) error {
 	elements := map[string]interface{}{
-		"id": obj.Id,
+		"id":     obj.Id,
 		"base64": obj.Base64,
 	}
 	for name, el := range elements {

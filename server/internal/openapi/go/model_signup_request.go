@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // SignupRequest - Signup Request
 type SignupRequest struct {
-
 	Credentials Credentials `json:"credentials"`
 }
 

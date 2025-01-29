@@ -1,11 +1,18 @@
 package verification
 
 import (
-	"verni/internal/common"
+	"errors"
 )
 
 type UserId string
+
+var (
+	CodeHasNotBeenSent    = errors.New("code has not been sent")
+	CodeNotDelivered      = errors.New("not delivered")
+	WrongConfirmationCode = errors.New("wrong confirmation code")
+)
+
 type Controller interface {
-	SendConfirmationCode(uid UserId) *common.CodeBasedError[SendConfirmationCodeErrorCode]
-	ConfirmEmail(uid UserId, code string) *common.CodeBasedError[ConfirmEmailErrorCode]
+	SendConfirmationCode(uid UserId) error
+	ConfirmEmail(uid UserId, code string) error
 }

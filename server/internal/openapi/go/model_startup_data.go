@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // StartupData - All data required to startup a user session
 type StartupData struct {
-
 	Session Session `json:"session"`
 
 	Operations []Operation `json:"operations"`
@@ -24,7 +20,7 @@ type StartupData struct {
 // AssertStartupDataRequired checks if the required fields are not zero-ed
 func AssertStartupDataRequired(obj StartupData) error {
 	elements := map[string]interface{}{
-		"session": obj.Session,
+		"session":    obj.Session,
 		"operations": obj.Operations,
 	}
 	for name, el := range elements {

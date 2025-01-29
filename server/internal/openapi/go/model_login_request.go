@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type LoginRequest struct {
-
 	Credentials Credentials `json:"credentials"`
 }
 

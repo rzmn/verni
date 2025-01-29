@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type SignupSucceededResponse struct {
-
 	Response StartupData `json:"response"`
 }
 

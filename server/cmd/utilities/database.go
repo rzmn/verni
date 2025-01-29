@@ -171,7 +171,7 @@ func tables() []table {
 			create: func(db db.DB) error {
 				_, err := db.Exec(`
 				CREATE TABLE pushTokens(
-					id text NOT NULL,
+					userId text NOT NULL,
 					deviceId text NOT NULL,
 					token text NOT NULL,
 					PRIMARY KEY(userId, deviceId)

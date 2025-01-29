@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type CreateSpendingOperationCreateSpending struct {
-
 	SpendingId string `json:"spendingId"`
 
 	GroupId string `json:"groupId"`
@@ -35,11 +31,11 @@ type CreateSpendingOperationCreateSpending struct {
 func AssertCreateSpendingOperationCreateSpendingRequired(obj CreateSpendingOperationCreateSpending) error {
 	elements := map[string]interface{}{
 		"spendingId": obj.SpendingId,
-		"groupId": obj.GroupId,
-		"name": obj.Name,
-		"currency": obj.Currency,
-		"amount": obj.Amount,
-		"shares": obj.Shares,
+		"groupId":    obj.GroupId,
+		"name":       obj.Name,
+		"currency":   obj.Currency,
+		"amount":     obj.Amount,
+		"shares":     obj.Shares,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

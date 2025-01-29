@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type VerifyEmailOperationVerifyEmail struct {
-
 	Verified bool `json:"verified"`
 }
 

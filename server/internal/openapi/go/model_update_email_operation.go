@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // UpdateEmailOperation - Update email operation
 type UpdateEmailOperation struct {
-
 	UpdateEmail UpdateEmailRequest `json:"updateEmail"`
 }
 

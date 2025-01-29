@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // BaseOperation - Common properties for any operation
 type BaseOperation struct {
-
 	OperationId string `json:"operationId"`
 
 	CreatedAt int64 `json:"createdAt"`
@@ -27,8 +23,8 @@ type BaseOperation struct {
 func AssertBaseOperationRequired(obj BaseOperation) error {
 	elements := map[string]interface{}{
 		"operationId": obj.OperationId,
-		"createdAt": obj.CreatedAt,
-		"authorId": obj.AuthorId,
+		"createdAt":   obj.CreatedAt,
+		"authorId":    obj.AuthorId,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

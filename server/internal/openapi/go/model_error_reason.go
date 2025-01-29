@@ -10,35 +10,32 @@
 
 package openapi
 
-
 import (
 	"fmt"
 )
-
-
 
 type ErrorReason string
 
 // List of ErrorReason
 const (
-	WRONG_FORMAT ErrorReason = "wrongFormat"
-	ALREADY_TAKEN ErrorReason = "alreadyTaken"
-	TOKEN_EXPIRED ErrorReason = "tokenExpired"
-	WRONG_ACCESS_TOKEN ErrorReason = "wrongAccessToken"
-	INTERNAL ErrorReason = "internal"
-	NO_SUCH_USER ErrorReason = "noSuchUser"
-	NO_SUCH_REQUEST ErrorReason = "noSuchRequest"
-	ALREADY_SEND ErrorReason = "alreadySend"
+	WRONG_FORMAT          ErrorReason = "wrongFormat"
+	ALREADY_TAKEN         ErrorReason = "alreadyTaken"
+	TOKEN_EXPIRED         ErrorReason = "tokenExpired"
+	WRONG_ACCESS_TOKEN    ErrorReason = "wrongAccessToken"
+	INTERNAL              ErrorReason = "internal"
+	NO_SUCH_USER          ErrorReason = "noSuchUser"
+	NO_SUCH_REQUEST       ErrorReason = "noSuchRequest"
+	ALREADY_SEND          ErrorReason = "alreadySend"
 	HAVE_INCOMING_REQUEST ErrorReason = "haveIncomingRequest"
-	ALREADY_FRIENDS ErrorReason = "alreadyFriends"
-	NOT_A_FRIEND ErrorReason = "notAFriend"
-	BAD_REQUEST ErrorReason = "badRequest"
-	EXPENSE_NOT_FOUND ErrorReason = "expenseNotFound"
-	IS_NOT_YOUR_EXPENSE ErrorReason = "isNotYourExpense"
-	NOT_DELIVERED ErrorReason = "notDelivered"
-	ALREADY_CONFIRMED ErrorReason = "alreadyConfirmed"
+	ALREADY_FRIENDS       ErrorReason = "alreadyFriends"
+	NOT_A_FRIEND          ErrorReason = "notAFriend"
+	BAD_REQUEST           ErrorReason = "badRequest"
+	EXPENSE_NOT_FOUND     ErrorReason = "expenseNotFound"
+	IS_NOT_YOUR_EXPENSE   ErrorReason = "isNotYourExpense"
+	NOT_DELIVERED         ErrorReason = "notDelivered"
+	ALREADY_CONFIRMED     ErrorReason = "alreadyConfirmed"
 	INCORRECT_CREDENTIALS ErrorReason = "incorrectCredentials"
-	PRIVACY_VIOLATION ErrorReason = "privacyViolation"
+	PRIVACY_VIOLATION     ErrorReason = "privacyViolation"
 )
 
 // AllowedErrorReasonEnumValues is all the allowed values of ErrorReason enum
@@ -65,24 +62,24 @@ var AllowedErrorReasonEnumValues = []ErrorReason{
 
 // validErrorReasonEnumValue provides a map of ErrorReasons for fast verification of use input
 var validErrorReasonEnumValues = map[ErrorReason]struct{}{
-	"wrongFormat": {},
-	"alreadyTaken": {},
-	"tokenExpired": {},
-	"wrongAccessToken": {},
-	"internal": {},
-	"noSuchUser": {},
-	"noSuchRequest": {},
-	"alreadySend": {},
-	"haveIncomingRequest": {},
-	"alreadyFriends": {},
-	"notAFriend": {},
-	"badRequest": {},
-	"expenseNotFound": {},
-	"isNotYourExpense": {},
-	"notDelivered": {},
-	"alreadyConfirmed": {},
+	"wrongFormat":          {},
+	"alreadyTaken":         {},
+	"tokenExpired":         {},
+	"wrongAccessToken":     {},
+	"internal":             {},
+	"noSuchUser":           {},
+	"noSuchRequest":        {},
+	"alreadySend":          {},
+	"haveIncomingRequest":  {},
+	"alreadyFriends":       {},
+	"notAFriend":           {},
+	"badRequest":           {},
+	"expenseNotFound":      {},
+	"isNotYourExpense":     {},
+	"notDelivered":         {},
+	"alreadyConfirmed":     {},
 	"incorrectCredentials": {},
-	"privacyViolation": {},
+	"privacyViolation":     {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise
@@ -101,8 +98,6 @@ func NewErrorReasonFromValue(v string) (ErrorReason, error) {
 
 	return "", fmt.Errorf("invalid value '%v' for ErrorReason: valid values are %v", v, AllowedErrorReasonEnumValues)
 }
-
-
 
 // AssertErrorReasonRequired checks if the required fields are not zero-ed
 func AssertErrorReasonRequired(obj ErrorReason) error {

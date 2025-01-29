@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type CreateUserOperationCreateUser struct {
-
 	UserId string `json:"userId"`
 
 	DisplayName string `json:"displayName"`
@@ -23,7 +19,7 @@ type CreateUserOperationCreateUser struct {
 // AssertCreateUserOperationCreateUserRequired checks if the required fields are not zero-ed
 func AssertCreateUserOperationCreateUserRequired(obj CreateUserOperationCreateUser) error {
 	elements := map[string]interface{}{
-		"userId": obj.UserId,
+		"userId":      obj.UserId,
 		"displayName": obj.DisplayName,
 	}
 	for name, el := range elements {

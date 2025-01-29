@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type UpdateEmailSucceededResponse struct {
-
 	Response StartupData `json:"response"`
 }
 

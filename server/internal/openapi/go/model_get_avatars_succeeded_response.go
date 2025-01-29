@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type GetAvatarsSucceededResponse struct {
-
 	Response map[string]Image `json:"response"`
 }
 

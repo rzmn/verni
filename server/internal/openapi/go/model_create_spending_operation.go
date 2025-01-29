@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // CreateSpendingOperation - Create spending operation
 type CreateSpendingOperation struct {
-
 	CreateSpending CreateSpendingOperationCreateSpending `json:"createSpending"`
 }
 

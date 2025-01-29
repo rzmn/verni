@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type UpdatePasswordRequest struct {
-
 	Old string `json:"old"`
 
 	New string `json:"new"`

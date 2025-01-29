@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type RegisterForPushNotificationsSucceededResponse struct {
-
 	Response map[string]interface{} `json:"response"`
 }
 

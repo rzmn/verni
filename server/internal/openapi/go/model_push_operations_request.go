@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type PushOperationsRequest struct {
-
 	DeviceId string `json:"deviceId,omitempty"`
 
 	Operations []Operation `json:"operations,omitempty"`

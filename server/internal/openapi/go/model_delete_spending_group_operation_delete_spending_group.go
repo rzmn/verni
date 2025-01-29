@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type DeleteSpendingGroupOperationDeleteSpendingGroup struct {
-
 	GroupId string `json:"groupId"`
 }
 

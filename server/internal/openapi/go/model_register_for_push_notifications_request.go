@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type RegisterForPushNotificationsRequest struct {
-
 	Token string `json:"token"`
 }
 

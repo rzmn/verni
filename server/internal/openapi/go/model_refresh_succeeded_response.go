@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type RefreshSucceededResponse struct {
-
 	Response Session `json:"response"`
 }
 

@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type ConfirmEmailRequest struct {
-
 	Code string `json:"code"`
 }
 

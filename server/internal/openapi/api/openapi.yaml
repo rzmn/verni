@@ -805,6 +805,14 @@ components:
       required:
       - deleteSpending
       type: object
+    UploadImageOperation:
+      description: Upload image operation
+      properties:
+        uploadImage:
+          $ref: '#/components/schemas/UploadImageOperation_uploadImage'
+      required:
+      - uploadImage
+      type: object
     BaseOperation:
       description: Common properties for any operation
       properties:
@@ -834,6 +842,7 @@ components:
         - $ref: '#/components/schemas/DeleteSpendingOperation'
         - $ref: '#/components/schemas/UpdateEmailOperation'
         - $ref: '#/components/schemas/VerifyEmailOperation'
+        - $ref: '#/components/schemas/UploadImageOperation'
       example:
         createdAt: 0
         operationId: operationId
@@ -1211,4 +1220,16 @@ components:
       required:
       - groupId
       - spendingId
+      type: object
+    UploadImageOperation_uploadImage:
+      properties:
+        imageId:
+          description: image identifier
+          type: string
+        base64:
+          description: base64 string representation of the image.
+          type: string
+      required:
+      - base64
+      - imageId
       type: object

@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type DeleteSpendingOperationDeleteSpending struct {
-
 	SpendingId string `json:"spendingId"`
 
 	GroupId string `json:"groupId"`
@@ -24,7 +20,7 @@ type DeleteSpendingOperationDeleteSpending struct {
 func AssertDeleteSpendingOperationDeleteSpendingRequired(obj DeleteSpendingOperationDeleteSpending) error {
 	elements := map[string]interface{}{
 		"spendingId": obj.SpendingId,
-		"groupId": obj.GroupId,
+		"groupId":    obj.GroupId,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

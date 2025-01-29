@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"verni/internal/common"
 	"verni/internal/controllers/verification"
 	authRepository "verni/internal/repositories/auth"
 	verificationRepository "verni/internal/repositories/verification"
@@ -36,20 +35,22 @@ type defaultController struct {
 	logger       logging.Service
 }
 
-func (c *defaultController) SendConfirmationCode(uid verification.UserId) *common.CodeBasedError[verification.SendConfirmationCodeErrorCode] {
+func (c *defaultController) SendConfirmationCode(uid verification.UserId) error {
 	const op = "confirmation.EmailConfirmation.SendConfirmationCode"
 	c.logger.LogInfo("%s: start[uid=%s]", op, uid)
 	user, err := c.auth.GetUserInfo(authRepository.UserId(uid))
 	if err != nil {
-		c.logger.LogInfo("%s: cannot get user email by id err: %v", op, err)
-		return common.NewErrorWithDescription(verification.SendConfirmationCodeErrorInternal, err.Error())
+		err := fmt.Errorf("getting user by email: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	email := user.Email
 	code := fmt.Sprintf("%d", generate6DigitCode())
 	transaction := c.verification.StoreEmailVerificationCode(email, code)
 	if err := transaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: store tokens failed %v", op, err)
-		return common.NewErrorWithDescription(verification.SendConfirmationCodeErrorInternal, err.Error())
+		err := fmt.Errorf("storing verification code: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	if err := c.emailService.Send(
 		"Subject: Confirm your Verni email\r\n"+
@@ -57,40 +58,43 @@ func (c *defaultController) SendConfirmationCode(uid verification.UserId) *commo
 			fmt.Sprintf("Email Verification code: %s.\r\n", code),
 		email,
 	); err != nil {
-		c.logger.LogInfo("%s: send failed: %v", op, err)
 		transaction.Rollback()
-		return common.NewErrorWithDescription(verification.SendConfirmationCodeErrorNotDelivered, err.Error())
+		c.logger.LogInfo("%s: send failed: %v", op, err)
+		return fmt.Errorf("sending verification code: %w", verification.CodeNotDelivered)
 	}
 	c.logger.LogInfo("%s: success[uid=%s]", op, uid)
 	return nil
 }
 
-func (c *defaultController) ConfirmEmail(uid verification.UserId, code string) *common.CodeBasedError[verification.ConfirmEmailErrorCode] {
+func (c *defaultController) ConfirmEmail(uid verification.UserId, code string) error {
 	const op = "confirmation.EmailConfirmation.ConfirmEmail"
 	c.logger.LogInfo("%s: start[uid=%s]", op, uid)
 	user, err := c.auth.GetUserInfo(authRepository.UserId(uid))
 	if err != nil {
-		c.logger.LogInfo("%s: cannot get user email by id err: %v", op, err)
-		return common.NewErrorWithDescription(verification.ConfirmEmailErrorInternal, err.Error())
+		err := fmt.Errorf("getting user by email: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	email := user.Email
 	codeFromDb, err := c.verification.GetEmailVerificationCode(email)
 	if err != nil {
-		c.logger.LogInfo("%s: extract token failed: %v", op, err)
-		return common.NewErrorWithDescription(verification.ConfirmEmailErrorInternal, err.Error())
+		err := fmt.Errorf("getting verification code: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	if codeFromDb == nil {
 		c.logger.LogInfo("%s: code has not been sent", op)
-		return common.NewErrorWithDescription(verification.ConfirmEmailErrorCodeHasNotBeenSent, "code has not been sent")
+		return fmt.Errorf("checking if verification code exists: %w", verification.CodeHasNotBeenSent)
 	}
 	if *codeFromDb != code {
 		c.logger.LogInfo("%s: verification code is wrong", op)
-		return common.NewError(verification.ConfirmEmailErrorWrongConfirmationCode)
+		return fmt.Errorf("checking verification matches: %w", verification.WrongConfirmationCode)
 	}
 	transaction := c.auth.MarkUserEmailValidated(authRepository.UserId(uid))
 	if err := transaction.Perform(); err != nil {
-		c.logger.LogInfo("%s: failed to mark email as validated: %v", op, err)
-		return common.NewErrorWithDescription(verification.ConfirmEmailErrorInternal, err.Error())
+		err := fmt.Errorf("marking verification code as validated: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return err
 	}
 	c.logger.LogInfo("%s: success[uid=%s]", op, uid)
 	return nil

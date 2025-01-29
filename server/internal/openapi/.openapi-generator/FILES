@@ -54,6 +54,8 @@ go/model_update_email_request.go
 go/model_update_email_succeeded_response.go
 go/model_update_password_request.go
 go/model_update_password_succeeded_response.go
+go/model_upload_image_operation.go
+go/model_upload_image_operation_upload_image.go
 go/model_user.go
 go/model_verify_email_operation.go
 go/model_verify_email_operation_verify_email.go

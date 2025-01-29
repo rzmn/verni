@@ -10,12 +10,8 @@
 
 package openapi
 
-
-
-
 // UpdateDisplayNameOperation - Update display name operation
 type UpdateDisplayNameOperation struct {
-
 	UpdateDisplayName CreateUserOperationCreateUser `json:"updateDisplayName"`
 }
 

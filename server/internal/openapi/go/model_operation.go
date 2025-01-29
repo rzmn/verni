@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type Operation struct {
-
 	OperationId string `json:"operationId"`
 
 	CreatedAt int64 `json:"createdAt"`
@@ -40,24 +36,27 @@ type Operation struct {
 	UpdateEmail UpdateEmailRequest `json:"updateEmail"`
 
 	VerifyEmail VerifyEmailOperationVerifyEmail `json:"verifyEmail"`
+
+	UploadImage UploadImageOperationUploadImage `json:"uploadImage"`
 }
 
 // AssertOperationRequired checks if the required fields are not zero-ed
 func AssertOperationRequired(obj Operation) error {
 	elements := map[string]interface{}{
-		"operationId": obj.OperationId,
-		"createdAt": obj.CreatedAt,
-		"authorId": obj.AuthorId,
-		"createUser": obj.CreateUser,
-		"bindUser": obj.BindUser,
-		"updateAvatar": obj.UpdateAvatar,
-		"updateDisplayName": obj.UpdateDisplayName,
+		"operationId":         obj.OperationId,
+		"createdAt":           obj.CreatedAt,
+		"authorId":            obj.AuthorId,
+		"createUser":          obj.CreateUser,
+		"bindUser":            obj.BindUser,
+		"updateAvatar":        obj.UpdateAvatar,
+		"updateDisplayName":   obj.UpdateDisplayName,
 		"createSpendingGroup": obj.CreateSpendingGroup,
 		"deleteSpendingGroup": obj.DeleteSpendingGroup,
-		"createSpending": obj.CreateSpending,
-		"deleteSpending": obj.DeleteSpending,
-		"updateEmail": obj.UpdateEmail,
-		"verifyEmail": obj.VerifyEmail,
+		"createSpending":      obj.CreateSpending,
+		"deleteSpending":      obj.DeleteSpending,
+		"updateEmail":         obj.UpdateEmail,
+		"verifyEmail":         obj.VerifyEmail,
+		"uploadImage":         obj.UploadImage,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -95,6 +94,9 @@ func AssertOperationRequired(obj Operation) error {
 	if err := AssertVerifyEmailOperationVerifyEmailRequired(obj.VerifyEmail); err != nil {
 		return err
 	}
+	if err := AssertUploadImageOperationUploadImageRequired(obj.UploadImage); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -128,6 +130,9 @@ func AssertOperationConstraints(obj Operation) error {
 		return err
 	}
 	if err := AssertVerifyEmailOperationVerifyEmailConstraints(obj.VerifyEmail); err != nil {
+		return err
+	}
+	if err := AssertUploadImageOperationUploadImageConstraints(obj.UploadImage); err != nil {
 		return err
 	}
 	return nil

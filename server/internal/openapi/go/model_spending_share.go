@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 type SpendingShare struct {
 
 	// User Identifier.

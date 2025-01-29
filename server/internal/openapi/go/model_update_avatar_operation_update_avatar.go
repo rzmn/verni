@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type UpdateAvatarOperationUpdateAvatar struct {
-
 	UserId string `json:"userId"`
 
 	ImageId string `json:"imageId"`
@@ -23,7 +19,7 @@ type UpdateAvatarOperationUpdateAvatar struct {
 // AssertUpdateAvatarOperationUpdateAvatarRequired checks if the required fields are not zero-ed
 func AssertUpdateAvatarOperationUpdateAvatarRequired(obj UpdateAvatarOperationUpdateAvatar) error {
 	elements := map[string]interface{}{
-		"userId": obj.UserId,
+		"userId":  obj.UserId,
 		"imageId": obj.ImageId,
 	}
 	for name, el := range elements {

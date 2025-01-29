@@ -10,9 +10,6 @@
 
 package openapi
 
-
-
-
 // Credentials - User Credentials.
 type Credentials struct {
 
@@ -29,7 +26,7 @@ type Credentials struct {
 // AssertCredentialsRequired checks if the required fields are not zero-ed
 func AssertCredentialsRequired(obj Credentials) error {
 	elements := map[string]interface{}{
-		"email": obj.Email,
+		"email":    obj.Email,
 		"password": obj.Password,
 		"deviceId": obj.DeviceId,
 	}

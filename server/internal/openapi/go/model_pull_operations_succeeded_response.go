@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type PullOperationsSucceededResponse struct {
-
 	Response []Operation `json:"response"`
 }
 

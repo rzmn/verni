@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type CreateSpendingGroupOperationCreateSpendingGroup struct {
-
 	GroupId string `json:"groupId"`
 
 	Participants []string `json:"participants"`
@@ -25,7 +21,7 @@ type CreateSpendingGroupOperationCreateSpendingGroup struct {
 // AssertCreateSpendingGroupOperationCreateSpendingGroupRequired checks if the required fields are not zero-ed
 func AssertCreateSpendingGroupOperationCreateSpendingGroupRequired(obj CreateSpendingGroupOperationCreateSpendingGroup) error {
 	elements := map[string]interface{}{
-		"groupId": obj.GroupId,
+		"groupId":      obj.GroupId,
 		"participants": obj.Participants,
 	}
 	for name, el := range elements {

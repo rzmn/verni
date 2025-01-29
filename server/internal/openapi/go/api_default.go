@@ -14,12 +14,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"reflect"
 )
 
 // DefaultAPIController binds http requests to an api service and writes the service results to the http response
 type DefaultAPIController struct {
-	service DefaultAPIServicer
+	service      DefaultAPIServicer
 	errorHandler ErrorHandler
 }
 
@@ -123,7 +122,7 @@ func (c *DefaultAPIController) Routes() Routes {
 	}
 }
 
-// Signup - 
+// Signup -
 func (c *DefaultAPIController) Signup(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	signupRequestParam := SignupRequest{}
@@ -151,7 +150,7 @@ func (c *DefaultAPIController) Signup(w http.ResponseWriter, r *http.Request) {
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// Login - 
+// Login -
 func (c *DefaultAPIController) Login(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	loginRequestParam := LoginRequest{}
@@ -179,7 +178,7 @@ func (c *DefaultAPIController) Login(w http.ResponseWriter, r *http.Request) {
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// RefreshSession - 
+// RefreshSession -
 func (c *DefaultAPIController) RefreshSession(w http.ResponseWriter, r *http.Request) {
 	refreshSessionRequestParam := RefreshSessionRequest{}
 	d := json.NewDecoder(r.Body)
@@ -206,7 +205,7 @@ func (c *DefaultAPIController) RefreshSession(w http.ResponseWriter, r *http.Req
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// UpdateEmail - 
+// UpdateEmail -
 func (c *DefaultAPIController) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	updateEmailRequestParam := UpdateEmailRequest{}
@@ -234,7 +233,7 @@ func (c *DefaultAPIController) UpdateEmail(w http.ResponseWriter, r *http.Reques
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// UpdatePassword - 
+// UpdatePassword -
 func (c *DefaultAPIController) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	updatePasswordRequestParam := UpdatePasswordRequest{}
@@ -262,7 +261,7 @@ func (c *DefaultAPIController) UpdatePassword(w http.ResponseWriter, r *http.Req
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// RegisterForPushNotifications - 
+// RegisterForPushNotifications -
 func (c *DefaultAPIController) RegisterForPushNotifications(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	registerForPushNotificationsRequestParam := RegisterForPushNotificationsRequest{}
@@ -290,7 +289,7 @@ func (c *DefaultAPIController) RegisterForPushNotifications(w http.ResponseWrite
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// Logout - 
+// Logout -
 func (c *DefaultAPIController) Logout(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	result, err := c.service.Logout(r.Context(), authorizationParam)
@@ -303,7 +302,7 @@ func (c *DefaultAPIController) Logout(w http.ResponseWriter, r *http.Request) {
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// GetAvatars - 
+// GetAvatars -
 func (c *DefaultAPIController) GetAvatars(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
@@ -325,7 +324,7 @@ func (c *DefaultAPIController) GetAvatars(w http.ResponseWriter, r *http.Request
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// SearchUsers - 
+// SearchUsers -
 func (c *DefaultAPIController) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
@@ -352,7 +351,7 @@ func (c *DefaultAPIController) SearchUsers(w http.ResponseWriter, r *http.Reques
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// ConfirmEmail - 
+// ConfirmEmail -
 func (c *DefaultAPIController) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	confirmEmailRequestParam := ConfirmEmailRequest{}
@@ -380,7 +379,7 @@ func (c *DefaultAPIController) ConfirmEmail(w http.ResponseWriter, r *http.Reque
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// SendEmailConfirmationCode - 
+// SendEmailConfirmationCode -
 func (c *DefaultAPIController) SendEmailConfirmationCode(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	result, err := c.service.SendEmailConfirmationCode(r.Context(), authorizationParam)
@@ -393,7 +392,7 @@ func (c *DefaultAPIController) SendEmailConfirmationCode(w http.ResponseWriter, 
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// PullOperations - 
+// PullOperations -
 func (c *DefaultAPIController) PullOperations(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
@@ -420,7 +419,7 @@ func (c *DefaultAPIController) PullOperations(w http.ResponseWriter, r *http.Req
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// PushOperations - 
+// PushOperations -
 func (c *DefaultAPIController) PushOperations(w http.ResponseWriter, r *http.Request) {
 	authorizationParam := r.Header.Get("Authorization")
 	pushOperationsRequestParam := PushOperationsRequest{}
@@ -448,7 +447,7 @@ func (c *DefaultAPIController) PushOperations(w http.ResponseWriter, r *http.Req
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// ConfirmOperations - 
+// ConfirmOperations -
 func (c *DefaultAPIController) ConfirmOperations(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {

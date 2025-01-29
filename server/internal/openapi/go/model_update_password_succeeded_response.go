@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type UpdatePasswordSucceededResponse struct {
-
 	Response StartupData `json:"response"`
 }
 

@@ -10,11 +10,7 @@
 
 package openapi
 
-
-
-
 type SearchUsersSucceededResponse struct {
-
 	Response []User `json:"response"`
 }
 
