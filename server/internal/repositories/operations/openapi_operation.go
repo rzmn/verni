@@ -6,10 +6,10 @@ import (
 )
 
 type OpenApiOperation struct {
-	openapi.Operation
+	openapi.SomeOperation
 }
 
-func CreateOperation(operation openapi.Operation) Operation {
+func CreateOperation(operation openapi.SomeOperation) Operation {
 	return Operation{
 		CreatedAt:   operation.CreatedAt,
 		OperationId: OperationId(operation.OperationId),
@@ -55,7 +55,7 @@ func (o *OpenApiOperation) Data() ([]byte, error) {
 func (o *OpenApiOperation) TrackedEntities() []TrackedEntity {
 	if !openapi.IsZeroValue(o.CreateUser) {
 		return []TrackedEntity{
-			TrackedEntity{
+			{
 				Id:   o.CreateUser.UserId,
 				Type: EntityTypeUser,
 			},

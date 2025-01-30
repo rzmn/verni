@@ -14,7 +14,7 @@ type UserInfo struct {
 }
 
 type Repository interface {
-	CreateUser(user UserId, email string, password string, refreshToken string) repositories.Transaction
+	CreateUser(user UserId, email string, password string) repositories.Transaction
 
 	MarkUserEmailValidated(user UserId) repositories.Transaction
 

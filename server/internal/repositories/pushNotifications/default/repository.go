@@ -52,7 +52,7 @@ func (c *defaultRepository) storePushToken(user pushNotifications.UserId, device
 	c.logger.LogInfo("%s: start[uid=%v]", op, user)
 	query := `
 INSERT INTO pushTokens(userId, deviceId, token) VALUES ($1, $2, $3)
-ON CONFLICT (id) DO UPDATE SET token = $3;
+ON CONFLICT (userId, deviceId) DO UPDATE SET token = $3;
 `
 	_, err := c.db.Exec(query, string(user), string(device), token)
 	if err != nil {

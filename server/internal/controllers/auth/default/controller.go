@@ -111,13 +111,24 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 		c.logger.LogInfo("%s: %v", op, err)
 		return auth.Session{}, err
 	}
+	createSessionTransaction := c.authRepository.UpdateRefreshToken(
+		authRepository.UserId(subject.User),
+		authRepository.DeviceId(subject.Device),
+		string(refreshToken),
+	)
+	if err := createSessionTransaction.Perform(); err != nil {
+		createOperationTransaction.Rollback()
+		err := fmt.Errorf("creating session: %w", err)
+		c.logger.LogInfo("%s: %v", op, err)
+		return auth.Session{}, err
+	}
 	createProfileTransaction := c.authRepository.CreateUser(
 		authRepository.UserId(subject.User),
 		email,
 		string(password),
-		string(refreshToken),
 	)
 	if err := createProfileTransaction.Perform(); err != nil {
+		createSessionTransaction.Rollback()
 		createOperationTransaction.Rollback()
 		err := fmt.Errorf("creating profile: %w", err)
 		c.logger.LogInfo("%s: %v", op, err)
