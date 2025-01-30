@@ -614,7 +614,7 @@ components:
           $ref: '#/components/schemas/Session'
         operations:
           items:
-            $ref: '#/components/schemas/Operation'
+            $ref: '#/components/schemas/SomeOperation'
           type: array
       required:
       - operations
@@ -726,15 +726,13 @@ components:
       - privacyViolation
       type: string
     UpdateEmailOperation:
-      description: Update email operation
       properties:
         updateEmail:
-          $ref: '#/components/schemas/updateEmail_request'
+          $ref: '#/components/schemas/UpdateEmailOperation_updateEmail'
       required:
       - updateEmail
       type: object
     VerifyEmailOperation:
-      description: Verify email operation
       properties:
         verifyEmail:
           $ref: '#/components/schemas/VerifyEmailOperation_verifyEmail'
@@ -742,7 +740,6 @@ components:
       - verifyEmail
       type: object
     CreateUserOperation:
-      description: Create user operation
       properties:
         createUser:
           $ref: '#/components/schemas/CreateUserOperation_createUser'
@@ -750,7 +747,6 @@ components:
       - createUser
       type: object
     BindUserOperation:
-      description: Bind user operation
       properties:
         bindUser:
           $ref: '#/components/schemas/BindUserOperation_bindUser'
@@ -758,7 +754,6 @@ components:
       - bindUser
       type: object
     UpdateAvatarOperation:
-      description: Update avatar operation
       properties:
         updateAvatar:
           $ref: '#/components/schemas/UpdateAvatarOperation_updateAvatar'
@@ -766,15 +761,13 @@ components:
       - updateAvatar
       type: object
     UpdateDisplayNameOperation:
-      description: Update display name operation
       properties:
         updateDisplayName:
-          $ref: '#/components/schemas/CreateUserOperation_createUser'
+          $ref: '#/components/schemas/UpdateDisplayNameOperation_updateDisplayName'
       required:
       - updateDisplayName
       type: object
     CreateSpendingGroupOperation:
-      description: Create spending group operation
       properties:
         createSpendingGroup:
           $ref: '#/components/schemas/CreateSpendingGroupOperation_createSpendingGroup'
@@ -782,7 +775,6 @@ components:
       - createSpendingGroup
       type: object
     DeleteSpendingGroupOperation:
-      description: Delete spending group operation
       properties:
         deleteSpendingGroup:
           $ref: '#/components/schemas/DeleteSpendingGroupOperation_deleteSpendingGroup'
@@ -790,7 +782,6 @@ components:
       - deleteSpendingGroup
       type: object
     CreateSpendingOperation:
-      description: Create spending operation
       properties:
         createSpending:
           $ref: '#/components/schemas/CreateSpendingOperation_createSpending'
@@ -798,7 +789,6 @@ components:
       - createSpending
       type: object
     DeleteSpendingOperation:
-      description: Delete spending operation
       properties:
         deleteSpending:
           $ref: '#/components/schemas/DeleteSpendingOperation_deleteSpending'
@@ -806,7 +796,6 @@ components:
       - deleteSpending
       type: object
     UploadImageOperation:
-      description: Upload image operation
       properties:
         uploadImage:
           $ref: '#/components/schemas/UploadImageOperation_uploadImage'
@@ -828,7 +817,7 @@ components:
       - createdAt
       - operationId
       type: object
-    Operation:
+    SomeOperation:
       allOf:
       - $ref: '#/components/schemas/BaseOperation'
       - oneOf:
@@ -1081,7 +1070,7 @@ components:
       properties:
         response:
           items:
-            $ref: '#/components/schemas/Operation'
+            $ref: '#/components/schemas/SomeOperation'
           type: array
       required:
       - response
@@ -1092,7 +1081,7 @@ components:
           type: string
         operations:
           items:
-            $ref: '#/components/schemas/Operation'
+            $ref: '#/components/schemas/SomeOperation'
           type: array
       type: object
     pushOperationsSucceededResponse:
@@ -1107,7 +1096,7 @@ components:
       properties:
         response:
           items:
-            $ref: '#/components/schemas/Operation'
+            $ref: '#/components/schemas/SomeOperation'
           type: array
       required:
       - response
@@ -1123,7 +1112,16 @@ components:
       required:
       - response
       title: pushOperationsCodeSucceededResponse
+    UpdateEmailOperation_updateEmail:
+      description: Update email operation
+      properties:
+        email:
+          type: string
+      required:
+      - email
+      type: object
     VerifyEmailOperation_verifyEmail:
+      description: Verify email operation
       properties:
         verified:
           type: boolean
@@ -1131,6 +1129,7 @@ components:
       - verified
       type: object
     CreateUserOperation_createUser:
+      description: Create user operation
       properties:
         userId:
           type: string
@@ -1141,6 +1140,7 @@ components:
       - userId
       type: object
     BindUserOperation_bindUser:
+      description: Bind user operation
       properties:
         oldId:
           type: string
@@ -1151,6 +1151,7 @@ components:
       - oldId
       type: object
     UpdateAvatarOperation_updateAvatar:
+      description: Update avatar operation
       properties:
         userId:
           type: string
@@ -1160,7 +1161,19 @@ components:
       - imageId
       - userId
       type: object
+    UpdateDisplayNameOperation_updateDisplayName:
+      description: Update display name operation
+      properties:
+        userId:
+          type: string
+        displayName:
+          type: string
+      required:
+      - displayName
+      - userId
+      type: object
     CreateSpendingGroupOperation_createSpendingGroup:
+      description: Create spending group operation
       properties:
         groupId:
           type: string
@@ -1176,6 +1189,7 @@ components:
       - participants
       type: object
     DeleteSpendingGroupOperation_deleteSpendingGroup:
+      description: Delete spending group operation
       properties:
         groupId:
           type: string
@@ -1183,6 +1197,7 @@ components:
       - groupId
       type: object
     CreateSpendingOperation_createSpending:
+      description: Create spending operation
       properties:
         spendingId:
           type: string
@@ -1212,6 +1227,7 @@ components:
       - spendingId
       type: object
     DeleteSpendingOperation_deleteSpending:
+      description: Delete spending operation
       properties:
         spendingId:
           type: string
@@ -1222,6 +1238,7 @@ components:
       - spendingId
       type: object
     UploadImageOperation_uploadImage:
+      description: Upload image operation
       properties:
         imageId:
           description: image identifier

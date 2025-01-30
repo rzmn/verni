@@ -10,9 +10,8 @@
 
 package openapi
 
-// UpdateEmailOperation - Update email operation
 type UpdateEmailOperation struct {
-	UpdateEmail UpdateEmailRequest `json:"updateEmail"`
+	UpdateEmail UpdateEmailOperationUpdateEmail `json:"updateEmail"`
 }
 
 // AssertUpdateEmailOperationRequired checks if the required fields are not zero-ed
@@ -26,7 +25,7 @@ func AssertUpdateEmailOperationRequired(obj UpdateEmailOperation) error {
 		}
 	}
 
-	if err := AssertUpdateEmailRequestRequired(obj.UpdateEmail); err != nil {
+	if err := AssertUpdateEmailOperationUpdateEmailRequired(obj.UpdateEmail); err != nil {
 		return err
 	}
 	return nil
@@ -34,7 +33,7 @@ func AssertUpdateEmailOperationRequired(obj UpdateEmailOperation) error {
 
 // AssertUpdateEmailOperationConstraints checks if the values respects the defined constraints
 func AssertUpdateEmailOperationConstraints(obj UpdateEmailOperation) error {
-	if err := AssertUpdateEmailRequestConstraints(obj.UpdateEmail); err != nil {
+	if err := AssertUpdateEmailOperationUpdateEmailConstraints(obj.UpdateEmail); err != nil {
 		return err
 	}
 	return nil

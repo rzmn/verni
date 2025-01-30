@@ -10,6 +10,7 @@
 
 package openapi
 
+// UploadImageOperationUploadImage - Upload image operation
 type UploadImageOperationUploadImage struct {
 
 	// image identifier

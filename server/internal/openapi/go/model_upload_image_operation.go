@@ -10,7 +10,6 @@
 
 package openapi
 
-// UploadImageOperation - Upload image operation
 type UploadImageOperation struct {
 	UploadImage UploadImageOperationUploadImage `json:"uploadImage"`
 }

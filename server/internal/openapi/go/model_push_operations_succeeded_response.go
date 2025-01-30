@@ -11,7 +11,7 @@
 package openapi
 
 type PushOperationsSucceededResponse struct {
-	Response []Operation `json:"response"`
+	Response []SomeOperation `json:"response"`
 }
 
 // AssertPushOperationsSucceededResponseRequired checks if the required fields are not zero-ed
@@ -26,7 +26,7 @@ func AssertPushOperationsSucceededResponseRequired(obj PushOperationsSucceededRe
 	}
 
 	for _, el := range obj.Response {
-		if err := AssertOperationRequired(el); err != nil {
+		if err := AssertSomeOperationRequired(el); err != nil {
 			return err
 		}
 	}
@@ -36,7 +36,7 @@ func AssertPushOperationsSucceededResponseRequired(obj PushOperationsSucceededRe
 // AssertPushOperationsSucceededResponseConstraints checks if the values respects the defined constraints
 func AssertPushOperationsSucceededResponseConstraints(obj PushOperationsSucceededResponse) error {
 	for _, el := range obj.Response {
-		if err := AssertOperationConstraints(el); err != nil {
+		if err := AssertSomeOperationConstraints(el); err != nil {
 			return err
 		}
 	}

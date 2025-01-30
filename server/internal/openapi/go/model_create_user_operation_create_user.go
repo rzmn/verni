@@ -10,6 +10,7 @@
 
 package openapi
 
+// CreateUserOperationCreateUser - Create user operation
 type CreateUserOperationCreateUser struct {
 	UserId string `json:"userId"`
 

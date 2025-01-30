@@ -10,7 +10,7 @@
 
 package openapi
 
-type Operation struct {
+type SomeOperation struct {
 	OperationId string `json:"operationId"`
 
 	CreatedAt int64 `json:"createdAt"`
@@ -23,7 +23,7 @@ type Operation struct {
 
 	UpdateAvatar UpdateAvatarOperationUpdateAvatar `json:"updateAvatar"`
 
-	UpdateDisplayName CreateUserOperationCreateUser `json:"updateDisplayName"`
+	UpdateDisplayName UpdateDisplayNameOperationUpdateDisplayName `json:"updateDisplayName"`
 
 	CreateSpendingGroup CreateSpendingGroupOperationCreateSpendingGroup `json:"createSpendingGroup"`
 
@@ -33,15 +33,15 @@ type Operation struct {
 
 	DeleteSpending DeleteSpendingOperationDeleteSpending `json:"deleteSpending"`
 
-	UpdateEmail UpdateEmailRequest `json:"updateEmail"`
+	UpdateEmail UpdateEmailOperationUpdateEmail `json:"updateEmail"`
 
 	VerifyEmail VerifyEmailOperationVerifyEmail `json:"verifyEmail"`
 
 	UploadImage UploadImageOperationUploadImage `json:"uploadImage"`
 }
 
-// AssertOperationRequired checks if the required fields are not zero-ed
-func AssertOperationRequired(obj Operation) error {
+// AssertSomeOperationRequired checks if the required fields are not zero-ed
+func AssertSomeOperationRequired(obj SomeOperation) error {
 	elements := map[string]interface{}{
 		"operationId":         obj.OperationId,
 		"createdAt":           obj.CreatedAt,
@@ -73,7 +73,7 @@ func AssertOperationRequired(obj Operation) error {
 	if err := AssertUpdateAvatarOperationUpdateAvatarRequired(obj.UpdateAvatar); err != nil {
 		return err
 	}
-	if err := AssertCreateUserOperationCreateUserRequired(obj.UpdateDisplayName); err != nil {
+	if err := AssertUpdateDisplayNameOperationUpdateDisplayNameRequired(obj.UpdateDisplayName); err != nil {
 		return err
 	}
 	if err := AssertCreateSpendingGroupOperationCreateSpendingGroupRequired(obj.CreateSpendingGroup); err != nil {
@@ -88,7 +88,7 @@ func AssertOperationRequired(obj Operation) error {
 	if err := AssertDeleteSpendingOperationDeleteSpendingRequired(obj.DeleteSpending); err != nil {
 		return err
 	}
-	if err := AssertUpdateEmailRequestRequired(obj.UpdateEmail); err != nil {
+	if err := AssertUpdateEmailOperationUpdateEmailRequired(obj.UpdateEmail); err != nil {
 		return err
 	}
 	if err := AssertVerifyEmailOperationVerifyEmailRequired(obj.VerifyEmail); err != nil {
@@ -100,8 +100,8 @@ func AssertOperationRequired(obj Operation) error {
 	return nil
 }
 
-// AssertOperationConstraints checks if the values respects the defined constraints
-func AssertOperationConstraints(obj Operation) error {
+// AssertSomeOperationConstraints checks if the values respects the defined constraints
+func AssertSomeOperationConstraints(obj SomeOperation) error {
 	if err := AssertCreateUserOperationCreateUserConstraints(obj.CreateUser); err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func AssertOperationConstraints(obj Operation) error {
 	if err := AssertUpdateAvatarOperationUpdateAvatarConstraints(obj.UpdateAvatar); err != nil {
 		return err
 	}
-	if err := AssertCreateUserOperationCreateUserConstraints(obj.UpdateDisplayName); err != nil {
+	if err := AssertUpdateDisplayNameOperationUpdateDisplayNameConstraints(obj.UpdateDisplayName); err != nil {
 		return err
 	}
 	if err := AssertCreateSpendingGroupOperationCreateSpendingGroupConstraints(obj.CreateSpendingGroup); err != nil {
@@ -126,7 +126,7 @@ func AssertOperationConstraints(obj Operation) error {
 	if err := AssertDeleteSpendingOperationDeleteSpendingConstraints(obj.DeleteSpending); err != nil {
 		return err
 	}
-	if err := AssertUpdateEmailRequestConstraints(obj.UpdateEmail); err != nil {
+	if err := AssertUpdateEmailOperationUpdateEmailConstraints(obj.UpdateEmail); err != nil {
 		return err
 	}
 	if err := AssertVerifyEmailOperationVerifyEmailConstraints(obj.VerifyEmail); err != nil {

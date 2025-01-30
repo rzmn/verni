@@ -14,7 +14,7 @@ package openapi
 type StartupData struct {
 	Session Session `json:"session"`
 
-	Operations []Operation `json:"operations"`
+	Operations []SomeOperation `json:"operations"`
 }
 
 // AssertStartupDataRequired checks if the required fields are not zero-ed
@@ -33,7 +33,7 @@ func AssertStartupDataRequired(obj StartupData) error {
 		return err
 	}
 	for _, el := range obj.Operations {
-		if err := AssertOperationRequired(el); err != nil {
+		if err := AssertSomeOperationRequired(el); err != nil {
 			return err
 		}
 	}
@@ -46,7 +46,7 @@ func AssertStartupDataConstraints(obj StartupData) error {
 		return err
 	}
 	for _, el := range obj.Operations {
-		if err := AssertOperationConstraints(el); err != nil {
+		if err := AssertSomeOperationConstraints(el); err != nil {
 			return err
 		}
 	}

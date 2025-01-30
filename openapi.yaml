@@ -523,7 +523,7 @@ paths:
                   response:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Operation"
+                      $ref: "#/components/schemas/SomeOperation"
                 required:
                   - response
         "401":
@@ -560,7 +560,7 @@ paths:
                 operations:
                   type: array
                   items:
-                    $ref: "#/components/schemas/Operation"
+                    $ref: "#/components/schemas/SomeOperation"
       responses:
         "200":
           description: Operations list to be applied.
@@ -572,7 +572,7 @@ paths:
                   response:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Operation"
+                      $ref: "#/components/schemas/SomeOperation"
                 required:
                   - response
         "401":
@@ -684,7 +684,7 @@ components:
         operations:
           type: array
           items:
-            $ref: "#/components/schemas/Operation"
+            $ref: "#/components/schemas/SomeOperation"
       required:
         - session
         - operations
@@ -779,10 +779,10 @@ components:
         - incorrectCredentials
         - privacyViolation
     UpdateEmailOperation:
-      description: Update email operation
       type: object
       properties:
         updateEmail:
+          description: Update email operation
           type: object
           properties:
             email:
@@ -792,10 +792,10 @@ components:
       required:
         - updateEmail
     VerifyEmailOperation:
-      description: Verify email operation
       type: object
       properties:
         verifyEmail:
+          description: Verify email operation
           type: object
           properties:
             verified:
@@ -805,10 +805,10 @@ components:
       required:
         - verifyEmail
     CreateUserOperation:
-      description: Create user operation
       type: object
       properties:
         createUser:
+          description: Create user operation
           type: object
           properties:
             userId:
@@ -821,10 +821,10 @@ components:
       required:
         - createUser
     BindUserOperation:
-      description: Bind user operation
       type: object
       properties:
         bindUser:
+          description: Bind user operation
           type: object
           properties:
             oldId:
@@ -837,10 +837,10 @@ components:
       required:
         - bindUser
     UpdateAvatarOperation:
-      description: Update avatar operation
       type: object
       properties:
         updateAvatar:
+          description: Update avatar operation
           type: object
           properties:
             userId:
@@ -853,10 +853,10 @@ components:
       required:
         - updateAvatar
     UpdateDisplayNameOperation:
-      description: Update display name operation
       type: object
       properties:
         updateDisplayName:
+          description: Update display name operation
           type: object
           properties:
             userId:
@@ -869,10 +869,10 @@ components:
       required:
         - updateDisplayName
     CreateSpendingGroupOperation:
-      description: Create spending group operation
       type: object
       properties:
         createSpendingGroup:
+          description: Create spending group operation
           type: object
           properties:
             groupId:
@@ -890,10 +890,10 @@ components:
       required:
         - createSpendingGroup
     DeleteSpendingGroupOperation:
-      description: Delete spending group operation
       type: object
       properties:
         deleteSpendingGroup:
+          description: Delete spending group operation
           type: object
           properties:
             groupId:
@@ -903,10 +903,10 @@ components:
       required:
         - deleteSpendingGroup
     CreateSpendingOperation:
-      description: Create spending operation
       type: object
       properties:
         createSpending:
+          description: Create spending operation
           type: object
           properties:
             spendingId:
@@ -937,10 +937,10 @@ components:
       required:
         - createSpending
     DeleteSpendingOperation:
-      description: Delete spending operation
       type: object
       properties:
         deleteSpending:
+          description: Delete spending operation
           type: object
           properties:
             spendingId:
@@ -953,10 +953,10 @@ components:
       required:
         - deleteSpending
     UploadImageOperation:
-      description: Upload image operation
       type: object
       properties:
         uploadImage:
+          description: Upload image operation
           type: object
           properties:
             imageId:
@@ -985,7 +985,7 @@ components:
         - operationId
         - createdAt
         - authorId
-    Operation:
+    SomeOperation:
       allOf:
         - $ref: "#/components/schemas/BaseOperation"
         - oneOf:

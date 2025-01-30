@@ -10,9 +10,8 @@
 
 package openapi
 
-// UpdateDisplayNameOperation - Update display name operation
 type UpdateDisplayNameOperation struct {
-	UpdateDisplayName CreateUserOperationCreateUser `json:"updateDisplayName"`
+	UpdateDisplayName UpdateDisplayNameOperationUpdateDisplayName `json:"updateDisplayName"`
 }
 
 // AssertUpdateDisplayNameOperationRequired checks if the required fields are not zero-ed
@@ -26,7 +25,7 @@ func AssertUpdateDisplayNameOperationRequired(obj UpdateDisplayNameOperation) er
 		}
 	}
 
-	if err := AssertCreateUserOperationCreateUserRequired(obj.UpdateDisplayName); err != nil {
+	if err := AssertUpdateDisplayNameOperationUpdateDisplayNameRequired(obj.UpdateDisplayName); err != nil {
 		return err
 	}
 	return nil
@@ -34,7 +33,7 @@ func AssertUpdateDisplayNameOperationRequired(obj UpdateDisplayNameOperation) er
 
 // AssertUpdateDisplayNameOperationConstraints checks if the values respects the defined constraints
 func AssertUpdateDisplayNameOperationConstraints(obj UpdateDisplayNameOperation) error {
-	if err := AssertCreateUserOperationCreateUserConstraints(obj.UpdateDisplayName); err != nil {
+	if err := AssertUpdateDisplayNameOperationUpdateDisplayNameConstraints(obj.UpdateDisplayName); err != nil {
 		return err
 	}
 	return nil

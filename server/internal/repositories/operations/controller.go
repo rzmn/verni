@@ -23,17 +23,23 @@ type Operation struct {
 
 type Repository interface {
 	Push(operations []Operation, userId UserId, deviceId DeviceId) repositories.Transaction
-	Pull(userId UserId, deviceId DeviceId) ([]Operation, error)
+	Pull(userId UserId, deviceId DeviceId, ignoreLargeOperations bool) ([]Operation, error)
 	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) repositories.Transaction
+
+	Get(affectingEntities []TrackedEntity) ([]Operation, error)
+	Search(payloadType string, hint string) ([]Operation, error)
 }
 
 const (
-	CreateUserOperationPayloadType = "CreateUser"
-	UnknownOperationPayloadType    = "Unknown"
+	CreateUserOperationPayloadType        = "CreateUser"
+	UpdateDisplayNameOperationPayloadType = "UpdateDisplayName"
+	UploadImageOperationPayloadType       = "UploadImage"
+	UnknownOperationPayloadType           = "Unknown"
 )
 
 const (
-	EntityTypeUser = "User"
+	EntityTypeUser  = "User"
+	EntityTypeImage = "Image"
 )
 
 var (
@@ -44,4 +50,6 @@ type OperationPayload interface {
 	Type() string
 	Data() ([]byte, error)
 	TrackedEntities() []TrackedEntity
+	IsLarge() bool
+	SearchHint() *string
 }

@@ -10,7 +10,6 @@
 
 package openapi
 
-// UpdateAvatarOperation - Update avatar operation
 type UpdateAvatarOperation struct {
 	UpdateAvatar UpdateAvatarOperationUpdateAvatar `json:"updateAvatar"`
 }

@@ -10,6 +10,7 @@
 
 package openapi
 
+// CreateSpendingGroupOperationCreateSpendingGroup - Create spending group operation
 type CreateSpendingGroupOperationCreateSpendingGroup struct {
 	GroupId string `json:"groupId"`
 

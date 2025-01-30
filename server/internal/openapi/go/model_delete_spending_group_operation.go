@@ -10,7 +10,6 @@
 
 package openapi
 
-// DeleteSpendingGroupOperation - Delete spending group operation
 type DeleteSpendingGroupOperation struct {
 	DeleteSpendingGroup DeleteSpendingGroupOperationDeleteSpendingGroup `json:"deleteSpendingGroup"`
 }

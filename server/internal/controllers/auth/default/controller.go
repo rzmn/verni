@@ -16,21 +16,18 @@ import (
 	authRepository "verni/internal/repositories/auth"
 	operationsRepository "verni/internal/repositories/operations"
 	pushNotificationsRepository "verni/internal/repositories/pushNotifications"
-	usersRepository "verni/internal/repositories/users"
 
 	"github.com/google/uuid"
 )
 
 type AuthRepository authRepository.Repository
 type OperationsRepository operationsRepository.Repository
-type UsersRepository usersRepository.Repository
 type PushTokensRepository pushNotificationsRepository.Repository
 
 func New(
 	authRepository AuthRepository,
 	operationsRepository OperationsRepository,
 	pushTokensRepository PushTokensRepository,
-	usersRepository UsersRepository,
 	jwtService jwt.Service,
 	formatValidationService formatValidation.Service,
 	logger logging.Service,
@@ -39,7 +36,6 @@ func New(
 		authRepository:          authRepository,
 		operationsRepository:    operationsRepository,
 		pushTokensRepository:    pushTokensRepository,
-		usersRepository:         usersRepository,
 		jwtService:              jwtService,
 		formatValidationService: formatValidationService,
 		logger:                  logger,
@@ -50,7 +46,6 @@ type defaultController struct {
 	authRepository          AuthRepository
 	operationsRepository    OperationsRepository
 	pushTokensRepository    PushTokensRepository
-	usersRepository         UsersRepository
 	jwtService              jwt.Service
 	formatValidationService formatValidation.Service
 	logger                  logging.Service
@@ -94,19 +89,10 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 		return auth.Session{}, err
 	}
 	displayName := strings.Split(email, "@")[0]
-	createUserTransaction := c.usersRepository.CreateUser(
-		usersRepository.UserId(subject.User),
-		displayName,
-	)
-	if err := createUserTransaction.Perform(); err != nil {
-		err := fmt.Errorf("creating user: %w", err)
-		c.logger.LogInfo("%s: %v", op, err)
-		return auth.Session{}, err
-	}
 	createOperationTransaction := c.operationsRepository.Push(
 		[]operationsRepository.Operation{
 			operationsRepository.CreateOperation(
-				openapi.Operation{
+				openapi.SomeOperation{
 					OperationId: uuid.New().String(),
 					CreatedAt:   time.Now().UnixMilli(),
 					AuthorId:    string(subject.User),
@@ -121,7 +107,6 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 		operationsRepository.DeviceId(subject.Device),
 	)
 	if err := createOperationTransaction.Perform(); err != nil {
-		createUserTransaction.Rollback()
 		err := fmt.Errorf("creating operation: %w", err)
 		c.logger.LogInfo("%s: %v", op, err)
 		return auth.Session{}, err
@@ -134,7 +119,6 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 	)
 	if err := createProfileTransaction.Perform(); err != nil {
 		createOperationTransaction.Rollback()
-		createUserTransaction.Rollback()
 		err := fmt.Errorf("creating profile: %w", err)
 		c.logger.LogInfo("%s: %v", op, err)
 		return auth.Session{}, err

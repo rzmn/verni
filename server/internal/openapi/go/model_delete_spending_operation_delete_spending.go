@@ -10,6 +10,7 @@
 
 package openapi
 
+// DeleteSpendingOperationDeleteSpending - Delete spending operation
 type DeleteSpendingOperationDeleteSpending struct {
 	SpendingId string `json:"spendingId"`
 

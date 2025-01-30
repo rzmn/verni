@@ -30,7 +30,6 @@ go/model_image.go
 go/model_login_request.go
 go/model_login_succeeded_response.go
 go/model_logout_succeeded_response.go
-go/model_operation.go
 go/model_pull_operations_succeeded_response.go
 go/model_push_operations_code_succeeded_response.go
 go/model_push_operations_request.go
@@ -44,12 +43,15 @@ go/model_send_email_confirmation_code_succeeded_response.go
 go/model_session.go
 go/model_signup_request.go
 go/model_signup_succeeded_response.go
+go/model_some_operation.go
 go/model_spending_share.go
 go/model_startup_data.go
 go/model_update_avatar_operation.go
 go/model_update_avatar_operation_update_avatar.go
 go/model_update_display_name_operation.go
+go/model_update_display_name_operation_update_display_name.go
 go/model_update_email_operation.go
+go/model_update_email_operation_update_email.go
 go/model_update_email_request.go
 go/model_update_email_succeeded_response.go
 go/model_update_password_request.go

@@ -13,13 +13,13 @@ package openapi
 type PushOperationsRequest struct {
 	DeviceId string `json:"deviceId,omitempty"`
 
-	Operations []Operation `json:"operations,omitempty"`
+	Operations []SomeOperation `json:"operations,omitempty"`
 }
 
 // AssertPushOperationsRequestRequired checks if the required fields are not zero-ed
 func AssertPushOperationsRequestRequired(obj PushOperationsRequest) error {
 	for _, el := range obj.Operations {
-		if err := AssertOperationRequired(el); err != nil {
+		if err := AssertSomeOperationRequired(el); err != nil {
 			return err
 		}
 	}
@@ -29,7 +29,7 @@ func AssertPushOperationsRequestRequired(obj PushOperationsRequest) error {
 // AssertPushOperationsRequestConstraints checks if the values respects the defined constraints
 func AssertPushOperationsRequestConstraints(obj PushOperationsRequest) error {
 	for _, el := range obj.Operations {
-		if err := AssertOperationConstraints(el); err != nil {
+		if err := AssertSomeOperationConstraints(el); err != nil {
 			return err
 		}
 	}
