@@ -26,8 +26,8 @@ func (c *defaultRepository) StorePushToken(user pushNotifications.UserId, device
 
 	currentToken, err := c.GetPushToken(user, device)
 	if err != nil {
-		err = fmt.Errorf("getting token info: %w", err)
-		c.logger.LogInfo("%s: %v", op, err)
+		err = fmt.Errorf("%s: getting token info: %w", op, err)
+		c.logger.LogInfo("%v", err)
 		return repositories.Transaction{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
