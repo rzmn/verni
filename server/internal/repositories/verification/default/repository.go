@@ -1,6 +1,8 @@
 package defaultRepository
 
 import (
+	"database/sql"
+	"fmt"
 	"verni/internal/db"
 	"verni/internal/repositories"
 	"verni/internal/repositories/verification"
@@ -20,115 +22,105 @@ type postgresRepository struct {
 }
 
 func (c *postgresRepository) StoreEmailVerificationCode(email string, code string) repositories.Transaction {
-	const op = "repositories.verification.postgresRepository.StoreEmailVerificationCode"
+	const op = "repositories.verification.defaultRepository.StoreEmailVerificationCode"
+
 	currentCode, err := c.GetEmailVerificationCode(email)
+	if err != nil {
+		c.logger.LogInfo("%s: failed to get current code: %v", op, err)
+		return repositories.Transaction{
+			Perform:  func() error { return err },
+			Rollback: func() error { return err },
+		}
+	}
+
 	return repositories.Transaction{
 		Perform: func() error {
-			if err != nil {
-				c.logger.LogInfo("%s: failed to get current code err: %v", op, err)
-				return err
-			}
 			return c.storeEmailVerificationCode(email, code)
 		},
 		Rollback: func() error {
-			if err != nil {
-				c.logger.LogInfo("%s: failed to get current code err: %v", op, err)
-				return err
-			}
 			if currentCode == nil {
 				return c.removeEmailVerificationCode(email)
-			} else {
-				return c.storeEmailVerificationCode(email, *currentCode)
 			}
+			return c.storeEmailVerificationCode(email, *currentCode)
 		},
 	}
 }
 
 func (c *postgresRepository) storeEmailVerificationCode(email string, code string) error {
-	const op = "repositories.verification.postgresRepository.storeEmailVerificationCode"
+	const op = "repositories.verification.defaultRepository.storeEmailVerificationCode"
 	c.logger.LogInfo("%s: start[email=%s]", op, email)
+
 	query := `
-INSERT INTO emailVerification(email, code) VALUES ($1, $2)
-ON CONFLICT (email) DO UPDATE SET code = $2;
+INSERT INTO emailVerification(email, code)
+VALUES ($1, $2)
+ON CONFLICT (email) DO UPDATE SET code = EXCLUDED.code;
 `
-	_, err := c.db.Exec(query, email, code)
-	if err != nil {
-		c.logger.LogInfo("%s: failed to perform query err: %v", op, err)
-		return err
+
+	if _, err := c.db.Exec(query, email, code); err != nil {
+		return fmt.Errorf("%s: failed to perform query: %w", op, err)
 	}
+
 	c.logger.LogInfo("%s: success[email=%s]", op, email)
 	return nil
 }
 
 func (c *postgresRepository) GetEmailVerificationCode(email string) (*string, error) {
-	const op = "repositories.verification.postgresRepository.GetEmailVerificationCode"
+	const op = "repositories.verification.defaultRepository.GetEmailVerificationCode"
 	c.logger.LogInfo("%s: start[email=%s]", op, email)
+
 	query := `SELECT code FROM emailVerification WHERE email = $1;`
-	rows, err := c.db.Query(query, email)
-	if err != nil {
-		c.logger.LogInfo("%s: failed to perform query err: %v", op, err)
-		return nil, err
-	}
-	defer rows.Close()
-	if rows.Next() {
-		var code string
-		if err := rows.Scan(&code); err != nil {
-			c.logger.LogInfo("%s: failed to perform scan err: %v", op, err)
-			return nil, err
+	row := c.db.QueryRow(query, email)
+
+	var code string
+	if err := row.Scan(&code); err != nil {
+		if err == sql.ErrNoRows {
+			c.logger.LogInfo("%s: no code found for email=%s", op, email)
+			return nil, nil
 		}
-		if err := rows.Err(); err != nil {
-			c.logger.LogInfo("%s: found rows err: %v", op, err)
-			return nil, err
-		}
-		c.logger.LogInfo("%s: success[email=%s]", op, email)
-		return &code, nil
+		return nil, fmt.Errorf("%s: failed to scan row for push token: %w", op, err)
 	}
-	if err := rows.Err(); err != nil {
-		c.logger.LogInfo("%s: found rows err: %v", op, err)
-		return nil, err
-	}
+
 	c.logger.LogInfo("%s: success[email=%s]", op, email)
-	return nil, nil
+	return &code, nil
 }
 
 func (c *postgresRepository) RemoveEmailVerificationCode(email string) repositories.Transaction {
-	const op = "repositories.verification.postgresRepository.RemoveEmailVerificationCode"
+	const op = "repositories.verification.defaultRepository.RemoveEmailVerificationCode"
+
 	code, err := c.GetEmailVerificationCode(email)
+	if err != nil {
+		c.logger.LogInfo("%s: failed to get current code: %v", op, err)
+		return repositories.Transaction{
+			Perform:  func() error { return err },
+			Rollback: func() error { return err },
+		}
+	}
+
 	return repositories.Transaction{
 		Perform: func() error {
-			if err != nil {
-				c.logger.LogInfo("%s: failed to get current code err: %v", op, err)
-				return err
-			}
 			if code == nil {
 				return nil
-			} else {
-				return c.removeEmailVerificationCode(email)
 			}
+			return c.removeEmailVerificationCode(email)
 		},
 		Rollback: func() error {
-			if err != nil {
-				c.logger.LogInfo("%s: failed to get current code err: %v", op, err)
-				return err
-			}
 			if code == nil {
 				return nil
-			} else {
-				return c.storeEmailVerificationCode(email, *code)
 			}
+			return c.storeEmailVerificationCode(email, *code)
 		},
 	}
 }
 
 func (c *postgresRepository) removeEmailVerificationCode(email string) error {
-	const op = "repositories.verification.postgresRepository.removeEmailVerificationCode"
+	const op = "repositories.verification.defaultRepository.removeEmailVerificationCode"
 	c.logger.LogInfo("%s: start[email=%s]", op, email)
+
 	query := `DELETE FROM emailVerification WHERE email = $1;`
-	_, err := c.db.Exec(query, email)
-	if err != nil {
-		c.logger.LogInfo("%s: failed to perform query err: %v", op, err)
-		return err
+	if _, err := c.db.Exec(query, email); err != nil {
+		return fmt.Errorf("%s: failed to perform query: %w", op, err)
 	}
+
 	c.logger.LogInfo("%s: success[email=%s]", op, email)
 	return nil
 }

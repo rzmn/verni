@@ -123,13 +123,19 @@ func (c *defaultRepository) IsSessionExists(user auth.UserId, device auth.Device
 
 func (c *defaultRepository) ExclusiveSession(user auth.UserId, device auth.DeviceId) repositories.Transaction {
 	const op = "repositories.auth.defaultRepository.ExclusiveSession"
+
 	tokensData, err := c.getTokenDataPerDevice(user)
+	if err != nil {
+		c.logger.LogInfo("%s: failed to get current token data: %v", op, err)
+		return repositories.Transaction{
+			Perform:  func() error { return err },
+			Rollback: func() error { return err },
+		}
+	}
+	delete(tokensData, device)
+
 	return repositories.Transaction{
 		Perform: func() error {
-			if err != nil {
-				return fmt.Errorf("%s: failed to get current credentals err: %w", op, err)
-			}
-			delete(tokensData, device)
 			devices := []auth.DeviceId{}
 			for device := range tokensData {
 				devices = append(devices, device)
@@ -137,13 +143,10 @@ func (c *defaultRepository) ExclusiveSession(user auth.UserId, device auth.Devic
 			return c.removeTokenData(user, devices)
 		},
 		Rollback: func() error {
-			if err != nil {
-				return fmt.Errorf("%s: failed to get current credentals err: %w", op, err)
-			}
-			delete(tokensData, device)
 			var result error = nil
 			for device, token := range tokensData {
 				if err := c.updateRefreshToken(user, device, token); err != nil {
+					c.logger.LogInfo("%s: encountered error rolling back token data: %v", op, err)
 					result = err
 				}
 			}
@@ -185,6 +188,7 @@ func (c *defaultRepository) removeTokenData(user auth.UserId, devices []auth.Dev
 	c.logger.LogInfo("%s: start[user=%s]", op, user)
 
 	if len(devices) == 0 {
+		c.logger.LogInfo("%s: no devices passed, early empty return", op, user)
 		return nil
 	}
 
