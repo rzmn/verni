@@ -43,3 +43,10 @@ func (c *defaultService) ValidateDisplayNameFormat(name string) error {
 	}
 	return nil
 }
+
+func (c *defaultService) ValidateDeviceIdFormat(id string) error {
+	if len(id) < 4 {
+		return fmt.Errorf("device id is invalid: should contain at least 4 characters")
+	}
+	return nil
+}

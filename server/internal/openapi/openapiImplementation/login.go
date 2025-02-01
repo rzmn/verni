@@ -13,7 +13,7 @@ func (s *DefaultAPIService) Login(
 	device string,
 	request openapi.LoginRequest,
 ) (openapi.ImplResponse, error) {
-	session, err := s.auth.Signup(
+	session, err := s.auth.Login(
 		auth.DeviceId(device),
 		request.Credentials.Email,
 		auth.Password(request.Credentials.Password),

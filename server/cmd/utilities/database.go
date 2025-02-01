@@ -94,6 +94,7 @@ func tables() []table {
 					authorId text NOT NULL,
 					operationType text NOT NULL,
 					isLarge text NOT NULL,
+					data BYTEA NOT NULL,
 					searchHint text
 				);`)
 				return err

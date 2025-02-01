@@ -62,6 +62,10 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 		c.logger.LogInfo("%s: wrong password format err: %v", op, err)
 		return auth.Session{}, fmt.Errorf("validating password format: %w", auth.BadFormat)
 	}
+	if err := c.formatValidationService.ValidateDeviceIdFormat(string(device)); err != nil {
+		c.logger.LogInfo("%s: wrong device id format err: %v", op, err)
+		return auth.Session{}, fmt.Errorf("validating device id format: %w", auth.BadFormat)
+	}
 	uidAccosiatedWithEmail, err := c.authRepository.GetUserIdByEmail(email)
 	if err != nil {
 		err := fmt.Errorf("getting uid by credentials from db: %w", err)
