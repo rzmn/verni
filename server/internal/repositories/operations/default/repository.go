@@ -1,6 +1,7 @@
 package defaultRepository
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 	"verni/internal/db"
@@ -26,7 +27,14 @@ func (c *defaultRepository) Push(
 	userId operations.UserId,
 	deviceId operations.DeviceId,
 ) repositories.Transaction {
-
+	return repositories.Transaction{
+		Perform: func() error {
+			return c.push(operations, userId, deviceId)
+		},
+		Rollback: func() error {
+			return c.pushRollback(operations, userId, deviceId)
+		},
+	}
 }
 
 func (c *defaultRepository) Pull(
@@ -36,6 +44,90 @@ func (c *defaultRepository) Pull(
 ) ([]operations.Operation, error) {
 	const op = "repositories.operations.defaultRepository.Pull"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
+
+	query := `
+SELECT
+    o.operationId,
+    o.createdAt,
+    o.data,
+    o.isLarge,
+    o.searchHint,
+    ae.entityId,
+    ae.entityType
+FROM operations o
+JOIN operationsAffectingEntity ae ON o.operationId = ae.operationId
+WHERE ae.operationId IN (
+    SELECT oe.operationId
+    FROM operationsAffectingEntity oe
+    WHERE oe.operationId NOT IN (
+        SELECT co.operationId
+        FROM confirmedOperations co
+        WHERE co.userId = $1 AND co.deviceId = $2
+    )
+) AND (ae.entityId, ae.entityType) IN (
+    SELECT te.entityId, te.entityType
+    FROM trackedEntities te
+    WHERE te.userId = $1
+);`
+
+	rows, err := c.db.Query(query, userId, deviceId)
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to execute query: %w", op, err)
+	}
+	defer rows.Close()
+
+	payloadMap := make(map[operations.OperationId]rawPayload)
+	operationsMap := make(map[operations.OperationId]operations.Operation)
+
+	for rows.Next() {
+		var operation operations.Operation
+		var payload rawPayload
+
+		var entityID string
+		var entityType string
+		var searchHint sql.NullString
+
+		if err := rows.Scan(
+			&operation.OperationId,
+			&operation.CreatedAt,
+			&payload.data,
+			&payload.isLarge,
+			&searchHint,
+			&entityID,
+			&entityType,
+		); err != nil {
+			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
+		}
+
+		if searchHint.Valid {
+			payload.searchHint = &searchHint.String
+		}
+
+		payload.trackedEntities = append(payload.trackedEntities, operations.TrackedEntity{
+			Id:   entityID,
+			Type: entityType,
+		})
+
+		if existingPayload, exists := payloadMap[operation.OperationId]; exists {
+			payload = existingPayload
+		}
+
+		operation.Payload = &payload
+		operationsMap[operation.OperationId] = operation
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: error occurred during row iteration: %w", op, err)
+	}
+
+	result := make([]operations.Operation, 0, len(operationsMap))
+	for _, operation := range operationsMap {
+		result = append(result, operation)
+	}
+
+	c.logger.LogInfo("%s: success[user=%s device=%s]", op, userId, deviceId)
+
+	return result, nil
 }
 
 func (c *defaultRepository) Confirm(
@@ -215,9 +307,154 @@ func (c *defaultRepository) getTrackedEntities(user operations.UserId) ([]operat
 }
 
 func (c *defaultRepository) Get(affectingEntities []operations.TrackedEntity) ([]operations.Operation, error) {
+	const op = "repositories.operations.defaultRepository.Get"
+	c.logger.LogInfo("%s: start", op)
 
+	if len(affectingEntities) == 0 {
+		c.logger.LogInfo("%s: no entities provided, early return", op)
+		return nil, nil
+	}
+
+	query := `
+SELECT
+    o.operationId,
+    o.createdAt,
+    o.data,
+    o.isLarge,
+    o.searchHint,
+    ae.entityId,
+    ae.entityType
+FROM operations o
+JOIN operationsAffectingEntity ae ON o.operationId = ae.operationId
+WHERE `
+
+	var conditions []string
+	var args []interface{}
+	for i, entity := range affectingEntities {
+		conditions = append(conditions, fmt.Sprintf("(ae.entityId = $%d AND ae.entityType = $%d)", i*2+1, i*2+2))
+		args = append(args, entity.Id, entity.Type)
+	}
+
+	query += strings.Join(conditions, " OR ")
+
+	rows, err := c.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to execute query: %w", op, err)
+	}
+	defer rows.Close()
+
+	operationsMap := make(map[operations.OperationId]operations.Operation)
+
+	for rows.Next() {
+		var operation operations.Operation
+		var payload rawPayload
+		var entityID, entityType string
+		var searchHint sql.NullString
+
+		if err := rows.Scan(&operation.OperationId, &operation.CreatedAt, &payload.data, &payload.isLarge, &searchHint, &entityID, &entityType); err != nil {
+			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
+		}
+
+		if searchHint.Valid {
+			payload.searchHint = &searchHint.String
+		}
+
+		trackedEntity := operations.TrackedEntity{
+			Id:   entityID,
+			Type: entityType,
+		}
+
+		if existingOp, exists := operationsMap[operation.OperationId]; exists {
+			operation = existingOp
+		}
+
+		payload.trackedEntities = append(payload.trackedEntities, trackedEntity)
+		operation.Payload = &payload
+
+		operationsMap[operation.OperationId] = operation
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: error occurred during row iteration: %w", op, err)
+	}
+
+	result := make([]operations.Operation, 0, len(operationsMap))
+	for _, operation := range operationsMap {
+		result = append(result, operation)
+	}
+	c.logger.LogInfo("%s: success", op)
+
+	return result, nil
 }
 
 func (c *defaultRepository) Search(payloadType string, hint string) ([]operations.Operation, error) {
+	const op = "repositories.operations.defaultRepository.Search"
+	c.logger.LogInfo("%s: start[type=%s hint=%s]", op, payloadType, hint)
 
+	query := `
+SELECT
+    o.operationId,
+    o.createdAt,
+    o.data,
+    o.isLarge,
+    o.searchHint,
+    ae.entityId,
+    ae.entityType
+FROM operations o
+JOIN operationsAffectingEntity ae ON o.operationId = ae.operationId
+WHERE o.operationType = $1
+  AND o.searchHint IS NOT NULL
+  AND o.searchHint LIKE '%' || $2 || '%';`
+
+	rows, err := c.db.Query(query, payloadType, hint)
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to execute query: %w", op, err)
+	}
+	defer rows.Close()
+
+	operationsMap := make(map[operations.OperationId]operations.Operation)
+	payloadMap := make(map[operations.OperationId]rawPayload)
+
+	for rows.Next() {
+		var operation operations.Operation
+		var payload rawPayload
+		var entityID string
+		var entityType string
+		var searchHint sql.NullString
+
+		if err := rows.Scan(&operation.OperationId, &operation.CreatedAt, &payload.data, &payload.isLarge, &searchHint, &entityID, &entityType); err != nil {
+			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
+		}
+
+		if searchHint.Valid {
+			payload.searchHint = &searchHint.String
+		}
+
+		trackedEntity := operations.TrackedEntity{
+			Id:   entityID,
+			Type: entityType,
+		}
+
+		if current, exists := payloadMap[operation.OperationId]; exists {
+			payload = current
+		}
+
+		payload.trackedEntities = append(payload.trackedEntities, trackedEntity)
+		operation.Payload = &payload
+
+		operationsMap[operation.OperationId] = operation
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: error occurred during row iteration: %w", op, err)
+	}
+
+	result := make([]operations.Operation, 0, len(operationsMap))
+	for _, operation := range operationsMap {
+		result = append(result, operation)
+	}
+
+	c.logger.LogInfo("%s: success[type=%s hint=%s]", op, payloadType, hint)
+
+	return result, nil
 }

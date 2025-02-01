@@ -15,8 +15,8 @@ type TrackedEntity struct {
 }
 
 type Operation struct {
-	CreatedAt   int64
 	OperationId OperationId
+	CreatedAt   int64
 	AuthorId    UserId
 	Payload     OperationPayload
 }
@@ -44,6 +44,7 @@ const (
 
 var (
 	BadOperation = errors.New("bad operation")
+	Conflict     = errors.New("operation identifier is already taken")
 )
 
 type OperationPayload interface {
