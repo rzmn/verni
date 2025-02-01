@@ -13,6 +13,7 @@ package openapi
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -79,11 +80,6 @@ func (c *DefaultAPIController) Routes() Routes {
 			"/auth/registerForPushNotifications",
 			c.RegisterForPushNotifications,
 		},
-		"Logout": Route{
-			strings.ToUpper("Delete"),
-			"/auth/logout",
-			c.Logout,
-		},
 		"GetAvatars": Route{
 			strings.ToUpper("Get"),
 			"/avatars/get",
@@ -124,7 +120,7 @@ func (c *DefaultAPIController) Routes() Routes {
 
 // Signup -
 func (c *DefaultAPIController) Signup(w http.ResponseWriter, r *http.Request) {
-	authorizationParam := r.Header.Get("Authorization")
+	xDeviceIDParam := r.Header.Get("X-Device-ID")
 	signupRequestParam := SignupRequest{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -140,7 +136,7 @@ func (c *DefaultAPIController) Signup(w http.ResponseWriter, r *http.Request) {
 		c.errorHandler(w, r, err, nil)
 		return
 	}
-	result, err := c.service.Signup(r.Context(), authorizationParam, signupRequestParam)
+	result, err := c.service.Signup(r.Context(), xDeviceIDParam, signupRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -152,7 +148,7 @@ func (c *DefaultAPIController) Signup(w http.ResponseWriter, r *http.Request) {
 
 // Login -
 func (c *DefaultAPIController) Login(w http.ResponseWriter, r *http.Request) {
-	authorizationParam := r.Header.Get("Authorization")
+	xDeviceIDParam := r.Header.Get("X-Device-ID")
 	loginRequestParam := LoginRequest{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -168,7 +164,7 @@ func (c *DefaultAPIController) Login(w http.ResponseWriter, r *http.Request) {
 		c.errorHandler(w, r, err, nil)
 		return
 	}
-	result, err := c.service.Login(r.Context(), authorizationParam, loginRequestParam)
+	result, err := c.service.Login(r.Context(), xDeviceIDParam, loginRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -289,19 +285,6 @@ func (c *DefaultAPIController) RegisterForPushNotifications(w http.ResponseWrite
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// Logout -
-func (c *DefaultAPIController) Logout(w http.ResponseWriter, r *http.Request) {
-	authorizationParam := r.Header.Get("Authorization")
-	result, err := c.service.Logout(r.Context(), authorizationParam)
-	// If an error occurred, encode the error with the status code
-	if err != nil {
-		c.errorHandler(w, r, err, &result)
-		return
-	}
-	// If no error, encode the body and the result code
-	_ = EncodeJSONResponse(result.Body, &result.Code, w)
-}
-
 // GetAvatars -
 func (c *DefaultAPIController) GetAvatars(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
@@ -394,22 +377,8 @@ func (c *DefaultAPIController) SendEmailConfirmationCode(w http.ResponseWriter, 
 
 // PullOperations -
 func (c *DefaultAPIController) PullOperations(w http.ResponseWriter, r *http.Request) {
-	query, err := parseQuery(r.URL.RawQuery)
-	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
-		return
-	}
 	authorizationParam := r.Header.Get("Authorization")
-	var deviceIdParam string
-	if query.Has("deviceId") {
-		param := query.Get("deviceId")
-
-		deviceIdParam = param
-	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "deviceId"}, nil)
-		return
-	}
-	result, err := c.service.PullOperations(r.Context(), authorizationParam, deviceIdParam)
+	result, err := c.service.PullOperations(r.Context(), authorizationParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -455,20 +424,11 @@ func (c *DefaultAPIController) ConfirmOperations(w http.ResponseWriter, r *http.
 		return
 	}
 	authorizationParam := r.Header.Get("Authorization")
-	var deviceIdParam string
-	if query.Has("deviceId") {
-		param := query.Get("deviceId")
-
-		deviceIdParam = param
-	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "deviceId"}, nil)
-		return
-	}
 	var idsParam []string
 	if query.Has("ids") {
 		idsParam = strings.Split(query.Get("ids"), ",")
 	}
-	result, err := c.service.ConfirmOperations(r.Context(), authorizationParam, deviceIdParam, idsParam)
+	result, err := c.service.ConfirmOperations(r.Context(), authorizationParam, idsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

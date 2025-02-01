@@ -295,7 +295,7 @@ func (c *defaultController) CheckToken(accessToken string) (auth.UserDevice, err
 	c.logger.LogInfo("%s: access token ok", op)
 	return auth.UserDevice{
 		User:   auth.UserId(subject.User),
-		Device: auth.UserId(subject.Device),
+		Device: auth.DeviceId(subject.Device),
 	}, nil
 }
 

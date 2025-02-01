@@ -10,7 +10,11 @@
 
 package openapi
 
+
+
+
 type LogoutSucceededResponse struct {
+
 	Response map[string]interface{} `json:"response"`
 }
 

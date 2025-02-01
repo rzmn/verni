@@ -13,6 +13,7 @@ package openapi
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -21,8 +22,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 // A Route defines the parameters for an api endpoint

@@ -9,10 +9,10 @@ paths:
     put:
       operationId: signup
       parameters:
-      - description: Bearer Token
+      - description: Device Identifier
         explode: false
         in: header
-        name: Authorization
+        name: X-Device-ID
         required: true
         schema:
           type: string
@@ -52,10 +52,10 @@ paths:
     put:
       operationId: login
       parameters:
-      - description: Bearer Token
+      - description: Device Identifier
         explode: false
         in: header
-        name: Authorization
+        name: X-Device-ID
         required: true
         schema:
           type: string
@@ -256,37 +256,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Something went wrong.
-  /auth/logout:
-    delete:
-      operationId: logout
-      parameters:
-      - description: Bearer Token
-        explode: false
-        in: header
-        name: Authorization
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/logoutSucceededResponse'
-          description: Active session has been invalidated.
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthenticated
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Something went wrong.
   /avatars/get:
     get:
       operationId: getAvatars
@@ -439,13 +408,6 @@ paths:
         schema:
           type: string
         style: simple
-      - explode: true
-        in: query
-        name: deviceId
-        required: true
-        schema:
-          type: string
-        style: form
       responses:
         "200":
           content:
@@ -522,13 +484,6 @@ paths:
         style: simple
       - explode: true
         in: query
-        name: deviceId
-        required: true
-        schema:
-          type: string
-        style: form
-      - explode: true
-        in: query
         name: ids
         required: true
         schema:
@@ -566,11 +521,7 @@ components:
         password:
           description: User password.
           type: string
-        deviceId:
-          description: User device identifier.
-          type: string
       required:
-      - deviceId
       - email
       - password
       type: object
@@ -622,11 +573,6 @@ components:
       type: object
     User:
       description: User.
-      example:
-        avatarId: avatarId
-        displayName: displayName
-        id: id
-        ownerId: ownerId
       properties:
         id:
           description: User Identifier.
@@ -920,20 +866,11 @@ components:
     updateEmailSucceededResponse:
       example:
         response:
-          operations:
-          - createdAt: 0
-            operationId: operationId
-            authorId: authorId
-          - createdAt: 0
-            operationId: operationId
-            authorId: authorId
-          session:
-            id: id
-            accessToken: accessToken
-            refreshToken: refreshToken
+          key: ""
       properties:
         response:
-          $ref: '#/components/schemas/StartupData'
+          additionalProperties: true
+          type: object
       required:
       - response
       title: updateEmailSucceededResponse
@@ -950,20 +887,11 @@ components:
     updatePasswordSucceededResponse:
       example:
         response:
-          operations:
-          - createdAt: 0
-            operationId: operationId
-            authorId: authorId
-          - createdAt: 0
-            operationId: operationId
-            authorId: authorId
-          session:
-            id: id
-            accessToken: accessToken
-            refreshToken: refreshToken
+          key: ""
       properties:
         response:
-          $ref: '#/components/schemas/StartupData'
+          additionalProperties: true
+          type: object
       required:
       - response
       title: updatePasswordSucceededResponse
@@ -985,17 +913,6 @@ components:
       required:
       - response
       title: registerForPushNotificationsSucceededResponse
-    logoutSucceededResponse:
-      example:
-        response:
-          key: ""
-      properties:
-        response:
-          additionalProperties: true
-          type: object
-      required:
-      - response
-      title: logoutSucceededResponse
     getAvatarsSucceededResponse:
       example:
         response:
@@ -1013,18 +930,16 @@ components:
     searchUsersSucceededResponse:
       example:
         response:
-        - avatarId: avatarId
-          displayName: displayName
-          id: id
-          ownerId: ownerId
-        - avatarId: avatarId
-          displayName: displayName
-          id: id
-          ownerId: ownerId
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
+        - createdAt: 0
+          operationId: operationId
+          authorId: authorId
       properties:
         response:
           items:
-            $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/SomeOperation'
           type: array
       required:
       - response
@@ -1077,8 +992,6 @@ components:
       title: pullOperationsSucceededResponse
     pushOperations_request:
       properties:
-        deviceId:
-          type: string
         operations:
           items:
             $ref: '#/components/schemas/SomeOperation'

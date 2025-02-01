@@ -16,7 +16,7 @@ type Session struct {
 
 type UserDevice struct {
 	User   UserId
-	Device UserId
+	Device DeviceId
 }
 
 var (

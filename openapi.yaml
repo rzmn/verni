@@ -7,9 +7,9 @@ paths:
     put:
       operationId: signup
       parameters:
-        - name: Authorization
+        - name: X-Device-ID
           in: header
-          description: "Bearer Token"
+          description: "Device Identifier"
           required: true
           schema:
             type: string
@@ -59,9 +59,9 @@ paths:
     put:
       operationId: login
       parameters:
-        - name: Authorization
+        - name: X-Device-ID
           in: header
-          description: "Bearer Token"
+          description: "Device Identifier"
           required: true
           schema:
             type: string
@@ -174,7 +174,7 @@ paths:
                 title: updateEmailSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/StartupData"
+                    $ref: "#/components/schemas/Empty"
                 required:
                   - response
         "401":
@@ -234,7 +234,7 @@ paths:
                 title: updatePasswordSucceededResponse
                 properties:
                   response:
-                    $ref: "#/components/schemas/StartupData"
+                    $ref: "#/components/schemas/Empty"
                 required:
                   - response
         "401":
@@ -289,40 +289,6 @@ paths:
             application/json:
               schema:
                 title: registerForPushNotificationsSucceededResponse
-                properties:
-                  response:
-                    $ref: "#/components/schemas/Empty"
-                required:
-                  - response
-        "401":
-          description: Unauthenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Something went wrong.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /auth/logout:
-    delete:
-      operationId: logout
-      parameters:
-        - name: Authorization
-          in: header
-          description: "Bearer Token"
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Active session has been invalidated.
-          content:
-            application/json:
-              schema:
-                title: logoutSucceededResponse
                 properties:
                   response:
                     $ref: "#/components/schemas/Empty"
@@ -403,7 +369,7 @@ paths:
                   response:
                     type: array
                     items:
-                      $ref: "#/components/schemas/User"
+                      $ref: "#/components/schemas/SomeOperation"
                 required:
                   - response
         "401":
@@ -507,11 +473,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: deviceId
-          required: true
-          in: query
-          schema:
-            type: string
       responses:
         "200":
           description: Operations list to be applied.
@@ -555,8 +516,6 @@ paths:
             schema:
               type: object
               properties:
-                deviceId:
-                  type: string
                 operations:
                   type: array
                   items:
@@ -603,11 +562,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: deviceId
-          required: true
-          in: query
-          schema:
-            type: string
         - name: ids
           required: true
           in: query
@@ -651,13 +605,9 @@ components:
         password:
           type: string
           description: User password.
-        deviceId:
-          type: string
-          description: User device identifier.
       required:
         - email
         - password
-        - deviceId
     Session:
       type: object
       description: User Session.

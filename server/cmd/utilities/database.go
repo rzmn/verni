@@ -91,7 +91,10 @@ func tables() []table {
 				CREATE TABLE operations(
 					operationId text NOT NULL PRIMARY KEY,
 					createdAt bigint NOT NULL,
-					authorId text NOT NULL
+					authorId text NOT NULL,
+					operationType text NOT NULL,
+					isLarge text NOT NULL,
+					searchHint text
 				);`)
 				return err
 			},

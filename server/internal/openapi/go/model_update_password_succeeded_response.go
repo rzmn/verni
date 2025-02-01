@@ -11,7 +11,7 @@
 package openapi
 
 type UpdatePasswordSucceededResponse struct {
-	Response StartupData `json:"response"`
+	Response map[string]interface{} `json:"response"`
 }
 
 // AssertUpdatePasswordSucceededResponseRequired checks if the required fields are not zero-ed
@@ -25,16 +25,10 @@ func AssertUpdatePasswordSucceededResponseRequired(obj UpdatePasswordSucceededRe
 		}
 	}
 
-	if err := AssertStartupDataRequired(obj.Response); err != nil {
-		return err
-	}
 	return nil
 }
 
 // AssertUpdatePasswordSucceededResponseConstraints checks if the values respects the defined constraints
 func AssertUpdatePasswordSucceededResponseConstraints(obj UpdatePasswordSucceededResponse) error {
-	if err := AssertStartupDataConstraints(obj.Response); err != nil {
-		return err
-	}
 	return nil
 }

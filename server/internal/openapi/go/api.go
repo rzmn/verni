@@ -13,6 +13,7 @@ package openapi
 import (
 	"context"
 	"net/http"
+	"reflect"
 )
 
 // DefaultAPIRouter defines the required methods for binding the api requests to a responses for the DefaultAPI
@@ -25,7 +26,6 @@ type DefaultAPIRouter interface {
 	UpdateEmail(http.ResponseWriter, *http.Request)
 	UpdatePassword(http.ResponseWriter, *http.Request)
 	RegisterForPushNotifications(http.ResponseWriter, *http.Request)
-	Logout(http.ResponseWriter, *http.Request)
 	GetAvatars(http.ResponseWriter, *http.Request)
 	SearchUsers(http.ResponseWriter, *http.Request)
 	ConfirmEmail(http.ResponseWriter, *http.Request)
@@ -46,12 +46,11 @@ type DefaultAPIServicer interface {
 	UpdateEmail(context.Context, string, UpdateEmailRequest) (ImplResponse, error)
 	UpdatePassword(context.Context, string, UpdatePasswordRequest) (ImplResponse, error)
 	RegisterForPushNotifications(context.Context, string, RegisterForPushNotificationsRequest) (ImplResponse, error)
-	Logout(context.Context, string) (ImplResponse, error)
 	GetAvatars(context.Context, string, []string) (ImplResponse, error)
 	SearchUsers(context.Context, string, string) (ImplResponse, error)
 	ConfirmEmail(context.Context, string, ConfirmEmailRequest) (ImplResponse, error)
 	SendEmailConfirmationCode(context.Context, string) (ImplResponse, error)
-	PullOperations(context.Context, string, string) (ImplResponse, error)
+	PullOperations(context.Context, string) (ImplResponse, error)
 	PushOperations(context.Context, string, PushOperationsRequest) (ImplResponse, error)
-	ConfirmOperations(context.Context, string, string, []string) (ImplResponse, error)
+	ConfirmOperations(context.Context, string, []string) (ImplResponse, error)
 }

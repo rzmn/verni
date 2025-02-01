@@ -11,7 +11,7 @@
 package openapi
 
 type UpdateEmailSucceededResponse struct {
-	Response StartupData `json:"response"`
+	Response map[string]interface{} `json:"response"`
 }
 
 // AssertUpdateEmailSucceededResponseRequired checks if the required fields are not zero-ed
@@ -25,16 +25,10 @@ func AssertUpdateEmailSucceededResponseRequired(obj UpdateEmailSucceededResponse
 		}
 	}
 
-	if err := AssertStartupDataRequired(obj.Response); err != nil {
-		return err
-	}
 	return nil
 }
 
 // AssertUpdateEmailSucceededResponseConstraints checks if the values respects the defined constraints
 func AssertUpdateEmailSucceededResponseConstraints(obj UpdateEmailSucceededResponse) error {
-	if err := AssertStartupDataConstraints(obj.Response); err != nil {
-		return err
-	}
 	return nil
 }

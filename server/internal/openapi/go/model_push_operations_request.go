@@ -11,8 +11,6 @@
 package openapi
 
 type PushOperationsRequest struct {
-	DeviceId string `json:"deviceId,omitempty"`
-
 	Operations []SomeOperation `json:"operations,omitempty"`
 }
 
