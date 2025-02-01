@@ -13,7 +13,6 @@ package openapi
 import (
 	"context"
 	"net/http"
-	"reflect"
 )
 
 // DefaultAPIRouter defines the required methods for binding the api requests to a responses for the DefaultAPI

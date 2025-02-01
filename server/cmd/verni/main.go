@@ -13,14 +13,10 @@ import (
 	"verni/internal/openapi/openapiImplementation"
 	authRepository "verni/internal/repositories/auth"
 	defaultAuthRepository "verni/internal/repositories/auth/default"
-	imagesRepository "verni/internal/repositories/images"
-	defaultImagesRepository "verni/internal/repositories/images/default"
+	operationsRepository "verni/internal/repositories/operations"
+	defaultOperationsRepository "verni/internal/repositories/operations/default"
 	pushRegistryRepository "verni/internal/repositories/pushNotifications"
 	defaultPushRegistryRepository "verni/internal/repositories/pushNotifications/default"
-	spendingsRepository "verni/internal/repositories/spendings"
-	defaultSpendingsRepository "verni/internal/repositories/spendings/default"
-	usersRepository "verni/internal/repositories/users"
-	defaultUsersRepository "verni/internal/repositories/users/default"
 	verificationRepository "verni/internal/repositories/verification"
 	defaultVerificationRepository "verni/internal/repositories/verification/default"
 	defaultServer "verni/internal/server/default"
@@ -44,8 +40,10 @@ import (
 
 	authController "verni/internal/controllers/auth"
 	defaultAuthController "verni/internal/controllers/auth/default"
-	avatarsController "verni/internal/controllers/avatars"
-	defaultAvatarsController "verni/internal/controllers/avatars/default"
+	imagesController "verni/internal/controllers/images"
+	defaultImagesController "verni/internal/controllers/images/default"
+	operationsController "verni/internal/controllers/operations"
+	defaultOperationsController "verni/internal/controllers/operations/default"
 	usersController "verni/internal/controllers/users"
 	defaultUsersController "verni/internal/controllers/users/default"
 	verificationController "verni/internal/controllers/verification"
@@ -54,10 +52,8 @@ import (
 
 type Repositories struct {
 	auth         authRepository.Repository
-	images       imagesRepository.Repository
+	operations   operationsRepository.Repository
 	pushRegistry pushRegistryRepository.Repository
-	spendings    spendingsRepository.Repository
-	users        usersRepository.Repository
 	verification verificationRepository.Repository
 }
 
@@ -70,7 +66,8 @@ type Services struct {
 
 type Controllers struct {
 	auth         authController.Controller
-	avatars      avatarsController.Controller
+	images       imagesController.Controller
+	operations   operationsController.Controller
 	users        usersController.Controller
 	verification verificationController.Controller
 }
@@ -172,10 +169,8 @@ func main() {
 	defer database.Close()
 	repositories := Repositories{
 		auth:         defaultAuthRepository.New(database, logger),
-		images:       defaultImagesRepository.New(database, logger),
+		operations:   defaultOperationsRepository.New(database, logger),
 		pushRegistry: defaultPushRegistryRepository.New(database, logger),
-		spendings:    defaultSpendingsRepository.New(database, logger),
-		users:        defaultUsersRepository.New(database, logger),
 		verification: defaultVerificationRepository.New(database, logger),
 	}
 	services := Services{
@@ -245,20 +240,22 @@ func main() {
 	controllers := Controllers{
 		auth: defaultAuthController.New(
 			repositories.auth,
+			repositories.operations,
 			repositories.pushRegistry,
-			repositories.users,
 			services.jwt,
 			services.formatValidationService,
 			logger,
 		),
-		avatars: defaultAvatarsController.New(
-			repositories.images,
+		images: defaultImagesController.New(
+			repositories.operations,
+			logger,
+		),
+		operations: defaultOperationsController.New(
+			repositories.operations,
 			logger,
 		),
 		users: defaultUsersController.New(
-			repositories.users,
-			repositories.images,
-			services.formatValidationService,
+			repositories.operations,
 			logger,
 		),
 		verification: defaultVerificationController.New(
@@ -273,7 +270,8 @@ func main() {
 			controllers.auth,
 			controllers.verification,
 			controllers.users,
-			controllers.avatars,
+			controllers.images,
+			controllers.operations,
 			logger,
 		)
 	}()

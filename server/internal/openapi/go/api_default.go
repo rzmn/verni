@@ -13,7 +13,6 @@ package openapi
 import (
 	"encoding/json"
 	"net/http"
-	"reflect"
 	"strings"
 )
 
