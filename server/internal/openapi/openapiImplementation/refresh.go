@@ -33,7 +33,7 @@ func (s *DefaultAPIService) handleRefreshError(err error, request openapi.Refres
 	case errors.Is(err, auth.TokenExpired):
 		reason = openapi.TOKEN_EXPIRED
 		statusCode = 401
-	case errors.Is(err, auth.AlreadyTaken):
+	case errors.Is(err, auth.BadFormat), errors.Is(err, auth.WrongCredentials):
 		reason = openapi.WRONG_ACCESS_TOKEN
 		statusCode = 409
 	default:
@@ -41,7 +41,6 @@ func (s *DefaultAPIService) handleRefreshError(err error, request openapi.Refres
 		reason = openapi.INTERNAL
 		statusCode = 500
 	}
-
 	description := fmt.Errorf("refresh error: %w", err).Error()
 	return openapi.Response(statusCode, openapi.ErrorResponse{
 		Error: openapi.Error{

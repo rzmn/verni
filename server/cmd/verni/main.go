@@ -31,6 +31,7 @@ import (
 	defaultJwtService "verni/internal/services/jwt/default"
 	"verni/internal/services/logging"
 	prodLoggingService "verni/internal/services/logging/prod"
+	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
 	"verni/internal/services/pathProvider"
 	envBasedPathProvider "verni/internal/services/pathProvider/env"
 	"verni/internal/services/pushNotifications"
@@ -87,35 +88,22 @@ func main() {
 	}
 	logger, pathProvider, config := func() (logging.Service, pathProvider.Service, Config) {
 		startupTime := time.Now()
-		var loggingDirectoryRef *string = nil
-		var watchdogRef *watchdog.Service = nil
-		logger := prodLoggingService.New(func() *prodLoggingService.ProdLoggerConfig {
-			if loggingDirectoryRef == nil {
-				return nil
-			}
-			if watchdogRef == nil {
-				return nil
-			}
-			return &prodLoggingService.ProdLoggerConfig{
-				Watchdog:         *watchdogRef,
-				LoggingDirectory: *loggingDirectoryRef,
-			}
-		})
-		pathProvider := envBasedPathProvider.New(logger)
-		loggingDirectory := pathProvider.AbsolutePath(fmt.Sprintf("./session[%s].log", startupTime.Format("2006.01.02 15:04:05")))
+		tmpLogger := standartOutputLoggingService.New()
+		tmpPathProvider := envBasedPathProvider.New(tmpLogger)
+		loggingDirectory := tmpPathProvider.AbsolutePath(
+			fmt.Sprintf("./session[%s].log", startupTime.Format("2006.01.02 15:04:05")),
+		)
 		if err := os.MkdirAll(loggingDirectory, os.ModePerm); err != nil {
-			loggingDirectoryRef = nil
-		} else {
-			loggingDirectoryRef = &loggingDirectory
+			tmpLogger.LogFatal("failed to create logging directory %s", loggingDirectory)
 		}
-		configFile, err := os.Open(pathProvider.AbsolutePath("./config/prod/verni.json"))
+		configFile, err := os.Open(tmpPathProvider.AbsolutePath("./config/prod/verni.json"))
 		if err != nil {
-			logger.LogFatal("failed to open config file: %s", err)
+			tmpLogger.LogFatal("failed to open config file: %s", err)
 		}
 		defer configFile.Close()
 		configData, err := io.ReadAll(configFile)
 		if err != nil {
-			logger.LogFatal("failed to read config file: %s", err)
+			tmpLogger.LogFatal("failed to read config file: %s", err)
 		}
 		var config Config
 		json.Unmarshal([]byte(configData), &config)
@@ -124,23 +112,27 @@ func main() {
 			case "telegram":
 				data, err := json.Marshal(config.Watchdog.Config)
 				if err != nil {
-					logger.LogFatal("failed to serialize telegram watchdog config err: %v", err)
+					tmpLogger.LogFatal("failed to serialize telegram watchdog config err: %v", err)
 				}
 				var telegramConfig telegramWatchdog.TelegramConfig
 				json.Unmarshal(data, &telegramConfig)
-				logger.LogInfo("creating telegram watchdog with config %v", telegramConfig)
+				tmpLogger.LogInfo("creating telegram watchdog with config %v", telegramConfig)
 				watchdog, err := telegramWatchdog.New(telegramConfig)
 				if err != nil {
-					logger.LogFatal("failed to initialize telegram watchdog err: %v", err)
+					tmpLogger.LogFatal("failed to initialize telegram watchdog err: %v", err)
 				}
-				logger.LogInfo("initialized postgres")
+				tmpLogger.LogInfo("initialized telegram watchdog")
 				return watchdog
 			default:
-				logger.LogFatal("unknown storage type %s", config.Storage.Type)
+				tmpLogger.LogFatal("unknown storage type %s", config.Storage.Type)
 				return nil
 			}
 		}()
-		watchdogRef = &watchdog
+		logger := prodLoggingService.New(prodLoggingService.ProdLoggerConfig{
+			Watchdog:         watchdog,
+			LoggingDirectory: loggingDirectory,
+		})
+		pathProvider := envBasedPathProvider.New(logger)
 		return logger, pathProvider, config
 	}()
 	logger.LogInfo("initializing with config %v", config)

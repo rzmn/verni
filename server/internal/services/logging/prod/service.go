@@ -1,12 +1,10 @@
 package prodLoggingService
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"verni/internal/services/logging"
@@ -19,31 +17,13 @@ type ProdLoggerConfig struct {
 	LoggingDirectory string
 }
 
-func New(configProvider func() *ProdLoggerConfig) logging.Service {
-	logger := &prodLoggingService{
-		consoleLogger: standartOutputLoggingService.New(),
-		watchdogProvider: func() *watchdog.Service {
-			config := configProvider()
-			if config == nil {
-				return nil
-			}
-			return &config.Watchdog
-		},
-		logsDirectoryProvider: func() *string {
-			config := configProvider()
-			if config == nil {
-				return nil
-			}
-			return &config.LoggingDirectory
-		},
-		wg:                           sync.WaitGroup{},
-		logger:                       make(chan func(), 10),
-		delayedLinesToWriteToLogFile: []string{},
-		watchdogContext:              createWatchdogContext(),
-		delayedWatchdogCalls:         []func(watchdog.Service){},
+func New(config ProdLoggerConfig) logging.Service {
+	return &prodLoggingService{
+		consoleLogger:   standartOutputLoggingService.New(),
+		watchdog:        config.Watchdog,
+		logsDirectory:   config.LoggingDirectory,
+		watchdogContext: createWatchdogContext(),
 	}
-	go logger.logImpl(context.Background())
-	return logger
 }
 
 type watchdogContext struct {
@@ -82,52 +62,35 @@ func createWatchdogContext() watchdogContext {
 }
 
 type prodLoggingService struct {
-	consoleLogger                logging.Service
-	watchdogProvider             func() *watchdog.Service
-	logsDirectoryProvider        func() *string
-	wg                           sync.WaitGroup
-	logger                       chan func()
-	delayedLinesToWriteToLogFile []string
-	watchdogContext              watchdogContext
-	delayedWatchdogCalls         []func(watchdog.Service)
+	consoleLogger   logging.Service
+	watchdog        watchdog.Service
+	logsDirectory   string
+	watchdogContext watchdogContext
 }
 
 func (c *prodLoggingService) LogInfo(format string, v ...any) {
 	message := prepare(format, v...)
 	c.consoleLogger.LogInfo(message)
-	c.wg.Add(1)
-	c.logger <- func() {
-		c.watchdogContext.Append(message)
-		c.writeToFile(message)
-	}
+	c.writeToFile(message)
+	c.watchdogContext.Append(message)
 }
 
 func (c *prodLoggingService) LogError(format string, v ...any) {
-	message := prepare(format, v...)
-	c.consoleLogger.LogError(message)
-	c.wg.Add(2)
-	c.logger <- func() {
-		c.watchdogContext.Append(message)
-		c.writeToFile("[error] " + message)
-	}
-	c.logger <- func() {
-		c.fireWatchdog("[error] " + message)
-	}
+	withoutTag := prepare(format, v...)
+	c.consoleLogger.LogError(withoutTag)
+	message := fmt.Sprintf("[error] %s", withoutTag)
+	c.writeToFile(message)
+	c.watchdogContext.Append(message)
+	c.fireWatchdog(message)
 }
 
 func (c *prodLoggingService) LogFatal(format string, v ...any) {
-	message := prepare(format, v...)
-	c.wg.Add(2)
-	c.logger <- func() {
-		c.watchdogContext.Append(message)
-		c.writeToFile("[fatal] " + message)
-	}
-	c.logger <- func() {
-		c.fireWatchdog("[fatal] " + message)
-	}
-	c.wg.Wait()
-	close(c.logger)
-	c.consoleLogger.LogFatal(message)
+	withoutTag := prepare(format, v...)
+	message := fmt.Sprintf("[error] %s", withoutTag)
+	c.writeToFile(message)
+	c.watchdogContext.Append(message)
+	c.fireWatchdog(message)
+	c.consoleLogger.LogFatal(withoutTag)
 }
 
 func prepare(format string, v ...any) string {
@@ -138,84 +101,37 @@ func prepare(format string, v ...any) string {
 }
 
 func (c *prodLoggingService) writeToFile(message string) {
-	logsDirectory := c.logsDirectoryProvider()
-	if logsDirectory != nil {
-		path := getLogPath(*logsDirectory)
-		f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-		if err != nil {
-			c.delayedLinesToWriteToLogFile = append(c.delayedLinesToWriteToLogFile, message)
-			return
-		}
-		defer f.Close()
-		chunk := ""
-		for _, message := range c.delayedLinesToWriteToLogFile {
-			chunk += message + "\n"
-		}
-		chunk += message + "\n"
-		if _, err = f.WriteString(chunk); err != nil {
-			c.delayedLinesToWriteToLogFile = []string{chunk}
-			return
-		}
-		c.delayedLinesToWriteToLogFile = []string{}
-	} else {
-		c.delayedLinesToWriteToLogFile = append(c.delayedLinesToWriteToLogFile, message)
+	path := getLogPath(c.logsDirectory)
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		message := message + "\n" + fmt.Sprintf("[panic] cannot open log file: %v", err)
+		c.watchdog.NotifyMessage(message)
+		c.consoleLogger.LogFatal(message)
+		return
+	}
+	if _, err = f.WriteString(message + "\n"); err != nil {
+		message := message + "\n" + fmt.Sprintf("[panic] cannot write to log file: %v", err)
+		c.watchdog.NotifyMessage(message)
+		c.consoleLogger.LogFatal(message)
+		return
 	}
 }
 
 func (c *prodLoggingService) fireWatchdog(message string) {
 	file, err := os.CreateTemp("", "watchdogContext")
 	if err != nil {
-		c.fireWatchdogImpl(func(watchdog watchdog.Service) {
-			watchdog.NotifyMessage(fmt.Sprintf("[panic] shutting down wd, reason: cannot create logs file err: %v", err))
-			c.watchdogProvider = nil
-		})
+		c.watchdog.NotifyMessage(fmt.Sprintf("[panic] shutting down wd, reason: cannot create logs file err: %v", err))
 		return
 	}
 	context := strings.Join(c.watchdogContext.Array(), "\n")
 	if _, err = file.WriteString(context); err != nil {
-		c.fireWatchdogImpl(func(watchdog watchdog.Service) {
-			watchdog.NotifyMessage(fmt.Sprintf("[panic] shutting down wd, reason: cannot write logs to file err: %v", err))
-			c.watchdogProvider = nil
-		})
+		c.watchdog.NotifyMessage(fmt.Sprintf("[panic] shutting down wd, reason: cannot write logs to file err: %v", err))
 		return
 	}
-	c.fireWatchdogImpl(func(watchdog watchdog.Service) {
-		watchdog.NotifyMessage(fmt.Sprintf("internal error: %s", message))
-		watchdog.NotifyFile(file.Name())
-	})
-}
-
-func (c *prodLoggingService) fireWatchdogImpl(routine func(watchdog watchdog.Service)) {
-	c.delayedWatchdogCalls = append(c.delayedWatchdogCalls, routine)
-	for _, routine := range c.delayedWatchdogCalls {
-		provider := c.watchdogProvider
-		if provider == nil {
-			c.delayedWatchdogCalls = []func(watchdog.Service){}
-			return
-		}
-		watchdog := provider()
-		if watchdog == nil {
-			return
-		}
-		routine(*watchdog)
-	}
-	c.delayedWatchdogCalls = []func(watchdog.Service){}
+	c.watchdog.NotifyMessage(fmt.Sprintf("internal error: %s", message))
+	c.watchdog.NotifyFile(file.Name())
 }
 
 func getLogPath(directory string) string {
 	return filepath.Join(directory, "./1.log")
-}
-
-func (c *prodLoggingService) logImpl(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case routine := <-c.logger:
-			if routine != nil {
-				routine()
-			}
-			c.wg.Done()
-		}
-	}
 }

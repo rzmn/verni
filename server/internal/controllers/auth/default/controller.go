@@ -249,7 +249,7 @@ func (c *defaultController) Refresh(refreshToken string) (auth.Session, error) {
 	transaction := c.authRepository.UpdateRefreshToken(
 		authRepository.UserId(subject.User),
 		authRepository.DeviceId(subject.Device),
-		refreshToken,
+		string(newRefreshToken),
 	)
 	if err := transaction.Perform(); err != nil {
 		err := fmt.Errorf("storing new refresh token: %w", err)

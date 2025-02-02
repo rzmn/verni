@@ -17,7 +17,7 @@ func (c *standartOutputLoggingService) LogInfo(format string, v ...any) {
 }
 
 func (c *standartOutputLoggingService) LogError(format string, v ...any) {
-	log.Fatalf(format, v...)
+	log.Printf(format, v...)
 }
 
 func (c *standartOutputLoggingService) LogFatal(format string, v ...any) {
