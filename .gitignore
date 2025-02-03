@@ -20,6 +20,7 @@ server/node_modules
 server/main
 server/logs
 server/config
+server/cmd/utilities/utilities
 
 ## Playgrounds
 timeline.xctimeline

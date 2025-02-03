@@ -26,13 +26,14 @@ func (c *defaultRepository) Push(
 	operations []operations.Operation,
 	userId operations.UserId,
 	deviceId operations.DeviceId,
+	confirm bool,
 ) repositories.Transaction {
 	return repositories.Transaction{
 		Perform: func() error {
-			return c.push(operations, userId, deviceId)
+			return c.push(operations, userId, deviceId, confirm)
 		},
 		Rollback: func() error {
-			return c.pushRollback(operations, userId, deviceId)
+			return c.pushRollback(operations, userId, deviceId, confirm)
 		},
 	}
 }

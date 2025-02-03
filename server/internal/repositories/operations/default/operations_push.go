@@ -11,6 +11,7 @@ func (c *defaultRepository) push(
 	operations []operations.Operation,
 	userId operations.UserId,
 	deviceId operations.DeviceId,
+	confirm bool,
 ) error {
 	const op = "repositories.operations.defaultRepository.push"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
@@ -41,8 +42,10 @@ func (c *defaultRepository) push(
 			}
 		}
 
-		if err := insertConfirmedOperation(tx, userId, deviceId, operation.OperationId); err != nil {
-			return err
+		if confirm {
+			if err := insertConfirmedOperation(tx, userId, deviceId, operation.OperationId); err != nil {
+				return err
+			}
 		}
 	}
 

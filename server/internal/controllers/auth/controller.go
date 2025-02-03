@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	openapi "verni/internal/openapi/go"
 )
 
 type UserId string
@@ -12,6 +13,11 @@ type Session struct {
 	Id           UserId
 	AccessToken  string
 	RefreshToken string
+}
+
+type StartupData struct {
+	Session    Session
+	Operations []openapi.SomeOperation
 }
 
 type UserDevice struct {
@@ -29,9 +35,9 @@ var (
 )
 
 type Controller interface {
-	Signup(device DeviceId, email string, password Password) (Session, error)
+	Signup(device DeviceId, email string, password Password) (StartupData, error)
 
-	Login(device DeviceId, email string, password Password) (Session, error)
+	Login(device DeviceId, email string, password Password) (StartupData, error)
 
 	Refresh(refreshToken string) (Session, error)
 

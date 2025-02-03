@@ -14,7 +14,7 @@ func (s *DefaultAPIService) Signup(
 	request openapi.SignupRequest,
 ) (openapi.ImplResponse, error) {
 
-	session, err := s.auth.Signup(
+	startupData, err := s.auth.Signup(
 		auth.DeviceId(device),
 		request.Credentials.Email,
 		auth.Password(request.Credentials.Password),
@@ -25,8 +25,8 @@ func (s *DefaultAPIService) Signup(
 
 	return openapi.Response(200, openapi.SignupSucceededResponse{
 		Response: openapi.StartupData{
-			Session:    sessionToOpenapi(session),
-			Operations: []openapi.SomeOperation{},
+			Session:    sessionToOpenapi(startupData.Session),
+			Operations: startupData.Operations,
 		},
 	}), nil
 }

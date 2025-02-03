@@ -40,6 +40,7 @@ func (c *defaultController) Push(
 		}),
 		operationsRepository.UserId(userId),
 		operationsRepository.DeviceId(deviceId),
+		true,
 	).Perform(); err != nil {
 		return fmt.Errorf("pushing operations to repository: %w", err)
 	}

@@ -22,7 +22,7 @@ type Operation struct {
 }
 
 type Repository interface {
-	Push(operations []Operation, userId UserId, deviceId DeviceId) repositories.Transaction
+	Push(operations []Operation, userId UserId, deviceId DeviceId, confirm bool) repositories.Transaction
 	Pull(userId UserId, deviceId DeviceId, ignoreLargeOperations bool) ([]Operation, error)
 	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) repositories.Transaction
 

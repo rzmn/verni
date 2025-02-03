@@ -11,6 +11,7 @@ func (c *defaultRepository) pushRollback(
 	operations []operations.Operation,
 	userId operations.UserId,
 	deviceId operations.DeviceId,
+	confirm bool,
 ) error {
 	const op = "repositories.operations.defaultRepository.pushRollback"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
@@ -28,8 +29,10 @@ func (c *defaultRepository) pushRollback(
 	}()
 
 	for _, operation := range operations {
-		if err := deleteConfirmedOperation(tx, userId, deviceId, operation.OperationId); err != nil {
-			return err
+		if confirm {
+			if err := deleteConfirmedOperation(tx, userId, deviceId, operation.OperationId); err != nil {
+				return err
+			}
 		}
 
 		if err := deleteEntities(tx, operation.OperationId); err != nil {
