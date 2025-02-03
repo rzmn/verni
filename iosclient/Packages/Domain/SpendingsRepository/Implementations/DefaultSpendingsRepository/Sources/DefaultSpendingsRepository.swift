@@ -17,7 +17,7 @@ public actor DefaultSpendingsRepository: Sendable {
     private let userId: User.Identifier
 
     private let updatesSubject: AsyncSubject<[SpendingsUpdate]>
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.Operation]>?
+    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
 
     public init(
         userId: User.Identifier,
@@ -75,11 +75,11 @@ public actor DefaultSpendingsRepository: Sendable {
         }
     }
 
-    private func received(operation: Components.Schemas.Operation) {
+    private func received(operation: Components.Schemas.SomeOperation) {
         received(operations: [operation])
     }
 
-    private func received(operations: [Components.Schemas.Operation]) {
+    private func received(operations: [Components.Schemas.SomeOperation]) {
         let oldState = state
         for operation in operations {
             state = reducer(operation, state)
@@ -219,7 +219,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         let groupId = infrastructure.nextId(
             isBlacklisted: isSpendingGroupIdReserved
         )
-        let operation = await Components.Schemas.Operation(
+        let operation = await Components.Schemas.SomeOperation(
             value1: Components.Schemas.BaseOperation(
                 operationId: infrastructure.nextId(
                     isBlacklisted: isOperationIdReserved
@@ -258,7 +258,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         else {
             throw .notAllowed
         }
-        let operation = await Components.Schemas.Operation(
+        let operation = await Components.Schemas.SomeOperation(
             value1: Components.Schemas.BaseOperation(
                 operationId: infrastructure.nextId(
                     isBlacklisted: isOperationIdReserved
@@ -313,7 +313,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         let spendingId = infrastructure.nextId(
             isBlacklisted: isSpendingIdReserved
         )
-        let operation = await Components.Schemas.Operation(
+        let operation = await Components.Schemas.SomeOperation(
             value1: Components.Schemas.BaseOperation(
                 operationId: infrastructure.nextId(
                     isBlacklisted: isOperationIdReserved
@@ -370,7 +370,7 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         else {
             throw .notAllowed
         }
-        let operation = await Components.Schemas.Operation(
+        let operation = await Components.Schemas.SomeOperation(
             value1: Components.Schemas.BaseOperation(
                 operationId: infrastructure.nextId(
                     isBlacklisted: isOperationIdReserved

@@ -18,7 +18,7 @@ public actor DefaultProfileRepository: Sendable {
     private let updatesSubject: AsyncSubject<Profile>
     private let infrastructure: InfrastructureLayer
     private var state: State
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.Operation]>?
+    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
     
     public init(
         infrastructure: InfrastructureLayer,
@@ -78,11 +78,11 @@ public actor DefaultProfileRepository: Sendable {
         }
     }
     
-    private func received(operation: Components.Schemas.Operation) {
+    private func received(operation: Components.Schemas.SomeOperation) {
         received(operations: [operation])
     }
     
-    private func received(operations: [Components.Schemas.Operation]) {
+    private func received(operations: [Components.Schemas.SomeOperation]) {
         let oldState = state
         for operation in operations {
             state = reducer(operation, state)
@@ -125,9 +125,8 @@ extension DefaultProfileRepository: ProfileRepository {
         } catch {
             throw EmailUpdateError(error: error)
         }
-        let startupData: Components.Schemas.StartupData
         do {
-            startupData = try response.get()
+            _ = try response.get()
         } catch {
             switch error {
             case .expected(let error):
@@ -137,12 +136,6 @@ extension DefaultProfileRepository: ProfileRepository {
                 logE { "update email undocumented response code: \(statusCode), payload: \(payload)" }
                 throw EmailUpdateError(error: error)
             }
-        }
-        do {
-            try await sync.pulled(operations: startupData.operations)
-        } catch {
-            logE { "updateEmail: failed to handle startup data error: \(error)" }
-            throw .other(.other(error))
         }
     }
     
@@ -162,9 +155,8 @@ extension DefaultProfileRepository: ProfileRepository {
         } catch {
             throw PasswordUpdateError(error: error)
         }
-        let startupData: Components.Schemas.StartupData
         do {
-            startupData = try response.get()
+            _ = try response.get()
         } catch {
             switch error {
             case .expected(let error):
@@ -174,12 +166,6 @@ extension DefaultProfileRepository: ProfileRepository {
                 logE { "update password undocumented response code: \(statusCode), payload: \(payload)" }
                 throw PasswordUpdateError(error: error)
             }
-        }
-        do {
-            try await sync.pulled(operations: startupData.operations)
-        } catch {
-            logE { "updateEmail: failed to handle startup data error: \(error)" }
-            throw .other(.other(error))
         }
     }
 }

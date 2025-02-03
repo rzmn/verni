@@ -36,7 +36,9 @@ extension RemoteDataSource: UsersRemoteDataSource {
         }
         let users: [Components.Schemas.User]
         do {
-            users = try response.get()
+            users = []
+            _ = try response.get()
+            assertionFailure("not implemented")
         } catch {
             switch error {
             case .expected(let error):

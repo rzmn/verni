@@ -2,9 +2,9 @@ import Api
 
 public protocol SandboxStorage: Storage {
     var userId: HostId { get async }
-    var operations: [Components.Schemas.Operation] { get async }
-    
-    func update(operations: [Components.Schemas.Operation]) async throws
+    var operations: [Components.Schemas.SomeOperation] { get async }
+
+    func update(operations: [Components.Schemas.SomeOperation]) async throws
 }
 
 extension SandboxStorage {

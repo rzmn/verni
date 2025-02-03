@@ -6,7 +6,7 @@ internal import SQLite
 @StorageActor final class SQLiteSandboxStorage {
     let logger: Logger
     let connection: SQLiteConnectionHolder
-    private(set) var operations: [Components.Schemas.Operation]
+    private(set) var operations: [Components.Schemas.SomeOperation]
     
     init(
         logger: Logger,
@@ -24,7 +24,7 @@ internal import SQLite
 }
 
 extension SQLiteSandboxStorage: SandboxStorage {
-    func update(operations: [Components.Schemas.Operation]) async throws {
+    func update(operations: [Components.Schemas.SomeOperation]) async throws {
         guard let database = connection.database else {
             return
         }

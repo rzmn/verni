@@ -42,7 +42,7 @@ let package = Package(
     ]
 )
 
-// autogen_script_content (/Users/rzmn/Projects/verni/swiftverni/Scripts/package_swift_autogen.sh) start - do not modify
+// autogen_script_content (/Users/rzmn/Projects/verni/swiftverni/iosclient/Scripts/package_swift_autogen.sh) start - do not modify
 extension Package.Dependency {
     enum TargetType {
         case interface(String)
@@ -86,4 +86,4 @@ extension Package.Dependency {
         }
     }
 }
-// autogen_script_content (/Users/rzmn/Projects/verni/swiftverni/Scripts/package_swift_autogen.sh) end - do not modify
+// autogen_script_content (/Users/rzmn/Projects/verni/swiftverni/iosclient/Scripts/package_swift_autogen.sh) end - do not modify

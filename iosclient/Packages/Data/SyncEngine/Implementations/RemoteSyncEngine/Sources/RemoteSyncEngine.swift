@@ -6,7 +6,7 @@ import AsyncExtensions
 
 actor RemoteSyncEngine {
     let logger: Logger
-    private let updatesSubject: AsyncSubject<[Components.Schemas.Operation]>
+    private let updatesSubject: AsyncSubject<[Components.Schemas.SomeOperation]>
     private var updatesSubscribersCount: BlockAsyncSubscription<Int>?
     private let api: APIProtocol
     private let storage: UserStorage
@@ -37,7 +37,7 @@ actor RemoteSyncEngine {
 }
 
 extension RemoteSyncEngine: Engine {
-    var updates: any AsyncBroadcast<[Components.Schemas.Operation]> {
+    var updates: any AsyncBroadcast<[Components.Schemas.SomeOperation]> {
         updatesSubject
     }
     
@@ -69,13 +69,13 @@ extension RemoteSyncEngine: Engine {
         assertionFailure("not implemented")
     }
     
-    var operations: [Components.Schemas.Operation] {
+    var operations: [Components.Schemas.SomeOperation] {
         get async {
             await storage.operations.map(\.payload)
         }
     }
 
-    func push(operations: [Components.Schemas.Operation]) async throws {
+    func push(operations: [Components.Schemas.SomeOperation]) async throws {
         try await storage
             .update(
                 operations: operations.map {
@@ -88,7 +88,7 @@ extension RemoteSyncEngine: Engine {
         await sync()
     }
     
-    func pulled(operations: [Components.Schemas.Operation]) async throws {
+    func pulled(operations: [Components.Schemas.SomeOperation]) async throws {
         try await storage
             .update(
                 operations: operations.map {
@@ -102,7 +102,7 @@ extension RemoteSyncEngine: Engine {
     }
     
     private func sync() async {
-        let operations: [Components.Schemas.Operation] = await storage.operations
+        let operations: [Components.Schemas.SomeOperation] = await storage.operations
             .compactMap {
                 guard case .pendingSync = $0.kind else {
                     return nil
@@ -113,13 +113,12 @@ extension RemoteSyncEngine: Engine {
             return
         }
         logI { "found \(operations) pending operations, syncing..." }
-        let unconfirmed: [Components.Schemas.Operation]
+        let unconfirmed: [Components.Schemas.SomeOperation]
         do {
             let response = try await api.pushOperations(
                 .init(
                     body: .json(
                         .init(
-                            deviceId: storage.deviceId,
                             operations: operations
                         )
                     )
@@ -175,7 +174,7 @@ extension RemoteSyncEngine: Engine {
     }
     
     private func confirm() async {
-        let operations: [Components.Schemas.Operation] = await storage.operations
+        let operations: [Components.Schemas.SomeOperation] = await storage.operations
             .compactMap {
                 guard case .pendingConfirm = $0.kind else {
                     return nil
@@ -190,7 +189,6 @@ extension RemoteSyncEngine: Engine {
             let response = try await api.confirmOperations(
                 .init(
                     query: .init(
-                        deviceId: storage.deviceId,
                         ids: operations.map(\.value1.operationId)
                     )
                 )

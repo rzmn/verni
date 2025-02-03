@@ -11,7 +11,7 @@ internal import Convenience
 public actor DefaultAvatarsRepository: Sendable {
     public let logger: Logger
     private let updatesSubject: AsyncSubject<[Image.Identifier: Image]>
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.Operation]>?
+    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
     private let infrastructure: InfrastructureLayer
     private let sync: Engine
     private let reducer: Reducer
@@ -64,11 +64,11 @@ public actor DefaultAvatarsRepository: Sendable {
         }
     }
     
-    private func received(operation: Components.Schemas.Operation) {
+    private func received(operation: Components.Schemas.SomeOperation) {
         received(operations: [operation])
     }
     
-    private func received(operations: [Components.Schemas.Operation]) {
+    private func received(operations: [Components.Schemas.SomeOperation]) {
         let oldState = state
         for operation in operations {
             state = reducer(operation, state)
@@ -117,7 +117,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         let imageId = infrastructure.nextId(
             isBlacklisted: isImageIdReserved
         )
-        let operation = await Components.Schemas.Operation(
+        let operation = await Components.Schemas.SomeOperation(
             value1: Components.Schemas.BaseOperation(
                 operationId: infrastructure.nextId(
                     isBlacklisted: isOperationIdReserved

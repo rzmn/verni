@@ -7,9 +7,9 @@ public struct Operation: Sendable, Hashable, Equatable, Codable {
         case synced
     }
     public var kind: Kind
-    public var payload: Components.Schemas.Operation
+    public var payload: Components.Schemas.SomeOperation
 
-    public init(kind: Kind, payload: Components.Schemas.Operation) {
+    public init(kind: Kind, payload: Components.Schemas.SomeOperation) {
         self.kind = kind
         self.payload = payload
     }
@@ -25,7 +25,7 @@ extension Operation: BaseOperationConvertible {
     }
 }
 
-extension Components.Schemas.Operation: BaseOperationConvertible {
+extension Components.Schemas.SomeOperation: BaseOperationConvertible {
     public var base: Components.Schemas.BaseOperation {
         value1
     }

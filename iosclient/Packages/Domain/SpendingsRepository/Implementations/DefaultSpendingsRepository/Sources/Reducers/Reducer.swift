@@ -1,6 +1,6 @@
 import Api
 
-typealias Reducer = (Components.Schemas.Operation, State) -> State
+typealias Reducer = (Components.Schemas.SomeOperation, State) -> State
 
 func DefaultReducer(
     createSpendingGroupReducer: @escaping (Components.Schemas.BaseOperation, Components.Schemas.CreateSpendingGroupOperation, State) -> State,

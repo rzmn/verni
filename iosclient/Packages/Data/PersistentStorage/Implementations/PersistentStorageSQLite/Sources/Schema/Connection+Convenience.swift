@@ -31,6 +31,9 @@ extension Connection {
     @StorageActor func update<Value: BaseOperationConvertible & Codable>(
         operations: [Value]
     ) throws {
+        guard !operations.isEmpty else {
+            return
+        }
         try run(
             Table(Schema.operations.tableName)
                 .insertMany(

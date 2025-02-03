@@ -18,7 +18,8 @@ Package.resolved
 .swiftpm
 server/node_modules
 server/main
-server/session*
+server/logs
+server/config
 
 ## Playgrounds
 timeline.xctimeline

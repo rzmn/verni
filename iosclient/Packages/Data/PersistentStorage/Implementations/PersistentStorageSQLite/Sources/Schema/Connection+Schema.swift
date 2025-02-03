@@ -18,7 +18,7 @@ extension Connection {
     }
     
     @StorageActor func createTablesForSandbox() throws {
-        try createTable(schema: .operations, key: String.self, value: Components.Schemas.Operation.self)
+        try createTable(schema: .operations, key: String.self, value: Components.Schemas.SomeOperation.self)
     }
     
     @StorageActor func createTablesForUser() throws {

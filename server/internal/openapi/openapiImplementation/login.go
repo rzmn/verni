@@ -24,7 +24,8 @@ func (s *DefaultAPIService) Login(
 
 	return openapi.Response(200, openapi.LoginSucceededResponse{
 		Response: openapi.StartupData{
-			Session: sessionToOpenapi(session),
+			Session:    sessionToOpenapi(session),
+			Operations: []openapi.SomeOperation{},
 		},
 	}), nil
 }

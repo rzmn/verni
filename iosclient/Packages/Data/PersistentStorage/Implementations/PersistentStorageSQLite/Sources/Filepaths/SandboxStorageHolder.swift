@@ -67,13 +67,13 @@ extension SandboxStorageHolder {
             self.implInit = implInit
         }
         
-        var operations: [Components.Schemas.Operation] {
+        var operations: [Components.Schemas.SomeOperation] {
             get async {
                 await impl.operations
             }
         }
         
-        func update(operations: [Components.Schemas.Operation]) async throws {
+        func update(operations: [Components.Schemas.SomeOperation]) async throws {
             try await impl.update(operations: operations)
         }
         

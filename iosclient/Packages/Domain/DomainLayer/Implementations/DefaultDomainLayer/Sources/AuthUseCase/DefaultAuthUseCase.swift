@@ -66,12 +66,14 @@ extension DefaultAuthUseCase: AuthUseCase {
         let response: Operations.Login.Output
         do {
             response = try await sharedDomain.data.sandbox.api.login(
+                headers: Operations.Login.Input.Headers(
+                    xDeviceID: await sessionHost.deviceId
+                ),
                 body: .json(
                     .init(
                         credentials: .init(
                             email: credentials.email,
-                            password: credentials.password,
-                            deviceId: await sessionHost.deviceId
+                            password: credentials.password
                         )
                     )
                 )
@@ -107,12 +109,14 @@ extension DefaultAuthUseCase: AuthUseCase {
         let response: Operations.Signup.Output
         do {
             response = try await sharedDomain.data.sandbox.api.signup(
+                headers: Operations.Signup.Input.Headers(
+                    xDeviceID: await sessionHost.deviceId
+                ),
                 body: .json(
                     .init(
                         credentials: .init(
                             email: credentials.email,
-                            password: credentials.password,
-                            deviceId: await sessionHost.deviceId
+                            password: credentials.password
                         )
                     )
                 )

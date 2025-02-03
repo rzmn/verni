@@ -69,7 +69,7 @@ extension Operations.Login.Output: ApiResult {
 
 extension Operations.SearchUsers.Output: ApiResult {
     @discardableResult
-    public func get() throws(ApiError) -> [Components.Schemas.User] {
+    public func get() throws(ApiError) -> [Components.Schemas.SomeOperation] {
         switch self {
         case .ok(let value):
             switch value.body {
@@ -114,7 +114,7 @@ extension Operations.GetAvatars.Output: ApiResult {
 
 extension Operations.UpdateEmail.Output: ApiResult {
     @discardableResult
-    public func get() throws(ApiError) -> Components.Schemas.StartupData {
+    public func get() throws(ApiError) -> Components.Schemas.Empty {
         switch self {
         case .ok(let value):
             switch value.body {
@@ -149,7 +149,7 @@ extension Operations.UpdateEmail.Output: ApiResult {
 
 extension Operations.UpdatePassword.Output: ApiResult {
     @discardableResult
-    public func get() throws(ApiError) -> Components.Schemas.StartupData {
+    public func get() throws(ApiError) -> Components.Schemas.Empty {
         switch self {
         case .ok(let value):
             switch value.body {

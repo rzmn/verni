@@ -1,6 +1,6 @@
 import Api
 
-typealias Reducer = (Components.Schemas.Operation, State) -> State
+typealias Reducer = (Components.Schemas.SomeOperation, State) -> State
 
 func DefaultReducer(
     verifyEmailReducer: @escaping (Components.Schemas.BaseOperation, Components.Schemas.VerifyEmailOperation, State) -> State,

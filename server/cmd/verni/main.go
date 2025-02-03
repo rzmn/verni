@@ -91,7 +91,7 @@ func main() {
 		tmpLogger := standartOutputLoggingService.New()
 		tmpPathProvider := envBasedPathProvider.New(tmpLogger)
 		loggingDirectory := tmpPathProvider.AbsolutePath(
-			fmt.Sprintf("./session[%s].log", startupTime.Format("2006.01.02 15:04:05")),
+			fmt.Sprintf("./logs/session[%s].log", startupTime.Format("2006.01.02 15:04:05")),
 		)
 		if err := os.MkdirAll(loggingDirectory, os.ModePerm); err != nil {
 			tmpLogger.LogFatal("failed to create logging directory %s", loggingDirectory)
