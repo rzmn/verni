@@ -31,10 +31,18 @@ type Repository interface {
 }
 
 const (
-	CreateUserOperationPayloadType        = "CreateUser"
-	UpdateDisplayNameOperationPayloadType = "UpdateDisplayName"
-	UploadImageOperationPayloadType       = "UploadImage"
-	UnknownOperationPayloadType           = "Unknown"
+	CreateUserOperationPayloadType          = "CreateUser"
+	UpdateDisplayNameOperationPayloadType   = "UpdateDisplayName"
+	UploadImageOperationPayloadType         = "UploadImage"
+	BindUserOperationPayloadType            = "BindUser"
+	UpdateAvatarOperationPayloadType        = "UpdateAvatar"
+	CreateSpendingGroupOperationPayloadType = "CreateSpendingGroup"
+	DeleteSpendingGroupOperationPayloadType = "DeleteSpendingGroup"
+	CreateSpendingOperationPayloadType      = "CreateSpending"
+	DeleteSpendingOperationPayloadType      = "DeleteSpending"
+	UpdateEmailOperationPayloadType         = "UpdateEmail"
+	VerifyEmailOperationPayloadType         = "VerifyEmail"
+	UnknownOperationPayloadType             = "Unknown"
 )
 
 const (
@@ -43,8 +51,8 @@ const (
 )
 
 var (
-	BadOperation = errors.New("bad operation")
-	Conflict     = errors.New("operation identifier is already taken")
+	ErrBadOperation = errors.New("bad operation")
+	ErrConflict     = errors.New("operation identifier is already taken")
 )
 
 type OperationPayload interface {
