@@ -21,14 +21,24 @@ type Operation struct {
 	Payload     OperationPayload
 }
 
+type PushOperation struct {
+	Operation
+	EntityBindActions []EntityBindAction
+}
+
 type Repository interface {
-	Push(operations []Operation, userId UserId, deviceId DeviceId, confirm bool) repositories.Transaction
+	Push(operations []PushOperation, userId UserId, deviceId DeviceId, confirm bool) repositories.Transaction
 	Pull(userId UserId, deviceId DeviceId, ignoreLargeOperations bool) ([]Operation, error)
 	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) repositories.Transaction
 
 	Get(affectingEntities []TrackedEntity) ([]Operation, error)
 	Search(payloadType string, hint string) ([]Operation, error)
 }
+
+var (
+	ErrBadOperation = errors.New("bad operation")
+	ErrConflict     = errors.New("operation identifier is already taken")
+)
 
 const (
 	CreateUserOperationPayloadType          = "CreateUser"
@@ -46,14 +56,15 @@ const (
 )
 
 const (
-	EntityTypeUser  = "User"
-	EntityTypeImage = "Image"
+	EntityTypeUser          = "User"
+	EntityTypeImage         = "Image"
+	EntityTypeSpendingGroup = "SpendingGroup"
 )
 
-var (
-	ErrBadOperation = errors.New("bad operation")
-	ErrConflict     = errors.New("operation identifier is already taken")
-)
+type EntityBindAction struct {
+	Watchers []UserId
+	Entity   TrackedEntity
+}
 
 type OperationPayload interface {
 	Type() string

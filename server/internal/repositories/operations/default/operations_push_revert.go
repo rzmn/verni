@@ -8,7 +8,7 @@ import (
 )
 
 func (c *defaultRepository) pushRollback(
-	operations []operations.Operation,
+	operations []operations.PushOperation,
 	userId operations.UserId,
 	deviceId operations.DeviceId,
 	confirm bool,
@@ -43,9 +43,11 @@ func (c *defaultRepository) pushRollback(
 			return err
 		}
 
-		for _, entity := range operation.Payload.TrackedEntities() {
-			if err := deleteTrackedEntity(tx, userId, entity); err != nil {
-				return err
+		for _, action := range operation.EntityBindActions {
+			for _, watcher := range action.Watchers {
+				if err := deleteTrackedEntity(tx, watcher, action.Entity); err != nil {
+					return err
+				}
 			}
 		}
 	}

@@ -35,7 +35,7 @@ func (c *defaultController) Push(
 	const op = "controllers.operations.defaultController.Push"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
 	if err := c.operationsRepository.Push(
-		common.Map(operations, func(operation openapi.SomeOperation) operationsRepository.Operation {
+		common.Map(operations, func(operation openapi.SomeOperation) operationsRepository.PushOperation {
 			return operationsRepository.CreateOperation(operation)
 		}),
 		operationsRepository.UserId(userId),

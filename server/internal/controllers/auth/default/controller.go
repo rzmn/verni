@@ -102,7 +102,7 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 		},
 	}
 	createOperationTransaction := c.operationsRepository.Push(
-		common.Map(startupOperations, func(operation openapi.SomeOperation) operationsRepository.Operation {
+		common.Map(startupOperations, func(operation openapi.SomeOperation) operationsRepository.PushOperation {
 			return operationsRepository.CreateOperation(operation)
 		}),
 		operationsRepository.UserId(subject.User),

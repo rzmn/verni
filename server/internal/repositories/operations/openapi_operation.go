@@ -9,14 +9,17 @@ type OpenApiOperation struct {
 	openapi.SomeOperation
 }
 
-func CreateOperation(operation openapi.SomeOperation) Operation {
-	return Operation{
-		CreatedAt:   operation.CreatedAt,
-		OperationId: OperationId(operation.OperationId),
-		AuthorId:    UserId(operation.AuthorId),
-		Payload: &OpenApiOperation{
-			operation,
+func CreateOperation(operation openapi.SomeOperation) PushOperation {
+	return PushOperation{
+		Operation{
+			CreatedAt:   operation.CreatedAt,
+			OperationId: OperationId(operation.OperationId),
+			AuthorId:    UserId(operation.AuthorId),
+			Payload: &OpenApiOperation{
+				operation,
+			},
 		},
+		EntityBindActions(OpenApiOperation{operation}),
 	}
 }
 
@@ -71,6 +74,48 @@ func (o *OpenApiOperation) Data() ([]byte, error) {
 	return json.Marshal(o)
 }
 
+func EntityBindActions(o OpenApiOperation) []EntityBindAction {
+	unique := func(slice []UserId) []UserId {
+		uniqueMap := make(map[UserId]struct{})
+		for _, userId := range slice {
+			uniqueMap[userId] = struct{}{}
+		}
+		return slice
+	}
+	switch o.Type() {
+	case CreateUserOperationPayloadType:
+		return []EntityBindAction{{
+			Watchers: []UserId{UserId(o.AuthorId)},
+			Entity:   TrackedEntity{Id: o.CreateUser.UserId, Type: EntityTypeUser},
+		}}
+	case CreateSpendingGroupOperationPayloadType:
+		watchers := []UserId{UserId(o.AuthorId)}
+		for _, participant := range o.CreateSpendingGroup.Participants {
+			watchers = append(watchers, UserId(participant))
+		}
+		watchers = unique(watchers)
+		actions := []EntityBindAction{{
+			Watchers: watchers,
+			Entity:   TrackedEntity{Id: o.CreateSpendingGroup.GroupId, Type: EntityTypeSpendingGroup},
+		}}
+		for _, entity := range watchers {
+			currentEntityWatchers := []UserId{}
+			for _, watcher := range watchers {
+				if watcher != entity {
+					currentEntityWatchers = append(currentEntityWatchers, watcher)
+				}
+			}
+			actions = append(actions, EntityBindAction{
+				Watchers: currentEntityWatchers,
+				Entity:   TrackedEntity{Id: string(entity), Type: EntityTypeUser},
+			})
+		}
+		return actions
+	default:
+		return []EntityBindAction{}
+	}
+}
+
 func (o *OpenApiOperation) TrackedEntities() []TrackedEntity {
 	switch o.Type() {
 	case CreateUserOperationPayloadType:
@@ -98,6 +143,34 @@ func (o *OpenApiOperation) TrackedEntities() []TrackedEntity {
 			{Id: o.BindUser.OldId, Type: EntityTypeUser},
 			{Id: o.BindUser.NewId, Type: EntityTypeUser},
 		}
+	case CreateSpendingGroupOperationPayloadType:
+		return []TrackedEntity{{
+			Id:   o.CreateSpendingGroup.GroupId,
+			Type: EntityTypeSpendingGroup,
+		}}
+	case DeleteSpendingGroupOperationPayloadType:
+		return []TrackedEntity{{
+			Id:   o.DeleteSpendingGroup.GroupId,
+			Type: EntityTypeSpendingGroup,
+		}}
+	case CreateSpendingOperationPayloadType:
+		return []TrackedEntity{
+			{Id: o.CreateSpending.GroupId, Type: EntityTypeSpendingGroup},
+		}
+	case DeleteSpendingOperationPayloadType:
+		return []TrackedEntity{
+			{Id: o.DeleteSpending.GroupId, Type: EntityTypeSpendingGroup},
+		}
+	case UpdateEmailOperationPayloadType:
+		return []TrackedEntity{{
+			Id:   o.AuthorId,
+			Type: EntityTypeUser,
+		}}
+	case VerifyEmailOperationPayloadType:
+		return []TrackedEntity{{
+			Id:   o.AuthorId,
+			Type: EntityTypeUser,
+		}}
 	default:
 		return []TrackedEntity{}
 	}

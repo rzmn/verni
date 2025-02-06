@@ -23,7 +23,7 @@ type defaultRepository struct {
 }
 
 func (c *defaultRepository) Push(
-	operations []operations.Operation,
+	operations []operations.PushOperation,
 	userId operations.UserId,
 	deviceId operations.DeviceId,
 	confirm bool,
@@ -276,35 +276,6 @@ WHERE userId = $%d AND deviceId = $%d AND operationId IN (%s);`,
 
 	c.logger.LogInfo("%s: success[user=%s device=%s]", op, userId, deviceId)
 	return results, nil
-}
-
-func (c *defaultRepository) getTrackedEntities(user operations.UserId) ([]operations.TrackedEntity, error) {
-	const op = "repositories.operations.defaultRepository.getTrackedEntities"
-	c.logger.LogInfo("%s: start[user=%s]", op, user)
-
-	query := `SELECT entityId, entityType FROM trackedEntities WHERE userId = $1;`
-
-	rows, err := c.db.Query(query, string(user))
-	if err != nil {
-		return nil, fmt.Errorf("%s: failed to execute query: %w", op, err)
-	}
-	defer rows.Close()
-
-	var entities []operations.TrackedEntity
-	for rows.Next() {
-		var entity operations.TrackedEntity
-		if err := rows.Scan(&entity.Id, &entity.Type); err != nil {
-			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
-		}
-		entities = append(entities, entity)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%s: error occurred during row iteration: %w", op, err)
-	}
-
-	c.logger.LogInfo("%s: success[user=%s]", op, user)
-	return entities, nil
 }
 
 func (c *defaultRepository) Get(affectingEntities []operations.TrackedEntity) ([]operations.Operation, error) {

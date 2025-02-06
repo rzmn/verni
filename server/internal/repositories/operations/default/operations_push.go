@@ -8,7 +8,7 @@ import (
 )
 
 func (c *defaultRepository) push(
-	operations []operations.Operation,
+	operations []operations.PushOperation,
 	userId operations.UserId,
 	deviceId operations.DeviceId,
 	confirm bool,
@@ -37,8 +37,13 @@ func (c *defaultRepository) push(
 			if err := insertEntity(tx, operation.OperationId, entity); err != nil {
 				return err
 			}
-			if err := insertTrackedEntity(tx, userId, entity); err != nil {
-				return err
+		}
+
+		for _, action := range operation.EntityBindActions {
+			for _, watcher := range action.Watchers {
+				if err := insertTrackedEntity(tx, watcher, action.Entity); err != nil {
+					return err
+				}
 			}
 		}
 
@@ -53,7 +58,7 @@ func (c *defaultRepository) push(
 	return nil
 }
 
-func insertOperation(tx *sql.Tx, operation operations.Operation) error {
+func insertOperation(tx *sql.Tx, operation operations.PushOperation) error {
 	query := `
 INSERT INTO operations (operationId, createdAt, authorId, operationType, isLarge, data, searchHint)
 VALUES ($1, $2, $3, $4, $5, $6, $7);`
