@@ -39,20 +39,20 @@ type yandexService struct {
 func (c *yandexService) Send(subject string, email string) error {
 	const op = "emailSender.yandexService.Send"
 	c.logger.LogInfo("%s: start", op)
-	to := []string{
-		email,
-	}
+
+	to := []string{email}
 	auth := smtp.PlainAuth("", c.sender, c.password, c.host)
 
 	message := []byte(
 		fmt.Sprintf("From: Verni <%s>\r\n", c.sender) +
 			fmt.Sprintf("To: %s\r\n", email) + subject,
 	)
-	err := smtp.SendMail(c.host+":"+c.port, auth, c.sender, to, []byte(message))
-	if err != nil {
-		c.logger.LogInfo("%s: send failed: %v", op, err)
-		return err
+
+	addr := fmt.Sprintf("%s:%s", c.host, c.port)
+	if err := smtp.SendMail(addr, auth, c.sender, to, message); err != nil {
+		return fmt.Errorf("%s: sending email: %w", op, err)
 	}
+
 	c.logger.LogInfo("%s: success", op)
 	return nil
 }
