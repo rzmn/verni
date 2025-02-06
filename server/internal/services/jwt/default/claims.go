@@ -1,6 +1,7 @@
 package defaultJwtService
 
 import (
+	"fmt"
 	"time"
 	jwtService "verni/internal/services/jwt"
 
@@ -18,38 +19,48 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+// NewTokenClaims creates a new Claims instance with the given parameters
 func NewTokenClaims(
 	subject jwtService.Subject,
-	timeProvider func() time.Time,
+	now time.Time,
 	tokenType string,
 	lifetime time.Duration,
 ) Claims {
-	currentTime := timeProvider()
 	return Claims{
 		TokenType: tokenType,
 		Device:    subject.Device,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   string(subject.User),
-			ExpiresAt: jwt.NewNumericDate(currentTime.Add(lifetime)),
-			IssuedAt:  jwt.NewNumericDate(currentTime),
+			ExpiresAt: jwt.NewNumericDate(now.Add(lifetime)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 	}
 }
 
+// NewTokenString creates a signed JWT string from claims
 func NewTokenString(claims Claims, secret []byte) (string, error) {
-	tokenString, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to sign token: %w", err)
 	}
 	return tokenString, nil
 }
 
+// GetToken parses and validates a JWT string
 func GetToken(signedToken string, secret []byte) (*jwt.Token, error) {
-	return jwt.ParseWithClaims(
+	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&Claims{},
 		func(token *jwt.Token) (interface{}, error) {
-			return []byte(secret), nil
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return secret, nil
 		},
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse token: %w", err)
+	}
+	return token, nil
 }

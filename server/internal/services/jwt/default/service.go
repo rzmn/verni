@@ -40,41 +40,33 @@ type defaultService struct {
 }
 
 func (c *defaultService) IssueRefreshToken(subject jwtService.Subject) (jwtService.RefreshToken, error) {
-	const op = "jwt.defaultService.IssueRefreshToken"
-	rawToken, err := NewTokenString(
-		NewTokenClaims(
-			subject,
-			c.currentTime,
-			TokenTypeRefresh,
-			c.refreshTokenLifetime,
-		),
-		[]byte(c.refreshTokenSecret),
+	claims := NewTokenClaims(
+		subject,
+		c.currentTime(),
+		TokenTypeRefresh,
+		c.refreshTokenLifetime,
 	)
+
+	token, err := NewTokenString(claims, []byte(c.refreshTokenSecret))
 	if err != nil {
-		err := fmt.Errorf("issue refresh token for %v: %w", subject, err)
-		c.logger.LogInfo("%s: %v", op, err)
-		return "", err
+		return "", fmt.Errorf("issuing refresh token for subject %v: %w", subject, err)
 	}
-	return jwtService.RefreshToken(rawToken), nil
+	return jwtService.RefreshToken(token), nil
 }
 
 func (c *defaultService) IssueAccessToken(subject jwtService.Subject) (jwtService.AccessToken, error) {
-	const op = "jwt.defaultService.IssueAccessToken"
-	rawToken, err := NewTokenString(
-		NewTokenClaims(
-			subject,
-			c.currentTime,
-			TokenTypeAccess,
-			c.refreshTokenLifetime,
-		),
-		[]byte(c.accessTokenSecret),
+	claims := NewTokenClaims(
+		subject,
+		c.currentTime(),
+		TokenTypeAccess,
+		c.accessTokenLifetime,
 	)
+
+	token, err := NewTokenString(claims, []byte(c.accessTokenSecret))
 	if err != nil {
-		err := fmt.Errorf("issue access token for %v: %w", subject, err)
-		c.logger.LogInfo("%s: %v", op, err)
-		return "", err
+		return "", fmt.Errorf("issuing access token for %v: %w", subject, err)
 	}
-	return jwtService.AccessToken(rawToken), nil
+	return jwtService.AccessToken(token), nil
 }
 
 func (c *defaultService) ValidateRefreshToken(token jwtService.RefreshToken) error {
@@ -90,8 +82,9 @@ func (c *defaultService) ValidateAccessToken(token jwtService.AccessToken) error
 func (c *defaultService) GetRefreshTokenSubject(token jwtService.RefreshToken) (jwtService.Subject, error) {
 	claims, err := c.ValidateToken(string(token), c.refreshTokenSecret, TokenTypeRefresh)
 	if err != nil {
-		return jwtService.Subject{}, err
+		return jwtService.Subject{}, fmt.Errorf("getting refresh token subject: %w", err)
 	}
+
 	return jwtService.Subject{
 		User:   jwtService.UserId(claims.Subject),
 		Device: claims.Device,
@@ -101,8 +94,9 @@ func (c *defaultService) GetRefreshTokenSubject(token jwtService.RefreshToken) (
 func (c *defaultService) GetAccessTokenSubject(token jwtService.AccessToken) (jwtService.Subject, error) {
 	claims, err := c.ValidateToken(string(token), c.accessTokenSecret, TokenTypeAccess)
 	if err != nil {
-		return jwtService.Subject{}, err
+		return jwtService.Subject{}, fmt.Errorf("getting access token subject: %w", err)
 	}
+
 	return jwtService.Subject{
 		User:   jwtService.UserId(claims.Subject),
 		Device: claims.Device,

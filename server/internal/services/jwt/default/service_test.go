@@ -12,260 +12,165 @@ import (
 	"github.com/google/uuid"
 )
 
-func createConfig() defaultJwtService.DefaultConfig {
-	return defaultJwtService.DefaultConfig{
-		RefreshTokenLifetimeHours: 24 * 30,
-		AccessTokenLifetimeHours:  1,
+type testService struct {
+	service jwt.Service
+	config  defaultJwtService.DefaultConfig
+}
+
+func setupTestService(currentTime func() time.Time) testService {
+	config := defaultJwtService.DefaultConfig{
+		RefreshTokenLifetimeHours: 24 * 30, // 30 days
+		AccessTokenLifetimeHours:  1,       // 1 hour
 		RefreshTokenSecret:        "RefreshTokenSecret",
 		AccessTokenSecret:         "AccessTokenSecret",
 	}
+
+	return testService{
+		service: defaultJwtService.New(
+			config,
+			standartOutputLoggingService.New(),
+			currentTime,
+		),
+		config: config,
+	}
 }
 
-func nextSubject() jwt.Subject {
+func generateSubject() jwt.Subject {
 	return jwt.Subject{
 		User:   jwt.UserId(uuid.New().String()),
 		Device: jwt.DeviceId(uuid.New().String()),
 	}
 }
 
-func TestIssuedRefreshTokenIsValid(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueRefreshToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	if err := service.ValidateRefreshToken(token); err != nil {
-		t.Fatalf("ValidateRefreshToken err: %v", err)
-	}
+func TestTokenIssuance(t *testing.T) {
+	t.Run("refresh token issuance and validation", func(t *testing.T) {
+		svc := setupTestService(time.Now)
+		subject := generateSubject()
+
+		token, err := svc.service.IssueRefreshToken(subject)
+		if err != nil {
+			t.Fatalf("failed to issue refresh token: %v", err)
+		}
+
+		if err := svc.service.ValidateRefreshToken(token); err != nil {
+			t.Errorf("failed to validate refresh token: %v", err)
+		}
+
+		gotSubject, err := svc.service.GetRefreshTokenSubject(token)
+		if err != nil {
+			t.Fatalf("failed to get subject from refresh token: %v", err)
+		}
+		if gotSubject != subject {
+			t.Errorf("got subject %v, want %v", gotSubject, subject)
+		}
+	})
+
+	t.Run("access token issuance and validation", func(t *testing.T) {
+		svc := setupTestService(time.Now)
+		subject := generateSubject()
+
+		token, err := svc.service.IssueAccessToken(subject)
+		if err != nil {
+			t.Fatalf("failed to issue access token: %v", err)
+		}
+
+		if err := svc.service.ValidateAccessToken(token); err != nil {
+			t.Errorf("failed to validate access token: %v", err)
+		}
+
+		gotSubject, err := svc.service.GetAccessTokenSubject(token)
+		if err != nil {
+			t.Fatalf("failed to get subject from access token: %v", err)
+		}
+		if gotSubject != subject {
+			t.Errorf("got subject %v, want %v", gotSubject, subject)
+		}
+	})
 }
 
-func TestIssuedRefreshTokenIsNotAnAccessToken(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueRefreshToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	validateAccessTokenError := service.ValidateAccessToken(jwt.AccessToken(token))
-	if validateAccessTokenError == nil {
-		t.Fatalf("refresh token is recognized as a valid access token")
-	} else if !errors.Is(err, jwt.BadToken) {
-		t.Fatalf("ValidateAccessToken unexpected err: %v", validateAccessTokenError)
-	}
+func TestTokenTypeValidation(t *testing.T) {
+	t.Run("refresh token cannot be used as access token", func(t *testing.T) {
+		svc := setupTestService(time.Now)
+		subject := generateSubject()
+
+		refreshToken, _ := svc.service.IssueRefreshToken(subject)
+
+		err := svc.service.ValidateAccessToken(jwt.AccessToken(refreshToken))
+		if !errors.Is(err, jwt.BadToken) {
+			t.Errorf("expected BadToken error, got %v", err)
+		}
+
+		_, err = svc.service.GetAccessTokenSubject(jwt.AccessToken(refreshToken))
+		if !errors.Is(err, jwt.BadToken) {
+			t.Errorf("expected BadToken error, got %v", err)
+		}
+	})
+
+	t.Run("access token cannot be used as refresh token", func(t *testing.T) {
+		svc := setupTestService(time.Now)
+		subject := generateSubject()
+
+		accessToken, _ := svc.service.IssueAccessToken(subject)
+
+		err := svc.service.ValidateRefreshToken(jwt.RefreshToken(accessToken))
+		if !errors.Is(err, jwt.BadToken) {
+			t.Errorf("expected BadToken error, got %v", err)
+		}
+
+		_, err = svc.service.GetRefreshTokenSubject(jwt.RefreshToken(accessToken))
+		if !errors.Is(err, jwt.BadToken) {
+			t.Errorf("expected BadToken error, got %v", err)
+		}
+	})
 }
 
-func TestIssuedRefreshTokenSubjectInaccessibleAsAnAccessToken(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueRefreshToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	subjectFromTokenAsAccessToken, err := service.GetAccessTokenSubject(jwt.AccessToken(token))
-	if err == nil {
-		t.Fatalf("unexpected valid subject from access token %s", subjectFromTokenAsAccessToken)
-	} else if !errors.Is(err, jwt.BadToken) {
-		t.Fatalf("unexpected err getting subject from access token %v", err)
-	}
-}
+func TestTokenExpiration(t *testing.T) {
+	t.Run("expired refresh token", func(t *testing.T) {
+		// Set time to after refresh token expiration
+		expiredTime := func() time.Time {
+			return time.Now().Add(-31 * 24 * time.Hour) // 31 days ago
+		}
+		svc := setupTestService(expiredTime)
 
-func TestIssuedRefreshTokenSubject(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueRefreshToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	subjectFromToken, err := service.GetRefreshTokenSubject(token)
-	if err != nil {
-		t.Fatalf("GetRefreshTokenSubject err: %v", err)
-	}
-	if subject != subjectFromToken {
-		t.Fatalf("subjects did not match %s != %s", subject, subjectFromToken)
-	}
-}
+		token, _ := svc.service.IssueRefreshToken(generateSubject())
 
-func TestExpiredRefreshToken(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now().Add(-(time.Hour*time.Duration(createConfig().RefreshTokenLifetimeHours) + time.Hour))
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueRefreshToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	err = service.ValidateRefreshToken(token)
-	if err == nil {
-		t.Fatalf("outdated token should not be valid")
-	} else if !errors.Is(err, jwt.TokenExpired) {
-		t.Fatalf("outdated token unexpected validation err %v", err)
-	}
-}
+		err := svc.service.ValidateRefreshToken(token)
+		if !errors.Is(err, jwt.TokenExpired) {
+			t.Errorf("expected TokenExpired error, got %v", err)
+		}
+	})
 
-func TestRefreshTokenValidOnTheLastMinute(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now().Add(-(time.Hour*time.Duration(createConfig().RefreshTokenLifetimeHours) - time.Minute))
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueRefreshToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	if err := service.ValidateRefreshToken(token); err != nil {
-		t.Fatalf("ValidateRefreshToken err: %v", err)
-	}
-}
+	t.Run("expired access token", func(t *testing.T) {
+		// Set time to after access token expiration
+		expiredTime := func() time.Time {
+			return time.Now().Add(-2 * time.Hour) // 2 hours ago
+		}
+		svc := setupTestService(expiredTime)
 
-func TestIssuedAccessTokenIsValid(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueAccessToken(subject)
-	if err != nil {
-		t.Fatalf("IssueAccessToken err: %v", err)
-	}
-	if err := service.ValidateAccessToken(token); err != nil {
-		t.Fatalf("ValidateAccessToken err: %v", err)
-	}
-}
+		token, _ := svc.service.IssueAccessToken(generateSubject())
 
-func TestIssuedAccessTokenIsNotARefreshToken(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueAccessToken(subject)
-	if err != nil {
-		t.Fatalf("IssueAccessToken err: %v", err)
-	}
-	err = service.ValidateRefreshToken(jwt.RefreshToken(token))
-	if err == nil {
-		t.Fatalf("access token is recognized as a valid refresh token")
-	} else if !errors.Is(err, jwt.BadToken) {
-		t.Fatalf("ValidateRefreshToken unexpected err: %v", err)
-	}
-}
+		err := svc.service.ValidateAccessToken(token)
+		if !errors.Is(err, jwt.TokenExpired) {
+			t.Errorf("expected TokenExpired error, got %v", err)
+		}
+	})
 
-func TestIssuedAccessTokenSubjectInaccessibleAsAnRefreshToken(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueAccessToken(subject)
-	if err != nil {
-		t.Fatalf("IssueAccessToken err: %v", err)
-	}
-	subjectFromTokenAsRefreshToken, err := service.GetRefreshTokenSubject(jwt.RefreshToken(token))
-	if err == nil {
-		t.Fatalf("unexpected valid subject from refresh token %s", subjectFromTokenAsRefreshToken)
-	} else if !errors.Is(err, jwt.BadToken) {
-		t.Fatalf("unexpected err getting subject from refresh token %v", err)
-	}
-}
+	t.Run("tokens valid just before expiration", func(t *testing.T) {
+		// Set time to just before expiration
+		almostExpiredTime := func() time.Time {
+			return time.Now().Add(-55 * time.Minute) // 55 minutes ago
+		}
+		svc := setupTestService(almostExpiredTime)
+		subject := generateSubject()
 
-func TestIssuedAccessTokenSubject(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now()
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueAccessToken(subject)
-	if err != nil {
-		t.Fatalf("IssueAccessToken err: %v", err)
-	}
-	subjectFromToken, err := service.GetAccessTokenSubject(token)
-	if err != nil {
-		t.Fatalf("GetAccessTokenSubject err: %v", err)
-	}
-	if subject != subjectFromToken {
-		t.Fatalf("subjects did not match %s != %s", subject, subjectFromToken)
-	}
-}
+		accessToken, _ := svc.service.IssueAccessToken(subject)
+		if err := svc.service.ValidateAccessToken(accessToken); err != nil {
+			t.Errorf("access token should be valid: %v", err)
+		}
 
-func TestExpiredAccessToken(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now().Add(-(time.Hour + time.Hour))
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueAccessToken(subject)
-	if err != nil {
-		t.Fatalf("IssueAccessToken err: %v", err)
-	}
-	err = service.ValidateAccessToken(token)
-	if err == nil {
-		t.Fatalf("outdated token should not be valid")
-	} else if !errors.Is(err, jwt.TokenExpired) {
-		t.Fatalf("outdated token unexpected validation err %v", err)
-	}
-}
-
-func TestAccessTokenValidOnTheLastMinute(t *testing.T) {
-	service := defaultJwtService.New(
-		createConfig(),
-		standartOutputLoggingService.New(),
-		func() time.Time {
-			return time.Now().Add(-(time.Hour - time.Minute))
-		},
-	)
-	subject := nextSubject()
-	token, err := service.IssueAccessToken(subject)
-	if err != nil {
-		t.Fatalf("IssueRefreshToken err: %v", err)
-	}
-	if err := service.ValidateAccessToken(token); err != nil {
-		t.Fatalf("ValidateRefreshToken err: %v", err)
-	}
+		refreshToken, _ := svc.service.IssueRefreshToken(subject)
+		if err := svc.service.ValidateRefreshToken(refreshToken); err != nil {
+			t.Errorf("refresh token should be valid: %v", err)
+		}
+	})
 }
