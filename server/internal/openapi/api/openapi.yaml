@@ -408,6 +408,13 @@ paths:
         schema:
           type: string
         style: simple
+      - explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          $ref: '#/components/schemas/OperationType'
+        style: form
       responses:
         "200":
           content:
@@ -624,6 +631,11 @@ components:
     Empty:
       additionalProperties: true
       type: object
+    OperationType:
+      enum:
+      - regular
+      - large
+      type: string
     Error:
       description: Error
       example:

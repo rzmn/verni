@@ -10,6 +10,6 @@ type DeviceId string
 
 type Controller interface {
 	Push(operations []openapi.SomeOperation, userId UserId, deviceId DeviceId) error
-	Pull(userId UserId, deviceId DeviceId, ignoreLargeOperations bool) ([]openapi.SomeOperation, error)
+	Pull(userId UserId, deviceId DeviceId, operationsType openapi.OperationType) ([]openapi.SomeOperation, error)
 	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) error
 }

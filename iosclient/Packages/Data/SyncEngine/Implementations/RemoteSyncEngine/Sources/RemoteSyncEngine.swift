@@ -6,6 +6,7 @@ import AsyncExtensions
 
 actor RemoteSyncEngine {
     let logger: Logger
+    private let updatesListener: UpdatesListener
     private let updatesSubject: AsyncSubject<[Components.Schemas.SomeOperation]>
     private var updatesSubscribersCount: BlockAsyncSubscription<Int>?
     private let api: APIProtocol
@@ -23,6 +24,12 @@ actor RemoteSyncEngine {
         self.storage = storage
         self.taskFactory = taskFactory
         self.logger = logger
+        self.updatesListener = await ShortPoller(
+            api: api,
+            logger: logger
+                .with(prefix: "🔄"),
+            taskFactory: taskFactory
+        )
         updatesSubject = AsyncSubject(
             taskFactory: taskFactory,
             logger: logger
@@ -58,15 +65,28 @@ extension RemoteSyncEngine: Engine {
     }
     
     private func start() {
-        /// call `pull` once
-        /// then set up remote updates
-        /// repeatedly (eg every 10 sec) check if the remote updates service is alive, if not - call `pull` and reschedule service and timer
-        /// also repeatedly checking for pending push operations would be helpful too
-        assertionFailure("not implemented")
+        let pulled: @Sendable ([Components.Schemas.SomeOperation]) async -> Void = { [weak self] operations in
+            guard let self else { return }
+            do {
+                try await self.pulled(operations: operations)
+            } catch {
+                self.logger.logW { "pulled failed due \(error)" }
+            }
+        }
+        taskFactory.detached {
+            await self.updatesListener.start { [weak self] operations in
+                guard let self else { return }
+                taskFactory.detached {
+                    await pulled(operations)
+                }
+            }
+        }
     }
     
     private func stop() {
-        assertionFailure("not implemented")
+        taskFactory.detached {
+            await self.updatesListener.stop()
+        }
     }
     
     var operations: [Components.Schemas.SomeOperation] {

@@ -29,6 +29,7 @@ go/model_get_avatars_succeeded_response.go
 go/model_image.go
 go/model_login_request.go
 go/model_login_succeeded_response.go
+go/model_operation_type.go
 go/model_pull_operations_succeeded_response.go
 go/model_push_operations_code_succeeded_response.go
 go/model_push_operations_request.go

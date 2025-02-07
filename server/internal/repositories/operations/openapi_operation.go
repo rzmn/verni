@@ -23,7 +23,7 @@ func CreateOperation(operation openapi.SomeOperation) PushOperation {
 	}
 }
 
-func (o *OpenApiOperation) Type() string {
+func (o *OpenApiOperation) Type() OperationPayloadType {
 	if !openapi.IsZeroValue(o.CreateUser) {
 		return CreateUserOperationPayloadType
 	} else if !openapi.IsZeroValue(o.UpdateDisplayName) {

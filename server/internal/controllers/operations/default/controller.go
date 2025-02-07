@@ -51,7 +51,7 @@ func (c *defaultController) Push(
 func (c *defaultController) Pull(
 	userId operations.UserId,
 	deviceId operations.DeviceId,
-	ignoreLargeOperations bool,
+	operationsType openapi.OperationType,
 ) ([]openapi.SomeOperation, error) {
 	const op = "controllers.operations.defaultController.Pull"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
@@ -59,7 +59,16 @@ func (c *defaultController) Pull(
 	pulled, err := c.operationsRepository.Pull(
 		operationsRepository.UserId(userId),
 		operationsRepository.DeviceId(deviceId),
-		false,
+		func() operationsRepository.OperationType {
+			switch operationsType {
+			case openapi.REGULAR:
+				return operationsRepository.OperationTypeRegular
+			case openapi.LARGE:
+				return operationsRepository.OperationTypeLarge
+			default:
+				return operationsRepository.OperationTypeRegular
+			}
+		}(),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("pulling operations from repository: %w", err)

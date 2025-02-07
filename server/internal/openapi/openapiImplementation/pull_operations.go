@@ -10,6 +10,7 @@ import (
 func (s *DefaultAPIService) PullOperations(
 	ctx context.Context,
 	token string,
+	operationsType openapi.OperationType,
 ) (openapi.ImplResponse, error) {
 	sessionInfo, earlyResponse := s.validateToken(token)
 	if earlyResponse != nil {
@@ -19,7 +20,7 @@ func (s *DefaultAPIService) PullOperations(
 	result, err := s.operations.Pull(
 		operations.UserId(sessionInfo.User),
 		operations.DeviceId(sessionInfo.Device),
-		false,
+		operationsType,
 	)
 	if err != nil {
 		return s.handlePullOperationsError(err)

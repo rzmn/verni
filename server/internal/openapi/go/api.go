@@ -49,7 +49,7 @@ type DefaultAPIServicer interface {
 	SearchUsers(context.Context, string, string) (ImplResponse, error)
 	ConfirmEmail(context.Context, string, ConfirmEmailRequest) (ImplResponse, error)
 	SendEmailConfirmationCode(context.Context, string) (ImplResponse, error)
-	PullOperations(context.Context, string) (ImplResponse, error)
+	PullOperations(context.Context, string, OperationType) (ImplResponse, error)
 	PushOperations(context.Context, string, PushOperationsRequest) (ImplResponse, error)
 	ConfirmOperations(context.Context, string, []string) (ImplResponse, error)
 }

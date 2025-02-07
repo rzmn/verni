@@ -376,8 +376,22 @@ func (c *DefaultAPIController) SendEmailConfirmationCode(w http.ResponseWriter, 
 
 // PullOperations -
 func (c *DefaultAPIController) PullOperations(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
 	authorizationParam := r.Header.Get("Authorization")
-	result, err := c.service.PullOperations(r.Context(), authorizationParam)
+	var type_Param OperationType
+	if query.Has("type") {
+		param := OperationType(query.Get("type"))
+
+		type_Param = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "type"}, nil)
+		return
+	}
+	result, err := c.service.PullOperations(r.Context(), authorizationParam, type_Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

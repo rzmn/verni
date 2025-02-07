@@ -182,7 +182,7 @@ func (c *defaultController) Login(device auth.DeviceId, email string, password a
 	rawPulledOperations, err := c.operationsRepository.Pull(
 		operationsRepository.UserId(subject.User),
 		operationsRepository.DeviceId(subject.Device),
-		true,
+		operationsRepository.OperationTypeRegular,
 	)
 	if err != nil {
 		return auth.StartupData{}, fmt.Errorf("%s: pulling operations for startup: %w", op, err)

@@ -22,7 +22,7 @@ func (s *DefaultAPIService) PushOperations(
 		operations.UserId(sessionInfo.User),
 		operations.DeviceId(sessionInfo.Device),
 	); err != nil {
-		return s.handlePullOperationsError(err)
+		return s.handlePushOperationsError(err, request)
 	}
 
 	return openapi.Response(200, openapi.PushOperationsSucceededResponse{

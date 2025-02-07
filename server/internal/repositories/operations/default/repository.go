@@ -41,7 +41,7 @@ func (c *defaultRepository) Push(
 func (c *defaultRepository) Pull(
 	userId operations.UserId,
 	deviceId operations.DeviceId,
-	ignoreLargeoperations bool,
+	operationsType operations.OperationType,
 ) ([]operations.Operation, error) {
 	const op = "repositories.operations.defaultRepository.Pull"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
@@ -51,7 +51,6 @@ SELECT
     o.operationId,
     o.createdAt,
     o.data,
-    o.isLarge,
     o.searchHint,
     ae.entityId,
     ae.entityType
@@ -69,9 +68,9 @@ WHERE ae.operationId IN (
     SELECT te.entityId, te.entityType
     FROM trackedEntities te
     WHERE te.userId = $1
-);`
-
-	rows, err := c.db.Query(query, userId, deviceId)
+) AND o.isLarge = $3;`
+	isLarge := operationsType == operations.OperationTypeLarge
+	rows, err := c.db.Query(query, userId, deviceId, isLarge)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to execute query: %w", op, err)
 	}
@@ -92,7 +91,6 @@ WHERE ae.operationId IN (
 			&operation.OperationId,
 			&operation.CreatedAt,
 			&payload.data,
-			&payload.isLarge,
 			&searchHint,
 			&entityID,
 			&entityType,
@@ -104,9 +102,11 @@ WHERE ae.operationId IN (
 			payload.searchHint = &searchHint.String
 		}
 
+		payload.isLarge = isLarge
+
 		payload.trackedEntities = append(payload.trackedEntities, operations.TrackedEntity{
 			Id:   entityID,
-			Type: entityType,
+			Type: operations.EntityType(entityType),
 		})
 
 		if existingPayload, exists := payloadMap[operation.OperationId]; exists {
@@ -333,7 +333,7 @@ WHERE `
 
 		trackedEntity := operations.TrackedEntity{
 			Id:   entityID,
-			Type: entityType,
+			Type: operations.EntityType(entityType),
 		}
 
 		if existingOp, exists := operationsMap[operation.OperationId]; exists {
@@ -359,7 +359,7 @@ WHERE `
 	return result, nil
 }
 
-func (c *defaultRepository) Search(payloadType string, hint string) ([]operations.Operation, error) {
+func (c *defaultRepository) Search(payloadType operations.OperationPayloadType, hint string) ([]operations.Operation, error) {
 	const op = "repositories.operations.defaultRepository.Search"
 	c.logger.LogInfo("%s: start[type=%s hint=%s]", op, payloadType, hint)
 
@@ -404,7 +404,7 @@ WHERE o.operationType = $1
 
 		trackedEntity := operations.TrackedEntity{
 			Id:   entityID,
-			Type: entityType,
+			Type: operations.EntityType(entityType),
 		}
 
 		if current, exists := payloadMap[operation.OperationId]; exists {

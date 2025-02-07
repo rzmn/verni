@@ -473,6 +473,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: type
+          required: true
+          in: query
+          schema:
+            $ref: "#/components/schemas/OperationType"
       responses:
         "200":
           description: Operations list to be applied.
@@ -688,6 +693,11 @@ components:
     Empty:
       type: object
       additionalProperties: true
+    OperationType:
+      type: string
+      enum:
+        - regular
+        - large
     Error:
       type: object
       description: Error
