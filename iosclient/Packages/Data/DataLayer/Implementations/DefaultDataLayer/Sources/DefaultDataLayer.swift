@@ -119,13 +119,26 @@ extension DefaultDataLayer: DataLayer {
     ) async throws -> DataSession {
         let logger = infrastructure.logger
             .with(scope: .dataLayer(.hosted))
-        let storage = try await storageFactory.create(
-            host: startupData.session.id,
-            refreshToken: startupData.session.refreshToken,
-            operations: startupData.operations.map {
-                Operation(kind: .pendingConfirm, payload: $0)
-            }
-        )
+        let storage: UserStorage
+        if let existing = await try storageFactory.hostsAvailable.first(where: { $0.hostId == startupData.session.id }) {
+            logI { "existed session found, awaking" }
+            storage = try await existing.awake()
+            await try storage.update(refreshToken: startupData.session.refreshToken)
+            await try storage.update(
+                operations: startupData.operations.map{
+                    Operation(kind: .pendingConfirm, payload: $0)
+                }
+            )
+        } else {
+            logI { "no existed session found, creating" }
+            storage = try await storageFactory.create(
+                host: startupData.session.id,
+                refreshToken: startupData.session.refreshToken,
+                operations: startupData.operations.map {
+                    Operation(kind: .pendingConfirm, payload: $0)
+                }
+            )
+        }
         let apiFactory = DefaultApiFactory(
             url: Constants.apiEndpoint,
             taskFactory: infrastructure.taskFactory,

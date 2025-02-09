@@ -25,7 +25,7 @@ import TestLogging
 
         // then
 
-        #expect(sample.fileData = data)
+        #expect(sample.fileData == data)
     }
 
     @Test
@@ -85,7 +85,7 @@ import TestLogging
         let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         let fileUrl = URL(filePath: NSTemporaryDirectory())
             .appending(component: UUID().uuidString)
-        try! Foundation.FileManager.default.createFile(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0])
+        Foundation.FileManager.default.createFile(atPath: fileUrl.path(), contents: Data(), attributes: [.posixPermissions: 0])
 
         // when
 
@@ -117,7 +117,7 @@ import TestLogging
             .appending(component: UUID().uuidString)
         let manager = FoundationFileManager(logger: TestLogger(prefix: #function))
         try! manager.createDirectory(at: directory)
-        let data = "bla bla".data(using: .utf8)
+        let data = "bla bla".data(using: .utf8)!
         let file = directory.appending(component: UUID().uuidString)
         let subdirectory = directory.appending(component: UUID().uuidString)
         try! manager.createFile(at: file, content: data)
