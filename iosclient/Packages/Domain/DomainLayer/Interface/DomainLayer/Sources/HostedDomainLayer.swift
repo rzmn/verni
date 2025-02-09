@@ -1,4 +1,5 @@
 import Entities
+import AvatarsRepository
 import ProfileRepository
 import UsersRepository
 import SpendingsRepository
@@ -14,6 +15,10 @@ public protocol HostedDomainLayer: SharedDomainLayerCovertible {
     var profileRepository: ProfileRepository { get }
     var usersRepository: UsersRepository { get }
     var spendingsRepository: SpendingsRepository { get }
+    var avatarsRepository: AvatarsRepository { get }
+    
+    var usersRemoteDataSource: UsersRemoteDataSource { get }
+    var avatarsRemoteDataSource: AvatarsRemoteDataSource { get }
 
     var logoutUseCase: LogoutUseCase { get }
 

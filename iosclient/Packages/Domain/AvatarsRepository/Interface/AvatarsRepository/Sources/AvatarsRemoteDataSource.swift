@@ -1,6 +1,6 @@
 import Entities
 
-public protocol AvatarsRemoteDataSource {
+public protocol AvatarsRemoteDataSource: Sendable {
     func fetch(
         ids: [Image.Identifier]
     ) async -> [Image.Identifier: Image]

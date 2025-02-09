@@ -9,8 +9,9 @@ protocol UpdatesListener: Sendable {
 }
 
 actor ShortPoller: UpdatesListener {
+    let logger: Logger
+    
     private let api: APIProtocol
-    private let logger: Logger
     private let taskFactory: TaskFactory
     private var timer: Timer?
     private var callback: (@Sendable ([Components.Schemas.SomeOperation]) -> Void)?
@@ -54,11 +55,28 @@ extension ShortPoller {
     
     private func pull() async {
         logger.logW { "pulling updates..." }
-//        do {
-//            let operations = try await api.pull()
-//            callback?(operations)
-//        } catch {
-//            logger.logW { "Pull failed: \(error)" }
-//        }
+        let response: Operations.PullOperations.Output
+        do {
+            response = try await api.pullOperations(
+                .init(
+                    query: .init(_type: .large)
+                )
+            )
+        } catch {
+            return logger.logW { "pull failed: \(error)" }
+        }
+        let operations: [Components.Schemas.SomeOperation]
+        do {
+            operations = try response.get()
+        } catch {
+            switch error {
+            case .expected(let payload):
+                return logW { "login finished with error: \(payload)" }
+            case .undocumented(let statusCode, let payload):
+                return logE { "login undocumented response code: \(statusCode), payload: \(payload)" }
+            }
+        }
     }
 }
+
+extension ShortPoller: Loggable {}

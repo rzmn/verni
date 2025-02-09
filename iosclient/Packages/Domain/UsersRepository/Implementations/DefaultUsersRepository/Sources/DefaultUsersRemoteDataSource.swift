@@ -5,11 +5,11 @@ import Logging
 internal import EntitiesApiConvenience
 internal import Convenience
 
-final class RemoteDataSource: Sendable {
-    let logger: Logger
+public final class DefaultUsersRemoteDataSource: Sendable {
+    public let logger: Logger
     private let api: APIProtocol
     
-    init(
+    public init(
         api: APIProtocol,
         logger: Logger
     ) {
@@ -18,8 +18,8 @@ final class RemoteDataSource: Sendable {
     }
 }
 
-extension RemoteDataSource: UsersRemoteDataSource {
-    func searchUsers(
+extension DefaultUsersRemoteDataSource: UsersRemoteDataSource {
+    public func searchUsers(
         query: String
     ) async throws(GeneralError) -> [User] {
         let response: Operations.SearchUsers.Output
@@ -65,4 +65,4 @@ extension RemoteDataSource: UsersRemoteDataSource {
     }
 }
 
-extension RemoteDataSource: Loggable {}
+extension DefaultUsersRemoteDataSource: Loggable {}

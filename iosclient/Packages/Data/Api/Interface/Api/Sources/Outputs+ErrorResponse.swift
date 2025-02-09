@@ -67,6 +67,31 @@ extension Operations.Login.Output: ApiResult {
     }
 }
 
+extension Operations.PullOperations.Output: ApiResult {
+    @discardableResult
+    public func get() throws(ApiError) -> [Components.Schemas.SomeOperation] {
+        switch self {
+        case .ok(let value):
+            switch value.body {
+            case .json(let body):
+                return body.response
+            }
+        case .unauthorized(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .internalServerError(let value):
+            switch value.body {
+            case .json(let body):
+                throw .expected(body.error)
+            }
+        case .undocumented(let statusCode, let payload):
+            throw .undocumented(statusCode: statusCode, payload)
+        }
+    }
+}
+
 extension Operations.SearchUsers.Output: ApiResult {
     @discardableResult
     public func get() throws(ApiError) -> [Components.Schemas.SomeOperation] {
