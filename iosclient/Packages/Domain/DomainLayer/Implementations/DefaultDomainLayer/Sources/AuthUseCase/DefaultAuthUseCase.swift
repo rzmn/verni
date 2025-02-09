@@ -38,10 +38,7 @@ extension DefaultAuthUseCase: AuthUseCase {
             }
             throw .hasNoSession
         }
-        let logoutSubject = AsyncSubject<Void>(
-            taskFactory: sharedDomain.infrastructure.taskFactory,
-            logger: sharedDomain.infrastructure.logger
-        )
+        let logoutSubject = EventPublisher<Void>()
         let session: DataSession
         do {
             session = try await preview.awake(
@@ -147,10 +144,7 @@ extension DefaultAuthUseCase: AuthUseCase {
     }
     
     private func acquire(startupData: Components.Schemas.StartupData) async throws -> HostedDomainLayer {
-        let logoutSubject = AsyncSubject<Void>(
-            taskFactory: sharedDomain.infrastructure.taskFactory,
-            logger: sharedDomain.infrastructure.logger
-        )
+        let logoutSubject = EventPublisher<Void>()
         let session = try await sharedDomain.data.create(
             startupData: startupData,
             loggedOutHandler: logoutSubject

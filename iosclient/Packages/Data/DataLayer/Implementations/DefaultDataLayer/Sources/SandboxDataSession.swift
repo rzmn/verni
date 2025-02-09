@@ -12,11 +12,29 @@ internal import DefaultApiImplementation
 internal import PersistentStorageSQLite
 
 public final class SandboxDataSession: DataSession {
-    private let syncEngineFactory: EngineFactory
-    private let _sync: AsyncLazyObject<Engine>
+    private actor EngineBox {
+        private var _value: Engine?
+        private let block: @Sendable () async -> Engine
+        var value: Engine {
+            get async {
+                guard let _value else {
+                    let value = await block()
+                    _value = value
+                    return value
+                }
+                return _value
+            }
+        }
+        
+        init(_ block: @escaping @Sendable () async -> Engine) {
+            self.block = block
+        }
+    }
+    
+    private let engineBox: EngineBox
     public var sync: Engine {
         get async {
-            await _sync.value
+            await engineBox.value
         }
     }
     public let api: APIProtocol
@@ -41,8 +59,7 @@ public final class SandboxDataSession: DataSession {
                 scope: .sync
             )
         )
-        self.syncEngineFactory = syncEngineFactory
-        _sync = AsyncLazyObject {
+        engineBox = EngineBox {
             await syncEngineFactory.create()
         }
     }

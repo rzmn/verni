@@ -15,9 +15,7 @@ public actor DefaultSpendingsRepository: Sendable {
     private var state: State
     private let sync: Engine
     private let userId: User.Identifier
-
-    private let updatesSubject: AsyncSubject<[SpendingsUpdate]>
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
+    private let eventPublisher: EventPublisher<[SpendingsUpdate]>
 
     public init(
         userId: User.Identifier,
@@ -59,18 +57,15 @@ public actor DefaultSpendingsRepository: Sendable {
         self.infrastructure = infrastructure
         self.sync = sync
         self.userId = userId
-        updatesSubject = AsyncSubject(
-            taskFactory: infrastructure.taskFactory,
-            logger: logger.with(
-                prefix: "🆕"
-            )
-        )
+        eventPublisher = EventPublisher()
         for operation in await sync.operations {
             state = reducer(operation, state)
         }
-        remoteUpdatesSubscription = await sync.updates.subscribe { [weak self] operations in
-            Task { [weak self] in
-                await self?.received(operations: operations)
+        await sync.updates.subscribeWeak(self) { [weak self] operations in
+            guard let self else { return }
+            infrastructure.taskFactory.task { [weak self] in
+                guard let self else { return }
+                await received(operations: operations)
             }
         }
     }
@@ -144,8 +139,9 @@ public actor DefaultSpendingsRepository: Sendable {
                 }
             )
         }
-        infrastructure.taskFactory.detached { [weak updatesSubject] in
-            await updatesSubject?.yield(updates)
+        infrastructure.taskFactory.task { [weak self] in
+            guard let self else { return }
+            await eventPublisher.notify(updates)
         }
     }
 
@@ -171,8 +167,8 @@ extension DefaultSpendingsRepository: SpendingsRepository {
         }
     }
     
-    public nonisolated var updates: any AsyncBroadcast<[SpendingsUpdate]> {
-        updatesSubject
+    public nonisolated var updates: any EventSource<[SpendingsUpdate]> {
+        eventPublisher
     }
 
     public subscript(spending: Spending.Identifier) -> Spending? {

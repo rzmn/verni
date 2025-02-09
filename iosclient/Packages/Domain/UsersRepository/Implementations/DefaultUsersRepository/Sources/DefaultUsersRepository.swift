@@ -15,9 +15,7 @@ public actor DefaultUsersRepository: Sendable {
     private var state: State
     private let sync: Engine
     private let userId: User.Identifier
-
-    private let updatesSubject: AsyncSubject<[User.Identifier: AnyUser]>
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
+    private let eventPublisher: EventPublisher<[User.Identifier: AnyUser]>
 
     public init(
         userId: User.Identifier,
@@ -52,18 +50,15 @@ public actor DefaultUsersRepository: Sendable {
         self.infrastructure = infrastructure
         self.sync = sync
         self.userId = userId
-        updatesSubject = AsyncSubject(
-            taskFactory: infrastructure.taskFactory,
-            logger: logger.with(
-                prefix: "🆕"
-            )
-        )
+        eventPublisher = EventPublisher()
         for operation in await sync.operations {
             state = reducer(operation, state)
         }
-        remoteUpdatesSubscription = await sync.updates.subscribe { [weak self] operations in
-            Task { [weak self] in
-                await self?.received(operations: operations)
+        await sync.updates.subscribeWeak(self) { [weak self] operations in
+            guard let self else { return }
+            infrastructure.taskFactory.task { [weak self] in
+                guard let self else { return }
+                await received(operations: operations)
             }
         }
     }
@@ -91,7 +86,8 @@ public actor DefaultUsersRepository: Sendable {
             return
         }
         infrastructure.taskFactory.detached { [weak self] in
-            await self?.updatesSubject.yield(updates)
+            guard let self else { return }
+            await eventPublisher.notify(updates)
         }
     }
 }
@@ -107,8 +103,8 @@ extension DefaultUsersRepository: UsersRepository {
         }
     }
 
-    public nonisolated var updates: any AsyncBroadcast<[User.Identifier: AnyUser]> {
-        updatesSubject
+    public nonisolated var updates: any EventSource<[User.Identifier: AnyUser]> {
+        eventPublisher
     }
 
     public subscript(id: User.Identifier) -> AnyUser? {

@@ -34,7 +34,7 @@ public enum SpendingsUpdate: Sendable {
 }
 
 public protocol SpendingsRepository: Sendable {
-    var updates: any AsyncBroadcast<[SpendingsUpdate]> { get }
+    var updates: any EventSource<[SpendingsUpdate]> { get }
     
     subscript(spending: Spending.Identifier) -> Spending? { get async }
     subscript(group groupId: SpendingGroup.Identifier) -> (group: SpendingGroup, participants: [SpendingGroup.Participant])? { get async }

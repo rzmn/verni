@@ -64,7 +64,7 @@ extension DefaultDataLayer: DataLayer {
             self.logger = logger
         }
         
-        func awake(loggedOutHandler: AsyncSubject<Void>) async throws -> DataSession {
+        func awake(loggedOutHandler: EventPublisher<Void>) async throws -> DataSession {
             let storage = try await storagePreview.awake()
             let apiFactory = DefaultApiFactory(
                 url: Constants.apiEndpoint,
@@ -115,7 +115,7 @@ extension DefaultDataLayer: DataLayer {
     
     public func create(
         startupData: Components.Schemas.StartupData,
-        loggedOutHandler: AsyncSubject<Void>
+        loggedOutHandler: EventPublisher<Void>
     ) async throws -> DataSession {
         let logger = infrastructure.logger
             .with(scope: .dataLayer(.hosted))

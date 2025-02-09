@@ -7,8 +7,7 @@ import AsyncExtensions
 actor RemoteSyncEngine {
     let logger: Logger
     private let updatesListener: UpdatesListener
-    private let updatesSubject: AsyncSubject<[Components.Schemas.SomeOperation]>
-    private var updatesSubscribersCount: BlockAsyncSubscription<Int>?
+    private let eventPublisher: EventPublisher<[Components.Schemas.SomeOperation]>
     private let api: APIProtocol
     private let storage: UserStorage
     private let taskFactory: TaskFactory
@@ -30,22 +29,13 @@ actor RemoteSyncEngine {
                 .with(prefix: "⏱️"),
             taskFactory: taskFactory
         )
-        updatesSubject = AsyncSubject(
-            taskFactory: taskFactory,
-            logger: logger
-        )
-        updatesSubscribersCount = await updatesSubject.subscribersCount.countPublisher.subscribe { [weak self] subscribersCount in
-            guard let self else { return }
-            taskFactory.task {
-                await self.handleSubscribersUpdated(count: subscribersCount)
-            }
-        }
+        eventPublisher = EventPublisher()
     }
 }
 
 extension RemoteSyncEngine: Engine {
-    var updates: any AsyncBroadcast<[Components.Schemas.SomeOperation]> {
-        updatesSubject
+    var updates: any EventSource<[Components.Schemas.SomeOperation]> {
+        eventPublisher
     }
     
     func handleSubscribersUpdated(count: Int) {

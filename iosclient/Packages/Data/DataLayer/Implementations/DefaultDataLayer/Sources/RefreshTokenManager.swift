@@ -9,12 +9,12 @@ actor RefreshTokenManager {
     private let api: APIProtocol
     private let persistency: UserStorage
     private var accessTokenValue: String?
-    private let authenticationLostSubject: AsyncSubject<Void>
+    private let authenticationLostSubject: EventPublisher<Void>
 
     init(
         api: APIProtocol,
         persistency: UserStorage,
-        authenticationLostSubject: AsyncSubject<Void>,
+        authenticationLostSubject: EventPublisher<Void>,
         accessToken: String?
     ) {
         self.api = api
@@ -43,7 +43,7 @@ extension RefreshTokenManager: RefreshTokenRepository {
             if let error = error.noConnection {
                 throw .noConnection(error)
             } else {
-                await authenticationLostSubject.yield(())
+                await authenticationLostSubject.notify()
                 throw .internalError(error)
             }
         }
@@ -55,17 +55,17 @@ extension RefreshTokenManager: RefreshTokenRepository {
                 session = payload.response
             }
         case .unauthorized(let error):
-            await authenticationLostSubject.yield(())
+            await authenticationLostSubject.notify()
             throw .expired(ErrorContext(context: error))
         case .conflict, .internalServerError, .undocumented:
-            await authenticationLostSubject.yield(())
+            await authenticationLostSubject.notify()
             throw .internalError(ErrorContext(context: response))
         }
         accessTokenValue = session.accessToken
         do {
             try await persistency.update(refreshToken: session.refreshToken)
         } catch {
-            await authenticationLostSubject.yield(())
+            await authenticationLostSubject.notify()
             throw .internalError(error)
         }
     }

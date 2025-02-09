@@ -4,6 +4,6 @@ public protocol DataLayerPreview: Sendable {
     var hostId: HostId { get }
     
     func awake(
-        loggedOutHandler: AsyncSubject<Void>
+        loggedOutHandler: EventPublisher<Void>
     ) async throws -> DataSession
 }

@@ -15,7 +15,7 @@ public actor DefaultRemoteEventsService {
 }
 
 extension DefaultRemoteEventsService: RemoteUpdatesService {
-    public func subscribe() async -> any AsyncBroadcast<RemoteUpdate> {
+    public func subscribe() async -> any EventSource<RemoteUpdate> {
         let service: WebSocketRemoteUpdatesService
         if let webSocket {
             service = webSocket
@@ -27,6 +27,6 @@ extension DefaultRemoteEventsService: RemoteUpdatesService {
             self.webSocket = webSocket
             service = webSocket
         }
-        return await service.publisher
+        return await service.source
     }
 }

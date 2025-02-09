@@ -14,7 +14,7 @@ public enum PasswordUpdateError: Error, Sendable {
 }
 
 public protocol ProfileRepository: Sendable {
-    var updates: any AsyncBroadcast<Profile> { get }
+    var updates: any EventSource<Profile> { get }
     
     var profile: Profile { get async }
     

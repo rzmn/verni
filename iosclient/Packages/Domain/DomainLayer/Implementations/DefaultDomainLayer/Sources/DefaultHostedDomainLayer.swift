@@ -37,7 +37,7 @@ final class DefaultHostedDomainLayer: Sendable {
     
     init(
         sharedDomain: DefaultSharedDomainLayer,
-        logoutSubject: AsyncSubject<Void>,
+        logoutSubject: EventPublisher<Void>,
         sessionHost: SessionHost,
         dataSession: DataSession,
         userId: User.Identifier

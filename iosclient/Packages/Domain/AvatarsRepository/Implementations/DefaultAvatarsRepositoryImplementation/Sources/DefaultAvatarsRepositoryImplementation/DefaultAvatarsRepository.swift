@@ -10,8 +10,7 @@ internal import Convenience
 
 public actor DefaultAvatarsRepository: Sendable {
     public let logger: Logger
-    private let updatesSubject: AsyncSubject<[Image.Identifier: Image]>
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
+    private let eventPublisher: EventPublisher<[Image.Identifier: Image]>
     private let infrastructure: InfrastructureLayer
     private let sync: Engine
     private let reducer: Reducer
@@ -48,18 +47,15 @@ public actor DefaultAvatarsRepository: Sendable {
         self.infrastructure = infrastructure
         self.sync = sync
         self.userId = userId
-        updatesSubject = AsyncSubject(
-            taskFactory: infrastructure.taskFactory,
-            logger: logger.with(
-                prefix: "🆕"
-            )
-        )
+        eventPublisher = EventPublisher()
         for operation in await sync.operations {
             state = reducer(operation, state)
         }
-        remoteUpdatesSubscription = await sync.updates.subscribe { [weak self] operations in
-            Task { [weak self] in
-                await self?.received(operations: operations)
+        await sync.updates.subscribeWeak(self) { [weak self] operations in
+            guard let self else { return }
+            infrastructure.taskFactory.task { [weak self] in
+                guard let self else { return }
+                await received(operations: operations)
             }
         }
     }
@@ -87,7 +83,8 @@ public actor DefaultAvatarsRepository: Sendable {
             return
         }
         infrastructure.taskFactory.detached { [weak self] in
-            await self?.updatesSubject.yield(updates)
+            guard let self else { return }
+            await eventPublisher.notify(updates)
         }
     }
 }
@@ -103,8 +100,8 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         }
     }
     
-    public nonisolated var updates: any AsyncBroadcast<[Image.Identifier: Image]> {
-        updatesSubject
+    public nonisolated var updates: any EventSource<[Image.Identifier: Image]> {
+        eventPublisher
     }
     
     public subscript(id: Image.Identifier) -> Image? {

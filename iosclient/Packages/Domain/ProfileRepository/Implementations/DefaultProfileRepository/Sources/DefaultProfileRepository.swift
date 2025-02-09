@@ -15,10 +15,9 @@ public actor DefaultProfileRepository: Sendable {
     private let sync: Engine
     private let reducer: Reducer
     private let userId: User.Identifier
-    private let updatesSubject: AsyncSubject<Profile>
+    private let eventPublisher: EventPublisher<Profile>
     private let infrastructure: InfrastructureLayer
     private var state: State
-    private var remoteUpdatesSubscription: BlockAsyncSubscription<[Components.Schemas.SomeOperation]>?
     
     public init(
         infrastructure: InfrastructureLayer,
@@ -62,18 +61,15 @@ public actor DefaultProfileRepository: Sendable {
             )
         )
         self.infrastructure = infrastructure
-        self.updatesSubject = AsyncSubject(
-            taskFactory: infrastructure.taskFactory,
-            logger: logger.with(
-                prefix: "🆕"
-            )
-        )
+        self.eventPublisher = EventPublisher()
         for operation in await sync.operations {
             state = reducer(operation, state)
         }
-        remoteUpdatesSubscription = await sync.updates.subscribe { [weak self] operations in
-            Task { [weak self] in
-                await self?.received(operations: operations)
+        await sync.updates.subscribeWeak(self) { [weak self] operations in
+            guard let self else { return }
+            infrastructure.taskFactory.task { [weak self] in
+                guard let self else { return }
+                await received(operations: operations)
             }
         }
     }
@@ -91,14 +87,15 @@ public actor DefaultProfileRepository: Sendable {
             return
         }
         infrastructure.taskFactory.detached { [weak self] in
-            await self?.updatesSubject.yield(profile)
+            guard let self else { return }
+            await eventPublisher.notify(profile)
         }
     }
 }
 
 extension DefaultProfileRepository: ProfileRepository {
-    public nonisolated var updates: any AsyncBroadcast<Profile> {
-        updatesSubject
+    public nonisolated var updates: any EventSource<Profile> {
+        eventPublisher
     }
     
     public var profile: Profile {

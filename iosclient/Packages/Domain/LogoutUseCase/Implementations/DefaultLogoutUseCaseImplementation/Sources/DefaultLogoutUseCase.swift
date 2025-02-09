@@ -10,39 +10,36 @@ public protocol LogoutPerformer: Sendable {
 
 public actor DefaultLogoutUseCase {
     public let logger: Logger
-    private let didLogoutBroadcast: AsyncSubject<LogoutReason>
+    private let didLogoutNotifier: EventPublisher<LogoutReason>
     private let logoutPerformer: LogoutPerformer
     private let taskFactory: TaskFactory
-    private var didLogoutSubscription: (any CancellableEventSource)?
 
     public init(
-        shouldLogout: any AsyncBroadcast<Void>,
+        shouldLogout: EventPublisher<Void>,
         taskFactory: TaskFactory,
         logoutPerformer: LogoutPerformer,
         logger: Logger
     ) async {
-        self.didLogoutBroadcast = AsyncSubject(
-            taskFactory: taskFactory,
-            logger: logger
-        )
+        self.didLogoutNotifier = EventPublisher()
         self.logoutPerformer = logoutPerformer
         self.taskFactory = taskFactory
         self.logger = logger
-        didLogoutSubscription = await shouldLogout.subscribe { [weak self] reason in
-            self?.taskFactory.task { [weak self] in
+        await shouldLogout.subscribeWeak(self) { [weak self] reason in
+            guard let self else { return }
+            taskFactory.task { [weak self] in
                 guard let self else { return }
                 guard await logoutPerformer.performLogout() else {
                     return
                 }
-                await self.didLogoutBroadcast.yield(.refreshTokenFailed)
+                await didLogoutNotifier.notify(.refreshTokenFailed)
             }
         }
     }
 }
 
 extension DefaultLogoutUseCase: LogoutUseCase {
-    public var didLogoutPublisher: any AsyncBroadcast<LogoutReason> {
-        didLogoutBroadcast
+    public var didLogoutEventSource: any EventSource<LogoutReason> {
+        didLogoutNotifier
     }
 
     public func logout() async {

@@ -8,7 +8,7 @@ public enum UploadImageError: Error {
 }
 
 public protocol AvatarsRepository: Sendable {
-    var updates: any AsyncBroadcast<[Image.Identifier: Image]> { get }
+    var updates: any EventSource<[Image.Identifier: Image]> { get }
 
     subscript(
         id: Image.Identifier

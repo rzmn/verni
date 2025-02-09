@@ -2,7 +2,7 @@ import AsyncExtensions
 import Api
 
 public protocol Engine: Sendable {
-    var updates: any AsyncBroadcast<[Components.Schemas.SomeOperation]> { get async }
+    var updates: any EventSource<[Components.Schemas.SomeOperation]> { get async }
     
     var operations: [Components.Schemas.SomeOperation] { get async }
     

@@ -27,7 +27,7 @@ public enum CreateUserError: Error {
 }
 
 public protocol UsersRepository: Sendable {
-    var updates: any AsyncBroadcast<[User.Identifier: AnyUser]> { get }
+    var updates: any EventSource<[User.Identifier: AnyUser]> { get }
 
     subscript(id: User.Identifier) -> AnyUser? { get async }
     subscript(query: String) -> [AnyUser] { get async }

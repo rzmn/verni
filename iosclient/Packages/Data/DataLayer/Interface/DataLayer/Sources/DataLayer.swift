@@ -8,7 +8,7 @@ public protocol DataLayer: Sendable {
     
     func create(
         startupData: Components.Schemas.StartupData,
-        loggedOutHandler: AsyncSubject<Void>
+        loggedOutHandler: EventPublisher<Void>
     ) async throws -> DataSession
     
     func deleteSession(hostId: HostId) async

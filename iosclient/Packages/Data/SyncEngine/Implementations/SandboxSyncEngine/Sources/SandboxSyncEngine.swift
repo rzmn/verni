@@ -7,7 +7,7 @@ import AsyncExtensions
 actor SandboxSyncEngine {
     let logger: Logger
     private let storage: SandboxStorage
-    private let updatesSubject: AsyncSubject<[Components.Schemas.SomeOperation]>
+    private let eventPublisher: EventPublisher<[Components.Schemas.SomeOperation]>
 
     init(
         storage: SandboxStorage,
@@ -16,10 +16,7 @@ actor SandboxSyncEngine {
     ) async {
         self.storage = storage
         self.logger = logger
-        self.updatesSubject = AsyncSubject(
-            taskFactory: taskFactory,
-            logger: logger
-        )
+        self.eventPublisher = EventPublisher()
     }
 }
 
@@ -30,10 +27,8 @@ extension SandboxSyncEngine: Engine {
         }
     }
     
-    var updates: any AsyncBroadcast<[Components.Schemas.SomeOperation]> {
-        get async {
-            updatesSubject
-        }
+    var updates: any EventSource<[Components.Schemas.SomeOperation]> {
+        eventPublisher
     }
     
     func push(operations: [Components.Schemas.SomeOperation]) async throws {
