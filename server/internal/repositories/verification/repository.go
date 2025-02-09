@@ -5,7 +5,7 @@ import (
 )
 
 type Repository interface {
-	StoreEmailVerificationCode(email string, code string) repositories.Transaction
+	StoreEmailVerificationCode(email string, code string) repositories.UnitOfWork
 	GetEmailVerificationCode(email string) (*string, error)
-	RemoveEmailVerificationCode(email string) repositories.Transaction
+	RemoveEmailVerificationCode(email string) repositories.UnitOfWork
 }

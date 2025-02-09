@@ -15,9 +15,9 @@ var (
 )
 
 type Repository interface {
-	Push(operations []PushOperation, userId UserId, deviceId DeviceId, confirm bool) repositories.Transaction
+	Push(operations []PushOperation, userId UserId, deviceId DeviceId, confirm bool) repositories.UnitOfWork
 	Pull(userId UserId, deviceId DeviceId, operationType OperationType) ([]Operation, error)
-	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) repositories.Transaction
+	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) repositories.UnitOfWork
 
 	Get(affectingEntities []TrackedEntity) ([]Operation, error)
 	Search(payloadType OperationPayloadType, hint string) ([]Operation, error)

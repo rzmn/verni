@@ -27,8 +27,8 @@ func (c *defaultRepository) Push(
 	userId operations.UserId,
 	deviceId operations.DeviceId,
 	confirm bool,
-) repositories.Transaction {
-	return repositories.Transaction{
+) repositories.UnitOfWork {
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.push(operations, userId, deviceId, confirm)
 		},
@@ -135,14 +135,14 @@ func (c *defaultRepository) Confirm(
 	operationIds []operations.OperationId,
 	user operations.UserId,
 	device operations.DeviceId,
-) repositories.Transaction {
+) repositories.UnitOfWork {
 	const op = "repositories.operations.defaultRepository.Confirm"
 
 	toFilter, err := c.getConfirmed(operationIds, user, device)
 	if err != nil {
 		err = fmt.Errorf("%s: failed to get confirmed operations: %w", op, err)
 		c.logger.LogInfo("%v", err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
@@ -162,13 +162,13 @@ func (c *defaultRepository) Confirm(
 
 	if len(toConfirm) == 0 {
 		c.logger.LogInfo("%s: nothing to confirm, early return", op)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return nil },
 			Rollback: func() error { return nil },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.markConfirmed(toConfirm, true, user, device)
 		},

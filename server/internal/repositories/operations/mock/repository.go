@@ -6,14 +6,14 @@ import (
 )
 
 type RepositoryMock struct {
-	PushImpl    func(operations []operations.PushOperation, userId operations.UserId, deviceId operations.DeviceId, confirm bool) repositories.Transaction
+	PushImpl    func(operations []operations.PushOperation, userId operations.UserId, deviceId operations.DeviceId, confirm bool) repositories.UnitOfWork
 	PullImpl    func(userId operations.UserId, deviceId operations.DeviceId, ignoreLargeOperations bool) ([]operations.Operation, error)
-	ConfirmImpl func(operations []operations.OperationId, userId operations.UserId, deviceId operations.DeviceId) repositories.Transaction
+	ConfirmImpl func(operations []operations.OperationId, userId operations.UserId, deviceId operations.DeviceId) repositories.UnitOfWork
 	GetImpl     func(affectingEntities []operations.TrackedEntity) ([]operations.Operation, error)
 	SearchImpl  func(payloadType string, hint string) ([]operations.Operation, error)
 }
 
-func (r *RepositoryMock) Push(operations []operations.PushOperation, userId operations.UserId, deviceId operations.DeviceId, confirm bool) repositories.Transaction {
+func (r *RepositoryMock) Push(operations []operations.PushOperation, userId operations.UserId, deviceId operations.DeviceId, confirm bool) repositories.UnitOfWork {
 	return r.PushImpl(operations, userId, deviceId, confirm)
 }
 
@@ -21,7 +21,7 @@ func (r *RepositoryMock) Pull(userId operations.UserId, deviceId operations.Devi
 	return r.PullImpl(userId, deviceId, ignoreLargeOperations)
 }
 
-func (r *RepositoryMock) Confirm(operations []operations.OperationId, userId operations.UserId, deviceId operations.DeviceId) repositories.Transaction {
+func (r *RepositoryMock) Confirm(operations []operations.OperationId, userId operations.UserId, deviceId operations.DeviceId) repositories.UnitOfWork {
 	return r.ConfirmImpl(operations, userId, deviceId)
 }
 

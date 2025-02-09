@@ -7,22 +7,22 @@ import (
 )
 
 type RepositoryMock struct {
-	CreateUserImpl             func(uid auth.UserId, email string, password string, refreshToken string) repositories.Transaction
-	MarkUserEmailValidatedImpl func(uid auth.UserId) repositories.Transaction
+	CreateUserImpl             func(uid auth.UserId, email string, password string, refreshToken string) repositories.UnitOfWork
+	MarkUserEmailValidatedImpl func(uid auth.UserId) repositories.UnitOfWork
 	IsUserExistsImpl           func(uid auth.UserId) (bool, error)
 	CheckCredentialsImpl       func(email string, password string) (bool, error)
 	GetUserIdByEmailImpl       func(email string) (*auth.UserId, error)
-	UpdateRefreshTokenImpl     func(uid auth.UserId, token string) repositories.Transaction
-	UpdatePasswordImpl         func(uid auth.UserId, newPassword string) repositories.Transaction
-	UpdateEmailImpl            func(uid auth.UserId, newEmail string) repositories.Transaction
+	UpdateRefreshTokenImpl     func(uid auth.UserId, token string) repositories.UnitOfWork
+	UpdatePasswordImpl         func(uid auth.UserId, newPassword string) repositories.UnitOfWork
+	UpdateEmailImpl            func(uid auth.UserId, newEmail string) repositories.UnitOfWork
 	GetUserInfoImpl            func(uid auth.UserId) (auth.UserInfo, error)
 }
 
-func (c *RepositoryMock) CreateUser(uid auth.UserId, email string, password string, refreshToken string) repositories.Transaction {
+func (c *RepositoryMock) CreateUser(uid auth.UserId, email string, password string, refreshToken string) repositories.UnitOfWork {
 	return c.CreateUserImpl(uid, email, password, refreshToken)
 }
 
-func (c *RepositoryMock) MarkUserEmailValidated(uid auth.UserId) repositories.Transaction {
+func (c *RepositoryMock) MarkUserEmailValidated(uid auth.UserId) repositories.UnitOfWork {
 	return c.MarkUserEmailValidatedImpl(uid)
 }
 
@@ -38,15 +38,15 @@ func (c *RepositoryMock) GetUserIdByEmail(email string) (*auth.UserId, error) {
 	return c.GetUserIdByEmailImpl(email)
 }
 
-func (c *RepositoryMock) UpdateRefreshToken(uid auth.UserId, token string) repositories.Transaction {
+func (c *RepositoryMock) UpdateRefreshToken(uid auth.UserId, token string) repositories.UnitOfWork {
 	return c.UpdateRefreshTokenImpl(uid, token)
 }
 
-func (c *RepositoryMock) UpdatePassword(uid auth.UserId, newPassword string) repositories.Transaction {
+func (c *RepositoryMock) UpdatePassword(uid auth.UserId, newPassword string) repositories.UnitOfWork {
 	return c.UpdatePasswordImpl(uid, newPassword)
 }
 
-func (c *RepositoryMock) UpdateEmail(uid auth.UserId, newEmail string) repositories.Transaction {
+func (c *RepositoryMock) UpdateEmail(uid auth.UserId, newEmail string) repositories.UnitOfWork {
 	return c.UpdateEmailImpl(uid, newEmail)
 }
 

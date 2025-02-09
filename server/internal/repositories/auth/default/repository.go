@@ -23,8 +23,8 @@ type defaultRepository struct {
 	logger logging.Service
 }
 
-func (c *defaultRepository) CreateUser(user auth.UserId, email string, password string) repositories.Transaction {
-	return repositories.Transaction{
+func (c *defaultRepository) CreateUser(user auth.UserId, email string, password string) repositories.UnitOfWork {
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.createUser(user, email, password)
 		},
@@ -65,19 +65,19 @@ func (c *defaultRepository) deleteUser(user auth.UserId) error {
 	return nil
 }
 
-func (c *defaultRepository) MarkUserEmailValidated(user auth.UserId) repositories.Transaction {
+func (c *defaultRepository) MarkUserEmailValidated(user auth.UserId) repositories.UnitOfWork {
 	const op = "repositories.auth.defaultRepository.MarkUserEmailValidated"
 
 	existed, err := c.GetUserInfo(user)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current credentials: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			if existed.EmailVerified {
 				return nil
@@ -121,20 +121,20 @@ func (c *defaultRepository) IsSessionExists(user auth.UserId, device auth.Device
 	return exists, nil
 }
 
-func (c *defaultRepository) ExclusiveSession(user auth.UserId, device auth.DeviceId) repositories.Transaction {
+func (c *defaultRepository) ExclusiveSession(user auth.UserId, device auth.DeviceId) repositories.UnitOfWork {
 	const op = "repositories.auth.defaultRepository.ExclusiveSession"
 
 	tokensData, err := c.getTokenDataPerDevice(user)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current token data: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 	delete(tokensData, device)
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			devices := []auth.DeviceId{}
 			for device := range tokensData {
@@ -249,20 +249,20 @@ func (c *defaultRepository) GetUserIdByEmail(email string) (*auth.UserId, error)
 	return (*auth.UserId)(&id), nil
 }
 
-func (c *defaultRepository) UpdateRefreshToken(user auth.UserId, device auth.DeviceId, token string) repositories.Transaction {
+func (c *defaultRepository) UpdateRefreshToken(user auth.UserId, device auth.DeviceId, token string) repositories.UnitOfWork {
 	const op = "repositories.auth.defaultRepository.UpdateRefreshToken"
 	c.logger.LogInfo("%s: start[uid=%s]", op, user)
 
 	existed, err := c.getTokenDataPerDevice(user)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current credentials: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.updateRefreshToken(user, device, token)
 		},
@@ -309,14 +309,14 @@ func (c *defaultRepository) CheckRefreshToken(user auth.UserId, device auth.Devi
 	return exists, nil
 }
 
-func (c *defaultRepository) UpdatePassword(user auth.UserId, password string) repositories.Transaction {
+func (c *defaultRepository) UpdatePassword(user auth.UserId, password string) repositories.UnitOfWork {
 	const op = "repositories.auth.defaultRepository.UpdatePassword"
 	c.logger.LogInfo("%s: start[user=%s]", op, user)
 
 	existed, err := c.GetUserInfo(user)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current credentials: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
@@ -325,13 +325,13 @@ func (c *defaultRepository) UpdatePassword(user auth.UserId, password string) re
 	passwordHash, err := hashPassword(password)
 	if err != nil {
 		c.logger.LogInfo("%s: cannot hash password: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.updatePassword(user, passwordHash)
 		},
@@ -354,20 +354,20 @@ func (c *defaultRepository) updatePassword(user auth.UserId, passwordHash string
 	return nil
 }
 
-func (c *defaultRepository) UpdateEmail(user auth.UserId, newEmail string) repositories.Transaction {
+func (c *defaultRepository) UpdateEmail(user auth.UserId, newEmail string) repositories.UnitOfWork {
 	const op = "repositories.auth.defaultRepository.UpdateEmail"
 	c.logger.LogInfo("%s: start[user=%s]", op, user)
 
 	existed, err := c.GetUserInfo(user)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current credentials: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.updateEmail(user, newEmail, false)
 		},

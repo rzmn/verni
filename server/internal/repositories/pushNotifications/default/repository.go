@@ -21,20 +21,20 @@ type defaultRepository struct {
 	logger logging.Service
 }
 
-func (c *defaultRepository) StorePushToken(user pushNotifications.UserId, device pushNotifications.DeviceId, token string) repositories.Transaction {
+func (c *defaultRepository) StorePushToken(user pushNotifications.UserId, device pushNotifications.DeviceId, token string) repositories.UnitOfWork {
 	const op = "repositories.pushNotifications.defaultRepository.StorePushToken"
 
 	currentToken, err := c.GetPushToken(user, device)
 	if err != nil {
 		err = fmt.Errorf("%s: getting token info: %w", op, err)
 		c.logger.LogInfo("%v", err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.storePushToken(user, device, token)
 		},

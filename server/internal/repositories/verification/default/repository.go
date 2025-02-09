@@ -21,19 +21,19 @@ type postgresRepository struct {
 	logger logging.Service
 }
 
-func (c *postgresRepository) StoreEmailVerificationCode(email string, code string) repositories.Transaction {
+func (c *postgresRepository) StoreEmailVerificationCode(email string, code string) repositories.UnitOfWork {
 	const op = "repositories.verification.defaultRepository.StoreEmailVerificationCode"
 
 	currentCode, err := c.GetEmailVerificationCode(email)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current code: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			return c.storeEmailVerificationCode(email, code)
 		},
@@ -84,19 +84,19 @@ func (c *postgresRepository) GetEmailVerificationCode(email string) (*string, er
 	return &code, nil
 }
 
-func (c *postgresRepository) RemoveEmailVerificationCode(email string) repositories.Transaction {
+func (c *postgresRepository) RemoveEmailVerificationCode(email string) repositories.UnitOfWork {
 	const op = "repositories.verification.defaultRepository.RemoveEmailVerificationCode"
 
 	code, err := c.GetEmailVerificationCode(email)
 	if err != nil {
 		c.logger.LogInfo("%s: failed to get current code: %v", op, err)
-		return repositories.Transaction{
+		return repositories.UnitOfWork{
 			Perform:  func() error { return err },
 			Rollback: func() error { return err },
 		}
 	}
 
-	return repositories.Transaction{
+	return repositories.UnitOfWork{
 		Perform: func() error {
 			if code == nil {
 				return nil
