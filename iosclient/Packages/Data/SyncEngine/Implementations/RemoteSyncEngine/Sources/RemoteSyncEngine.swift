@@ -27,7 +27,7 @@ actor RemoteSyncEngine {
         self.updatesListener = await ShortPoller(
             api: api,
             logger: logger
-                .with(prefix: "🔄"),
+                .with(prefix: "⏱️"),
             taskFactory: taskFactory
         )
         updatesSubject = AsyncSubject(

@@ -79,7 +79,7 @@ extension FoundationFileManager: FileManager {
             throw .noSuchDirectory
         }
         guard isDirectory.boolValue else {
-            logW { "directory \(url) is referring to file" }
+            logW { "url \(url) is referring to file" }
             throw .urlIsReferringToFile
         }
         let content: [URL]
@@ -109,6 +109,27 @@ extension FoundationFileManager: FileManager {
             throw .internal(error)
         }
         return content
+    }
+    
+    public func readFile(at url: URL) throws(ReadFileError) -> Data {
+        var isDirectory = ObjCBool(false)
+        let exists = fileManager.fileExists(atPath: url.path(), isDirectory: &isDirectory)
+        guard exists else {
+            logI { "file \(url) does not exists" }
+            throw .noSuchFile
+        }
+        guard !isDirectory.boolValue else {
+            logW { "url \(url) is referring to directory" }
+            throw .urlIsReferringToDirectory
+        }
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            logE { "failed to read file \(url) error: \(error)" }
+            throw .internal(error)
+        }
+        return data
     }
 
     public func removeItem(at url: URL) throws(RemoveItemError) {

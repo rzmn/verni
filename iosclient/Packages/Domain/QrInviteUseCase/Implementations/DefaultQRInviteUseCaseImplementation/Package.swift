@@ -14,6 +14,7 @@ let package = Package(
     ],
     dependencies: [
         .local(.currentLayer(.interface("QrInviteUseCase"))),
+        .local(.infrastructure(.interface("Filesystem"))),
         .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
     ],
     targets: [
@@ -21,6 +22,7 @@ let package = Package(
             name: "DefaultQRInviteUseCaseImplementation",
             dependencies: [
                 "QrInviteUseCase",
+                "Filesystem",
                 .product(name: "QRCode", package: "qrcode"),
             ],
             path: "Sources",

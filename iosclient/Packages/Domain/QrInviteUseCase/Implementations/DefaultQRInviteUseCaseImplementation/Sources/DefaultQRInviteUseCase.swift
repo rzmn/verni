@@ -1,6 +1,7 @@
 import UIKit
 import QrInviteUseCase
 import Logging
+import Filesystem
 internal import QRCode
 
 private extension QRCode.Builder {
@@ -37,11 +38,17 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
         ).first?.appending(component: "verni.qr.cache")
     }
     public let logger: Logger
+    public let fileManager: Filesystem.FileManager
     private let urlById: (String) -> String
 
-    public init(logger: Logger, urlById: @escaping (String) -> String) {
+    public init(
+        logger: Logger,
+        fileManager: Filesystem.FileManager,
+        urlById: @escaping (String) -> String
+    ) {
         self.logger = logger
         self.urlById = urlById
+        self.fileManager = fileManager
     }
 
     @MainActor public func generate(background: UIColor, tint: UIColor, size: Int, userId: String) async throws -> Data {
@@ -82,9 +89,14 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
         }
         let data: Data
         do {
-            data = try Data(contentsOf: filepath)
+            data = try fileManager.readFile(at: filepath)
         } catch {
-            logE { "cannot read cached data from \(filepath) due error: \(error)" }
+            switch error {
+            case .noSuchFile:
+                logI { "cache miss for \(userId)" }
+            default:
+                logE { "cannot read cached data from \(filepath) due error: \(error)" }
+            }
             return nil
         }
         cache(data: data, for: userId)

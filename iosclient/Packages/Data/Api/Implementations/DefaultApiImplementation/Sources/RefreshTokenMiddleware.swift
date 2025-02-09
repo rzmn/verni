@@ -95,26 +95,13 @@ extension RefreshTokenMiddleware: ClientMiddleware {
             )
         case .authenticated(let token):
             do {
-                let (response, body) = try await next(request, body, baseURL)
-                if response.status == .unauthorized {
-                    response.headerFields
-                    return try await refreshAndReshedule(
-                        request,
-                        body: body,
-                        baseURL: baseURL,
-                        operationID: operationID,
-                        requestID: requestID,
-                        next: next
-                    )
-                } else {
-                    return try await next(
-                        modify(request) {
-                            $0.headerFields[.authorization] = "Bearer \(token)"
-                        },
-                        body,
-                        baseURL
-                    )
-                }
+                return try await next(
+                    modify(request) {
+                        $0.headerFields[.authorization] = "Bearer \(token)"
+                    },
+                    body,
+                    baseURL
+                )
             } catch {
                 throw error
             }

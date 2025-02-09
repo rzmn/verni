@@ -15,6 +15,10 @@ public protocol FileManager: Sendable {
         at url: URL,
         mask: DirectoryMask
     ) throws(ListDirectoryError) -> [URL]
+    
+    func readFile(
+        at url: URL
+    ) throws(ReadFileError) -> Data
 
     func removeItem(
         at url: URL

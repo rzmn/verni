@@ -58,9 +58,7 @@ extension ShortPoller {
         let response: Operations.PullOperations.Output
         do {
             response = try await api.pullOperations(
-                .init(
-                    query: .init(_type: .large)
-                )
+                .init(query: .init(_type: .large))
             )
         } catch {
             return logger.logW { "pull failed: \(error)" }

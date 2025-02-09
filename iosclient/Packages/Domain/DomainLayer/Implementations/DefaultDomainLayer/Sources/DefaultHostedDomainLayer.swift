@@ -118,7 +118,8 @@ extension DefaultHostedDomainLayer: HostedDomainLayer {
     func qrInviteUseCase() -> QRInviteUseCase {
         DefaultQRInviteUseCase(
             logger: logger
-                .with(scope: .qrCode)
+                .with(scope: .qrCode),
+            fileManager: sharedDomain.infrastructure.fileManager
         ) { userId in
             AppUrl.users(.show(id: userId)).url
         }
