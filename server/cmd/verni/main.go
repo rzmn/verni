@@ -36,6 +36,8 @@ import (
 	envBasedPathProvider "verni/internal/services/pathProvider/env"
 	"verni/internal/services/pushNotifications"
 	applePushNotifications "verni/internal/services/pushNotifications/apns"
+	"verni/internal/services/realtimeEvents"
+	defaultRealtimeEvents "verni/internal/services/realtimeEvents/default"
 	"verni/internal/services/watchdog"
 	telegramWatchdog "verni/internal/services/watchdog/telegram"
 
@@ -63,6 +65,7 @@ type Services struct {
 	jwt                     jwt.Service
 	emailSender             emailSender.Service
 	formatValidationService formatValidation.Service
+	realtimeEventsService   realtimeEvents.Service
 }
 
 type Controllers struct {
@@ -228,6 +231,9 @@ func main() {
 		formatValidationService: func() formatValidation.Service {
 			return defaultFormatValidation.New(logger)
 		}(),
+		realtimeEventsService: func() realtimeEvents.Service {
+			return defaultRealtimeEvents.NewUserUpdateService()
+		}(),
 	}
 	controllers := Controllers{
 		auth: defaultAuthController.New(
@@ -277,8 +283,14 @@ func main() {
 			var ginConfig defaultServer.ServerConfig
 			json.Unmarshal(data, &ginConfig)
 			logger.LogInfo("creating gin server with config %v", ginConfig)
+
 			return defaultServer.New(
 				ginConfig,
+				openapiImplementation.NewWebsocketHandler(
+					services.realtimeEventsService,
+					controllers.auth,
+					logger,
+				),
 				api,
 				logger,
 			)

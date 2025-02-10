@@ -18,18 +18,21 @@ type ServerConfig struct {
 
 func New(
 	config ServerConfig,
+	sseHandler func(w http.ResponseWriter, r *http.Request),
 	servicer openapi.DefaultAPIServicer,
 	logger logging.Service,
 ) server.Server {
 	logger.LogInfo("creating gin server with config %v", config)
+	router := openapi.NewRouter(
+		openapi.NewDefaultAPIController(
+			servicer,
+		),
+	)
+	router.HandleFunc("/operationsQueue", sseHandler)
 	return &defaultServer{
 		server: http.Server{
-			Addr: ":" + config.Port,
-			Handler: openapi.NewRouter(
-				openapi.NewDefaultAPIController(
-					servicer,
-				),
-			),
+			Addr:         ":" + config.Port,
+			Handler:      router,
 			ReadTimeout:  time.Second * time.Duration(config.IdleTimeoutSec),
 			WriteTimeout: time.Second * time.Duration(config.IdleTimeoutSec),
 		},

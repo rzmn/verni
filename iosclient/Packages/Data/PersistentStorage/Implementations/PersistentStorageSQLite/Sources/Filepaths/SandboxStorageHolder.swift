@@ -52,13 +52,12 @@ extension SandboxStorageHolder {
         private var _impl: SandboxStorage?
         private var impl: SandboxStorage {
             get async {
-                let value: SandboxStorage
-                if let existed = _impl {
-                    value = existed
-                } else {
-                    value = try! await implInit()
+                guard let _impl else {
+                    let value = try! await implInit()
+                    _impl = value
+                    return value
                 }
-                return value
+                return _impl
             }
         }
         private let implInit: @Sendable () async throws -> SandboxStorage

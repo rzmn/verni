@@ -6,25 +6,30 @@ import (
 	"strings"
 	"verni/internal/controllers/auth"
 	openapi "verni/internal/openapi/go"
+	"verni/internal/services/logging"
 )
 
 func (s *DefaultAPIService) validateToken(rawTokenValue string) (auth.UserDevice, *openapi.ImplResponse) {
+	return validateToken(s.logger, s.auth, rawTokenValue)
+}
+
+func validateToken(logger logging.Service, authController auth.Controller, rawTokenValue string) (auth.UserDevice, *openapi.ImplResponse) {
 	splitted := strings.Fields(rawTokenValue)
 	if len(splitted) != 2 {
 		description := "wrong token format"
-		return auth.UserDevice{}, s.createCheckAuthHeaderResponse(401, openapi.BAD_REQUEST, description)
+		return auth.UserDevice{}, createCheckAuthHeaderResponse(401, openapi.BAD_REQUEST, description)
 	}
 
 	// Check the token
-	session, err := s.auth.CheckToken(splitted[1])
+	session, err := authController.CheckToken(splitted[1])
 	if err != nil {
-		return auth.UserDevice{}, s.handleTokenError(err)
+		return auth.UserDevice{}, handleTokenError(logger, err)
 	}
 
 	return session, nil
 }
 
-func (s *DefaultAPIService) createCheckAuthHeaderResponse(statusCode int, reason openapi.ErrorReason, description string) *openapi.ImplResponse {
+func createCheckAuthHeaderResponse(statusCode int, reason openapi.ErrorReason, description string) *openapi.ImplResponse {
 	response := openapi.Response(statusCode, openapi.ErrorResponse{
 		Error: openapi.Error{
 			Reason:      reason,
@@ -34,7 +39,7 @@ func (s *DefaultAPIService) createCheckAuthHeaderResponse(statusCode int, reason
 	return &response
 }
 
-func (s *DefaultAPIService) handleTokenError(err error) *openapi.ImplResponse {
+func handleTokenError(logger logging.Service, err error) *openapi.ImplResponse {
 	var reason openapi.ErrorReason
 	var statusCode int
 
@@ -45,11 +50,11 @@ func (s *DefaultAPIService) handleTokenError(err error) *openapi.ImplResponse {
 	case errors.Is(err, auth.BadFormat):
 		reason = openapi.BAD_REQUEST
 	default:
-		s.logger.LogError("check auth header failed with unknown err: %v", err)
+		logger.LogError("check auth header failed with unknown err: %v", err)
 		reason = openapi.INTERNAL
 		statusCode = 500
 	}
 
 	description := fmt.Errorf("check auth header error: %w", err).Error()
-	return s.createCheckAuthHeaderResponse(statusCode, reason, description)
+	return createCheckAuthHeaderResponse(statusCode, reason, description)
 }

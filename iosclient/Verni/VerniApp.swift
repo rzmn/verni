@@ -3,7 +3,6 @@ import DefaultAppLayer
 import DefaultDomainLayer
 import DefaultDataLayer
 import DefaultInfrastructureLayer
-import DesignSystem
 
 @main
 struct VerniApp: App {
@@ -27,6 +26,5 @@ struct VerniApp: App {
         WindowGroup {
             factory.view()
         }
-        .environment(AvatarView.Repository.preview)
     }
 }

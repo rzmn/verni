@@ -32,6 +32,7 @@ public struct AppView: View {
             }
             .environment(ColorPalette(scheme: colorScheme))
             .environment(PaddingsPalette.default)
+            .environment(AvatarView.Repository.preview)
     }
 
     @ViewBuilder private var contentWithDebugMenu: some View {
