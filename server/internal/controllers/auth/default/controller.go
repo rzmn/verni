@@ -285,11 +285,11 @@ func (c *defaultController) CheckToken(accessToken string) (auth.UserDevice, err
 
 	if err := c.jwtService.ValidateAccessToken(jwt.AccessToken(accessToken)); err != nil {
 		if errors.Is(err, jwt.TokenExpired) {
-			return auth.UserDevice{}, fmt.Errorf("%s: validating access token: %w", op, auth.TokenExpired)
+			return auth.UserDevice{}, fmt.Errorf("%s: validating access token %s: %w", op, accessToken, auth.TokenExpired)
 		} else if errors.Is(err, jwt.BadToken) {
-			return auth.UserDevice{}, fmt.Errorf("%s: validating access token: %w", op, auth.BadFormat)
+			return auth.UserDevice{}, fmt.Errorf("%s: validating access token %s: %w", op, accessToken, auth.BadFormat)
 		} else {
-			return auth.UserDevice{}, fmt.Errorf("%s: validating access token: %w", op, err)
+			return auth.UserDevice{}, fmt.Errorf("%s: validating access token %s: %w", op, accessToken, err)
 		}
 	}
 

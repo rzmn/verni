@@ -36,7 +36,7 @@ func (s *DefaultAPIService) ConfirmOperations(
 func (s *DefaultAPIService) handleConfirmOperationsError(err error, ids []string) (openapi.ImplResponse, error) {
 	s.logger.LogError("push operations %v failed: %v", ids, err)
 
-	description := fmt.Errorf("pull operations error: %w", err).Error()
+	description := fmt.Errorf("confirm operations error: %w", err).Error()
 	return openapi.Response(500, openapi.ErrorResponse{
 		Error: openapi.Error{
 			Reason:      openapi.INTERNAL,

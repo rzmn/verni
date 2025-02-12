@@ -20,6 +20,7 @@ func New(
 ) operations.Controller {
 	return &defaultController{
 		operationsRepository: operationsRepository,
+		realtimeEvents:       realtimeEvents,
 		logger:               logger,
 	}
 }
@@ -60,6 +61,7 @@ func (c *defaultController) Push(
 			if userToNotify == operationsRepository.UserId(userId) {
 				devicesToIgnore = append(devicesToIgnore, realtimeEvents.DeviceId(deviceId))
 			}
+			c.logger.LogInfo("notifying %s about update, d: %v", userId, devicesToIgnore)
 			c.realtimeEvents.NotifyUpdate(realtimeEvents.UserId(userId), devicesToIgnore)
 		}
 	}

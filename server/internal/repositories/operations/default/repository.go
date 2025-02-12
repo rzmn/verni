@@ -435,6 +435,11 @@ func (c *defaultRepository) GetUsers(trackingEntities []operations.TrackedEntity
 	const op = "repositories.operations.defaultRepository.GetUsers"
 	c.logger.LogInfo("%s: start", op)
 
+	if len(trackingEntities) == 0 {
+		c.logger.LogInfo("%s: no entities provided, early return", op)
+		return nil, nil
+	}
+
 	placeholders := make([]string, len(trackingEntities))
 	for i := range trackingEntities {
 		placeholders[i] = fmt.Sprintf("($%d, $%d)", i*2+1, i*2+2)

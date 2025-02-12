@@ -33,7 +33,7 @@ func (s *DefaultAPIService) PushOperations(
 func (s *DefaultAPIService) handlePushOperationsError(err error, request openapi.PushOperationsRequest) (openapi.ImplResponse, error) {
 	s.logger.LogError("push operations %v failed: %v", request, err)
 
-	description := fmt.Errorf("pull operations error: %w", err).Error()
+	description := fmt.Errorf("push operations error: %w", err).Error()
 	return openapi.Response(500, openapi.ErrorResponse{
 		Error: openapi.Error{
 			Reason:      openapi.INTERNAL,

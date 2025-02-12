@@ -95,7 +95,8 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case msg := <-messageChan:
-			fmt.Fprint(w, msg)
+			h.logger.LogInfo("[debug] sending %s for descriptor %v", msg, descriptor)
+			fmt.Fprintf(w, "data: %s\n\n", msg)
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			}
@@ -136,7 +137,7 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 			}
 
 			for _, ch := range channels {
-				// Non-blocking send
+				h.logger.LogInfo("[debug] sending %s for channel for %s, %s", string(updateJSON), userId, device)
 				select {
 				case ch <- string(updateJSON):
 				default:
