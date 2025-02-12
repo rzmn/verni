@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 	"verni/internal/controllers/auth"
+	"verni/internal/controllers/operations"
 	openapi "verni/internal/openapi/go"
 	"verni/internal/services/logging"
 	"verni/internal/services/realtimeEvents"
@@ -17,15 +17,16 @@ type connectionDescriptor struct {
 	device realtimeEvents.DeviceId
 }
 
-type websocketHandler struct {
+type sseHandler struct {
 	eventService     realtimeEvents.Service
 	logger           logging.Service
 	auth             auth.Controller
+	operations       operations.Controller
 	connectionsMutex sync.RWMutex
 	connections      map[connectionDescriptor][]chan string
 }
 
-func (h *websocketHandler) Handle(w http.ResponseWriter, r *http.Request) {
+func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	sessionInfo, earlyResponse := validateToken(h.logger, h.auth, r.Header.Get("Authorization"))
 	if earlyResponse != nil {
 		errJSON, err := json.MarshalIndent(earlyResponse.Body, "", " ")
@@ -98,18 +99,31 @@ func (h *websocketHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *websocketHandler) handleUpdate(userId realtimeEvents.UserId, device realtimeEvents.DeviceId) {
+func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, device realtimeEvents.DeviceId) {
 	h.connectionsMutex.RLock()
 	defer h.connectionsMutex.RUnlock()
 
 	if channels, exists := h.connections[connectionDescriptor{userId: userId, device: device}]; exists {
-		update := fmt.Sprintf("data: {\"userId\": \"%s\", \"timestamp\": %d}\n\n",
-			userId, time.Now().Unix())
+		operations, err := h.operations.Pull(operations.UserId(userId), operations.DeviceId(device), openapi.REGULAR)
+
+		var update openapi.ImplResponse
+		if err != nil {
+			update = handlePullOperationsError(h.logger, err)
+		} else {
+			update = openapi.Response(200, openapi.PullOperationsSucceededResponse{
+				Response: operations,
+			})
+		}
+		updateJSON, err := json.Marshal(update.Body)
+		if err != nil {
+			h.logger.LogError("marshalling update: %v", err)
+			return
+		}
 
 		for _, ch := range channels {
 			// Non-blocking send
 			select {
-			case ch <- update:
+			case ch <- string(updateJSON):
 			default:
 				// Channel is full or closed
 			}
@@ -117,16 +131,18 @@ func (h *websocketHandler) handleUpdate(userId realtimeEvents.UserId, device rea
 	}
 }
 
-func NewWebsocketHandler(
+func NewSSEHandler(
 	service realtimeEvents.Service,
 	auth auth.Controller,
+	operations operations.Controller,
 	logger logging.Service,
 ) func(w http.ResponseWriter, r *http.Request) {
-	handler := &websocketHandler{
+	handler := &sseHandler{
 		eventService: service,
 		connections:  make(map[connectionDescriptor][]chan string),
 		logger:       logger,
 		auth:         auth,
+		operations:   operations,
 	}
 	handler.eventService.AddListener(handler.handleUpdate)
 	return handler.Handle

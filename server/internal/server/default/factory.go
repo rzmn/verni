@@ -22,7 +22,7 @@ func New(
 	servicer openapi.DefaultAPIServicer,
 	logger logging.Service,
 ) server.Server {
-	logger.LogInfo("creating gin server with config %v", config)
+	logger.LogInfo("creating http server with config %v", config)
 	router := openapi.NewRouter(
 		openapi.NewDefaultAPIController(
 			servicer,

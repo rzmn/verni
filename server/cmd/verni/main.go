@@ -286,9 +286,10 @@ func main() {
 
 			return defaultServer.New(
 				ginConfig,
-				openapiImplementation.NewWebsocketHandler(
+				openapiImplementation.NewSSEHandler(
 					services.realtimeEventsService,
 					controllers.auth,
+					controllers.operations,
 					logger,
 				),
 				api,

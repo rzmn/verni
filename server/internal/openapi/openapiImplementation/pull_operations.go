@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"verni/internal/controllers/operations"
 	openapi "verni/internal/openapi/go"
+	"verni/internal/services/logging"
 )
 
 func (s *DefaultAPIService) PullOperations(
@@ -23,7 +24,7 @@ func (s *DefaultAPIService) PullOperations(
 		operationsType,
 	)
 	if err != nil {
-		return s.handlePullOperationsError(err)
+		return handlePullOperationsError(s.logger, err), nil
 	}
 
 	return openapi.Response(200, openapi.PullOperationsSucceededResponse{
@@ -31,8 +32,8 @@ func (s *DefaultAPIService) PullOperations(
 	}), nil
 }
 
-func (s *DefaultAPIService) handlePullOperationsError(err error) (openapi.ImplResponse, error) {
-	s.logger.LogError("pull operations failed: %v", err)
+func handlePullOperationsError(logger logging.Service, err error) openapi.ImplResponse {
+	logger.LogError("pull operations failed: %v", err)
 
 	description := fmt.Errorf("pull operations error: %w", err).Error()
 	return openapi.Response(500, openapi.ErrorResponse{
@@ -40,5 +41,5 @@ func (s *DefaultAPIService) handlePullOperationsError(err error) (openapi.ImplRe
 			Reason:      openapi.INTERNAL,
 			Description: &description,
 		},
-	}), nil
+	})
 }
