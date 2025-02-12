@@ -47,7 +47,7 @@ func isEmptyValuePrimitive(v reflect.Value) bool {
 	case reflect.Int, reflect.Int64:
 		return v.Int() == 0
 	case reflect.Bool:
-		return v.Bool() == false
+		return !v.Bool()
 	case reflect.Ptr:
 		return v.IsNil()
 	case reflect.Slice:

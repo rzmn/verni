@@ -42,6 +42,11 @@ type SomeOperation struct {
 
 // AssertSomeOperationRequired checks if the required fields are not zero-ed
 func AssertSomeOperationRequired(obj SomeOperation) error {
+	return AssertSomeOperationConstraints(obj)
+}
+
+// AssertSomeOperationConstraints checks if the values respects the defined constraints
+func AssertSomeOperationConstraints(obj SomeOperation) error {
 	elements := map[string]interface{}{
 		"operationId":         obj.OperationId,
 		"createdAt":           obj.CreatedAt,
@@ -58,82 +63,72 @@ func AssertSomeOperationRequired(obj SomeOperation) error {
 		"verifyEmail":         obj.VerifyEmail,
 		"uploadImage":         obj.UploadImage,
 	}
+
+	matchesCount := 0
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
-			return &RequiredError{Field: name}
+			continue
+		}
+		switch name {
+		case "createUser":
+			if err := AssertCreateUserOperationCreateUserRequired(obj.CreateUser); err != nil {
+				return err
+			}
+			matchesCount++
+		case "bindUser":
+			if err := AssertBindUserOperationBindUserRequired(obj.BindUser); err != nil {
+				return err
+			}
+			matchesCount++
+		case "updateAvatar":
+			if err := AssertUpdateAvatarOperationUpdateAvatarRequired(obj.UpdateAvatar); err != nil {
+				return err
+			}
+			matchesCount++
+		case "updateDisplayName":
+			if err := AssertUpdateDisplayNameOperationUpdateDisplayNameRequired(obj.UpdateDisplayName); err != nil {
+				return err
+			}
+			matchesCount++
+		case "createSpendingGroup":
+			if err := AssertCreateSpendingGroupOperationCreateSpendingGroupRequired(obj.CreateSpendingGroup); err != nil {
+				return err
+			}	
+			matchesCount++
+		case "deleteSpendingGroup":
+			if err := AssertDeleteSpendingGroupOperationDeleteSpendingGroupRequired(obj.DeleteSpendingGroup); err != nil {
+				return err
+			}
+			matchesCount++
+		case "createSpending":
+			if err := AssertCreateSpendingOperationCreateSpendingRequired(obj.CreateSpending); err != nil {
+				return err
+			}
+			matchesCount++
+		case "deleteSpending":
+			if err := AssertDeleteSpendingOperationDeleteSpendingRequired(obj.DeleteSpending); err != nil {
+				return err
+			}
+			matchesCount++
+		case "updateEmail":
+			if err := AssertUpdateEmailOperationUpdateEmailRequired(obj.UpdateEmail); err != nil {
+				return err
+			}
+			matchesCount++
+		case "verifyEmail":
+			if err := AssertVerifyEmailOperationVerifyEmailRequired(obj.VerifyEmail); err != nil {
+				return err
+			}
+			matchesCount++
+		case "uploadImage":
+			if err := AssertUploadImageOperationUploadImageRequired(obj.UploadImage); err != nil {
+				return err
+			}
+			matchesCount++
 		}
 	}
-
-	if err := AssertCreateUserOperationCreateUserRequired(obj.CreateUser); err != nil {
-		return err
-	}
-	if err := AssertBindUserOperationBindUserRequired(obj.BindUser); err != nil {
-		return err
-	}
-	if err := AssertUpdateAvatarOperationUpdateAvatarRequired(obj.UpdateAvatar); err != nil {
-		return err
-	}
-	if err := AssertUpdateDisplayNameOperationUpdateDisplayNameRequired(obj.UpdateDisplayName); err != nil {
-		return err
-	}
-	if err := AssertCreateSpendingGroupOperationCreateSpendingGroupRequired(obj.CreateSpendingGroup); err != nil {
-		return err
-	}
-	if err := AssertDeleteSpendingGroupOperationDeleteSpendingGroupRequired(obj.DeleteSpendingGroup); err != nil {
-		return err
-	}
-	if err := AssertCreateSpendingOperationCreateSpendingRequired(obj.CreateSpending); err != nil {
-		return err
-	}
-	if err := AssertDeleteSpendingOperationDeleteSpendingRequired(obj.DeleteSpending); err != nil {
-		return err
-	}
-	if err := AssertUpdateEmailOperationUpdateEmailRequired(obj.UpdateEmail); err != nil {
-		return err
-	}
-	if err := AssertVerifyEmailOperationVerifyEmailRequired(obj.VerifyEmail); err != nil {
-		return err
-	}
-	if err := AssertUploadImageOperationUploadImageRequired(obj.UploadImage); err != nil {
-		return err
-	}
-	return nil
-}
-
-// AssertSomeOperationConstraints checks if the values respects the defined constraints
-func AssertSomeOperationConstraints(obj SomeOperation) error {
-	if err := AssertCreateUserOperationCreateUserConstraints(obj.CreateUser); err != nil {
-		return err
-	}
-	if err := AssertBindUserOperationBindUserConstraints(obj.BindUser); err != nil {
-		return err
-	}
-	if err := AssertUpdateAvatarOperationUpdateAvatarConstraints(obj.UpdateAvatar); err != nil {
-		return err
-	}
-	if err := AssertUpdateDisplayNameOperationUpdateDisplayNameConstraints(obj.UpdateDisplayName); err != nil {
-		return err
-	}
-	if err := AssertCreateSpendingGroupOperationCreateSpendingGroupConstraints(obj.CreateSpendingGroup); err != nil {
-		return err
-	}
-	if err := AssertDeleteSpendingGroupOperationDeleteSpendingGroupConstraints(obj.DeleteSpendingGroup); err != nil {
-		return err
-	}
-	if err := AssertCreateSpendingOperationCreateSpendingConstraints(obj.CreateSpending); err != nil {
-		return err
-	}
-	if err := AssertDeleteSpendingOperationDeleteSpendingConstraints(obj.DeleteSpending); err != nil {
-		return err
-	}
-	if err := AssertUpdateEmailOperationUpdateEmailConstraints(obj.UpdateEmail); err != nil {
-		return err
-	}
-	if err := AssertVerifyEmailOperationVerifyEmailConstraints(obj.VerifyEmail); err != nil {
-		return err
-	}
-	if err := AssertUploadImageOperationUploadImageConstraints(obj.UploadImage); err != nil {
-		return err
+	if matchesCount != 1 {
+		return &RequiredError{Field: "value matches to multiple operations"}
 	}
 	return nil
 }
