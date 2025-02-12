@@ -31,7 +31,7 @@ type sseHandler struct {
 func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	sessionInfo, earlyResponse := validateToken(h.logger, h.auth, r.Header.Get("Authorization"))
 	if earlyResponse != nil {
-		errJSON, err := json.MarshalIndent(earlyResponse.Body, "", " ")
+		errJSON, err := json.Marshal(earlyResponse.Body)
 		if err != nil {
 			http.Error(w, string(openapi.INTERNAL), http.StatusInternalServerError)
 			return

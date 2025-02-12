@@ -49,6 +49,7 @@ func handleTokenError(logger logging.Service, err error) *openapi.ImplResponse {
 		statusCode = 401
 	case errors.Is(err, auth.BadFormat):
 		reason = openapi.BAD_REQUEST
+		statusCode = 400
 	default:
 		logger.LogError("check auth header failed with unknown err: %v", err)
 		reason = openapi.INTERNAL
