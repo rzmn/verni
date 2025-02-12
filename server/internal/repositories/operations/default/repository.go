@@ -430,3 +430,48 @@ WHERE o.operationType = $1
 
 	return result, nil
 }
+
+func (c *defaultRepository) GetUsers(trackingEntities []operations.TrackedEntity) ([]operations.UserId, error) {
+	const op = "repositories.operations.defaultRepository.GetUsers"
+	c.logger.LogInfo("%s: start", op)
+
+	placeholders := make([]string, len(trackingEntities))
+	for i := range trackingEntities {
+		placeholders[i] = fmt.Sprintf("($%d, $%d)", i*2+1, i*2+2)
+	}
+	query := fmt.Sprintf(`
+SELECT DISTINCT 
+	te.userId
+FROM 
+	trackedEntities te
+WHERE 
+	(te.entityId, te.entityType) IN (%s);`, strings.Join(placeholders, ", "))
+
+	args := make([]interface{}, len(trackingEntities)*2)
+	for i, entity := range trackingEntities {
+		args[i*2] = entity.Id
+		args[i*2+1] = entity.Type
+	}
+
+	rows, err := c.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to execute query: %w", op, err)
+	}
+	defer rows.Close()
+
+	var results []operations.UserId
+	for rows.Next() {
+		var userId string
+		if err := rows.Scan(&userId); err != nil {
+			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
+		}
+		results = append(results, operations.UserId(userId))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: error occurred during row iteration: %w", op, err)
+	}
+
+	c.logger.LogInfo("%s: success", op)
+	return results, nil
+}

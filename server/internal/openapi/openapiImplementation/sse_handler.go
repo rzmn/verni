@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"verni/internal/common"
 	"verni/internal/controllers/auth"
 	"verni/internal/controllers/operations"
 	openapi "verni/internal/openapi/go"
@@ -24,6 +25,7 @@ type sseHandler struct {
 	operations       operations.Controller
 	connectionsMutex sync.RWMutex
 	connections      map[connectionDescriptor][]chan string
+	devicesPerUser   map[realtimeEvents.UserId][]realtimeEvents.DeviceId
 }
 
 func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +58,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Register client
 	h.connectionsMutex.Lock()
 	h.connections[descriptor] = append(h.connections[descriptor], messageChan)
+	h.devicesPerUser[descriptor.userId] = append(h.devicesPerUser[descriptor.userId], descriptor.device)
 	h.connectionsMutex.Unlock()
 
 	// Ensure cleanup on disconnect
@@ -76,6 +79,9 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 				delete(h.connections, descriptor)
 			}
 		}
+		h.devicesPerUser[descriptor.userId] = common.Filter(h.devicesPerUser[descriptor.userId], func(device realtimeEvents.DeviceId) bool {
+			return device != descriptor.device
+		})
 		close(messageChan)
 	}()
 
@@ -99,33 +105,43 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, device realtimeEvents.DeviceId) {
+func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices []realtimeEvents.DeviceId) {
 	h.connectionsMutex.RLock()
 	defer h.connectionsMutex.RUnlock()
 
-	if channels, exists := h.connections[connectionDescriptor{userId: userId, device: device}]; exists {
-		operations, err := h.operations.Pull(operations.UserId(userId), operations.DeviceId(device), openapi.REGULAR)
-
-		var update openapi.ImplResponse
-		if err != nil {
-			update = handlePullOperationsError(h.logger, err)
-		} else {
-			update = openapi.Response(200, openapi.PullOperationsSucceededResponse{
-				Response: operations,
-			})
-		}
-		updateJSON, err := json.Marshal(update.Body)
-		if err != nil {
-			h.logger.LogError("marshalling update: %v", err)
-			return
+	ignoringDevicesMap := make(map[realtimeEvents.DeviceId]bool)
+	for _, device := range ignoringDevices {
+		ignoringDevicesMap[device] = true
+	}
+	for _, device := range h.devicesPerUser[userId] {
+		if ignoringDevicesMap[device] {
+			continue
 		}
 
-		for _, ch := range channels {
-			// Non-blocking send
-			select {
-			case ch <- string(updateJSON):
-			default:
-				// Channel is full or closed
+		if channels, exists := h.connections[connectionDescriptor{userId: userId, device: device}]; exists {
+			operations, err := h.operations.Pull(operations.UserId(userId), operations.DeviceId(device), openapi.REGULAR)
+
+			var update openapi.ImplResponse
+			if err != nil {
+				update = handlePullOperationsError(h.logger, err)
+			} else {
+				update = openapi.Response(200, openapi.PullOperationsSucceededResponse{
+					Response: operations,
+				})
+			}
+			updateJSON, err := json.Marshal(update.Body)
+			if err != nil {
+				h.logger.LogError("marshalling update: %v", err)
+				return
+			}
+
+			for _, ch := range channels {
+				// Non-blocking send
+				select {
+				case ch <- string(updateJSON):
+				default:
+					// Channel is full or closed
+				}
 			}
 		}
 	}
@@ -138,11 +154,12 @@ func NewSSEHandler(
 	logger logging.Service,
 ) func(w http.ResponseWriter, r *http.Request) {
 	handler := &sseHandler{
-		eventService: service,
-		connections:  make(map[connectionDescriptor][]chan string),
-		logger:       logger,
-		auth:         auth,
-		operations:   operations,
+		eventService:   service,
+		connections:    make(map[connectionDescriptor][]chan string),
+		devicesPerUser: make(map[realtimeEvents.UserId][]realtimeEvents.DeviceId),
+		logger:         logger,
+		auth:           auth,
+		operations:     operations,
 	}
 	handler.eventService.AddListener(handler.handleUpdate)
 	return handler.Handle

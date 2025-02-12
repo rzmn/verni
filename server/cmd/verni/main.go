@@ -250,6 +250,7 @@ func main() {
 		),
 		operations: defaultOperationsController.New(
 			repositories.operations,
+			services.realtimeEventsService,
 			logger,
 		),
 		users: defaultUsersController.New(

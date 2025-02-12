@@ -8,12 +8,14 @@ import (
 	openapi "verni/internal/openapi/go"
 	operationsRepository "verni/internal/repositories/operations"
 	"verni/internal/services/logging"
+	"verni/internal/services/realtimeEvents"
 )
 
 type OperationsRepository operationsRepository.Repository
 
 func New(
 	operationsRepository OperationsRepository,
+	realtimeEvents realtimeEvents.Service,
 	logger logging.Service,
 ) operations.Controller {
 	return &defaultController{
@@ -24,6 +26,7 @@ func New(
 
 type defaultController struct {
 	operationsRepository OperationsRepository
+	realtimeEvents       realtimeEvents.Service
 	logger               logging.Service
 }
 
@@ -34,15 +37,31 @@ func (c *defaultController) Push(
 ) error {
 	const op = "controllers.operations.defaultController.Push"
 	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
+	operationsToPush := common.Map(operations, func(operation openapi.SomeOperation) operationsRepository.PushOperation {
+		return operationsRepository.CreateOperation(operation)
+	})
 	if err := c.operationsRepository.Push(
-		common.Map(operations, func(operation openapi.SomeOperation) operationsRepository.PushOperation {
-			return operationsRepository.CreateOperation(operation)
-		}),
+		operationsToPush,
 		operationsRepository.UserId(userId),
 		operationsRepository.DeviceId(deviceId),
 		true,
 	).Perform(); err != nil {
 		return fmt.Errorf("pushing operations to repository: %w", err)
+	}
+	for _, operation := range operationsToPush {
+		trackedEntities := operation.Payload.TrackedEntities()
+		userIdsToNotify, err := c.operationsRepository.GetUsers(trackedEntities)
+		if err != nil {
+			c.logger.LogError("getting users to notify: %v", err)
+			continue
+		}
+		for _, userToNotify := range userIdsToNotify {
+			devicesToIgnore := []realtimeEvents.DeviceId{}
+			if userToNotify == operationsRepository.UserId(userId) {
+				devicesToIgnore = append(devicesToIgnore, realtimeEvents.DeviceId(deviceId))
+			}
+			c.realtimeEvents.NotifyUpdate(realtimeEvents.UserId(userId), devicesToIgnore)
+		}
 	}
 	c.logger.LogInfo("%s: success[user=%s device=%s]", op, userId, deviceId)
 	return nil

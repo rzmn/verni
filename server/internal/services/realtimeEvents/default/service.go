@@ -23,10 +23,10 @@ func (s *userUpdateService) AddListener(listener realtimeEvents.Listener) {
 	s.listeners = append(s.listeners, listener)
 }
 
-func (s *userUpdateService) NotifyUpdate(userId realtimeEvents.UserId, device realtimeEvents.DeviceId) {
+func (s *userUpdateService) NotifyUpdate(userId realtimeEvents.UserId, ignoringDevices []realtimeEvents.DeviceId) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	for _, listener := range s.listeners {
-		listener(userId, device)
+		listener(userId, ignoringDevices)
 	}
 }

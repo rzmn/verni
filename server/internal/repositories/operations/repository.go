@@ -19,6 +19,7 @@ type Repository interface {
 	Pull(userId UserId, deviceId DeviceId, operationType OperationType) ([]Operation, error)
 	Confirm(operations []OperationId, userId UserId, deviceId DeviceId) repositories.UnitOfWork
 
+	GetUsers(trackingEntities []TrackedEntity) ([]UserId, error)
 	Get(affectingEntities []TrackedEntity) ([]Operation, error)
 	Search(payloadType OperationPayloadType, hint string) ([]Operation, error)
 }
