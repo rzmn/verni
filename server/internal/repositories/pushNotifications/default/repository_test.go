@@ -1,131 +1,192 @@
 package defaultRepository_test
 
-// import (
-// 	"encoding/json"
-// 	"io"
-// 	"os"
-// 	"testing"
+import (
+	"database/sql"
+	"encoding/json"
+	"os"
+	"testing"
 
-// 	"verni/internal/db"
-// 	postgresDb "verni/internal/db/postgres"
-// 	"verni/internal/repositories/pushNotifications"
-// 	defaultRepository "verni/internal/repositories/pushNotifications/default"
-// 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
-// 	envBasedPathProvider "verni/internal/services/pathProvider/env"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-// 	"github.com/google/uuid"
-// )
+	postgresDb "verni/internal/db/postgres"
+	"verni/internal/repositories/pushNotifications"
+	defaultRepository "verni/internal/repositories/pushNotifications/default"
+	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
+	envBasedPathProvider "verni/internal/services/pathProvider/env"
+)
 
-// var (
-// 	database db.DB
-// )
+var testConfig postgresDb.PostgresConfig
 
-// func TestMain(m *testing.M) {
-// 	logger := standartOutputLoggingService.New()
-// 	pathProvider := envBasedPathProvider.New(logger)
-// 	database = func() db.DB {
-// 		configFile, err := os.Open(pathProvider.AbsolutePath("./config/test/postgres_storage.json"))
-// 		if err != nil {
-// 			logger.LogFatal("failed to open config file: %s", err)
-// 		}
-// 		defer configFile.Close()
-// 		configData, err := io.ReadAll(configFile)
-// 		if err != nil {
-// 			logger.LogFatal("failed to read config file: %s", err)
-// 		}
-// 		var config postgresDb.PostgresConfig
-// 		json.Unmarshal([]byte(configData), &config)
-// 		db, err := postgresDb.Postgres(config, logger)
-// 		if err != nil {
-// 			logger.LogFatal("failed to init db err: %v", err)
-// 		}
-// 		return db
-// 	}()
-// 	code := m.Run()
+func setupTestDB(t *testing.T) *sql.DB {
+	logger := standartOutputLoggingService.New()
+	pathProvider := envBasedPathProvider.New(logger)
+	path := pathProvider.AbsolutePath("./config/test/postgres_storage.json")
 
-// 	os.Exit(code)
-// }
+	configFile, err := os.ReadFile(path)
+	require.NoError(t, err)
 
-// func randomUid() pushNotifications.UserId {
-// 	return pushNotifications.UserId(uuid.New().String())
-// }
+	err = json.Unmarshal(configFile, &testConfig)
+	require.NoError(t, err)
 
-// func TestStorePushToken(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
+	db, err := postgresDb.Postgres(testConfig, logger)
+	require.NoError(t, err)
 
-// 	// initially token should be nil
+	// Clear test data
+	_, err = db.Exec("DELETE FROM pushTokens")
+	require.NoError(t, err)
 
-// 	uid := randomUid()
-// 	shouldBeEmpty, err := repository.GetPushToken(uid)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `shouldBeEmpty` err: %v", err)
-// 	}
-// 	if shouldBeEmpty != nil {
-// 		t.Fatalf("`shouldBeEmpty` unexpected value: %s", *shouldBeEmpty)
-// 	}
+	return db.(*sql.DB)
+}
 
-// 	// test store token when there is no token set previously
+func TestRepository_StorePushToken(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
 
-// 	token := uuid.New().String()
-// 	storeTransaction := repository.StorePushToken(uid, token)
-// 	if err := storeTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `storeTransaction` err: %v", err)
-// 	}
-// 	shouldBeEqualToToken, err := repository.GetPushToken(uid)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `shouldBeEqualToToken` err: %v", err)
-// 	}
-// 	if shouldBeEqualToToken == nil {
-// 		t.Fatalf("`shouldBeEqualToToken` is nil")
-// 	}
-// 	if *shouldBeEqualToToken != token {
-// 		t.Fatalf("`shouldBeEqualToToken` should be equal to %s, found %s", token, *shouldBeEqualToToken)
-// 	}
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
 
-// 	// test store token when there is some token set previously
+	t.Run("store new token", func(t *testing.T) {
+		// Arrange
+		userId := pushNotifications.UserId("test-user-1")
+		deviceId := pushNotifications.DeviceId("device-1")
+		token := "push-token-123"
 
-// 	newToken := uuid.New().String()
-// 	updateTransaction := repository.StorePushToken(uid, newToken)
-// 	if err := updateTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `updateTransaction` err: %v", err)
-// 	}
-// 	shouldBeEqualToNewToken, err := repository.GetPushToken(uid)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `shouldBeEqualToNewToken` err: %v", err)
-// 	}
-// 	if shouldBeEqualToNewToken == nil {
-// 		t.Fatalf("`shouldBeEqualToNewToken` is nil")
-// 	}
-// 	if *shouldBeEqualToNewToken != newToken {
-// 		t.Fatalf("`shouldBeEqualToNewToken` should be equal to %s, found %s", token, *shouldBeEqualToNewToken)
-// 	}
+		// Act
+		work := repo.StorePushToken(userId, deviceId, token)
+		err := work.Perform()
 
-// 	// test rollback store token when there is some token set previously
+		// Assert
+		assert.NoError(t, err)
 
-// 	if err := updateTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `updateTransaction` err: %v", err)
-// 	}
-// 	shouldBeEqualToToken, err = repository.GetPushToken(uid)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `shouldBeEqualToToken` err: %v", err)
-// 	}
-// 	if shouldBeEqualToToken == nil {
-// 		t.Fatalf("[after rollback] `shouldBeEqualToToken` is nil")
-// 	}
-// 	if *shouldBeEqualToToken != token {
-// 		t.Fatalf("[after rollback] `shouldBeEqualToToken` should be equal to %s, found %s", token, *shouldBeEqualToToken)
-// 	}
+		// Verify token was stored
+		storedToken, err := repo.GetPushToken(userId, deviceId)
+		assert.NoError(t, err)
+		assert.NotNil(t, storedToken)
+		assert.Equal(t, token, *storedToken)
+	})
 
-// 	// test rollback store token when there is no token set previously
+	t.Run("update existing token", func(t *testing.T) {
+		// Arrange
+		userId := pushNotifications.UserId("test-user-2")
+		deviceId := pushNotifications.DeviceId("device-2")
+		token1 := "push-token-1"
+		token2 := "push-token-2"
 
-// 	if err := storeTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `storeTransaction` err: %v", err)
-// 	}
-// 	shouldBeEmpty, err = repository.GetPushToken(uid)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `shouldBeEmpty` err: %v", err)
-// 	}
-// 	if shouldBeEmpty != nil {
-// 		t.Fatalf("[after rollback] `shouldBeEmpty` unexpected value: %s", *shouldBeEmpty)
-// 	}
-// }
+		// Store initial token
+		work := repo.StorePushToken(userId, deviceId, token1)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act - Update token
+		work = repo.StorePushToken(userId, deviceId, token2)
+		err = work.Perform()
+
+		// Assert
+		assert.NoError(t, err)
+
+		// Verify token was updated
+		storedToken, err := repo.GetPushToken(userId, deviceId)
+		assert.NoError(t, err)
+		assert.NotNil(t, storedToken)
+		assert.Equal(t, token2, *storedToken)
+	})
+}
+
+func TestRepository_GetPushToken(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("get existing token", func(t *testing.T) {
+		// Arrange
+		userId := pushNotifications.UserId("test-user-3")
+		deviceId := pushNotifications.DeviceId("device-3")
+		token := "push-token-123"
+
+		work := repo.StorePushToken(userId, deviceId, token)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		storedToken, err := repo.GetPushToken(userId, deviceId)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, storedToken)
+		assert.Equal(t, token, *storedToken)
+	})
+
+	t.Run("get non-existent token", func(t *testing.T) {
+		// Act
+		token, err := repo.GetPushToken("nonexistent-user", "nonexistent-device")
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Nil(t, token)
+	})
+}
+
+func TestRepository_StorePushToken_Rollback(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("rollback new token", func(t *testing.T) {
+		// Arrange
+		userId := pushNotifications.UserId("test-user-4")
+		deviceId := pushNotifications.DeviceId("device-4")
+		token := "push-token-123"
+
+		// Act
+		work := repo.StorePushToken(userId, deviceId, token)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		err = work.Rollback()
+		require.NoError(t, err)
+
+		// Assert
+		storedToken, err := repo.GetPushToken(userId, deviceId)
+		assert.NoError(t, err)
+		assert.Nil(t, storedToken)
+	})
+
+	t.Run("rollback token update", func(t *testing.T) {
+		// Arrange
+		userId := pushNotifications.UserId("test-user-5")
+		deviceId := pushNotifications.DeviceId("device-5")
+		token1 := "push-token-1"
+		token2 := "push-token-2"
+
+		// Store initial token
+		work := repo.StorePushToken(userId, deviceId, token1)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act - Update and rollback
+		work = repo.StorePushToken(userId, deviceId, token2)
+		err = work.Perform()
+		require.NoError(t, err)
+
+		err = work.Rollback()
+		require.NoError(t, err)
+
+		// Assert - Should be back to token1
+		storedToken, err := repo.GetPushToken(userId, deviceId)
+		assert.NoError(t, err)
+		assert.NotNil(t, storedToken)
+		assert.Equal(t, token1, *storedToken)
+	})
+}
+
+func TestMain(m *testing.M) {
+	// Setup code (create database, tables, etc.)
+	code := m.Run()
+	// Cleanup code
+	os.Exit(code)
+}
