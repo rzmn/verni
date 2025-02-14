@@ -42,6 +42,13 @@ func (c *defaultRepository) createUser(user auth.UserId, email, password string)
 	if err != nil {
 		return fmt.Errorf("%s: cannot hash password: %w", op, err)
 	}
+	userWithEmail, err := c.GetUserIdByEmail(email)
+	if err != nil {
+		return fmt.Errorf("%s: getting user id by email: %w", op, err)
+	}
+	if userWithEmail != nil {
+		return fmt.Errorf("%s: user with email %s already exists", op, email)
+	}
 
 	query := `INSERT INTO credentials(userId, email, password, emailVerified) VALUES($1, $2, $3, False);`
 	if _, err := c.db.Exec(query, string(user), email, passwordHash); err != nil {
@@ -97,7 +104,7 @@ func (c *defaultRepository) IsUserExists(user auth.UserId) (bool, error) {
 	const op = "repositories.auth.defaultRepository.IsUserExists"
 	c.logger.LogInfo("%s: start[user=%s]", op, user)
 
-	query := `SELECT EXISTS(SELECT 1 FROM credentials WHERE id = $1);`
+	query := `SELECT EXISTS(SELECT 1 FROM credentials WHERE userId = $1);`
 	var exists bool
 	if err := c.db.QueryRow(query, string(user)).Scan(&exists); err != nil {
 		return false, fmt.Errorf("%s: failed to scan result: %w", op, err)
@@ -345,7 +352,7 @@ func (c *defaultRepository) updatePassword(user auth.UserId, passwordHash string
 	const op = "repositories.auth.defaultRepository.updatePassword"
 	c.logger.LogInfo("%s: start[user=%s]", op, user)
 
-	query := `UPDATE credentials SET password = $2 WHERE id = $1;`
+	query := `UPDATE credentials SET password = $2 WHERE userId = $1;`
 	if _, err := c.db.Exec(query, string(user), passwordHash); err != nil {
 		return fmt.Errorf("%s: failed to perform query: %w", op, err)
 	}
@@ -380,6 +387,14 @@ func (c *defaultRepository) UpdateEmail(user auth.UserId, newEmail string) repos
 func (c *defaultRepository) updateEmail(user auth.UserId, newEmail string, verified bool) error {
 	const op = "repositories.auth.defaultRepository.updateEmail"
 	c.logger.LogInfo("%s: start[user=%s]", op, user)
+
+	userWithEmail, err := c.GetUserIdByEmail(newEmail)
+	if err != nil {
+		return fmt.Errorf("%s: getting user id by email: %w", op, err)
+	}
+	if userWithEmail != nil {
+		return fmt.Errorf("%s: user with email %s already exists", op, newEmail)
+	}
 
 	query := `UPDATE credentials SET email = $2, emailVerified = $3 WHERE userId = $1;`
 	if _, err := c.db.Exec(query, string(user), newEmail, verified); err != nil {

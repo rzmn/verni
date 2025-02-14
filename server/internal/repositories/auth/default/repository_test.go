@@ -1,359 +1,557 @@
 package defaultRepository_test
 
-// import (
-// 	"encoding/json"
-// 	"fmt"
-// 	"io"
-// 	"os"
-// 	"strings"
-// 	"testing"
+import (
+	"database/sql"
+	"encoding/json"
+	"os"
+	"testing"
 
-// 	"verni/internal/db"
-// 	postgresDb "verni/internal/db/postgres"
-// 	"verni/internal/repositories/auth"
-// 	defaultRepository "verni/internal/repositories/auth/default"
-// 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
-// 	envBasedPathProvider "verni/internal/services/pathProvider/env"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-// 	"github.com/google/uuid"
-// )
+	postgresDb "verni/internal/db/postgres"
+	"verni/internal/repositories/auth"
+	defaultRepository "verni/internal/repositories/auth/default"
+	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
+	envBasedPathProvider "verni/internal/services/pathProvider/env"
+)
 
-// var (
-// 	database db.DB
-// )
+var testConfig postgresDb.PostgresConfig
 
-// func TestMain(m *testing.M) {
-// 	logger := standartOutputLoggingService.New()
-// 	pathProvider := envBasedPathProvider.New(logger)
-// 	database = func() db.DB {
-// 		configFile, err := os.Open(pathProvider.AbsolutePath("./config/test/postgres_storage.json"))
-// 		if err != nil {
-// 			logger.LogFatal("failed to open config file: %s", err)
-// 		}
-// 		defer configFile.Close()
-// 		configData, err := io.ReadAll(configFile)
-// 		if err != nil {
-// 			logger.LogFatal("failed to read config file: %s", err)
-// 		}
-// 		var config postgresDb.PostgresConfig
-// 		json.Unmarshal([]byte(configData), &config)
-// 		db, err := postgresDb.Postgres(config, logger)
-// 		if err != nil {
-// 			logger.LogFatal("failed to init db err: %v", err)
-// 		}
-// 		return db
-// 	}()
-// 	code := m.Run()
+func setupTestDB(t *testing.T) *sql.DB {
+	logger := standartOutputLoggingService.New()
+	pathProvider := envBasedPathProvider.New(logger)
+	path := pathProvider.AbsolutePath("./config/test/postgres_storage.json")
 
-// 	os.Exit(code)
-// }
+	configFile, err := os.ReadFile(path)
+	require.NoError(t, err)
 
-// func randomUid() auth.UserId {
-// 	return auth.UserId(uuid.New().String())
-// }
+	err = json.Unmarshal(configFile, &testConfig)
+	require.NoError(t, err)
 
-// func randomEmail() string {
-// 	return strings.ReplaceAll(fmt.Sprintf("%s.verni.co", uuid.New().String()), "-", "")
-// }
+	db, err := postgresDb.Postgres(testConfig, logger)
+	require.NoError(t, err)
 
-// func TestGetUserInfo(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+	// Clear test data
+	_, err = db.Exec("DELETE FROM refreshTokens")
+	require.NoError(t, err)
+	_, err = db.Exec("DELETE FROM credentials")
+	require.NoError(t, err)
 
-// 	userInfo, err := repository.GetUserInfo(userId)
-// 	if err == nil {
-// 		t.Fatalf("[initial] expected to get error from `GetUserInfo` info, found nil")
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	userInfo, err = repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `userInfo` err: %v", err)
-// 	}
-// 	if userInfo.UserId != userId || userInfo.Email != userEmail || userInfo.RefreshToken != userToken || userInfo.EmailVerified {
-// 		t.Fatalf("user info did not match, expected: %v found: %v", auth.UserInfo{
-// 			UserId:        userId,
-// 			Email:         userEmail,
-// 			RefreshToken:  userInfo.RefreshToken,
-// 			EmailVerified: false,
-// 		}, userInfo)
-// 	}
-// 	if err := createUserTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `createUserTransaction` err: %v", err)
-// 	}
-// 	userInfo, err = repository.GetUserInfo(userId)
-// 	if err == nil {
-// 		t.Fatalf("[after rollback] expected to get error from `GetUserInfo` info, found nil")
-// 	}
-// }
+	return db.(*sql.DB)
+}
 
-// func TestMarkUserEmailValidated(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+func TestRepository_CreateUser(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
 
-// 	if err := repository.MarkUserEmailValidated(userId).Perform(); err == nil {
-// 		t.Fatalf("[initial] expected to get error from `MarkUserEmailValidated` info, found nil")
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	markValidatedTransaction := repository.MarkUserEmailValidated(userId)
-// 	if err := markValidatedTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `markValidatedTransaction` err: %v", err)
-// 	}
-// 	userInfo, err := repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `userInfo` err: %v", err)
-// 	}
-// 	if !userInfo.EmailVerified {
-// 		t.Fatalf("`userInfo.EmailVerified` should be true")
-// 	}
-// 	if err := markValidatedTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `markValidatedTransaction` err: %v", err)
-// 	}
-// 	userInfo, err = repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `userInfo` err: %v", err)
-// 	}
-// 	if userInfo.EmailVerified {
-// 		t.Fatalf("[after rollback] `userInfo.EmailVerified` should be false")
-// 	}
-// }
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
 
-// func TestIsUserExists(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+	t.Run("successful user creation", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-1")
+		email := "test1@example.com"
+		password := "password123"
 
-// 	userExists, err := repository.IsUserExists(userId)
-// 	if err != nil {
-// 		t.Fatalf("[initial] failed to get `userExists` err: %v", err)
-// 	}
-// 	if userExists {
-// 		t.Fatalf("[initial] `userExists` should be false")
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	userExists, err = repository.IsUserExists(userId)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `userExists` err: %v", err)
-// 	}
-// 	if !userExists {
-// 		t.Fatalf("`userExists` should be true")
-// 	}
-// 	if err := createUserTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `createUserTransaction` err: %v", err)
-// 	}
-// 	userExists, err = repository.IsUserExists(userId)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `userExists` err: %v", err)
-// 	}
-// 	if userExists {
-// 		t.Fatalf("[after rollback] `userExists` should be false")
-// 	}
-// }
+		// Act
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
 
-// func TestCheckCredentials(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+		// Assert
+		assert.NoError(t, err)
 
-// 	passed, err := repository.CheckCredentials(userEmail, userPassword)
-// 	if err != nil {
-// 		t.Fatalf("[initial] failed to perform `CheckCredentials`, err: %v", err)
-// 	}
-// 	if passed {
-// 		t.Fatalf("`CheckCredentials` should return false, arg %v", userPassword)
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	passed, err = repository.CheckCredentials(userEmail, userPassword)
-// 	if err != nil {
-// 		t.Fatalf("failed to run `CheckCredentials` err: %v", err)
-// 	}
-// 	if !passed {
-// 		t.Fatalf("`CheckCredentials` should be true, arg: %v", userPassword)
-// 	}
-// 	wrongPassword := uuid.New().String()
-// 	shouldNotPass, err := repository.CheckCredentials(userEmail, wrongPassword)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `shouldNotPass` err: %v", err)
-// 	}
-// 	if shouldNotPass {
-// 		t.Fatalf("`shouldNotPass` should be false, arg: %v", wrongPassword)
-// 	}
-// }
+		// Verify user exists
+		exists, err := repo.IsUserExists(userId)
+		assert.NoError(t, err)
+		assert.True(t, exists)
 
-// func TestGetUserIdByEmail(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+		// Verify credentials
+		valid, err := repo.CheckCredentials(email, password)
+		assert.NoError(t, err)
+		assert.True(t, valid)
+	})
 
-// 	shouldBeNil, err := repository.GetUserIdByEmail(userEmail)
-// 	if err != nil {
-// 		t.Fatalf("[initial] failed to get `shouldBeNil` info, found nil")
-// 	}
-// 	if shouldBeNil != nil {
-// 		t.Fatalf("[initial] `shouldBeNil` should be nil, found %s", *shouldBeNil)
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	shouldBeEqualToUserId, err := repository.GetUserIdByEmail(userEmail)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `shouldBeEqualToUserId` err: %v", err)
-// 	}
-// 	if shouldBeEqualToUserId == nil {
-// 		t.Fatalf("`shouldBeEqualToUserId` should not be nil")
-// 	}
-// 	if *shouldBeEqualToUserId != userId {
-// 		t.Fatalf("`shouldBeEqualToUserId` should not be equal to %s, found %s", userId, *shouldBeEqualToUserId)
-// 	}
-// 	if err := createUserTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `createUserTransaction` err: %v", err)
-// 	}
-// 	shouldBeNil, err = repository.GetUserIdByEmail(userEmail)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `shouldBeNil` info, found nil")
-// 	}
-// 	if shouldBeNil != nil {
-// 		t.Fatalf("[after rollback] `shouldBeNil` should be nil, found %s", *shouldBeNil)
-// 	}
-// }
+	t.Run("duplicate email", func(t *testing.T) {
+		// Arrange
+		userId1 := auth.UserId("test-user-2")
+		userId2 := auth.UserId("test-user-3")
+		email := "test2@example.com"
+		password := "password123"
 
-// func TestUpdateRefreshToken(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+		// Create first user
+		work := repo.CreateUser(userId1, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
 
-// 	if err := repository.UpdateRefreshToken(userId, uuid.New().String()).Perform(); err == nil {
-// 		t.Fatalf("[initial] expected to get error from `UpdateRefreshToken` info, found nil")
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	newRefreshToken := uuid.New().String()
-// 	updateRefreshTokenTransaction := repository.UpdateRefreshToken(userId, newRefreshToken)
-// 	if err := updateRefreshTokenTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `updateRefreshTokenTransaction` err: %v", err)
-// 	}
-// 	userInfo, err := repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `userInfo` err: %v", err)
-// 	}
-// 	if userInfo.RefreshToken != newRefreshToken {
-// 		t.Fatalf("userInfo.RefreshToken is not equal to newRefreshToken: %s != %s", userInfo.RefreshToken, newRefreshToken)
-// 	}
-// 	if err := updateRefreshTokenTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `updateRefreshTokenTransaction` err: %v", err)
-// 	}
-// 	userInfo, err = repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `userInfo` err: %v", err)
-// 	}
-// 	if userInfo.RefreshToken != userToken {
-// 		t.Fatalf("[after rollback] userInfo.RefreshToken is not equal to userToken: %s != %s", userInfo.RefreshToken, userToken)
-// 	}
-// }
+		// Act - try to create second user with same email
+		work = repo.CreateUser(userId2, email, password)
+		err = work.Perform()
 
-// func TestUpdatePassword(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+		// Assert
+		assert.Error(t, err)
+	})
+}
 
-// 	if err := repository.UpdatePassword(userId, uuid.New().String()).Perform(); err == nil {
-// 		t.Fatalf("[initial] expected to get error from `UpdatePassword` info, found nil")
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	newPassword := uuid.New().String()
-// 	updatePasswordTransaction := repository.UpdatePassword(userId, newPassword)
-// 	if err := updatePasswordTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `updatePasswordTransaction` err: %v", err)
-// 	}
-// 	shouldBeTrue, err := repository.CheckCredentials(userEmail, newPassword)
-// 	if err != nil {
-// 		t.Fatalf("failed to perform `CheckCredentials` err: %v", err)
-// 	}
-// 	if !shouldBeTrue {
-// 		t.Fatalf("`CheckCredentials` should return true")
-// 	}
-// 	if err := updatePasswordTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `updateRefreshTokenTransaction` err: %v", err)
-// 	}
-// 	shouldBeTrue, err = repository.CheckCredentials(userEmail, userPassword)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to perform `CheckCredentials` err: %v", err)
-// 	}
-// 	if !shouldBeTrue {
-// 		t.Fatalf("[after rollback] `CheckCredentials` should return true")
-// 	}
-// }
+func TestRepository_MarkUserEmailValidated(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
 
-// func TestUpdateEmail(t *testing.T) {
-// 	repository := defaultRepository.New(database, standartOutputLoggingService.New())
-// 	userId := randomUid()
-// 	userEmail := randomEmail()
-// 	userToken := uuid.New().String()
-// 	userPassword := uuid.New().String()
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
 
-// 	if err := repository.UpdateEmail(userId, uuid.New().String()).Perform(); err == nil {
-// 		t.Fatalf("[initial] expected to get error from `UpdateEmail` info, found nil")
-// 	}
-// 	createUserTransaction := repository.CreateUser(userId, userEmail, userPassword, userToken)
-// 	if err := createUserTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `createUserTransaction` err: %v", err)
-// 	}
-// 	if err := repository.MarkUserEmailValidated(userId).Perform(); err != nil {
-// 		t.Fatalf("[initial] `MarkUserEmailValidated` failed err: %v", err)
-// 	}
-// 	newEmail := randomEmail()
-// 	updateEmailTransaction := repository.UpdateEmail(userId, newEmail)
-// 	if err := updateEmailTransaction.Perform(); err != nil {
-// 		t.Fatalf("failed to perform `updateEmailTransaction` err: %v", err)
-// 	}
-// 	userInfo, err := repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("failed to get `userInfo` err: %v", err)
-// 	}
-// 	if userInfo.Email != newEmail || userInfo.EmailVerified {
-// 		t.Fatalf("userInfo should have new and unverified email, found verfified=%t email=%s", userInfo.EmailVerified, userInfo.Email)
-// 	}
-// 	if err := updateEmailTransaction.Rollback(); err != nil {
-// 		t.Fatalf("failed to rollback `updateEmailTransaction` err: %v", err)
-// 	}
-// 	userInfo, err = repository.GetUserInfo(userId)
-// 	if err != nil {
-// 		t.Fatalf("[after rollback] failed to get `userInfo` err: %v", err)
-// 	}
-// 	if userInfo.Email != userEmail || !userInfo.EmailVerified {
-// 		t.Fatalf("[after rollback] userInfo should have old and verified email, found verified=%t email=%s", userInfo.EmailVerified, userInfo.Email)
-// 	}
-// }
+	t.Run("successful email validation", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-4")
+		email := "test4@example.com"
+		password := "password123"
+
+		// Create user
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		work = repo.MarkUserEmailValidated(userId)
+		err = work.Perform()
+
+		// Assert
+		assert.NoError(t, err)
+
+		// Verify email is marked as validated
+		info, err := repo.GetUserInfo(userId)
+		assert.NoError(t, err)
+		assert.True(t, info.EmailVerified)
+	})
+}
+
+func TestRepository_CheckCredentials(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("valid credentials", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-5")
+		email := "test5@example.com"
+		password := "password123"
+
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		valid, err := repo.CheckCredentials(email, password)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.True(t, valid)
+	})
+
+	t.Run("invalid password", func(t *testing.T) {
+		// Arrange
+		email := "test5@example.com"
+		wrongPassword := "wrongpassword"
+
+		// Act
+		valid, err := repo.CheckCredentials(email, wrongPassword)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.False(t, valid)
+	})
+
+	t.Run("non-existent email", func(t *testing.T) {
+		// Act
+		valid, err := repo.CheckCredentials("nonexistent@example.com", "password123")
+
+		// Assert
+		assert.NoError(t, err)
+		assert.False(t, valid)
+	})
+}
+
+func TestRepository_RefreshToken(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("refresh token lifecycle", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-6")
+		deviceId := auth.DeviceId("device-1")
+		email := "test6@example.com"
+		password := "password123"
+		token := "refresh-token-123"
+
+		// Create user
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act - Update token
+		work = repo.UpdateRefreshToken(userId, deviceId, token)
+		err = work.Perform()
+		assert.NoError(t, err)
+
+		// Assert - Check token
+		valid, err := repo.CheckRefreshToken(userId, deviceId, token)
+		assert.NoError(t, err)
+		assert.True(t, valid)
+
+		// Assert - Session exists
+		exists, err := repo.IsSessionExists(userId, deviceId)
+		assert.NoError(t, err)
+		assert.True(t, exists)
+	})
+}
+
+func TestRepository_ExclusiveSession(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("exclusive session removes other sessions", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-7")
+		device1 := auth.DeviceId("device-1")
+		device2 := auth.DeviceId("device-2")
+		email := "test7@example.com"
+		password := "password123"
+
+		// Create user and sessions
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		work = repo.UpdateRefreshToken(userId, device1, "token1")
+		err = work.Perform()
+		require.NoError(t, err)
+
+		work = repo.UpdateRefreshToken(userId, device2, "token2")
+		err = work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		work = repo.ExclusiveSession(userId, device1)
+		err = work.Perform()
+		assert.NoError(t, err)
+
+		// Assert
+		exists, err := repo.IsSessionExists(userId, device1)
+		assert.NoError(t, err)
+		assert.True(t, exists)
+
+		exists, err = repo.IsSessionExists(userId, device2)
+		assert.NoError(t, err)
+		assert.False(t, exists)
+	})
+}
+
+func TestRepository_UpdateEmail(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("successful email update", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-8")
+		oldEmail := "test8@example.com"
+		newEmail := "test8new@example.com"
+		password := "password123"
+
+		work := repo.CreateUser(userId, oldEmail, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		work = repo.UpdateEmail(userId, newEmail)
+		err = work.Perform()
+
+		// Assert
+		assert.NoError(t, err)
+
+		info, err := repo.GetUserInfo(userId)
+		assert.NoError(t, err)
+		assert.Equal(t, newEmail, info.Email)
+		assert.False(t, info.EmailVerified)
+	})
+}
+
+func TestRepository_UpdatePassword(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("successful password update", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-9")
+		email := "test9@example.com"
+		oldPassword := "password123"
+		newPassword := "newpassword123"
+
+		work := repo.CreateUser(userId, email, oldPassword)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		work = repo.UpdatePassword(userId, newPassword)
+		err = work.Perform()
+
+		// Assert
+		assert.NoError(t, err)
+
+		// Verify old password no longer works
+		valid, err := repo.CheckCredentials(email, oldPassword)
+		assert.NoError(t, err)
+		assert.False(t, valid)
+
+		// Verify new password works
+		valid, err = repo.CheckCredentials(email, newPassword)
+		assert.NoError(t, err)
+		assert.True(t, valid)
+	})
+}
+
+func TestRepository_GetUserIdByEmail(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("existing user", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-10")
+		email := "test10@example.com"
+		password := "password123"
+
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Act
+		foundId, err := repo.GetUserIdByEmail(email)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, foundId)
+		assert.Equal(t, userId, *foundId)
+	})
+
+	t.Run("non-existent user", func(t *testing.T) {
+		// Act
+		foundId, err := repo.GetUserIdByEmail("nonexistent@example.com")
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Nil(t, foundId)
+	})
+}
+
+func TestRepository_MarkUserEmailValidated_Error(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("non-existent user", func(t *testing.T) {
+		// Act
+		work := repo.MarkUserEmailValidated("nonexistent-user")
+		err := work.Perform()
+
+		// Assert
+		assert.Error(t, err)
+	})
+
+	t.Run("already validated email", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-11")
+		email := "test11@example.com"
+		password := "password123"
+
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Validate first time
+		work = repo.MarkUserEmailValidated(userId)
+		err = work.Perform()
+		require.NoError(t, err)
+
+		// Act - Try to validate again
+		work = repo.MarkUserEmailValidated(userId)
+		err = work.Perform()
+
+		// Assert - Should not return error, but should not change state
+		assert.NoError(t, err)
+
+		info, err := repo.GetUserInfo(userId)
+		assert.NoError(t, err)
+		assert.True(t, info.EmailVerified)
+	})
+}
+
+func TestRepository_UpdateEmail_Error(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("duplicate email", func(t *testing.T) {
+		// Arrange
+		userId1 := auth.UserId("test-user-12")
+		userId2 := auth.UserId("test-user-13")
+		email1 := "test12@example.com"
+		email2 := "test13@example.com"
+		password := "password123"
+
+		// Create first user
+		work := repo.CreateUser(userId1, email1, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		// Create second user
+		work = repo.CreateUser(userId2, email2, password)
+		err = work.Perform()
+		require.NoError(t, err)
+
+		// Act - Try to update second user's email to first user's email
+		work = repo.UpdateEmail(userId2, email1)
+		err = work.Perform()
+
+		// Assert
+		assert.Error(t, err)
+
+		// Verify email wasn't changed
+		info, err := repo.GetUserInfo(userId2)
+		assert.NoError(t, err)
+		assert.Equal(t, email2, info.Email)
+	})
+}
+
+func TestRepository_RefreshToken_Rollback(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("rollback refresh token update", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-14")
+		deviceId := auth.DeviceId("device-1")
+		email := "test14@example.com"
+		password := "password123"
+		token1 := "refresh-token-1"
+		token2 := "refresh-token-2"
+
+		// Create user and initial token
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		work = repo.UpdateRefreshToken(userId, deviceId, token1)
+		err = work.Perform()
+		require.NoError(t, err)
+
+		// Act - Update token and rollback
+		work = repo.UpdateRefreshToken(userId, deviceId, token2)
+		err = work.Perform()
+		require.NoError(t, err)
+
+		err = work.Rollback()
+		require.NoError(t, err)
+
+		// Assert - Should be back to token1
+		valid, err := repo.CheckRefreshToken(userId, deviceId, token1)
+		assert.NoError(t, err)
+		assert.True(t, valid)
+
+		valid, err = repo.CheckRefreshToken(userId, deviceId, token2)
+		assert.NoError(t, err)
+		assert.False(t, valid)
+	})
+}
+
+func TestRepository_GetUserInfo_Error(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("non-existent user", func(t *testing.T) {
+		// Act
+		_, err := repo.GetUserInfo("nonexistent-user")
+
+		// Assert
+		assert.Error(t, err)
+	})
+}
+
+func TestRepository_ExclusiveSession_Rollback(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	logger := standartOutputLoggingService.New()
+	repo := defaultRepository.New(db, logger)
+
+	t.Run("rollback exclusive session", func(t *testing.T) {
+		// Arrange
+		userId := auth.UserId("test-user-15")
+		device1 := auth.DeviceId("device-1")
+		device2 := auth.DeviceId("device-2")
+		email := "test15@example.com"
+		password := "password123"
+
+		// Create user and sessions
+		work := repo.CreateUser(userId, email, password)
+		err := work.Perform()
+		require.NoError(t, err)
+
+		work = repo.UpdateRefreshToken(userId, device1, "token1")
+		err = work.Perform()
+		require.NoError(t, err)
+
+		work = repo.UpdateRefreshToken(userId, device2, "token2")
+		err = work.Perform()
+		require.NoError(t, err)
+
+		// Act - Make exclusive and rollback
+		work = repo.ExclusiveSession(userId, device1)
+		err = work.Perform()
+		require.NoError(t, err)
+
+		err = work.Rollback()
+		require.NoError(t, err)
+
+		// Assert - Both sessions should exist again
+		exists, err := repo.IsSessionExists(userId, device1)
+		assert.NoError(t, err)
+		assert.True(t, exists)
+
+		exists, err = repo.IsSessionExists(userId, device2)
+		assert.NoError(t, err)
+		assert.True(t, exists)
+	})
+}
+
+func TestMain(m *testing.M) {
+	// Setup code (create database, tables, etc.)
+	code := m.Run()
+	// Cleanup code
+	os.Exit(code)
+}
