@@ -392,7 +392,7 @@ func (c *defaultRepository) updateEmail(user auth.UserId, newEmail string, verif
 	if err != nil {
 		return fmt.Errorf("%s: getting user id by email: %w", op, err)
 	}
-	if userWithEmail != nil {
+	if userWithEmail != nil && *userWithEmail != user {
 		return fmt.Errorf("%s: user with email %s already exists", op, newEmail)
 	}
 
