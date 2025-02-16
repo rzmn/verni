@@ -64,6 +64,10 @@ func (c *defaultController) Search(query string) ([]openapi.SomeOperation, error
 			},
 		)
 	}
+	if len(entities) == 0 {
+		c.logger.LogInfo("%s: success[q=%s]", op, query)
+		return []openapi.SomeOperation{}, nil
+	}
 	operations, err := c.operationsRepository.Get(entities)
 	if err != nil {
 		err := fmt.Errorf("getting operations affecting selected users: %w", err)
