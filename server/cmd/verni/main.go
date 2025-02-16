@@ -33,7 +33,7 @@ import (
 	prodLoggingService "verni/internal/services/logging/prod"
 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
 	"verni/internal/services/pathProvider"
-	envBasedPathProvider "verni/internal/services/pathProvider/env"
+	defaultPathProvider "verni/internal/services/pathProvider/default"
 	"verni/internal/services/pushNotifications"
 	applePushNotifications "verni/internal/services/pushNotifications/apns"
 	"verni/internal/services/realtimeEvents"
@@ -92,7 +92,7 @@ func main() {
 	logger, pathProvider, config := func() (logging.Service, pathProvider.Service, Config) {
 		startupTime := time.Now()
 		tmpLogger := standartOutputLoggingService.New()
-		tmpPathProvider := envBasedPathProvider.New(tmpLogger)
+		tmpPathProvider := defaultPathProvider.New(tmpLogger)
 		loggingDirectory := tmpPathProvider.AbsolutePath(
 			fmt.Sprintf("./logs/session[%s].log", startupTime.Format("2006.01.02 15:04:05")),
 		)
@@ -135,7 +135,7 @@ func main() {
 			Watchdog:         watchdog,
 			LoggingDirectory: loggingDirectory,
 		})
-		pathProvider := envBasedPathProvider.New(logger)
+		pathProvider := defaultPathProvider.New(logger)
 		return logger, pathProvider, config
 	}()
 	logger.LogInfo("initializing with config %v", config)

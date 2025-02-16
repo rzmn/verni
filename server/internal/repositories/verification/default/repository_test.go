@@ -12,7 +12,7 @@ import (
 	postgresDb "verni/internal/db/postgres"
 	defaultRepository "verni/internal/repositories/verification/default"
 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
-	envBasedPathProvider "verni/internal/services/pathProvider/env"
+	defaultPathProvider "verni/internal/services/pathProvider/default"
 )
 
 var testConfig postgresDb.PostgresConfig
@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 
 func setupTestDB(t *testing.T) *sql.DB {
 	logger := standartOutputLoggingService.New()
-	pathProvider := envBasedPathProvider.New(logger)
+	pathProvider := defaultPathProvider.New(logger)
 	path := pathProvider.AbsolutePath("./config/test/postgres_storage.json")
 
 	configFile, err := os.ReadFile(path)

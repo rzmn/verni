@@ -10,12 +10,12 @@ import (
 
 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
 	"verni/internal/services/pathProvider"
-	envBasedPathProvider "verni/internal/services/pathProvider/env"
+	defaultPathProvider "verni/internal/services/pathProvider/default"
 )
 
 func main() {
 	logger := standartOutputLoggingService.New()
-	pathProvider := envBasedPathProvider.New(logger)
+	pathProvider := defaultPathProvider.New(logger)
 	args := os.Args[1:]
 	command, err := valueForArg(argNameCommandType, args)
 	if err != nil {

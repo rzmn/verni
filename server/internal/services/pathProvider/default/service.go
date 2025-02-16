@@ -34,15 +34,9 @@ func findProjectRoot() (string, error) {
 }
 
 func New(logger logging.Service) pathProvider.Service {
-	root, present := os.LookupEnv("VERNI_PROJECT_ROOT")
-	if !present {
-		logger.LogInfo("`VERNI_PROJECT_ROOT` is not set, looking for `go.mod` file location")
-		goModPath, err := findProjectRoot()
-		if err != nil {
-			logger.LogFatal("failed to find `go.mod` file location: %s", err)
-		}
-		logger.LogInfo("`go.mod` file location: %s", goModPath)
-		root = goModPath
+	root, err := findProjectRoot()
+	if err != nil {
+		logger.LogFatal("failed to find `go.mod` file location: %s", err)
 	}
 	logger.LogInfo("override relative paths root: %s", root)
 	return &defaultService{
