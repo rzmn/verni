@@ -1,1944 +1,570 @@
 package defaultController_test
 
-// import (
-// 	"errors"
-// 	"testing"
+import (
+	"errors"
+	"testing"
 
-// 	"verni/internal/controllers/auth"
-// 	defaultController "verni/internal/controllers/auth/default"
-// 	"verni/internal/repositories"
-// 	authRepository "verni/internal/repositories/auth"
-// 	auth_mock "verni/internal/repositories/auth/mock"
-// 	"verni/internal/repositories/pushNotifications"
-// 	pushNotifications_mock "verni/internal/repositories/pushNotifications/mock"
-// 	"verni/internal/repositories/users"
-// 	users_mock "verni/internal/repositories/users/mock"
-// 	formatValidation_mock "verni/internal/services/formatValidation/mock"
-// 	"verni/internal/services/jwt"
-// 	jwt_mock "verni/internal/services/jwt/mock"
-// 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
+	"github.com/stretchr/testify/assert"
 
-// 	"github.com/google/uuid"
-// )
+	"verni/internal/controllers/auth"
+	defaultController "verni/internal/controllers/auth/default"
+	"verni/internal/repositories"
+	authRepository "verni/internal/repositories/auth"
+	authRepository_mock "verni/internal/repositories/auth/mock"
+	operationsRepository "verni/internal/repositories/operations"
+	operationsRepository_mock "verni/internal/repositories/operations/mock"
+	"verni/internal/repositories/pushNotifications"
+	pushNotificationsRepository_mock "verni/internal/repositories/pushNotifications/mock"
+	formatValidation_mock "verni/internal/services/formatValidation/mock"
+	"verni/internal/services/jwt"
+	jwt_mock "verni/internal/services/jwt/mock"
+	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
+)
 
-// func TestSignupInvalidEmailFormat(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return errors.New("some error")
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorWrongFormat {
-// 		t.Fatalf("err code should be `wrong format`, found %v", err)
-// 	}
-// }
+func TestController_Signup(t *testing.T) {
+	logger := standartOutputLoggingService.New()
 
-// func TestSignupInvalidPasswordFormat(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return errors.New("some error")
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorWrongFormat {
-// 		t.Fatalf("err code should be `wrong format`, found %v", err)
-// 	}
-// }
+	t.Run("successful signup", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
+				return nil, nil
+			},
+			UpdateRefreshTokenImpl: func(user authRepository.UserId, device authRepository.DeviceId, token string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+			CreateUserImpl: func(user authRepository.UserId, email string, password string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
 
-// func TestSignupFailedToCheckIfEmailIsTaken(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, errors.New("some error")
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		opsRepo := &operationsRepository_mock.RepositoryMock{
+			PushImpl: func(operations []operationsRepository.PushOperation, userId operationsRepository.UserId, deviceId operationsRepository.DeviceId, confirm bool) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
 
-// func TestSignupFailedEmailIsTaken(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			id := uuid.New().String()
-// 			return (*authRepository.UserId)(&id), nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorAlreadyTaken {
-// 		t.Fatalf("err code should be `already taken`, found %v", err)
-// 	}
-// }
+		jwtService := &jwt_mock.ServiceMock{
+			IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, error) {
+				return "access-token", nil
+			},
+			IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, error) {
+				return "refresh-token", nil
+			},
+		}
 
-// func TestSignupIssueAccessTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidateEmailFormatImpl:    func(email string) error { return nil },
+			ValidatePasswordFormatImpl: func(password string) error { return nil },
+			ValidateDeviceIdFormatImpl: func(id string) error { return nil },
+		}
 
-// func TestSignupIssueRefreshTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		pushRepo := &pushNotificationsRepository_mock.RepositoryMock{}
 
-// func TestSignupCreateUserMetaFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{
-// 		StoreUserImpl: func(user users.User) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		controller := defaultController.New(
+			authRepo,
+			opsRepo,
+			pushRepo,
+			jwtService,
+			formatValidationService,
+			logger,
+		)
 
-// func TestSignupCreateUserFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 		CreateUserImpl: func(uid authRepository.UserId, email, password, refreshToken string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	storeUserCalls := 0
-// 	storeUserRollbacks := 0
-// 	usersRepositoryMock := users_mock.RepositoryMock{
-// 		StoreUserImpl: func(user users.User) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					storeUserCalls += 1
-// 					return nil
-// 				},
-// 				Rollback: func() error {
-// 					storeUserRollbacks += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.SignupErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// 	if storeUserCalls != 1 || storeUserRollbacks != 1 {
-// 		t.Fatalf("store and rollback should be called once, found %d %d", storeUserCalls, storeUserRollbacks)
-// 	}
-// }
+		// Act
+		result, err := controller.Signup("device-1", "test@example.com", "password123")
 
-// func TestSignupOk(t *testing.T) {
-// 	createUserCalls := 0
-// 	storeUserCalls := 0
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 		CreateUserImpl: func(uid authRepository.UserId, email, password, refreshToken string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					createUserCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	usersRepositoryMock := users_mock.RepositoryMock{
-// 		StoreUserImpl: func(user users.User) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					storeUserCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Signup(uuid.New().String(), uuid.New().String())
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if createUserCalls != 1 || storeUserCalls != 1 {
-// 		t.Fatalf("`createUser` and `storeUser`, should be called once, found %d %d", createUserCalls, storeUserCalls)
-// 	}
-// }
+		// Assert
+		assert.NoError(t, err)
+		assert.NotEmpty(t, result.Session.Id)
+		assert.Equal(t, "access-token", result.Session.AccessToken)
+		assert.Equal(t, "refresh-token", result.Session.RefreshToken)
+		assert.Len(t, result.Operations, 1)
+		assert.Equal(t, "test", result.Operations[0].CreateUser.DisplayName)
+	})
 
-// func TestLoginUnableToCheckCredentials(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return false, errors.New("some error")
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+	t.Run("email already taken", func(t *testing.T) {
+		// Arrange
+		existingUserId := authRepository.UserId("existing-user")
+		authRepo := &authRepository_mock.RepositoryMock{
+			GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
+				return &existingUserId, nil
+			},
+		}
 
-// func TestLoginWrongCredentials(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return false, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorWrongCredentials {
-// 		t.Fatalf("err code should be `wrong credentials`, found %v", err)
-// 	}
-// }
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidateEmailFormatImpl:    func(email string) error { return nil },
+			ValidatePasswordFormatImpl: func(password string) error { return nil },
+			ValidateDeviceIdFormatImpl: func(id string) error { return nil },
+		}
 
-// func TestLoginGetUserFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, errors.New("some error")
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			nil,
+			formatValidationService,
+			logger,
+		)
 
-// func TestLoginGetUserNotFound(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Act
+		_, err := controller.Signup("device-1", "test@example.com", "password123")
 
-// func TestLoginIssueAccessTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			uid := uuid.New().String()
-// 			return (*authRepository.UserId)(&uid), nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.AlreadyTaken)
+	})
 
-// func TestLoginIssueRefreshTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			uid := uuid.New().String()
-// 			return (*authRepository.UserId)(&uid), nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+	t.Run("invalid email format", func(t *testing.T) {
+		// Arrange
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidateEmailFormatImpl: func(email string) error {
+				return errors.New("invalid email")
+			},
+			ValidatePasswordFormatImpl: func(password string) error { return nil },
+			ValidateDeviceIdFormatImpl: func(id string) error { return nil },
+		}
 
-// func TestLoginUpdateTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			uid := uuid.New().String()
-// 			return (*authRepository.UserId)(&uid), nil
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LoginErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		controller := defaultController.New(
+			nil,
+			nil,
+			nil,
+			nil,
+			formatValidationService,
+			logger,
+		)
 
-// func TestLoginOk(t *testing.T) {
-// 	updateTokenCalls := 0
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			uid := uuid.New().String()
-// 			return (*authRepository.UserId)(&uid), nil
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateTokenCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Login(uuid.New().String(), uuid.New().String())
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if updateTokenCalls != 1 {
-// 		t.Fatalf("should update token once")
-// 	}
-// }
+		// Act
+		_, err := controller.Signup("device-1", "invalid-email", "password123")
 
-// func TestRefreshTokenExpired(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return &jwt.Error{Code: jwt.CodeTokenExpired}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorTokenExpired {
-// 		t.Fatalf("err code should be `token expired`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.BadFormat)
+	})
+}
 
-// func TestRefreshTokenWrong(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return &jwt.Error{Code: jwt.CodeTokenInvalid}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorTokenIsWrong {
-// 		t.Fatalf("err code should be `token wrong`, found %v", err)
-// 	}
-// }
+func TestController_Login(t *testing.T) {
+	logger := standartOutputLoggingService.New()
 
-// func TestRefreshUnableToValidateToken(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return &jwt.Error{Code: jwt.CodeInternal}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+	t.Run("successful login", func(t *testing.T) {
+		// Arrange
+		userId := authRepository.UserId("test-user")
+		authRepo := &authRepository_mock.RepositoryMock{
+			CheckCredentialsImpl: func(email string, password string) (bool, error) {
+				return true, nil
+			},
+			GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
+				return &userId, nil
+			},
+			UpdateRefreshTokenImpl: func(user authRepository.UserId, device authRepository.DeviceId, token string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
 
-// func TestRefreshUnableToGetSubject(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		opsRepo := &operationsRepository_mock.RepositoryMock{
+			PullImpl: func(userId operationsRepository.UserId, deviceId operationsRepository.DeviceId, operationType operationsRepository.OperationType) ([]operationsRepository.Operation, error) {
+				return []operationsRepository.Operation{}, nil
+			},
+		}
 
-// func TestRefreshUnableToGetCurrentToken(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, errors.New("some error")
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		jwtService := &jwt_mock.ServiceMock{
+			IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, error) {
+				return "access-token", nil
+			},
+			IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, error) {
+				return "refresh-token", nil
+			},
+		}
 
-// func TestRefreshTokensDidNotMatch(t *testing.T) {
-// 	currentToken := uuid.New().String()
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{
-// 				RefreshToken: currentToken,
-// 			}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(uuid.New().String())
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorTokenIsWrong {
-// 		t.Fatalf("err code should be `token wrong`, found %v", err)
-// 	}
-// }
+		controller := defaultController.New(
+			authRepo,
+			opsRepo,
+			nil,
+			jwtService,
+			nil,
+			logger,
+		)
 
-// func TestRefreshIssueAccessTokenFailed(t *testing.T) {
-// 	currentToken := uuid.New().String()
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{
-// 				RefreshToken: currentToken,
-// 			}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), nil
-// 		},
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(currentToken)
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Act
+		result, err := controller.Login("device-1", "test@example.com", "password123")
 
-// func TestRefreshIssueRefreshTokenFailed(t *testing.T) {
-// 	currentToken := uuid.New().String()
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{
-// 				RefreshToken: currentToken,
-// 			}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), nil
-// 		},
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(currentToken)
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, auth.UserId(userId), result.Session.Id)
+		assert.Equal(t, "access-token", result.Session.AccessToken)
+		assert.Equal(t, "refresh-token", result.Session.RefreshToken)
+	})
 
-// func TestRefreshUpdateRefreshTokenFailed(t *testing.T) {
-// 	currentToken := uuid.New().String()
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{
-// 				RefreshToken: currentToken,
-// 			}, nil
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), nil
-// 		},
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(currentToken)
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RefreshErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+	t.Run("wrong credentials", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			CheckCredentialsImpl: func(email string, password string) (bool, error) {
+				return false, nil
+			},
+		}
 
-// func TestRefreshOk(t *testing.T) {
-// 	updateRefreshTokenCalls := 0
-// 	currentToken := uuid.New().String()
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{
-// 				RefreshToken: currentToken,
-// 			}, nil
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateRefreshTokenCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		ValidateRefreshTokenImpl: func(token jwt.RefreshToken) *jwt.Error {
-// 			return nil
-// 		},
-// 		GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, *jwt.Error) {
-// 			return jwt.Subject(uuid.New().String()), nil
-// 		},
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.Refresh(currentToken)
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if updateRefreshTokenCalls != 1 {
-// 		t.Fatalf("token should be updated once, found %d", updateRefreshTokenCalls)
-// 	}
-// }
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			nil,
+			nil,
+			logger,
+		)
 
-// func TestLogoutIssueNewRefreshTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	err := controller.Logout(auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LogoutErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Act
+		_, err := controller.Login("device-1", "test@example.com", "wrong-password")
 
-// func TestLogoutUpdateRefreshTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	err := controller.Logout(auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.LogoutErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.WrongCredentials)
+	})
+}
 
-// func TestLogoutOk(t *testing.T) {
-// 	updateRefreshTokenCalls := 0
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateRefreshTokenCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	err := controller.Logout(auth.UserId(uuid.New().String()))
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if updateRefreshTokenCalls != 1 {
-// 		t.Fatalf("token should be updated once, found %d", updateRefreshTokenCalls)
-// 	}
-// }
+func TestController_Refresh(t *testing.T) {
+	logger := standartOutputLoggingService.New()
 
-// func TestUpdateEmailWrongFormat(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return errors.New("some error")
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorWrongFormat {
-// 		t.Fatalf("err code should be `wrong format`, found %v", err)
-// 	}
-// }
+	t.Run("successful token refresh", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			CheckRefreshTokenImpl: func(user authRepository.UserId, device authRepository.DeviceId, token string) (bool, error) {
+				return true, nil
+			},
+			UpdateRefreshTokenImpl: func(user authRepository.UserId, device authRepository.DeviceId, token string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
 
-// func TestUpdateEmailGetUserFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, errors.New("some error")
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		jwtService := &jwt_mock.ServiceMock{
+			ValidateRefreshTokenImpl: func(token jwt.RefreshToken) error {
+				return nil
+			},
+			GetRefreshTokenSubjectImpl: func(token jwt.RefreshToken) (jwt.Subject, error) {
+				return jwt.Subject{
+					User:   "test-user",
+					Device: "device-1",
+				}, nil
+			},
+			IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, error) {
+				return "new-access-token", nil
+			},
+			IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, error) {
+				return "new-refresh-token", nil
+			},
+		}
 
-// func TestUpdateEmailAlreadyTaken(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			id := uuid.New().String()
-// 			return (*authRepository.UserId)(&id), nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorAlreadyTaken {
-// 		t.Fatalf("err code should be `already taken`, found %v", err)
-// 	}
-// }
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			jwtService,
+			nil,
+			logger,
+		)
 
-// func TestUpdateEmailIssueAccessTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Act
+		result, err := controller.Refresh("old-refresh-token")
 
-// func TestUpdateEmailIssueRefreshTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, auth.UserId("test-user"), result.Id)
+		assert.Equal(t, "new-access-token", result.AccessToken)
+		assert.Equal(t, "new-refresh-token", result.RefreshToken)
+	})
 
-// func TestUpdateEmailEmailUpdateFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 		UpdateEmailImpl: func(uid authRepository.UserId, newEmail string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+	t.Run("expired refresh token", func(t *testing.T) {
+		// Arrange
+		jwtService := &jwt_mock.ServiceMock{
+			ValidateRefreshTokenImpl: func(token jwt.RefreshToken) error {
+				return jwt.TokenExpired
+			},
+		}
 
-// func TestUpdateEmailTokenUpdateFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	updateEmailCalls := 0
-// 	updateEmailRollbacks := 0
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 		UpdateEmailImpl: func(uid authRepository.UserId, newEmail string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateEmailCalls += 1
-// 					return nil
-// 				},
-// 				Rollback: func() error {
-// 					updateEmailRollbacks += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdateEmailErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// 	if updateEmailCalls != 1 {
-// 		t.Fatalf("should update email once, found %d", updateEmailCalls)
-// 	}
-// 	if updateEmailRollbacks != 1 {
-// 		t.Fatalf("should update email rollback once, found %d", updateEmailRollbacks)
-// 	}
-// }
+		controller := defaultController.New(
+			nil,
+			nil,
+			nil,
+			jwtService,
+			nil,
+			logger,
+		)
 
-// func TestUpdateEmailOk(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidateEmailFormatImpl: func(email string) error {
-// 			return nil
-// 		},
-// 	}
-// 	updateEmailCalls := 0
-// 	updateTokenCalls := 0
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
-// 			return nil, nil
-// 		},
-// 		UpdateEmailImpl: func(uid authRepository.UserId, newEmail string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateEmailCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateTokenCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdateEmail(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if updateEmailCalls != 1 {
-// 		t.Fatalf("should update email once, found %d", updateEmailCalls)
-// 	}
-// 	if updateTokenCalls != 1 {
-// 		t.Fatalf("should update token once, found %d", updateTokenCalls)
-// 	}
-// }
+		// Act
+		_, err := controller.Refresh("expired-token")
 
-// func TestUpdatePasswordNewPasswordHasWrongFormat(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return errors.New("some error")
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorWrongFormat {
-// 		t.Fatalf("err code should be `wrong format`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.TokenExpired)
+	})
+}
 
-// func TestUpdatePasswordGetUserFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, errors.New("some error")
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+func TestController_CheckToken(t *testing.T) {
+	logger := standartOutputLoggingService.New()
 
-// func TestUpdatePasswordCredentialsCheckFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return false, errors.New("some error")
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+	t.Run("valid access token", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			IsSessionExistsImpl: func(user authRepository.UserId, device authRepository.DeviceId) (bool, error) {
+				return true, nil
+			},
+		}
 
-// func TestUpdatePasswordOldPasswordIsWrong(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return false, nil
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorOldPasswordIsWrong {
-// 		t.Fatalf("err code should be `old password is wrong`, found %v", err)
-// 	}
-// }
+		jwtService := &jwt_mock.ServiceMock{
+			ValidateAccessTokenImpl: func(token jwt.AccessToken) error {
+				return nil
+			},
+			GetAccessTokenSubjectImpl: func(token jwt.AccessToken) (jwt.Subject, error) {
+				return jwt.Subject{
+					User:   "test-user",
+					Device: "device-1",
+				}, nil
+			},
+		}
 
-// func TestUpdatePasswordIssueAccessTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			jwtService,
+			nil,
+			logger,
+		)
 
-// func TestUpdatePasswordIssueRefreshTokenFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), &jwt.Error{}
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Act
+		result, err := controller.CheckToken("valid-access-token")
 
-// func TestUpdatePasswordPasswordUpdateFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 		UpdatePasswordImpl: func(uid authRepository.UserId, newPassword string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, auth.UserId("test-user"), result.User)
+		assert.Equal(t, auth.DeviceId("device-1"), result.Device)
+	})
 
-// func TestUpdatePasswordTokenUpdateFailed(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	updatePasswordCalls := 0
-// 	updatePasswordRollbacks := 0
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 		UpdatePasswordImpl: func(uid authRepository.UserId, newPassword string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updatePasswordCalls += 1
-// 					return nil
-// 				},
-// 				Rollback: func() error {
-// 					updatePasswordRollbacks += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.UpdatePasswordErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// 	if updatePasswordCalls != 1 {
-// 		t.Fatalf("password should be updated once, found %d", updatePasswordCalls)
-// 	}
-// 	if updatePasswordRollbacks != 1 {
-// 		t.Fatalf("password update should be rolled back once, found %d", updatePasswordRollbacks)
-// 	}
-// }
+	t.Run("expired access token", func(t *testing.T) {
+		// Arrange
+		jwtService := &jwt_mock.ServiceMock{
+			ValidateAccessTokenImpl: func(token jwt.AccessToken) error {
+				return jwt.TokenExpired
+			},
+		}
 
-// func TestUpdatePasswordOk(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{
-// 		ValidatePasswordFormatImpl: func(password string) error {
-// 			return nil
-// 		},
-// 	}
-// 	updatePasswordCalls := 0
-// 	updateTokenCalls := 0
-// 	authRepositoryMock := auth_mock.RepositoryMock{
-// 		CheckCredentialsImpl: func(email, password string) (bool, error) {
-// 			return true, nil
-// 		},
-// 		GetUserInfoImpl: func(uid authRepository.UserId) (authRepository.UserInfo, error) {
-// 			return authRepository.UserInfo{}, nil
-// 		},
-// 		UpdatePasswordImpl: func(uid authRepository.UserId, newPassword string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updatePasswordCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 		UpdateRefreshTokenImpl: func(uid authRepository.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					updateTokenCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{
-// 		IssueAccessTokenImpl: func(subject jwt.Subject) (jwt.AccessToken, *jwt.Error) {
-// 			return jwt.AccessToken(uuid.New().String()), nil
-// 		},
-// 		IssueRefreshTokenImpl: func(subject jwt.Subject) (jwt.RefreshToken, *jwt.Error) {
-// 			return jwt.RefreshToken(uuid.New().String()), nil
-// 		},
-// 	}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	_, err := controller.UpdatePassword(uuid.New().String(), uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if updatePasswordCalls != 1 {
-// 		t.Fatalf("password should be updated once, found %d", updatePasswordCalls)
-// 	}
-// 	if updateTokenCalls != 1 {
-// 		t.Fatalf("token update should be once, found %d", updateTokenCalls)
-// 	}
-// }
+		controller := defaultController.New(
+			nil,
+			nil,
+			nil,
+			jwtService,
+			nil,
+			logger,
+		)
 
-// func TestRegisterForPushNotificationsFailedToStoreToken(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{
-// 		StorePushTokenImpl: func(uid pushNotifications.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					return errors.New("some error")
-// 				},
-// 			}
-// 		},
-// 	}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	err := controller.RegisterForPushNotifications(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err == nil {
-// 		t.Fatalf("err should not be nil")
-// 	}
-// 	if err.Code != auth.RegisterForPushNotificationsErrorInternal {
-// 		t.Fatalf("err code should be `internal`, found %v", err)
-// 	}
-// }
+		// Act
+		_, err := controller.CheckToken("expired-token")
 
-// func TestRegisterForPushNotificationsOk(t *testing.T) {
-// 	formatValidatorMock := formatValidation_mock.ServiceMock{}
-// 	authRepositoryMock := auth_mock.RepositoryMock{}
-// 	storeTokenCalls := 0
-// 	pushTokensRepositoryMock := pushNotifications_mock.RepositoryMock{
-// 		StorePushTokenImpl: func(uid pushNotifications.UserId, token string) repositories.Transaction {
-// 			return repositories.Transaction{
-// 				Perform: func() error {
-// 					storeTokenCalls += 1
-// 					return nil
-// 				},
-// 			}
-// 		},
-// 	}
-// 	usersRepositoryMock := users_mock.RepositoryMock{}
-// 	jwtServiceMock := jwt_mock.ServiceMock{}
-// 	controller := defaultController.New(
-// 		&authRepositoryMock,
-// 		&pushTokensRepositoryMock,
-// 		&usersRepositoryMock,
-// 		&jwtServiceMock,
-// 		&formatValidatorMock,
-// 		standartOutputLoggingService.New(),
-// 	)
-// 	err := controller.RegisterForPushNotifications(uuid.New().String(), auth.UserId(uuid.New().String()))
-// 	if err != nil {
-// 		t.Fatalf("err should be nil, found %v", err)
-// 	}
-// 	if storeTokenCalls != 1 {
-// 		t.Fatalf("store should be called once, found %d", storeTokenCalls)
-// 	}
-// }
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.TokenExpired)
+	})
+}
+
+func TestController_UpdateEmail(t *testing.T) {
+	logger := standartOutputLoggingService.New()
+
+	t.Run("successful email update", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
+				return nil, nil
+			},
+			UpdateEmailImpl: func(user authRepository.UserId, newEmail string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+			ExclusiveSessionImpl: func(user authRepository.UserId, device authRepository.DeviceId) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
+
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidateEmailFormatImpl: func(email string) error { return nil },
+		}
+
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			nil,
+			formatValidationService,
+			logger,
+		)
+
+		// Act
+		err := controller.UpdateEmail("new@example.com", "test-user", "device-1")
+
+		// Assert
+		assert.NoError(t, err)
+	})
+
+	t.Run("email already taken", func(t *testing.T) {
+		// Arrange
+		existingUserId := authRepository.UserId("existing-user")
+		authRepo := &authRepository_mock.RepositoryMock{
+			GetUserIdByEmailImpl: func(email string) (*authRepository.UserId, error) {
+				return &existingUserId, nil
+			},
+		}
+
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidateEmailFormatImpl: func(email string) error { return nil },
+		}
+
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			nil,
+			formatValidationService,
+			logger,
+		)
+
+		// Act
+		err := controller.UpdateEmail("taken@example.com", "test-user", "device-1")
+
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.AlreadyTaken)
+	})
+}
+
+func TestController_UpdatePassword(t *testing.T) {
+	logger := standartOutputLoggingService.New()
+
+	t.Run("successful password update", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			GetUserInfoImpl: func(user authRepository.UserId) (authRepository.UserInfo, error) {
+				return authRepository.UserInfo{
+					UserId: "test-user",
+					Email:  "test@example.com",
+				}, nil
+			},
+			CheckCredentialsImpl: func(email string, password string) (bool, error) {
+				return true, nil
+			},
+			UpdatePasswordImpl: func(user authRepository.UserId, newPassword string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+			ExclusiveSessionImpl: func(user authRepository.UserId, device authRepository.DeviceId) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
+
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidatePasswordFormatImpl: func(password string) error { return nil },
+		}
+
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			nil,
+			formatValidationService,
+			logger,
+		)
+
+		// Act
+		err := controller.UpdatePassword("old-password", "new-password", "test-user", "device-1")
+
+		// Assert
+		assert.NoError(t, err)
+	})
+
+	t.Run("wrong old password", func(t *testing.T) {
+		// Arrange
+		authRepo := &authRepository_mock.RepositoryMock{
+			GetUserInfoImpl: func(user authRepository.UserId) (authRepository.UserInfo, error) {
+				return authRepository.UserInfo{
+					UserId: "test-user",
+					Email:  "test@example.com",
+				}, nil
+			},
+			CheckCredentialsImpl: func(email string, password string) (bool, error) {
+				return false, nil
+			},
+		}
+
+		formatValidationService := &formatValidation_mock.ServiceMock{
+			ValidatePasswordFormatImpl: func(password string) error { return nil },
+		}
+
+		controller := defaultController.New(
+			authRepo,
+			nil,
+			nil,
+			nil,
+			formatValidationService,
+			logger,
+		)
+
+		// Act
+		err := controller.UpdatePassword("wrong-password", "new-password", "test-user", "device-1")
+
+		// Assert
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, auth.WrongCredentials)
+	})
+}
+
+func TestController_RegisterForPushNotifications(t *testing.T) {
+	logger := standartOutputLoggingService.New()
+
+	t.Run("successful push token registration", func(t *testing.T) {
+		// Arrange
+		pushRepo := &pushNotificationsRepository_mock.RepositoryMock{
+			StorePushTokenImpl: func(user pushNotifications.UserId, device pushNotifications.DeviceId, token string) repositories.UnitOfWork {
+				return repositories.UnitOfWork{
+					Perform:  func() error { return nil },
+					Rollback: func() error { return nil },
+				}
+			},
+		}
+
+		controller := defaultController.New(
+			nil,
+			nil,
+			pushRepo,
+			nil,
+			nil,
+			logger,
+		)
+
+		// Act
+		err := controller.RegisterForPushNotifications("push-token", "test-user", "device-1")
+
+		// Assert
+		assert.NoError(t, err)
+	})
+}
