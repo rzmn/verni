@@ -1,67 +1,94 @@
 import PersistentStorage
+import Api
 
-private struct AnyBox: @unchecked Sendable {
-    let value: Any?
+public final class MockUserStorage: @unchecked Sendable, UserStorage {
+    public var userId: HostId
+    public var deviceId: DeviceId
+    public var refreshToken: String
+    public var operations: [Operation]
+    
+    public init(
+        userId: HostId,
+        deviceId: DeviceId,
+        refreshToken: String,
+        operations: [Operation] = []
+    ) {
+        self.userId = userId
+        self.deviceId = deviceId
+        self.refreshToken = refreshToken
+        self.operations = operations
+    }
+    
+    public func update(operations: [Operation]) async throws {
+        self.operations = operations
+    }
+    
+    public func update(refreshToken: String) async throws {
+        self.refreshToken = refreshToken
+    }
+    
+    public func close() async {}
+    public func invalidate() async {}
 }
 
-actor PersistencyMock: UserStorage {
-    subscript<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
-        index: Index<D>
-    ) -> Value? where D.Key == Key, D.Value == Value {
-        get async {
-            await getFunc(index).value as? Value
-        }
+public final class MockSandboxStorage: @unchecked Sendable, SandboxStorage {
+    public var operations: [Components.Schemas.SomeOperation]
+    
+    public init(operations: [Components.Schemas.SomeOperation] = []) {
+        self.operations = operations
     }
-
-    private nonisolated(unsafe) func getFunc(_ arg: AnyHashable) async -> AnyBox {
-        AnyBox(value: await getBlock?(arg))
+    
+    public func update(operations: [Components.Schemas.SomeOperation]) async throws {
+        self.operations = operations
     }
+    
+    public func close() async {}
+    public func invalidate() async {}
+}
 
-    func update<Key: Sendable & Codable & Equatable, Value: Sendable & Codable, D: Descriptor>(
-        value: Value,
-        for index: Index<D>
-    ) async where D.Key == Key, D.Value == Value {
-        await updateBlock?(index, value)
+public final class MockUserStoragePreview: UserStoragePreview {
+    public let hostId: HostId
+    private let storage: UserStorage
+    
+    public init(hostId: HostId, storage: UserStorage) {
+        self.hostId = hostId
+        self.storage = storage
     }
-
-    var getBlock: (@Sendable (AnyHashable) async -> Any?)?
-    var updateBlock: ((AnyHashable, Any?) async -> Void)?
-
-    var userIdBlock: (@Sendable () async -> UserDto.Identifier)?
-    var getRefreshTokenBlock: (@Sendable () async -> String)?
-
-    var closeBlock: (@Sendable () async -> Void)?
-    var invalidateBlock: (@Sendable () async -> Void)?
-
-    var userId: UserDto.Identifier {
-        get async {
-            guard let userIdBlock else {
-                fatalError("not implemented")
-            }
-            return await userIdBlock()
-        }
-    }
-
-    var refreshToken: String {
-        get async {
-            guard let getRefreshTokenBlock else {
-                fatalError("not implemented")
-            }
-            return await getRefreshTokenBlock()
-        }
-    }
-
-    func close() async {
-        guard let closeBlock else {
-            fatalError("not implemented")
-        }
-        return await closeBlock()
-    }
-
-    func invalidate() async {
-        guard let invalidateBlock else {
-            fatalError("not implemented")
-        }
-        return await invalidateBlock()
+    
+    public func awake() async throws -> UserStorage {
+        storage
     }
 }
+
+public final class MockStorageFactory: @unchecked Sendable, StorageFactory {
+    public let sandbox: SandboxStorage
+    private let availableHosts: [UserStoragePreview]
+    private let storageCreator: (HostId, String, [Operation]) async throws -> UserStorage
+    
+    public init(
+        sandbox: SandboxStorage = MockSandboxStorage(),
+        availableHosts: [UserStoragePreview] = [],
+        storageCreator: @escaping (HostId, String, [Operation]) async throws -> UserStorage = { hostId, refreshToken, operations in
+            MockUserStorage(userId: hostId, deviceId: "mock-device", refreshToken: refreshToken, operations: operations)
+        }
+    ) {
+        self.sandbox = sandbox
+        self.availableHosts = availableHosts
+        self.storageCreator = storageCreator
+    }
+    
+    public var hostsAvailable: [UserStoragePreview] {
+        get async throws {
+            availableHosts
+        }
+    }
+    
+    public func create(
+        host: HostId,
+        refreshToken: String,
+        operations: [Operation]
+    ) async throws -> UserStorage {
+        try await storageCreator(host, refreshToken, operations)
+    }
+}
+
