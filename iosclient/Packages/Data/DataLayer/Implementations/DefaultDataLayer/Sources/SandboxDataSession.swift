@@ -62,9 +62,5 @@ public final class SandboxDataSession: DataSession {
         engineBox = EngineBox {
             await syncEngineFactory.create()
         }
-    }
-    
-    public func suspend() async {
-        assertionFailure("not implemented")
-    }
+    }    
 }

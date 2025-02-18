@@ -7,6 +7,7 @@ public struct TestFileManagerOverAnother<Impl: Filesystem.FileManager> {
     public var listDirectoryBlock: (@Sendable (URL, DirectoryMask) throws(ListDirectoryError) -> [URL])?
     public var removeItemBlock: (@Sendable (URL) throws(RemoveItemError) -> Void)?
     public var createFileBlock: (@Sendable (URL) throws(CreateFileError) -> Void)?
+    public var readFileBlock: (@Sendable (URL) throws(ReadFileError) -> Data)?
 
     let impl: Impl
 
@@ -49,5 +50,12 @@ extension TestFileManagerOverAnother: Filesystem.FileManager {
             return try impl.removeItem(at: url)
         }
         return try removeItemBlock(url)
+    }
+    
+    public func readFile(at url: URL) throws(ReadFileError) -> Data {
+        guard let readFileBlock else {
+            return try readFile(at: url)
+        }
+        return try readFileBlock(url)
     }
 }

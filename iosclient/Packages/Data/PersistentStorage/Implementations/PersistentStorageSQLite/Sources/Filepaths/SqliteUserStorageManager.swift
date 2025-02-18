@@ -5,7 +5,7 @@ import PersistentStorage
 internal import SQLite
 internal import Convenience
 
-@StorageActor struct SqliteDbPathManager: Sendable {
+@StorageActor struct SqliteUserStorageManager: Sendable {
     let logger: Logger
 
     private let environment: Environment
@@ -18,7 +18,7 @@ internal import Convenience
     }
 }
 
-extension SqliteDbPathManager: DbPathManager {
+extension SqliteUserStorageManager: UserStorageManager {
     func create(hostId: HostId, refreshToken: String, operations: [Operation]) async throws -> UserStorage {
         invalidateIfNeeded()
         let directory = databaseDirectory(for: hostId)
@@ -86,7 +86,7 @@ extension SqliteDbPathManager: DbPathManager {
     }
 }
 
-extension SqliteDbPathManager {
+extension SqliteUserStorageManager {
     struct Item: Sendable, UserStoragePreview {
         let hostId: HostId
         let invalidator: @StorageActor @Sendable () -> Void
@@ -95,7 +95,7 @@ extension SqliteDbPathManager {
 
         @StorageActor init(
             hostId: HostId,
-            manager: SqliteDbPathManager,
+            manager: SqliteUserStorageManager,
             logger: Logger
         ) {
             self.hostId = hostId
@@ -120,11 +120,11 @@ extension SqliteDbPathManager {
     }
 }
 
-extension SqliteDbPathManager: Loggable {}
+extension SqliteUserStorageManager: Loggable {}
 
 // MARK: - Private
 
-extension SqliteDbPathManager {
+extension SqliteUserStorageManager {
     final class IdsHolder: Sendable {
         private let versionLabel: String
         
@@ -158,7 +158,7 @@ extension SqliteDbPathManager {
     }
 }
 
-extension SqliteDbPathManager {
+extension SqliteUserStorageManager {
     private var databaseDirectoryPrefix: String {
         "id_"
     }

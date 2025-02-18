@@ -2,7 +2,7 @@ import PersistentStorage
 import Logging
 internal import SQLite
 
-@StorageActor final class SQLiteConnectionHolder {
+@StorageActor final class SqliteConnectionHolder {
     let logger: Logger
     private(set) var database: Connection?
     private let invalidator: @StorageActor @Sendable () -> Void
@@ -18,7 +18,7 @@ internal import SQLite
     }
 }
 
-extension SQLiteConnectionHolder: Storage {    
+extension SqliteConnectionHolder: Storage {    
     func close() {
         database = nil
     }
@@ -30,4 +30,4 @@ extension SQLiteConnectionHolder: Storage {
     }
 }
 
-extension SQLiteConnectionHolder: Loggable {}
+extension SqliteConnectionHolder: Loggable {}

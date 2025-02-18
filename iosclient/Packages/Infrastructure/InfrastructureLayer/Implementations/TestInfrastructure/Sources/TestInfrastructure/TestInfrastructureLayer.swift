@@ -17,7 +17,7 @@ private var isDebug: Bool {
 
 public struct TestInfrastructureLayer: InfrastructureLayer {
     public var testTaskFactory = TestTaskFactory()
-    public var testFileManager = TestFileManagerOverAnother(impl: FoundationFileManager())
+    public var testFileManager: TestFileManagerOverAnother<FoundationFileManager>
 
     public var taskFactory: TaskFactory {
         testTaskFactory
@@ -30,8 +30,9 @@ public struct TestInfrastructureLayer: InfrastructureLayer {
     public var logger: Logging.Logger
 
     public init() {
-        self.logger = DefaultLogging.Logger(
+        self.logger = Logger(
             severity: isDebug ? .debug : .info
         )
+        self.testFileManager = TestFileManagerOverAnother(impl: FoundationFileManager(logger: logger))
     }
 }

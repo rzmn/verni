@@ -166,7 +166,17 @@ extension DefaultDataLayer: DataLayer {
     }
     
     public func deleteSession(hostId: HostId) async {
-        assertionFailure("not implemented")
+        let session: UserStorage
+        do {
+            let preview = try await storageFactory.hostsAvailable.first(where: { $0.hostId == hostId })
+            guard let preview else {
+                return logW { "session with host \(hostId) not found" }
+            }
+            session = try await preview.awake()
+        } catch {
+            return logE { "failed awake hosted storage error: \(error)" }
+        }
+        await session.invalidate()
     }
 }
 

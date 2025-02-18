@@ -10,8 +10,4 @@ final class HostedDataSession: DataSession {
         self.api = api
         self.sync = sync
     }
-    
-    func suspend() async {
-        assertionFailure("not implemented")
-    }
 }

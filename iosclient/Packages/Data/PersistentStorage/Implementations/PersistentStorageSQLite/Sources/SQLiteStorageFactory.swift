@@ -10,7 +10,7 @@ internal import SQLite
     public let logger: Logger
     
     private let environment: Environment
-    private let userStorageHolder: DbPathManager
+    private let userStorageHolder: UserStorageManager
     private let sandboxStorageHolder: SandboxStorageHolder
     private let taskFactory: TaskFactory
 
@@ -32,7 +32,7 @@ internal import SQLite
             logger: logger,
             environment: environment
         )
-        self.userStorageHolder = try SqliteDbPathManager(
+        self.userStorageHolder = try SqliteUserStorageManager(
             logger: logger,
             environment: environment
         )

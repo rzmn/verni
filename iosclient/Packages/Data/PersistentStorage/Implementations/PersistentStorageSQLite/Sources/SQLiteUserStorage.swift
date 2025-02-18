@@ -14,7 +14,7 @@ typealias Operation = PersistentStorage.Operation
     }
 
     let logger: Logger
-    private let connection: SQLiteConnectionHolder
+    private let connection: SqliteConnectionHolder
 
     private let hostId: HostId
     private let inMemoryCache: InMemoryCache
@@ -26,7 +26,7 @@ typealias Operation = PersistentStorage.Operation
         initialData: InitialData?,
         logger: Logger
     ) async throws {
-        self.connection = SQLiteConnectionHolder(
+        self.connection = SqliteConnectionHolder(
             logger: logger,
             database: database,
             invalidator: invalidator
@@ -91,7 +91,7 @@ extension SQLiteUserStorage: UserStorage {
         guard let database = connection.database else {
             return
         }
-        try database.update(operations: operations)
+        try database.upsert(operations: operations)
         await inMemoryCache.update(
             operations: operations.merged(with: inMemoryCache.operations).all
         )

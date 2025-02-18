@@ -28,7 +28,7 @@ extension Connection {
             .sorted
     }
     
-    @StorageActor func update<Value: BaseOperationConvertible & Codable>(
+    @StorageActor func upsert<Value: BaseOperationConvertible & Codable>(
         operations: [Value]
     ) throws {
         guard !operations.isEmpty else {

@@ -5,7 +5,7 @@ internal import SQLite
 
 @StorageActor final class SQLiteSandboxStorage {
     let logger: Logger
-    let connection: SQLiteConnectionHolder
+    let connection: SqliteConnectionHolder
     private(set) var operations: [Components.Schemas.SomeOperation]
     
     init(
@@ -14,7 +14,7 @@ internal import SQLite
         invalidator: @escaping @StorageActor @Sendable () -> Void
     ) throws {
         self.logger = logger
-        self.connection = SQLiteConnectionHolder(
+        self.connection = SqliteConnectionHolder(
             logger: logger,
             database: database,
             invalidator: invalidator
@@ -28,7 +28,7 @@ extension SQLiteSandboxStorage: SandboxStorage {
         guard let database = connection.database else {
             return
         }
-        try database.update(
+        try database.upsert(
             operations: operations
         )
         self.operations = operations.merged(with: self.operations).all
