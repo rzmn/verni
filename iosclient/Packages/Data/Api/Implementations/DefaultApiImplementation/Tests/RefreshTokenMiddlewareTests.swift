@@ -1,14 +1,14 @@
-import XCTest
 import HTTPTypes
 import Logging
 import TestInfrastructure
 import Api
 import OpenAPIRuntime
+import Testing
+import Foundation
 @testable import DefaultApiImplementation
 
-final class RefreshTokenMiddlewareTests: XCTestCase {
-    let infrastructure = TestInfrastructureLayer()
-    
+@Suite("RefreshToken Middleware Tests")
+struct RefreshTokenMiddlewareTests {
     final class MockTokenRepository: @unchecked Sendable, RefreshTokenRepository {
         var currentToken: String?
         var shouldFailRefresh = false
@@ -31,8 +31,10 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
         }
     }
     
-    func testSuccessfulRequestWithExistingToken() async throws {
+    @Test("Successful request with existing token")
+    func successfulRequestWithExistingToken() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         repository.currentToken = "valid_token"
         
@@ -58,13 +60,15 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
         )
         
         // Then
-        XCTAssertEqual(response.status, .ok)
-        XCTAssertEqual(capturedRequest?.headerFields[.authorization], "Bearer valid_token")
-        XCTAssertEqual(repository.refreshCallCount, 0)
+        #expect(response.status == .ok)
+        #expect(capturedRequest?.headerFields[.authorization] == "Bearer valid_token")
+        #expect(repository.refreshCallCount == 0)
     }
     
-    func testAutoRefreshWhenNoToken() async throws {
+    @Test("Auto refresh when no token")
+    func autoRefreshWhenNoToken() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         
         let middleware = RefreshTokenMiddleware(
@@ -89,13 +93,15 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
         )
         
         // Then
-        XCTAssertEqual(response.status, .ok)
-        XCTAssertEqual(capturedRequest?.headerFields[.authorization], "Bearer new_token_1")
-        XCTAssertEqual(repository.refreshCallCount, 1)
+        #expect(response.status == .ok)
+        #expect(capturedRequest?.headerFields[.authorization] == "Bearer new_token_1")
+        #expect(repository.refreshCallCount == 1)
     }
     
-    func testUnauthorizedWhenRefreshFails() async throws {
+    @Test("Unauthorized when refresh fails")
+    func unauthorizedWhenRefreshFails() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         repository.shouldFailRefresh = true
         repository.refreshError = .expired(NSError(domain: "test", code: -1))
@@ -113,18 +119,20 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
             baseURL: URL(string: "https://example.com")!,
             operationID: "test",
             next: { _, _, _ in
-                XCTFail("Next should not be called when refresh fails")
+                #expect(Bool(false), "Next should not be called when refresh fails")
                 return (HTTPResponse(status: .ok), nil)
             }
         )
         
         // Then
-        XCTAssertEqual(response.status.code, HTTPResponse.Status.unauthorized.code)
-        XCTAssertEqual(repository.refreshCallCount, 1)
+        #expect(response.status.code == HTTPResponse.Status.unauthorized.code)
+        #expect(repository.refreshCallCount == 1)
     }
     
-    func testRetryWithNoConnectionError() async throws {
+    @Test("Retry with no connection error")
+    func retryWithNoConnectionError() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         repository.shouldFailRefresh = true
         repository.refreshError = .noConnection(URLError(.notConnectedToInternet))
@@ -143,20 +151,24 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
                 baseURL: URL(string: "https://example.com")!,
                 operationID: "test",
                 next: { _, _, _ in
-                    XCTFail("Next should not be called when refresh fails")
+                    #expect(Bool(false), "Next should not be called when refresh fails")
                     return (HTTPResponse(status: .ok), nil)
                 }
             )
-            XCTFail("Should throw an error")
-        } catch {
+            #expect(Bool(false), "Should throw an error")
+        } catch let error as URLError {
             // Then
-            XCTAssert((error as? URLError)?.noConnection != nil)
-            XCTAssertEqual(repository.refreshCallCount, 1)
+            #expect(error.code == .notConnectedToInternet)
+            #expect(repository.refreshCallCount == 1)
+        } catch {
+            #expect(Bool(false), "Unexpected error type: \(error)")
         }
     }
     
-    func testConcurrentRequestsShareRefresh() async throws {
+    @Test("Concurrent requests share refresh")
+    func concurrentRequestsShareRefresh() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         
         let middleware = RefreshTokenMiddleware(
@@ -171,9 +183,7 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
             body: nil,
             baseURL: URL(string: "https://example.com")!,
             operationID: "test1",
-            next: { request, _, _ in
-                return (HTTPResponse(status: .ok), nil)
-            }
+            next: { _, _, _ in (HTTPResponse(status: .ok), nil) }
         )
         
         async let request2 = middleware.intercept(
@@ -181,20 +191,20 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
             body: nil,
             baseURL: URL(string: "https://example.com")!,
             operationID: "test2",
-            next: { request, _, _ in
-                return (HTTPResponse(status: .ok), nil)
-            }
+            next: { _, _, _ in (HTTPResponse(status: .ok), nil) }
         )
         
         // Then
         let (response1, response2) = try await (request1, request2)
-        XCTAssertEqual(response1.0.status, .ok)
-        XCTAssertEqual(response2.0.status, .ok)
-        XCTAssertEqual(repository.refreshCallCount, 1, "Multiple concurrent requests should share one refresh")
+        #expect(response1.0.status == .ok)
+        #expect(response2.0.status == .ok)
+        #expect(repository.refreshCallCount == 1, "Multiple concurrent requests should share one refresh")
     }
     
-    func testExpiredTokenError() async throws {
+    @Test("Expired token error")
+    func expiredTokenError() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         repository.shouldFailRefresh = true
         let expectedError = NSError(domain: "test", code: -1, userInfo: [NSLocalizedDescriptionKey: "Token expired"])
@@ -213,18 +223,20 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
             baseURL: URL(string: "https://example.com")!,
             operationID: "test",
             next: { _, _, _ in
-                XCTFail("Next should not be called when refresh fails with expired token")
+                #expect(Bool(false), "Next should not be called when refresh fails with expired token")
                 return (HTTPResponse(status: .ok), nil)
             }
         )
         
         // Then
-        XCTAssertEqual(response.status.code, HTTPResponse.Status.unauthorized.code)
-        XCTAssertEqual(repository.refreshCallCount, 1)
+        #expect(response.status.code == HTTPResponse.Status.unauthorized.code)
+        #expect(repository.refreshCallCount == 1)
     }
     
-    func testInternalErrorDuringRefresh() async throws {
+    @Test("Internal error during refresh")
+    func internalErrorDuringRefresh() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         repository.shouldFailRefresh = true
         let expectedError = NSError(domain: "test", code: -1, userInfo: [NSLocalizedDescriptionKey: "Internal server error"])
@@ -243,18 +255,20 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
             baseURL: URL(string: "https://example.com")!,
             operationID: "test",
             next: { _, _, _ in
-                XCTFail("Next should not be called when refresh fails with internal error")
+                #expect(Bool(false), "Next should not be called when refresh fails with internal error")
                 return (HTTPResponse(status: .ok), nil)
             }
         )
         
         // Then
-        XCTAssertEqual(response.status.code, HTTPResponse.Status.unauthorized.code)
-        XCTAssertEqual(repository.refreshCallCount, 1)
+        #expect(response.status.code == HTTPResponse.Status.unauthorized.code)
+        #expect(repository.refreshCallCount == 1)
     }
     
-    func testNoConnectionErrorDuringRefresh() async throws {
+    @Test("No connection error during refresh")
+    func noConnectionErrorDuringRefresh() async throws {
         // Given
+        let infrastructure = TestInfrastructureLayer()
         let repository = MockTokenRepository()
         repository.shouldFailRefresh = true
         repository.refreshError = .noConnection(URLError(.notConnectedToInternet))
@@ -273,17 +287,17 @@ final class RefreshTokenMiddlewareTests: XCTestCase {
                 baseURL: URL(string: "https://example.com")!,
                 operationID: "test",
                 next: { _, _, _ in
-                    XCTFail("Next should not be called when refresh fails with no connection")
+                    #expect(Bool(false), "Next should not be called when refresh fails with no connection")
                     return (HTTPResponse(status: .ok), nil)
                 }
             )
-            XCTFail("Should throw an error")
+            #expect(Bool(false), "Should throw an error")
         } catch let error as URLError {
             // Then
-            XCTAssertEqual(error.code, .notConnectedToInternet)
-            XCTAssertEqual(repository.refreshCallCount, 1)
+            #expect(error.code == .notConnectedToInternet)
+            #expect(repository.refreshCallCount == 1)
         } catch {
-            XCTFail("Unexpected error type: \(error)")
+            #expect(Bool(false), "Unexpected error type: \(error)")
         }
     }
 } 

@@ -12,7 +12,7 @@ actor RefreshTokenMiddleware {
     let logger: Logger
 
     enum State {
-        case initial
+        case initial(Task<Bool /* have token */, Never>?)
         case refreshFailed(requestId: UUID, error: URLError)
         case refreshing(Task<Void, Never>)
         case authenticated(token: String)
@@ -33,7 +33,7 @@ actor RefreshTokenMiddleware {
         self.tokenRepository = tokenRepository
         self.taskFactory = taskFactory
         self.logger = logger
-        self.state = .initial
+        self.state = .initial(nil)
     }
 }
 
@@ -45,7 +45,7 @@ extension RefreshTokenMiddleware: ClientMiddleware {
         operationID: String,
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
-        try await intercept(
+        try await doIntercept(
             request,
             body: body,
             baseURL: baseURL,
@@ -55,7 +55,7 @@ extension RefreshTokenMiddleware: ClientMiddleware {
         )
     }
 
-    func intercept(
+    private func doIntercept(
         _ request: HTTPRequest,
         body: HTTPBody?,
         baseURL: URL,
@@ -64,18 +64,40 @@ extension RefreshTokenMiddleware: ClientMiddleware {
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
         switch state {
-        case .initial:
-            if let token = await tokenRepository.accessToken() {
-                state = .authenticated(token: token)
-                return try await intercept(
-                    request,
-                    body: body,
-                    baseURL: baseURL,
-                    operationID: operationID,
-                    next: next
-                )
+        case .initial(let task):
+            if let task {
+                let haveToken = await task.value
+                if haveToken {
+                    return try await doIntercept(
+                        request,
+                        body: body,
+                        baseURL: baseURL,
+                        operationID: operationID,
+                        requestID: requestID,
+                        next: next
+                    )
+                } else {
+                    return try await refreshAndReshedule(
+                        request,
+                        body: body,
+                        baseURL: baseURL,
+                        operationID: operationID,
+                        requestID: requestID,
+                        next: next
+                    )
+                }
             } else {
-                return try await refreshAndReshedule(
+                state = .initial(
+                    taskFactory.task {
+                        if let token = await self.tokenRepository.accessToken() {
+                            self.state = .authenticated(token: token)
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
+                )
+                return try await doIntercept(
                     request,
                     body: body,
                     baseURL: baseURL,
@@ -86,11 +108,12 @@ extension RefreshTokenMiddleware: ClientMiddleware {
             }
         case .refreshing(let task):
             await task.value
-            return try await intercept(
+            return try await doIntercept(
                 request,
                 body: body,
                 baseURL: baseURL,
                 operationID: operationID,
+                requestID: requestID,
                 next: next
             )
         case .authenticated(let token):
@@ -156,12 +179,23 @@ extension RefreshTokenMiddleware: ClientMiddleware {
                 }
             }
         }
-        state = .refreshing(
-            taskFactory.task {
-                self.state = await refresh()
-            }
-        )
-        return try await intercept(
+        switch state {
+        case .refreshing, .initial, .refreshFailed:
+            break
+        case .authenticated, .unauthorized:
+            assertionFailure("refreshing token from invalid state \(state)")
+        }
+        switch state {
+        case .refreshing:
+            break
+        default:
+            state = .refreshing(
+                taskFactory.task {
+                    self.state = await refresh()
+                }
+            )
+        }
+        return try await doIntercept(
             request,
             body: body,
             baseURL: baseURL,
