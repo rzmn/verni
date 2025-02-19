@@ -33,6 +33,7 @@ let package = Package(
         .testTarget(
             name: "DefaultApiImplementationTests",
             dependencies: [
+                "DefaultApiImplementation",
                 "Api",
                 "Logging",
                 "Convenience",
