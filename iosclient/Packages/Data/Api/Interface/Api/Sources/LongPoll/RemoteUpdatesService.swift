@@ -1,5 +1,8 @@
 import AsyncExtensions
 
 public protocol RemoteUpdatesService: Sendable {
-    func subscribe() async -> any EventSource<RemoteUpdate>
+    var eventSource: any EventSource<RemoteUpdate> { get async }
+    
+    func start() async
+    func stop() async
 }
