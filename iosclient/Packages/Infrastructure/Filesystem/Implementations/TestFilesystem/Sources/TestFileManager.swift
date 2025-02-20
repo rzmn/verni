@@ -54,7 +54,7 @@ extension TestFileManagerOverAnother: Filesystem.FileManager {
     
     public func readFile(at url: URL) throws(ReadFileError) -> Data {
         guard let readFileBlock else {
-            return try readFile(at: url)
+            return try impl.readFile(at: url)
         }
         return try readFileBlock(url)
     }

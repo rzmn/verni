@@ -22,6 +22,13 @@ let package = Package(
                 "CredentialsFormatValidationUseCase"
             ],
             path: "Sources"
+        ),
+        .testTarget(
+            name: "DefaultValidationUseCasesImplementationTests",
+            dependencies: [
+                "DefaultValidationUseCasesImplementation",
+            ],
+            path: "Tests"
         )
     ]
 )

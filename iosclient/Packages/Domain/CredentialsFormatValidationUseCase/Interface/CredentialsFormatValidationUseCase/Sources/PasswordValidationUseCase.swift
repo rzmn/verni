@@ -1,5 +1,5 @@
-public enum PasswordValidationVerdict: Error, Sendable {
-    public enum CharacterType: Sendable, Hashable {
+public enum PasswordValidationVerdict: Error, Sendable, Equatable {
+    public enum CharacterType: Sendable, Hashable, Equatable {
         case numbers
         case lowercaseLetters
         case uppercaseLetters
@@ -19,11 +19,11 @@ public enum PasswordValidationVerdict: Error, Sendable {
         }
     }
 
-    public enum InvalidityReason: Sendable {
+    public enum InvalidityReason: Sendable, Equatable {
         case minimalCharacterCount(Int)
         case hasInvalidCharacter(found: Character, allowed: [CharacterType])
     }
-    public enum WeaknessReason: Sendable {
+    public enum WeaknessReason: Sendable, Equatable {
         case shouldBeAtLeastNCharacterTypesCount(count: Int, has: [CharacterType], allowed: [CharacterType])
     }
     case invalid(InvalidityReason)

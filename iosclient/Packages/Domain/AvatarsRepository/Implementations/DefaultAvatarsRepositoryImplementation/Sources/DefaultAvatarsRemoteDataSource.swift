@@ -4,20 +4,30 @@ import Api
 import Filesystem
 import Foundation
 import Logging
+import AsyncExtensions
 internal import Convenience
 
-public final class DefaultAvatarsRemoteDataSource: Sendable {
+public actor DefaultAvatarsRemoteDataSource: Sendable {
     public let logger: Logger
     private let cache: Cache?
     private let api: APIProtocol
+    private let taskFactory: TaskFactory
+    enum Element {
+        case fetching(query: Task<[Image.Identifier: Image], Never>)
+        case fetched(Image)
+    }
+    private var elements: [Image.Identifier: Element]
     
     public init(
         logger: Logger,
         fileManager: Filesystem.FileManager,
+        taskFactory: TaskFactory,
         api: APIProtocol
     ) {
         self.logger = logger
         self.api = api
+        self.taskFactory = taskFactory
+        self.elements = [:]
         do {
             cache = try Cache(
                 fileManager: fileManager,
@@ -32,21 +42,63 @@ public final class DefaultAvatarsRemoteDataSource: Sendable {
 
 extension DefaultAvatarsRemoteDataSource: AvatarsRemoteDataSource {
     public func fetch(ids: [Image.Identifier]) async -> [Image.Identifier: Image] {
-        var cached = [Image.Identifier: Image]()
-        if let cache {
-            for id in ids {
-                cached[id] = await cache.get(imageId: id)
+        let cached: [Image.Identifier: Image] = cache.flatMap { cache in
+            ids.reduce(into: [:]) { dict, id in
+                if let status = elements[id] {
+                    if case .fetched(let image) = status {
+                        dict[id] = image
+                    }
+                } else if let cached = cache.get(imageId: id) {
+                    elements[id] = .fetched(cached)
+                    dict[id] = cached
+                }
             }
+        } ?? [:]
+        let fetching: [Image.Identifier: Task<[Image.Identifier: Image], Never>] = ids
+            .filter { cached[$0] == nil }
+            .reduce(into: [:]) { dict, id in
+                guard case .fetching(let task) = elements[id] else {
+                    return
+                }
+                dict[id] = task
+            }
+        let toFetch = ids
+            .filter { cached[$0] == nil }
+            .filter { fetching[$0] == nil }
+        let task = taskFactory.task {
+            return await self.doFetch(
+                ids: toFetch
+            )
         }
-        let fetched = await doFetch(
-            ids: ids.filter { cached[$0] == nil }
-        )
-        return cached.reduce(into: fetched) { dict, item in
-            dict[item.key] = item.value
+        for id in toFetch {
+            elements[id] = .fetching(query: task)
+        }
+        let fetchingWithJustRequestedValues = toFetch.reduce(into: fetching) { dict, id in
+            guard case .fetching(let task) = elements[id] else {
+                return
+            }
+            dict[id] = task
+        }
+        return await withTaskGroup(of: [Image.Identifier: Image].self) { group in
+            for task in fetchingWithJustRequestedValues.values {
+                group.addTask {
+                    await task.value
+                }
+            }
+            var result = cached
+            for await dict in group {
+                for (id, image) in dict {
+                    result[id] = image
+                }
+            }
+            return result
         }
     }
     
     private func doFetch(ids: [Image.Identifier]) async -> [Image.Identifier: Image] {
+        guard !ids.isEmpty else {
+            return [:]
+        }
         let response: Operations.GetAvatars.Output
         do {
             response = try await api.getAvatars(
@@ -74,7 +126,14 @@ extension DefaultAvatarsRemoteDataSource: AvatarsRemoteDataSource {
         }
         if let cache {
             for (_, image) in result {
-                await cache.store(image: image)
+                cache.store(image: image)
+            }
+        }
+        for id in ids {
+            if let image = result[id] {
+                elements[id] = .fetched(image)
+            } else {
+                elements[id] = nil
             }
         }
         return result
@@ -84,7 +143,7 @@ extension DefaultAvatarsRemoteDataSource: AvatarsRemoteDataSource {
 extension DefaultAvatarsRemoteDataSource: Loggable {}
 
 extension DefaultAvatarsRemoteDataSource {
-    actor Cache: Loggable {
+    final class Cache: Sendable, Loggable {
         let logger: Logger
         let fileManager: Filesystem.FileManager
         let directory: URL
@@ -130,9 +189,8 @@ extension DefaultAvatarsRemoteDataSource {
             do {
                 return Image(
                     id: imageId,
-                    base64: try Data(
-                        contentsOf: url(for: imageId)
-                    ).base64EncodedString()
+                    base64: try fileManager.readFile(at: url(for: imageId))
+                        .base64EncodedString()
                 )
             } catch {
                 return nil

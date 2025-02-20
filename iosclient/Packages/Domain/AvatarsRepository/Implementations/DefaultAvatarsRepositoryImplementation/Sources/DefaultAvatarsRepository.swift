@@ -70,14 +70,11 @@ public actor DefaultAvatarsRepository: Sendable {
             state = reducer(operation, state)
         }
         let updates = state.images.reduce(into: [:] as [Image.Identifier: Image]) { dict, kv in
-            let (userId, user) = kv
-            guard let value = user.value else {
+            let (id, image) = kv
+            guard oldState.images[id] != image else {
                 return
             }
-            guard oldState.images[userId]?.value != value else {
-                return
-            }
-            dict[userId] = value
+            dict[id] = image
         }
         guard !updates.isEmpty else {
             return
@@ -106,7 +103,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
     
     public subscript(id: Image.Identifier) -> Image? {
         get async {
-            state.images[id]?.value
+            state.images[id]
         }
     }
     
@@ -134,7 +131,7 @@ extension DefaultAvatarsRepository: AvatarsRepository {
         do {
             try await sync.push(operation: operation)
         } catch {
-            logE { "createUser: push failed error: \(error)" }
+            logE { "uploadImage: push failed error: \(error)" }
             throw .internal(error)
         }
         received(operation: operation)

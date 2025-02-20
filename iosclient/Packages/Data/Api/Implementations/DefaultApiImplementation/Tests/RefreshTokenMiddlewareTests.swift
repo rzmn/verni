@@ -232,7 +232,7 @@ struct RefreshTokenMiddlewareTests {
             baseURL: URL(string: "https://example.com")!,
             operationID: "test",
             next: { _, _, _ in
-                #expect(Bool(false), "Next should not be called when refresh fails with expired token")
+                Issue.record("Next should not be called when refresh fails with expired token")
                 return (HTTPResponse(status: .ok), nil)
             }
         )
@@ -264,7 +264,7 @@ struct RefreshTokenMiddlewareTests {
             baseURL: URL(string: "https://example.com")!,
             operationID: "test",
             next: { _, _, _ in
-                #expect(Bool(false), "Next should not be called when refresh fails with internal error")
+                Issue.record("Next should not be called when refresh fails with internal error")
                 return (HTTPResponse(status: .ok), nil)
             }
         )
@@ -296,17 +296,17 @@ struct RefreshTokenMiddlewareTests {
                 baseURL: URL(string: "https://example.com")!,
                 operationID: "test",
                 next: { _, _, _ in
-                    #expect(Bool(false), "Next should not be called when refresh fails with no connection")
+                    Issue.record("Next should not be called when refresh fails with no connection")
                     return (HTTPResponse(status: .ok), nil)
                 }
             )
-            #expect(Bool(false), "Should throw an error")
+            Issue.record("Should throw an error")
         } catch let error as URLError {
             // Then
             #expect(error.code == .notConnectedToInternet)
             #expect(repository.refreshCallCount == 1)
         } catch {
-            #expect(Bool(false), "Unexpected error type: \(error)")
+            Issue.record("Unexpected error type: \(error)")
         }
     }
 } 

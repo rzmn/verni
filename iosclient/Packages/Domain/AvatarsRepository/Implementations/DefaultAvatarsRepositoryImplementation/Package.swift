@@ -20,7 +20,8 @@ let package = Package(
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Filesystem"))),
         .local(.infrastructure(.interface("Convenience"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.infrastructure(.interface("InfrastructureLayer"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
     ],
     targets: [
         .target(
@@ -34,7 +35,8 @@ let package = Package(
                 "Convenience",
                 "Filesystem",
                 "InfrastructureLayer"
-            ]
+            ],
+            path: "Sources"
         ),
         .testTarget(
             name: "DefaultAvatarsRepositoryImplementationTests",
@@ -42,6 +44,7 @@ let package = Package(
                 "DefaultAvatarsRepositoryImplementation",
                 "Entities",
                 "AvatarsRepository",
+                "TestInfrastructure",
                 "Api",
                 "SyncEngine",
                 "Logging"
