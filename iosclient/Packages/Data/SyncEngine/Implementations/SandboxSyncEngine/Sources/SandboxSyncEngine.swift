@@ -21,7 +21,7 @@ actor SandboxSyncEngine {
 }
 
 extension SandboxSyncEngine: Engine {
-    var operations: [Api.Components.Schemas.SomeOperation] {
+    var operations: [Components.Schemas.SomeOperation] {
         get async {
             await storage.operations
         }
@@ -34,11 +34,8 @@ extension SandboxSyncEngine: Engine {
     func push(operations: [Components.Schemas.SomeOperation]) async throws {
         try await storage
             .update(operations: operations)
-    }
-    
-    func pulled(operations: [Components.Schemas.SomeOperation]) async throws {
-        try await storage
-            .update(operations: operations)
+        await eventPublisher
+            .notify(operations)
     }
 }
 

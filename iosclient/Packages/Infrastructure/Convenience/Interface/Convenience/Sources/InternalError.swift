@@ -16,7 +16,11 @@ public struct UndocumentedBehaviour<T: Sendable>: Sendable, Error {
     }
 }
 
-public enum InternalError: Error, CustomStringConvertible {
+public enum InternalError: Error, Equatable, CustomStringConvertible {
+    public static func == (lhs: InternalError, rhs: InternalError) -> Bool {
+        lhs.description == rhs.description
+    }
+    
     case error(String, underlying: Error? = nil)
 
     public var description: String {

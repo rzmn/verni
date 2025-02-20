@@ -19,6 +19,7 @@ let package = Package(
         .local(.infrastructure(.interface("Convenience"))),
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("AsyncExtensions"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
     ],
     targets: [
         .target(
@@ -32,6 +33,20 @@ let package = Package(
                 "AsyncExtensions",
             ],
             path: "Sources"
+        ),
+        .testTarget(
+            name: "SandboxSyncEngineTests",
+            dependencies: [
+                "SandboxSyncEngine",
+                "TestInfrastructure",
+                "Api",
+                "PersistentStorage",
+                "SyncEngine",
+                "Convenience",
+                "Logging",
+                "AsyncExtensions",
+            ],
+            path: "Tests"
         )
     ]
 )

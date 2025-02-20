@@ -525,6 +525,8 @@ paths:
                   type: array
                   items:
                     $ref: "#/components/schemas/SomeOperation"
+              required:
+                - operations
       responses:
         "200":
           description: Operations list to be applied.

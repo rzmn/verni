@@ -112,6 +112,8 @@ struct RefreshTokenMiddlewareTests {
             logger: infrastructure.logger
         )
         
+        var nextCalled = false
+        
         // When
         let (response, _) = try await middleware.intercept(
             HTTPRequest(method: .get, scheme: "https", authority: "example.com", path: "/test"),
@@ -119,12 +121,13 @@ struct RefreshTokenMiddlewareTests {
             baseURL: URL(string: "https://example.com")!,
             operationID: "test",
             next: { _, _, _ in
-                #expect(Bool(false), "Next should not be called when refresh fails")
+                nextCalled = true
                 return (HTTPResponse(status: .ok), nil)
             }
         )
         
         // Then
+        #expect(nextCalled == false, "Next should not be called when refresh fails")
         #expect(response.status.code == HTTPResponse.Status.unauthorized.code)
         #expect(repository.refreshCallCount == 1)
     }
@@ -143,6 +146,9 @@ struct RefreshTokenMiddlewareTests {
             logger: infrastructure.logger
         )
         
+        var nextCalled = false
+        var didThrow = false
+        
         // When
         do {
             _ = try await middleware.intercept(
@@ -151,18 +157,21 @@ struct RefreshTokenMiddlewareTests {
                 baseURL: URL(string: "https://example.com")!,
                 operationID: "test",
                 next: { _, _, _ in
-                    #expect(Bool(false), "Next should not be called when refresh fails")
+                    nextCalled = true
                     return (HTTPResponse(status: .ok), nil)
                 }
             )
-            #expect(Bool(false), "Should throw an error")
         } catch let error as URLError {
+            didThrow = true
             // Then
             #expect(error.code == .notConnectedToInternet)
             #expect(repository.refreshCallCount == 1)
         } catch {
-            #expect(Bool(false), "Unexpected error type: \(error)")
+            #expect(false, "Unexpected error type: \(error)")
         }
+        
+        #expect(nextCalled == false, "Next should not be called when refresh fails")
+        #expect(didThrow == true, "Should throw an error")
     }
     
     @Test("Concurrent requests share refresh")
