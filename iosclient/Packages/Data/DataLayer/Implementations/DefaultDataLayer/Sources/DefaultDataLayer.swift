@@ -81,6 +81,12 @@ extension DefaultDataLayer: DataLayer {
             let api = apiFactory.create()
             let syncFactory = RemoteSyncEngineFactory(
                 api: api,
+                updates: DefaultRemoteEventsService(
+                    taskFactory: taskFactory,
+                    logger: logger
+                        .with(scope: .sync),
+                    apiEndpoint: Constants.apiEndpoint
+                ),
                 storage: storage,
                 taskFactory: taskFactory,
                 logger: logger
@@ -154,6 +160,12 @@ extension DefaultDataLayer: DataLayer {
         let api = apiFactory.create()
         let syncFactory = RemoteSyncEngineFactory(
             api: api,
+            updates: DefaultRemoteEventsService(
+                taskFactory: infrastructure.taskFactory,
+                logger: logger
+                    .with(scope: .sync),
+                apiEndpoint: Constants.apiEndpoint
+            ),
             storage: storage,
             taskFactory: infrastructure.taskFactory,
             logger: logger

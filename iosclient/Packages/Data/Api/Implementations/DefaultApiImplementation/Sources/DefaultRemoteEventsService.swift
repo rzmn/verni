@@ -11,7 +11,7 @@ public actor DefaultRemoteEventsService {
     private var sse: SSEService?
     private let eventPublisher = EventPublisher<RemoteUpdate>()
 
-    init(
+    public init(
         taskFactory: TaskFactory,
         logger: Logger,
         apiEndpoint: URL

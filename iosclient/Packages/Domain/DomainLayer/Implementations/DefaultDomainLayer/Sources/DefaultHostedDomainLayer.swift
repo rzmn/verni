@@ -83,6 +83,7 @@ final class DefaultHostedDomainLayer: Sendable {
                 scope: .images
             ),
             fileManager: sharedDomain.infrastructure.fileManager,
+            taskFactory: sharedDomain.infrastructure.taskFactory,
             api: dataSession.api
         )
         self.spendingsRepository = await DefaultSpendingsRepository(
