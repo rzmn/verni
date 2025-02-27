@@ -17,7 +17,9 @@ let package = Package(
         .local(.currentLayer(.interface("EntitiesApiConvenience"))),
         .local(.currentLayer(.interface("Entities"))),
         .local(.data(.interface("Api"))),
-        .local(.infrastructure(.interface("Logging")))
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
+        .local(.data(.implementation(interface: "Api", implementation: "MockApiImplementation")))
     ],
     targets: [
         .target(
@@ -28,8 +30,22 @@ let package = Package(
                 "PushRegistrationUseCase",
                 "Logging",
                 "Api"
+            ],
+            path: "Sources"
+        ),
+        .testTarget(
+            name: "DefaultPushRegistrationUseCaseTests",
+            dependencies: [
+                "DefaultPushRegistrationUseCaseImplementation",
+                "EntitiesApiConvenience",
+                "Entities",
+                "TestInfrastructure",
+                "MockApiImplementation",
+                "PushRegistrationUseCase",
+                "Logging",
+                "Api"
             ]
-        )
+        ),
     ]
 )
 

@@ -1,10 +1,3 @@
-//
-//  SSEServiceTests.swift
-//  DefaultApiImplementation
-//
-//  Created by Никита Разумный on 2/19/25.
-//
-
 import HTTPTypes
 import Logging
 import TestInfrastructure
