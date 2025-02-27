@@ -9,37 +9,8 @@ import TestInfrastructure
 import SyncEngine
 import Filesystem
 import AvatarsRepository
+import MockApiImplementation
 @testable import DefaultAvatarsRepositoryImplementation
-
-final class MockAPI: @unchecked Sendable, APIProtocol {
-    var avatars: [String: Components.Schemas.Image] = [:]
-    var shouldFailGetAvatars = false
-    var getAvatarsCallCount = 0
-    
-    func getAvatars(_ input: Operations.GetAvatars.Input) async throws -> Operations.GetAvatars.Output {
-        getAvatarsCallCount += 1
-        if shouldFailGetAvatars {
-            return .internalServerError(.init(body: .json(.init(error: .init(reason: ._internal)))))
-        }
-        let requestedIds = input.query.ids
-        let response = avatars.filter { requestedIds.contains($0.key) }
-        return .ok(.init(body: .json(.init(response: .init(additionalProperties: response)))))
-    }
-    
-    // Implement other APIProtocol methods as needed...
-    func signup(_ input: Operations.Signup.Input) async throws -> Operations.Signup.Output { fatalError() }
-    func login(_ input: Operations.Login.Input) async throws -> Operations.Login.Output { fatalError() }
-    func refreshSession(_ input: Operations.RefreshSession.Input) async throws -> Operations.RefreshSession.Output { fatalError() }
-    func updateEmail(_ input: Operations.UpdateEmail.Input) async throws -> Operations.UpdateEmail.Output { fatalError() }
-    func updatePassword(_ input: Operations.UpdatePassword.Input) async throws -> Operations.UpdatePassword.Output { fatalError() }
-    func registerForPushNotifications(_ input: Operations.RegisterForPushNotifications.Input) async throws -> Operations.RegisterForPushNotifications.Output { fatalError() }
-    func searchUsers(_ input: Operations.SearchUsers.Input) async throws -> Operations.SearchUsers.Output { fatalError() }
-    func confirmEmail(_ input: Operations.ConfirmEmail.Input) async throws -> Operations.ConfirmEmail.Output { fatalError() }
-    func sendEmailConfirmationCode(_ input: Operations.SendEmailConfirmationCode.Input) async throws -> Operations.SendEmailConfirmationCode.Output { fatalError() }
-    func pullOperations(_ input: Operations.PullOperations.Input) async throws -> Operations.PullOperations.Output { fatalError() }
-    func pushOperations(_ input: Operations.PushOperations.Input) async throws -> Operations.PushOperations.Output { fatalError() }
-    func confirmOperations(_ input: Operations.ConfirmOperations.Input) async throws -> Operations.ConfirmOperations.Output { fatalError() }
-}
 
 @Suite("DefaultAvatarsRepository Tests")
 struct AvatarsRepositoryTests {
@@ -90,6 +61,7 @@ struct AvatarsRepositoryTests {
         
         // When
         let imageId = try await repository.upload(image: imageData)
+        try await infrastructure.testTaskFactory.runUntilIdle()
         
         // Then
         #expect(sync.pushCallCount == 1)
@@ -141,7 +113,7 @@ struct AvatarsRemoteDataSourceTests {
     func fetchAvatarsWithCache() async throws {
         // Given
         var infrastructure = TestInfrastructureLayer()
-        let api = MockAPI()
+        let api = MockApi()
         
         nonisolated(unsafe) var storedFiles: [URL: Data] = [:]
         infrastructure.testFileManager.createDirectoryBlock = { _ in true }
@@ -183,8 +155,8 @@ struct AvatarsRemoteDataSourceTests {
     func fetchAvatarsFailure() async throws {
         // Given
         let infrastructure = TestInfrastructureLayer()
-        let api = MockAPI()
-        api.shouldFailGetAvatars = true
+        let api = MockApi()
+        api.shouldFailRequest = true
         
         let dataSource = DefaultAvatarsRemoteDataSource(
             logger: infrastructure.logger,
@@ -205,7 +177,7 @@ struct AvatarsRemoteDataSourceTests {
     func fetchMultipleAvatars() async throws {
         // Given
         var infrastructure = TestInfrastructureLayer()
-        let api = MockAPI()
+        let api = MockApi()
         
         nonisolated(unsafe) var storedFiles: [URL: Data] = [:]
         infrastructure.testFileManager.createDirectoryBlock = { _ in true }
@@ -250,7 +222,7 @@ struct AvatarsRemoteDataSourceTests {
     func useCachedImage() async throws {
         // Given
         var infrastructure = TestInfrastructureLayer()
-        let api = MockAPI()
+        let api = MockApi()
         
         let imageId = "test1"
         let imageData = "testData"

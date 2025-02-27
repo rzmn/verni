@@ -22,6 +22,7 @@ let package = Package(
         .local(.infrastructure(.interface("Convenience"))),
         .local(.infrastructure(.interface("InfrastructureLayer"))),
         .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
+        .local(.data(.implementation(interface: "Api", implementation: "MockApiImplementation")))
     ],
     targets: [
         .target(
@@ -45,6 +46,7 @@ let package = Package(
                 "Entities",
                 "AvatarsRepository",
                 "TestInfrastructure",
+                "MockApiImplementation",
                 "Api",
                 "SyncEngine",
                 "Logging"

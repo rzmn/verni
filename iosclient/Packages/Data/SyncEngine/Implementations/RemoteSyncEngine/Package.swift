@@ -20,6 +20,7 @@ let package = Package(
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("AsyncExtensions"))),
         .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
+        .local(.currentLayer(.implementation(interface: "Api", implementation: "MockApiImplementation")))
     ],
     targets: [
         .target(
@@ -45,6 +46,7 @@ let package = Package(
                 "Convenience",
                 "Logging",
                 "AsyncExtensions",
+                "MockApiImplementation",
             ],
             path: "Tests"
         )

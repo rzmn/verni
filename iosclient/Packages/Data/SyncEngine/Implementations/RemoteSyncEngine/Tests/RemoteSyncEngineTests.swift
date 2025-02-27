@@ -6,6 +6,7 @@ import PersistentStorage
 import AsyncExtensions
 import TestInfrastructure
 import Convenience
+import MockApiImplementation
 @testable import RemoteSyncEngine
 
 private extension Components.Schemas.SomeOperation {
@@ -53,49 +54,6 @@ struct RemoteSyncEngineTests {
         }
     }
     
-    final class MockAPI: @unchecked Sendable, APIProtocol {
-        var pushOperationsCallCount = 0
-        var confirmOperationsCallCount = 0
-        var shouldFailPush = false
-        var shouldFailConfirm = false
-        var pushedOperations: [Components.Schemas.SomeOperation] = []
-        var confirmedIds: [String] = []
-        
-        func pushOperations(_ input: Operations.PushOperations.Input) async throws -> Operations.PushOperations.Output {
-            pushOperationsCallCount += 1
-            if shouldFailPush {
-                return .internalServerError(.init(body: .json(.init(error: .init(reason: ._internal)))))
-            }
-            switch input.body {
-            case .json(let payload):
-                pushedOperations = payload.operations
-                return .ok(.init(body: .json(.init(response: payload.operations))))
-            }
-        }
-        
-        func confirmOperations(_ input: Operations.ConfirmOperations.Input) async throws -> Operations.ConfirmOperations.Output {
-            confirmOperationsCallCount += 1
-            if shouldFailConfirm {
-                return .internalServerError(.init(body: .json(.init(error: .init(reason: ._internal)))))
-            }
-            confirmedIds = input.query.ids
-            return .ok(.init(body: .json(.init(response: .init()))))
-        }
-        
-        // Implement other APIProtocol methods as needed...
-        func signup(_ input: Operations.Signup.Input) async throws -> Operations.Signup.Output { fatalError() }
-        func login(_ input: Operations.Login.Input) async throws -> Operations.Login.Output { fatalError() }
-        func refreshSession(_ input: Operations.RefreshSession.Input) async throws -> Operations.RefreshSession.Output { fatalError() }
-        func updateEmail(_ input: Operations.UpdateEmail.Input) async throws -> Operations.UpdateEmail.Output { fatalError() }
-        func updatePassword(_ input: Operations.UpdatePassword.Input) async throws -> Operations.UpdatePassword.Output { fatalError() }
-        func registerForPushNotifications(_ input: Operations.RegisterForPushNotifications.Input) async throws -> Operations.RegisterForPushNotifications.Output { fatalError() }
-        func getAvatars(_ input: Operations.GetAvatars.Input) async throws -> Operations.GetAvatars.Output { fatalError() }
-        func searchUsers(_ input: Operations.SearchUsers.Input) async throws -> Operations.SearchUsers.Output { fatalError() }
-        func confirmEmail(_ input: Operations.ConfirmEmail.Input) async throws -> Operations.ConfirmEmail.Output { fatalError() }
-        func sendEmailConfirmationCode(_ input: Operations.SendEmailConfirmationCode.Input) async throws -> Operations.SendEmailConfirmationCode.Output { fatalError() }
-        func pullOperations(_ input: Operations.PullOperations.Input) async throws -> Operations.PullOperations.Output { fatalError() }
-    }
-    
     final class MockRemoteUpdatesService: @unchecked Sendable, RemoteUpdatesService {
         let eventPublisher = EventPublisher<RemoteUpdate>()
         var startCallCount = 0
@@ -124,7 +82,7 @@ struct RemoteSyncEngineTests {
         // Given
         let infrastructure = TestInfrastructureLayer()
         let storage = MockUserStorage()
-        let api = MockAPI()
+        let api = MockApi()
         let updates = MockRemoteUpdatesService()
         
         let factory = RemoteSyncEngineFactory(
@@ -168,7 +126,7 @@ struct RemoteSyncEngineTests {
         // Given
         let infrastructure = TestInfrastructureLayer()
         let storage = MockUserStorage()
-        let api = MockAPI()
+        let api = MockApi()
         let updates = MockRemoteUpdatesService()
         
         let factory = RemoteSyncEngineFactory(
@@ -196,7 +154,7 @@ struct RemoteSyncEngineTests {
         // Then
         #expect(storage.updateCallCount == 2) // Initial store + confirmed update
         #expect(api.confirmOperationsCallCount == 1)
-        #expect(api.confirmedIds == ["1"])
+        #expect(api.confirmedOperationIds == ["1"])
         
         let storedOperations = await storage.operations
         #expect(storedOperations.count == 1)
@@ -212,8 +170,8 @@ struct RemoteSyncEngineTests {
         // Given
         let infrastructure = TestInfrastructureLayer()
         let storage = MockUserStorage()
-        let api = MockAPI()
-        api.shouldFailPush = true
+        let api = MockApi()
+        api.shouldFailRequest = true
         let updates = MockRemoteUpdatesService()
         
         let factory = RemoteSyncEngineFactory(
@@ -254,8 +212,8 @@ struct RemoteSyncEngineTests {
         // Given
         let infrastructure = TestInfrastructureLayer()
         let storage = MockUserStorage()
-        let api = MockAPI()
-        api.shouldFailConfirm = true
+        let api = MockApi()
+        api.shouldFailRequest = true
         let updates = MockRemoteUpdatesService()
         
         let factory = RemoteSyncEngineFactory(

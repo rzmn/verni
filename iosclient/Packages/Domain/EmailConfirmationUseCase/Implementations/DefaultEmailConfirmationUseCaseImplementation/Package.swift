@@ -19,6 +19,8 @@ let package = Package(
         .local(.data(.interface("Api"))),
         .local(.infrastructure(.interface("Convenience"))),
         .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
+        .local(.data(.implementation(interface: "Api", implementation: "MockApiImplementation")))
     ],
     targets: [
         .target(
@@ -30,6 +32,20 @@ let package = Package(
                 "Api",
                 "Convenience",
                 "Logging"
+            ],
+            path: "Sources"
+        ),
+        .testTarget(
+            name: "DefaultEmailConfirmationUseCaseImplementationTests",
+            dependencies: [
+                "DefaultEmailConfirmationUseCaseImplementation",
+                "EntitiesApiConvenience",
+                "Entities",
+                "MockApiImplementation",
+                "Api",
+                "Convenience",
+                "Logging",
+                "TestInfrastructure"
             ]
         )
     ]
