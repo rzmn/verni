@@ -14,7 +14,9 @@ let package = Package(
     ],
     dependencies: [
         .local(.currentLayer(.interface("SaveCredendialsUseCase"))),
-        .local(.infrastructure(.interface("Logging")))
+        .local(.infrastructure(.interface("Logging"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
+        .local(.data(.implementation(interface: "Api", implementation: "MockApiImplementation")))
     ],
     targets: [
         .target(
@@ -22,6 +24,15 @@ let package = Package(
             dependencies: [
                 "SaveCredendialsUseCase",
                 "Logging"
+            ],
+            path: "Sources"
+        ),
+        .testTarget(
+            name: "DefaultSaveCredendialsUseCaseTests",
+            dependencies: [
+                "DefaultSaveCredendialsUseCaseImplementation",
+                "TestInfrastructure",
+                "MockApiImplementation"
             ]
         )
     ]

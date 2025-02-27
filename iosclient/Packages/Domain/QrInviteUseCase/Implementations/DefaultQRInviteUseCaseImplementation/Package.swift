@@ -15,6 +15,8 @@ let package = Package(
     dependencies: [
         .local(.currentLayer(.interface("QrInviteUseCase"))),
         .local(.infrastructure(.interface("Filesystem"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
+        .local(.data(.implementation(interface: "Api", implementation: "MockApiImplementation"))),
         .package(url: "https://github.com/dagronf/qrcode.git", from: "20.0.0"),
     ],
     targets: [
@@ -28,6 +30,14 @@ let package = Package(
             path: "Sources",
             resources: [
                 .process("Resources")
+            ]
+        ),
+        .testTarget(
+            name: "DefaultQRInviteUseCaseTests",
+            dependencies: [
+                "DefaultQRInviteUseCaseImplementation",
+                "TestInfrastructure",
+                "MockApiImplementation"
             ]
         )
     ]
