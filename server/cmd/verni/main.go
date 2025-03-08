@@ -294,6 +294,7 @@ func main() {
 					logger,
 				),
 				api,
+				pathProvider,
 				logger,
 			)
 		default:
