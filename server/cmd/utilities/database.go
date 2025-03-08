@@ -26,15 +26,16 @@ func createDatabaseActions(configData []byte, logger logging.Service) (databaseA
 		setup: func() {
 			for _, table := range tables() {
 				if err := table.create(database); err != nil {
-					logger.LogInfo("failed to create table %s err: %v", err, table.name)
+					logger.LogInfo("failed to create table %s err: %v", table.name, err)
+				} else {
+					logger.LogInfo("created table %s", table.name)
 				}
-				logger.LogInfo("created table %s", table.name)
 			}
 		},
 		drop: func() {
 			for _, table := range tables() {
 				if err := table.delete(database); err != nil {
-					logger.LogInfo("failed to drop table %s err: %v", err, table.name)
+					logger.LogInfo("failed to drop table %s err: %v", table.name, err)
 				}
 				logger.LogInfo("droped table %s", table.name)
 			}
