@@ -62,6 +62,8 @@ func New(
 		http.ServeFile(w, r, filepath.Join(staticDir, "docs/index.html"))
 	})
 	router.HandleFunc("/operationsQueue", sseHandler)
+	router.HandleFunc("/.well-known/apple-app-site-association", aasaHandler)
+	router.HandleFunc("/apple-app-site-association", aasaHandler)
 	return &defaultServer{
 		server: http.Server{
 			Addr:         ":" + config.Port,
