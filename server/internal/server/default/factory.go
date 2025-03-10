@@ -46,7 +46,7 @@ func New(
 	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(staticDir, "favicon.ico"))
 	})
-	router.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml")
 		http.ServeFile(w, r, pathProvider.AbsolutePath("./openapi.yaml"))
 	})
