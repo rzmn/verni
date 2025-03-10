@@ -48,7 +48,7 @@ func New(
 	})
 	router.HandleFunc("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml")
-		http.ServeFile(w, r, pathProvider.AbsolutePath("./openapi.yaml"))
+		http.ServeFile(w, r, pathProvider.AbsolutePath("../openapi.yaml"))
 	})
 	router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(staticDir, "docs/index.html"))
