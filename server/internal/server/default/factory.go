@@ -3,6 +3,8 @@ package defaultServer
 import (
 	"errors"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	openapi "verni/internal/openapi/go"
@@ -32,17 +34,32 @@ func New(
 			openapi.WithDefaultAPIErrorHandler(ErrorHandler),
 		),
 	)
-	fs := http.FileServer(http.Dir(pathProvider.AbsolutePath("./website/static")))
+	staticDir := pathProvider.AbsolutePath("./website/static")
+	fs := http.FileServer(http.Dir(staticDir))
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			http.ServeFile(w, r, pathProvider.AbsolutePath("./website/static/index.html"))
+			http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
 			return
 		}
 		// For all other paths, serve from static directory
 		fs.ServeHTTP(w, r)
 	})
 	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, pathProvider.AbsolutePath("./website/static/favicon.ico"))
+		http.ServeFile(w, r, filepath.Join(staticDir, "favicon.ico"))
+	})
+	// Create symlink for openapi.yml if it doesn't exist
+	openapiSource := pathProvider.AbsolutePath("./openapi.yaml")
+	openapiDest := filepath.Join(staticDir, "openapi.yaml")
+
+	// Remove existing symlink if it exists
+	os.Remove(openapiDest)
+
+	// Create new symlink
+	if err := os.Symlink(openapiSource, openapiDest); err != nil {
+		logger.LogError("failed to create symlink for openapi.yml: %v", err)
+	}
+	router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(staticDir, "docs/index.html"))
 	})
 	router.HandleFunc("/operationsQueue", sseHandler)
 	return &defaultServer{
