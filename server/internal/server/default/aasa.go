@@ -26,7 +26,7 @@ type AppLinksDetails struct {
 	Paths []string `json:"paths"`
 }
 
-const AppIdentifier = "NPZKGHFT2A.com.rzmn.accountydev.app"
+const AppIdentifier = "NPZKGHFT2A.com.rzmn.dev.verni"
 
 func aasaHandler(w http.ResponseWriter, r *http.Request) {
 	var config = Config{
