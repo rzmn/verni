@@ -3,7 +3,6 @@ package defaultServer
 import (
 	"errors"
 	"net/http"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -47,17 +46,10 @@ func New(
 	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(staticDir, "favicon.ico"))
 	})
-	// Create symlink for openapi.yml if it doesn't exist
-	openapiSource := pathProvider.AbsolutePath("./openapi.yaml")
-	openapiDest := filepath.Join(staticDir, "openapi.yaml")
-
-	// Remove existing symlink if it exists
-	os.Remove(openapiDest)
-
-	// Create new symlink
-	if err := os.Symlink(openapiSource, openapiDest); err != nil {
-		logger.LogError("failed to create symlink for openapi.yml: %v", err)
-	}
+	router.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/yaml")
+		http.ServeFile(w, r, pathProvider.AbsolutePath("./openapi.yaml"))
+	})
 	router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(staticDir, "docs/index.html"))
 	})
