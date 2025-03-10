@@ -52,6 +52,7 @@ SELECT
     o.createdAt,
     o.data,
     o.searchHint,
+    o.operationType,
     ae.entityId,
     ae.entityType
 FROM operations o
@@ -92,6 +93,7 @@ WHERE ae.operationId IN (
 			&operation.CreatedAt,
 			&payload.data,
 			&searchHint,
+			&payload.payloadType,
 			&entityID,
 			&entityType,
 		); err != nil {
@@ -294,6 +296,7 @@ SELECT
     o.data,
     o.isLarge,
     o.searchHint,
+    o.operationType,
     ae.entityId,
     ae.entityType
 FROM operations o
@@ -323,7 +326,7 @@ WHERE `
 		var entityID, entityType string
 		var searchHint sql.NullString
 
-		if err := rows.Scan(&operation.OperationId, &operation.CreatedAt, &payload.data, &payload.isLarge, &searchHint, &entityID, &entityType); err != nil {
+		if err := rows.Scan(&operation.OperationId, &operation.CreatedAt, &payload.data, &payload.isLarge, &searchHint, &payload.payloadType, &entityID, &entityType); err != nil {
 			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
 		}
 
@@ -370,6 +373,7 @@ SELECT
     o.data,
     o.isLarge,
     o.searchHint,
+    o.operationType,
     ae.entityId,
     ae.entityType
 FROM operations o
@@ -394,7 +398,7 @@ WHERE o.operationType = $1
 		var entityType string
 		var searchHint sql.NullString
 
-		if err := rows.Scan(&operation.OperationId, &operation.CreatedAt, &payload.data, &payload.isLarge, &searchHint, &entityID, &entityType); err != nil {
+		if err := rows.Scan(&operation.OperationId, &operation.CreatedAt, &payload.data, &payload.isLarge, &searchHint, &payload.payloadType, &entityID, &entityType); err != nil {
 			return nil, fmt.Errorf("%s: failed to scan row: %w", op, err)
 		}
 
