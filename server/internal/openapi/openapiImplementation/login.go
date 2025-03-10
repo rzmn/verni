@@ -38,6 +38,9 @@ func (s *DefaultAPIService) handleLoginError(err error, request openapi.LoginReq
 	case errors.Is(err, auth.WrongCredentials):
 		reason = openapi.INCORRECT_CREDENTIALS
 		statusCode = 409
+	case errors.Is(err, auth.BadFormat):
+		reason = openapi.WRONG_FORMAT
+		statusCode = 422
 	default:
 		s.logger.LogError("signup request %v failed with unknown err: %v", request, err)
 		reason = openapi.INTERNAL

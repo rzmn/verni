@@ -1,6 +1,7 @@
 package defaultServer
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -28,6 +29,7 @@ func New(
 	router := openapi.NewRouter(
 		openapi.NewDefaultAPIController(
 			servicer,
+			openapi.WithDefaultAPIErrorHandler(ErrorHandler),
 		),
 	)
 	fs := http.FileServer(http.Dir(pathProvider.AbsolutePath("./website/static")))
@@ -52,4 +54,35 @@ func New(
 		},
 		logger: logger,
 	}
+}
+
+func ErrorHandler(w http.ResponseWriter, _ *http.Request, err error, _ *openapi.ImplResponse) {
+	var (
+		code        = http.StatusInternalServerError
+		description *string
+		reason      = openapi.INTERNAL
+	)
+
+	var parsingErr *openapi.ParsingError
+	if ok := errors.As(err, &parsingErr); ok {
+		code = http.StatusBadRequest
+		desc := err.Error()
+		description = &desc
+		reason = openapi.BAD_REQUEST
+	}
+
+	var requiredErr *openapi.RequiredError
+	if ok := errors.As(err, &requiredErr); ok {
+		code = http.StatusBadRequest
+		desc := err.Error()
+		description = &desc
+		reason = openapi.BAD_REQUEST
+	}
+
+	_ = openapi.EncodeJSONResponse(openapi.Response(code, openapi.ErrorResponse{
+		Error: openapi.Error{
+			Reason:      reason,
+			Description: description,
+		},
+	}), &code, w)
 }
