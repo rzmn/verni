@@ -57,6 +57,10 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 	const op = "auth.defaultController.Signup"
 	c.logger.LogInfo("%s: start", op)
 
+	if len(device) == 0 {
+		return auth.StartupData{}, fmt.Errorf("%s: device id is empty: %w", op, auth.BadFormat)
+	}
+
 	if err := c.formatValidationService.ValidateEmailFormat(email); err != nil {
 		return auth.StartupData{}, fmt.Errorf("%s: validating email format: %w", op, auth.BadFormat)
 	}
@@ -148,6 +152,10 @@ func (c *defaultController) Signup(device auth.DeviceId, email string, password 
 func (c *defaultController) Login(device auth.DeviceId, email string, password auth.Password) (auth.StartupData, error) {
 	const op = "auth.defaultController.Login"
 	c.logger.LogInfo("%s: start", op)
+
+	if len(device) == 0 {
+		return auth.StartupData{}, fmt.Errorf("%s: device id is empty: %w", op, auth.BadFormat)
+	}
 
 	valid, err := c.authRepository.CheckCredentials(email, string(password))
 	if err != nil {

@@ -47,6 +47,17 @@ func AssertSomeOperationRequired(obj SomeOperation) error {
 
 // AssertSomeOperationConstraints checks if the values respects the defined constraints
 func AssertSomeOperationConstraints(obj SomeOperation) error {
+	baseElements := map[string]interface{}{
+		"operationId": obj.OperationId,
+		"createdAt":   obj.CreatedAt,
+		"authorId":    obj.AuthorId,
+	}
+	for name, el := range baseElements {
+		if isZero := IsZeroValue(el); isZero {
+			return &RequiredError{Field: name}
+		}
+	}
+
 	elements := map[string]interface{}{
 		"operationId":         obj.OperationId,
 		"createdAt":           obj.CreatedAt,
