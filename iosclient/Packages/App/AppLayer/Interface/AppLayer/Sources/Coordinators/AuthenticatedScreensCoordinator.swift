@@ -137,6 +137,7 @@ struct AuthenticatedScreensCoordinator: View {
                     colors.background.secondary.default.opacity(appearTransitionProgress)
                         .ignoresSafeArea()
                 )
+                .environment(state.session.images)
         } else {
             EmptyView()
         }

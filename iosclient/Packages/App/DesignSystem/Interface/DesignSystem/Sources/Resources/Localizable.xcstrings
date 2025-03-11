@@ -210,6 +210,17 @@
         }
       }
     },
+    "profile_edit_update_avatar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UPDATE AVATAR"
+          }
+        }
+      }
+    },
     "profile_title" : {
       "extractionState" : "manual",
       "localizations" : {

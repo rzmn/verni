@@ -129,8 +129,6 @@ public struct SpendingsItem: View {
     .background(.gray)
     .environment(AvatarView.Repository(getBlock: { _ in
         Data.stubAvatar
-    }, getIfCachedBlock: { _ in
-        Data.stubAvatar
     }))
     .environment(ColorPalette.dark)
     .loadCustomFonts()

@@ -1,7 +1,7 @@
 import AppBase
 import AppLayer
 import DomainLayer
-internal import DesignSystem
+import DesignSystem
 
 @MainActor public final class DefaultAppFactory: AppFactory {
     private let model: AppModel

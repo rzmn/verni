@@ -20,7 +20,7 @@ private struct PreviewModifier: ViewModifier {
             .environment(ColorPalette.dark)
             .environment(PaddingsPalette.default)
             .environment(
-                AvatarView.Repository(getBlock: { _ in .stubAvatar }, getIfCachedBlock: { _ in .stubAvatar })
+                AvatarView.Repository(getBlock: { _ in .stubAvatar })
             )
             .loadCustomFonts(class: packageClass)
     }

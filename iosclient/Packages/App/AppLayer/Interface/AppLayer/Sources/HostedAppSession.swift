@@ -1,9 +1,11 @@
 import AppBase
+import DesignSystem
 import ProfileScreen
 import SpendingsScreen
 
 @MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
+    var images: AvatarView.Repository { get }
     var profile: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions> { get }
     var spendings: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions> { get }
     func logout() async

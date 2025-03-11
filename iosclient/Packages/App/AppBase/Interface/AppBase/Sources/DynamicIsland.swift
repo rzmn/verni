@@ -17,7 +17,7 @@ internal import Device
         let multipler: CGFloat
         switch Device.version() {
         case .iPhone16Pro, .iPhone16Pro_Max:
-            multipler = 14
+            multipler = 16
         default:
             multipler = 12
         }

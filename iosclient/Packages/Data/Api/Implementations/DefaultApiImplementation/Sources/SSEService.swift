@@ -29,6 +29,7 @@ actor SSEService {
     private func processEvents() async {
         do {
             let (stream, response) = try await session.bytes(from: url)
+            logI { "listening for events..." }
             
             guard
                 let httpResponse = response as? HTTPURLResponse,
@@ -43,6 +44,7 @@ actor SSEService {
                 guard line.hasPrefix(prefix) else { continue }
                 
                 let jsonData = line.dropFirst(prefix.count)
+                logI { "got event \(jsonData)" }
                 
                 do {
                     await publisher.notify(

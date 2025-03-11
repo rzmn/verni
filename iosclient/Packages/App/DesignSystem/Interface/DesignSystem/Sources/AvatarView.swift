@@ -6,12 +6,10 @@ public struct AvatarView: View {
 
     @Observable @MainActor public class Repository: Sendable {
         private let get: (AvatarId) async -> Data?
-        private let getIfCached: (AvatarId) -> Data?
         private var ramCache = [AvatarId: Data]()
 
-        public init(getBlock: @escaping (AvatarId) async -> Data?, getIfCachedBlock: @escaping (AvatarId) -> Data?) {
+        public init(getBlock: @escaping (AvatarId) async -> Data?) {
             get = getBlock
-            getIfCached = getIfCachedBlock
         }
 
         func get(id: AvatarId) async -> Data? {
@@ -28,15 +26,11 @@ public struct AvatarView: View {
             if let data = ramCache[id] {
                 return data
             }
-            if let data = getIfCached(id) {
-                ramCache[id] = data
-                return data
-            }
             return nil
         }
 
         public static var preview: Repository {
-            Repository(getBlock: {_ in nil}, getIfCachedBlock: { _ in nil })
+            Repository(getBlock: { _ in nil })
         }
     }
 

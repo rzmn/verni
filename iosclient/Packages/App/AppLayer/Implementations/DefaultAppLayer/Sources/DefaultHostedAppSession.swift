@@ -3,11 +3,14 @@ import AppBase
 import ProfileScreen
 import SpendingsScreen
 import DomainLayer
+import DesignSystem
+import Foundation
 internal import LoggingExtensions
 internal import DefaultProfileScreen
 internal import DefaultSpendingsScreen
 
 final class DefaultHostedAppSession: HostedAppSession {
+    var images: AvatarView.Repository
     var sandbox: any SandboxAppSession
     var profile: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
     var spendings: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions>
@@ -31,6 +34,14 @@ final class DefaultHostedAppSession: HostedAppSession {
             logger: logger
                 .with(scope: .spendings)
         ).create()
+        self.images = AvatarView.Repository(
+            getBlock: { avatarId in
+                await session.avatarsRemoteDataSource.fetch(id: avatarId)
+                    .flatMap { image in
+                        Data.init(base64Encoded: image.base64)
+                    }
+            }
+        )
     }
     
     func logout() async {

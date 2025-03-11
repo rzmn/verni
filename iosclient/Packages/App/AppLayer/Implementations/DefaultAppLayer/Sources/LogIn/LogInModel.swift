@@ -10,9 +10,9 @@ import AuthUseCase
 import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
 import DomainLayer
+import DesignSystem
 internal import Logging
 internal import Convenience
-internal import DesignSystem
 
 actor LogInModel {
     private let store: Store<LogInState, LogInAction<AnyHostedAppSession>>

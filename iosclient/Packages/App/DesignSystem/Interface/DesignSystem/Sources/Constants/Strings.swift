@@ -93,6 +93,10 @@ public extension VerniL10N {
     static var profileActionEditProfile: Self {
         mapping("profile_action_edit_profile")
     }
+    
+    static var profileEditUpdateAvatar: Self {
+        mapping("profile_edit_update_avatar")
+    }
 
     static var profileActionAccountSettings: Self {
         mapping("profile_action_account_settings")

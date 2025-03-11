@@ -7,7 +7,7 @@ import AuthUseCase
 import CredentialsFormatValidationUseCase
 import SaveCredendialsUseCase
 import DomainLayer
-internal import DesignSystem
+import DesignSystem
 internal import Convenience
 
 @MainActor final class LoginSideEffects: ActionHandler {

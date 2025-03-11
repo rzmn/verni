@@ -4,10 +4,10 @@ import AppBase
 import SwiftUI
 import AppLayer
 import DomainLayer
+import DesignSystem
 import AuthWelcomeScreen
 internal import Logging
 internal import Convenience
-internal import DesignSystem
 
 actor AppModel {
     private var pendingPushToken: Data?
