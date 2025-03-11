@@ -19,6 +19,7 @@ let package = Package(
         .local(.currentLayer(.interface("ProfileScreen"))),
         .local(.currentLayer(.interface("LogInScreen"))),
         .local(.currentLayer(.interface("SplashScreen"))),
+        .local(.currentLayer(.interface("AddExpenseScreen"))),
         .local(.currentLayer(.interface("DesignSystem"))),
         .local(.currentLayer(.interface("AppBase"))),
         .local(.domain(.interface("DomainLayer"))),
@@ -30,6 +31,7 @@ let package = Package(
             name: "AppLayer",
             dependencies: [
                 "AuthWelcomeScreen",
+                "AddExpenseScreen",
                 "DebugMenuScreen",
                 "SpendingsScreen",
                 "ProfileScreen",

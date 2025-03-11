@@ -2,12 +2,14 @@ import AppBase
 import DesignSystem
 import ProfileScreen
 import SpendingsScreen
+import AddExpenseScreen
 
 @MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
     var images: AvatarView.Repository { get }
     var profile: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions> { get }
     var spendings: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions> { get }
+    var addExpense: any ScreenProvider<AddExpenseEvent, AddExpenseView, AddExpenseTransitions> { get }
     func logout() async
 }
 
