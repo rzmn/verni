@@ -3,6 +3,12 @@ import Foundation
 public typealias Amount = Decimal
 public typealias MsSince1970 = Int64
 
+extension Amount {
+    public var currencyFormatted: String {
+        String(format: "%.2f", NSDecimalNumber(decimal: self).doubleValue)
+    }
+}
+
 fileprivate extension Date {
     var byRoudingSeconds: Date {
         Date(timeIntervalSince1970: TimeInterval(Int64(timeIntervalSince1970)))

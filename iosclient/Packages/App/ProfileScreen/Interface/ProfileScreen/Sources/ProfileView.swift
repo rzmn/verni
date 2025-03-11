@@ -8,14 +8,14 @@ public struct ProfileView: View {
     @ObservedObject var store: Store<ProfileState, ProfileAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-
+    
     @Binding private var tabTransitionProgress: CGFloat
-
+    
     public init(store: Store<ProfileState, ProfileAction>, transitions: ProfileTransitions) {
         self.store = store
         _tabTransitionProgress = transitions.tab.progress
     }
-
+    
     public var body: some View {
         VStack(spacing: 0) {
             navigationBar
@@ -44,27 +44,31 @@ public struct ProfileView: View {
                 .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
                 .padding(.horizontal, 2)
             Spacer()
-
+            
         }
         .background(colors.background.primary.default.opacity(tabTransitionOpacity))
     }
-
+    
     private var navigationBar: some View {
         NavigationBar(
             config: NavigationBar.Config(
                 leftItem: NavigationBar.Item(
-                    config: NavigationBar.ItemConfig(
-                        style: .primary,
-                        icon: .bellBorder
+                    config: .icon(
+                        .init(
+                            style: .primary,
+                            icon: .bellBorder
+                        )
                     ),
                     action: {
                         store.dispatch(.onNotificationsTap)
                     }
                 ),
                 rightItem: NavigationBar.Item(
-                    config: NavigationBar.ItemConfig(
-                        style: .primary,
-                        icon: .logout
+                    config: .icon(
+                        .init(
+                            style: .primary,
+                            icon: .logout
+                        )
                     ),
                     action: {
                         store.dispatch(.onLogoutTap)
@@ -83,7 +87,7 @@ extension ProfileView {
     private var tabTransitionOpacity: CGFloat {
         1 - abs(tabTransitionProgress)
     }
-
+    
     private var tabTransitionOffset: CGFloat {
         28 * tabTransitionProgress
     }
@@ -93,7 +97,7 @@ extension ProfileView {
 
 private struct ProfilePreview: View {
     @State var tabTransition: CGFloat = 0
-
+    
     var body: some View {
         ZStack {
             ProfileView(

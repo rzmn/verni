@@ -6,15 +6,15 @@ public struct AuthWelcomeView: View {
     @ObservedObject var store: Store<AuthWelcomeState, AuthWelcomeAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
-
+    
     @Binding private var dismissalTransitionProgress: CGFloat
     @Binding private var dismissalDestinationOffset: CGFloat?
     @Binding private var dismissalSourceOffset: CGFloat?
-
+    
     @Binding private var appearTransitionProgress: CGFloat
     @Binding private var appearDestinationOffset: CGFloat?
     @Binding private var appearSourceOffset: CGFloat?
-
+    
     public init(
         store: Store<AuthWelcomeState, AuthWelcomeAction>,
         transitionFrom: ModalTransition,
@@ -24,20 +24,22 @@ public struct AuthWelcomeView: View {
         _appearTransitionProgress = transitionFrom.progress
         _appearSourceOffset = transitionFrom.sourceOffset
         _appearDestinationOffset = transitionFrom.destinationOffset
-
+        
         _dismissalTransitionProgress = transitionTo.progress
         _dismissalSourceOffset = transitionTo.sourceOffset
         _dismissalDestinationOffset = transitionTo.destinationOffset
     }
-
+    
     public var body: some View {
         VStack(spacing: 0) {
             NavigationBar(
                 config: NavigationBar.Config(
                     leftItem: NavigationBar.Item(
-                        config: NavigationBar.ItemConfig(
-                            style: .primary,
-                            icon: .arrowLeft
+                        config: .icon(
+                            .init(
+                                style: .primary,
+                                icon: .arrowLeft
+                            )
                         ),
                         action: {}
                     ),
@@ -85,21 +87,21 @@ public struct AuthWelcomeView: View {
                 .ignoresSafeArea()
         )
     }
-
+    
     private var dismissalTransitionOffset: CGFloat {
         guard let dismissalSourceOffset, let dismissalDestinationOffset else {
             return 0
         }
         return (dismissalDestinationOffset - dismissalSourceOffset) * dismissalTransitionProgress
     }
-
+    
     private var appearTransitionOffset: CGFloat {
         guard let appearSourceOffset, let appearDestinationOffset else {
             return 0
         }
         return (appearSourceOffset - appearDestinationOffset) * (1 - appearTransitionProgress)
     }
-
+    
     private var titleSection: some View {
         Text(.authWelcomeTitle)
             .foregroundStyle(colors.text.secondary.default)
@@ -108,7 +110,7 @@ public struct AuthWelcomeView: View {
             .padding(.vertical, 16)
             .opacity(appearTransitionProgress)
     }
-
+    
     private var signInOAuthSection: some View {
         VStack {
             HStack {
@@ -132,7 +134,7 @@ public struct AuthWelcomeView: View {
         .padding(.horizontal, 16)
         .opacity(appearTransitionProgress)
     }
-
+    
     private var bottomButtonsSection: some View {
         VStack {
             DesignSystem.Button(
@@ -167,7 +169,7 @@ private struct AuthWelcomePreview: View {
     @State var appearTransition: CGFloat = 0
     @State var dismissTransition: CGFloat = 0
     @State var sourceOffset: CGFloat?
-
+    
     var body: some View {
         ZStack {
             AuthWelcomeView(
@@ -185,7 +187,7 @@ private struct AuthWelcomePreview: View {
                     sourceOffset: $sourceOffset,
                     destinationOffset: .constant(0)
                 )
-
+                
             )
             VStack {
                 Text("sourceOffset: \(sourceOffset ?? -1)")

@@ -32,9 +32,11 @@ public struct SpendingsView: View {
             NavigationBar(
                 config: NavigationBar.Config(
                     rightItem: NavigationBar.Item(
-                        config: NavigationBar.ItemConfig(
-                            style: .primary,
-                            icon: .search
+                        config: .icon(
+                            .init(
+                                style: .primary,
+                                icon: .search
+                            )
                         ),
                         action: {
                             store.dispatch(.onSearchTap)

@@ -50,6 +50,7 @@ public protocol SpendingsRepository: Sendable {
         id: SpendingGroup.Identifier
     ) async throws(DeleteSpendingGroupError)
     
+    @discardableResult
     func createSpending(
         in groupId: SpendingGroup.Identifier,
         displayName: String,

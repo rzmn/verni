@@ -9,14 +9,14 @@ public struct LogInView<Session: Sendable>: View {
     @Binding private var transitionProgress: CGFloat
     @Binding private var destinationOffset: CGFloat?
     @Binding private var sourceOffset: CGFloat?
-
+    
     public init(store: Store<LogInState, LogInAction<Session>>, transition: ModalTransition) {
         self.store = store
         _transitionProgress = transition.progress
         _sourceOffset = transition.sourceOffset
         _destinationOffset = transition.destinationOffset
     }
-
+    
     public var body: some View {
         VStack(spacing: 0) {
             navigationBar
@@ -35,14 +35,16 @@ public struct LogInView<Session: Sendable>: View {
             )
         )
     }
-
+    
     private var navigationBar: some View {
         NavigationBar(
             config: NavigationBar.Config(
                 leftItem: NavigationBar.Item(
-                    config: NavigationBar.ItemConfig(
-                        style: .primary,
-                        icon: .arrowLeft
+                    config: .icon(
+                        .init(
+                            style: .primary,
+                            icon: .arrowLeft
+                        )
                     ),
                     action: {
                         UIApplication.dismissKeyboard()
@@ -63,14 +65,14 @@ public struct LogInView<Session: Sendable>: View {
             }
         }
     }
-
+    
     private var transitionOffset: CGFloat {
         guard let sourceOffset, let destinationOffset else {
             return 0
         }
         return (destinationOffset - sourceOffset) * (1 - transitionProgress)
     }
-
+    
     private var content: some View {
         VStack {
             DesignSystem.TextField(
@@ -134,7 +136,7 @@ public struct LogInView<Session: Sendable>: View {
 private struct LogInPreview: View {
     @State var transition: CGFloat = 0
     @State var sourceOffset: CGFloat?
-
+    
     var body: some View {
         ZStack {
             LogInView<Int>(

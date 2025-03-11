@@ -15,6 +15,7 @@ public enum LoggingScope: CustomStringConvertible {
     case sync
     case users
     case spendings
+    case addSpending
     case auth
     case logIn
     case pushNotifications
@@ -51,6 +52,8 @@ public enum LoggingScope: CustomStringConvertible {
             "🪪"
         case .spendings:
             "💸"
+        case .addSpending:
+            "🤑"
         case .auth:
             "🛂"
         case .pushNotifications:
