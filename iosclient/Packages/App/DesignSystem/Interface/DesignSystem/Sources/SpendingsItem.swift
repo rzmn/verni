@@ -71,44 +71,22 @@ public struct SpendingsItem: View {
                 .foregroundStyle(colors.text.secondary.default)
                 .font(.medium(size: 15))
             HStack {
-                accesoryIcon
-                    .frame(width: 20, height: 20)
-                    .foregroundStyle(accesoryIconForeground)
-                    .background(accesoryIconBackground)
-                    .clipShape(.rect(cornerRadius: 4))
+                BalanceAccessory(
+                    style: {
+                        switch config.style {
+                        case .positive:
+                            .positive
+                        case .negative:
+                            .negative
+                        }
+                    }()
+                )
                 Text(config.amount)
                     .font(.medium(size: 20))
                     .foregroundStyle(colors.text.primary.default)
             }
             .padding(.top, 2)
             .padding(.bottom, 12)
-        }
-    }
-
-    private var accesoryIcon: Image {
-        switch config.style {
-        case .positive:
-            .plus
-        case .negative:
-            .minus
-        }
-    }
-
-    private var accesoryIconBackground: Color {
-        switch config.style {
-        case .positive:
-            colors.background.positive.default
-        case .negative:
-            colors.background.negative.default
-        }
-    }
-
-    private var accesoryIconForeground: Color {
-        switch config.style {
-        case .positive:
-            colors.icon.positive.default
-        case .negative:
-            colors.icon.negative.default
         }
     }
 }

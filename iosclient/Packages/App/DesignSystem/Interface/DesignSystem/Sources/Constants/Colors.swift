@@ -114,6 +114,19 @@ extension ColorPalette {
                 }
             }
         }
+        
+        public struct Brand {
+            let theme: Theme
+
+            public var `static`: Color {
+                switch theme {
+                case .dark:
+                    .hex(0x593EFF)
+                case .light:
+                    .hex(0x593EFF)
+                }
+            }
+        }
 
         public struct Negative {
             let theme: Theme
@@ -142,6 +155,10 @@ extension ColorPalette {
 
         public var negative: Negative {
             Negative(theme: theme)
+        }
+        
+        public var brand: Brand {
+            Brand(theme: theme)
         }
     }
 

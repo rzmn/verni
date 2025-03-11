@@ -157,6 +157,46 @@ public extension VerniL10N {
     static func spendingsPeopleInvolved(count: Int) -> Self {
         mappingFormat(format: "spendings_people_involved", count)
     }
+    
+    static var addExpenseOwesYouFormat: Self {
+        mapping("add_expense_owes_you")
+    }
+    
+    static func addExpenseOwesYou(counterparty: String) -> Self {
+        mappingFormat(format: "add_expense_owes_you", counterparty)
+    }
+    
+    static var addExpenseYouOweFormat: Self {
+        mapping("add_expense_you_owe")
+    }
+    
+    static func addExpenseYouOwe(counterparty: String) -> Self {
+        mappingFormat(format: "add_expense_you_owe", counterparty)
+    }
+    
+    static var addExpenseSplitEqually: Self {
+        mapping("add_expense_equally_option")
+    }
+    
+    static var addExpenseFull: Self {
+        mapping("add_expense_full_option")
+    }
+    
+    static var addExpenseTitlePlaceholder: Self {
+        mapping("add_expense_title_placeholder")
+    }
+    
+    static var addExpenseNavTitle: Self {
+        mapping("add_expense_nav_title")
+    }
+    
+    static var addExpenseNavCancel: Self {
+        mapping("add_expense_nav_cancel")
+    }
+    
+    static var addExpenseNavSubmit: Self {
+        mapping("add_expense_nav_submit")
+    }
 }
 
 extension String: VerniL10N {
@@ -165,7 +205,7 @@ extension String: VerniL10N {
     }
 
     public static func mappingFormat(format: String, _ arguments: any CVarArg...) -> String {
-        let key = NSLocalizedString(format, bundle: .module, comment: "")
+        let key = NSLocalizedString(format, bundle: .module, comment: "") as String
         let formatted = String(format: key, arguments)
         return formatted
     }
@@ -177,7 +217,7 @@ extension LocalizedStringKey: VerniL10N {
     }
 
     public static func mappingFormat(format: String, _ arguments: any CVarArg...) -> LocalizedStringKey {
-        let key = NSLocalizedString(format, bundle: .module, comment: "")
+        let key = NSLocalizedString(format, bundle: .module, comment: "") as String
         let formatted = String(format: key, arguments)
         return LocalizedStringKey(formatted)
     }
