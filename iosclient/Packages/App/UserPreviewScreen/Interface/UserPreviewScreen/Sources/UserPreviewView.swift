@@ -60,6 +60,9 @@ public struct UserPreviewView: View {
             }
         }
         .padding(16)
+        .onAppear {
+            store.dispatch(.appeared)
+        }
     }
 }
 

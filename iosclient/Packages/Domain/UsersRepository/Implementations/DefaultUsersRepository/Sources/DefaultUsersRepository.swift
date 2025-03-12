@@ -15,6 +15,7 @@ public actor DefaultUsersRepository: Sendable {
     private var state: State
     private let sync: Engine
     private let userId: User.Identifier
+    private let intermediateCache: IntermediateUsersCache?
     private let eventPublisher: EventPublisher<[User.Identifier: AnyUser]>
 
     public init(
@@ -50,6 +51,15 @@ public actor DefaultUsersRepository: Sendable {
         self.infrastructure = infrastructure
         self.sync = sync
         self.userId = userId
+        do {
+            intermediateCache = try await IntermediateUsersCache(
+                fileManager: infrastructure.fileManager,
+                logger: logger
+            )
+        } catch {
+            logger.logE { "failed to initialize intermediate users cache error: \(error)" }
+            intermediateCache = nil
+        }
         eventPublisher = EventPublisher()
         for operation in await sync.operations {
             state = reducer(operation, state)
@@ -109,7 +119,12 @@ extension DefaultUsersRepository: UsersRepository {
 
     public subscript(id: User.Identifier) -> AnyUser? {
         get async {
-            state.users[id]?.value
+            if let value = state.users[id]?.value {
+                return value
+            }
+            return await intermediateCache?.performIsolated { cache in
+                cache[id].flatMap(AnyUser.regular)
+            }
         }
     }
 
@@ -118,6 +133,12 @@ extension DefaultUsersRepository: UsersRepository {
             state.users.values.compactMap(\.value).filter {
                 $0.payload.displayName.contains(query)
             }
+        }
+    }
+    
+    public func storeUserData(user: User) async {
+        await intermediateCache?.performIsolated { cache in
+            cache[user.id] = user
         }
     }
 

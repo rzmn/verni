@@ -21,17 +21,7 @@ public struct SpendingsState: Equatable, Sendable {
 
         public var amount: String {
             balance.map { (currency, value) in
-                let value = abs(value)
-                switch currency {
-                case .usDollar:
-                    return "$\(value)"
-                case .euro:
-                    return "€\(value)"
-                case .russianRuble:
-                    return "\(value)₽"
-                case .unknown(let code):
-                    return "\(value) \(code)"
-                }
+                currency.formatted(amount: abs(value))
             }.joined(separator: " + ")
         }
     }

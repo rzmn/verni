@@ -43,7 +43,7 @@ extension UserPreviewSideEffects: ActionHandler {
     func handle(_ action: UserPreviewAction) {
         switch action {
         case .appeared:
-            break
+            appeared()
         case .createSpendingGroup:
             createSpendingGroup()
         default:
@@ -51,8 +51,9 @@ extension UserPreviewSideEffects: ActionHandler {
         }
     }
     
-    private func loadUserInfo() {
+    private func appeared() {
         Task {
+            await usersRepository.storeUserData(user: store.state.user)
             if let info = await usersRepository[userId], case .regular(let user) = info {
                 store.dispatch(.infoUpdated(user))
             }

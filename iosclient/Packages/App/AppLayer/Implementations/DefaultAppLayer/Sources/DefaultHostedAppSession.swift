@@ -37,6 +37,7 @@ final class DefaultHostedAppSession: HostedAppSession {
         self.spendings = await DefaultSpendingsFactory(
             spendingsRepository: session.spendingsRepository,
             usersRepository: session.usersRepository,
+            hostId: session.profileRepository.profile.userId,
             logger: logger
                 .with(scope: .spendings)
         ).create()

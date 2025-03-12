@@ -31,6 +31,10 @@ public protocol UsersRepository: Sendable {
 
     subscript(id: User.Identifier) -> AnyUser? { get async }
     subscript(query: String) -> [AnyUser] { get async }
+    
+    func storeUserData(
+        user: User
+    ) async
 
     func createUser(
         displayName: String

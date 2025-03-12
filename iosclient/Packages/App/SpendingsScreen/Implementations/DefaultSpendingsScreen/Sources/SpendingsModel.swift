@@ -19,6 +19,7 @@ actor SpendingsModel {
     init(
         spendingsRepository: SpendingsRepository,
         usersRepository: UsersRepository,
+        hostId: User.Identifier,
         logger: Logger
     ) async {
         self.spendingsRepository = spendingsRepository
@@ -38,7 +39,7 @@ actor SpendingsModel {
                     logger.logW { "skipping group \(group) due to wrong participants count \(participants)" }
                     return nil
                 }
-                guard let counterparty = users.first(where: { $0.user.id == "" }) else {
+                guard let counterparty = users.first(where: { $0.user.id != hostId }) else {
                     logger.logW { "counterparty not found in \(users.map(\.user))" }
                     return nil
                 }
