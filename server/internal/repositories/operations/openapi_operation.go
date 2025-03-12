@@ -80,7 +80,11 @@ func EntityBindActions(o OpenApiOperation) []EntityBindAction {
 		for _, userId := range slice {
 			uniqueMap[userId] = struct{}{}
 		}
-		return slice
+		uniqueSlice := make([]UserId, 0, len(uniqueMap))
+		for userId := range uniqueMap {
+			uniqueSlice = append(uniqueSlice, userId)
+		}
+		return uniqueSlice
 	}
 	switch o.Type() {
 	case CreateUserOperationPayloadType:
