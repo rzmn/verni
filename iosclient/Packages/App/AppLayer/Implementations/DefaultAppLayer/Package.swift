@@ -18,6 +18,11 @@ let package = Package(
         .local(.currentLayer(.interface("AppBase"))),
         .local(.currentLayer(.interface("AuthWelcomeScreen"))),
         .local(.currentLayer(.interface("AddExpenseScreen"))),
+        .local(.currentLayer(.interface("UserPreviewScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "UserPreviewScreen", implementation: "DefaultUserPreviewScreen"))),
         .local(
             .currentLayer(
                 .implementation(
@@ -75,6 +80,7 @@ let package = Package(
                 "DomainLayer",
                 "Logging",
                 "Convenience",
+                "DefaultUserPreviewScreen"
             ],
             path: "Sources"
         )

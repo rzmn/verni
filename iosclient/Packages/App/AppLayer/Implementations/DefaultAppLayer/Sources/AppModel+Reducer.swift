@@ -62,6 +62,39 @@ extension AppModel {
                     authenticated.bottomSheet = sheet
                     $0 = .launched(.authenticated(authenticated))
                 }
+            case .onUserPreview(let user):
+                return modify(state) {
+                    guard case .launched(let launched) = $0 else {
+                        return
+                    }
+                    guard case .authenticated(var authenticated) = launched else {
+                        return
+                    }
+                    authenticated.externalUserPreview = .pending(user)
+                    $0 = .launched(.authenticated(authenticated))
+                }
+            case .onShowPreview(let user, let provider):
+                return modify(state) {
+                    guard case .launched(let launched) = $0 else {
+                        return
+                    }
+                    guard case .authenticated(var authenticated) = launched else {
+                        return
+                    }
+                    authenticated.externalUserPreview = .ready(user, provider)
+                    $0 = .launched(.authenticated(authenticated))
+                }
+            case .onCloseUserPreview:
+                return modify(state) {
+                    guard case .launched(let launched) = $0 else {
+                        return
+                    }
+                    guard case .authenticated(var authenticated) = launched else {
+                        return
+                    }
+                    authenticated.externalUserPreview = nil
+                    $0 = .launched(.authenticated(authenticated))
+                }
             }
         }
     }

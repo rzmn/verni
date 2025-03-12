@@ -32,6 +32,18 @@ public struct AppView: View {
             }
             .environment(ColorPalette(scheme: colorScheme))
             .environment(PaddingsPalette.default)
+            .onOpenURL { url in
+                guard let appUrl = AppUrl(url: url) else {
+                    return
+                }
+                switch appUrl {
+                case .users(let url):
+                    switch url {
+                    case .show(let user):
+                        store.dispatch(.onUserPreview(user))
+                    }
+                }
+            }
     }
 
     @ViewBuilder private var contentWithDebugMenu: some View {

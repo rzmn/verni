@@ -1,4 +1,5 @@
 import SwiftUI
+import UserPreviewScreen
 import AppBase
 import ProfileScreen
 import SpendingsScreen
@@ -118,6 +119,25 @@ struct AuthenticatedScreensCoordinator: View {
                         }
                     )
                 )
+                .fullScreenCover(
+                    item: .constant(
+                        store.localState
+                            .flatMap(\.externalUserPreview)
+                            .flatMap {
+                                guard case .ready(let user, let provider) = $0 else {
+                                    return nil
+                                }
+                                return AnyIdentifiable(value: provider, id: user.id)
+                            }
+                    )
+                ) { (identifiable: AnyIdentifiable<any UserPreviewScreenProvider>) in
+                    identifiable.value.instantiate { event in
+                        switch event {
+                        case .closed, .spendingGroupCreated:
+                            store.dispatch(.onCloseUserPreview)
+                        }
+                    }(UserPreviewTransitions())
+                }
                 .bottomSheet(
                     preset: Binding(
                         get: { () -> AlertBottomSheetPreset? in

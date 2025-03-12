@@ -36,6 +36,8 @@ extension AppSideEffects: ActionHandler {
             }
         case .logIn(let session, _):
             store.dispatch(.onAuthorized(session))
+        case .onUserPreview(let user):
+            showUserPreview(user)
         default:
             break
         }
@@ -54,6 +56,16 @@ extension AppSideEffects: ActionHandler {
         }
     }
 
+    private func showUserPreview(_ user: User) {
+        guard let state = store.state.launched?.authenticated else {
+            return
+        }
+        Task {
+            await store.dispatch(
+                .onShowPreview(user, state.session.userPreview(user))
+            )
+        }
+    }
 
     private func doLaunchWithFakePause(session: AnySharedAppSession) async {
         async let sleep: () = await Task.sleep(timeInterval: 1)

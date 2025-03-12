@@ -46,9 +46,9 @@ actor ProfileModel {
         await store.append(
             handler: ProfileSideEffects(
                 store: store,
-                repository: profileRepository,
-                qrUseCase: qrInviteUseCase,
-                userId: profile.userId
+                profileRepository: profileRepository,
+                usersRepository: usersRepository,
+                qrUseCase: qrInviteUseCase
             ),
             keepingUnique: true
         )

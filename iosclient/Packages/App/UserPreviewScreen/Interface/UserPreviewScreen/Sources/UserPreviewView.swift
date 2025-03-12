@@ -86,11 +86,7 @@ private struct ProfilePreview: View {
                     ),
                     reducer: { state, _ in state }
                 ),
-                transitions: UserPreviewTransitions(
-                    tab: TabTransition(
-                        progress: $tabTransition
-                    )
-                )
+                transitions: UserPreviewTransitions()
             )
             .environment(ColorPalette.light)
             VStack {

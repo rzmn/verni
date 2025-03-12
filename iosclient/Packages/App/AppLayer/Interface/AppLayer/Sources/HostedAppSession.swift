@@ -3,13 +3,21 @@ import DesignSystem
 import ProfileScreen
 import SpendingsScreen
 import AddExpenseScreen
+import UserPreviewScreen
+import Entities
+
+public typealias ProfileScreenProvider = ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
+public typealias SpendingsScreenProvider = ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions>
+public typealias AddExpenseScreenProvider = ScreenProvider<AddExpenseEvent, AddExpenseView, AddExpenseTransitions>
+public typealias UserPreviewScreenProvider = ScreenProvider<UserPreviewEvent, UserPreviewView, UserPreviewTransitions>
 
 @MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
     var images: AvatarView.Repository { get }
-    var profile: any ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions> { get }
-    var spendings: any ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions> { get }
-    var addExpense: any ScreenProvider<AddExpenseEvent, AddExpenseView, AddExpenseTransitions> { get }
+    var profile: any ProfileScreenProvider { get }
+    var spendings: any SpendingsScreenProvider { get }
+    var addExpense: any AddExpenseScreenProvider { get }
+    var userPreview: (User) async -> any UserPreviewScreenProvider { get }
     func logout() async
 }
 

@@ -1,10 +1,10 @@
 import SwiftUI
 
-struct AnyIdentifiable<T>: Identifiable {
-    let value: T
-    let id: String
+public struct AnyIdentifiable<T>: Identifiable {
+    public let value: T
+    public let id: String
 
-    init(value: T, id: String = UUID().uuidString) {
+    public init(value: T, id: String = UUID().uuidString) {
         self.value = value
         self.id = id
     }

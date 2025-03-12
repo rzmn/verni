@@ -1,4 +1,6 @@
 import DesignSystem
+import Entities
+import Foundation
 
 public enum LaunchSession: Sendable {
     case anonymous(AnySandboxAppSession)
@@ -15,6 +17,10 @@ public enum AppAction: Sendable {
     case logIn(AnyHostedAppSession, AnonymousState)
 
     case onAuthorized(AnyHostedAppSession)
+    
+    case onUserPreview(User)
+    case onShowPreview(User, any UserPreviewScreenProvider)
+    case onCloseUserPreview
 
     case addExpense
     case selectTabAnonymous(AnonymousState.Tab)

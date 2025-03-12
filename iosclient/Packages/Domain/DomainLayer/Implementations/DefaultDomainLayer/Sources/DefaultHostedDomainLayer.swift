@@ -121,9 +121,7 @@ extension DefaultHostedDomainLayer: HostedDomainLayer {
             logger: logger
                 .with(scope: .qrCode),
             fileManager: sharedDomain.infrastructure.fileManager
-        ) { userId in
-            AppUrl.users(.show(id: userId)).url
-        }
+        )
     }
     
     var shared: SharedDomainLayer {

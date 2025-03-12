@@ -39,28 +39,25 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
     }
     public let logger: Logger
     public let fileManager: Filesystem.FileManager
-    private let urlById: (String) -> String
 
     public init(
         logger: Logger,
-        fileManager: Filesystem.FileManager,
-        urlById: @escaping (String) -> String
+        fileManager: Filesystem.FileManager
     ) {
         self.logger = logger
-        self.urlById = urlById
         self.fileManager = fileManager
     }
 
-    @MainActor public func generate(background: UIColor, tint: UIColor, size: Int, userId: String) async throws -> Data {
-        try await doGenerate(background: background, tint: tint, size: size, userId: userId)
+    @MainActor public func generate(background: UIColor, tint: UIColor, size: Int, text: String) async throws -> Data {
+        try await doGenerate(background: background, tint: tint, size: size, text: text)
     }
 
-    private func doGenerate(background: UIColor, tint: UIColor, size: Int, userId: String) throws -> Data {
-        if let cached = getCached(for: userId) {
+    private func doGenerate(background: UIColor, tint: UIColor, size: Int, text: String) throws -> Data {
+        if let cached = getCached(for: text) {
             return cached
         }
         let pngData = try QRCode.build
-            .text(urlById(userId))
+            .text(text)
             .ifNotNil(value: logoImage, block: { builder, logoImage in
                 builder.logo(logoImage, position: .squareCenter(inset: 12))
             })
@@ -70,7 +67,7 @@ public actor DefaultQRInviteUseCase: QRInviteUseCase, Loggable {
             .onPixels.shape(QRCode.PixelShape.RoundedPath())
             .eye.shape(QRCode.EyeShape.Squircle())
             .generate.image(dimension: size, representation: .png())
-        cache(data: pngData, for: userId)
+        cache(data: pngData, for: text)
         return pngData
     }
 

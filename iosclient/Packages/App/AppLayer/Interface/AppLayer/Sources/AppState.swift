@@ -1,4 +1,5 @@
 import DesignSystem
+import Entities
 internal import Convenience
 
 public struct LaunchingState: Equatable, Sendable {
@@ -51,7 +52,24 @@ public struct AuthenticatedState: Equatable, Sendable {
         case toTheLeft
         case toTheRight
     }
+    public enum UserPreview: Equatable {
+        case pending(User)
+        case ready(User, any UserPreviewScreenProvider)
+        
+        var user: User {
+            switch self {
+            case .pending(let user), .ready(let user, _):
+                return user
+            }
+        }
+        
+        public static func == (lhs: AuthenticatedState.UserPreview, rhs: AuthenticatedState.UserPreview) -> Bool {
+            lhs.user == rhs.user
+        }
+    }
+    
     public var session: AnyHostedAppSession
+    public var externalUserPreview: UserPreview?
     public var tabs: [Tab]
     public var tab: TabItem
     public var bottomSheet: AlertBottomSheetPreset?
