@@ -130,7 +130,8 @@ func tables() []table {
 					userId text NOT NULL,
 					entityId text NOT NULL,
 					entityType text NOT NULL,
-					PRIMARY KEY(userId, entityId, entityType)
+					operationId text NOT NULL,
+					PRIMARY KEY(userId, entityId, entityType, operationId)
 				);`)
 				return err
 			},

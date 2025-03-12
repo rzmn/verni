@@ -41,7 +41,7 @@ func (c *defaultRepository) push(
 
 		for _, action := range operation.EntityBindActions {
 			for _, watcher := range action.Watchers {
-				if err := insertTrackedEntity(tx, watcher, action.Entity); err != nil {
+				if err := insertTrackedEntity(tx, operation.OperationId, watcher, action.Entity); err != nil {
 					return err
 				}
 			}
@@ -93,15 +93,16 @@ VALUES ($1, $2, $3);`
 	return nil
 }
 
-func insertTrackedEntity(tx *sql.Tx, userId operations.UserId, entity operations.TrackedEntity) error {
+func insertTrackedEntity(tx *sql.Tx, operationId operations.OperationId, userId operations.UserId, entity operations.TrackedEntity) error {
 	query := `
-INSERT INTO trackedEntities (userId, entityId, entityType)
-VALUES ($1, $2, $3);`
+INSERT INTO trackedEntities (userId, entityId, entityType, operationId)
+VALUES ($1, $2, $3, $4);`
 
 	if _, err := tx.Exec(query,
 		userId,
 		entity.Id,
 		entity.Type,
+		operationId,
 	); err != nil {
 		return fmt.Errorf("failed to insert tracked entity for user %s: %w", userId, err)
 	}

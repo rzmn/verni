@@ -45,7 +45,7 @@ func (c *defaultRepository) pushRollback(
 
 		for _, action := range operation.EntityBindActions {
 			for _, watcher := range action.Watchers {
-				if err := deleteTrackedEntity(tx, watcher, action.Entity); err != nil {
+				if err := deleteTrackedEntity(tx, operation.OperationId, watcher, action.Entity); err != nil {
 					return err
 				}
 			}
@@ -89,12 +89,12 @@ WHERE operationId = $1;`
 	return nil
 }
 
-func deleteTrackedEntity(tx *sql.Tx, userId operations.UserId, entity operations.TrackedEntity) error {
+func deleteTrackedEntity(tx *sql.Tx, operationId operations.OperationId, userId operations.UserId, entity operations.TrackedEntity) error {
 	query := `
 DELETE FROM trackedEntities
-WHERE userId = $1 AND entityId = $2 AND entityType = $3;`
+WHERE userId = $1 AND entityId = $2 AND entityType = $3 AND operationId = $4;`
 
-	if _, err := tx.Exec(query, userId, entity.Id, entity.Type); err != nil {
+	if _, err := tx.Exec(query, userId, entity.Id, entity.Type, operationId); err != nil {
 		return fmt.Errorf("failed to delete tracked entity for user %s: %w", userId, err)
 	}
 	return nil
