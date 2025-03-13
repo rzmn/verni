@@ -503,7 +503,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/pushOperationsCodeSucceededResponse'
+                $ref: '#/components/schemas/confirmOperationsSucceededResponse'
           description: Operation list has been confirmed.
         "401":
           content:
@@ -1008,6 +1008,8 @@ components:
           items:
             $ref: '#/components/schemas/SomeOperation'
           type: array
+      required:
+      - operations
       type: object
     pushOperationsSucceededResponse:
       example:
@@ -1026,7 +1028,7 @@ components:
       required:
       - response
       title: pushOperationsSucceededResponse
-    pushOperationsCodeSucceededResponse:
+    confirmOperationsSucceededResponse:
       example:
         response:
           key: ""
@@ -1036,7 +1038,7 @@ components:
           type: object
       required:
       - response
-      title: pushOperationsCodeSucceededResponse
+      title: confirmOperationsSucceededResponse
     UpdateEmailOperation_updateEmail:
       description: Update email operation
       properties:

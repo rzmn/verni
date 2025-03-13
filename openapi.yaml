@@ -582,7 +582,7 @@ paths:
           content:
             application/json:
               schema:
-                title: pushOperationsCodeSucceededResponse
+                title: confirmOperationsSucceededResponse
                 properties:
                   response:
                     $ref: "#/components/schemas/Empty"

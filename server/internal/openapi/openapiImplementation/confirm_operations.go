@@ -28,13 +28,13 @@ func (s *DefaultAPIService) ConfirmOperations(
 		return s.handleConfirmOperationsError(err, ids)
 	}
 
-	return openapi.Response(200, openapi.PushOperationsSucceededResponse{
-		Response: []openapi.SomeOperation{},
+	return openapi.Response(200, openapi.ConfirmOperationsSucceededResponse{
+		Response: map[string]interface{}{},
 	}), nil
 }
 
 func (s *DefaultAPIService) handleConfirmOperationsError(err error, ids []string) (openapi.ImplResponse, error) {
-	s.logger.LogError("push operations %v failed: %v", ids, err)
+	s.logger.LogError("confirm operations %v failed: %v", ids, err)
 
 	description := fmt.Errorf("confirm operations error: %w", err).Error()
 	return openapi.Response(500, openapi.ErrorResponse{
