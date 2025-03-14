@@ -61,8 +61,8 @@ func (c *defaultController) Push(
 			if userToNotify == operationsRepository.UserId(userId) {
 				devicesToIgnore = append(devicesToIgnore, realtimeEvents.DeviceId(deviceId))
 			}
-			c.logger.LogInfo("notifying %s about update, d: %v", userId, devicesToIgnore)
-			c.realtimeEvents.NotifyUpdate(realtimeEvents.UserId(userId), devicesToIgnore)
+			c.logger.LogInfo("notifying %s about update, devices to ignore: %v", userToNotify, devicesToIgnore)
+			c.realtimeEvents.NotifyUpdate(realtimeEvents.UserId(userToNotify), devicesToIgnore)
 		}
 	}
 	c.logger.LogInfo("%s: success[user=%s device=%s]", op, userId, deviceId)
