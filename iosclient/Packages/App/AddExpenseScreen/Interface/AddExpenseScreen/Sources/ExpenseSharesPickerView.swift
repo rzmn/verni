@@ -7,24 +7,21 @@ struct ExpenseSharesPickerView: View {
     @ObservedObject private var store: Store<AddExpenseState, AddExpenseAction>
     @Environment(AvatarView.Repository.self) private var repository
     @Environment(ColorPalette.self) private var colors
-    private let host: User
     private let counterparty: User
     
     init(
         store: Store<AddExpenseState, AddExpenseAction>,
-        host: User,
         counterparty: User
     ) {
         self.store = store
-        self.host = host
         self.counterparty = counterparty
     }
 
     var body: some View {
         VStack {
-            item(paid: host, owed: counterparty, selected: store.state.paidByHost)
+            item(paid: store.state.host, owed: counterparty, selected: store.state.paidByHost)
                 .padding(2)
-            item(paid: counterparty, owed: host, selected: !store.state.paidByHost)
+            item(paid: counterparty, owed: store.state.host, selected: !store.state.paidByHost)
                 .padding(2)
         }
         .background(colors.background.secondary.default)
@@ -49,7 +46,7 @@ struct ExpenseSharesPickerView: View {
                 }
                 Text({
                     let argumentString = counterparty.payload.displayName
-                    let formatString: String = paid.id == host.id ? .addExpenseYouOweFormat : .addExpenseOwesYouFormat
+                    let formatString: String = paid.id == store.state.host.id ? .addExpenseYouOweFormat : .addExpenseOwesYouFormat
                     let resultString = String(format: formatString, argumentString)
                     
                     var result = AttributedString(resultString)
@@ -79,11 +76,12 @@ struct ExpenseSharesPickerView: View {
                     }
                 }
                 BalanceAccessory(
-                    style: paid.id == host.id ? .positive : .negative
+                    style: paid.id == store.state.host.id ? .positive : .negative
                 )
                 Text(store.state.currency.formatted(amount: amount))
                     .font(.medium(size: 20))
                     .foregroundStyle(colors.text.primary.default)
+                    .contentTransition(.numericText())
             }
             .frame(height: 48)
             .padding(.horizontal, 16)
@@ -98,7 +96,15 @@ struct ExpenseSharesPickerView: View {
                 : .clear
         )
         .opacity(selected ? 1 : 0.5)
+        .contentShape(Rectangle())
         .clipShape(.rect(cornerRadius: 16, style: .circular))
+        .onTapGesture {
+            if !selected {
+                withAnimation(.default.speed(3)) {
+                    store.dispatch(.paidByHostToggled)
+                }
+            }
+        }
     }
 }
 
@@ -143,7 +149,6 @@ extension User {
             ),
             reducer: { state, _ in state }
         ),
-        host: .previewHost,
         counterparty: .previewCounterparty
     )
     .preview(packageClass: ClassToIdentifyBundle.self)

@@ -27,6 +27,16 @@ extension AddExpenseModel {
                 }
             case .submit, .cancel, .expenseAdded:
                 return state
+            case .selectCounterparty(let id):
+                return modify(state) { state in
+                    if let id {
+                        state.counterparty = state.availableCounterparties.first {
+                            $0.id == id
+                        }
+                    } else {
+                        state.counterparty = nil
+                    }
+                }
             }
         }
     }

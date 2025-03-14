@@ -80,12 +80,13 @@ struct BottomBar: View {
                     (tab == self.tab ? tab.selectedIcon : tab.icon)
                         .foregroundStyle(colors.icon.primary.default)
                         .frame(width: itemSize, height: itemSize)
-                case .action(let image, _):
+                case .action(let image, let action):
                     image
                         .foregroundStyle(colors.icon.primary.staticLight)
                         .frame(width: itemSize, height: itemSize)
                         .background(colors.background.brand.static)
                         .clipShape(.rect(cornerRadius: itemSize / 2))
+                        .onTapGesture(perform: action)
                 }
             }
             .buttonStyle(BottomBarButtonStyle())

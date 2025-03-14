@@ -43,9 +43,21 @@ actor SpendingsModel {
                     logger.logW { "counterparty not found in \(users.map(\.user))" }
                     return nil
                 }
+                guard let spendings = await spendingsRepository[spendingsIn: group.id] else {
+                    logger.logW { "spendings not found in \(users.map(\.user))" }
+                    return nil
+                }
                 return SpendingsState.Item(
                     user: counterparty.user,
-                    balance: [:]
+                    balance: spendings
+                        .reduce(into: [Currency: Amount]()) { dict, element in
+                            let hostsShare = element.payload.shares
+                                .first { $0.userId == hostId }
+                            guard let hostsShare else {
+                                return
+                            }
+                            dict[element.payload.currency] = dict[element.payload.currency, default: 0] + hostsShare.amount
+                        }
                 )
             }
         store = await Store(

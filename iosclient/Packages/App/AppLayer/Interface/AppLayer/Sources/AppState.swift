@@ -70,6 +70,7 @@ public struct AuthenticatedState: Equatable, Sendable {
     
     public var session: AnyHostedAppSession
     public var externalUserPreview: UserPreview?
+    public var isAddingSpending: Bool
     public var tabs: [Tab]
     public var tab: TabItem
     public var bottomSheet: AlertBottomSheetPreset?
@@ -104,12 +105,14 @@ public struct AuthenticatedState: Equatable, Sendable {
         tabs: [Tab],
         tab: TabItem,
         bottomSheet: AlertBottomSheetPreset?,
+        isAddingSpending: Bool,
         unauthenticatedFailure: String?
     ) {
         self.session = session
         self.tabs = tabs
         self.tab = tab
         self.bottomSheet = bottomSheet
+        self.isAddingSpending = isAddingSpending
         self.unauthenticatedFailure = unauthenticatedFailure
     }
 }

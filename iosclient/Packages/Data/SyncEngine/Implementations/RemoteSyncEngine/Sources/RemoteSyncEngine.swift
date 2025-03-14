@@ -141,8 +141,14 @@ extension RemoteSyncEngine: Engine {
                 return assertionFailure("not implemented")
             case .internalServerError(let response):
                 return logE { "internal error on push: \(response)" }
-            case .undocumented(let statusCode, let body):
-                return logE { "undocumented response on push: code \(statusCode) body: \(body)" }
+            case .undocumented(let statusCode, let payload):
+                do {
+                    let description = try await payload.logDescription
+                    return logE { "undocumented response on push: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    return logE { "undocumented response on push: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
+                
             }
             try await storage.update(
                 operations: synced.map {
@@ -194,13 +200,18 @@ extension RemoteSyncEngine: Engine {
                 return logE { "confirm is not allowed (unauthorized): \(response)" }
             case .internalServerError(let response):
                 return logE { "internal error on confirm: \(response)" }
-            case .undocumented(let statusCode, let body):
-                return logE { "undocumented response on confirm: status: \(statusCode) body: \(body)" }
+            case .undocumented(let statusCode, let payload):
+                do {
+                    let description = try await payload.logDescription
+                    return logE { "undocumented response on confirm: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    return logE { "undocumented response on confirm: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
             }
         } catch {
             return logE { "confirm failed due error: \(error)" }
         }
-        logE { "confirm succeeded" }
+        logI { "confirm succeeded" }
     }
 }
 

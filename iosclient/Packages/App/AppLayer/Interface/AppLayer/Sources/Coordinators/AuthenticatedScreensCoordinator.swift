@@ -3,6 +3,7 @@ import UserPreviewScreen
 import AppBase
 import ProfileScreen
 import SpendingsScreen
+import AddExpenseScreen
 import DesignSystem
 
 private extension Store<AppState, AppAction> {
@@ -55,22 +56,140 @@ private extension Optional where Wrapped == AuthenticatedState.TabPosition {
     }
 }
 
+extension View {
+    @ViewBuilder func ifLet<T, Content: View>(_ value: T?, transform: (Self, T) -> Content) -> some View {
+        if let value {
+            transform(self, value)
+        } else {
+            self
+        }
+    }
+}
+
 struct AuthenticatedScreensCoordinator: View {
     @Environment(ColorPalette.self) var colors
     @ObservedObject private var store: Store<AppState, AppAction>
     @Binding private var appearTransitionProgress: CGFloat
-
+    
     @State private var spendingsTabTransitionProgress: CGFloat
     @State private var profileTabTransitionProgress: CGFloat
-
+    
     init(store: Store<AppState, AppAction>, appearTransitionProgress: Binding<CGFloat>) {
         self.store = store
         _appearTransitionProgress = appearTransitionProgress
         spendingsTabTransitionProgress = (store.localState?.position(of: .spendings) as Optional).transitionValue
         profileTabTransitionProgress = (store.localState?.position(of: .profile) as Optional).transitionValue
     }
-
+    
     var body: some View {
+        contentView
+            .bottomSheet(preset: userDialogBottomSheet)
+            .fullScreenCover(item: isAddingSpending) { (identifiable: AnyIdentifiable<any AddExpenseScreenProvider>) in
+                identifiable.value.instantiate { event in
+                    switch event {
+                    case .finished:
+                        store.dispatch(.showAddExpense(false))
+                    }
+                }(AddExpenseTransitions())
+                    .fullScreenCover(
+                        item: userPreviewFromAddExpenseScreen,
+                        content: userPreview(from:)
+                    )
+            }
+            .fullScreenCover(
+                item: userPreviewFromContentView,
+                content: userPreview(from:)
+            )
+            .bottomSheet(preset: alertBottomSheet)
+            .background(
+                colors.background.secondary.default.opacity(appearTransitionProgress)
+                    .ignoresSafeArea()
+            )
+            .ifLet(store.localState) { view, state in
+                view.environment(state.session.images)
+            }
+    }
+}
+
+// MARK: - full screen covers
+
+extension AuthenticatedScreensCoordinator {
+    var isAddingSpending: Binding<AnyIdentifiable<any AddExpenseScreenProvider>?> {
+        .constant(
+            store.localState
+                .flatMap { state -> AnyIdentifiable<any AddExpenseScreenProvider>? in
+                    guard state.isAddingSpending else {
+                        return nil
+                    }
+                    return AnyIdentifiable(value: state.session.addExpense, id: "addExpense")
+                }
+        )
+    }
+    
+    var userPreviewFromAddExpenseScreen: Binding<AnyIdentifiable<any UserPreviewScreenProvider>?> {
+        .constant(
+            store.localState
+                .flatMap(\.externalUserPreview)
+                .flatMap { preview -> AnyIdentifiable<any UserPreviewScreenProvider>? in
+                    guard case .ready(let user, let provider) = preview else {
+                        return nil
+                    }
+                    return AnyIdentifiable(value: provider, id: user.id)
+                }
+        )
+    }
+    
+    var userPreviewFromContentView: Binding<AnyIdentifiable<any UserPreviewScreenProvider>?> {
+        .constant(
+            store.localState?.isAddingSpending == true ? nil : userPreviewFromAddExpenseScreen.wrappedValue
+        )
+    }
+    
+    @ViewBuilder func userPreview(from identifiable: AnyIdentifiable<any UserPreviewScreenProvider>) -> some View {
+        identifiable.value.instantiate { event in
+            switch event {
+            case .closed, .spendingGroupCreated:
+                store.dispatch(.onCloseUserPreview)
+            }
+        }(UserPreviewTransitions())
+    }
+}
+
+// MARK: - bottom sheets
+
+extension AuthenticatedScreensCoordinator {
+    var userDialogBottomSheet: Binding<AlertBottomSheetPreset?> {
+        Binding(
+            get: {
+                store.localState?.bottomSheet
+            },
+            set: { newValue in
+                store.dispatch(.updateBottomSheet(newValue))
+            }
+        )
+    }
+    
+    var alertBottomSheet: Binding<AlertBottomSheetPreset?> {
+        Binding(
+            get: { () -> AlertBottomSheetPreset? in
+                if let reason = store.localState?.unauthenticatedFailure {
+                    return .blocker(title: "unauthorized", subtitle: "\(reason)", actionTitle: "logout") {
+                        store.dispatch(.logoutRequested)
+                    }
+                } else {
+                    return nil
+                }
+                
+            },
+            set: { _ in }
+        )
+    }
+}
+
+// MARK: - tabs
+
+extension AuthenticatedScreensCoordinator {
+    @ViewBuilder private var contentView: some View {
         if let state = store.localState {
             tabs(state: state)
                 .bottomBar(
@@ -80,7 +199,7 @@ struct AuthenticatedScreensCoordinator: View {
                                 switch $0 {
                                 case .addExpense:
                                     return .action(.plus, {
-                                        store.dispatch(.addExpense)
+                                        store.dispatch(.showAddExpense(true))
                                     })
                                 case .item(let item):
                                     return .tab(item.barTab)
@@ -109,60 +228,11 @@ struct AuthenticatedScreensCoordinator: View {
                     ),
                     appearTransitionProgress: $appearTransitionProgress
                 )
-                .bottomSheet(
-                    preset: Binding(
-                        get: {
-                            store.localState?.bottomSheet
-                        },
-                        set: { newValue in
-                            store.dispatch(.updateBottomSheet(newValue))
-                        }
-                    )
-                )
-                .fullScreenCover(
-                    item: .constant(
-                        store.localState
-                            .flatMap(\.externalUserPreview)
-                            .flatMap {
-                                guard case .ready(let user, let provider) = $0 else {
-                                    return nil
-                                }
-                                return AnyIdentifiable(value: provider, id: user.id)
-                            }
-                    )
-                ) { (identifiable: AnyIdentifiable<any UserPreviewScreenProvider>) in
-                    identifiable.value.instantiate { event in
-                        switch event {
-                        case .closed, .spendingGroupCreated:
-                            store.dispatch(.onCloseUserPreview)
-                        }
-                    }(UserPreviewTransitions())
-                }
-                .bottomSheet(
-                    preset: Binding(
-                        get: { () -> AlertBottomSheetPreset? in
-                            if let reason = state.unauthenticatedFailure {
-                                return .blocker(title: "unauthorized", subtitle: "\(reason)", actionTitle: "logout") {
-                                    store.dispatch(.logoutRequested)
-                                }
-                            } else {
-                                return nil
-                            }
-
-                        },
-                        set: { _ in }
-                    )
-                )
-                .background(
-                    colors.background.secondary.default.opacity(appearTransitionProgress)
-                        .ignoresSafeArea()
-                )
-                .environment(state.session.images)
         } else {
             EmptyView()
         }
     }
-
+    
     @ViewBuilder private func tabs(state: AuthenticatedState) -> some View {
         ZStack {
             ForEach(state.tabItems.filter({ $0 != state.tab })) { item in
@@ -171,7 +241,7 @@ struct AuthenticatedScreensCoordinator: View {
             tab(for: state.tab, state: state)
         }
     }
-
+    
     @ViewBuilder private func tab(for item: AuthenticatedState.TabItem, state: AuthenticatedState) -> some View {
         switch item {
         case .spendings:
@@ -180,7 +250,7 @@ struct AuthenticatedScreensCoordinator: View {
             profileTab(state: state)
         }
     }
-
+    
     @ViewBuilder private func spendingsTab(state: AuthenticatedState) -> some View {
         state.session.spendings.instantiate { event in
             switch event {
@@ -200,7 +270,7 @@ struct AuthenticatedScreensCoordinator: View {
             )
         )
     }
-
+    
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {
         state.session.profile.instantiate { event in
             switch event {

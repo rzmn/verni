@@ -130,7 +130,12 @@ extension DefaultProfileRepository: ProfileRepository {
                 logW { "update email finished with error: \(error)" }
                 throw EmailUpdateError(error: error)
             case .undocumented(let statusCode, let payload):
-                logE { "update email undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on update email: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on update email: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw EmailUpdateError(error: error)
             }
         }
@@ -160,7 +165,12 @@ extension DefaultProfileRepository: ProfileRepository {
                 logW { "update password finished with error: \(error)" }
                 throw PasswordUpdateError(error: error)
             case .undocumented(let statusCode, let payload):
-                logE { "update password undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on update password: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on update password: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw PasswordUpdateError(error: error)
             }
         }

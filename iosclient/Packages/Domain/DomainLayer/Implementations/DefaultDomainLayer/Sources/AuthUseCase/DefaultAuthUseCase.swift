@@ -87,7 +87,12 @@ extension DefaultAuthUseCase: AuthUseCase {
                 logW { "login finished with error: \(payload)" }
                 throw LoginError(payload)
             case .undocumented(let statusCode, let payload):
-                logE { "login undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on login: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on login: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw LoginError(error)
             }
         }
@@ -130,7 +135,12 @@ extension DefaultAuthUseCase: AuthUseCase {
                 logW { "signup finished with error: \(payload)" }
                 throw SignupError(payload)
             case .undocumented(let statusCode, let payload):
-                logE { "signup undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on signup: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on signup: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw SignupError(error)
             }
         }

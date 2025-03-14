@@ -16,13 +16,17 @@ public struct SpendingsState: Equatable, Sendable {
         }
 
         public var isPositive: Bool {
-            (balance.first?.value ?? 0) > 0
+            (balance.first?.value ?? 0) >= 0
         }
 
         public var amount: String {
-            balance.map { (currency, value) in
-                currency.formatted(amount: abs(value))
-            }.joined(separator: " + ")
+            if balance.isEmpty {
+                Currency.russianRuble.formatted(amount: 0)
+            } else {
+                balance.map { (currency, value) in
+                    currency.formatted(amount: abs(value))
+                }.joined(separator: " + ")
+            }
         }
     }
 

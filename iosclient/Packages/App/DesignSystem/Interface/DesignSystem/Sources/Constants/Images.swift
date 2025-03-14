@@ -40,6 +40,10 @@ extension Image {
     public static var pencilFill: Image {
         Image("pencil-fill", bundle: .module)
     }
+    
+    public static var pencilBorder: Image {
+        Image("pencil-border", bundle: .module)
+    }
 
     public static var settingsFill: Image {
         Image("settings-fill", bundle: .module)

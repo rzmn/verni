@@ -14,7 +14,12 @@ public struct SpendingsItem: View {
         let style: Style
         let amount: String
 
-        public init(avatar: AvatarView.AvatarId?, name: String, style: Style, amount: String) {
+        public init(
+            avatar: AvatarView.AvatarId?,
+            name: String,
+            style: Style,
+            amount: String
+        ) {
             self.avatar = avatar
             self.name = name
             self.style = style

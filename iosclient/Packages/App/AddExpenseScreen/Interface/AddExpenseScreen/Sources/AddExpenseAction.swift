@@ -11,4 +11,5 @@ public enum AddExpenseAction: Sendable {
     case submit
     case expenseAdded
     case errorOccured(String)
+    case selectCounterparty(User.Identifier?)
 }

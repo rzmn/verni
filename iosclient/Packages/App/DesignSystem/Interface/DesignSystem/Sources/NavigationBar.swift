@@ -1,9 +1,19 @@
 import SwiftUI
 
 public struct NavigationBar: View {
+    public struct ButtonConfig {
+        let title: LocalizedStringKey
+        let enabled: Bool
+        
+        public init(title: LocalizedStringKey, enabled: Bool) {
+            self.title = title
+            self.enabled = enabled
+        }
+    }
+    
     public enum ItemConfig {
         case icon(IconButton.Config)
-        case button(LocalizedStringKey)
+        case button(ButtonConfig)
     }
     public struct Item {
         let config: ItemConfig
@@ -55,12 +65,14 @@ public struct NavigationBar: View {
                     )
                     .padding(.leading, 2)
                     .padding(.top, 1)
-                case .button(let string):
+                case .button(let config):
                     SwiftUI.Button(action: item.action) {
-                        Text(string)
+                        Text(config.title)
                             .font(.medium(size: 15))
                             .foregroundStyle(colors.text.primary.default)
                             .padding(.horizontal, 15)
+                            .opacity(config.enabled ? 1 : 0.5)
+                            .allowsHitTesting(config.enabled)
                     }
                     .frame(height: 54)
                     .background(colors.background.primary.default)
@@ -78,12 +90,14 @@ public struct NavigationBar: View {
                     )
                     .padding(.leading, 2)
                     .padding(.top, 1)
-                case .button(let string):
+                case .button(let config):
                     SwiftUI.Button(action: item.action) {
-                        Text(string)
+                        Text(config.title)
                             .font(.medium(size: 15))
                             .foregroundStyle(colors.text.primary.default)
                             .padding(.horizontal, 15)
+                            .opacity(config.enabled ? 1 : 0.5)
+                            .allowsHitTesting(config.enabled)
                     }
                     .frame(height: 54)
                     .background(colors.background.primary.default)

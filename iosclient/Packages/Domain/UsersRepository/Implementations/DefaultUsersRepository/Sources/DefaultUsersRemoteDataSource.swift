@@ -45,7 +45,12 @@ extension DefaultUsersRemoteDataSource: UsersRemoteDataSource {
                 logW { "search users finished with error: \(error)" }
                 throw GeneralError(error: error)
             case .undocumented(let statusCode, let payload):
-                logE { "search users undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on search users: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on search users: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw GeneralError(error: error)
             }
         }

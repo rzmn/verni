@@ -36,8 +36,17 @@ extension AppModel {
                     return state
                 }
                 return .launched(.authenticated(modify(authenticated) { $0.tab = tab }))
-            case .addExpense:
-                return state
+            case .showAddExpense(let addExpense):
+                return modify(state) {
+                    guard case .launched(let launched) = $0 else {
+                        return
+                    }
+                    guard case .authenticated(var authenticated) = launched else {
+                        return
+                    }
+                    authenticated.isAddingSpending = addExpense
+                    $0 = .launched(.authenticated(authenticated))
+                }
             case .unauthorized(let reason):
                 return modify(state) {
                     guard case .launched(let launched) = $0 else {
@@ -120,6 +129,7 @@ extension AppModel {
             ],
             tab: .spendings,
             bottomSheet: nil,
+            isAddingSpending: false,
             unauthenticatedFailure: nil
         )
     }

@@ -10,11 +10,9 @@ public struct AddExpenseView: View {
     @Environment(ColorPalette.self) var colors
     
     @State private var textValue: String = "0"
-    @Binding private var tabTransitionProgress: CGFloat
     
     public init(store: Store<AddExpenseState, AddExpenseAction>, transitions: AddExpenseTransitions) {
         self.store = store
-        _tabTransitionProgress = transitions.modal.progress
     }
     
     public var body: some View {
@@ -23,6 +21,7 @@ public struct AddExpenseView: View {
             content
         }
         .background(colors.background.secondary.default)
+        .keyboardDismiss()
     }
     
     private var content: some View {
@@ -36,13 +35,19 @@ public struct AddExpenseView: View {
                         textValue
                     },
                     set: { newValue in
-                        let filtered = newValue.filter { $0.isNumber }
+                        let filtered = String(
+                            newValue
+                                .filter { $0.isNumber }
+                                .drop(while: { $0 == "0" })
+                        )
                         let formatted = filtered.isEmpty ? "0" : filtered
-                        if formatted != newValue {
-                            textValue = filtered
+                        if formatted != textValue {
+                            textValue = formatted
                         }
                         if let value = Decimal(string: formatted) {
-                            store.dispatch(.amountChanged(value))
+                            withAnimation {
+                                store.dispatch(.amountChanged(value))
+                            }
                         }
                     }
                 )
@@ -78,21 +83,28 @@ public struct AddExpenseView: View {
                         text: .addExpenseSplitEqually
                     )
                 ) {
-                    store.dispatch(.selectSplitRule(.equally))
+                    withAnimation {
+                        store.dispatch(.selectSplitRule(.equally))
+                    }
                 }
+                .opacity(store.state.splitRule == .equally ? 1 : 0.5)
+                .allowsHitTesting(store.state.splitRule != .equally)
                 DesignSystem.Button(
                     config: .init(
                         style: .primary,
                         text: .addExpenseFull
                     )
                 ) {
-                    store.dispatch(.selectSplitRule(.full))
+                    withAnimation {
+                        store.dispatch(.selectSplitRule(.full))
+                    }
                 }
+                .opacity(store.state.splitRule == .full ? 1 : 0.5)
+                .allowsHitTesting(store.state.splitRule != .full)
             }
             if let counterparty = store.state.counterparty {
                 ExpenseSharesPickerView(
                     store: store,
-                    host: store.state.host,
                     counterparty: counterparty
                 )
             }
@@ -109,6 +121,7 @@ public struct AddExpenseView: View {
                     placeholder: .addExpenseTitlePlaceholder
                 )
             )
+            CounterpartiesPickerView(store: store)
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -121,13 +134,23 @@ public struct AddExpenseView: View {
         NavigationBar(
             config: NavigationBar.Config(
                 leftItem: .init(
-                    config: .button(.addExpenseNavCancel),
+                    config: .button(
+                        .init(
+                            title: .addExpenseNavCancel,
+                            enabled: true
+                        )
+                    ),
                     action: {
                         store.dispatch(.cancel)
                     }
                 ),
                 rightItem: .init(
-                    config: .button(.addExpenseNavSubmit),
+                    config: .button(
+                        .init(
+                            title: .addExpenseNavSubmit,
+                            enabled: store.state.canSubmit
+                        )
+                    ),
                     action: {
                         store.dispatch(.submit)
                     }
@@ -160,13 +183,7 @@ private struct AddExpensePreview: View {
                     ),
                     reducer: { state, _ in state }
                 ),
-                transitions: AddExpenseTransitions(
-                    modal: ModalTransition(
-                        progress: .constant(0),
-                        sourceOffset: .constant(0),
-                        destinationOffset: .constant(0)
-                    )
-                )
+                transitions: AddExpenseTransitions()
             )
         }
     }

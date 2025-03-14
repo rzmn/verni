@@ -22,7 +22,7 @@ public enum AppAction: Sendable {
     case onShowPreview(User, any UserPreviewScreenProvider)
     case onCloseUserPreview
 
-    case addExpense
+    case showAddExpense(Bool)
     case selectTabAnonymous(AnonymousState.Tab)
     case selectTabAuthenticated(AuthenticatedState.TabItem)
     case updateBottomSheet(AlertBottomSheetPreset?)

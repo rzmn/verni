@@ -117,7 +117,12 @@ extension DefaultAvatarsRemoteDataSource: AvatarsRemoteDataSource {
                 logW { "get avatars finished with error: \(error)" }
                 return [:]
             case .undocumented(let statusCode, let payload):
-                logE { "get avatars undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on get avatars: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on get avatars: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 return [:]
             }
         }

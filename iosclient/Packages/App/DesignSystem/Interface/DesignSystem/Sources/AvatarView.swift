@@ -53,52 +53,94 @@ public struct AvatarView: View {
     }
 
     @ViewBuilder private var content: some View {
-        if let imageData = imageData ?? avatar.flatMap(repository.getIfCached(id:)) {
-            if let image = UIImage(data: imageData) {
-                GeometryReader { geometry in
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
+        if let avatar {
+            if let imageData = imageData ?? repository.getIfCached(id: avatar) {
+                if let image = UIImage(data: imageData) {
+                    GeometryReader { geometry in
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .clipped()
+                    }
+                } else {
+                    failed
                 }
             } else {
-                placeholder("[debug] placeholder for `failed to load`")
+                loading
+                    .onAppear {
+                        task = Task {
+                            guard let data = await repository.get(id: avatar) else {
+                                return
+                            }
+                            if Task.isCancelled {
+                                return
+                            }
+                            Task { @MainActor in
+                                imageData = data
+                                self.task = nil
+                            }
+                        }
+                    }
             }
         } else {
-            placeholder("[debug] placeholder for `loading`")
-                .onAppear {
-                    guard let avatar else {
-                        return
-                    }
-                    task = Task {
-                        guard let data = await repository.get(id: avatar) else {
-                            return
-                        }
-                        if Task.isCancelled {
-                            return
-                        }
-                        Task { @MainActor in
-                            imageData = data
-                            self.task = nil
-                        }
-                    }
-                }
+            empty
         }
     }
+    
+    private var failed: some View {
+        placeholder("❌")
+    }
+    
+    private var empty: some View {
+        placeholder("🌞")
+    }
+    
+    private var loading: some View {
+        placeholder("🌀")
+            .animation(
+                .linear(duration: 1).repeatForever(autoreverses: false),
+                value: true
+            )
+    }
 
-    private func placeholder(_ text: String) -> some View {
-        VStack(spacing: 0) {
-            Spacer()
-            HStack(spacing: 0) {
+    private func placeholder(_ emoji: String) -> some View {
+        GeometryReader { geometry in
+            HStack {
                 Spacer()
-                Text(text)
-                    .font(.medium(size: 15))
-                    .foregroundStyle(colors.text.primary.default)
+                VStack {
+                    Spacer()
+                    Text(emoji)
+                        .font(.system(size: min(geometry.size.width, geometry.size.height) * 0.6))
+                        .minimumScaleFactor(0.1)
+                        .lineLimit(1)
+                    Spacer()
+                }
                 Spacer()
             }
-            Spacer()
         }
     }
-
 }
+
+#if DEBUG
+
+class ClassToIdentifyBundle {}
+
+#Preview {
+    VStack {
+        AvatarView(
+            avatar: nil
+        )
+        .frame(width: 250, height: 150)
+        .clipShape(.rect(cornerRadius: 75))
+        AvatarView(
+            avatar: "123"
+        )
+        .frame(width: 150, height: 150)
+        .clipShape(.rect(cornerRadius: 75))
+    }
+    .environment(AvatarView.Repository { _ in .stubAvatar })
+    .environment(ColorPalette.light)
+}
+
+#endif

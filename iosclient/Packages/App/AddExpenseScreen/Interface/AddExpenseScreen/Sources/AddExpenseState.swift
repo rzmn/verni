@@ -13,6 +13,10 @@ public struct AddExpenseState: Equatable, Sendable {
     public var counterparty: User?
     public var availableCounterparties: [User]
     
+    public var canSubmit: Bool {
+        amount > 0 && counterparty != nil && !title.isEmpty
+    }
+    
     public init(
         currency: Currency,
         amount: Amount,

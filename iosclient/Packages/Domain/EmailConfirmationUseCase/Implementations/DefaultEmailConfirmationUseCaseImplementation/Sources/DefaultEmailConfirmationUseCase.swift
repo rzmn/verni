@@ -37,7 +37,12 @@ extension DefaultEmailConfirmationUseCase: EmailConfirmationUseCase {
                 logW { "send email confirmation code finished with error: \(error)" }
                 throw SendEmailConfirmationCodeError(error: error)
             case .undocumented(let statusCode, let payload):
-                logE { "send email confirmation code undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on send email confirmation code: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on send email confirmation code: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw SendEmailConfirmationCodeError(error: error)
             }
         }
@@ -66,7 +71,12 @@ extension DefaultEmailConfirmationUseCase: EmailConfirmationUseCase {
                 logW { "confirm email finished with error: \(error)" }
                 throw EmailConfirmationError(error: error)
             case .undocumented(let statusCode, let payload):
-                logE { "confirm email undocumented response code: \(statusCode), payload: \(payload)" }
+                do {
+                    let description = try await payload.logDescription
+                    logE { "undocumented response on confirm email: code \(statusCode) body: \(description ?? "nil")" }
+                } catch {
+                    logE { "undocumented response on confirm email: code \(statusCode) body: \(payload) decodingFailure: \(error)" }
+                }
                 throw EmailConfirmationError(error: error)
             }
         }
