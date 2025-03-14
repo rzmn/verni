@@ -66,23 +66,25 @@ extension DefaultDataLayer: DataLayer {
         
         func awake(loggedOutHandler: EventPublisher<Void>) async throws -> DataSession {
             let storage = try await storagePreview.awake()
+            let refreshTokenRepository = RefreshTokenManager(
+                api: sandboxSession.api,
+                persistency: storage,
+                authenticationLostSubject: loggedOutHandler,
+                accessToken: nil as String?
+            )
             let apiFactory = DefaultApiFactory(
                 url: Constants.apiEndpoint,
                 taskFactory: taskFactory,
                 logger: logger
                     .with(scope: .api),
-                tokenRepository: RefreshTokenManager(
-                    api: sandboxSession.api,
-                    persistency: storage,
-                    authenticationLostSubject: loggedOutHandler,
-                    accessToken: nil as String?
-                )
+                tokenRepository: refreshTokenRepository
             )
             let api = apiFactory.create()
             let syncFactory = RemoteSyncEngineFactory(
                 api: api,
                 updates: DefaultRemoteEventsService(
                     taskFactory: taskFactory,
+                    tokenRepository: refreshTokenRepository,
                     logger: logger
                         .with(scope: .sync),
                     apiEndpoint: Constants.apiEndpoint
@@ -145,23 +147,25 @@ extension DefaultDataLayer: DataLayer {
                 }
             )
         }
+        let refreshTokenRepository = RefreshTokenManager(
+            api: sandbox.api,
+            persistency: storage,
+            authenticationLostSubject: loggedOutHandler,
+            accessToken: nil as String?
+        )
         let apiFactory = DefaultApiFactory(
             url: Constants.apiEndpoint,
             taskFactory: infrastructure.taskFactory,
             logger: logger
                 .with(scope: .api),
-            tokenRepository: RefreshTokenManager(
-                api: sandbox.api,
-                persistency: storage,
-                authenticationLostSubject: loggedOutHandler,
-                accessToken: nil as String?
-            )
+            tokenRepository: refreshTokenRepository
         )
         let api = apiFactory.create()
         let syncFactory = RemoteSyncEngineFactory(
             api: api,
             updates: DefaultRemoteEventsService(
                 taskFactory: infrastructure.taskFactory,
+                tokenRepository: refreshTokenRepository,
                 logger: logger
                     .with(scope: .sync),
                 apiEndpoint: Constants.apiEndpoint

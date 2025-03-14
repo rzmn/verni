@@ -63,6 +63,11 @@ extension DefaultApiFactory: ApiFactory {
     }
     
     public func remoteUpdates() -> RemoteUpdatesService {
-        DefaultRemoteEventsService(taskFactory: taskFactory, logger: logger, apiEndpoint: url)
+        DefaultRemoteEventsService(
+            taskFactory: taskFactory,
+            tokenRepository: tokenRepository,
+            logger: logger,
+            apiEndpoint: url
+        )
     }
 }

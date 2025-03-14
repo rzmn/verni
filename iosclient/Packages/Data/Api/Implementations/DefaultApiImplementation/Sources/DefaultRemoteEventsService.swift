@@ -8,17 +8,20 @@ public actor DefaultRemoteEventsService {
     private let taskFactory: TaskFactory
     private let logger: Logger
     private let apiEndpoint: URL
+    private let tokenRepository: RefreshTokenRepository?
     private var sse: SSEService?
     private let eventPublisher = EventPublisher<RemoteUpdate>()
 
     public init(
         taskFactory: TaskFactory,
+        tokenRepository: RefreshTokenRepository?,
         logger: Logger,
         apiEndpoint: URL
     ) {
         self.taskFactory = taskFactory
         self.logger = logger
         self.apiEndpoint = apiEndpoint
+        self.tokenRepository = tokenRepository
     }
 }
 
@@ -38,7 +41,8 @@ extension DefaultRemoteEventsService: RemoteUpdatesService {
                 let service = await SSEService(
                     taskFactory: taskFactory,
                     logger: logger,
-                    endpoint: apiEndpoint
+                    endpoint: apiEndpoint,
+                    tokenRepository: tokenRepository
                 )
                 await service.eventSource.subscribeWeak(self) { [taskFactory, eventPublisher] event in
                     taskFactory.task {

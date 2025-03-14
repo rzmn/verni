@@ -29,13 +29,16 @@ type sseHandler struct {
 }
 
 func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	const op = "openapiImplementation.sseHandler.Handle"
 	sessionInfo, earlyResponse := validateToken(h.logger, h.auth, r.Header.Get("Authorization"))
 	if earlyResponse != nil {
 		errJSON, err := json.Marshal(earlyResponse.Body)
 		if err != nil {
+			h.logger.LogError("%s: marshaling early response: %w", op, err)
 			http.Error(w, string(openapi.INTERNAL), http.StatusInternalServerError)
 			return
 		}
+		h.logger.LogInfo("%s: unable to open sse connection: %v", op, earlyResponse.Body)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(earlyResponse.Code)
 		w.Write(errJSON)
@@ -95,7 +98,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case msg := <-messageChan:
-			h.logger.LogInfo("[debug] sending %s for descriptor %v", msg, descriptor)
+			h.logger.LogInfo("%s: sending %s for descriptor %v", op, msg, descriptor)
 			fmt.Fprintf(w, "data: %s\n\n", msg)
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
