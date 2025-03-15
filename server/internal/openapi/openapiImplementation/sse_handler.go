@@ -95,6 +95,8 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		f.Flush()
 	}
 
+	h.handleUpdate(descriptor.userId, []realtimeEvents.DeviceId{descriptor.device})
+
 	// Keep connection alive and send updates
 	for {
 		select {
