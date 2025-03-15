@@ -102,14 +102,18 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "data: %s\n\n", msg)
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
+			} else {
+				h.logger.LogError("%s: unable to flush - connection might be closed for %v", op, descriptor)
 			}
 		case <-r.Context().Done():
+			h.logger.LogInfo("%s: context done for descriptor %v", op, descriptor)
 			return
 		}
 	}
 }
 
 func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices []realtimeEvents.DeviceId) {
+	const op = "openapiImplementation.sseHandler.handleUpdate"
 	h.connectionsMutex.RLock()
 	defer h.connectionsMutex.RUnlock()
 
@@ -135,16 +139,17 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 			}
 			updateJSON, err := json.Marshal(update.Body)
 			if err != nil {
-				h.logger.LogError("marshalling update: %v", err)
+				h.logger.LogError("%s: marshalling update: %v", op, err)
 				return
 			}
 
 			for _, ch := range channels {
-				h.logger.LogInfo("[debug] sending %s for channel for %s, %s", string(updateJSON), userId, device)
+				h.logger.LogInfo("%s: attempting to send update %s for channel for %s, %s", op, string(updateJSON), userId, device)
 				select {
 				case ch <- string(updateJSON):
+					h.logger.LogInfo("%s: successfully sent update for %s, %s", op, userId, device)
 				default:
-					// Channel is full or closed
+					h.logger.LogError("%s: channel full or closed for %s, %s - dropping message", op, userId, device)
 				}
 			}
 		}
