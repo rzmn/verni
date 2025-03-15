@@ -44,6 +44,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		w.Write(errJSON)
 		return
 	}
+	h.logger.LogInfo("%s: opening sse connection for %s", op, sessionInfo.User)
 	// Set headers for SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -114,6 +115,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices []realtimeEvents.DeviceId) {
 	const op = "openapiImplementation.sseHandler.handleUpdate"
+	h.logger.LogInfo("%s: handling update for %s", op, userId)
 	h.connectionsMutex.RLock()
 	defer h.connectionsMutex.RUnlock()
 
