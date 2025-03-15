@@ -61,11 +61,14 @@ public struct SpendingsView: View {
                         style: item.isPositive ? .positive : .negative,
                         amount: item.amount
                     )
-                )
+                ).id(item.user.id)
             }
             .opacity(adjustedTransitionOpacity)
             .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             Spacer()
+        }
+        .onAppear {
+            store.dispatch(.onAppear)
         }
     }
     

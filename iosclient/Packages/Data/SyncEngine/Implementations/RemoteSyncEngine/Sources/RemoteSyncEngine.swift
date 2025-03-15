@@ -40,29 +40,6 @@ actor RemoteSyncEngine {
             }
         }
         await remoteUpdatesService.start()
-        Task {
-            let response: Operations.PullOperations.Output
-            do {
-                response = try await api.pullOperations(.init(query: .init(_type: .regular)))
-            } catch {
-                return logW { "failed to pull initial operations error: \(error)" }
-            }
-            let operations: [Components.Schemas.SomeOperation]
-            switch response {
-            case .ok(let payload):
-                switch payload.body {
-                case .json(let payload):
-                    operations = payload.response
-                }
-            default:
-                return logW { "got api error pulling initial operations error: \(response)" }
-            }
-            do {
-                try await pulled(operations: operations)
-            } catch {
-                return logW { "failed to mark initial operations as pulled error: \(response)" }
-            }
-        }
     }
 }
 

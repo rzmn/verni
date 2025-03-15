@@ -69,6 +69,7 @@ public struct SpendingsItem: View {
         }
     }
 
+    @State private var animationId = UUID()
     private var spendingAmountPreview: some View {
         VStack(alignment: .trailing, spacing: 0) {
             Spacer()
@@ -89,6 +90,8 @@ public struct SpendingsItem: View {
                 Text(config.amount)
                     .font(.medium(size: 20))
                     .foregroundStyle(colors.text.primary.default)
+                    .contentTransition(.numericText())
+                    .animation(.default, value: config.amount)
             }
             .padding(.top, 2)
             .padding(.bottom, 12)

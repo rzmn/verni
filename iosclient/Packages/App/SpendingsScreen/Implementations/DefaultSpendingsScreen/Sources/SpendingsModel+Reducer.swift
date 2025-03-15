@@ -7,6 +7,8 @@ extension SpendingsModel {
             switch action {
             case .onSearchTap:
                 return state
+            case .onAppear:
+                return state
             case .onOverallBalanceTap:
                 return state
             case .onUserTap:

@@ -10,6 +10,7 @@ public final class DefaultApiFactory: Sendable {
     private let taskFactory: TaskFactory
     private let logger: Logger
     private let url: URL
+    private let api: APIProtocol
     
     public init(
         url: URL,
@@ -21,12 +22,7 @@ public final class DefaultApiFactory: Sendable {
         self.logger = logger
         self.taskFactory = taskFactory
         self.url = url
-    }
-}
-
-extension DefaultApiFactory: ApiFactory {
-    public func create() -> any APIProtocol {
-        Client(
+        self.api = Client(
             serverURL: url,
             transport: URLSessionTransport(),
             middlewares: [
@@ -61,13 +57,20 @@ extension DefaultApiFactory: ApiFactory {
             ].compactMap { $0 }
         )
     }
+}
+
+extension DefaultApiFactory: ApiFactory {
+    public func create() -> any APIProtocol {
+        api
+    }
     
     public func remoteUpdates() -> RemoteUpdatesService {
         DefaultRemoteEventsService(
             taskFactory: taskFactory,
             tokenRepository: tokenRepository,
             logger: logger,
-            apiEndpoint: url
+            apiEndpoint: url,
+            api: api
         )
     }
 }

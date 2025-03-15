@@ -87,7 +87,8 @@ extension DefaultDataLayer: DataLayer {
                     tokenRepository: refreshTokenRepository,
                     logger: logger
                         .with(scope: .sync),
-                    apiEndpoint: Constants.apiEndpoint
+                    apiEndpoint: Constants.apiEndpoint,
+                    api: api
                 ),
                 storage: storage,
                 taskFactory: taskFactory,
@@ -168,7 +169,8 @@ extension DefaultDataLayer: DataLayer {
                 tokenRepository: refreshTokenRepository,
                 logger: logger
                     .with(scope: .sync),
-                apiEndpoint: Constants.apiEndpoint
+                apiEndpoint: Constants.apiEndpoint,
+                api: api
             ),
             storage: storage,
             taskFactory: infrastructure.taskFactory,
