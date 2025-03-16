@@ -68,6 +68,12 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Ensure cleanup on disconnect
 	defer func() {
 		h.logger.LogInfo("%s: cleaning up connection for descriptor: %v", op, descriptor)
+
+		fmt.Fprintf(w, "data: {\"type\": \"disconnected\"}\n\n")
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+
 		h.connectionsMutex.Lock()
 		defer h.connectionsMutex.Unlock()
 
