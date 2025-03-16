@@ -95,7 +95,10 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		f.Flush()
 	}
 
-	h.handleUpdate(descriptor.userId, []realtimeEvents.DeviceId{descriptor.device})
+	allDevicesExceptCurrent := common.Filter(h.devicesPerUser[descriptor.userId], func(device realtimeEvents.DeviceId) bool {
+		return device != descriptor.device
+	})
+	h.handleUpdate(descriptor.userId, allDevicesExceptCurrent)
 
 	// Keep connection alive and send updates
 	for {
