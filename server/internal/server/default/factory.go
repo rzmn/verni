@@ -19,6 +19,18 @@ type ServerConfig struct {
 	Port           string `json:"port"`
 }
 
+func timeoutMiddleware(next http.Handler, defaultTimeout, sseTimeout time.Duration) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var handler http.Handler
+		if r.URL.Path == "/operationsQueue" {
+			handler = http.TimeoutHandler(next, sseTimeout, "SSE timeout exceeded")
+		} else {
+			handler = http.TimeoutHandler(next, defaultTimeout, "Request timeout exceeded")
+		}
+		handler.ServeHTTP(w, r)
+	})
+}
+
 func New(
 	config ServerConfig,
 	sseHandler func(w http.ResponseWriter, r *http.Request),
@@ -54,24 +66,20 @@ func New(
 		http.ServeFile(w, r, filepath.Join(staticDir, "docs/index.html"))
 	})
 
-	router.Handle("/operationsQueue", http.TimeoutHandler(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if f, ok := w.(http.Flusher); ok {
-				f.Flush()
-			}
-			sseHandler(w, r)
-		}),
-		600*time.Second,
-		"SSE timeout exceeded",
-	))
+	router.HandleFunc("/operationsQueue", sseHandler)
 	router.HandleFunc("/.well-known/apple-app-site-association", aasaHandler)
 	router.HandleFunc("/apple-app-site-association", aasaHandler)
+
+	defaultTimeout := time.Duration(config.TimeoutSec) * time.Second
+	sseTimeout := 600 * time.Second
+
 	return &defaultServer{
 		server: http.Server{
 			Addr:         ":" + config.Port,
-			Handler:      router,
-			ReadTimeout:  time.Second * time.Duration(config.IdleTimeoutSec),
-			WriteTimeout: time.Second * time.Duration(config.IdleTimeoutSec),
+			Handler:      timeoutMiddleware(router, defaultTimeout, sseTimeout),
+			ReadTimeout:  610 * time.Second,
+			WriteTimeout: 0, // Disable write timeout for SSE
+			IdleTimeout:  time.Second * time.Duration(config.IdleTimeoutSec),
 		},
 		logger: logger,
 	}
