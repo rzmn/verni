@@ -67,6 +67,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure cleanup on disconnect
 	defer func() {
+		h.logger.LogError("%s: cleaning up connection for descriptor: %v", op, descriptor)
 		h.connectionsMutex.Lock()
 		defer h.connectionsMutex.Unlock()
 
@@ -120,7 +121,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices []realtimeEvents.DeviceId) {
 	const op = "openapiImplementation.sseHandler.handleUpdate"
-	h.logger.LogInfo("%s: handling update for %s", op, userId)
+	h.logger.LogInfo("%s: handling update for %s, ignoring devices: %v", op, userId, ignoringDevices)
 	h.connectionsMutex.RLock()
 	defer h.connectionsMutex.RUnlock()
 
@@ -128,6 +129,7 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 	for _, device := range ignoringDevices {
 		ignoringDevicesMap[device] = true
 	}
+	h.logger.LogInfo("%s: handling update for %s - known devices: %v", op, userId, h.devicesPerUser[userId])
 	for _, device := range h.devicesPerUser[userId] {
 		if ignoringDevicesMap[device] {
 			continue
