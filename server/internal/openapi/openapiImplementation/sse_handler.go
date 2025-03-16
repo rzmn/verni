@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"verni/internal/common"
+	"time"
 	"verni/internal/controllers/auth"
 	"verni/internal/controllers/operations"
 	openapi "verni/internal/openapi/go"
@@ -25,8 +25,14 @@ type sseHandler struct {
 	operations       operations.Controller
 	connectionsMutex sync.RWMutex
 	connections      map[connectionDescriptor][]chan string
-	devicesPerUser   map[realtimeEvents.UserId][]realtimeEvents.DeviceId
+	devicesPerUser   map[realtimeEvents.UserId]map[realtimeEvents.DeviceId]struct{}
 }
+
+const (
+	channelBuffer = 10
+	// Add a reasonable timeout for message sending
+	messageTimeout = 100 * time.Millisecond
+)
 
 func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	const op = "openapiImplementation.sseHandler.Handle"
@@ -57,43 +63,50 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		device: realtimeEvents.DeviceId(sessionInfo.Device),
 	}
 	// Create channel for this client
-	messageChan := make(chan string, 10)
+	messageChan := make(chan string, channelBuffer)
 
 	// Register client
 	h.connectionsMutex.Lock()
+	if h.devicesPerUser[descriptor.userId] == nil {
+		h.devicesPerUser[descriptor.userId] = make(map[realtimeEvents.DeviceId]struct{})
+	}
 	h.connections[descriptor] = append(h.connections[descriptor], messageChan)
-	h.devicesPerUser[descriptor.userId] = append(h.devicesPerUser[descriptor.userId], descriptor.device)
+	h.devicesPerUser[descriptor.userId][descriptor.device] = struct{}{}
 	h.connectionsMutex.Unlock()
 
 	// Ensure cleanup on disconnect
 	defer func() {
 		h.logger.LogInfo("%s: cleaning up connection for descriptor: %v", op, descriptor)
 
+		h.connectionsMutex.Lock()
+
+		// Remove this client's channel
+		if channels, exists := h.connections[descriptor]; exists {
+			newChannels := make([]chan string, 0, len(channels)-1)
+			for _, ch := range channels {
+				if ch != messageChan {
+					newChannels = append(newChannels, ch)
+				}
+			}
+			if len(newChannels) == 0 {
+				delete(h.connections, descriptor)
+				// Only remove from devicesPerUser if this was the last channel for this device
+				delete(h.devicesPerUser[descriptor.userId], descriptor.device)
+				if len(h.devicesPerUser[descriptor.userId]) == 0 {
+					delete(h.devicesPerUser, descriptor.userId)
+				}
+			} else {
+				h.connections[descriptor] = newChannels
+			}
+		}
+
+		close(messageChan)
+		h.connectionsMutex.Unlock()
+
 		fmt.Fprintf(w, "data: {\"type\": \"disconnected\"}\n\n")
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
-
-		h.connectionsMutex.Lock()
-		defer h.connectionsMutex.Unlock()
-
-		// Remove this client's channel
-		if channels, exists := h.connections[descriptor]; exists {
-			for i, ch := range channels {
-				if ch == messageChan {
-					h.connections[descriptor] = append(channels[:i], channels[i+1:]...)
-					break
-				}
-			}
-			// Clean up if no more channels for this user
-			if len(h.connections[descriptor]) == 0 {
-				delete(h.connections, descriptor)
-			}
-		}
-		h.devicesPerUser[descriptor.userId] = common.Filter(h.devicesPerUser[descriptor.userId], func(device realtimeEvents.DeviceId) bool {
-			return device != descriptor.device
-		})
-		close(messageChan)
 	}()
 
 	// Send initial connection established message
@@ -102,9 +115,12 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		f.Flush()
 	}
 
-	allDevicesExceptCurrent := common.Filter(h.devicesPerUser[descriptor.userId], func(device realtimeEvents.DeviceId) bool {
-		return device != descriptor.device
-	})
+	var allDevicesExceptCurrent []realtimeEvents.DeviceId
+	for device := range h.devicesPerUser[descriptor.userId] {
+		if device != descriptor.device {
+			allDevicesExceptCurrent = append(allDevicesExceptCurrent, device)
+		}
+	}
 	h.handleUpdate(descriptor.userId, allDevicesExceptCurrent)
 
 	// Keep connection alive and send updates
@@ -135,14 +151,22 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 	for _, device := range ignoringDevices {
 		ignoringDevicesMap[device] = true
 	}
-	h.logger.LogInfo("%s: handling update for %s - known devices: %v", op, userId, h.devicesPerUser[userId])
-	for _, device := range h.devicesPerUser[userId] {
-		if ignoringDevicesMap[device] {
+
+	// Safety check for nil map
+	devices, exists := h.devicesPerUser[userId]
+	if !exists {
+		h.logger.LogInfo("%s: no devices found for user %s", op, userId)
+		return
+	}
+
+	h.logger.LogInfo("%s: handling update for %s - known devices: %v", op, userId, devices)
+	for deviceId := range devices {
+		if ignoringDevicesMap[deviceId] {
 			continue
 		}
 
-		if channels, exists := h.connections[connectionDescriptor{userId: userId, device: device}]; exists {
-			operations, err := h.operations.Pull(operations.UserId(userId), operations.DeviceId(device), openapi.REGULAR)
+		if channels, exists := h.connections[connectionDescriptor{userId: userId, device: deviceId}]; exists {
+			operations, err := h.operations.Pull(operations.UserId(userId), operations.DeviceId(deviceId), openapi.REGULAR)
 
 			var update map[string]interface{}
 			if err != nil {
@@ -163,17 +187,55 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 				return
 			}
 
-			for _, ch := range channels {
-				h.logger.LogInfo("%s: attempting to send update %s for channel for %s, %s", op, string(updateJSON), userId, device)
+			var staleChan []int
+			for i, ch := range channels {
+				h.logger.LogInfo("%s: attempting to send update %s for channel for %s, %s", op, string(updateJSON), userId, deviceId)
 				select {
 				case ch <- string(updateJSON):
-					h.logger.LogInfo("%s: successfully sent update for %s, %s", op, userId, device)
-				default:
-					h.logger.LogInfo("%s: channel full or closed for %s, %s - dropping message", op, userId, device)
+					h.logger.LogInfo("%s: successfully sent update for %s, %s", op, userId, deviceId)
+				case <-time.After(messageTimeout):
+					// Mark channel as stale if we can't send within timeout
+					h.logger.LogInfo("%s: channel timeout for %s, %s - marking for cleanup", op, userId, deviceId)
+					staleChan = append(staleChan, i)
 				}
+			}
+
+			// Clean up stale channels if any were found
+			if len(staleChan) > 0 {
+				h.connectionsMutex.RUnlock()
+				h.connectionsMutex.Lock()
+				newChannels := make([]chan string, 0, len(channels)-len(staleChan))
+				for i, ch := range channels {
+					if !contains(staleChan, i) {
+						newChannels = append(newChannels, ch)
+					} else {
+						close(ch)
+					}
+				}
+				if len(newChannels) == 0 {
+					delete(h.connections, connectionDescriptor{userId: userId, device: deviceId})
+					delete(h.devicesPerUser[userId], deviceId)
+					if len(h.devicesPerUser[userId]) == 0 {
+						delete(h.devicesPerUser, userId)
+					}
+				} else {
+					h.connections[connectionDescriptor{userId: userId, device: deviceId}] = newChannels
+				}
+				h.connectionsMutex.Unlock()
+				h.connectionsMutex.RLock()
 			}
 		}
 	}
+}
+
+// Helper function to check if slice contains an int
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func NewSSEHandler(
@@ -185,7 +247,7 @@ func NewSSEHandler(
 	handler := &sseHandler{
 		eventService:   service,
 		connections:    make(map[connectionDescriptor][]chan string),
-		devicesPerUser: make(map[realtimeEvents.UserId][]realtimeEvents.DeviceId),
+		devicesPerUser: make(map[realtimeEvents.UserId]map[realtimeEvents.DeviceId]struct{}),
 		logger:         logger,
 		auth:           auth,
 		operations:     operations,
