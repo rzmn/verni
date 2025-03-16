@@ -67,7 +67,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure cleanup on disconnect
 	defer func() {
-		h.logger.LogError("%s: cleaning up connection for descriptor: %v", op, descriptor)
+		h.logger.LogInfo("%s: cleaning up connection for descriptor: %v", op, descriptor)
 		h.connectionsMutex.Lock()
 		defer h.connectionsMutex.Unlock()
 
@@ -110,7 +110,7 @@ func (h *sseHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			} else {
-				h.logger.LogError("%s: unable to flush - connection might be closed for %v", op, descriptor)
+				h.logger.LogInfo("%s: unable to flush - connection might be closed for %v", op, descriptor)
 			}
 		case <-r.Context().Done():
 			h.logger.LogInfo("%s: context done for descriptor %v", op, descriptor)
@@ -163,7 +163,7 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 				case ch <- string(updateJSON):
 					h.logger.LogInfo("%s: successfully sent update for %s, %s", op, userId, device)
 				default:
-					h.logger.LogError("%s: channel full or closed for %s, %s - dropping message", op, userId, device)
+					h.logger.LogInfo("%s: channel full or closed for %s, %s - dropping message", op, userId, device)
 				}
 			}
 		}
