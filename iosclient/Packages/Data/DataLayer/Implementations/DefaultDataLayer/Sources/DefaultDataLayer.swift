@@ -82,14 +82,7 @@ extension DefaultDataLayer: DataLayer {
             let api = apiFactory.create()
             let syncFactory = RemoteSyncEngineFactory(
                 api: api,
-                updates: DefaultRemoteEventsService(
-                    taskFactory: taskFactory,
-                    tokenRepository: refreshTokenRepository,
-                    logger: logger
-                        .with(scope: .sync),
-                    apiEndpoint: Constants.apiEndpoint,
-                    api: api
-                ),
+                updates: apiFactory.remoteUpdates(),
                 storage: storage,
                 taskFactory: taskFactory,
                 logger: logger
@@ -124,6 +117,7 @@ extension DefaultDataLayer: DataLayer {
     
     public func create(
         startupData: Components.Schemas.StartupData,
+        deviceId: String,
         loggedOutHandler: EventPublisher<Void>
     ) async throws -> DataSession {
         let logger = infrastructure.logger
@@ -142,6 +136,7 @@ extension DefaultDataLayer: DataLayer {
             logI { "no existed session found, creating" }
             storage = try await storageFactory.create(
                 host: startupData.session.id,
+                deviceId: deviceId,
                 refreshToken: startupData.session.refreshToken,
                 operations: startupData.operations.map {
                     Operation(kind: .pendingConfirm, payload: $0)
@@ -164,14 +159,7 @@ extension DefaultDataLayer: DataLayer {
         let api = apiFactory.create()
         let syncFactory = RemoteSyncEngineFactory(
             api: api,
-            updates: DefaultRemoteEventsService(
-                taskFactory: infrastructure.taskFactory,
-                tokenRepository: refreshTokenRepository,
-                logger: logger
-                    .with(scope: .sync),
-                apiEndpoint: Constants.apiEndpoint,
-                api: api
-            ),
+            updates: apiFactory.remoteUpdates(),
             storage: storage,
             taskFactory: infrastructure.taskFactory,
             logger: logger

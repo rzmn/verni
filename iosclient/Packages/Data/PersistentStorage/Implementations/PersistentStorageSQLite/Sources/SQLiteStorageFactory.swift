@@ -52,11 +52,13 @@ extension SQLiteStorageFactory: StorageFactory {
 
     public func create(
         host: HostId,
+        deviceId: String,
         refreshToken: String,
         operations: [PersistentStorage.Operation]
     ) async throws -> UserStorage {
         try await userStorageHolder.create(
             hostId: host,
+            deviceId: deviceId,
             refreshToken: refreshToken,
             operations: operations
         )

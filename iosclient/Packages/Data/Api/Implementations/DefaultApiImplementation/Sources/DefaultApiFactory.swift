@@ -3,13 +3,15 @@ import Convenience
 import AsyncExtensions
 import Logging
 import Foundation
+import OpenAPIRuntime
 internal import OpenAPIURLSession
 
 public final class DefaultApiFactory: Sendable {
-    private let tokenRepository: RefreshTokenRepository?
+    private let refreshTokenMiddleware: RefreshTokenMiddleware?
     private let taskFactory: TaskFactory
     private let logger: Logger
     private let url: URL
+    private let remoteUpdatesService: RemoteUpdatesService
     private let api: APIProtocol
     
     public init(
@@ -18,7 +20,14 @@ public final class DefaultApiFactory: Sendable {
         logger: Logger,
         tokenRepository: RefreshTokenRepository?
     ) {
-        self.tokenRepository = tokenRepository
+        self.refreshTokenMiddleware = tokenRepository.flatMap { tokenRepository in
+            RefreshTokenMiddleware(
+                tokenRepository: tokenRepository,
+                taskFactory: taskFactory,
+                logger: logger
+                    .with(prefix: "🚥")
+            )
+        }
         self.logger = logger
         self.taskFactory = taskFactory
         self.url = url
@@ -26,14 +35,7 @@ public final class DefaultApiFactory: Sendable {
             serverURL: url,
             transport: URLSessionTransport(),
             middlewares: [
-                tokenRepository.flatMap { tokenRepository in
-                    RefreshTokenMiddleware(
-                        tokenRepository: tokenRepository,
-                        taskFactory: taskFactory,
-                        logger: logger
-                            .with(prefix: "🚥")
-                    )
-                },
+                refreshTokenMiddleware as ClientMiddleware?,
                 RetryingMiddleware(
                     logger: logger
                         .with(prefix: "🔄"),
@@ -56,6 +58,13 @@ public final class DefaultApiFactory: Sendable {
                 )
             ].compactMap { $0 }
         )
+        self.remoteUpdatesService = DefaultRemoteEventsService(
+            taskFactory: taskFactory,
+            refreshTokenMiddleware: refreshTokenMiddleware,
+            logger: logger,
+            apiEndpoint: url,
+            api: api
+        )
     }
 }
 
@@ -65,12 +74,6 @@ extension DefaultApiFactory: ApiFactory {
     }
     
     public func remoteUpdates() -> RemoteUpdatesService {
-        DefaultRemoteEventsService(
-            taskFactory: taskFactory,
-            tokenRepository: tokenRepository,
-            logger: logger,
-            apiEndpoint: url,
-            api: api
-        )
+        remoteUpdatesService
     }
 }

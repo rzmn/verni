@@ -6,6 +6,7 @@ public protocol StorageFactory: Sendable {
     
     func create(
         host: HostId,
+        deviceId: String,
         refreshToken: String,
         operations: [Operation]
     ) async throws -> UserStorage

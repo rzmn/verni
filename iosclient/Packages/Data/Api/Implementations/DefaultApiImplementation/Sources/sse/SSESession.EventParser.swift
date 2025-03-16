@@ -3,52 +3,77 @@ import Logging
 import Api
 
 extension SSESession {
-    actor EventParser {
+    enum Event: Decodable {
+        case connected
+        case update(RemoteUpdate)
+        case error(Components.Schemas._Error)
+        
+        enum CodingKeys: String, CodingKey {
+            case type
+            case update
+            case error
+            case payload
+        }
+        
+        enum EventType: String, Decodable {
+            case connected
+            case update
+            case error
+        }
+        
+        enum UpdateType: String, Decodable {
+            case operationsPulled
+        }
+        
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let type = try container.decode(EventType.self, forKey: .type)
+            switch type {
+            case .connected:
+                self = .connected
+            case .update:
+                let update = try container.decode(UpdateType.self, forKey: .update)
+                switch update {
+                case .operationsPulled:
+                    self = .update(
+                        .newOperationsAvailable(
+                            try container.decode(
+                                [Components.Schemas.SomeOperation].self,
+                                forKey: .payload
+                            )
+                        )
+                    )
+                }
+            case .error:
+                self = .error(
+                    try container.decode(
+                        Components.Schemas.ErrorResponse.self,
+                        forKey: .error
+                    ).error
+                )
+            }
+        }
+    }
+    
+    protocol EventParser: Sendable {
+        func process(message: String) async throws -> Event
+    }
+    
+    actor DefaultEventParser: EventParser {
         let logger: Logger
         private let decoder = JSONDecoder()
-        private var connected = false
         
         init(logger: Logger) {
             self.logger = logger
         }
         
-        func process(message: String) -> RemoteUpdate? {
-            do {
-                if connected {
-                    return .newOperationsAvailable(
-                        try JSONDecoder().decode(
-                            NewOperationsAvailableNotification.self,
-                            from: Data(message.utf8)
-                        ).response
-                    )
-                } else {
-                    let notification = try JSONDecoder().decode(
-                        StreamNotification.self,
-                        from: Data(message.utf8)
-                    )
-                    if notification.type == "connected" {
-                        connected = true
-                        logI { "connection established" }
-                    } else {
-                        logW { "unknown notification type \(notification.type)" }
-                    }
-                    return nil
-                }
-            } catch {
-                logE { "failed to decode SSE data error: \(error)" }
-                return nil
-            }
+        func process(message: String) throws -> Event {
+            try JSONDecoder().decode(
+                Event.self,
+                from: Data(message.utf8)
+            )
         }
     }
 }
 
-extension SSESession.EventParser {
-    struct StreamNotification: Decodable {
-        let type: String
-    }
-    struct NewOperationsAvailableNotification: Decodable {
-        let response: [Components.Schemas.SomeOperation]
-    }
-}
-
-extension SSESession.EventParser: Loggable {}
+extension SSESession.DefaultEventParser: Loggable {}

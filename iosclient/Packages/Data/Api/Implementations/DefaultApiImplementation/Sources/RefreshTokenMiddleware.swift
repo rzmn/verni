@@ -37,6 +37,36 @@ actor RefreshTokenMiddleware {
     }
 }
 
+extension RefreshTokenMiddleware {
+    enum RoutineFailure: Error {
+        case unauthorized
+    }
+    
+    func intercept<T: Sendable>(
+        routine: (_ authHeaderValue: String?) async -> Result<T, RoutineFailure>
+    ) async throws -> T? {
+        var result: T?
+        let _ = try await intercept(
+            HTTPRequest(method: .get, scheme: nil, authority: nil, path: nil),
+            body: nil,
+            baseURL: URL(filePath: "/"),
+            operationID: UUID().uuidString
+        ) { request, _, _ in
+            switch await routine(request.headerFields[.authorization]) {
+            case .success(let value):
+                result = value
+                return (HTTPResponse(status: .ok), nil)
+            case .failure(let reason):
+                switch reason {
+                case .unauthorized:
+                    return (HTTPResponse(status: .unauthorized), nil)
+                }
+            }
+        }
+        return result
+    }
+}
+
 extension RefreshTokenMiddleware: ClientMiddleware {
     func intercept(
         _ request: HTTPRequest,
@@ -118,13 +148,25 @@ extension RefreshTokenMiddleware: ClientMiddleware {
             )
         case .authenticated(let token):
             do {
-                return try await next(
+                let (responseFromNext, bodyFromNext) = try await next(
                     modify(request) {
                         $0.headerFields[.authorization] = "Bearer \(token)"
                     },
                     body,
                     baseURL
                 )
+                if responseFromNext.status == .unauthorized {
+                    return try await refreshAndReshedule(
+                        request,
+                        body: body,
+                        baseURL: baseURL,
+                        operationID: operationID,
+                        requestID: requestID,
+                        next: next
+                    )
+                } else {
+                    return (responseFromNext, bodyFromNext)
+                }
             } catch {
                 throw error
             }
@@ -180,9 +222,9 @@ extension RefreshTokenMiddleware: ClientMiddleware {
             }
         }
         switch state {
-        case .refreshing, .initial, .refreshFailed:
+        case .refreshing, .initial, .refreshFailed, .authenticated:
             break
-        case .authenticated, .unauthorized:
+        case .unauthorized:
             assertionFailure("refreshing token from invalid state \(state)")
         }
         switch state {

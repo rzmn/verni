@@ -19,7 +19,7 @@ internal import Convenience
 }
 
 extension SqliteUserStorageManager: UserStorageManager {
-    func create(hostId: HostId, refreshToken: String, operations: [Operation]) async throws -> UserStorage {
+    func create(hostId: HostId, deviceId: String, refreshToken: String, operations: [Operation]) async throws -> UserStorage {
         invalidateIfNeeded()
         let directory = databaseDirectory(for: hostId)
         do {
@@ -48,6 +48,7 @@ extension SqliteUserStorageManager: UserStorageManager {
             hostId: hostId,
             initialData: SQLiteUserStorage.InitialData(
                 refreshToken: refreshToken,
+                deviceId: deviceId,
                 operations: operations
             ),
             logger: logger

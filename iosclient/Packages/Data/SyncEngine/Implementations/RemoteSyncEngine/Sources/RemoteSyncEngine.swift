@@ -154,14 +154,15 @@ extension RemoteSyncEngine: Engine {
             return
         }
         logI { "found \(operations) unconfirmed operations, syncing..." }
-        do {
-            let response = try await api.confirmOperations(
+        let input = Operations.ConfirmOperations.Input.init(
+            body: .json(
                 .init(
-                    query: .init(
-                        ids: operations.map(\.value1.operationId)
-                    )
+                    ids: operations.map(\.value1.operationId)
                 )
             )
+        )
+        do {
+            let response = try await api.confirmOperations(input)
             switch response {
             case .ok:
                 try await storage

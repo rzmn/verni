@@ -10,6 +10,7 @@ typealias Operation = PersistentStorage.Operation
 @StorageActor class SQLiteUserStorage {
     struct InitialData {
         let refreshToken: String
+        let deviceId: String
         let operations: [Operation]
     }
 
@@ -34,13 +35,12 @@ typealias Operation = PersistentStorage.Operation
         self.hostId = hostId
         self.logger = logger
         if let initialData {
-            let deviceId = UUID().uuidString
             inMemoryCache = InMemoryCache(
                 refreshToken: initialData.refreshToken,
-                deviceId: deviceId,
+                deviceId: initialData.deviceId,
                 operations: initialData.operations
             )
-            try updateStringForHost(value: deviceId, schema: .deviceId)
+            try updateStringForHost(value: initialData.deviceId, schema: .deviceId)
             try await update(operations: initialData.operations)
             try await update(refreshToken: initialData.refreshToken)
         } else {

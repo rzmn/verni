@@ -1,13 +1,22 @@
 import Foundation
 
 final class SSEDataDelegate: NSObject, URLSessionDataDelegate {
+    struct Response: Sendable {
+        let value: URLResponse
+        let disposition: @Sendable (URLSession.ResponseDisposition) -> Void
+    }
     enum Event: Sendable {
         case onData(Data)
-        case onResponse(URLResponse, disposition: @Sendable (URLSession.ResponseDisposition) -> Void)
         case onComplete(Error?)
     }
     private let internalStream = AsyncStream<Event>.makeStream()
-    var eventStream: AsyncStream<Event> { internalStream.stream }
+    var eventStream: AsyncStream<Event> {
+        internalStream.stream
+    }
+    private let internalPromise = AsyncStream<Response>.makeStream()
+    var responsePromise: AsyncStream<Response> {
+        internalPromise.stream
+    }
     
     func urlSession(
         _ session: URLSession,
@@ -31,7 +40,12 @@ final class SSEDataDelegate: NSObject, URLSessionDataDelegate {
         didReceive response: URLResponse,
         completionHandler: @escaping @Sendable (URLSession.ResponseDisposition) -> Void
     ) {
-        internalStream.continuation.yield(.onResponse(response, disposition: completionHandler))
+        internalPromise.continuation.yield(
+            Response(
+                value: response,
+                disposition: completionHandler
+            )
+        )
     }
     
     func urlSession(

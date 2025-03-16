@@ -60,11 +60,12 @@ extension DefaultAuthUseCase: AuthUseCase {
     func login(
         credentials: Credentials
     ) async throws(LoginError) -> any HostedDomainLayer {
+        let deviceId = await sessionHost.deviceId
         let response: Operations.Login.Output
         do {
             response = try await sharedDomain.data.sandbox.api.login(
                 headers: Operations.Login.Input.Headers(
-                    xDeviceID: await sessionHost.deviceId
+                    xDeviceID: deviceId
                 ),
                 body: .json(
                     .init(
@@ -98,7 +99,7 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         let session: HostedDomainLayer
         do {
-            session = try await acquire(startupData: startupData)
+            session = try await acquire(startupData: startupData, deviceId: deviceId)
         } catch {
             throw .other(error)
         }
@@ -108,11 +109,12 @@ extension DefaultAuthUseCase: AuthUseCase {
     func signup(
         credentials: Credentials
     ) async throws(SignupError) -> any HostedDomainLayer {
+        let deviceId = await sessionHost.deviceId
         let response: Operations.Signup.Output
         do {
             response = try await sharedDomain.data.sandbox.api.signup(
                 headers: Operations.Signup.Input.Headers(
-                    xDeviceID: await sessionHost.deviceId
+                    xDeviceID: deviceId
                 ),
                 body: .json(
                     .init(
@@ -146,17 +148,18 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         let session: HostedDomainLayer
         do {
-            session = try await acquire(startupData: startupData)
+            session = try await acquire(startupData: startupData, deviceId: deviceId)
         } catch {
             throw .other(error)
         }
         return session
     }
     
-    private func acquire(startupData: Components.Schemas.StartupData) async throws -> HostedDomainLayer {
+    private func acquire(startupData: Components.Schemas.StartupData, deviceId: String) async throws -> HostedDomainLayer {
         let logoutSubject = EventPublisher<Void>()
         let session = try await sharedDomain.data.create(
             startupData: startupData,
+            deviceId: deviceId,
             loggedOutHandler: logoutSubject
         )
         await sessionHost.performIsolated { sessionHost in
