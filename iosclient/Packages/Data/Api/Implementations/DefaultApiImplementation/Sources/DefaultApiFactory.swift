@@ -62,8 +62,7 @@ public final class DefaultApiFactory: Sendable {
             taskFactory: taskFactory,
             refreshTokenMiddleware: refreshTokenMiddleware,
             logger: logger,
-            apiEndpoint: url,
-            api: api
+            apiEndpoint: url
         )
     }
 }

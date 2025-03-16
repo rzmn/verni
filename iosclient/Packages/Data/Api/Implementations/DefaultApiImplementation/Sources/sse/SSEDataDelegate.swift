@@ -18,6 +18,10 @@ final class SSEDataDelegate: NSObject, URLSessionDataDelegate {
         internalPromise.stream
     }
     
+    deinit {
+        print("[debug] sse data delegate deinit")
+    }
+    
     func urlSession(
         _ session: URLSession,
         dataTask: URLSessionDataTask,
