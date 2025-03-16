@@ -478,7 +478,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Something went wrong.
   /operations/confirm:
-    get:
+    post:
       operationId: confirmOperations
       parameters:
       - description: Bearer Token
@@ -489,15 +489,12 @@ paths:
         schema:
           type: string
         style: simple
-      - explode: true
-        in: query
-        name: ids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/confirmOperations_request'
         required: true
-        schema:
-          items:
-            type: string
-          type: array
-        style: form
       responses:
         "200":
           content:
@@ -1028,6 +1025,15 @@ components:
       required:
       - response
       title: pushOperationsSucceededResponse
+    confirmOperations_request:
+      properties:
+        ids:
+          items:
+            type: string
+          type: array
+      required:
+      - ids
+      type: object
     confirmOperationsSucceededResponse:
       example:
         response:

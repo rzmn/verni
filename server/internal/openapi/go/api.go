@@ -51,5 +51,5 @@ type DefaultAPIServicer interface {
 	SendEmailConfirmationCode(context.Context, string) (ImplResponse, error)
 	PullOperations(context.Context, string, OperationType) (ImplResponse, error)
 	PushOperations(context.Context, string, PushOperationsRequest) (ImplResponse, error)
-	ConfirmOperations(context.Context, string, []string) (ImplResponse, error)
+	ConfirmOperations(context.Context, string, ConfirmOperationsRequest) (ImplResponse, error)
 }

@@ -11,7 +11,7 @@ import (
 func (s *DefaultAPIService) ConfirmOperations(
 	ctx context.Context,
 	token string,
-	ids []string,
+	request openapi.ConfirmOperationsRequest,
 ) (openapi.ImplResponse, error) {
 	sessionInfo, earlyResponse := s.validateToken(token)
 	if earlyResponse != nil {
@@ -19,13 +19,13 @@ func (s *DefaultAPIService) ConfirmOperations(
 	}
 
 	if err := s.operations.Confirm(
-		common.Map(ids, func(id string) operations.OperationId {
+		common.Map(request.Ids, func(id string) operations.OperationId {
 			return operations.OperationId(id)
 		}),
 		operations.UserId(sessionInfo.User),
 		operations.DeviceId(sessionInfo.Device),
 	); err != nil {
-		return s.handleConfirmOperationsError(err, ids)
+		return s.handleConfirmOperationsError(err, request.Ids)
 	}
 
 	return openapi.Response(200, openapi.ConfirmOperationsSucceededResponse{

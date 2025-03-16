@@ -110,7 +110,7 @@ func (c *DefaultAPIController) Routes() Routes {
 			c.PushOperations,
 		},
 		"ConfirmOperations": Route{
-			strings.ToUpper("Get"),
+			strings.ToUpper("Post"),
 			"/operations/confirm",
 			c.ConfirmOperations,
 		},
@@ -431,17 +431,23 @@ func (c *DefaultAPIController) PushOperations(w http.ResponseWriter, r *http.Req
 
 // ConfirmOperations -
 func (c *DefaultAPIController) ConfirmOperations(w http.ResponseWriter, r *http.Request) {
-	query, err := parseQuery(r.URL.RawQuery)
-	if err != nil {
+	authorizationParam := r.Header.Get("Authorization")
+	confirmOperationsRequestParam := ConfirmOperationsRequest{}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&confirmOperationsRequestParam); err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
-	authorizationParam := r.Header.Get("Authorization")
-	var idsParam []string
-	if query.Has("ids") {
-		idsParam = strings.Split(query.Get("ids"), ",")
+	if err := AssertConfirmOperationsRequestRequired(confirmOperationsRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
 	}
-	result, err := c.service.ConfirmOperations(r.Context(), authorizationParam, idsParam)
+	if err := AssertConfirmOperationsRequestConstraints(confirmOperationsRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	result, err := c.service.ConfirmOperations(r.Context(), authorizationParam, confirmOperationsRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

@@ -11,6 +11,7 @@ go/model_bind_user_operation.go
 go/model_bind_user_operation_bind_user.go
 go/model_confirm_email_request.go
 go/model_confirm_email_succeeded_response.go
+go/model_confirm_operations_request.go
 go/model_confirm_operations_succeeded_response.go
 go/model_create_spending_group_operation.go
 go/model_create_spending_group_operation_create_spending_group.go
