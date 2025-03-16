@@ -133,15 +133,20 @@ func (h *sseHandler) handleUpdate(userId realtimeEvents.UserId, ignoringDevices 
 		if channels, exists := h.connections[connectionDescriptor{userId: userId, device: device}]; exists {
 			operations, err := h.operations.Pull(operations.UserId(userId), operations.DeviceId(device), openapi.REGULAR)
 
-			var update openapi.ImplResponse
+			var update map[string]interface{}
 			if err != nil {
-				update = handlePullOperationsError(h.logger, err)
+				update = map[string]interface{}{
+					"type":  "error",
+					"error": handlePullOperationsError(h.logger, err),
+				}
 			} else {
-				update = openapi.Response(200, openapi.PullOperationsSucceededResponse{
-					Response: operations,
-				})
+				update = map[string]interface{}{
+					"type":    "update",
+					"update":  "operationsPulled",
+					"payload": operations,
+				}
 			}
-			updateJSON, err := json.Marshal(update.Body)
+			updateJSON, err := json.Marshal(update)
 			if err != nil {
 				h.logger.LogError("%s: marshalling update: %v", op, err)
 				return
