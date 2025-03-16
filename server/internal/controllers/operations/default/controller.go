@@ -117,7 +117,7 @@ func (c *defaultController) Confirm(
 	deviceId operations.DeviceId,
 ) error {
 	const op = "controllers.operations.defaultController.Confirm"
-	c.logger.LogInfo("%s: start[user=%s device=%s]", op, userId, deviceId)
+	c.logger.LogInfo("%s: start[user=%s device=%s operationsCount=%d]", op, userId, deviceId, len(operationIds))
 	if err := c.operationsRepository.Confirm(
 		common.Map(operationIds, func(id operations.OperationId) operationsRepository.OperationId {
 			return operationsRepository.OperationId(id)
@@ -127,6 +127,6 @@ func (c *defaultController) Confirm(
 	).Perform(); err != nil {
 		return fmt.Errorf("confirming operations in repository: %w", err)
 	}
-	c.logger.LogInfo("%s: success[user=%s device=%s]", op, userId, deviceId)
+	c.logger.LogInfo("%s: success[user=%s device=%s operationsCount=%d]", op, userId, deviceId, len(operationIds))
 	return nil
 }
