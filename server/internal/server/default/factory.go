@@ -19,15 +19,14 @@ type ServerConfig struct {
 	Port           string `json:"port"`
 }
 
-func timeoutMiddleware(next http.Handler, defaultTimeout, sseTimeout time.Duration) http.Handler {
+func timeoutMiddleware(next http.Handler, defaultTimeout time.Duration) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var handler http.Handler
 		if r.URL.Path == "/operationsQueue" {
-			handler = http.TimeoutHandler(next, sseTimeout, "SSE timeout exceeded")
+			next.ServeHTTP(w, r)
 		} else {
-			handler = http.TimeoutHandler(next, defaultTimeout, "Request timeout exceeded")
+			handler := http.TimeoutHandler(next, defaultTimeout, "Request timeout exceeded")
+			handler.ServeHTTP(w, r)
 		}
-		handler.ServeHTTP(w, r)
 	})
 }
 
@@ -71,14 +70,13 @@ func New(
 	router.HandleFunc("/apple-app-site-association", aasaHandler)
 
 	defaultTimeout := time.Duration(config.TimeoutSec) * time.Second
-	sseTimeout := 600 * time.Second
 
 	return &defaultServer{
 		server: http.Server{
 			Addr:         ":" + config.Port,
-			Handler:      timeoutMiddleware(router, defaultTimeout, sseTimeout),
+			Handler:      timeoutMiddleware(router, defaultTimeout),
 			ReadTimeout:  610 * time.Second,
-			WriteTimeout: 0, // Disable write timeout for SSE
+			WriteTimeout: 0,
 			IdleTimeout:  time.Second * time.Duration(config.IdleTimeoutSec),
 		},
 		logger: logger,
