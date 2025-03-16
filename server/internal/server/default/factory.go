@@ -53,7 +53,17 @@ func New(
 	router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(staticDir, "docs/index.html"))
 	})
-	router.HandleFunc("/operationsQueue", sseHandler)
+
+	router.Handle("/operationsQueue", http.TimeoutHandler(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
+			sseHandler(w, r)
+		}),
+		600*time.Second,
+		"SSE timeout exceeded",
+	))
 	router.HandleFunc("/.well-known/apple-app-site-association", aasaHandler)
 	router.HandleFunc("/apple-app-site-association", aasaHandler)
 	return &defaultServer{
