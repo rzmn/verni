@@ -1,25 +1,21 @@
 import Foundation
+import Logging
 
-final class SSEDataDelegate: NSObject, URLSessionDataDelegate {
-    struct Response: Sendable {
-        let value: URLResponse
-        let disposition: @Sendable (URLSession.ResponseDisposition) -> Void
-    }
-    enum Event: Sendable {
-        case onData(Data)
-        case onComplete(Error?)
-    }
+final class DataDelegate: NSObject, URLSessionDataDelegate, Sendable {
+    let logger: Logger
     private let internalStream = AsyncStream<Event>.makeStream()
     var eventStream: AsyncStream<Event> {
         internalStream.stream
     }
-    private let internalPromise = AsyncStream<Response>.makeStream()
-    var responsePromise: AsyncStream<Response> {
+    
+    private let internalPromise = AsyncThrowingStream<Response, Error>.makeStream()
+    var responsePromise: AsyncThrowingStream<Response, Error> {
         internalPromise.stream
     }
     
-    deinit {
-        print("[debug] sse data delegate deinit")
+    init(logger: Logger) {
+        self.logger = logger
+        super.init()
     }
     
     func urlSession(
@@ -35,7 +31,14 @@ final class SSEDataDelegate: NSObject, URLSessionDataDelegate {
         task: URLSessionTask,
         didCompleteWithError error: Error?
     ) {
+        if let error {
+            logger.logI { "task did complete, error: \(error)" }
+        } else {
+            logger.logI { "task did complete" }
+        }
         internalStream.continuation.yield(.onComplete(error))
+        internalStream.continuation.finish()
+        internalPromise.continuation.finish(throwing: error)
     }
     
     func urlSession(
@@ -60,3 +63,17 @@ final class SSEDataDelegate: NSObject, URLSessionDataDelegate {
         completionHandler(.performDefaultHandling, nil)
     }
 }
+
+extension DataDelegate {
+    struct Response: Sendable {
+        let value: URLResponse
+        let disposition: @Sendable (URLSession.ResponseDisposition) -> Void
+    }
+    
+    enum Event: Sendable {
+        case onData(Data)
+        case onComplete(Error?)
+    }
+}
+
+extension DataDelegate: Loggable {}

@@ -1,47 +1,34 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "DefaultApiImplementation",
+    name: "ServerSideEvents",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DefaultApiImplementation",
-            targets: ["DefaultApiImplementation"]
+            name: "ServerSideEvents",
+            targets: ["ServerSideEvents"]
         )
     ],
     dependencies: [
         .local(.currentLayer(.interface("Api"))),
-        .local(.currentLayer(.interface("ServerSideEvents"))),
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
-        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "TestInfrastructure"))),
         .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
     ],
     targets: [
         .target(
-            name: "DefaultApiImplementation",
+            name: "ServerSideEvents",
             dependencies: [
                 "Api",
                 "Logging",
-                "ServerSideEvents",
                 "Convenience",
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
             ],
             path: "Sources"
-        ),
-        .testTarget(
-            name: "DefaultApiImplementationTests",
-            dependencies: [
-                "DefaultApiImplementation",
-                "ServerSideEvents",
-                "Api",
-                "Logging",
-                "Convenience",
-                "TestInfrastructure"
-            ]
         ),
     ]
 )

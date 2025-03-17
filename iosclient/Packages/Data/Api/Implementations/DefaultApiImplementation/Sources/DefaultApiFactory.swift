@@ -4,6 +4,7 @@ import AsyncExtensions
 import Logging
 import Foundation
 import OpenAPIRuntime
+import ServerSideEvents
 internal import OpenAPIURLSession
 
 public final class DefaultApiFactory: Sendable {
@@ -18,6 +19,7 @@ public final class DefaultApiFactory: Sendable {
         url: URL,
         taskFactory: TaskFactory,
         logger: Logger,
+        serverSideEventsFactory: ServerSideEventsServiceFactory,
         tokenRepository: RefreshTokenRepository?
     ) {
         self.refreshTokenMiddleware = tokenRepository.flatMap { tokenRepository in
@@ -31,7 +33,7 @@ public final class DefaultApiFactory: Sendable {
         self.logger = logger
         self.taskFactory = taskFactory
         self.url = url
-        self.api = Client(
+        api = Client(
             serverURL: url,
             transport: URLSessionTransport(),
             middlewares: [
@@ -58,11 +60,8 @@ public final class DefaultApiFactory: Sendable {
                 )
             ].compactMap { $0 }
         )
-        self.remoteUpdatesService = DefaultRemoteEventsService(
-            taskFactory: taskFactory,
-            refreshTokenMiddleware: refreshTokenMiddleware,
-            logger: logger,
-            apiEndpoint: url
+        remoteUpdatesService = serverSideEventsFactory.create(
+            refreshTokenMiddleware: refreshTokenMiddleware
         )
     }
 }

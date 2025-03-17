@@ -167,7 +167,7 @@ struct RefreshTokenMiddlewareTests {
             #expect(error.code == .notConnectedToInternet)
             #expect(repository.refreshCallCount == 1)
         } catch {
-            #expect(false, "Unexpected error type: \(error)")
+            Issue.record("Unexpected error type: \(error)")
         }
         
         #expect(nextCalled == false, "Next should not be called when refresh fails")

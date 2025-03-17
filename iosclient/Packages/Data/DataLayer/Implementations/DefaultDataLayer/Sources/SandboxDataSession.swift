@@ -6,10 +6,12 @@ import DataLayer
 import Logging
 import InfrastructureLayer
 import SyncEngine
+import ServerSideEvents
 internal import SandboxSyncEngine
 internal import Convenience
 internal import DefaultApiImplementation
 internal import PersistentStorageSQLite
+internal import DefaultServerSideEvents
 
 public final class SandboxDataSession: DataSession {
     private actor EngineBox {
@@ -50,6 +52,13 @@ public final class SandboxDataSession: DataSession {
             taskFactory: infrastructure.taskFactory,
             logger: logger
                 .with(scope: .api),
+            serverSideEventsFactory: DefaultServerSideEventsServiceFactory(
+                taskFactory: infrastructure.taskFactory,
+                logger: logger.with(
+                    prefix: "[sse]"
+                ),
+                endpoint: Constants.apiEndpoint
+            ),
             tokenRepository: nil
         ).create()
         let syncEngineFactory = SandboxSyncEngineFactory(

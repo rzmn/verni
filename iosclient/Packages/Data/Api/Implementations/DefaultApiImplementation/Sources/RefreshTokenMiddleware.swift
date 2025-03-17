@@ -5,6 +5,7 @@ import Foundation
 import AsyncExtensions
 import Convenience
 import Api
+import ServerSideEvents
 
 actor RefreshTokenMiddleware {
     let tokenRepository: RefreshTokenRepository
@@ -37,33 +38,27 @@ actor RefreshTokenMiddleware {
     }
 }
 
-extension RefreshTokenMiddleware {
-    enum RoutineFailure: Error {
-        case unauthorized
-    }
-    
-    func intercept<T: Sendable>(
-        routine: (_ authHeaderValue: String?) async -> Result<T, RoutineFailure>
-    ) async throws -> T? {
-        var result: T?
-        let _ = try await intercept(
+extension RefreshTokenMiddleware: AuthMiddleware {
+    func intercept<E: AuthMiddlewareError>(
+        routine: @escaping @Sendable (_ authHeaderValue: String?) async -> Result<Void, E>
+    ) async throws {
+        _ = try await intercept(
             HTTPRequest(method: .get, scheme: nil, authority: nil, path: nil),
             body: nil,
             baseURL: URL(filePath: "/"),
             operationID: UUID().uuidString
         ) { request, _, _ in
             switch await routine(request.headerFields[.authorization]) {
-            case .success(let value):
-                result = value
+            case .success:
                 return (HTTPResponse(status: .ok), nil)
             case .failure(let reason):
-                switch reason {
-                case .unauthorized:
+                if reason.isTokenExpired {
                     return (HTTPResponse(status: .unauthorized), nil)
+                } else {
+                    throw reason
                 }
             }
         }
-        return result
     }
 }
 

@@ -1,10 +1,9 @@
-import Foundation
-import AsyncExtensions
-import Convenience
 import Api
+import Foundation
 import Logging
+import Convenience
 
-actor SSESession {
+actor DefaultServerSideEventsSession {
     let logger: Logger
     
     private var state: State {
@@ -15,21 +14,27 @@ actor SSESession {
             }
             if case .finished = state {
                 stream.continuation.finish()
+                switch oldValue {
+                case .initial, .finished, .initializing:
+                    break
+                case .connecting(let dataTask), .connected(let dataTask):
+                    dataTask.cancel()
+                }
+                urlSession.invalidateAndCancel()
             }
         }
     }
     private let urlSession: URLSession
-    private let urlSessionTask: URLSessionTask
-    private let dataDelegate: SSEDataDelegate
+    private let dataDelegate: DataDelegate
     private let stream: (stream: AsyncStream<RemoteUpdate>, continuation: AsyncStream<RemoteUpdate>.Continuation)
+    private let urlConfiguration: UrlConfiguration
     
     private let chunkCollectorFactory: () -> ChunkCollector
     private let eventParserFactory: () -> EventParser
     
     init(
         logger: Logger,
-        authHeaderValue: String?,
-        url: URL,
+        urlConfiguration: UrlConfiguration,
         stream: (stream: AsyncStream<RemoteUpdate>, continuation: AsyncStream<RemoteUpdate>.Continuation),
         chunkCollectorFactory: @escaping () -> ChunkCollector,
         eventParserFactory: @escaping () -> EventParser
@@ -39,94 +44,93 @@ actor SSESession {
         self.eventParserFactory = eventParserFactory
         self.stream = stream
         self.state = .initial
-        
-        dataDelegate = SSEDataDelegate()
-        
+        self.urlConfiguration = urlConfiguration
+        dataDelegate = DataDelegate(
+            logger: logger.with(
+                prefix: "[url.delegate]"
+            )
+        )
         urlSession = URLSession(
-            configuration: modify(URLSessionConfiguration.default) {
-                $0.timeoutIntervalForRequest = 600
-                $0.timeoutIntervalForResource = 3600
-                $0.httpMaximumConnectionsPerHost = 1
-                $0.requestCachePolicy = .reloadIgnoringLocalCacheData
-                $0.networkServiceType = .responsiveData
-                $0.shouldUseExtendedBackgroundIdleMode = true
-                $0.connectionProxyDictionary = [:]
-            },
+            configuration: urlConfiguration.sessionConfiguration(),
             delegate: dataDelegate,
             delegateQueue: modify(OperationQueue()) {
                 $0.name = "com.app.sse.delegate"
                 $0.maxConcurrentOperationCount = 1
             }
         )
-        urlSessionTask = urlSession.dataTask(
-            with: modify(URLRequest(url: url)) {
-                if let authHeaderValue {
-                    $0.setValue(authHeaderValue, forHTTPHeaderField: "Authorization")
-                }
-                $0.setValue("text/event-stream", forHTTPHeaderField: "Accept")
-                $0.setValue("text/event-stream", forHTTPHeaderField: "Content-Type")
-                $0.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
-                $0.setValue("keep-alive", forHTTPHeaderField: "Connection")
-                $0.httpMethod = "GET"
-                $0.timeoutInterval = 600
-            }
-        )
-    }
-    
-    deinit {
-        print("[debug] sse session deinit")
+        Task {
+            await listenForEvents()
+        }
     }
 }
 
-extension SSESession {
+extension DefaultServerSideEventsSession {
     enum State {
         case initial
-        case connecting
-        case connected
+        case initializing
+        case connecting(URLSessionDataTask)
+        case connected(URLSessionDataTask)
         case finished(TerminationReason)
     }
 }
 
-extension SSESession {
-    enum InitializationFailureReason: Error {
-        case nonHttpResponse(URLResponse)
-        case tokenExpired
-        case nonRetriableHttpError(Int)
+extension DefaultServerSideEventsSession: ServerSideEventsSession {
+    nonisolated var updatesStream: AsyncStream<RemoteUpdate> {
+        stream.stream
     }
     
-    func start() async -> Result<Void, InitializationFailureReason> {
-        do {
-            return .success(try await start())
-        } catch {
-            return .failure(error)
-        }
+    func stop() {
+        state = .finished(.failed(InternalError.error("canceled")))
     }
     
-    func stop() async {
-        urlSessionTask.cancel()
-    }
-    
-    private func start() async throws(InitializationFailureReason) {
+    func start() async throws(SessionStartError) {
         guard case .initial = state else {
             return logE { "trying to start already started session" }
         }
-        state = .connecting
-        Task {
-            await listenForEvents()
-        }
+        state = .initializing
+        let request = await urlConfiguration.urlRequest()
         do {
-            try await listenForResponse()
+            try Task.checkCancellation()
+        } catch {
+            logI { "failed to initialize sse session error: \(error)" }
+            state = .finished(.failed(error))
+            throw .canceled
+        }
+        let dataTask = urlSession.dataTask(with: request)
+        state = .connecting(dataTask)
+        do {
+            try await perform(dataTask: dataTask)
         } catch {
             state = .finished(.failed(error))
-            logW { "failed to start sse session" }
+            logW { "failed to start sse session error: \(error)" }
             throw error
         }
+        state = .connected(dataTask)
     }
     
-    private func listenForResponse() async throws(InitializationFailureReason) {
+    private func perform(dataTask: URLSessionDataTask) async throws(SessionStartError) {
         var responseIterator = dataDelegate.responsePromise.makeAsyncIterator()
-        urlSessionTask.resume()
-        while let response = await responseIterator.next() {
+        dataTask.resume()
+        let next = { () async throws(SessionStartError) -> DataDelegate.Response? in
+            let value: DataDelegate.Response?
+            do {
+                value = try await responseIterator.next()
+            } catch {
+                guard !Task.isCancelled else {
+                    throw .canceled
+                }
+                if let error = error.noConnection {
+                    throw .retriableError(.general(error))
+                } else {
+                    throw .nonRetriableError(.general(error))
+                }
+            }
+            guard !Task.isCancelled else {
+                throw .canceled
+            }
+            return value
+        }
+        while let response = try await next() {
             guard let httpResponse = response.value as? HTTPURLResponse else {
                 logE { "invalid response type from SSE endpoint: \(response)" }
                 throw .nonHttpResponse(response.value)
@@ -139,9 +143,14 @@ extension SSESession {
             case 401:
                 logW { "sse stream - expired" }
                 throw .tokenExpired
+            case 408, // Request Timeout
+                 429, // Too Many Requests
+                 500...599: // Server Errors
+                logW { "sse stream - retriable error [\(httpResponse.statusCode)]" }
+                throw .retriableError(.http(httpResponse.statusCode))
             default:
-                logW { "sse stream - failed [\(httpResponse.statusCode)]" }
-                throw .nonRetriableHttpError(httpResponse.statusCode)
+                logW { "sse stream - non-retriable error [\(httpResponse.statusCode)]" }
+                throw .nonRetriableError(.http(httpResponse.statusCode))
             }
         }
     }
@@ -149,10 +158,6 @@ extension SSESession {
     private func listenForEvents() async {
         let chunkCollector = chunkCollectorFactory()
         let eventParser = eventParserFactory()
-        logD { "[debug] sse event loop start" }
-        defer {
-            logD { "[debug] sse event loop end" }
-        }
         for await event in dataDelegate.eventStream {
             switch event {
             case .onData(let data):
@@ -169,7 +174,7 @@ extension SSESession {
                     case .completed(let string):
                         rawMessage = string
                     }
-                    let event: SSESession.Event
+                    let event: SessionEvent
                     do {
                         event = try await eventParser.process(message: rawMessage)
                     } catch {
@@ -180,6 +185,10 @@ extension SSESession {
                     switch event {
                     case .connected:
                         logI { "connection notification received" }
+                        continue
+                    case .disconnected:
+                        logI { "disconnected notification received" }
+                        state = .finished(.completed)
                         continue
                     case .update(let value):
                         update = value
@@ -201,11 +210,11 @@ extension SSESession {
     }
 }
 
-extension SSESession {
+extension DefaultServerSideEventsSession {
     enum TerminationReason: Error {
         case completed
         case failed(Error)
     }
 }
 
-extension SSESession: Loggable {}
+extension DefaultServerSideEventsSession: Loggable {}

@@ -10,6 +10,7 @@ internal import Convenience
 internal import DefaultApiImplementation
 internal import RemoteSyncEngine
 internal import PersistentStorageSQLite
+internal import DefaultServerSideEvents
 
 public final class DefaultDataLayer: Sendable {
     public let logger: Logger
@@ -77,6 +78,13 @@ extension DefaultDataLayer: DataLayer {
                 taskFactory: taskFactory,
                 logger: logger
                     .with(scope: .api),
+                serverSideEventsFactory: DefaultServerSideEventsServiceFactory(
+                    taskFactory: taskFactory,
+                    logger: logger.with(
+                        prefix: "[sse]"
+                    ),
+                    endpoint: Constants.apiEndpoint
+                ),
                 tokenRepository: refreshTokenRepository
             )
             let api = apiFactory.create()
@@ -123,11 +131,11 @@ extension DefaultDataLayer: DataLayer {
         let logger = infrastructure.logger
             .with(scope: .dataLayer(.hosted))
         let storage: UserStorage
-        if let existing = await try storageFactory.hostsAvailable.first(where: { $0.hostId == startupData.session.id }) {
+        if let existing = try await storageFactory.hostsAvailable.first(where: { $0.hostId == startupData.session.id }) {
             logI { "existed session found, awaking" }
             storage = try await existing.awake()
-            await try storage.update(refreshToken: startupData.session.refreshToken)
-            await try storage.update(
+            try await storage.update(refreshToken: startupData.session.refreshToken)
+            try await storage.update(
                 operations: startupData.operations.map{
                     Operation(kind: .pendingConfirm, payload: $0)
                 }
@@ -154,6 +162,13 @@ extension DefaultDataLayer: DataLayer {
             taskFactory: infrastructure.taskFactory,
             logger: logger
                 .with(scope: .api),
+            serverSideEventsFactory: DefaultServerSideEventsServiceFactory(
+                taskFactory: infrastructure.taskFactory,
+                logger: logger.with(
+                    prefix: "[sse]"
+                ),
+                endpoint: Constants.apiEndpoint
+            ),
             tokenRepository: refreshTokenRepository
         )
         let api = apiFactory.create()
