@@ -2,9 +2,13 @@ name: Xcode - Build and Analyze
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
+    paths:
+      - 'iosclient/**'
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
+    paths:
+      - 'iosclient/**'
 
 jobs:
   build:

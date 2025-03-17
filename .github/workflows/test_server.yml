@@ -3,8 +3,12 @@ name: Run Go unit tests
 on:
   push:
     branches: [main]
+    paths:
+      - 'server/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'server/**'
 
 jobs:
   test:
