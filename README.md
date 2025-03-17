@@ -6,7 +6,7 @@
 [![iOS Test](https://github.com/rzmn/swiftverni/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/test.yml)
 [![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
 
-# Verni - Open Source Expense Sharing Made Simple
+# Verni
 
 Verni is a mobile-first shared expenses tracker that helps you manage shared expenses and balances with friends. Inspired by Splitwise but built with a focus on scalability, reliability, and most importantly - being forever free.
 
