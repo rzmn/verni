@@ -40,7 +40,6 @@ struct ServerSideEventsSessionTests {
         data: {"type":"update","update":"operationsPulled","payload":\(String(data: try JSONEncoder().encode(operations), encoding: .utf8)!)}\n\n
         """.data(using: .utf8)!
         
-        var receivedUpdates: [RemoteUpdate] = []
         let stream = AsyncStream<RemoteUpdate>.makeStream()
         let session = DefaultServerSideEventsSession(
             logger: infrastructure.logger,
