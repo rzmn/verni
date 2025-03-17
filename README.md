@@ -27,6 +27,7 @@ Verni is a mobile-first shared expenses tracker that helps you manage shared exp
 - Detailed spending history
 - Real-time updates and notifications
 - Native iOS client with offline support
+- Spec-based development ([OpenAPI](https://verni.app/docs))
 
 ## 🛠 Tech Stack
 
@@ -46,7 +47,7 @@ Verni is a mobile-first shared expenses tracker that helps you manage shared exp
 - SwiftUI
 - Strict concurrency model
 - Modular architecture with SPM
-- URLSession-based networking
+- URLSession-based networking (SSE), URLSessionTransport (OpenAPI)
 - SQLite local storage
 - Redux-like state management
 - Comprehensive test coverage
