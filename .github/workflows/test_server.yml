@@ -1,4 +1,4 @@
-name: Run unit tests
+name: Run Go unit tests
 
 on:
   push:
@@ -47,4 +47,5 @@ jobs:
           go build .
           ./utilities --command create-tables --config-path ./config/test/postgres_storage.json
           cd $(git rev-parse --show-toplevel)
+          cd server
           go test ./...
