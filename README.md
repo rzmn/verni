@@ -1,6 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/rzmn/governi)](https://goreportcard.com/report/github.com/rzmn/governi)
-[![Server Build](https://github.com/rzmn/governi/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/build.yml)
-[![Server Test](https://github.com/rzmn/governi/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/test.yml)
+[![Server Build](https://github.com/rzmn/verni/actions/workflows/build_server.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/build_server.yml)
+[![Server Test](https://github.com/rzmn/verni/actions/workflows/test_server.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/test_server.yml)
 [![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
 [![iOS Build](https://github.com/rzmn/swiftverni/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/build.yml)
 [![iOS Test](https://github.com/rzmn/swiftverni/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/test.yml)
@@ -33,7 +33,7 @@ Verni is a mobile-first shared expenses tracker that helps you manage shared exp
 ## 🛠 Tech Stack
 
 ### Server Side
-- Go 
+- Go
 - PostgreSQL
 - JWT authentication
 - SMTP email service
@@ -129,4 +129,4 @@ Special thanks to all our contributors who help make Verni better every day!
 
 ---
 
-<p align="center">Made with ❤️ by the Verni community</p> 
+<p align="center">Made with ❤️ by the Verni community</p>

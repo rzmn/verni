@@ -1,3 +1,5 @@
+import Foundation
+
 public enum Currency: Hashable, Sendable {
     case russianRuble
     case usDollar

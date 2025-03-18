@@ -24,13 +24,13 @@ extension Package.Dependency {
     static func local(_ localPackage: LocalPackage) -> Package.Dependency {
         let root: String
         switch localPackage {
-        case .currentLayer(let targetType):
+        case .currentLayer:
             root = "CURRENT_LAYER_ROOT"
-        case .infrastructure(let targetType):
+        case .infrastructure:
             root = "CURRENT_LAYER_ROOT" + "../Infrastructure"
-        case .data(let targetType):
+        case .data:
             root = "CURRENT_LAYER_ROOT" + "../Data"
-        case .domain(let targetType):
+        case .domain:
             root = "CURRENT_LAYER_ROOT" + "../Domain"
         }
         switch localPackage.targetType {

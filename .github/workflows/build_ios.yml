@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'iosclient/**'
+      - "iosclient/**"
   pull_request:
     branches: [main]
     paths:
-      - 'iosclient/**'
+      - "iosclient/**"
 
 jobs:
   build:
@@ -24,4 +24,5 @@ jobs:
       - name: Build
         run: |
           cd $(git rev-parse --show-toplevel)
+          cd iosclient
           xcodebuild clean build analyze -project Verni.xcodeproj -scheme Verni -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15 Pro' | xcpretty && exit ${PIPESTATUS[0]}

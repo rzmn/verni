@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'server/**'
+      - "server/**"
   pull_request:
     branches: [main]
     paths:
-      - 'server/**'
+      - "server/**"
 
 jobs:
   test:
@@ -40,16 +40,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Test
-        run: |
-          set -e -x
-          cd $(git rev-parse --show-toplevel)
-          cd server
-          export VERNI_PROJECT_ROOT=$(pwd)
-          mkdir -p ./config/test/
-          echo '{"host":"localhost","port":5432,"user":"root","password":"verni_pwd","dbName":"verni_test_db"}' > ./config/test/postgres_storage.json
-          cd cmd/utilities
-          go build .
-          ./utilities --command create-tables --config-path ./config/test/postgres_storage.json
-          cd $(git rev-parse --show-toplevel)
-          cd server
-          go test ./...
+        run: cd $(git rev-parse --show-toplevel) && sh ./server/scripts/test.sh
