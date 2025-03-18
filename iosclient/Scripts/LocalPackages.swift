@@ -9,13 +9,15 @@ extension Package.Dependency {
         case domain(TargetType)
         case infrastructure(TargetType)
         case data(TargetType)
+        case app(TargetType)
 
         var targetType: TargetType {
             switch self {
             case .currentLayer(let targetType),
                 .infrastructure(let targetType),
                 .data(let targetType),
-                .domain(let targetType):
+                .domain(let targetType),
+                .app(let targetType):
                 return targetType
             }
         }
@@ -32,6 +34,8 @@ extension Package.Dependency {
             root = "CURRENT_LAYER_ROOT" + "../Data"
         case .domain:
             root = "CURRENT_LAYER_ROOT" + "../Domain"
+        case .app:
+            root = "CURRENT_LAYER_ROOT" + "../App"
         }
         switch localPackage.targetType {
         case .interface(let interface):

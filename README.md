@@ -2,9 +2,8 @@
 [![Server Build](https://github.com/rzmn/verni/actions/workflows/build_server.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/build_server.yml)
 [![Server Test](https://github.com/rzmn/verni/actions/workflows/test_server.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/test_server.yml)
 [![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
-[![iOS Build](https://github.com/rzmn/swiftverni/actions/workflows/build.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/build.yml)
-[![iOS Test](https://github.com/rzmn/swiftverni/actions/workflows/test.yml/badge.svg)](https://github.com/rzmn/swiftverni/actions/workflows/test.yml)
-[![Code Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=%24.record.coverage&label=Code%20Coverage)
+[![iOS Build](https://github.com/rzmn/verni/actions/workflows/build_ios.yml/badge.svg)](https://github.com/rzmn/verni/actions/workflows/build_ios.yml)
+[![iOS Test](https://github.com/rzmn/verni/actions/workflows/test_ios.yml/badge.svg)](https://github.com/rzmn/verni/actions/workflows/test_ios.yml)
 
 # Verni
 

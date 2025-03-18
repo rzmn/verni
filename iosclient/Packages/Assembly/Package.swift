@@ -1,39 +1,41 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
-    name: "FoundationFilesystem",
+    name: "Assembly",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "FoundationFilesystem",
-            targets: ["FoundationFilesystem"]
+            name: "Assembly",
+            targets: ["Assembly"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Filesystem"))),
-        .local(.currentLayer(.interface("Convenience"))),
-        .local(.currentLayer(.interface("Logging"))),
-        .local(.currentLayer(.implementation(interface: "Logging", implementation: "TestLogging")))
+        .local(.app(.interface("AppLayer"))),
+        .local(.app(.implementation(interface: "AppLayer", implementation: "DefaultAppLayer"))),
+        .local(.domain(.interface("DomainLayer"))),
+        .local(.domain(.implementation(interface: "DomainLayer", implementation: "DefaultDomainLayer"))),
+        .local(.infrastructure(.interface("InfrastructureLayer"))),
+        .local(.infrastructure(.implementation(interface: "InfrastructureLayer", implementation: "DefaultInfrastructureLayer"))),
+        .local(.data(.interface("DataLayer"))),
+        .local(.data(.implementation(interface: "DataLayer", implementation: "DefaultDataLayer"))),
     ],
     targets: [
         .target(
-            name: "FoundationFilesystem",
+            name: "Assembly",
             dependencies: [
-                "Logging",
-                "Filesystem",
-                "Convenience"
+                "AppLayer",
+                "DomainLayer",
+                "InfrastructureLayer",
+                "DataLayer",
+                "DefaultAppLayer",
+                "DefaultDomainLayer",
+                "DefaultInfrastructureLayer",
+                "DefaultDataLayer",
             ],
             path: "Sources"
-        ),
-        .testTarget(
-            name: "FoundationFilesystemTests",
-            dependencies: [
-                "FoundationFilesystem",
-                "TestLogging"
-            ]
         )
     ]
 )
@@ -68,15 +70,15 @@ extension Package.Dependency {
         let root: String
         switch localPackage {
         case .currentLayer:
-            root = "../../../"
+            root = ""
         case .infrastructure:
-            root = "../../../" + "../Infrastructure"
+            root = "" + "../Infrastructure"
         case .data:
-            root = "../../../" + "../Data"
+            root = "" + "../Data"
         case .domain:
-            root = "../../../" + "../Domain"
+            root = "" + "../Domain"
         case .app:
-            root = "../../../" + "../App"
+            root = "" + "../App"
         }
         switch localPackage.targetType {
         case .interface(let interface):

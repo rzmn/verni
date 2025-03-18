@@ -22,7 +22,4 @@ jobs:
         run: |
           sudo xcode-select -s "/Applications/Xcode_16.0.app"
       - name: Build
-        run: |
-          cd $(git rev-parse --show-toplevel)
-          cd iosclient
-          xcodebuild clean build analyze -project Verni.xcodeproj -scheme Verni -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15 Pro' | xcpretty && exit ${PIPESTATUS[0]}
+        run: cd $(git rev-parse --show-toplevel) && sh ./iosclient/Scripts/build.sh

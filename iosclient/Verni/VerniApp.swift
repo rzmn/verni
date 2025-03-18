@@ -1,30 +1,24 @@
 import SwiftUI
-import DefaultAppLayer
-import DefaultDomainLayer
-import DefaultDataLayer
-import DefaultInfrastructureLayer
+import Assembly
 
 @main
 struct VerniApp: App {
-    let factory = DefaultAppFactory {
-        let infrastructure = DefaultInfrastructureLayer()
-        let data: DefaultDataLayer
+    let appFactory = {
+        let bundleId = Bundle.main.bundleIdentifier.unsafelyUnwrapped
+        let appGroupId = "group.\(bundleId)"
         do {
-            data = try DefaultDataLayer(
-                infrastructure: infrastructure
-            )
+            return try Assembly(
+                bundleId: bundleId,
+                appGroupId: appGroupId
+            ).appFactory
         } catch {
-            fatalError("failed to initialize data layer error: \(error)")
+            fatalError("failed to initialize dependencies assembly")
         }
-        return await DefaultSandboxDomainLayer(
-            infrastructure: infrastructure,
-            data: data
-        )
-    }
+    }()
     
     var body: some Scene {
         WindowGroup {
-            factory.view()
+            appFactory.view()
         }
     }
 }

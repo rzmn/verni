@@ -19,9 +19,13 @@ public final class DefaultDataLayer: Sendable {
     private let storageFactory: StorageFactory
     private let infrastructure: InfrastructureLayer
     
-    public init(infrastructure: InfrastructureLayer) throws {
+    public init(
+        infrastructure: InfrastructureLayer,
+        bundleId: String,
+        appGroupId: String
+    ) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: Constants.appGroup
+            forSecurityApplicationGroupIdentifier: appGroupId
         ) else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }

@@ -7,12 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8473AE792D46420700DB8168 /* DefaultDataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 847DC95D2D46217500AF3C99 /* DefaultDataLayer */; };
-		8473AE7A2D46420700DB8168 /* DefaultDomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 847DC9602D46218900AF3C99 /* DefaultDomainLayer */; };
-		84CD19B42D463F41004F0107 /* DefaultInfrastructureLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19B32D463F41004F0107 /* DefaultInfrastructureLayer */; };
-		84CD19B72D463F51004F0107 /* DefaultDataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19B62D463F51004F0107 /* DefaultDataLayer */; };
-		84CD19BA2D463F66004F0107 /* DefaultDomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19B92D463F66004F0107 /* DefaultDomainLayer */; };
-		84CD19BD2D463F76004F0107 /* DefaultAppLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 84CD19BC2D463F76004F0107 /* DefaultAppLayer */; };
+		8456F1442D89EEAE0000D3DE /* Assembly in Frameworks */ = {isa = PBXBuildFile; productRef = 8456F1432D89EEAE0000D3DE /* Assembly */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,12 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8473AE7A2D46420700DB8168 /* DefaultDomainLayer in Frameworks */,
-				8473AE792D46420700DB8168 /* DefaultDataLayer in Frameworks */,
-				84CD19BD2D463F76004F0107 /* DefaultAppLayer in Frameworks */,
-				84CD19B42D463F41004F0107 /* DefaultInfrastructureLayer in Frameworks */,
-				84CD19B72D463F51004F0107 /* DefaultDataLayer in Frameworks */,
-				84CD19BA2D463F66004F0107 /* DefaultDomainLayer in Frameworks */,
+				8456F1442D89EEAE0000D3DE /* Assembly in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +89,7 @@
 				84CD19B62D463F51004F0107 /* DefaultDataLayer */,
 				84CD19B92D463F66004F0107 /* DefaultDomainLayer */,
 				84CD19BC2D463F76004F0107 /* DefaultAppLayer */,
+				8456F1432D89EEAE0000D3DE /* Assembly */,
 			);
 			productName = Verni;
 			productReference = 848C211E2D461F8C00931669 /* Verni.app */;
@@ -129,10 +120,7 @@
 			mainGroup = 848C21152D461F8C00931669;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				84CD19B22D463F41004F0107 /* XCLocalSwiftPackageReference "Packages/Infrastructure/InfrastructureLayer/Implementations/DefaultInfrastructureLayer" */,
-				84CD19B52D463F51004F0107 /* XCLocalSwiftPackageReference "Packages/Data/DataLayer/Implementations/DefaultDataLayer" */,
-				84CD19B82D463F66004F0107 /* XCLocalSwiftPackageReference "Packages/Domain/DomainLayer/Implementations/DefaultDomainLayer" */,
-				84CD19BB2D463F76004F0107 /* XCLocalSwiftPackageReference "Packages/App/AppLayer/Implementations/DefaultAppLayer" */,
+				8456F1422D89EEAE0000D3DE /* XCLocalSwiftPackageReference "Packages/Assembly" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 848C211F2D461F8C00931669 /* Products */;
@@ -372,25 +360,17 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		84CD19B22D463F41004F0107 /* XCLocalSwiftPackageReference "Packages/Infrastructure/InfrastructureLayer/Implementations/DefaultInfrastructureLayer" */ = {
+		8456F1422D89EEAE0000D3DE /* XCLocalSwiftPackageReference "Packages/Assembly" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Infrastructure/InfrastructureLayer/Implementations/DefaultInfrastructureLayer;
-		};
-		84CD19B52D463F51004F0107 /* XCLocalSwiftPackageReference "Packages/Data/DataLayer/Implementations/DefaultDataLayer" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Data/DataLayer/Implementations/DefaultDataLayer;
-		};
-		84CD19B82D463F66004F0107 /* XCLocalSwiftPackageReference "Packages/Domain/DomainLayer/Implementations/DefaultDomainLayer" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Domain/DomainLayer/Implementations/DefaultDomainLayer;
-		};
-		84CD19BB2D463F76004F0107 /* XCLocalSwiftPackageReference "Packages/App/AppLayer/Implementations/DefaultAppLayer" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/App/AppLayer/Implementations/DefaultAppLayer;
+			relativePath = Packages/Assembly;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8456F1432D89EEAE0000D3DE /* Assembly */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Assembly;
+		};
 		847DC95D2D46217500AF3C99 /* DefaultDataLayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DefaultDataLayer;
