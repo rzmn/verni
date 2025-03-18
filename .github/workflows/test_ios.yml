@@ -25,9 +25,7 @@ jobs:
         run: brew install xcbeautify
       - name: Test
         shell: bash
-        run: |
-          chmod +x ./iosclient/Scripts/test.sh
-          chmod +x ./iosclient/Scripts/coverage_report.sh
-          ./iosclient/Scripts/test.sh
+        working-directory: ./iosclient
+        run: sh ./Scripts/test.sh
         env:
           JSONBINS_KEY: ${{ secrets.JSONBINS_KEY }}
