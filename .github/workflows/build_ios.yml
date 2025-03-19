@@ -21,7 +21,12 @@ jobs:
       - name: Select Xcode
         run: |
           sudo xcode-select -s "/Applications/Xcode_16.0.app"
-
+      - name: Install xcbeautify
+        run: brew install xcbeautify
       - name: Build
         working-directory: ./iosclient
-        run: sh ./Scripts/build.sh
+        shell: bash
+        run: |
+          cd Scripts
+          chmod +x ./build.sh
+          ./build.sh

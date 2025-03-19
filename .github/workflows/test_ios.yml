@@ -26,6 +26,10 @@ jobs:
       - name: Test
         shell: bash
         working-directory: ./iosclient
-        run: sh ./Scripts/test.sh
+        run: |
+          cd Scripts
+          chmod +x ./test.sh
+          chmod +x ./coverage_report.sh
+          ./test.sh
         env:
           JSONBINS_KEY: ${{ secrets.JSONBINS_KEY }}

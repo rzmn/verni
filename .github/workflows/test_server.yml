@@ -35,10 +35,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.22"
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-
       - name: Build
         working-directory: ./server
-        run: sh ./scripts/test.sh
+        shell: bash
+        run: |
+          cd scripts
+          chmod +x ./test.sh
+          ./test.sh

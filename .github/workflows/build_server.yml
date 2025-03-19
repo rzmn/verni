@@ -23,7 +23,11 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.22"
-
       - name: Build
         working-directory: ./server
-        run: sh ./scripts/build.sh
+        shell: bash
+        run: |
+          cd scripts
+          chmod +x ./build.sh
+          ./build.sh
+
