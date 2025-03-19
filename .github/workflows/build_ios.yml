@@ -5,11 +5,12 @@ on:
     branches: [main]
     paths:
       - "iosclient/**"
+      - ".github/workflows/build_ios.yml"
   pull_request:
     branches: [main]
     paths:
       - "iosclient/**"
-
+      - ".github/workflows/build_ios.yml"
 jobs:
   build:
     name: Build and analyse default scheme using xcodebuild command

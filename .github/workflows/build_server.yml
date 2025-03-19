@@ -8,10 +8,12 @@ on:
     branches: [main]
     paths:
       - "server/**"
+      - ".github/workflows/build_server.yml"
   pull_request:
     branches: [main]
     paths:
       - "server/**"
+      - ".github/workflows/build_server.yml"
 
 jobs:
   build:

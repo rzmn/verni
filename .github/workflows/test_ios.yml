@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'iosclient/**'
+      - '.github/workflows/test_ios.yml'
   pull_request:
     branches: [main]
     paths:
       - 'iosclient/**'
+      - '.github/workflows/test_ios.yml'
 
 jobs:
   build:
