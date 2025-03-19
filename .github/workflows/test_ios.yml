@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Select Xcode
         run: |
-          sudo xcode-select -s "/Applications/Xcode_16.0.app"
+          sudo xcode-select -s "/Applications/Xcode.app"
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Test
