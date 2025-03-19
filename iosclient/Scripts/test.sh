@@ -52,14 +52,19 @@ function run_test() {
 INFRASTRUCTURE_DIR="${SCRIPT_DIR}/../Packages/Infrastructure"
 DATA_DIR="${SCRIPT_DIR}/../Packages/Data"
 
-declare -A TARGETS=(
-    ["FoundationFilesystem"]="${INFRASTRUCTURE_DIR}/Filesystem/Implementations/FoundationFilesystem"
-    ["DefaultApiImplementation"]="${DATA_DIR}/Api/Implementations/DefaultApiImplementation"
+TARGET_NAMES=(
+    "FoundationFilesystem"
+    "DefaultApiImplementation"
+)
+
+TARGET_PATHS=(
+    "${INFRASTRUCTURE_DIR}/Filesystem/Implementations/FoundationFilesystem"
+    "${DATA_DIR}/Api/Implementations/DefaultApiImplementation"
 )
 
 echo "Running tests for all targets..."
-for TARGET in "${!TARGETS[@]}"; do
-    run_test "${TARGET}" "${TARGETS[$TARGET]}"
+for i in "${!TARGET_NAMES[@]}"; do
+    run_test "${TARGET_NAMES[$i]}" "${TARGET_PATHS[$i]}"
 done
 
 sh "${SCRIPT_DIR}/coverage_report.sh"
