@@ -51,15 +51,42 @@ function run_test() {
 
 INFRASTRUCTURE_DIR="${SCRIPT_DIR}/../Packages/Infrastructure"
 DATA_DIR="${SCRIPT_DIR}/../Packages/Data"
+DOMAIN_DIR="${SCRIPT_DIR}/../Packages/Domain"
 
 TARGET_NAMES=(
     "FoundationFilesystem"
+    "PersistentStorageSQLite"
     "DefaultApiImplementation"
+    "DefaultServerSideEvents"
+    "SyncEngine"
+    "SandboxSyncEngine"
+    "RemoteSyncEngine"
+    "DefaultQRInviteUseCaseImplementation"
+    "DefaultReceivingPushUseCaseImplementation"
+    "DefaultAvatarsRepositoryImplementation"
+    "DefaultPushRegistrationUseCaseImplementation"
+    "DefaultLogoutUseCaseImplementation"
+    "DefaultSaveCredendialsUseCaseImplementation"
+    "DefaultEmailConfirmationUseCaseImplementation"
+    "DefaultValidationUseCasesImplementation"
 )
 
 TARGET_PATHS=(
     "${INFRASTRUCTURE_DIR}/Filesystem/Implementations/FoundationFilesystem"
+    "${DATA_DIR}/PersistentStorage/Implementations/PersistentStorageSQLite"
     "${DATA_DIR}/Api/Implementations/DefaultApiImplementation"
+    "${DATA_DIR}/ServerSideEvents/Implementations/DefaultServerSideEvents"
+    "${DATA_DIR}/SyncEngine/Interface/SyncEngine"
+    "${DATA_DIR}/SyncEngine/Implementations/SandboxSyncEngine"
+    "${DATA_DIR}/SyncEngine/Implementations/RemoteSyncEngine"
+    "${DOMAIN_DIR}/QrInviteUseCase/Implementations/DefaultQRInviteUseCaseImplementation"
+    "${DOMAIN_DIR}/IncomingPushUseCase/Implementations/DefaultReceivingPushUseCaseImplementation"
+    "${DOMAIN_DIR}/AvatarsRepository/Implementations/DefaultAvatarsRepositoryImplementation"
+    "${DOMAIN_DIR}/PushRegistrationUseCase/Implementations/DefaultPushRegistrationUseCaseImplementation"
+    "${DOMAIN_DIR}/LogoutUseCase/Implementations/DefaultLogoutUseCaseImplementation"
+    "${DOMAIN_DIR}/SaveCredendialsUseCase/Implementations/DefaultSaveCredendialsUseCaseImplementation"
+    "${DOMAIN_DIR}/EmailConfirmationUseCase/Implementations/DefaultEmailConfirmationUseCaseImplementation"
+    "${DOMAIN_DIR}/CredentialsFormatValidationUseCase/Implementations/DefaultValidationUseCasesImplementation"
 )
 
 echo "Running tests for all targets..."

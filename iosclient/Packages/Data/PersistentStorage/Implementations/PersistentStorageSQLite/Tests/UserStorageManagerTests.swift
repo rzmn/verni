@@ -25,10 +25,12 @@ struct UserStorageManagerTests {
             )
         )
         let hostId = UUID().uuidString
+        let deviceId = UUID().uuidString
         
         // when
         let _ = try await manager.create(
             hostId: hostId,
+            deviceId: deviceId,
             refreshToken: "token",
             operations: []
         )
@@ -36,6 +38,7 @@ struct UserStorageManagerTests {
         do {
             let _ = try await manager.create(
                 hostId: hostId,
+                deviceId: deviceId,
                 refreshToken: "token",
                 operations: []
             )
@@ -62,10 +65,12 @@ struct UserStorageManagerTests {
             )
         )
         let hostId = UUID().uuidString
+        let deviceId = UUID().uuidString
         
         // when
         let _ = try await manager.create(
             hostId: hostId,
+            deviceId: deviceId,
             refreshToken: "token",
             operations: []
         )
@@ -93,15 +98,19 @@ struct UserStorageManagerTests {
         )
         let hostId1 = UUID().uuidString
         let hostId2 = UUID().uuidString
+        let deviceId1 = UUID().uuidString
+        let deviceId2 = UUID().uuidString
         
         // when
         let _ = try await manager.create(
             hostId: hostId1,
+            deviceId: deviceId1,
             refreshToken: "token1",
             operations: []
         )
         let _ = try await manager.create(
             hostId: hostId2,
+            deviceId: deviceId2,
             refreshToken: "token2",
             operations: []
         )
@@ -129,10 +138,12 @@ struct UserStorageManagerTests {
             )
         )
         let hostId = UUID().uuidString
+        let deviceId = UUID().uuidString
         
         // when
         let _ = try await manager.create(
             hostId: hostId,
+            deviceId: deviceId,
             refreshToken: "token",
             operations: []
         )
@@ -166,10 +177,12 @@ struct UserStorageManagerTests {
             )
         )
         let hostId = UUID().uuidString
+        let deviceId = UUID().uuidString
         
         // when
         let _ = try await manager.create(
             hostId: hostId,
+            deviceId: deviceId,
             refreshToken: "token",
             operations: []
         )
@@ -206,5 +219,71 @@ struct UserStorageManagerTests {
         
         // then
         #expect(try await manager.items.isEmpty)
+    }
+    
+    @Test
+    func testStoragePreservesDeviceId() async throws {
+        // given
+        let infrastructure = TestInfrastructureLayer()
+        let manager = try SqliteUserStorageManager(
+            logger: infrastructure.logger,
+            environment: .init(
+                logger: infrastructure.logger,
+                fileManager: infrastructure.fileManager,
+                versionLabel: UUID().uuidString,
+                containerDirectory: Foundation.FileManager.default
+                    .temporaryDirectory
+                    .appending(component: UUID().uuidString)
+            )
+        )
+        let hostId = UUID().uuidString
+        let deviceId = UUID().uuidString
+        
+        // when
+        let storage = try await manager.create(
+            hostId: hostId,
+            deviceId: deviceId,
+            refreshToken: "token",
+            operations: []
+        )
+        
+        // then
+        let retrievedDeviceId = await storage.deviceId
+        #expect(retrievedDeviceId == deviceId)
+    }
+    
+    @Test
+    func testDeviceIdPersistedAfterReawakening() async throws {
+        // given
+        let infrastructure = TestInfrastructureLayer()
+        let manager = try SqliteUserStorageManager(
+            logger: infrastructure.logger,
+            environment: .init(
+                logger: infrastructure.logger,
+                fileManager: infrastructure.fileManager,
+                versionLabel: UUID().uuidString,
+                containerDirectory: Foundation.FileManager.default
+                    .temporaryDirectory
+                    .appending(component: UUID().uuidString)
+            )
+        )
+        let hostId = UUID().uuidString
+        let deviceId = UUID().uuidString
+        
+        // when
+        let _ = try await manager.create(
+            hostId: hostId,
+            deviceId: deviceId,
+            refreshToken: "token",
+            operations: []
+        )
+        
+        let items = try await manager.items
+        let preview = items.first!
+        let reawokenStorage = try await preview.awake()
+        
+        // then
+        let retrievedDeviceId = await reawokenStorage.deviceId
+        #expect(retrievedDeviceId == deviceId)
     }
 }
