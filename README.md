@@ -55,7 +55,7 @@ Currently implementing UI for:
 - Push notifications
 - Email notifications
 
-Note: Core business logic and use cases are implemented in the domain layer. Current focus is on building out the UI layer and improving test coverage. Expected UI completion: May-June 2025.
+Note: The set of features has been developed at the use case level, but is not ready enough at the user interface level and will be published later. (Expected for May-June 2025) At the moment, the interface is implemented for the login, profile card, expense list and the expense add screen.
 
 ## 🛠 Tech Stack
 
