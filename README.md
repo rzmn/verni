@@ -1,9 +1,12 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/rzmn/governi)](https://goreportcard.com/report/github.com/rzmn/governi)
-[![Server Build](https://github.com/rzmn/verni/actions/workflows/build_server.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/build_server.yml)
-[![Server Test](https://github.com/rzmn/verni/actions/workflows/test_server.yml/badge.svg)](https://github.com/rzmn/governi/actions/workflows/test_server.yml)
-[![Swift Version](https://img.shields.io/badge/swift-6.0-orange)](https://img.shields.io/badge/swift-6.0-orange)
-[![iOS Build](https://github.com/rzmn/verni/actions/workflows/build_ios.yml/badge.svg)](https://github.com/rzmn/verni/actions/workflows/build_ios.yml)
-[![iOS Test](https://github.com/rzmn/verni/actions/workflows/test_ios.yml/badge.svg)](https://github.com/rzmn/verni/actions/workflows/test_ios.yml)
+![Go Report Card](https://goreportcard.com/badge/github.com/rzmn/governi)
+![Server Build](https://github.com/rzmn/verni/actions/workflows/build_server.yml/badge.svg)
+![Server Test](https://github.com/rzmn/verni/actions/workflows/test_server.yml/badge.svg)
+![Swift Version](https://img.shields.io/badge/swift-6.0-orange)
+![iOS Build](https://github.com/rzmn/verni/actions/workflows/build_ios.yml/badge.svg)
+![iOS Test](https://github.com/rzmn/verni/actions/workflows/test_ios.yml/badge.svg)
+
+![iOS Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=record.coverage&label=iOS%20Code%20Coverage)
+![Go Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F67dd1f9c8960c979a575ac87%2Flatest&query=record.coverage&label=Go%20Code%20Coverage)
 
 # Verni
 

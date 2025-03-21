@@ -41,4 +41,4 @@ printf "📈 Coverage for covered packages: %d%% (%d total lines)\n" "${TOTAL_CO
 curl --location --request PUT 'https://api.jsonbin.io/v3/b/66e66909acd3cb34a884adb5' \
     --header "X-Master-Key: ${JSONBINS_KEY}" \
     --header "Content-Type: application/json" \
-    --data "{\"coverage\":\"${TOTAL_COVERAGE}%\"}"
+    --data "{\"coverage\":\"${PACKAGES_COVERED_COUNT} of ${PACKAGES_COUNT} packages covered, ${TOTAL_COVERAGE}% coverage\"}"
