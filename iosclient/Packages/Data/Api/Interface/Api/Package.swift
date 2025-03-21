@@ -4,7 +4,8 @@ import PackageDescription
 let package = Package(
     name: "Api",
     platforms: [
-        .iOS(.v17)
+        .iOS(.v17),
+        .macOS(.v10_15),
     ],
     products: [
         .library(
@@ -24,10 +25,7 @@ let package = Package(
                 "AsyncExtensions",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
             ],
-            path: "Sources",
-            plugins: [
-                .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator")
-            ]
+            path: "Sources"
         )
     ]
 )
