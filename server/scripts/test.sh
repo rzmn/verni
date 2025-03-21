@@ -13,7 +13,10 @@ go build .
 cd "${SCRIPT_DIR}/.."
 
 OPENAPI_DIR="${SCRIPT_DIR}/../internal/openapi"
-go test -v -coverpkg=./... -coverprofile=profile.cov -ignore="${OPENAPI_DIR}/*" ./...
+
+go test -v -coverpkg=./... -coverprofile=dirty.cov ./...
+cat dirty.cov | grep -Ev "/openapi/.*\\.go" > profile.cov
+
 COVERAGE=$(go tool cover -func profile.cov | tail -n 1 | awk '{print $3}')
 echo "📈 Total Coverage: ${COVERAGE}"
 
