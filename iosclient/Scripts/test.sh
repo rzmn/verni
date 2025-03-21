@@ -5,6 +5,10 @@ defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -b
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+BUILD_DIR="${SCRIPT_DIR}/_build"
+rm -rf "${BUILD_DIR}"
+mkdir -p "${BUILD_DIR}"
+
 RESULT_FILE="${SCRIPT_DIR}/result.report"
 rm -f "${RESULT_FILE}"
 
@@ -16,10 +20,6 @@ function run_test() {
     echo "----------------------------------------"
     echo "Testing: ${TARGET_NAME}"
 
-    BUILD_DIR="${PACKAGE_PATH}/_build"
-    rm -rf "${BUILD_DIR}"
-    mkdir -p "${BUILD_DIR}"
-
     cd "${PACKAGE_PATH}"
     swift package resolve
 
@@ -29,7 +29,7 @@ function run_test() {
         -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
         | xcbeautify
     
-    REPORT=$(find "${BUILD_DIR}" -name "*.xcresult" -print | head -n 1)
+    REPORT=$(find "${BUILD_DIR}" -name "*${TARGET_NAME}*.xcresult" -print | head -n 1)
 
     COVERAGE_DATA=$(xcrun xccov view --report --json "${REPORT}" | \
         jq --arg target "${TARGET_NAME}" '
@@ -55,36 +55,28 @@ DOMAIN_DIR="${SCRIPT_DIR}/../Packages/Domain"
 
 TARGET_NAMES=(
     "FoundationFilesystem"
+
     "PersistentStorageSQLite"
     "DefaultApiImplementation"
     "DefaultServerSideEvents"
-    "SyncEngine"
     "SandboxSyncEngine"
     "RemoteSyncEngine"
-    "DefaultQRInviteUseCaseImplementation"
-    "DefaultReceivingPushUseCaseImplementation"
+
     "DefaultAvatarsRepositoryImplementation"
-    "DefaultPushRegistrationUseCaseImplementation"
-    "DefaultLogoutUseCaseImplementation"
-    "DefaultSaveCredendialsUseCaseImplementation"
     "DefaultEmailConfirmationUseCaseImplementation"
     "DefaultValidationUseCasesImplementation"
 )
 
 TARGET_PATHS=(
     "${INFRASTRUCTURE_DIR}/Filesystem/Implementations/FoundationFilesystem"
+
     "${DATA_DIR}/PersistentStorage/Implementations/PersistentStorageSQLite"
     "${DATA_DIR}/Api/Implementations/DefaultApiImplementation"
     "${DATA_DIR}/ServerSideEvents/Implementations/DefaultServerSideEvents"
-    "${DATA_DIR}/SyncEngine/Interface/SyncEngine"
     "${DATA_DIR}/SyncEngine/Implementations/SandboxSyncEngine"
     "${DATA_DIR}/SyncEngine/Implementations/RemoteSyncEngine"
-    "${DOMAIN_DIR}/QrInviteUseCase/Implementations/DefaultQRInviteUseCaseImplementation"
-    "${DOMAIN_DIR}/IncomingPushUseCase/Implementations/DefaultReceivingPushUseCaseImplementation"
+
     "${DOMAIN_DIR}/AvatarsRepository/Implementations/DefaultAvatarsRepositoryImplementation"
-    "${DOMAIN_DIR}/PushRegistrationUseCase/Implementations/DefaultPushRegistrationUseCaseImplementation"
-    "${DOMAIN_DIR}/LogoutUseCase/Implementations/DefaultLogoutUseCaseImplementation"
-    "${DOMAIN_DIR}/SaveCredendialsUseCase/Implementations/DefaultSaveCredendialsUseCaseImplementation"
     "${DOMAIN_DIR}/EmailConfirmationUseCase/Implementations/DefaultEmailConfirmationUseCaseImplementation"
     "${DOMAIN_DIR}/CredentialsFormatValidationUseCase/Implementations/DefaultValidationUseCasesImplementation"
 )

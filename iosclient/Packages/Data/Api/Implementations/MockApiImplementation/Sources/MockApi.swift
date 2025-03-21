@@ -53,8 +53,11 @@ extension MockApi: APIProtocol {
         if shouldFailRequest {
             return .internalServerError(.init(body: .json(.init(error: .init(reason: ._internal)))))
         }
-        confirmedOperationIds = input.query.ids
-        return .ok(.init(body: .json(.init(response: .init()))))
+        switch input.body {
+        case .json(let payload):
+            confirmedOperationIds = payload.ids
+            return .ok(.init(body: .json(.init(response: .init()))))
+        }
     }
     
     public func sendEmailConfirmationCode(_ input: Operations.SendEmailConfirmationCode.Input) async throws -> Operations.SendEmailConfirmationCode.Output {
