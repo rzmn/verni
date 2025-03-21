@@ -1,5 +1,5 @@
 {
-  "originHash" : "14380dd198a48c6756e3b1cd7aaf3780497a758f8caf1e19d3d68b9536413330",
+  "originHash" : "247aaf2b1b6f983adee06a63cb0db1e7ebf98e303b875855e0831b65c62b2a3d",
   "pins" : [
     {
       "identity" : "openapikit",
@@ -71,15 +71,6 @@
       "state" : {
         "revision" : "81c309c7b43cd56b2d2b90ca0170f17ff3d0c433",
         "version" : "1.8.1"
-      }
-    },
-    {
-      "identity" : "swift-openapi-urlsession",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-openapi-urlsession",
-      "state" : {
-        "revision" : "9bf4c712ad7989d6a91dbe68748b8829a50837e4",
-        "version" : "1.0.2"
       }
     },
     {

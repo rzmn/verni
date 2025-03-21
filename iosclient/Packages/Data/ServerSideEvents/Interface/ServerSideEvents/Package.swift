@@ -16,7 +16,6 @@ let package = Package(
         .local(.currentLayer(.interface("Api"))),
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
     ],
     targets: [
         .target(
@@ -25,7 +24,6 @@ let package = Package(
                 "Api",
                 "Logging",
                 "Convenience",
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
             ],
             path: "Sources"
         ),
