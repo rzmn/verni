@@ -21,7 +21,6 @@ function run_test() {
     echo "Testing: ${TARGET_NAME}"
 
     cd "${PACKAGE_PATH}"
-    swift package resolve
 
     xcodebuild \
         -scheme "${SCHEME}" test \
@@ -86,5 +85,5 @@ for i in "${!TARGET_NAMES[@]}"; do
     run_test "${TARGET_NAMES[$i]}" "${TARGET_PATHS[$i]}"
 done
 
+rm -rf "${BUILD_DIR}"
 sh "${SCRIPT_DIR}/coverage_report.sh"
-
