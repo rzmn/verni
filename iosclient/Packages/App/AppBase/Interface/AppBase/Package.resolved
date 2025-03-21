@@ -1,0 +1,15 @@
+{
+  "originHash" : "c601d3f3a39350a7d3945917cbf9d16ecb1c038761727686107be8aba89268a1",
+  "pins" : [
+    {
+      "identity" : "device",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Ekhoo/Device.git",
+      "state" : {
+        "revision" : "14a553a755ba9ee54fc17db7a350e18d4cb9d995",
+        "version" : "3.7.0"
+      }
+    }
+  ],
+  "version" : 3
+}
