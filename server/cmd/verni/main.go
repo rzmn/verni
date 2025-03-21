@@ -41,6 +41,7 @@ import (
 	"verni/internal/services/watchdog"
 	telegramWatchdog "verni/internal/services/watchdog/telegram"
 
+	"errors"
 	authController "verni/internal/controllers/auth"
 	defaultAuthController "verni/internal/controllers/auth/default"
 	imagesController "verni/internal/controllers/images"
@@ -51,6 +52,14 @@ import (
 	defaultUsersController "verni/internal/controllers/users/default"
 	verificationController "verni/internal/controllers/verification"
 	defaultVerificationController "verni/internal/controllers/verification/default"
+)
+
+const (
+	argNameConfigPath = "--config-path"
+)
+
+var (
+	errArgNotFound = errors.New("arg not found")
 )
 
 type Repositories struct {
@@ -76,6 +85,16 @@ type Controllers struct {
 	verification verificationController.Controller
 }
 
+func valueForArg(argName string, args []string) (string, error) {
+	for i := 0; i < len(args); i += 2 {
+		if argName != args[i] {
+			continue
+		}
+		return args[i+1], nil
+	}
+	return "", errArgNotFound
+}
+
 func main() {
 	type Module struct {
 		Type   string                 `json:"type"`
@@ -99,7 +118,19 @@ func main() {
 		if err := os.MkdirAll(loggingDirectory, os.ModePerm); err != nil {
 			tmpLogger.LogFatal("failed to create logging directory %s", loggingDirectory)
 		}
-		configFile, err := os.Open(tmpPathProvider.AbsolutePath("./config/prod/verni.json"))
+
+		// Get config path from command line args
+		args := os.Args[1:]
+		configPath, err := valueForArg(argNameConfigPath, args)
+		if err != nil {
+			if errors.Is(err, errArgNotFound) {
+				configPath = "./config/prod/verni.json"
+			} else {
+				tmpLogger.LogFatal("failed to get config path: %s", err)
+			}
+		}
+
+		configFile, err := os.Open(tmpPathProvider.AbsolutePath(configPath))
 		if err != nil {
 			tmpLogger.LogFatal("failed to open config file: %s", err)
 		}
@@ -276,17 +307,17 @@ func main() {
 	}()
 	server := func() server.Server {
 		switch config.Server.Type {
-		case "gin":
+		case "default":
 			data, err := json.Marshal(config.Server.Config)
 			if err != nil {
 				logger.LogFatal("failed to serialize default server config err: %v", err)
 			}
-			var ginConfig defaultServer.ServerConfig
-			json.Unmarshal(data, &ginConfig)
-			logger.LogInfo("creating gin server with config %v", ginConfig)
+			var defaultConfig defaultServer.ServerConfig
+			json.Unmarshal(data, &defaultConfig)
+			logger.LogInfo("creating gin server with config %v", defaultConfig)
 
 			return defaultServer.New(
-				ginConfig,
+				defaultConfig,
 				openapiImplementation.NewSSEHandler(
 					services.realtimeEventsService,
 					controllers.auth,
