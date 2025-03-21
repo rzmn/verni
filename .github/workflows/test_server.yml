@@ -45,3 +45,5 @@ jobs:
           cd scripts
           chmod +x ./test.sh
           ./test.sh
+        env:
+          JSONBINS_KEY: ${{ secrets.JSONBINS_KEY }}

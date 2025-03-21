@@ -11,4 +11,12 @@ cd cmd/utilities
 go build .
 ./utilities --command create-tables --config-path ./config/test/postgres_storage.json
 cd "${SCRIPT_DIR}/.."
-go test ./...
+
+go test -v -coverpkg=./... -coverprofile=profile.cov ./...
+COVERAGE=$(go tool cover -func profile.cov | tail -n 1 | awk '{print $3}')
+echo "📈 Total Coverage: ${COVERAGE}"
+
+curl --location --request PUT 'https://api.jsonbin.io/v3/b/67dd1f9c8960c979a575ac87' \
+    --header "X-Master-Key: ${JSONBINS_KEY}" \
+    --header "Content-Type: application/json" \
+    --data "{\"coverage\":\"total: ${COVERAGE}\"}"
