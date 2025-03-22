@@ -5,8 +5,7 @@ extension LogInModel {
         LogInState(
             email: "",
             password: "",
-            canSubmitCredentials: true,
-            bottomSheet: nil
+            logInInProgress: false
         )
     }
 }

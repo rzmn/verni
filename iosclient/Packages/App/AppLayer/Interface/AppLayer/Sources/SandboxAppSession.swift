@@ -1,11 +1,13 @@
 import AppBase
 import AuthWelcomeScreen
 import LogInScreen
+import SignUpScreen
 import DomainLayer
 
 @MainActor public protocol SandboxAppSession: SharedAppSessionConvertible, AnyObject {
     var auth: any ScreenProvider<AuthWelcomeEvent, AuthWelcomeView, AuthWelcomeTransitions> { get }
     var logIn: any ScreenProvider<LogInEvent<AnyHostedAppSession>, LogInView<AnyHostedAppSession>, ModalTransition> { get }
+    var signUp: any ScreenProvider<SignUpEvent<AnyHostedAppSession>, SignUpView<AnyHostedAppSession>, ModalTransition> { get }
 }
 
 @dynamicMemberLookup

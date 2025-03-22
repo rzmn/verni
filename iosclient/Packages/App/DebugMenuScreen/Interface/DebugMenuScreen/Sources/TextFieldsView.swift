@@ -20,7 +20,7 @@ struct TextFieldsView: View {
                     text: $displayNameValue,
                     config: DesignSystem.TextField.Config(
                         placeholder: "Enter Display Name",
-                        hint: "Display Name",
+                        hint: .hintsEnabled(LocalizedStringKey("Display Name")),
                         content: .displayName
                     )
                 )
@@ -28,7 +28,7 @@ struct TextFieldsView: View {
                     text: $displayNameValueEmpty,
                     config: DesignSystem.TextField.Config(
                         placeholder: "Enter Display Name",
-                        hint: "Display Name",
+                        hint: .hintsEnabled(LocalizedStringKey("Display Name")),
                         content: .displayName
                     )
                 )
@@ -50,7 +50,7 @@ struct TextFieldsView: View {
                     text: $passwordValue,
                     config: DesignSystem.TextField.Config(
                         placeholder: "Enter Password",
-                        hint: "Password",
+                        hint: .hintsEnabled(LocalizedStringKey("Password")),
                         content: .password
                     )
                 )
@@ -58,7 +58,7 @@ struct TextFieldsView: View {
                     text: $passwordValueEmpty,
                     config: DesignSystem.TextField.Config(
                         placeholder: "Enter Password",
-                        hint: "Password",
+                        hint: .hintsEnabled(LocalizedStringKey("Password")),
                         content: .password
                     )
                 )

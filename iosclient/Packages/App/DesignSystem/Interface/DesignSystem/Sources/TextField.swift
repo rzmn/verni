@@ -11,12 +11,16 @@ public struct TextField: View {
         case numberPad
         case unspecified
     }
+    public enum HintStyle {
+        case hintsDisabled
+        case hintsEnabled(LocalizedStringKey?)
+    }
     public struct Config {
         let placeholder: LocalizedStringKey
-        let hint: LocalizedStringKey?
+        let hint: HintStyle
         let content: Content
 
-        public init(placeholder: LocalizedStringKey, hint: LocalizedStringKey? = nil, content: Content = .unspecified) {
+        public init(placeholder: LocalizedStringKey, hint: HintStyle = .hintsDisabled, content: Content = .unspecified) {
             self.placeholder = placeholder
             self.hint = hint
             self.content = content
@@ -40,23 +44,44 @@ public struct TextField: View {
     public var body: some View {
         VStack(spacing: 0) {
             textFieldWithPlaceholder
-            if let hint = config.hint {
-                HStack {
-                    Text(hint)
-                        .font(Font.medium(size: 12))
-                        .foregroundStyle(colors.text.secondary.default)
+            switch config.hint {
+            case .hintsDisabled:
+                EmptyView()
+            case .hintsEnabled(let hint):
+                if let hint {
+                    HStack {
+                        Text(hint)
+                            .font(Font.medium(size: 12))
+                            .foregroundStyle(colors.text.secondary.default)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(height: hintHeight)
+                } else {
                     Spacer()
+                        .frame(height: hintHeight)
                 }
-                .padding(.horizontal, 16)
             }
         }
-        .frame(height: config.hint == nil ? 54 : 74)
+        .frame(
+            height: {
+                switch config.hint {
+                case .hintsDisabled:
+                    textFieldHeight
+                case .hintsEnabled:
+                    textFieldHeight + hintHeight
+                }
+            }()
+        )
     }
+    
+    private var textFieldHeight: CGFloat { 54 }
+    private var hintHeight: CGFloat { 20 }
 
     @ViewBuilder private var textFieldWithPlaceholder: some View {
         textField
             .overlay {
-                VStack {
+                VStack(spacing: 0) {
                     HStack {
                         placeholder(isOnFocus: placeholderIsOnFocus)
                             .id(placeholderId)
@@ -122,7 +147,7 @@ public struct TextField: View {
             Spacer()
         }
         .padding(.horizontal, 16)
-        .frame(height: 54)
+        .frame(height: textFieldHeight)
         .background(colors.background.secondary.default)
         .clipShape(.rect(cornerRadius: paddings.corners.medium))
         .overlay {
@@ -237,8 +262,12 @@ public struct TextField: View {
 }
 
 #Preview {
-    TextField(text: .constant("Text"), config: TextField.Config(placeholder: "Placeholder", hint: "123"))
-        .environment(ColorPalette.light)
-        .environment(PaddingsPalette.default)
-        .loadCustomFonts()
+    TextField(
+        text: .constant("Text"),
+        config: TextField.Config(placeholder: "Placeholder", hint: .hintsEnabled("123"))
+    )
+    .environment(ColorPalette.light)
+    .environment(PaddingsPalette.default)
+    .loadCustomFonts()
+    .debugBorder()
 }

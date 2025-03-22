@@ -18,6 +18,7 @@ let package = Package(
         .local(.currentLayer(.interface("AppBase"))),
         .local(.currentLayer(.interface("AuthWelcomeScreen"))),
         .local(.currentLayer(.interface("AddExpenseScreen"))),
+        .local(.currentLayer(.interface("SignUpScreen"))),
         .local(.currentLayer(.interface("UserPreviewScreen"))),
         .local(
             .currentLayer(
@@ -75,6 +76,7 @@ let package = Package(
                 "ProfileScreen",
                 "DefaultProfileScreen",
                 "LogInScreen",
+                "SignUpScreen",
                 "SplashScreen",
                 "DefaultSplashScreen",
                 "DomainLayer",

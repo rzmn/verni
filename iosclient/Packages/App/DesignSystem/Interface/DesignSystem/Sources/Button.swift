@@ -19,30 +19,38 @@ public struct Button: View {
         public let style: Style
         public let text: LocalizedStringKey
         public let icon: Icon?
+        public let enabled: Bool
 
-        public init(style: Style, text: LocalizedStringKey, icon: Icon? = nil) {
+        public init(style: Style, text: LocalizedStringKey, icon: Icon? = nil, enabled: Bool = true) {
             self.style = style
             self.text = text
             self.icon = icon
+            self.enabled = enabled
         }
     }
 
     private let config: Config
     private let action: () -> Void
+    private let disabledAction: () -> Void
 
-    public init(config: Config, action: @escaping () -> Void) {
+    public init(config: Config, action: @escaping () -> Void, disabledAction: (() -> Void)? = nil) {
         self.config = config
         self.action = {
             HapticEngine.mediumImpact.perform()
             action()
         }
+        self.disabledAction = {
+            HapticEngine.error.perform()
+            disabledAction?()
+        }
     }
 
     public var body: some View {
-        SwiftUI.Button(action: action) {
+        SwiftUI.Button(action: config.enabled ? action : disabledAction) {
             buttonWithIcon
                 .background(backgroundShape)
         }
+        .opacity(config.enabled ? 1.0 : 0.5)
         .frame(maxWidth: .infinity)
         .frame(height: height)
     }

@@ -155,6 +155,28 @@
         }
       }
     },
+    "email_input_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
+          }
+        }
+      }
+    },
+    "email_invalid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not a valid email address"
+          }
+        }
+      }
+    },
     "fonts_section" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -199,17 +221,6 @@
         }
       }
     },
-    "login_email_placeholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Email"
-          }
-        }
-      }
-    },
     "login_forgot_password" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -221,7 +232,29 @@
         }
       }
     },
-    "login_password_placeholder" : {
+    "login_screen_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log in"
+          }
+        }
+      }
+    },
+    "password_at_least_characters" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "should have at least %d characters"
+          }
+        }
+      }
+    },
+    "password_input_placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -232,13 +265,35 @@
         }
       }
     },
-    "login_screen_title" : {
+    "password_invalid_character" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Log in"
+            "value" : "found invalid character %@"
+          }
+        }
+      }
+    },
+    "password_weak" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "password is weak"
+          }
+        }
+      }
+    },
+    "passwords_did_not_match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passwords did not match"
           }
         }
       }
@@ -342,6 +397,17 @@
         }
       }
     },
+    "repeat_password_input_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeat Password"
+          }
+        }
+      }
+    },
     "service_message_warning" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -437,6 +503,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "CREATE ACCOUNT"
+          }
+        }
+      }
+    },
+    "sign_up_password_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password"
+          }
+        }
+      }
+    },
+    "sign_up_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign up"
           }
         }
       }

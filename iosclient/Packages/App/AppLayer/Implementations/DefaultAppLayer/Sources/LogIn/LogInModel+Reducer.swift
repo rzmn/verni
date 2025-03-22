@@ -22,20 +22,18 @@ extension LogInModel {
                 return state
             case .onLoggingInStarted:
                 return modify(state) {
-                    $0.canSubmitCredentials = false
+                    $0.logInInProgress = true
                 }
             case .onLoggingInFailed:
                 return modify(state) {
-                    $0.canSubmitCredentials = true
+                    $0.logInInProgress = false
                 }
             case .onUpdateBottomSheet(let preset):
                 return modify(state) {
                     $0.bottomSheet = preset
                 }
             case .loggedIn:
-                return modify(state) {
-                    $0.canSubmitCredentials = true
-                }
+                return state
             }
         }
     }

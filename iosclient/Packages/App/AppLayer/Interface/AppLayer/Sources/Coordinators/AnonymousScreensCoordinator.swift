@@ -40,7 +40,9 @@ struct AnonymousScreensCoordinator: View {
 
     @State private var authWelcomeDestinationOffset: CGFloat?
     @State private var loginSourceOffset: CGFloat?
+    @State private var signUpSourceOffset: CGFloat?
 
+    @State private var toSignUpScreenTransitionProgress: CGFloat = 0
     @State private var toLoginScreenTransitionProgress: CGFloat = 0
 
     @Binding private var fromSplashTransitionProgress: CGFloat
@@ -70,6 +72,8 @@ struct AnonymousScreensCoordinator: View {
             authWelcomeView(state: state)
             loginView(state: state)
                 .opacity(toLoginScreenTransitionProgress)
+            signUpView(state: state)
+                .opacity(toSignUpScreenTransitionProgress)
         }
     }
 
@@ -87,11 +91,34 @@ struct AnonymousScreensCoordinator: View {
             }
         }(loginTransitions)
     }
+    
+    private func signUpView(state: AnonymousState) -> some View {
+        state.session.signUp.instantiate { event in
+            switch event {
+            case .dismiss:
+                withAnimation(.default) {
+                    toSignUpScreenTransitionProgress = 0
+                }
+            case .forgotPassword:
+                break
+            case .signUp(let session):
+                store.dispatch(.logIn(session, state))
+            }
+        }(signUpTransitions)
+    }
 
     private var loginTransitions: ModalTransition {
         ModalTransition(
             progress: $toLoginScreenTransitionProgress,
             sourceOffset: $loginSourceOffset,
+            destinationOffset: $authWelcomeDestinationOffset
+        )
+    }
+    
+    private var signUpTransitions: ModalTransition {
+        ModalTransition(
+            progress: $toSignUpScreenTransitionProgress,
+            sourceOffset: $signUpSourceOffset,
             destinationOffset: $authWelcomeDestinationOffset
         )
     }
@@ -104,7 +131,9 @@ struct AnonymousScreensCoordinator: View {
                     toLoginScreenTransitionProgress = 1.0
                 }
             case .signUp:
-                break
+                withAnimation(.default) {
+                    toSignUpScreenTransitionProgress = 1.0
+                }
             }
         }(authWelcomeTransitions)
     }
@@ -117,9 +146,19 @@ struct AnonymousScreensCoordinator: View {
                 destinationOffset: $authWelcomeDestinationOffset
             ),
             dismiss: ModalTransition(
-                progress: $toLoginScreenTransitionProgress,
+                progress: Binding(get: {
+                    max(toLoginScreenTransitionProgress, toSignUpScreenTransitionProgress)
+                }, set: { newValue in
+                    toLoginScreenTransitionProgress = newValue
+                    toSignUpScreenTransitionProgress = newValue
+                }),
                 sourceOffset: $authWelcomeDestinationOffset,
-                destinationOffset: $loginSourceOffset
+                destinationOffset: Binding(get: {
+                    loginSourceOffset ?? signUpSourceOffset
+                }, set: { newValue in
+                    loginSourceOffset = newValue
+                    signUpSourceOffset = newValue
+                })
             )
         )
     }

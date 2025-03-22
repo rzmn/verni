@@ -2,15 +2,15 @@ import SwiftUI
 import AppBase
 import DesignSystem
 
-public struct LogInView<Session: Sendable>: View {
-    @ObservedObject var store: Store<LogInState, LogInAction<Session>>
+public struct SignUpView<Session: Sendable>: View {
+    @ObservedObject var store: Store<SignUpState, SignUpAction<Session>>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
     @Binding private var transitionProgress: CGFloat
     @Binding private var destinationOffset: CGFloat?
     @Binding private var sourceOffset: CGFloat?
     
-    public init(store: Store<LogInState, LogInAction<Session>>, transition: ModalTransition) {
+    public init(store: Store<SignUpState, SignUpAction<Session>>, transition: ModalTransition) {
         self.store = store
         _transitionProgress = transition.progress
         _sourceOffset = transition.sourceOffset
@@ -51,7 +51,7 @@ public struct LogInView<Session: Sendable>: View {
                         store.dispatch(.onTapBack)
                     }
                 ),
-                title: .loginScreenTitle,
+                title: .signUpTitle,
                 style: .brand
             )
         )
@@ -74,7 +74,7 @@ public struct LogInView<Session: Sendable>: View {
     }
     
     private var content: some View {
-        VStack {
+        VStack(spacing: 0) {
             DesignSystem.TextField(
                 text: Binding(get: {
                     store.state.email
@@ -83,6 +83,10 @@ public struct LogInView<Session: Sendable>: View {
                 }),
                 config: TextField.Config(
                     placeholder: .emailInputPlaceholder,
+                    hint: .hintsEnabled(
+                        store.state.emailHint
+                            .flatMap { LocalizedStringKey($0) }
+                    ),
                     content: .email
                 )
             )
@@ -95,34 +99,44 @@ public struct LogInView<Session: Sendable>: View {
                 }),
                 config: TextField.Config(
                     placeholder: .passwordInputPlaceholder,
-                    content: .password
+                    hint: .hintsEnabled(
+                        store.state.passwordHint
+                            .flatMap { LocalizedStringKey($0) }
+                    ),
+                    content: .newPassword
+                )
+            )
+            .opacity(transitionProgress)
+            DesignSystem.TextField(
+                text: Binding(get: {
+                    store.state.passwordRepeat
+                }, set: { text in
+                    store.dispatch(.passwordRepeatTextChanged(text))
+                }),
+                config: TextField.Config(
+                    placeholder: .repeatPasswordInputPlaceholder,
+                    hint: .hintsEnabled(
+                        store.state.passwordRepeatHint
+                            .flatMap { LocalizedStringKey($0) }
+                    ),
+                    content: .newPassword
                 )
             )
             .opacity(transitionProgress)
             Spacer()
-                .frame(height: 22)
+                .frame(height: 12)
             DesignSystem.Button(
                 config: Button.Config(
                     style: .primary,
-                    text: .logIn,
-                    icon: .right(.arrowRight)
+                    text: .signUp,
+                    icon: .right(.arrowRight),
+                    enabled: store.state.canSubmitCredentials
                 ), action: {
-                    store.dispatch(.onLogInTap)
+                    store.dispatch(.onSignUpTap)
                 }
             )
             .opacity(transitionProgress)
-            .allowsHitTesting(!store.state.logInInProgress)
-            DesignSystem.Button(
-                config: Button.Config(
-                    style: .tertiary,
-                    text: .loginForgotPassword,
-                    icon: .none
-                ), action: {
-                    store.dispatch(.onForgotPasswordTap)
-                }
-            )
-            .opacity(transitionProgress)
-            .allowsHitTesting(!store.state.logInInProgress)
+            .allowsHitTesting(!store.state.signUpInProgress)
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -139,18 +153,22 @@ public struct LogInView<Session: Sendable>: View {
 
 #if DEBUG
 
-private struct LogInPreview: View {
-    @State var transition: CGFloat = 0
+private struct SignUpPreview: View {
+    @State var transition: CGFloat = 1
     @State var sourceOffset: CGFloat?
     
     var body: some View {
         ZStack {
-            LogInView<Int>(
+            SignUpView<Int>(
                 store: Store(
-                    state: LogInState(
+                    state: SignUpState(
                         email: "e@mail.co",
+                        emailHint: "wrong email",
                         password: "12345678",
-                        logInInProgress: false,
+                        passwordHint: "123",
+                        passwordRepeat: "bla bla",
+                        canSubmitCredentials: true,
+                        signUpInProgress: false,
                         bottomSheet: nil
                     ),
                     reducer: { state, _ in state }
@@ -173,7 +191,7 @@ private struct LogInPreview: View {
 class ClassToIdentifyBundle {}
 
 #Preview {
-    LogInPreview()
+    SignUpPreview()
         .preview(packageClass: ClassToIdentifyBundle.self)
 }
 

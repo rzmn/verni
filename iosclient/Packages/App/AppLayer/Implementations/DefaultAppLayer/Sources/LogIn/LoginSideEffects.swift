@@ -40,31 +40,17 @@ internal import Convenience
 
     func handle(_ action: LogInAction<AnyHostedAppSession>) {
         switch action {
-        case .onTapBack:
-            break
-        case .passwordTextChanged:
-            break
-        case .emailTextChanged:
-            break
-        case .onForgotPasswordTap:
-            break
         case .onLogInTap:
             logIn()
-        case .onLoggingInStarted:
-            break
-        case .onLoggingInFailed:
-            break
-        case .onUpdateBottomSheet:
-            break
-        case .loggedIn:
+        default:
             break
         }
     }
 
     private func logIn() {
         let state = store.state
-        guard state.canSubmitCredentials else {
-            return HapticEngine.error.perform()
+        guard !state.logInInProgress else {
+            return
         }
         store.dispatch(.onLoggingInStarted)
         let credentials = Credentials(

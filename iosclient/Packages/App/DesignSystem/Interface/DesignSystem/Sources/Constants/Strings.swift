@@ -61,17 +61,45 @@ public extension VerniL10N {
     static var signUp: Self {
         mapping("sign_up")
     }
+    
+    static var signUpTitle: Self {
+        mapping("sign_up_title")
+    }
 
     static var loginForgotPassword: Self {
         mapping("login_forgot_password")
     }
 
-    static var loginEmailPlaceholder: Self {
-        mapping("login_email_placeholder")
+    static var emailInputPlaceholder: Self {
+        mapping("email_input_placeholder")
     }
 
-    static var loginPasswordPlaceholder: Self {
-        mapping("login_password_placeholder")
+    static var passwordInputPlaceholder: Self {
+        mapping("password_input_placeholder")
+    }
+    
+    static var invalidEmail: Self {
+        mapping("email_invalid")
+    }
+    
+    static var passwordsDidNotMatch: Self {
+        mapping("passwords_did_not_match")
+    }
+    
+    static var passwordWeak: Self {
+        mapping("password_weak")
+    }
+    
+    static func passwordContainsInvalidCharacter(_ character: String) -> Self {
+        mappingFormat(format: "password_invalid_character", character)
+    }
+    
+    static func passwordShouldHaveAtLeast(charactersCount: Int) -> Self {
+        mappingFormat(format: "password_at_least_characters", charactersCount)
+    }
+    
+    static var repeatPasswordInputPlaceholder: Self {
+        mapping("repeat_password_input_placeholder")
     }
 
     static var loginScreenTitle: Self {

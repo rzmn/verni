@@ -19,6 +19,7 @@ public enum LoggingScope: CustomStringConvertible {
     case userPreview
     case auth
     case logIn
+    case signUp
     case pushNotifications
     case emailConfirmation
     case qrCode
@@ -39,6 +40,8 @@ public enum LoggingScope: CustomStringConvertible {
             "🔄"
         case .logIn:
             "👋"
+        case .signUp:
+            "👶"
         case .saveCredentials:
             "🔐"
         case .images:

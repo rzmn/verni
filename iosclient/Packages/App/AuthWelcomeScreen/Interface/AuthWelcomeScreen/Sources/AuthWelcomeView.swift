@@ -47,6 +47,7 @@ public struct AuthWelcomeView: View {
                     style: .brand
                 )
             )
+            .opacity(1 - dismissalTransitionProgress)
             Image.logoHorizontal
                 .resizable()
                 .aspectRatio(373.0 / 208.0 /* ??? */, contentMode: .fill)
