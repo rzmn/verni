@@ -100,6 +100,7 @@ public struct LogInView<Session: Sendable>: View {
             )
             .opacity(transitionProgress)
             Spacer()
+                .frame(height: 22)
             DesignSystem.Button(
                 config: Button.Config(
                     style: .primary,
@@ -109,6 +110,7 @@ public struct LogInView<Session: Sendable>: View {
                     store.dispatch(.onLogInTap)
                 }
             )
+            .opacity(transitionProgress)
             DesignSystem.Button(
                 config: Button.Config(
                     style: .tertiary,
@@ -118,6 +120,8 @@ public struct LogInView<Session: Sendable>: View {
                     store.dispatch(.onForgotPasswordTap)
                 }
             )
+            .opacity(transitionProgress)
+            Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
