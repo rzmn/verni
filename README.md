@@ -55,7 +55,7 @@ Currently implementing UI for:
 - Push notifications
 - Email notifications
 
-Note: The set of features has been developed at the use case level, but is not ready enough at the user interface level and will be published later. (Expected for May-June 2025) At the moment, the interface is implemented for the login, profile card, expense list and the expense add screen.
+🚧 Note: Core features are fully desined at the business logic level, with the UI/UX layer currently in active development. The iOS app already has working interfaces for user authentication, profile management, expense listing, and expense creation. Full design documentation coming in Q2 2025 as we refine and polish the user experience.
 
 ## 🛠 Tech Stack
 
