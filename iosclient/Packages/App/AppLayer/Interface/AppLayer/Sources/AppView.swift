@@ -3,6 +3,21 @@ import AppBase
 import DesignSystem
 internal import Convenience
 
+struct NoKeyboardAvoidanceModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        GeometryReader { _ in
+            content
+        }
+        .ignoresSafeArea(.keyboard)
+    }
+}
+
+extension View {
+    func noKeyboardAvoidance() -> some View {
+        self.modifier(NoKeyboardAvoidanceModifier())
+    }
+}
+
 public struct AppView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @ObservedObject private var store: Store<AppState, AppAction>
@@ -44,6 +59,7 @@ public struct AppView: View {
                     }
                 }
             }
+            .noKeyboardAvoidance()
     }
 
     @ViewBuilder private var contentWithDebugMenu: some View {
