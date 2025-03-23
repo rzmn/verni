@@ -31,7 +31,7 @@ final class DefaultSharedDomainLayer: SharedDomainLayer {
             .with(scope: .domainLayer(.shared))
         
         self.saveCredentialsUseCase = DefaultSaveCredendialsUseCase(
-            website: "https://verni.app",
+            website: "verni.app",
             logger: logger.with(
                 scope: .saveCredentials
             )
