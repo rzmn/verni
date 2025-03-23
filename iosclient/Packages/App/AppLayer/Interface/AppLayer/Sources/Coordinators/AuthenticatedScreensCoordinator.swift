@@ -4,6 +4,7 @@ import AppBase
 import ProfileScreen
 import SpendingsScreen
 import AddExpenseScreen
+import SpendingsGroupScreen
 import DesignSystem
 
 private extension Store<AppState, AppAction> {
@@ -77,8 +78,18 @@ struct AuthenticatedScreensCoordinator: View {
     init(store: Store<AppState, AppAction>, appearTransitionProgress: Binding<CGFloat>) {
         self.store = store
         _appearTransitionProgress = appearTransitionProgress
-        spendingsTabTransitionProgress = (store.localState?.position(of: .spendings) as Optional).transitionValue
-        profileTabTransitionProgress = (store.localState?.position(of: .profile) as Optional).transitionValue
+        spendingsTabTransitionProgress = (
+            store.localState?
+                .position(
+                    of: {
+                        guard case .spendings = $0 else {
+                            return false
+                        }
+                        return true
+                    }
+                ) as Optional
+        ).transitionValue
+        profileTabTransitionProgress = (store.localState?.position(of: { $0 == .profile }) as Optional).transitionValue
     }
     
     var body: some View {
@@ -221,8 +232,18 @@ extension AuthenticatedScreensCoordinator {
                             }
                             store.dispatch(.selectTabAuthenticated(tab))
                             withAnimation(.default.speed(3)) {
-                                spendingsTabTransitionProgress = (store.localState?.position(of: .spendings) as Optional).transitionValue
-                                profileTabTransitionProgress = (store.localState?.position(of: .profile) as Optional).transitionValue
+                                spendingsTabTransitionProgress = (
+                                    store.localState?
+                                        .position(
+                                            of: {
+                                                guard case .spendings = $0 else {
+                                                    return false
+                                                }
+                                                return true
+                                            }
+                                        ) as Optional
+                                ).transitionValue
+                                profileTabTransitionProgress = (store.localState?.position(of: { $0 == .profile }) as Optional).transitionValue
                             }
                         }
                     ),
@@ -244,31 +265,51 @@ extension AuthenticatedScreensCoordinator {
     
     @ViewBuilder private func tab(for item: AuthenticatedState.TabItem, state: AuthenticatedState) -> some View {
         switch item {
-        case .spendings:
-            spendingsTab(state: state)
+        case .spendings(let tabState):
+            spendingsTab(state: state, tabState: tabState)
         case .profile:
             profileTab(state: state)
         }
     }
     
-    @ViewBuilder private func spendingsTab(state: AuthenticatedState) -> some View {
-        state.session.spendings.instantiate { event in
-            switch event {
-            case .onUserTap:
-                break
-            }
-        }(
-            SpendingsTransitions(
-                appear: ModalTransition(
-                    progress: $appearTransitionProgress,
-                    sourceOffset: .constant(nil),
-                    destinationOffset: .constant(nil)
-                ),
-                tab: TabTransition(
-                    progress: $spendingsTabTransitionProgress
+    @ViewBuilder private func spendingsTab(state: AuthenticatedState, tabState: AuthenticatedState.SpendingsState) -> some View {
+        if let item = tabState.selectedGroup, case .ready(_, let spendingsGroupScreenProvider) = item {
+            spendingsGroupScreenProvider.instantiate { event in
+                switch event {
+                case .onClose:
+                    store.dispatch(.onCloseExpenses)
+                }
+            }(
+                SpendingsGroupTransitions(
+                    appear: ModalTransition(
+                        progress: $appearTransitionProgress,
+                        sourceOffset: .constant(nil),
+                        destinationOffset: .constant(nil)
+                    ),
+                    tab: TabTransition(
+                        progress: $spendingsTabTransitionProgress
+                    )
                 )
             )
-        )
+        } else {
+            state.session.spendings.instantiate { event in
+                switch event {
+                case .onGroupTap(let id):
+                    store.dispatch(.onExpenseGroupTap(id))
+                }
+            }(
+                SpendingsTransitions(
+                    appear: ModalTransition(
+                        progress: $appearTransitionProgress,
+                        sourceOffset: .constant(nil),
+                        destinationOffset: .constant(nil)
+                    ),
+                    tab: TabTransition(
+                        progress: $spendingsTabTransitionProgress
+                    )
+                )
+            )
+        }
     }
     
     @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {

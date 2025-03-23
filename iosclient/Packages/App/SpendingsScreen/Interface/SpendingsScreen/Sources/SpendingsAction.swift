@@ -7,5 +7,5 @@ public enum SpendingsAction: Sendable {
 
     case balanceUpdated([SpendingsState.Item])
 
-    case onUserTap(User)
+    case onGroupTap(SpendingGroup.Identifier)
 }

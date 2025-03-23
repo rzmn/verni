@@ -21,6 +21,10 @@ public enum AppAction: Sendable {
     case onUserPreview(User)
     case onShowPreview(User, any UserPreviewScreenProvider)
     case onCloseUserPreview
+    
+    case onExpenseGroupTap(SpendingGroup.Identifier)
+    case onShowGroupExpenses(SpendingGroup.Identifier, any SpendingsGroupScreenProvider)
+    case onCloseExpenses
 
     case showAddExpense(Bool)
     case selectTabAnonymous(AnonymousState.Tab)

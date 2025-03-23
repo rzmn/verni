@@ -1,17 +1,18 @@
 import Entities
-import SpendingsScreen
+import SpendingsGroupScreen
 import SpendingsRepository
 import UsersRepository
 import AppBase
+import SwiftUI
 
-@MainActor final class SpendingsSideEffects: Sendable {
-    private unowned let store: Store<SpendingsState, SpendingsAction>
+@MainActor final class SpendingsGroupSideEffects: Sendable {
+    private unowned let store: Store<SpendingsGroupState, SpendingsGroupAction>
     private let spendingsRepository: SpendingsRepository
     private let usersRepository: UsersRepository
     private let dataSource: SpendingsDataSource
 
     init(
-        store: Store<SpendingsState, SpendingsAction>,
+        store: Store<SpendingsGroupState, SpendingsGroupAction>,
         spendingsRepository: SpendingsRepository,
         dataSource: SpendingsDataSource,
         usersRepository: UsersRepository
@@ -23,20 +24,16 @@ import AppBase
     }
 }
 
-extension SpendingsSideEffects: ActionHandler {
+extension SpendingsGroupSideEffects: ActionHandler {
     var id: String {
-        "\(SpendingsSideEffects.self)"
+        "\(SpendingsGroupSideEffects.self)"
     }
 
-    func handle(_ action: SpendingsAction) {
+    func handle(_ action: SpendingsGroupAction) {
         switch action {
         case .onAppear:
             subscribeToUpdates()
-        case .onSearchTap:
-            break
-        case .onOverallBalanceTap:
-            break
-        case .onGroupTap, .balanceUpdated:
+        default:
             break
         }
     }
@@ -47,9 +44,19 @@ extension SpendingsSideEffects: ActionHandler {
                 .updates
                 .subscribeWeak(self) { [weak self] events in
                     guard let self else { return }
-                    Task {
+                    Task { @MainActor in
                         let spendings = await dataSource.spendings
-                        await store.dispatch(.balanceUpdated(spendings))
+                        let preview = await dataSource.groupPreview
+                        withAnimation {
+                            store.dispatch(
+                                .onSpendingsUpdated(
+                                    SpendingsGroupState(
+                                        preview: preview,
+                                        items: spendings
+                                    )
+                                )
+                            )
+                        }
                     }
                 }
         }

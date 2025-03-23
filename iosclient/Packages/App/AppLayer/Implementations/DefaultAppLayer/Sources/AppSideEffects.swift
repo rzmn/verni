@@ -38,6 +38,8 @@ extension AppSideEffects: ActionHandler {
             store.dispatch(.onAuthorized(session))
         case .onUserPreview(let user):
             showUserPreview(user)
+        case .onExpenseGroupTap(let id):
+            showSpendingsGroup(id)
         default:
             break
         }
@@ -63,6 +65,17 @@ extension AppSideEffects: ActionHandler {
         Task {
             await store.dispatch(
                 .onShowPreview(user, state.session.userPreview(user))
+            )
+        }
+    }
+    
+    private func showSpendingsGroup(_ id: Spending.Identifier) {
+        guard let state = store.state.launched?.authenticated else {
+            return
+        }
+        Task {
+            await store.dispatch(
+                .onShowGroupExpenses(id, state.session.spendingsGroup(id))
             )
         }
     }

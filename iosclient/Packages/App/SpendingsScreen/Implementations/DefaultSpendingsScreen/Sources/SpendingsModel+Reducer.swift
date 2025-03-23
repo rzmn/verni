@@ -11,7 +11,7 @@ extension SpendingsModel {
                 return state
             case .onOverallBalanceTap:
                 return state
-            case .onUserTap:
+            case .onGroupTap:
                 return state
             case .balanceUpdated(let balance):
                 return modify(state) {

@@ -2,6 +2,7 @@ import AppBase
 import DesignSystem
 import ProfileScreen
 import SpendingsScreen
+import SpendingsGroupScreen
 import AddExpenseScreen
 import UserPreviewScreen
 import Entities
@@ -10,6 +11,7 @@ public typealias ProfileScreenProvider = ScreenProvider<ProfileEvent, ProfileVie
 public typealias SpendingsScreenProvider = ScreenProvider<SpendingsEvent, SpendingsView, SpendingsTransitions>
 public typealias AddExpenseScreenProvider = ScreenProvider<AddExpenseEvent, AddExpenseView, AddExpenseTransitions>
 public typealias UserPreviewScreenProvider = ScreenProvider<UserPreviewEvent, UserPreviewView, UserPreviewTransitions>
+public typealias SpendingsGroupScreenProvider = ScreenProvider<SpendingsGroupEvent, SpendingsGroupView, SpendingsGroupTransitions>
 
 @MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
@@ -18,6 +20,7 @@ public typealias UserPreviewScreenProvider = ScreenProvider<UserPreviewEvent, Us
     var spendings: any SpendingsScreenProvider { get }
     var addExpense: any AddExpenseScreenProvider { get }
     var userPreview: (User) async -> any UserPreviewScreenProvider { get }
+    var spendingsGroup: (SpendingGroup.Identifier) async -> any SpendingsGroupScreenProvider { get }
     func logout() async
 }
 

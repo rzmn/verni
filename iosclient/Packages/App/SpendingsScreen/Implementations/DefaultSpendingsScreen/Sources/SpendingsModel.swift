@@ -24,26 +24,32 @@ struct SpendingsDataSource {
                     await spendingsRepository[group: $0]
                 }
                 .asyncCompactMap { (group, participants) -> SpendingsState.Item? in
-                    let users = await participants.asyncCompactMap { participant -> (participant: SpendingGroup.Participant, user: AnyUser)? in
-                        guard let user = await usersRepository[participant.userId] else {
-                            return nil
+                    let name: String
+                    let image: Entities.Image.Identifier?
+                    if let groupName = group.name {
+                        name = groupName
+                    } else {
+                        name = await participants
+                            .map(\.userId)
+                            .filter { $0 != hostId }
+                            .asyncCompactMap {
+                                await usersRepository[$0]?.payload.displayName
+                            }
+                            .joined(separator: ", ")
+                    }
+                    image = await participants
+                        .map(\.userId)
+                        .filter { $0 != hostId }
+                        .lazy
+                        .asyncCompactMap {
+                            await usersRepository[$0]?.payload.avatar
                         }
-                        return (participant, user)
-                    }
-                    guard users.count == 2 else {
-                        logger.logW { "skipping group \(group) due to wrong participants count \(participants)" }
-                        return nil
-                    }
-                    guard let counterparty = users.first(where: { $0.user.id != hostId }) else {
-                        logger.logW { "counterparty not found in \(users.map(\.user))" }
-                        return nil
-                    }
-                    guard let spendings = await spendingsRepository[spendingsIn: group.id] else {
-                        logger.logW { "spendings not found in \(users.map(\.user))" }
-                        return nil
-                    }
+                        .first
+                    let spendings = await spendingsRepository[spendingsIn: group.id] ?? []
                     return SpendingsState.Item(
-                        user: counterparty.user,
+                        id: group.id,
+                        image: image,
+                        name: name,
                         balance: spendings
                             .reduce(into: [Currency: Amount]()) { dict, element in
                                 let hostsShare = element.payload.shares
@@ -63,7 +69,7 @@ actor SpendingsModel {
     private let store: Store<SpendingsState, SpendingsAction>
     private let spendingsRepository: SpendingsRepository
     private let usersRepository: UsersRepository
-
+    
     init(
         spendingsRepository: SpendingsRepository,
         usersRepository: UsersRepository,
@@ -118,8 +124,8 @@ actor SpendingsModel {
                             id: "\(SpendingsEvent.self)",
                             handleBlock: { action in
                                 switch action {
-                                case .onUserTap(let user):
-                                    handler(.onUserTap(user))
+                                case .onGroupTap(let id):
+                                    handler(.onGroupTap(id))
                                 default:
                                     break
                                 }

@@ -69,7 +69,6 @@ public struct SpendingsItem: View {
         }
     }
 
-    @State private var animationId = UUID()
     private var spendingAmountPreview: some View {
         VStack(alignment: .trailing, spacing: 0) {
             Spacer()

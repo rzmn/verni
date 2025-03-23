@@ -20,6 +20,11 @@ let package = Package(
         .local(.currentLayer(.interface("AddExpenseScreen"))),
         .local(.currentLayer(.interface("SignUpScreen"))),
         .local(.currentLayer(.interface("UserPreviewScreen"))),
+        .local(.currentLayer(.interface("SpendingsGroupScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "SpendingsGroupScreen", implementation: "DefaultSpendingsGroupScreen"))),
         .local(
             .currentLayer(
                 .implementation(
@@ -65,6 +70,8 @@ let package = Package(
                 "LoggingExtensions",
                 "DesignSystem",
                 "AppBase",
+                "SpendingsGroupScreen",
+                "DefaultSpendingsGroupScreen",
                 "AddExpenseScreen",
                 "DefaultAddExpenseScreen",
                 "AuthWelcomeScreen",

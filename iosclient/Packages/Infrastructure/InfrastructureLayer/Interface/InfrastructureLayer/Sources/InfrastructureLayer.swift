@@ -14,11 +14,11 @@ public protocol InfrastructureLayer: Sendable {
 
 extension InfrastructureLayer {
     public var time: TimeInterval {
-        CACurrentMediaTime()
+        Date().timeIntervalSince1970
     }
     
     public var timeMs: Int64 {
-        Int64(UInt64(time) * MSEC_PER_SEC)
+        Int64(time * TimeInterval(MSEC_PER_SEC))
     }
     
     public func nextId() -> String {

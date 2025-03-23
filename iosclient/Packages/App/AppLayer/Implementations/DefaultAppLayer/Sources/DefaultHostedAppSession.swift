@@ -3,6 +3,7 @@ import AppBase
 import ProfileScreen
 import SpendingsScreen
 import AddExpenseScreen
+import SpendingsGroupScreen
 import DomainLayer
 import DesignSystem
 import Foundation
@@ -12,6 +13,7 @@ internal import DefaultProfileScreen
 internal import DefaultUserPreviewScreen
 internal import DefaultSpendingsScreen
 internal import DefaultAddExpenseScreen
+internal import DefaultSpendingsGroupScreen
 
 final class DefaultHostedAppSession: HostedAppSession {
     var userPreview: (User) async -> any UserPreviewScreenProvider
@@ -20,6 +22,7 @@ final class DefaultHostedAppSession: HostedAppSession {
     var profile: any ProfileScreenProvider
     var spendings: any SpendingsScreenProvider
     var addExpense: any AddExpenseScreenProvider
+    var spendingsGroup: (SpendingGroup.Identifier) async -> any SpendingsGroupScreenProvider
     private let domain: HostedDomainLayer
     
     init(sandbox: SandboxAppSession, session: HostedDomainLayer) async {
@@ -65,6 +68,16 @@ final class DefaultHostedAppSession: HostedAppSession {
                 usersRemoteDataSource: session.usersRemoteDataSource,
                 logger: logger
                     .with(scope: .userPreview)
+            ).create()
+        }
+        self.spendingsGroup = { groupId in
+            await DefaultSpendingsGroupFactory(
+                spendingsRepository: session.spendingsRepository,
+                usersRepository: session.usersRepository,
+                hostId: session.profileRepository.profile.userId,
+                groupId: groupId,
+                logger: logger
+                    .with(scope: .spendings)
             ).create()
         }
     }

@@ -202,12 +202,24 @@ public extension VerniL10N {
         mappingFormat(format: "add_expense_you_owe", counterparty)
     }
     
+    static func spending(paidBy: String, amount: String) -> Self {
+        mappingFormat(format: "spending_paid_format", paidBy, amount)
+    }
+    
+    static func spendingsOverallBalance(amount: String) -> Self {
+        mappingFormat(format: "spending_group_overall_balance", amount)
+    }
+    
     static var addExpenseSplitEqually: Self {
         mapping("add_expense_equally_option")
     }
     
     static var addExpenseFull: Self {
         mapping("add_expense_full_option")
+    }
+    
+    static var settledUp: Self {
+        mapping("spendings_settled_up")
     }
     
     static var addExpenseTitlePlaceholder: Self {
@@ -224,6 +236,14 @@ public extension VerniL10N {
     
     static var addExpenseNavSubmit: Self {
         mapping("add_expense_nav_submit")
+    }
+    
+    static var you: Self {
+        mapping("common_you")
+    }
+    
+    static var notFound: Self {
+        mapping("not_found")
     }
 }
 

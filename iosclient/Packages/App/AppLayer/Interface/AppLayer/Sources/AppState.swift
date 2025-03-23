@@ -34,8 +34,31 @@ public struct AuthenticatedState: Equatable, Sendable {
         case item(TabItem)
         case addExpense
     }
+    public enum SpendingsGroupPreview: Equatable, Sendable {
+        case pending(SpendingGroup.Identifier)
+        case ready(SpendingGroup.Identifier, any SpendingsGroupScreenProvider)
+        
+        var groupId: SpendingGroup.Identifier {
+            switch self {
+            case .pending(let groupId), .ready(let groupId, _):
+                return groupId
+            }
+        }
+        
+        public static func == (lhs: AuthenticatedState.SpendingsGroupPreview, rhs: AuthenticatedState.SpendingsGroupPreview) -> Bool {
+            lhs.groupId == rhs.groupId
+        }
+        
+    }
+    public struct SpendingsState: Equatable, Sendable {
+        public var selectedGroup: SpendingsGroupPreview?
+        
+        public init(selectedGroup: SpendingsGroupPreview? = nil) {
+            self.selectedGroup = selectedGroup
+        }
+    }
     public enum TabItem: Equatable, Identifiable, Sendable {
-        case spendings
+        case spendings(SpendingsState)
         case profile
 
         public var id: String {
@@ -52,7 +75,7 @@ public struct AuthenticatedState: Equatable, Sendable {
         case toTheLeft
         case toTheRight
     }
-    public enum UserPreview: Equatable {
+    public enum UserPreview: Equatable, Sendable {
         case pending(User)
         case ready(User, any UserPreviewScreenProvider)
         
@@ -87,8 +110,16 @@ public struct AuthenticatedState: Equatable, Sendable {
         }
     }
 
-    func position(of tabItem: TabItem) -> TabPosition? {
-        guard let center = tabs.firstIndex(of: .item(tab)), let index = tabs.firstIndex(of: .item(tabItem)) else {
+    func position(of tabItem: (TabItem) -> Bool) -> TabPosition? {
+        guard
+            let center = tabs.firstIndex(of: .item(tab)),
+            let index = tabs.firstIndex(where: {
+                guard case .item(let value) = $0 else {
+                    return false
+                }
+                return tabItem(value)
+            }
+        ) else {
             return nil
         }
         if center == index {

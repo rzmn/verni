@@ -133,6 +133,17 @@
         }
       }
     },
+    "common_you" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "you"
+          }
+        }
+      }
+    },
     "debug_menu_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -239,6 +250,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Log in"
+          }
+        }
+      }
+    },
+    "not_found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not found"
           }
         }
       }
@@ -529,6 +551,28 @@
         }
       }
     },
+    "spending_group_overall_balance" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "overall balance: %@"
+          }
+        }
+      }
+    },
+    "spending_paid_format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ paid %@"
+          }
+        }
+      }
+    },
     "spendings_negative_balance" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -569,6 +613,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "you owe"
+          }
+        }
+      }
+    },
+    "spendings_settled_up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "settled up"
           }
         }
       }

@@ -3,15 +3,20 @@ import Entities
 
 public struct SpendingsState: Equatable, Sendable {
     public struct Item: Sendable, Equatable, Identifiable {
-        public var user: AnyUser
+        public var id: SpendingGroup.Identifier
+        public var image: Image.Identifier?
+        public var name: String
         public var balance: [Currency: Amount]
-
-        public var id: String {
-            user.id
-        }
         
-        public init(user: AnyUser, balance: [Currency: Amount]) {
-            self.user = user
+        public init(
+            id: SpendingGroup.Identifier,
+            image: Image.Identifier? = nil,
+            name: String,
+            balance: [Currency: Amount]
+        ) {
+            self.id = id
+            self.image = image
+            self.name = name
             self.balance = balance
         }
 
@@ -19,11 +24,11 @@ public struct SpendingsState: Equatable, Sendable {
             (balance.first?.value ?? 0) >= 0
         }
 
-        public var amount: String {
+        public var amount: String? {
             if balance.isEmpty {
-                Currency.russianRuble.formatted(amount: 0)
+                return nil
             } else {
-                balance.map { (currency, value) in
+                return balance.map { (currency, value) in
                     currency.formatted(amount: abs(value))
                 }.joined(separator: " + ")
             }

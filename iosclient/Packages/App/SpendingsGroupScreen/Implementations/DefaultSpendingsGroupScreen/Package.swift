@@ -1,51 +1,40 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "AppLayer",
+    name: "DefaultSpendingsGroupScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AppLayer",
-            targets: ["AppLayer"]
+            name: "DefaultSpendingsGroupScreen",
+            targets: ["DefaultSpendingsGroupScreen"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AuthWelcomeScreen"))),
-        .local(.currentLayer(.interface("DebugMenuScreen"))),
-        .local(.currentLayer(.interface("SpendingsScreen"))),
-        .local(.currentLayer(.interface("ProfileScreen"))),
-        .local(.currentLayer(.interface("LogInScreen"))),
-        .local(.currentLayer(.interface("SignUpScreen"))),
-        .local(.currentLayer(.interface("SplashScreen"))),
-        .local(.currentLayer(.interface("AddExpenseScreen"))),
-        .local(.currentLayer(.interface("UserPreviewScreen"))),
-        .local(.currentLayer(.interface("DesignSystem"))),
         .local(.currentLayer(.interface("SpendingsGroupScreen"))),
         .local(.currentLayer(.interface("AppBase"))),
-        .local(.domain(.interface("DomainLayer"))),
+        .local(.currentLayer(.interface("DesignSystem"))),
+
+        .local(.domain(.interface("Entities"))),
+        .local(.domain(.interface("SpendingsRepository"))),
+        .local(.domain(.interface("UsersRepository"))),
+
         .local(.infrastructure(.interface("Logging"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
         .target(
-            name: "AppLayer",
+            name: "DefaultSpendingsGroupScreen",
             dependencies: [
-                "AuthWelcomeScreen",
-                "AddExpenseScreen",
-                "DebugMenuScreen",
-                "SpendingsScreen",
                 "SpendingsGroupScreen",
-                "UserPreviewScreen",
-                "ProfileScreen",
-                "LogInScreen",
-                "SignUpScreen",
-                "SplashScreen",
-                "DesignSystem",
                 "AppBase",
-                "DomainLayer",
+                "DesignSystem",
+                "Entities",
+                "SpendingsRepository",
+                "UsersRepository",
                 "Logging",
                 "Convenience",
             ],

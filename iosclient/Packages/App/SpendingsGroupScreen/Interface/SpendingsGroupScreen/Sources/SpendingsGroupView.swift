@@ -1,10 +1,11 @@
 import SwiftUI
 import AppBase
 import Entities
+internal import Convenience
 internal import DesignSystem
 
-public struct SpendingsView: View {
-    @ObservedObject var store: Store<SpendingsState, SpendingsAction>
+public struct SpendingsGroupView: View {
+    @ObservedObject var store: Store<SpendingsGroupState, SpendingsGroupAction>
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
     
@@ -15,8 +16,8 @@ public struct SpendingsView: View {
     @Binding private var tabTransitionProgress: CGFloat
     
     public init(
-        store: Store<SpendingsState, SpendingsAction>,
-        transitions: SpendingsTransitions
+        store: Store<SpendingsGroupState, SpendingsGroupAction>,
+        transitions: SpendingsGroupTransitions
     ) {
         self.store = store
         
@@ -31,46 +32,65 @@ public struct SpendingsView: View {
         VStack(spacing: 0) {
             NavigationBar(
                 config: NavigationBar.Config(
-                    rightItem: NavigationBar.Item(
+                    leftItem: NavigationBar.Item(
                         config: .icon(
                             .init(
                                 style: .primary,
-                                icon: .search
+                                icon: .arrowLeft
                             )
                         ),
                         action: {
-                            store.dispatch(.onSearchTap)
+                            store.dispatch(.onTapBack)
                         }
                     ),
-                    title: .spendingsTitle,
+                    title: "",
                     style: .primary
                 )
             )
             .modifier(VerticalTranslateEffect(offset: -0.8 * appearTransitionOffset))
             .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             .opacity(tabTransitionOpacity)
-            overallSection
-                .padding(.top, appearTransitionOffset)
-                .opacity(adjustedTransitionOpacity)
-                .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
-            ForEach(items) { (item: SpendingsState.Item) in
-                SpendingsItem(
-                    config: SpendingsItem.Config(
-                        avatar: item.image,
-                        name: item.name,
-                        style: item.isPositive ? .positive : .negative,
-                        amount: item.amount ?? .settledUp
-                    )
-                )
-                .id(item.id)
-                .onTapGesture {
-                    store.dispatch(.onGroupTap(item.id))
+            HStack {
+                AvatarView(avatar: store.state.preview.image)
+                    .frame(width: 68, height: 68)
+                    .clipShape(.rect(cornerRadius: 34))
+                    .padding(.top, 12)
+                Spacer()
+                    .frame(width: 22)
+                VStack(alignment: .leading, spacing: 0) {
+                    Spacer()
+                    Text(store.state.preview.name)
+                        .font(.medium(size: 20))
+                        .foregroundStyle(colors.text.primary.default)
+                        .padding(.top, 4)
+                    Text(.spendingsOverallBalance(amount: store.state.balanceFormatted ?? .settledUp))
+                        .font(.medium(size: 14))
+                        .minimumScaleFactor(0.3)
+                        .foregroundStyle(colors.text.secondary.default)
+                    Spacer()
+                }
+                .frame(height: 68)
+                Spacer()
+            }
+            .padding(.all, 12)
+            .modifier(VerticalTranslateEffect(offset: -0.8 * appearTransitionOffset))
+            .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
+            .opacity(tabTransitionOpacity)
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(store.state.items) { (item: SpendingsGroupState.Item) in
+                        SpendingItemView(store: store, item: item)
+                            .padding(.top, 2)
+                            .id(item.id)
+                            .transition(.slide)
+                    }
                 }
             }
             .opacity(adjustedTransitionOpacity)
             .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
             Spacer()
         }
+        .background(colors.background.secondary.default)
         .onAppear {
             store.dispatch(.onAppear)
         }
@@ -91,35 +111,6 @@ public struct SpendingsView: View {
     private var appearTransitionOffset: CGFloat {
         (1 - appearTransitionProgress) * UIScreen.main.bounds.height / 5
     }
-    
-    private var items: [SpendingsState.Item] {
-        store.state.previews
-    }
-    
-    private var overallSection: some View {
-        HStack(spacing: 0) {
-            Image.chevronDown
-                .frame(width: 24, height: 24)
-                .padding(.leading, 16)
-                .foregroundStyle(colors.text.primary.alternative)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(.spendingsOverallTitle)
-                    .font(.bold(size: 15))
-                    .foregroundStyle(colors.text.primary.alternative)
-                    .padding(.top, 20)
-                Spacer()
-                Text(.spendingsPeopleInvolved(count: store.state.previews.count))
-                    .font(.medium(size: 15))
-                    .foregroundStyle(colors.text.secondary.alternative)
-                    .padding(.bottom, 20)
-            }
-            .padding(.leading, 12)
-            Spacer()
-        }
-        .background(colors.background.primary.alternative)
-        .frame(height: 82)
-        .clipShape(.rect(cornerRadius: 24))
-    }
 }
 
 #if DEBUG
@@ -131,23 +122,27 @@ private struct SpendingsPreview: View {
     
     var body: some View {
         ZStack {
-            SpendingsView(
+            SpendingsGroupView(
                 store: Store(
-                    state: SpendingsState(
-                        previews: [
-                            SpendingsState.Item(
-                                id: UUID().uuidString,
-                                image: nil,
-                                name: "displayName",
-                                balance: [
-                                    .euro: 123
-                                ]
-                            )
+                    state: SpendingsGroupState(
+                        preview: SpendingsGroupState.GroupPreview(
+                            image: "123",
+                            name: "group name",
+                            balance: [
+                                .euro: 123,
+                                .russianRuble: 342
+                            ]
+                        ),
+                        items: [
+                            .preview,
+                            modify(.preview) {
+                                $0.id = UUID().uuidString
+                            }
                         ]
                     ),
                     reducer: { state, _ in state }
                 ),
-                transitions: SpendingsTransitions(
+                transitions: SpendingsGroupTransitions(
                     appear: ModalTransition(
                         progress: $appearTransition,
                         sourceOffset: .constant(0),
@@ -173,6 +168,7 @@ class ClassToIdentifyBundle {}
 
 #Preview {
     SpendingsPreview()
+        .environment(AvatarView.Repository { _ in .stubAvatar })
         .preview(packageClass: ClassToIdentifyBundle.self)
 }
 
