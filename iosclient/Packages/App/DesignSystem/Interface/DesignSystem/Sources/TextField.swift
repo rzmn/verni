@@ -94,6 +94,24 @@ public struct TextField: View {
                 }
             }
     }
+    
+    private func secureFieldModifier(view: some View) -> some View {
+        view
+            .font(Font.medium(size: 15))
+            .foregroundStyle(Color.clear)
+            .focused($inFocus)
+            .padding(.trailing, -2)
+    }
+    
+    @ViewBuilder var secureField: some View {
+        if contentType == .newPassword {
+            secureFieldModifier(view: SwiftUI.TextField("", text: textFieldBinding))
+                .textContentType(.none)
+        } else {
+            secureFieldModifier(view: SecureField("", text: textFieldBinding))
+                .textContentType(contentType)
+        }
+    }
 
     @FocusState private var inFocus: Bool
     @State private var showSecureFieldContent = false
@@ -113,14 +131,7 @@ public struct TextField: View {
                         .foregroundStyle(colors.text.primary.default)
                         .lineLimit(1)
                         .opacity(0)
-                        .overlay(
-                            SecureField("", text: textFieldBinding)
-                                .font(Font.medium(size: 15))
-                                .foregroundStyle(Color.clear)
-                                .focused($inFocus)
-                                .padding(.trailing, -2)
-
-                        )
+                        .overlay(secureField)
                         .background(
                             Text(
                                 showSecureFieldContent
@@ -208,7 +219,7 @@ public struct TextField: View {
     private var contentType: UITextContentType? {
         switch config.content {
         case .email:
-            .username
+            .emailAddress
         case .password:
             .password
         case .newPassword:
