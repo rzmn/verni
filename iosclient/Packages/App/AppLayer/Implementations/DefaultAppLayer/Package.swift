@@ -20,7 +20,12 @@ let package = Package(
         .local(.currentLayer(.interface("AddExpenseScreen"))),
         .local(.currentLayer(.interface("SignUpScreen"))),
         .local(.currentLayer(.interface("UserPreviewScreen"))),
+        .local(.currentLayer(.interface("ProfileEditingScreen"))),
         .local(.currentLayer(.interface("SpendingsGroupScreen"))),
+        .local(
+            .currentLayer(
+                .implementation(
+                    interface: "ProfileEditingScreen", implementation: "DefaultProfileEditingScreen"))),
         .local(
             .currentLayer(
                 .implementation(
@@ -67,9 +72,12 @@ let package = Package(
             name: "DefaultAppLayer",
             dependencies: [
                 "AppLayer",
+                "UserPreviewScreen",
                 "LoggingExtensions",
                 "DesignSystem",
                 "AppBase",
+                "ProfileEditingScreen",
+                "DefaultProfileEditingScreen",
                 "SpendingsGroupScreen",
                 "DefaultSpendingsGroupScreen",
                 "AddExpenseScreen",

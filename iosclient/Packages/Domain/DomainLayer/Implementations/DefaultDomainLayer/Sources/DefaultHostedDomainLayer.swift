@@ -30,6 +30,7 @@ final class DefaultHostedDomainLayer: Sendable {
     let logoutUseCase: LogoutUseCase
     let avatarsRemoteDataSource: AvatarsRemoteDataSource
     let usersRemoteDataSource: UsersRemoteDataSource
+    let avatarsRepository: AvatarsRepository
     let logger: Logger
 
     private let dataSession: DataSession
@@ -62,6 +63,14 @@ final class DefaultHostedDomainLayer: Sendable {
             sync: dataSession.sync,
             logger: logger.with(
                 scope: .profile
+            )
+        )
+        self.avatarsRepository = await DefaultAvatarsRepository(
+            userId: userId,
+            sync: dataSession.sync,
+            infrastructure: sharedDomain.infrastructure,
+            logger: logger.with(
+                scope: .images
             )
         )
         self.usersRepository = await DefaultUsersRepository(

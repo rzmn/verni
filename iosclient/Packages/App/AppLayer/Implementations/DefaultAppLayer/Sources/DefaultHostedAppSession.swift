@@ -14,6 +14,7 @@ internal import DefaultUserPreviewScreen
 internal import DefaultSpendingsScreen
 internal import DefaultAddExpenseScreen
 internal import DefaultSpendingsGroupScreen
+internal import DefaultProfileEditingScreen
 
 final class DefaultHostedAppSession: HostedAppSession {
     var userPreview: (User) async -> any UserPreviewScreenProvider
@@ -23,6 +24,7 @@ final class DefaultHostedAppSession: HostedAppSession {
     var spendings: any SpendingsScreenProvider
     var addExpense: any AddExpenseScreenProvider
     var spendingsGroup: (SpendingGroup.Identifier) async -> any SpendingsGroupScreenProvider
+    var profileEditing: any ProfileEditingScreenProvider
     private let domain: HostedDomainLayer
     
     init(sandbox: SandboxAppSession, session: HostedDomainLayer) async {
@@ -80,6 +82,13 @@ final class DefaultHostedAppSession: HostedAppSession {
                     .with(scope: .spendings)
             ).create()
         }
+        self.profileEditing = await DefaultProfileEditingFactory(
+            profileRepository: session.profileRepository,
+            usersRepository: session.usersRepository,
+            avatarsRepository: session.avatarsRepository,
+            logger: logger
+                .with(scope: .profileEditing)
+        ).create()
     }
     
     func logout() async {

@@ -5,13 +5,13 @@ internal import DesignSystem
 
 public struct ProfileState: Equatable, Sendable {
     public var profile: Profile
-    public var profileInfo: User
+    public var profileInfo: UserPayload
     public var avatarCardFlipCount: CGFloat
     public var qrCodeData: UIImage?
     
     public init(
         profile: Profile,
-        profileInfo: User,
+        profileInfo: UserPayload,
         avatarCardFlipCount: CGFloat,
         qrCodeData: UIImage?
     ) {

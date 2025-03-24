@@ -5,6 +5,7 @@ import SpendingsScreen
 import SpendingsGroupScreen
 import AddExpenseScreen
 import UserPreviewScreen
+import ProfileEditingScreen
 import Entities
 
 public typealias ProfileScreenProvider = ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
@@ -12,11 +13,13 @@ public typealias SpendingsScreenProvider = ScreenProvider<SpendingsEvent, Spendi
 public typealias AddExpenseScreenProvider = ScreenProvider<AddExpenseEvent, AddExpenseView, AddExpenseTransitions>
 public typealias UserPreviewScreenProvider = ScreenProvider<UserPreviewEvent, UserPreviewView, UserPreviewTransitions>
 public typealias SpendingsGroupScreenProvider = ScreenProvider<SpendingsGroupEvent, SpendingsGroupView, SpendingsGroupTransitions>
+public typealias ProfileEditingScreenProvider = ScreenProvider<ProfileEditingEvent, ProfileEditingView, ProfileEditingTransitions>
 
 @MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
     var images: AvatarView.Repository { get }
     var profile: any ProfileScreenProvider { get }
+    var profileEditing: any ProfileEditingScreenProvider { get }
     var spendings: any SpendingsScreenProvider { get }
     var addExpense: any AddExpenseScreenProvider { get }
     var userPreview: (User) async -> any UserPreviewScreenProvider { get }

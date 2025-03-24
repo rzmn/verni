@@ -40,6 +40,12 @@ extension AppModel {
             case .onCloseUserPreview:
                 return updateAuthenticatedState(state) { $0.externalUserPreview = nil }
                 
+            // Profile editing handling
+            case .onOpenEditProfile:
+                return modify(state) { updateProfileEditing(isEditingProfile: true, state: &$0) }
+            case .onCloseEditProfile:
+                return modify(state) { updateProfileEditing(isEditingProfile: false, state: &$0) }
+                
             // Expense group handling
             case .onCloseExpenses:
                 return modify(state) { updateSelectedSpendingsGroup(groupPreview: nil, state: &$0) }
@@ -92,18 +98,55 @@ extension AppModel {
 
     @MainActor private static func initialAuthenticatedState(session: AnyHostedAppSession) -> AuthenticatedState {
         let spendingsState = AuthenticatedState.SpendingsState()
+        let profileState = AuthenticatedState.ProfileState()
         return AuthenticatedState(
             session: session,
             tabs: [
                 .item(.spendings(spendingsState)),
                 .addExpense,
-                .item(.profile)
+                .item(.profile(profileState))
             ],
             tab: .spendings(spendingsState),
             bottomSheet: nil,
             isAddingSpending: false,
             unauthenticatedFailure: nil
         )
+    }
+    
+    @MainActor private static func updateProfileEditing(
+        isEditingProfile: Bool,
+        state: inout AppState
+    ) {
+        guard case .launched(let launched) = state else {
+            return
+        }
+        guard case .authenticated(var authenticated) = launched else {
+            return
+        }
+        authenticated.tabs = authenticated.tabs.map {
+            guard case .item(let tab) = $0 else {
+                return $0
+            }
+            guard case .profile(var state) = tab else {
+                return $0
+            }
+            state.isEditing = isEditingProfile
+            return .item(.profile(state))
+        }
+        if let tab = authenticated.tabs.compactMap(
+            { tab -> AuthenticatedState.TabItem? in
+                guard case .item(let tab) = tab else {
+                    return nil
+                }
+                guard case .profile = tab else {
+                    return nil
+                }
+                return tab
+            }
+        ).first {
+            authenticated.tab = tab
+        }
+        state = .launched(.authenticated(authenticated))
     }
     
     @MainActor private static func updateSelectedSpendingsGroup(

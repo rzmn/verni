@@ -34,6 +34,8 @@ extension ProfileSideEffects: ActionHandler {
         switch action {
         case .onRequestQrImage(let size):
             requestQrImage(size: size)
+        case .onAppear:
+            subscribeToUpdates()
         default:
             break
         }
@@ -58,6 +60,19 @@ extension ProfileSideEffects: ActionHandler {
                 return
             }
             await self.store.dispatch(.onQrImageReady(image))
+        }
+    }
+    
+    private func subscribeToUpdates() {
+        Task {
+            await usersRepository.updates.subscribeWeak(self) { event in
+                Task {
+                    guard let user = event[await self.profileRepository.profile.userId] else {
+                        return
+                    }
+                    await self.store.dispatch(.profileInfoUpdated(user.payload))
+                }
+            }
         }
     }
 }

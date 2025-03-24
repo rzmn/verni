@@ -41,7 +41,7 @@ struct ProfileSettingsList: View {
                     accessoryIcon: .chevronRight
                 )
             ) {
-                store.dispatch(.onEditProfileTap)
+                store.dispatch(.onAccountSettingsTap)
             }
             MenuOption(
                 config: MenuOption.Config(
@@ -51,7 +51,7 @@ struct ProfileSettingsList: View {
                     accessoryIcon: .chevronRight
                 )
             ) {
-                store.dispatch(.onEditProfileTap)
+                store.dispatch(.onNotificationsSettingsTap)
             }
             .padding(.top, 2)
         }
@@ -68,12 +68,9 @@ struct ProfileSettingsList: View {
                     userId: "",
                     email: .undefined
                 ),
-                profileInfo: User(
-                    id: "",
-                    payload: UserPayload(
-                        displayName: "name",
-                        avatar: nil
-                    )
+                profileInfo: UserPayload(
+                    displayName: "name",
+                    avatar: nil
                 ),
                 avatarCardFlipCount: 0,
                 qrCodeData: nil

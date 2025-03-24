@@ -122,8 +122,28 @@ public extension VerniL10N {
         mapping("profile_action_edit_profile")
     }
     
-    static var profileEditUpdateAvatar: Self {
-        mapping("profile_edit_update_avatar")
+    static var profileEditSetAnotherAvatar: Self {
+        mapping("profile_edit_avatar_set_another")
+    }
+    
+    static var profileEditSetDefault: Self {
+        mapping("profile_edit_avatar_set_default")
+    }
+    
+    static var profileEditSetNewAvatar: Self {
+        mapping("profile_edit_set_new_avatar")
+    }
+    
+    static var profileEditCurrent: Self {
+        mapping("profile_edit_current")
+    }
+    
+    static var profileEditDisplayNameTooShort: Self {
+        mapping("profile_edit_display_name_too_short")
+    }
+    
+    static var profileEditDisplayNamePlaceholder: Self {
+        mapping("profile_edit_display_name_placeholder")
     }
 
     static var profileActionAccountSettings: Self {
@@ -140,6 +160,10 @@ public extension VerniL10N {
 
     static var spendingsTitle: Self {
         mapping("spendings_title")
+    }
+    
+    static var profileEditConfirm: Self {
+        mapping("profile_edit_confirm")
     }
 
     static var spendingsOverallTitle: Self {

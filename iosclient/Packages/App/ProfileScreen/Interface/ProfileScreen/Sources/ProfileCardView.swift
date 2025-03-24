@@ -39,7 +39,7 @@ struct ProfileCardView: View {
     }
 
     @ViewBuilder private var avatarCard: some View {
-        AvatarView(avatar: store.state.profileInfo.payload.avatar)
+        AvatarView(avatar: store.state.profileInfo.avatar)
             .aspectRatio(cardAspectRatio, contentMode: .fit)
             .clipped()
             .clipShape(.rect(cornerRadius: cornerRadius, style: .circular))
@@ -60,7 +60,7 @@ struct ProfileCardView: View {
                 HStack {
                     VStack {
                         Spacer()
-                        Text(store.state.profileInfo.payload.displayName)
+                        Text(store.state.profileInfo.displayName)
                             .font(.medium(size: 28))
                             .foregroundStyle(colors.text.primary.staticLight)
                             .padding(.leading, 16)
@@ -157,12 +157,9 @@ class ClassToIdentifyBundle {}
                     userId: "",
                     email: .undefined
                 ),
-                profileInfo: User(
-                    id: "",
-                    payload: UserPayload(
-                        displayName: "name",
-                        avatar: nil
-                    )
+                profileInfo: UserPayload(
+                    displayName: "name",
+                    avatar: nil
                 ),
                 avatarCardFlipCount: 0,
                 qrCodeData: nil

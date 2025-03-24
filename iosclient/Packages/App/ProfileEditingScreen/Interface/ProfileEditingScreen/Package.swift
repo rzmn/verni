@@ -1,54 +1,31 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "AppLayer",
+    name: "ProfileEditingScreen",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "AppLayer",
-            targets: ["AppLayer"]
+            name: "ProfileEditingScreen",
+            targets: ["ProfileEditingScreen"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("AuthWelcomeScreen"))),
-        .local(.currentLayer(.interface("DebugMenuScreen"))),
-        .local(.currentLayer(.interface("SpendingsScreen"))),
-        .local(.currentLayer(.interface("ProfileScreen"))),
-        .local(.currentLayer(.interface("ProfileEditingScreen"))),
-        .local(.currentLayer(.interface("LogInScreen"))),
-        .local(.currentLayer(.interface("SignUpScreen"))),
-        .local(.currentLayer(.interface("SplashScreen"))),
-        .local(.currentLayer(.interface("AddExpenseScreen"))),
-        .local(.currentLayer(.interface("UserPreviewScreen"))),
-        .local(.currentLayer(.interface("DesignSystem"))),
-        .local(.currentLayer(.interface("SpendingsGroupScreen"))),
         .local(.currentLayer(.interface("AppBase"))),
-        .local(.domain(.interface("DomainLayer"))),
-        .local(.infrastructure(.interface("Logging"))),
+        .local(.currentLayer(.interface("DesignSystem"))),
+        .local(.domain(.interface("Entities"))),
         .local(.infrastructure(.interface("Convenience"))),
     ],
     targets: [
         .target(
-            name: "AppLayer",
+            name: "ProfileEditingScreen",
             dependencies: [
-                "AuthWelcomeScreen",
-                "AddExpenseScreen",
-                "DebugMenuScreen",
-                "SpendingsScreen",
-                "SpendingsGroupScreen",
-                "UserPreviewScreen",
-                "ProfileScreen",
-                "ProfileEditingScreen",
-                "LogInScreen",
-                "SignUpScreen",
-                "SplashScreen",
-                "DesignSystem",
                 "AppBase",
-                "DomainLayer",
-                "Logging",
+                "DesignSystem",
+                "Entities",
                 "Convenience",
             ],
             path: "Sources"

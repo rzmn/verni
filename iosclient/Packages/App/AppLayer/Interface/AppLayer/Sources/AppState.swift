@@ -57,9 +57,16 @@ public struct AuthenticatedState: Equatable, Sendable {
             self.selectedGroup = selectedGroup
         }
     }
+    public struct ProfileState: Equatable, Sendable {
+        public var isEditing: Bool
+        
+        public init(isEditing: Bool = false) {
+            self.isEditing = isEditing
+        }
+    }
     public enum TabItem: Equatable, Identifiable, Sendable {
         case spendings(SpendingsState)
-        case profile
+        case profile(ProfileState)
 
         public var id: String {
             switch self {

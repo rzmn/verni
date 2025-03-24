@@ -68,6 +68,7 @@ public struct AvatarView: View {
                 }
             } else {
                 loading
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .onAppear {
                         task = Task {
                             guard let data = await repository.get(id: avatar) else {
@@ -97,11 +98,7 @@ public struct AvatarView: View {
     }
     
     private var loading: some View {
-        placeholder("🌀")
-            .animation(
-                .linear(duration: 1).repeatForever(autoreverses: false),
-                value: true
-            )
+        ProgressView()
     }
 
     private func placeholder(_ emoji: String) -> some View {

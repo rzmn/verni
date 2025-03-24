@@ -5,6 +5,7 @@ import ProfileScreen
 import SpendingsScreen
 import AddExpenseScreen
 import SpendingsGroupScreen
+import ProfileEditingScreen
 import DesignSystem
 
 private extension Store<AppState, AppAction> {
@@ -89,7 +90,17 @@ struct AuthenticatedScreensCoordinator: View {
                     }
                 ) as Optional
         ).transitionValue
-        profileTabTransitionProgress = (store.localState?.position(of: { $0 == .profile }) as Optional).transitionValue
+        profileTabTransitionProgress = (
+            store.localState?
+                .position(
+                    of: {
+                        guard case .profile = $0 else {
+                            return false
+                        }
+                        return true
+                    }
+                ) as Optional
+        ).transitionValue
     }
     
     var body: some View {
@@ -243,7 +254,17 @@ extension AuthenticatedScreensCoordinator {
                                             }
                                         ) as Optional
                                 ).transitionValue
-                                profileTabTransitionProgress = (store.localState?.position(of: { $0 == .profile }) as Optional).transitionValue
+                                profileTabTransitionProgress = (
+                                    store.localState?
+                                        .position(
+                                            of: {
+                                                guard case .profile = $0 else {
+                                                    return false
+                                                }
+                                                return true
+                                            }
+                                        ) as Optional
+                                ).transitionValue
                             }
                         }
                     ),
@@ -267,8 +288,8 @@ extension AuthenticatedScreensCoordinator {
         switch item {
         case .spendings(let tabState):
             spendingsTab(state: state, tabState: tabState)
-        case .profile:
-            profileTab(state: state)
+        case .profile(let tabState):
+            profileTab(state: state, tabState: tabState)
         }
     }
     
@@ -312,44 +333,61 @@ extension AuthenticatedScreensCoordinator {
         }
     }
     
-    @ViewBuilder private func profileTab(state: AuthenticatedState) -> some View {
-        state.session.profile.instantiate { event in
-            switch event {
-            case .logout:
-                store.dispatch(
-                    .updateBottomSheet(
-                        .hint(
-                            title: "[debug] logout",
-                            subtitle: "[debug] sure?",
-                            actionTitle: "[debug] confirm",
-                            action: {
-                                store.dispatch(.logoutRequested)
-                            }
-                        )
+    @ViewBuilder private func profileTab(state: AuthenticatedState, tabState: AuthenticatedState.ProfileState) -> some View {
+        if tabState.isEditing {
+            state.session.profileEditing.instantiate { event in
+                switch event {
+                case .onClose:
+                    store.dispatch(.onCloseEditProfile)
+                }
+            }(
+                ProfileEditingTransitions(
+                    tab: TabTransition(
+                        progress: $profileTabTransitionProgress
                     )
-                )
-            case .showQrHint:
-                store.dispatch(
-                    .updateBottomSheet(
-                        .hint(
-                            title: .qrHintTitle,
-                            subtitle: .qrHintSubtitle,
-                            actionTitle: .sheetClose,
-                            action: {
-                                store.dispatch(.updateBottomSheet(nil))
-                            }
-                        )
-                    )
-                )
-            case .unauthorized(let reason):
-                store.dispatch(.unauthorized(reason: reason))
-            }
-        }(
-            ProfileTransitions(
-                tab: TabTransition(
-                    progress: $profileTabTransitionProgress
                 )
             )
-        )
+        } else {
+            state.session.profile.instantiate { event in
+                switch event {
+                case .logout:
+                    store.dispatch(
+                        .updateBottomSheet(
+                            .hint(
+                                title: "[debug] logout",
+                                subtitle: "[debug] sure?",
+                                actionTitle: "[debug] confirm",
+                                action: {
+                                    store.dispatch(.logoutRequested)
+                                }
+                            )
+                        )
+                    )
+                case .openEditing:
+                    store.dispatch(.onOpenEditProfile)
+                case .showQrHint:
+                    store.dispatch(
+                        .updateBottomSheet(
+                            .hint(
+                                title: .qrHintTitle,
+                                subtitle: .qrHintSubtitle,
+                                actionTitle: .sheetClose,
+                                action: {
+                                    store.dispatch(.updateBottomSheet(nil))
+                                }
+                            )
+                        )
+                    )
+                case .unauthorized(let reason):
+                    store.dispatch(.unauthorized(reason: reason))
+                }
+            }(
+                ProfileTransitions(
+                    tab: TabTransition(
+                        progress: $profileTabTransitionProgress
+                    )
+                )
+            )
+        }
     }
 }

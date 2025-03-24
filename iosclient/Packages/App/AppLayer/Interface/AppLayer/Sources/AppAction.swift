@@ -18,6 +18,9 @@ public enum AppAction: Sendable {
 
     case onAuthorized(AnyHostedAppSession)
     
+    case onOpenEditProfile
+    case onCloseEditProfile
+    
     case onUserPreview(User)
     case onShowPreview(User, any UserPreviewScreenProvider)
     case onCloseUserPreview

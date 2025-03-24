@@ -47,6 +47,9 @@ public struct ProfileView: View {
             
         }
         .background(colors.background.primary.default.opacity(tabTransitionOpacity))
+        .onAppear {
+            store.dispatch(.onAppear)
+        }
     }
     
     private var navigationBar: some View {
@@ -107,12 +110,9 @@ private struct ProfilePreview: View {
                             userId: "",
                             email: .undefined
                         ),
-                        profileInfo: User(
-                            id: "",
-                            payload: UserPayload(
-                                displayName: "name",
-                                avatar: nil
-                            )
+                        profileInfo: UserPayload(
+                            displayName: "name",
+                            avatar: nil
                         ),
                         avatarCardFlipCount: 0,
                         qrCodeData: nil

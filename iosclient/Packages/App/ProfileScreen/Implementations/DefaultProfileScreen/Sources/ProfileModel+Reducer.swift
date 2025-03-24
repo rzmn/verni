@@ -33,6 +33,12 @@ extension ProfileModel {
                 return state
             case .unauthorized:
                 return state
+            case .onAppear:
+                return state
+            case .profileInfoUpdated(let info):
+                return modify(state) {
+                    $0.profileInfo = info
+                }
             }
         }
     }

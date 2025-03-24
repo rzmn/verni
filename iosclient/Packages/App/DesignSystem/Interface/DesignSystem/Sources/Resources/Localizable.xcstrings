@@ -375,13 +375,79 @@
         }
       }
     },
-    "profile_edit_update_avatar" : {
+    "profile_edit_avatar_set_another" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "UPDATE AVATAR"
+            "value" : "SELECT ANOTHER"
+          }
+        }
+      }
+    },
+    "profile_edit_avatar_set_default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SET DEFAULT"
+          }
+        }
+      }
+    },
+    "profile_edit_confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVE CHANGES"
+          }
+        }
+      }
+    },
+    "profile_edit_current" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CURRENT:"
+          }
+        }
+      }
+    },
+    "profile_edit_display_name_placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "new name"
+          }
+        }
+      }
+    },
+    "profile_edit_display_name_too_short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "too short"
+          }
+        }
+      }
+    },
+    "profile_edit_set_new_avatar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SELECT NEW"
           }
         }
       }

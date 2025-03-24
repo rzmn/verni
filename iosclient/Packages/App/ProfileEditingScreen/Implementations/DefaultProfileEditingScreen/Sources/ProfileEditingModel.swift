@@ -5,47 +5,53 @@ import Combine
 import ProfileRepository
 import UsersRepository
 import AsyncExtensions
+import AvatarsRepository
 import SwiftUI
 import Logging
-import ProfileScreen
+import ProfileEditingScreen
 import QrInviteUseCase
 internal import Convenience
 internal import DesignSystem
 
-actor ProfileModel {
-    private let store: Store<ProfileState, ProfileAction>
+actor ProfileEditingModel {
+    private let store: Store<ProfileEditingState, ProfileEditingAction>
 
     init(
         profileRepository: ProfileRepository,
         usersRepository: UsersRepository,
-        qrInviteUseCase: QRInviteUseCase,
+        avatarsRepository: AvatarsRepository,
         logger: Logger
     ) async {
         let profile = await profileRepository.profile
-        let payload: UserPayload
-        if let user = await usersRepository[profile.userId] {
-            payload = user.payload
+        let user: User
+        if let anyUser = await usersRepository[profile.userId], case .regular(let data) = anyUser {
+            user = data
         } else {
-            payload = UserPayload(
-                displayName: profile.userId,
-                avatar: nil
+            user = User(
+                id: profile.userId,
+                payload: UserPayload(
+                    displayName: profile.userId,
+                    avatar: nil
+                )
             )
         }
         store = await Store(
-            state: ProfileState(
-                profile: profile,
-                profileInfo: payload,
-                avatarCardFlipCount: 0,
-                qrCodeData: nil
+            state: ProfileEditingState(
+                currentDisplayName: user.payload.displayName,
+                displayName: "",
+                currentAvatar: user.payload.avatar,
+                canSubmit: true,
+                showingImagePicker: false
             ),
             reducer: Self.reducer
         )
         await store.append(
-            handler: ProfileSideEffects(
+            handler: ProfileEditingSideEffects(
                 store: store,
                 profileRepository: profileRepository,
                 usersRepository: usersRepository,
-                qrUseCase: qrInviteUseCase
+                avatarsRepository: avatarsRepository,
+                logger: logger
             ),
             keepingUnique: true
         )
@@ -61,26 +67,20 @@ actor ProfileModel {
     }
 }
 
-@MainActor extension ProfileModel: ScreenProvider {
+@MainActor extension ProfileEditingModel: ScreenProvider {
     func instantiate(
-        handler: @escaping @MainActor (ProfileEvent) -> Void
-    ) -> (ProfileTransitions) -> ProfileView {
+        handler: @escaping @MainActor (ProfileEditingEvent) -> Void
+    ) -> (ProfileEditingTransitions) -> ProfileEditingView {
         return { transitions in
-            ProfileView(
+            ProfileEditingView(
                 store: modify(self.store) { store in
                     store.append(
                         handler: AnyActionHandler(
-                            id: "\(ProfileEvent.self)",
+                            id: "\(ProfileEditingEvent.self)",
                             handleBlock: { action in
                                 switch action {
-                                case .onLogoutTap:
-                                    handler(.logout)
-                                case .unauthorized(let reason):
-                                    handler(.unauthorized(reason: reason))
-                                case .onShowQrHintTap:
-                                    handler(.showQrHint)
-                                case .onEditProfileTap:
-                                    handler(.openEditing)
+                                case .onClose:
+                                    handler(.onClose)
                                 default:
                                     break
                                 }
