@@ -62,6 +62,7 @@ public struct SpendingsView: View {
                         amount: item.amount ?? .settledUp
                     )
                 )
+                .padding(.bottom, 2)
                 .id(item.id)
                 .onTapGesture {
                     store.dispatch(.onGroupTap(item.id))

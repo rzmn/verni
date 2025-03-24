@@ -22,6 +22,9 @@ public struct AddExpenseView: View {
         }
         .background(colors.background.secondary.default)
         .keyboardDismiss()
+        .onAppear {
+            store.dispatch(.appeared)
+        }
     }
     
     private var content: some View {

@@ -40,24 +40,32 @@ extension SpendingsGroupSideEffects: ActionHandler {
     
     private func subscribeToUpdates() {
         Task {
-            await spendingsRepository
-                .updates
-                .subscribeWeak(self) { [weak self] events in
-                    guard let self else { return }
-                    Task { @MainActor in
-                        let spendings = await dataSource.spendings
-                        let preview = await dataSource.groupPreview
-                        withAnimation {
-                            store.dispatch(
-                                .onSpendingsUpdated(
-                                    SpendingsGroupState(
-                                        preview: preview,
-                                        items: spendings
-                                    )
+            let reload: @Sendable () -> Void = { [weak self] in
+                guard let self else { return }
+                Task { @MainActor in
+                    let spendings = await dataSource.spendings
+                    let preview = await dataSource.groupPreview
+                    withAnimation {
+                        store.dispatch(
+                            .onSpendingsUpdated(
+                                SpendingsGroupState(
+                                    preview: preview,
+                                    items: spendings
                                 )
                             )
-                        }
+                        )
                     }
+                }
+            }
+            await spendingsRepository
+                .updates
+                .subscribeWeak(self) { events in
+                    reload()
+                }
+            await usersRepository
+                .updates
+                .subscribeWeak(self) { events in
+                    reload()
                 }
         }
     }

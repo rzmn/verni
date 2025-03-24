@@ -232,7 +232,7 @@ public struct ProfileEditingView: View {
                                 text: .profileEditSetDefault
                             )
                         ) {
-                            store.dispatch(.onSelectImage)
+                            store.dispatch(.onSelectDefaultImage)
                         }
                         DesignSystem.Button(
                             config: .init(
@@ -240,7 +240,7 @@ public struct ProfileEditingView: View {
                                 text: .profileEditSetAnotherAvatar
                             )
                         ) {
-                            store.dispatch(.onSelectDefaultImage)
+                            store.dispatch(.onSelectImage)
                         }
                     }
                 }

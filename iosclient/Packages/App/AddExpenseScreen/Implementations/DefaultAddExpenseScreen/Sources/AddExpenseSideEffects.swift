@@ -7,19 +7,16 @@ import UIKit
 @MainActor final class AddExpenseSideEffects: Sendable {
     private unowned let store: Store<AddExpenseState, AddExpenseAction>
     private let spendingsRepository: SpendingsRepository
-    private let groups: [OneToOneSpendingsGroup]
-    private let hostId: User.Identifier
+    private let dataSource: AddExpenseDataSource
 
     init(
         store: Store<AddExpenseState, AddExpenseAction>,
-        groups: [OneToOneSpendingsGroup],
-        hostId: User.Identifier,
+        dataSource: AddExpenseDataSource,
         spendingsRepository: SpendingsRepository
     ) {
         self.store = store
         self.spendingsRepository = spendingsRepository
-        self.hostId = hostId
-        self.groups = groups
+        self.dataSource = dataSource
     }
 }
 
@@ -32,6 +29,8 @@ extension AddExpenseSideEffects: ActionHandler {
         switch action {
         case .submit:
             createSpending(state: store.state)
+        case .appeared:
+            subscribeToUpdates()
         default:
             break
         }
@@ -41,10 +40,11 @@ extension AddExpenseSideEffects: ActionHandler {
         guard let counterparty = state.counterparty else {
             return
         }
-        guard let group = groups.first(where: { $0.counterparty.id == counterparty.id }) else {
-            return
-        }
         Task {
+            let groups = await dataSource.groups
+            guard let group = groups.first(where: { $0.counterparty.id == counterparty.id }) else {
+                return
+            }
             do {
                 try await spendingsRepository.createSpending(
                     in: group.group.id,
@@ -60,7 +60,7 @@ extension AddExpenseSideEffects: ActionHandler {
                                     amount: state.amount / 2 * (state.paidByHost ? -1 : +1)
                                 ),
                                 Spending.Share(
-                                    userId: hostId,
+                                    userId: dataSource.hostId,
                                     amount: state.amount / 2 * (state.paidByHost ? +1 : -1)
                                 )
                             ]
@@ -71,7 +71,7 @@ extension AddExpenseSideEffects: ActionHandler {
                                     amount: state.amount * (state.paidByHost ? -1 : +1)
                                 ),
                                 Spending.Share(
-                                    userId: hostId,
+                                    userId: dataSource.hostId,
                                     amount: state.amount * (state.paidByHost ? +1 : -1)
                                 )
                             ]
@@ -82,6 +82,26 @@ extension AddExpenseSideEffects: ActionHandler {
             } catch {
                 store.dispatch(.errorOccured("\(error)"))
             }
+        }
+    }
+    
+    private func subscribeToUpdates() {
+        Task {
+            let reload: @Sendable () -> Void = { [weak self] in
+                guard let self else { return }
+                Task {
+                    await store.dispatch(
+                        .availableCounterpartiesUpdated(
+                            await dataSource.groups.map(\.counterparty)
+                        )
+                    )
+                }
+            }
+            await spendingsRepository
+                .updates
+                .subscribeWeak(self) { event in
+                    reload()
+                }
         }
     }
 }

@@ -43,14 +43,21 @@ extension SpendingsSideEffects: ActionHandler {
     
     private func subscribeToUpdates() {
         Task {
+            let reload: @Sendable () -> Void = { [weak self] in
+                guard let self else { return }
+                Task {
+                    let spendings = await dataSource.spendings
+                    await store.dispatch(.balanceUpdated(spendings))
+                }
+            }            
+            await usersRepository.updates
+                .subscribeWeak(self) { events in
+                    reload()
+                }
             await spendingsRepository
                 .updates
-                .subscribeWeak(self) { [weak self] events in
-                    guard let self else { return }
-                    Task {
-                        let spendings = await dataSource.spendings
-                        await store.dispatch(.balanceUpdated(spendings))
-                    }
+                .subscribeWeak(self) { events in
+                    reload()
                 }
         }
     }

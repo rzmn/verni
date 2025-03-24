@@ -9,9 +9,39 @@ import AsyncExtensions
 import SwiftUI
 import Logging
 import AddExpenseScreen
-import QrInviteUseCase
 internal import Convenience
 internal import DesignSystem
+
+struct AddExpenseDataSource {
+    let hostId: User.Identifier
+    let spendingsRepository: SpendingsRepository
+    let usersRepository: UsersRepository
+    let logger: Logger
+    
+    var groups: [OneToOneSpendingsGroup] {
+        get async {
+            await spendingsRepository.groups
+                .asyncCompactMap { group -> OneToOneSpendingsGroup? in
+                    guard let group = await spendingsRepository[group: group] else {
+                        return nil
+                    }
+                    guard let participant = group.participants.first(where: { $0.userId != hostId }) else {
+                        return nil
+                    }
+                    guard let anyUser = await usersRepository[participant.userId] else {
+                        return nil
+                    }
+                    guard case .regular(let user) = anyUser else {
+                        return nil
+                    }
+                    return OneToOneSpendingsGroup(
+                        counterparty: user,
+                        group: group.group
+                    )
+                }
+        }
+    }
+}
 
 actor AddExpenseModel {
     private let store: Store<AddExpenseState, AddExpenseAction>
@@ -36,25 +66,13 @@ actor AddExpenseModel {
                 )
             )
         }
-        let groups = await spendingsRepository.groups
-            .asyncCompactMap { group -> OneToOneSpendingsGroup? in
-                guard let group = await spendingsRepository[group: group] else {
-                    return nil
-                }
-                guard let participant = group.participants.first(where: { $0.userId != hostId }) else {
-                    return nil
-                }
-                guard let anyUser = await usersRepository[participant.userId] else {
-                    return nil
-                }
-                guard case .regular(let user) = anyUser else {
-                    return nil
-                }
-                return OneToOneSpendingsGroup(
-                    counterparty: user,
-                    group: group.group
-                )
-            }
+        let dataSource = AddExpenseDataSource(
+            hostId: hostId,
+            spendingsRepository: spendingsRepository,
+            usersRepository: usersRepository,
+            logger: logger
+        )
+        let groups = await dataSource.groups
         store = await Store<AddExpenseState, AddExpenseAction>(
             state: AddExpenseState(
                 currency: .russianRuble,
@@ -72,8 +90,7 @@ actor AddExpenseModel {
         await store.append(
             handler: AddExpenseSideEffects(
                 store: store,
-                groups: groups,
-                hostId: hostId,
+                dataSource: dataSource,
                 spendingsRepository: spendingsRepository
             ),
             keepingUnique: true

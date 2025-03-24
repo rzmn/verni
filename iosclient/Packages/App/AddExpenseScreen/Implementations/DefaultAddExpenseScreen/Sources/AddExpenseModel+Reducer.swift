@@ -25,7 +25,14 @@ extension AddExpenseModel {
                 return modify(state) {
                     $0.title = reason
                 }
-            case .submit, .cancel, .expenseAdded:
+            case .availableCounterpartiesUpdated(let counterparties):
+                return modify(state) { state in
+                    state.counterparty = counterparties.first {
+                        $0.id == state.counterparty?.id
+                    }
+                    state.availableCounterparties = counterparties
+                }
+            case .submit, .cancel, .expenseAdded, .appeared:
                 return state
             case .selectCounterparty(let id):
                 return modify(state) { state in
