@@ -133,9 +133,15 @@ func (o *OpenApiOperation) TrackedEntities() []TrackedEntity {
 			Type: EntityTypeUser,
 		}}
 	case UpdateAvatarOperationPayloadType:
-		return []TrackedEntity{
-			{Id: o.UpdateAvatar.UserId, Type: EntityTypeUser},
-			{Id: o.UpdateAvatar.ImageId, Type: EntityTypeImage},
+		if o.UpdateAvatar.ImageId != nil {
+			return []TrackedEntity{
+				{Id: o.UpdateAvatar.UserId, Type: EntityTypeUser},
+				{Id: *o.UpdateAvatar.ImageId, Type: EntityTypeImage},
+			}
+		} else {
+			return []TrackedEntity{
+				{Id: o.UpdateAvatar.UserId, Type: EntityTypeUser},
+			}
 		}
 	case UploadImageOperationPayloadType:
 		return []TrackedEntity{{
