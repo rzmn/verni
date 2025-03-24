@@ -639,7 +639,7 @@ public enum Components {
                 /// - Remark: Generated from `#/components/schemas/UpdateAvatarOperation/updateAvatar/userId`.
                 public var userId: Swift.String
                 /// - Remark: Generated from `#/components/schemas/UpdateAvatarOperation/updateAvatar/imageId`.
-                public var imageId: Swift.String
+                public var imageId: Swift.String?
                 /// Creates a new `UpdateAvatarPayload`.
                 ///
                 /// - Parameters:
@@ -647,7 +647,7 @@ public enum Components {
                 ///   - imageId:
                 public init(
                     userId: Swift.String,
-                    imageId: Swift.String
+                    imageId: Swift.String? = nil
                 ) {
                     self.userId = userId
                     self.imageId = imageId

@@ -232,6 +232,19 @@ extension AuthenticatedScreensCoordinator {
                         get: {
                             state.tab.barTab
                         }, set: { newValue in
+                            guard state.tab.id != newValue.id else {
+                                switch state.tab {
+                                case .profile(let state):
+                                    if state.isEditing {
+                                        store.dispatch(.onCloseEditProfile)
+                                    }
+                                case .spendings(let state):
+                                    if state.selectedGroup != nil {
+                                        store.dispatch(.onCloseExpenses)
+                                    }
+                                }
+                                return
+                            }
                             let tabItems = state.tabs.compactMap { tab -> AuthenticatedState.TabItem? in
                                 guard case .item(let item) = tab else {
                                     return nil

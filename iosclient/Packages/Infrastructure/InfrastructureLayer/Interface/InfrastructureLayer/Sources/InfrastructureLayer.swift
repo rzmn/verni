@@ -27,7 +27,7 @@ extension InfrastructureLayer {
     
     public func nextId(isBlacklisted: (String) -> Bool) -> String {
         repeat {
-            let id = UUID().uuidString.lowercased()
+            let id = UUID().uuidString
             if isBlacklisted(id) {
                 continue
             }

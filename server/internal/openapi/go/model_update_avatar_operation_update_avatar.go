@@ -14,14 +14,13 @@ package openapi
 type UpdateAvatarOperationUpdateAvatar struct {
 	UserId string `json:"userId"`
 
-	ImageId string `json:"imageId"`
+	ImageId *string `json:"imageId,omitempty"`
 }
 
 // AssertUpdateAvatarOperationUpdateAvatarRequired checks if the required fields are not zero-ed
 func AssertUpdateAvatarOperationUpdateAvatarRequired(obj UpdateAvatarOperationUpdateAvatar) error {
 	elements := map[string]interface{}{
-		"userId":  obj.UserId,
-		"imageId": obj.ImageId,
+		"userId": obj.UserId,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

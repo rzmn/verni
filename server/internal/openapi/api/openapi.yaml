@@ -1089,9 +1089,9 @@ components:
         userId:
           type: string
         imageId:
+          nullable: true
           type: string
       required:
-      - imageId
       - userId
       type: object
     UpdateDisplayNameOperation_updateDisplayName:

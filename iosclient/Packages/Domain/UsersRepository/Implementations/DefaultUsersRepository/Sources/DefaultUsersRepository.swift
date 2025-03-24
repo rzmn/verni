@@ -265,7 +265,7 @@ extension DefaultUsersRepository: UsersRepository {
 
     public func updateAvatar(
         userId: User.Identifier,
-        imageId: Image.Identifier
+        imageId: Image.Identifier?
     ) async throws(UpdateAvatarError) {
         guard let anyUser = await self[userId] else {
             throw .userNotFound(userId)

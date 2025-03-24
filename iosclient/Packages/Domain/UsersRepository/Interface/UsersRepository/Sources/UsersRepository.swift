@@ -52,6 +52,6 @@ public protocol UsersRepository: Sendable {
 
     func updateAvatar(
         userId: User.Identifier,
-        imageId: Image.Identifier
+        imageId: Image.Identifier?
     ) async throws(UpdateAvatarError)
 }

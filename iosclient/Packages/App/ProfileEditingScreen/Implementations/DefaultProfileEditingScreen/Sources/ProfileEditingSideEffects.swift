@@ -144,7 +144,10 @@ extension ProfileEditingSideEffects: ActionHandler {
                         logW { "task not found for PhotosPickerItem \(item)" }
                     }
                 } else {
-                    // TODO: fix api to be able to remove avatar data
+                    try await usersRepository.updateAvatar(
+                        userId: profileRepository.profile.userId,
+                        imageId: nil
+                    )
                 }
             }
             if !state.displayName.isEmpty && state.displayName.isValidDisplayName {

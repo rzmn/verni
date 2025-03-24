@@ -815,9 +815,9 @@ components:
               type: string
             imageId:
               type: string
+              nullable: true
           required:
             - userId
-            - imageId
       required:
         - updateAvatar
     UpdateDisplayNameOperation:
