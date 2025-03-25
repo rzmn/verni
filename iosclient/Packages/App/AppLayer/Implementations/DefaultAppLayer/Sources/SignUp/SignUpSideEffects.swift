@@ -42,10 +42,18 @@ internal import Convenience
         self.emailValidationUseCase = emailValidationUseCase
         self.passwordValidationUseCase = passwordValidationUseCase
         self.saveCredentialsUseCase = saveCredentialsUseCase
-        setupValidationSubscriptions()
+        resetValidationSubscriptions()
     }
 
-    private func setupValidationSubscriptions() {
+    private func resetValidationSubscriptions() {
+        for cancellable in cancellables {
+            cancellable.cancel()
+        }
+        cancellables.removeAll()
+        emailValidationSubject = PassthroughSubject<String, Never>()
+        passwordValidationSubject = PassthroughSubject<String, Never>()
+        passwordRepeatMatchSubject = PassthroughSubject<String, Never>()
+        
         emailValidationSubject
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
             .sink { [weak self] email in
@@ -78,6 +86,8 @@ internal import Convenience
             passwordRepeatTextChanged(text: text)
         case .onSignUpTap:
             signUp()
+        case .onTapBack, .signUp:
+            resetValidationSubscriptions()
         default:
             break
         }

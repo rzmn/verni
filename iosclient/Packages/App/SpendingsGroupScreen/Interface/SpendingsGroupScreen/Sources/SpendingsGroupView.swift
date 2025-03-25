@@ -9,6 +9,7 @@ public struct SpendingsGroupView: View {
     @Environment(PaddingsPalette.self) var paddings
     @Environment(ColorPalette.self) var colors
     
+    @Binding private var onTapOwnerTabCounter: Int
     @Binding private var appearTransitionProgress: CGFloat
     @Binding private var appearDestinationOffset: CGFloat?
     @Binding private var appearSourceOffset: CGFloat?
@@ -26,6 +27,7 @@ public struct SpendingsGroupView: View {
         _appearDestinationOffset = transitions.appear.destinationOffset
         
         _tabTransitionProgress = transitions.tab.progress
+        _onTapOwnerTabCounter = transitions.tapOwnerTab.tapCounter
     }
     
     public var body: some View {
@@ -91,6 +93,9 @@ public struct SpendingsGroupView: View {
             Spacer()
         }
         .background(colors.background.secondary.default)
+        .onChange(of: onTapOwnerTabCounter) { _ in
+            store.dispatch(.onTapBack)
+        }
         .onAppear {
             store.dispatch(.onAppear)
         }
@@ -147,6 +152,8 @@ private struct SpendingsPreview: View {
                         progress: $appearTransition,
                         sourceOffset: .constant(0),
                         destinationOffset: $sourceOffset
+                    ), tapOwnerTab: TapOwnerTabTransition(
+                        tapCounter: .constant(0)
                     ),
                     tab: TabTransition(
                         progress: $tabTransition

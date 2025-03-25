@@ -122,33 +122,43 @@ extension ProfileEditingSideEffects: ActionHandler {
     private func editProfile() {
         let state = store.state
         Task {
+            let newDisplayName: String
+            let newAvatarId: Entities.Image.Identifier?
             if let selection = state.imageSelection {
                 if let item = selection.image {
                     if let photoItemTask {
                         if photoItemTask.item != item {
                             logW { "task item did not match picked PhotosPickerItem: task: \(photoItemTask.item), picked: \(item)" }
+                            newAvatarId = state.currentAvatar
                         } else {
                             let data = await photoItemTask.task.value
                             do {
+                                let id = try await avatarsRepository.upload(
+                                    image: data.base64EncodedString()
+                                )
                                 try await usersRepository.updateAvatar(
                                     userId: profileRepository.profile.userId,
-                                    imageId: try await avatarsRepository.upload(
-                                        image: data.base64EncodedString()
-                                    )
+                                    imageId: id
                                 )
+                                newAvatarId = id
                             } catch {
                                 logE { "failed to upload image error: \(error)" }
+                                newAvatarId = state.currentAvatar
                             }
                         }
                     } else {
                         logW { "task not found for PhotosPickerItem \(item)" }
+                        newAvatarId = state.currentAvatar
                     }
                 } else {
                     try await usersRepository.updateAvatar(
                         userId: profileRepository.profile.userId,
                         imageId: nil
                     )
+                    newAvatarId = nil
                 }
+            } else {
+                newAvatarId = state.currentAvatar
             }
             if !state.displayName.isEmpty && state.displayName.isValidDisplayName {
                 do {
@@ -156,11 +166,15 @@ extension ProfileEditingSideEffects: ActionHandler {
                         userId: profileRepository.profile.userId,
                         displayName: state.displayName
                     )
+                    newDisplayName = state.displayName
                 } catch {
                     logE { "failed to upload image error: \(error)" }
+                    newDisplayName = state.currentDisplayName
                 }
+            } else {
+                newDisplayName = state.currentDisplayName
             }
-            store.dispatch(.onClose)
+            store.dispatch(.onChangesSaved(displayName: newDisplayName, avatarId: newAvatarId))
         }
     }
 }

@@ -36,12 +36,9 @@ actor ProfileEditingModel {
             )
         }
         store = await Store(
-            state: ProfileEditingState(
-                currentDisplayName: user.payload.displayName,
-                displayName: "",
-                currentAvatar: user.payload.avatar,
-                canSubmit: true,
-                showingImagePicker: false
+            state: Self.initialState(
+                displayName: user.payload.displayName,
+                currentAvatar: user.payload.avatar
             ),
             reducer: Self.reducer
         )
@@ -79,7 +76,7 @@ actor ProfileEditingModel {
                             id: "\(ProfileEditingEvent.self)",
                             handleBlock: { action in
                                 switch action {
-                                case .onClose:
+                                case .onClose, .onChangesSaved:
                                     handler(.onClose)
                                 default:
                                     break

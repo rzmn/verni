@@ -25,6 +25,8 @@ public struct ProfileEditingState: Equatable, Sendable {
     
     public var canSubmit: Bool
     
+    public var sessionId: UUID
+    
     var hasChanges: Bool {
         let displayNameDiffers = currentDisplayName != displayName && !displayName.isEmpty
         let avatarDiffers: Bool
@@ -43,7 +45,8 @@ public struct ProfileEditingState: Equatable, Sendable {
         currentAvatar: Entities.Image.Identifier? = nil,
         imageSelection: ImageSelection? = nil,
         canSubmit: Bool,
-        showingImagePicker: Bool
+        showingImagePicker: Bool,
+        sessionId: UUID
     ) {
         self.currentDisplayName = currentDisplayName
         self.displayName = displayName
@@ -52,5 +55,6 @@ public struct ProfileEditingState: Equatable, Sendable {
         self.imageSelection = imageSelection
         self.canSubmit = canSubmit
         self.showingImagePicker = showingImagePicker
+        self.sessionId = sessionId
     }
 }

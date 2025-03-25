@@ -34,6 +34,7 @@ public struct LogInView<Session: Sendable>: View {
                 }
             )
         )
+        .id(store.state.sessionId)
     }
     
     private var navigationBar: some View {
@@ -151,7 +152,8 @@ private struct LogInPreview: View {
                         email: "e@mail.co",
                         password: "12345678",
                         logInInProgress: false,
-                        bottomSheet: nil
+                        bottomSheet: nil,
+                        sessionId: UUID()
                     ),
                     reducer: { state, _ in state }
                 ),

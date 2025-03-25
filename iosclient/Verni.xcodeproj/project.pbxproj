@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8456F1442D89EEAE0000D3DE /* Assembly in Frameworks */ = {isa = PBXBuildFile; productRef = 8456F1432D89EEAE0000D3DE /* Assembly */; };
+		845E3C112D93139400F98577 /* Assembly in Frameworks */ = {isa = PBXBuildFile; productRef = 8456F1432D89EEAE0000D3DE /* Assembly */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,17 +40,25 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8456F1442D89EEAE0000D3DE /* Assembly in Frameworks */,
+				845E3C112D93139400F98577 /* Assembly in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		844C761B2D931376007AB23A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		848C21152D461F8C00931669 = {
 			isa = PBXGroup;
 			children = (
 				848C21202D461F8C00931669 /* Verni */,
+				844C761B2D931376007AB23A /* Frameworks */,
 				848C211F2D461F8C00931669 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,12 +91,6 @@
 			);
 			name = Verni;
 			packageProductDependencies = (
-				847DC95D2D46217500AF3C99 /* DefaultDataLayer */,
-				847DC9602D46218900AF3C99 /* DefaultDomainLayer */,
-				84CD19B32D463F41004F0107 /* DefaultInfrastructureLayer */,
-				84CD19B62D463F51004F0107 /* DefaultDataLayer */,
-				84CD19B92D463F66004F0107 /* DefaultDomainLayer */,
-				84CD19BC2D463F76004F0107 /* DefaultAppLayer */,
 				8456F1432D89EEAE0000D3DE /* Assembly */,
 			);
 			productName = Verni;
@@ -120,7 +122,7 @@
 			mainGroup = 848C21152D461F8C00931669;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				8456F1422D89EEAE0000D3DE /* XCLocalSwiftPackageReference "Packages/Assembly" */,
+				844C76182D931362007AB23A /* XCLocalSwiftPackageReference "Packages/Assembly" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 848C211F2D461F8C00931669 /* Products */;
@@ -360,7 +362,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		8456F1422D89EEAE0000D3DE /* XCLocalSwiftPackageReference "Packages/Assembly" */ = {
+		844C76182D931362007AB23A /* XCLocalSwiftPackageReference "Packages/Assembly" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Assembly;
 		};
@@ -370,30 +372,6 @@
 		8456F1432D89EEAE0000D3DE /* Assembly */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Assembly;
-		};
-		847DC95D2D46217500AF3C99 /* DefaultDataLayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultDataLayer;
-		};
-		847DC9602D46218900AF3C99 /* DefaultDomainLayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultDomainLayer;
-		};
-		84CD19B32D463F41004F0107 /* DefaultInfrastructureLayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultInfrastructureLayer;
-		};
-		84CD19B62D463F51004F0107 /* DefaultDataLayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultDataLayer;
-		};
-		84CD19B92D463F66004F0107 /* DefaultDomainLayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultDomainLayer;
-		};
-		84CD19BC2D463F76004F0107 /* DefaultAppLayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = DefaultAppLayer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

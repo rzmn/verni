@@ -7,7 +7,7 @@ extension SignUpModel {
         return { state, action in
             switch action {
             case .onTapBack:
-                return state
+                return SignUpModel.initialState
             case .passwordTextChanged(let text):
                 return modify(state) {
                     $0.password = text
@@ -35,7 +35,7 @@ extension SignUpModel {
                     $0.bottomSheet = preset
                 }
             case .signUp:
-                return state
+                return SignUpModel.initialState
             case .emailHintChanged(let hint):
                 return modify(state) {
                     $0.emailHint = hint

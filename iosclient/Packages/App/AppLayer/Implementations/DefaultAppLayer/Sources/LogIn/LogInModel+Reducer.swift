@@ -7,7 +7,7 @@ extension LogInModel {
         return { state, action in
             switch action {
             case .onTapBack:
-                return state
+                return LogInModel.initialState
             case .passwordTextChanged(let text):
                 return modify(state) {
                     $0.password = text
@@ -33,7 +33,7 @@ extension LogInModel {
                     $0.bottomSheet = preset
                 }
             case .loggedIn:
-                return state
+                return LogInModel.initialState
             }
         }
     }

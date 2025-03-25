@@ -1,4 +1,5 @@
 import SignUpScreen
+import Foundation
 
 extension SignUpModel {
     static var initialState: SignUpState {
@@ -8,7 +9,8 @@ extension SignUpModel {
             passwordRepeat: "",
             canSubmitCredentials: false,
             signUpInProgress: false,
-            bottomSheet: nil
+            bottomSheet: nil,
+            sessionId: UUID()
         )
     }
 }

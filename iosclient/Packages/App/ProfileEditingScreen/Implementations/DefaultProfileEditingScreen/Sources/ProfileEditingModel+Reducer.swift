@@ -56,9 +56,15 @@ extension ProfileEditingModel {
                     $0.canSubmit = true
                 }
             case .onClose:
-                return modify(state) {
-                    $0.canSubmit = true
-                }
+                return ProfileEditingModel.initialState(
+                    displayName: state.currentDisplayName,
+                    currentAvatar: state.currentAvatar
+                )
+            case .onChangesSaved(let displayName, let avatarId):
+                return ProfileEditingModel.initialState(
+                    displayName: displayName,
+                    currentAvatar: avatarId
+                )
             case .onSaveChanges:
                 return modify(state) {
                     $0.canSubmit = false

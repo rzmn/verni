@@ -32,7 +32,12 @@ extension AddExpenseModel {
                     }
                     state.availableCounterparties = counterparties
                 }
-            case .submit, .cancel, .expenseAdded, .appeared:
+            case .cancel, .expenseAdded:
+                return AddExpenseModel.initialState(
+                    host: state.host,
+                    counterparties: state.availableCounterparties
+                )
+            case .submit, .appeared:
                 return state
             case .selectCounterparty(let id):
                 return modify(state) { state in

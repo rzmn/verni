@@ -8,6 +8,14 @@ public struct TabTransition {
     }
 }
 
+public struct TapOwnerTabTransition {
+    public let tapCounter: Binding<Int>
+
+    public init(tapCounter: Binding<Int>) {
+        self.tapCounter = tapCounter
+    }
+}
+
 public struct ModalTransition {
     public let progress: Binding<CGFloat>
     public let sourceOffset: Binding<CGFloat?>

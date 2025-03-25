@@ -74,7 +74,9 @@ struct AuthenticatedScreensCoordinator: View {
     @Binding private var appearTransitionProgress: CGFloat
     
     @State private var spendingsTabTransitionProgress: CGFloat
+    @State private var spendingsTabTapCounter: Int = 0
     @State private var profileTabTransitionProgress: CGFloat
+    @State private var profileTabTapCounter: Int = 0
     
     init(store: Store<AppState, AppAction>, appearTransitionProgress: Binding<CGFloat>) {
         self.store = store
@@ -236,11 +238,11 @@ extension AuthenticatedScreensCoordinator {
                                 switch state.tab {
                                 case .profile(let state):
                                     if state.isEditing {
-                                        store.dispatch(.onCloseEditProfile)
+                                        profileTabTapCounter += 1
                                     }
                                 case .spendings(let state):
                                     if state.selectedGroup != nil {
-                                        store.dispatch(.onCloseExpenses)
+                                        spendingsTabTapCounter += 1
                                     }
                                 }
                                 return
@@ -320,6 +322,9 @@ extension AuthenticatedScreensCoordinator {
                         sourceOffset: .constant(nil),
                         destinationOffset: .constant(nil)
                     ),
+                    tapOwnerTab: TapOwnerTabTransition(
+                        tapCounter: $spendingsTabTapCounter
+                    ),
                     tab: TabTransition(
                         progress: $spendingsTabTransitionProgress
                     )
@@ -357,6 +362,9 @@ extension AuthenticatedScreensCoordinator {
                 ProfileEditingTransitions(
                     tab: TabTransition(
                         progress: $profileTabTransitionProgress
+                    ),
+                    tapOwnerTab: TapOwnerTabTransition(
+                        tapCounter: $profileTabTapCounter
                     )
                 )
             )

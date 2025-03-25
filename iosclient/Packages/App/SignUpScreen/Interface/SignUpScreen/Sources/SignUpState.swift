@@ -15,6 +15,8 @@ public struct SignUpState: Equatable, Sendable {
     public var signUpInProgress: Bool
     public var bottomSheet: AlertBottomSheetPreset?
     
+    public var sessionId: UUID
+    
     public init(
         email: String,
         emailHint: String? = nil,
@@ -24,7 +26,8 @@ public struct SignUpState: Equatable, Sendable {
         passwordRepeatHint: String? = nil,
         canSubmitCredentials: Bool,
         signUpInProgress: Bool,
-        bottomSheet: AlertBottomSheetPreset? = nil
+        bottomSheet: AlertBottomSheetPreset? = nil,
+        sessionId: UUID
     ) {
         self.email = email
         self.emailHint = emailHint
@@ -35,5 +38,6 @@ public struct SignUpState: Equatable, Sendable {
         self.canSubmitCredentials = canSubmitCredentials
         self.signUpInProgress = signUpInProgress
         self.bottomSheet = bottomSheet
+        self.sessionId = sessionId
     }
 }

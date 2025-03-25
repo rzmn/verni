@@ -18,4 +18,5 @@ public enum ProfileEditingAction: Sendable {
     
     case onClose
     case onSaveChanges
+    case onChangesSaved(displayName: String, avatarId: Entities.Image.Identifier?)
 }

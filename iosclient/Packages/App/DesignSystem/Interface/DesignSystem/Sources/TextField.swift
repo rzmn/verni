@@ -20,7 +20,7 @@ public struct TextField: View {
         let hint: HintStyle
         let content: Content
 
-        public init(placeholder: LocalizedStringKey, hint: HintStyle = .hintsDisabled, content: Content = .unspecified) {
+        public init(placeholder: LocalizedStringKey, hint: HintStyle = .hintsDisabled, content: Content = .displayName) {
             self.placeholder = placeholder
             self.hint = hint
             self.content = content

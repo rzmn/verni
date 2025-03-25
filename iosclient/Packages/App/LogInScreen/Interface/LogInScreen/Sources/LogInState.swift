@@ -11,6 +11,7 @@ public struct LogInState: Equatable, Sendable {
     public var logInInProgress: Bool
     
     public var bottomSheet: AlertBottomSheetPreset?
+    public var sessionId: UUID
     
     public init(
         email: String,
@@ -18,7 +19,8 @@ public struct LogInState: Equatable, Sendable {
         password: String,
         passwordHint: String? = nil,
         logInInProgress: Bool,
-        bottomSheet: AlertBottomSheetPreset? = nil
+        bottomSheet: AlertBottomSheetPreset? = nil,
+        sessionId: UUID
     ) {
         self.email = email
         self.emailHint = emailHint
@@ -26,5 +28,6 @@ public struct LogInState: Equatable, Sendable {
         self.passwordHint = passwordHint
         self.logInInProgress = logInInProgress
         self.bottomSheet = bottomSheet
+        self.sessionId = UUID()
     }
 }

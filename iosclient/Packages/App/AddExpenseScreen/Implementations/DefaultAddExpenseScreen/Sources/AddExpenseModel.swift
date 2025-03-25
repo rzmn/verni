@@ -74,16 +74,9 @@ actor AddExpenseModel {
         )
         let groups = await dataSource.groups
         store = await Store<AddExpenseState, AddExpenseAction>(
-            state: AddExpenseState(
-                currency: .russianRuble,
-                amount: 0,
-                splitRule: .equally,
-                paidByHost: true,
-                title: "",
+            state: AddExpenseModel.initialState(
                 host: host,
-                counterparty: nil,
-                availableCounterparties: groups.map(\.counterparty)
-                
+                counterparties: groups.map(\.counterparty)
             ),
             reducer: Self.reducer
         )

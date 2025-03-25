@@ -72,12 +72,12 @@ public struct NavigationBar: View {
                             .foregroundStyle(colors.text.primary.default)
                             .padding(.horizontal, 15)
                             .opacity(config.enabled ? 1 : 0.5)
-                            .allowsHitTesting(config.enabled)
                     }
                     .frame(height: 54)
                     .background(colors.background.primary.default)
                     .clipShape(.rect(cornerRadius: 16))
                     .padding(.horizontal, 2)
+                    .allowsHitTesting(config.enabled)
                 }
             }
             Spacer()
@@ -97,12 +97,12 @@ public struct NavigationBar: View {
                             .foregroundStyle(colors.text.primary.default)
                             .padding(.horizontal, 15)
                             .opacity(config.enabled ? 1 : 0.5)
-                            .allowsHitTesting(config.enabled)
                     }
                     .frame(height: 54)
                     .background(colors.background.primary.default)
                     .clipShape(.rect(cornerRadius: 16))
                     .padding(.horizontal, 2)
+                    .allowsHitTesting(config.enabled)
                 }
             }
         }

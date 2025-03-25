@@ -11,10 +11,15 @@ public struct ProfileEditingView: View {
     @Environment(ColorPalette.self) var colors
     
     @Binding private var tabTransitionProgress: CGFloat
+    @Binding private var onTapOwnerTabCounter: Int
     
-    public init(store: Store<ProfileEditingState, ProfileEditingAction>, transitions: ProfileEditingTransitions) {
+    public init(
+        store: Store<ProfileEditingState, ProfileEditingAction>,
+        transitions: ProfileEditingTransitions
+    ) {
         self.store = store
         _tabTransitionProgress = transitions.tab.progress
+        _onTapOwnerTabCounter = transitions.tapOwnerTab.tapCounter
     }
     
     public var body: some View {
@@ -68,6 +73,10 @@ public struct ProfileEditingView: View {
             matching: .images
         )
         .keyboardDismiss()
+        .onChange(of: onTapOwnerTabCounter) { _ in
+            store.dispatch(.onClose)
+        }
+        .id(store.state.sessionId)
     }
     
     @ViewBuilder var displayDiffView: some View {
@@ -128,7 +137,8 @@ public struct ProfileEditingView: View {
                     hint: .hintsEnabled(
                         store.state.displayNameHint
                             .flatMap { LocalizedStringKey($0) }
-                    )
+                    ),
+                    content: .displayName
                 )
             )
         }
@@ -287,6 +297,7 @@ class ClassToIdentifyBundle {}
 
 private struct ProfilePreview: View {
     @State var tabTransition: CGFloat = 0
+    @State var tapOwnerTapTransition: Int = 0
     
     var body: some View {
         ZStack {
@@ -299,13 +310,17 @@ private struct ProfilePreview: View {
                         currentAvatar: "123",
                         imageSelection: .init(image: nil, uiImage: nil),
                         canSubmit: true,
-                        showingImagePicker: true
+                        showingImagePicker: true,
+                        sessionId: UUID()
                     ),
                     reducer: { state, _ in state }
                 ),
                 transitions: ProfileEditingTransitions(
                     tab: TabTransition(
                         progress: $tabTransition
+                    ),
+                    tapOwnerTab: TapOwnerTabTransition(
+                        tapCounter: $tapOwnerTapTransition
                     )
                 )
             )

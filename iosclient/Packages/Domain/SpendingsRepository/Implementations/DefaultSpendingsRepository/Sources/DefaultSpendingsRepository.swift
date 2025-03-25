@@ -1,12 +1,12 @@
 import Api
 import AsyncExtensions
-internal import Convenience
 import Entities
 import InfrastructureLayer
 import Logging
 import PersistentStorage
 import SpendingsRepository
 import SyncEngine
+internal import Convenience
 
 public actor DefaultSpendingsRepository: Sendable {
     public let logger: Logger

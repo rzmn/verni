@@ -34,6 +34,7 @@ public struct SignUpView<Session: Sendable>: View {
                 }
             )
         )
+        .id(store.state.sessionId)
     }
     
     private var navigationBar: some View {
@@ -169,7 +170,8 @@ private struct SignUpPreview: View {
                         passwordRepeat: "bla bla",
                         canSubmitCredentials: true,
                         signUpInProgress: false,
-                        bottomSheet: nil
+                        bottomSheet: nil,
+                        sessionId: UUID()
                     ),
                     reducer: { state, _ in state }
                 ),
