@@ -12,7 +12,7 @@ extension Sequence where Element: BaseOperationConvertible {
             guard lhs.base.createdAt != rhs.base.createdAt else {
                 return lhs.base.operationId < rhs.base.operationId
             }
-            return lhs.base.createdAt < rhs.base.createdAt
+            return lhs.base.createdAt > rhs.base.createdAt
         }
     }
     

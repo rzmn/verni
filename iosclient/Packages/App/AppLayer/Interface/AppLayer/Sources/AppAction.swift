@@ -20,6 +20,8 @@ public enum AppAction: Sendable {
     
     case onOpenEditProfile
     case onCloseEditProfile
+    case onOpenActivities
+    case onCloseActivities
     
     case onUserPreview(User)
     case onShowPreview(User, any UserPreviewScreenProvider)

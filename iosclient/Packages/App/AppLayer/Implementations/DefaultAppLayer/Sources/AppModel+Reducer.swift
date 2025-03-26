@@ -42,9 +42,13 @@ extension AppModel {
                 
             // Profile editing handling
             case .onOpenEditProfile:
-                return modify(state) { updateProfileEditing(isEditingProfile: true, state: &$0) }
+                return modify(state) { updateProfileEditing(activity: .editing, state: &$0) }
+            case .onOpenActivities:
+                return modify(state) { updateProfileEditing(activity: .browsingActivities, state: &$0) }
             case .onCloseEditProfile:
-                return modify(state) { updateProfileEditing(isEditingProfile: false, state: &$0) }
+                return modify(state) { updateProfileEditing(activity: nil, state: &$0) }
+            case .onCloseActivities:
+                return modify(state) { updateProfileEditing(activity: nil, state: &$0) }
                 
             // Expense group handling
             case .onCloseExpenses:
@@ -114,7 +118,7 @@ extension AppModel {
     }
     
     @MainActor private static func updateProfileEditing(
-        isEditingProfile: Bool,
+        activity: AuthenticatedState.ProfileState.Activity?,
         state: inout AppState
     ) {
         guard case .launched(let launched) = state else {
@@ -130,7 +134,7 @@ extension AppModel {
             guard case .profile(var state) = tab else {
                 return $0
             }
-            state.isEditing = isEditingProfile
+            state.activity = activity
             return .item(.profile(state))
         }
         if let tab = authenticated.tabs.compactMap(

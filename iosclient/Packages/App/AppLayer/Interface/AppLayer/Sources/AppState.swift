@@ -58,10 +58,14 @@ public struct AuthenticatedState: Equatable, Sendable {
         }
     }
     public struct ProfileState: Equatable, Sendable {
-        public var isEditing: Bool
+        public enum Activity: Equatable, Sendable {
+            case editing
+            case browsingActivities
+        }
+        public var activity: Activity?
         
-        public init(isEditing: Bool = false) {
-            self.isEditing = isEditing
+        public init(activity: Activity? = nil) {
+            self.activity = activity
         }
     }
     public enum TabItem: Equatable, Identifiable, Sendable {

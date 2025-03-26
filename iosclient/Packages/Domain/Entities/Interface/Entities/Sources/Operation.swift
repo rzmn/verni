@@ -4,7 +4,7 @@ extension Operation {
     public typealias Identifier = String
 }
 
-public struct Operation: Sendable, Equatable {
+public struct Operation: Sendable, Equatable, Identifiable {
     public enum EntityType: Sendable, Equatable {
         case user(AnyUser)
         case userRelation(from: AnyUser, to: AnyUser)

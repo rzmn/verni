@@ -8,6 +8,8 @@ import DomainLayer
 import DesignSystem
 import Foundation
 import Entities
+import ActivitiesScreen
+internal import DefaultActivitiesScreen
 internal import LoggingExtensions
 internal import DefaultProfileScreen
 internal import DefaultUserPreviewScreen
@@ -23,6 +25,7 @@ final class DefaultHostedAppSession: HostedAppSession {
     var profile: any ProfileScreenProvider
     var spendings: any SpendingsScreenProvider
     var addExpense: any AddExpenseScreenProvider
+    var activities: any ActivitiesScreenProvider
     var spendingsGroup: (SpendingGroup.Identifier) async -> any SpendingsGroupScreenProvider
     var profileEditing: any ProfileEditingScreenProvider
     private let domain: HostedDomainLayer
@@ -88,6 +91,13 @@ final class DefaultHostedAppSession: HostedAppSession {
             avatarsRepository: session.avatarsRepository,
             logger: logger
                 .with(scope: .profileEditing)
+        ).create()
+        self.activities = await DefaultActivitiesFactory(
+            operationsRepository: session.operationsRepository,
+            usersRepository: session.usersRepository,
+            spendingsRepository: session.spendingsRepository,
+            logger: logger
+                .with(scope: .operations)
         ).create()
     }
     

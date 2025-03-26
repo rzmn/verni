@@ -81,6 +81,8 @@ actor ProfileModel {
                                     handler(.showQrHint)
                                 case .onEditProfileTap:
                                     handler(.openEditing)
+                                case .onNotificationsTap:
+                                    handler(.openActivities)
                                 default:
                                     break
                                 }

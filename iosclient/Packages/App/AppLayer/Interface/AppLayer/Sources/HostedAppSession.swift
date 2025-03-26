@@ -6,6 +6,7 @@ import SpendingsGroupScreen
 import AddExpenseScreen
 import UserPreviewScreen
 import ProfileEditingScreen
+import ActivitiesScreen
 import Entities
 
 public typealias ProfileScreenProvider = ScreenProvider<ProfileEvent, ProfileView, ProfileTransitions>
@@ -14,6 +15,7 @@ public typealias AddExpenseScreenProvider = ScreenProvider<AddExpenseEvent, AddE
 public typealias UserPreviewScreenProvider = ScreenProvider<UserPreviewEvent, UserPreviewView, UserPreviewTransitions>
 public typealias SpendingsGroupScreenProvider = ScreenProvider<SpendingsGroupEvent, SpendingsGroupView, SpendingsGroupTransitions>
 public typealias ProfileEditingScreenProvider = ScreenProvider<ProfileEditingEvent, ProfileEditingView, ProfileEditingTransitions>
+public typealias ActivitiesScreenProvider = ScreenProvider<ActivitiesEvent, ActivitiesView, ActivitiesTransitions>
 
 @MainActor public protocol HostedAppSession: SharedAppSessionConvertible, AnyObject {
     var sandbox: SandboxAppSession { get }
@@ -22,6 +24,7 @@ public typealias ProfileEditingScreenProvider = ScreenProvider<ProfileEditingEve
     var profileEditing: any ProfileEditingScreenProvider { get }
     var spendings: any SpendingsScreenProvider { get }
     var addExpense: any AddExpenseScreenProvider { get }
+    var activities: any ActivitiesScreenProvider { get }
     var userPreview: (User) async -> any UserPreviewScreenProvider { get }
     var spendingsGroup: (SpendingGroup.Identifier) async -> any SpendingsGroupScreenProvider { get }
     func logout() async

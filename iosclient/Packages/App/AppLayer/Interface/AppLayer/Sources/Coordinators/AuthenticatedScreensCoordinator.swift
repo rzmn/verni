@@ -6,6 +6,7 @@ import SpendingsScreen
 import AddExpenseScreen
 import SpendingsGroupScreen
 import ProfileEditingScreen
+import ActivitiesScreen
 import DesignSystem
 
 private extension Store<AppState, AppAction> {
@@ -237,7 +238,7 @@ extension AuthenticatedScreensCoordinator {
                             guard state.tab.id != newValue.id else {
                                 switch state.tab {
                                 case .profile(let state):
-                                    if state.isEditing {
+                                    if state.activity != nil {
                                         profileTabTapCounter += 1
                                     }
                                 case .spendings(let state):
@@ -352,22 +353,38 @@ extension AuthenticatedScreensCoordinator {
     }
     
     @ViewBuilder private func profileTab(state: AuthenticatedState, tabState: AuthenticatedState.ProfileState) -> some View {
-        if tabState.isEditing {
-            state.session.profileEditing.instantiate { event in
-                switch event {
-                case .onClose:
-                    store.dispatch(.onCloseEditProfile)
-                }
-            }(
-                ProfileEditingTransitions(
-                    tab: TabTransition(
-                        progress: $profileTabTransitionProgress
-                    ),
-                    tapOwnerTab: TapOwnerTabTransition(
-                        tapCounter: $profileTabTapCounter
+        if let activity = tabState.activity {
+            switch activity {
+            case .editing:
+                state.session.profileEditing.instantiate { event in
+                    switch event {
+                    case .onClose:
+                        store.dispatch(.onCloseEditProfile)
+                    }
+                }(
+                    ProfileEditingTransitions(
+                        tab: TabTransition(
+                            progress: $profileTabTransitionProgress
+                        ),
+                        tapOwnerTab: TapOwnerTabTransition(
+                            tapCounter: $profileTabTapCounter
+                        )
                     )
                 )
-            )
+            case .browsingActivities:
+                state.session.activities.instantiate { event in
+                    switch event {
+                    case .closed:
+                        store.dispatch(.onCloseActivities)
+                    }
+                }(
+                    ActivitiesTransitions(
+                        tapOwnerTab: TapOwnerTabTransition(
+                            tapCounter: $profileTabTapCounter
+                        )
+                    )
+                )
+            }
         } else {
             state.session.profile.instantiate { event in
                 switch event {
@@ -401,6 +418,8 @@ extension AuthenticatedScreensCoordinator {
                     )
                 case .unauthorized(let reason):
                     store.dispatch(.unauthorized(reason: reason))
+                case .openActivities:
+                    store.dispatch(.onOpenActivities)
                 }
             }(
                 ProfileTransitions(
