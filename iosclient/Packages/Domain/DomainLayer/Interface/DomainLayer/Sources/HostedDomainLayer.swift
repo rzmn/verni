@@ -3,6 +3,7 @@ import AvatarsRepository
 import ProfileRepository
 import UsersRepository
 import SpendingsRepository
+import OperationsRepository
 import LogoutUseCase
 import PushRegistrationUseCase
 import IncomingPushUseCase
@@ -16,6 +17,7 @@ public protocol HostedDomainLayer: SharedDomainLayerCovertible {
     var usersRepository: UsersRepository { get }
     var spendingsRepository: SpendingsRepository { get }
     var avatarsRepository: AvatarsRepository { get }
+    var operationsRepository: OperationsRepository { get }
     
     var usersRemoteDataSource: UsersRemoteDataSource { get }
     var avatarsRemoteDataSource: AvatarsRemoteDataSource { get }

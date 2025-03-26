@@ -16,6 +16,7 @@ typealias Operation = PersistentStorage.Operation
 
     let logger: Logger
     private let connection: SqliteConnectionHolder
+    private let eventPublisher: EventPublisher<Void>
 
     private let hostId: HostId
     private let inMemoryCache: InMemoryCache
@@ -34,6 +35,7 @@ typealias Operation = PersistentStorage.Operation
         )
         self.hostId = hostId
         self.logger = logger
+        self.eventPublisher = EventPublisher()
         if let initialData {
             inMemoryCache = InMemoryCache(
                 refreshToken: initialData.refreshToken,
@@ -63,6 +65,10 @@ typealias Operation = PersistentStorage.Operation
 }
 
 extension SQLiteUserStorage: UserStorage {
+    nonisolated var onOperationsUpdated: any EventSource<Void> {
+        eventPublisher
+    }
+    
     var refreshToken: String {
         get async {
             await inMemoryCache.refreshToken
@@ -92,6 +98,7 @@ extension SQLiteUserStorage: UserStorage {
             return
         }
         try database.upsert(operations: operations)
+        await eventPublisher.notify()
         await inMemoryCache.update(
             operations: operations.merged(with: inMemoryCache.operations).all
         )

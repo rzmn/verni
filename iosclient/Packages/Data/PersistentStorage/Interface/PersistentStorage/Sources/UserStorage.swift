@@ -1,3 +1,5 @@
+import AsyncExtensions
+
 public typealias HostId = String
 public typealias DeviceId = String
 
@@ -6,6 +8,8 @@ public protocol UserStorage: Storage {
     var deviceId: DeviceId { get async }
 
     var refreshToken: String { get async }
+    
+    var onOperationsUpdated: any EventSource<Void> { get }
     var operations: [Operation] { get async }
     
     func update(operations: [Operation]) async throws

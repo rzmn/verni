@@ -6,6 +6,7 @@ import DataLayer
 import AsyncExtensions
 import Logging
 import LogoutUseCase
+import PersistentStorage
 internal import Convenience
 
 actor DefaultAuthUseCase {
@@ -40,8 +41,9 @@ extension DefaultAuthUseCase: AuthUseCase {
         }
         let logoutSubject = EventPublisher<Void>()
         let session: DataSession
+        let storage: UserStorage
         do {
-            session = try await preview.awake(
+            (session, storage) = try await preview.awake(
                 loggedOutHandler: logoutSubject
             )
         } catch {
@@ -53,6 +55,7 @@ extension DefaultAuthUseCase: AuthUseCase {
             logoutSubject: logoutSubject,
             sessionHost: sessionHost,
             dataSession: session,
+            userStorage: storage,
             userId: hostId
         )
     }
@@ -157,7 +160,9 @@ extension DefaultAuthUseCase: AuthUseCase {
     
     private func acquire(startupData: Components.Schemas.StartupData, deviceId: String) async throws -> HostedDomainLayer {
         let logoutSubject = EventPublisher<Void>()
-        let session = try await sharedDomain.data.create(
+        let storage: UserStorage
+        let session: DataSession
+        (session, storage) = try await sharedDomain.data.create(
             startupData: startupData,
             deviceId: deviceId,
             loggedOutHandler: logoutSubject
@@ -170,6 +175,7 @@ extension DefaultAuthUseCase: AuthUseCase {
             logoutSubject: logoutSubject,
             sessionHost: sessionHost,
             dataSession: session,
+            userStorage: storage,
             userId: startupData.session.id
         )
     }

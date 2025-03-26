@@ -1,54 +1,50 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "DomainLayer",
+    name: "DefaultOperationsRepository",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DomainLayer",
-            targets: ["DomainLayer"]
+            name: "DefaultOperationsRepository",
+            targets: ["DefaultOperationsRepository"]
         )
     ],
     dependencies: [
-        .local(.currentLayer(.interface("Entities"))),
-        .local(.currentLayer(.interface("AvatarsRepository"))),
         .local(.currentLayer(.interface("OperationsRepository"))),
         .local(.currentLayer(.interface("UsersRepository"))),
         .local(.currentLayer(.interface("SpendingsRepository"))),
-        .local(.currentLayer(.interface("ProfileRepository"))),
-        .local(.currentLayer(.interface("AuthUseCase"))),
-        .local(.currentLayer(.interface("SaveCredendialsUseCase"))),
-        .local(.currentLayer(.interface("QrInviteUseCase"))),
-        .local(.currentLayer(.interface("PushRegistrationUseCase"))),
-        .local(.currentLayer(.interface("LogoutUseCase"))),
-        .local(.currentLayer(.interface("IncomingPushUseCase"))),
-        .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
-        .local(.currentLayer(.interface("CredentialsFormatValidationUseCase"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.currentLayer(.interface("EntitiesApiConvenience"))),
+        .local(.data(.interface("Api"))),
+        .local(.data(.interface("SyncEngine"))),
+        .local(.data(.interface("DataLayer"))),
+        .local(.data(.interface("PersistentStorage"))),
+        .local(.infrastructure(.interface("AsyncExtensions"))),
+        .local(.infrastructure(.interface("Convenience"))),
+        .local(.infrastructure(.interface("Logging"))),
     ],
     targets: [
         .target(
-            name: "DomainLayer",
+            name: "DefaultOperationsRepository",
             dependencies: [
-                "Entities",
-                "AvatarsRepository",
+                "Api",
+                "DataLayer",
+                "Convenience",
+                "Logging",
+                "OperationsRepository",
                 "UsersRepository",
                 "SpendingsRepository",
-                "OperationsRepository",
-                "ProfileRepository",
-                "AuthUseCase",
-                "SaveCredendialsUseCase",
-                "QrInviteUseCase",
-                "PushRegistrationUseCase",
-                "LogoutUseCase",
-                "IncomingPushUseCase",
-                "EmailConfirmationUseCase",
-                "CredentialsFormatValidationUseCase",
-                "InfrastructureLayer"
-            ]
+                "PersistentStorage",
+                "Entities",
+                "SyncEngine",
+                "AsyncExtensions",
+                "EntitiesApiConvenience",
+            ],
+            path: "Sources"
         )
     ]
 )

@@ -5,6 +5,19 @@ public enum Currency: Hashable, Sendable {
     case usDollar
     case euro
     case unknown(String)
+    
+    public init(dto: String) {
+        switch dto {
+        case "RUB":
+            self = .russianRuble
+        case "EUR":
+            self = .euro
+        case "USD":
+            self = .usDollar
+        default:
+            self = .unknown(dto)
+        }
+    }
 
     public var stringValue: String {
         switch self {

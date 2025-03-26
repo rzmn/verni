@@ -1,54 +1,30 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
+
 let package = Package(
-    name: "DomainLayer",
+    name: "OperationsRepository",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "DomainLayer",
-            targets: ["DomainLayer"]
+            name: "OperationsRepository",
+            targets: ["OperationsRepository"]
         )
     ],
     dependencies: [
         .local(.currentLayer(.interface("Entities"))),
-        .local(.currentLayer(.interface("AvatarsRepository"))),
-        .local(.currentLayer(.interface("OperationsRepository"))),
-        .local(.currentLayer(.interface("UsersRepository"))),
-        .local(.currentLayer(.interface("SpendingsRepository"))),
-        .local(.currentLayer(.interface("ProfileRepository"))),
-        .local(.currentLayer(.interface("AuthUseCase"))),
-        .local(.currentLayer(.interface("SaveCredendialsUseCase"))),
-        .local(.currentLayer(.interface("QrInviteUseCase"))),
-        .local(.currentLayer(.interface("PushRegistrationUseCase"))),
-        .local(.currentLayer(.interface("LogoutUseCase"))),
-        .local(.currentLayer(.interface("IncomingPushUseCase"))),
-        .local(.currentLayer(.interface("EmailConfirmationUseCase"))),
-        .local(.currentLayer(.interface("CredentialsFormatValidationUseCase"))),
-        .local(.infrastructure(.interface("InfrastructureLayer")))
+        .local(.infrastructure(.interface("AsyncExtensions"))),
     ],
     targets: [
         .target(
-            name: "DomainLayer",
+            name: "OperationsRepository",
             dependencies: [
                 "Entities",
-                "AvatarsRepository",
-                "UsersRepository",
-                "SpendingsRepository",
-                "OperationsRepository",
-                "ProfileRepository",
-                "AuthUseCase",
-                "SaveCredendialsUseCase",
-                "QrInviteUseCase",
-                "PushRegistrationUseCase",
-                "LogoutUseCase",
-                "IncomingPushUseCase",
-                "EmailConfirmationUseCase",
-                "CredentialsFormatValidationUseCase",
-                "InfrastructureLayer"
-            ]
+                "AsyncExtensions",
+            ],
+            path: "Sources"
         )
     ]
 )

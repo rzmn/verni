@@ -10,13 +10,16 @@ import QrInviteUseCase
 import EmailConfirmationUseCase
 import PushRegistrationUseCase
 import AvatarsRepository
+import OperationsRepository
 import Logging
+import PersistentStorage
 internal import LoggingExtensions
 internal import DefaultLogoutUseCaseImplementation
 internal import DefaultProfileRepository
 internal import DefaultAvatarsRepositoryImplementation
 internal import DefaultUsersRepository
 internal import DefaultSpendingsRepository
+internal import DefaultOperationsRepository
 internal import DefaultQRInviteUseCaseImplementation
 internal import DefaultEmailConfirmationUseCaseImplementation
 internal import DefaultPushRegistrationUseCaseImplementation
@@ -31,6 +34,7 @@ final class DefaultHostedDomainLayer: Sendable {
     let avatarsRemoteDataSource: AvatarsRemoteDataSource
     let usersRemoteDataSource: UsersRemoteDataSource
     let avatarsRepository: AvatarsRepository
+    let operationsRepository: OperationsRepository
     let logger: Logger
 
     private let dataSession: DataSession
@@ -41,6 +45,7 @@ final class DefaultHostedDomainLayer: Sendable {
         logoutSubject: EventPublisher<Void>,
         sessionHost: SessionHost,
         dataSession: DataSession,
+        userStorage: UserStorage,
         userId: User.Identifier
     ) async {
         self.sharedDomain = sharedDomain
@@ -102,6 +107,14 @@ final class DefaultHostedDomainLayer: Sendable {
             logger: logger.with(
                 scope: .spendings
             )
+        )
+        self.operationsRepository = await DefaultOperationsRepository(
+            storage: userStorage,
+            infrastructure: sharedDomain.infrastructure,
+            spendingsRepository: spendingsRepository,
+            usersRepository: usersRepository,
+            logger: logger.with(
+                scope: .operations)
         )
     }
 }

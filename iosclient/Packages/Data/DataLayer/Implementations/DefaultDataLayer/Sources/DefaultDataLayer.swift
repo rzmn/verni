@@ -69,7 +69,7 @@ extension DefaultDataLayer: DataLayer {
             self.logger = logger
         }
         
-        func awake(loggedOutHandler: EventPublisher<Void>) async throws -> DataSession {
+        func awake(loggedOutHandler: EventPublisher<Void>) async throws -> (DataSession, UserStorage) {
             let storage = try await storagePreview.awake()
             let refreshTokenRepository = RefreshTokenManager(
                 api: sandboxSession.api,
@@ -100,9 +100,12 @@ extension DefaultDataLayer: DataLayer {
                 logger: logger
                     .with(scope: .sync)
             )
-            return HostedDataSession(
-                api: api,
-                sync: await syncFactory.create()
+            return (
+                HostedDataSession(
+                    api: api,
+                    sync: await syncFactory.create()
+                ),
+                storage
             )
         }
     }
@@ -131,7 +134,7 @@ extension DefaultDataLayer: DataLayer {
         startupData: Components.Schemas.StartupData,
         deviceId: String,
         loggedOutHandler: EventPublisher<Void>
-    ) async throws -> DataSession {
+    ) async throws -> (DataSession, UserStorage) {
         let logger = infrastructure.logger
             .with(scope: .dataLayer(.hosted))
         let storage: UserStorage
@@ -184,9 +187,12 @@ extension DefaultDataLayer: DataLayer {
             logger: logger
                 .with(scope: .sync)
         )
-        return HostedDataSession(
-            api: api,
-            sync: await syncFactory.create()
+        return (
+            HostedDataSession(
+                api: api,
+                sync: await syncFactory.create()
+            ),
+            storage
         )
     }
     

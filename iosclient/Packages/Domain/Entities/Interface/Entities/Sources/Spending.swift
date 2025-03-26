@@ -4,6 +4,19 @@ public typealias Amount = Decimal
 public typealias MsSince1970 = Int64
 
 extension Amount {
+    public init(dto: Int64) {
+        self = Decimal(dto) / 100
+    }
+}
+
+extension Int64 {
+    public init(amount: Amount) {
+        self = Int64((NSDecimalNumber(decimal: amount).doubleValue * 100))
+    }
+}
+
+
+extension Amount {
     public var currencyFormatted: String {
         String(format: "%.2f", NSDecimalNumber(decimal: self).doubleValue)
     }

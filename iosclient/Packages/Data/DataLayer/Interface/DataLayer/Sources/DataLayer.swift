@@ -1,5 +1,6 @@
 import Api
 import AsyncExtensions
+import PersistentStorage
 
 public protocol DataLayer: Sendable {
     var available: [DataLayerPreview] { get async }
@@ -10,7 +11,7 @@ public protocol DataLayer: Sendable {
         startupData: Components.Schemas.StartupData,
         deviceId: String,
         loggedOutHandler: EventPublisher<Void>
-    ) async throws -> DataSession
+    ) async throws -> (DataSession, UserStorage)
     
     func deleteSession(hostId: HostId) async
 }
