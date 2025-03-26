@@ -142,14 +142,17 @@ extension DefaultServerSideEventsSession: ServerSideEventsSession {
                 return
             case 401:
                 logW { "sse stream - expired" }
+                response.disposition(.cancel)
                 throw .tokenExpired
             case 408, // Request Timeout
                  429, // Too Many Requests
                  500...599: // Server Errors
                 logW { "sse stream - retriable error [\(httpResponse.statusCode)]" }
+                response.disposition(.cancel)
                 throw .retriableError(.http(httpResponse.statusCode))
             default:
                 logW { "sse stream - non-retriable error [\(httpResponse.statusCode)]" }
+                response.disposition(.cancel)
                 throw .nonRetriableError(.http(httpResponse.statusCode))
             }
         }

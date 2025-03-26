@@ -8,9 +8,9 @@ import Foundation
 extension SessionStartError: AuthMiddlewareError {
     var isTokenExpired: Bool {
         guard case .tokenExpired = self else {
-            return true
+            return false
         }
-        return false
+        return true
     }
 }
 
