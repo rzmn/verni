@@ -62,7 +62,9 @@ func CreateSpendingGroupReducer(
                         kind: .create(
                             SpendingGroup.Participant(
                                 userId: participantId,
-                                status: participantId == base.authorId ? .member : .invited
+                                status: .member
+                                // TODO: implement invites, current implementation is considering all as members
+                                // status: participantId == base.authorId ? .member : .invited
                             )
                         ),
                         id: base.operationId.operationId(creating: participantId),
