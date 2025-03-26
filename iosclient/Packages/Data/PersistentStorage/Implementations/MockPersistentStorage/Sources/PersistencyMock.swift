@@ -6,6 +6,7 @@ public final class MockUserStorage: @unchecked Sendable, UserStorage {
     public var deviceId: DeviceId
     public var refreshToken: String
     public var operations: [Operation]
+    public var onOperationsUpdatedPublisher = EventPublisher<Void>()
     
     public init(
         userId: HostId,
@@ -17,6 +18,10 @@ public final class MockUserStorage: @unchecked Sendable, UserStorage {
         self.deviceId = deviceId
         self.refreshToken = refreshToken
         self.operations = operations
+    }
+
+    public var onOperationsUpdated: any EventSource<Void> { 
+        onOperationsUpdatedPublisher 
     }
     
     public func update(operations: [Operation]) async throws {

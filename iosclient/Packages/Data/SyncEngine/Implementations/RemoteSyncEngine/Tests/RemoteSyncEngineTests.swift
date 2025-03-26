@@ -23,6 +23,8 @@ private extension Components.Schemas.SomeOperation {
 @Suite("RemoteSyncEngine Tests")
 struct RemoteSyncEngineTests {
     final class MockUserStorage: @unchecked Sendable, UserStorage {
+        var onOperationsUpdated: any EventSource<Void> { onOperationsUpdatedPublisher }
+        
         var userId: HostId { "userId" }
         var deviceId: DeviceId { "deviceId" }
         var refreshToken: String { "refreshToken" }
@@ -31,6 +33,7 @@ struct RemoteSyncEngineTests {
         var shouldFailUpdate = false
         var updateError: Error?
         var updateCallCount = 0
+        var onOperationsUpdatedPublisher = EventPublisher<Void>()
         
         func close() async {}
         func invalidate() async {}
