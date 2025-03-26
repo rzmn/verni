@@ -375,9 +375,9 @@ extension AuthenticatedScreensCoordinator {
                     store.dispatch(
                         .updateBottomSheet(
                             .hint(
-                                title: "[debug] logout",
-                                subtitle: "[debug] sure?",
-                                actionTitle: "[debug] confirm",
+                                title: .logoutTitle,
+                                subtitle: .logoutSubtitle,
+                                actionTitle: .logoutConfirm,
                                 action: {
                                     store.dispatch(.logoutRequested)
                                 }

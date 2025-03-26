@@ -269,6 +269,18 @@ public extension VerniL10N {
     static var notFound: Self {
         mapping("not_found")
     }
+    
+    static var logoutTitle: Self {
+        mapping("logout_title")
+    }
+    
+    static var logoutSubtitle: Self {
+        mapping("logout_subtitle")
+    }
+    
+    static var logoutConfirm: Self {
+        mapping("logout_confirm")
+    }
 }
 
 extension String: VerniL10N {
