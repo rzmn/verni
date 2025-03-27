@@ -15,8 +15,12 @@ go/model_confirm_operations_request.go
 go/model_confirm_operations_succeeded_response.go
 go/model_create_spending_group_operation.go
 go/model_create_spending_group_operation_create_spending_group.go
+go/model_create_spending_group_push_payload.go
+go/model_create_spending_group_push_payload_csg.go
 go/model_create_spending_operation.go
 go/model_create_spending_operation_create_spending.go
+go/model_create_spending_push_payload.go
+go/model_create_spending_push_payload_cs.go
 go/model_create_user_operation.go
 go/model_create_user_operation_create_user.go
 go/model_credentials.go

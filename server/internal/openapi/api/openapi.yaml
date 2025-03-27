@@ -680,6 +680,20 @@ components:
       - incorrectCredentials
       - privacyViolation
       type: string
+    CreateSpendingGroupPushPayload:
+      properties:
+        csg:
+          $ref: '#/components/schemas/CreateSpendingGroupPushPayload_csg'
+      required:
+      - csg
+      type: object
+    CreateSpendingPushPayload:
+      properties:
+        cs:
+          $ref: '#/components/schemas/CreateSpendingPushPayload_cs'
+      required:
+      - cs
+      type: object
     UpdateEmailOperation:
       properties:
         updateEmail:
@@ -1045,6 +1059,61 @@ components:
       required:
       - response
       title: confirmOperationsSucceededResponse
+    CreateSpendingGroupPushPayload_csg:
+      description: Create spending group push payload
+      properties:
+        gid:
+          description: Group identifier
+          type: string
+        gn:
+          description: Group name
+          nullable: true
+          type: string
+        pdns:
+          description: Participant display names
+          items:
+            type: string
+          type: array
+      required:
+      - gid
+      - pdns
+      type: object
+    CreateSpendingPushPayload_cs:
+      description: Create spending push payload
+      properties:
+        gid:
+          description: Group identifier
+          type: string
+        gn:
+          description: Group name
+          nullable: true
+          type: string
+        sid:
+          description: Spending identifier
+          type: string
+        sn:
+          description: Spending name
+          type: string
+        pdns:
+          description: Participant display names
+          items:
+            type: string
+          type: array
+        c:
+          description: Currency
+          type: string
+        a:
+          description: Amount
+          format: int64
+          type: integer
+      required:
+      - a
+      - c
+      - gid
+      - pdns
+      - sid
+      - sn
+      type: object
     UpdateEmailOperation_updateEmail:
       description: Update email operation
       properties:

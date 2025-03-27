@@ -746,6 +746,71 @@ components:
         - alreadyConfirmed
         - incorrectCredentials
         - privacyViolation
+    CreateSpendingGroupPushPayload:
+      type: object
+      properties:
+        csg:
+          description: Create spending group push payload
+          type: object
+          properties:
+            gid:
+              description: Group identifier
+              type: string
+            gn:
+              description: Group name
+              type: string
+              nullable: true
+            pdns:
+              description: Participant display names
+              type: array
+              items:
+                type: string
+          required:
+            - gid
+            - pdns
+      required:
+        - csg
+    CreateSpendingPushPayload:
+      type: object
+      properties:
+        cs:
+          description: Create spending push payload
+          type: object
+          properties:
+            gid:
+              description: Group identifier
+              type: string
+            gn:
+              description: Group name
+              type: string
+              nullable: true
+            sid:
+              description: Spending identifier
+              type: string
+            sn:
+              description: Spending name
+              type: string
+            pdns:
+              description: Participant display names
+              type: array
+              items:
+                type: string
+            c:
+              description: Currency
+              type: string
+            a:
+              description: Amount
+              type: integer
+              format: int64
+          required:
+            - gid
+            - pdns
+            - sid
+            - sn
+            - c
+            - a
+      required:
+        - cs
     UpdateEmailOperation:
       type: object
       properties:
