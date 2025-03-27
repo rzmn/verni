@@ -379,6 +379,9 @@ extension AuthenticatedScreensCoordinator {
                     }
                 }(
                     ActivitiesTransitions(
+                        tab: TabTransition(
+                            progress: $profileTabTransitionProgress
+                        ),
                         tapOwnerTab: TapOwnerTabTransition(
                             tapCounter: $profileTabTapCounter
                         )

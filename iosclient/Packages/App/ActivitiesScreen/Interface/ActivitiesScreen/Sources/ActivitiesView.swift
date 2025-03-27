@@ -11,6 +11,7 @@ public struct ActivitiesView: View {
     @Environment(ColorPalette.self) var colors
     
     @Binding private var onTapOwnerTabCounter: Int
+    @Binding private var tabTransitionProgress: CGFloat
     private let dateFormatter: DateFormatter
     
     public init(
@@ -22,6 +23,7 @@ public struct ActivitiesView: View {
         self.dateFormatter = dateFormatter
         
         _onTapOwnerTabCounter = transitions.tapOwnerTab.tapCounter
+        _tabTransitionProgress = transitions.tab.progress
     }
     
     public var body: some View {
@@ -37,6 +39,9 @@ public struct ActivitiesView: View {
         .onChange(of: onTapOwnerTabCounter) { _ in
             store.dispatch(.cancel)
         }
+        .opacity(tabTransitionOpacity)
+        .modifier(HorizontalTranslateEffect(offset: tabTransitionOffset))
+        .id(store.state.sessionId)
     }
     
     private var content: some View {
@@ -111,6 +116,16 @@ public struct ActivitiesView: View {
     }
 }
 
+extension ActivitiesView {
+    private var tabTransitionOpacity: CGFloat {
+        1 - abs(tabTransitionProgress)
+    }
+    
+    private var tabTransitionOffset: CGFloat {
+        28 * tabTransitionProgress
+    }
+}
+
 #if DEBUG
 
 class ClassToIdentifyBundle {}
@@ -123,11 +138,15 @@ private struct ActivitiesPreview: View {
             ActivitiesView(
                 store: Store(
                     state: ActivitiesState(
-                        operations: []
+                        operations: [],
+                        sessionId: UUID()
                     ),
                     reducer: { state, _ in state }
                 ), dateFormatter: DateFormatter(),
                 transitions: ActivitiesTransitions(
+                    tab: TabTransition(
+                        progress: .constant(1)
+                    ),
                     tapOwnerTab: TapOwnerTabTransition(
                         tapCounter: .constant(0)
                     )
