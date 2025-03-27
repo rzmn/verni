@@ -9,7 +9,7 @@ import AuthWelcomeScreen
 internal import Logging
 internal import Convenience
 
-actor AppModel {
+actor DefaultAppModel {
     private var pendingPushToken: Data?
     private var currentSession: HostedDomainLayer? {
         didSet {
@@ -29,8 +29,8 @@ actor AppModel {
         domain: @Sendable @escaping () async -> SandboxDomainLayer
     ) {
         store = Store(
-            state: AppModel.initialState,
-            reducer: AppModel.reducer
+            state: DefaultAppModel.initialState,
+            reducer: DefaultAppModel.reducer
         )
         store.append(
             handler: AppSideEffects(
@@ -42,13 +42,13 @@ actor AppModel {
     }
 }
 
-extension AppModel: AppFactory {
+extension DefaultAppModel: AppFactory {
     @MainActor func view() -> AppView {
         AppView(store: self.store)
     }
 }
 
-extension AppModel {
+extension DefaultAppModel {
     public func registerPushToken(token: Data) async {
         if let currentSession {
             await currentSession
@@ -59,7 +59,7 @@ extension AppModel {
         }
     }
 
-    public func handle(url: String) async {
+    public func handle(rawPushPayload: [AnyHashable : Any]) async {
         // stub
     }
 }

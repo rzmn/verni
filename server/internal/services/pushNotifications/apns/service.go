@@ -17,53 +17,43 @@ import (
 type ApnsConfig struct {
 	CertificatePath string `json:"certificatePath"`
 	CredentialsPath string `json:"credentialsPath"`
+	BundleId        string `json:"bundleId"`
 }
 
 type Repository pushNotificationsRepository.Repository
 
-func New(config ApnsConfig, logger logging.Service, pathProviderService pathProvider.Service, repository Repository) (pushNotifications.Service, error) {
+func New(
+	config ApnsConfig,
+	logger logging.Service,
+	pathProviderService pathProvider.Service,
+) (pushNotifications.Service, error) {
 	const op = "apns.AppleService"
 	credentialsData, err := os.ReadFile(pathProviderService.AbsolutePath(config.CredentialsPath))
 	if err != nil {
-		logger.LogInfo("%s: failed to open config: %v", op, err)
-		return &appleService{}, err
+		return &appleService{}, fmt.Errorf("%s: opening config: %w", op, err)
 	}
 	var credentials ApnsCredentials
 	json.Unmarshal(credentialsData, &credentials)
 	cert, err := certificate.FromP12File(pathProviderService.AbsolutePath(config.CertificatePath), credentials.Password)
 	if err != nil {
-		logger.LogInfo("%s: failed to open p12 creds %v: %v", op, err, credentials)
-		return &appleService{}, err
+		return &appleService{}, fmt.Errorf("%s: opening p12 creds %w", op, err)
 	}
 	return &appleService{
-		client:     apns2.NewClient(cert).Development(),
-		repository: repository,
-		logger:     logger,
+		client:   apns2.NewClient(cert).Production(),
+		bundleId: config.BundleId,
+		logger:   logger,
 	}, nil
 }
 
 type appleService struct {
-	client     *apns2.Client
-	repository Repository
-	logger     logging.Service
+	client   *apns2.Client
+	bundleId string
+	logger   logging.Service
 }
 
-type PushDataType int
-
-const (
-	PushDataTypeFriendRequestHasBeenAccepted = iota
-	PushDataTypeGotFriendRequest
-	PushDataTypeNewExpenseReceived
-)
-
-type PushData[T any] struct {
-	Type    PushDataType `json:"t"`
-	Payload *T           `json:"p,omitempty"`
-}
-
-type Push[T any] struct {
+type Push struct {
 	Aps  PushPayload `json:"aps"`
-	Data PushData[T] `json:"d"`
+	Data interface{} `json:"d"`
 }
 
 type PushPayload struct {
@@ -81,166 +71,35 @@ type ApnsCredentials struct {
 	Password string `json:"cert_pwd"`
 }
 
-// func (c *appleService) FriendRequestHasBeenAccepted(receiver pushNotifications.UserId, acceptedBy pushNotifications.UserId) {
-// 	const op = "apns.defaultService.FriendRequestHasBeenAccepted"
-// 	c.logger.LogInfo("%s: start[receiver=%s acceptedBy=%s]", op, receiver, acceptedBy)
-// 	receiverToken, err := c.repository.GetPushToken(pushNotificationsRepository.UserId(receiver))
-// 	if err != nil {
-// 		c.logger.LogError("%s: cannot get receiver token from db err: %v", op, err)
-// 		return
-// 	}
-// 	if receiverToken == nil {
-// 		c.logger.LogInfo("%s: receiver push token is nil", op)
-// 		return
-// 	}
-// 	type Payload struct {
-// 		Target pushNotifications.UserId `json:"t"`
-// 	}
-// 	body := fmt.Sprintf("By %s", acceptedBy)
-// 	payload := Payload{
-// 		Target: acceptedBy,
-// 	}
-// 	mutable := 1
-// 	payloadString, err := json.Marshal(Push[Payload]{
-// 		Aps: PushPayload{
-// 			MutableContent: &mutable,
-// 			Alert: PushPayloadAlert{
-// 				Title:    "Friend request has been accepted",
-// 				Subtitle: nil,
-// 				Body:     &body,
-// 			},
-// 		},
-// 		Data: PushData[Payload]{
-// 			Type:    PushDataTypeFriendRequestHasBeenAccepted,
-// 			Payload: &payload,
-// 		},
-// 	})
-// 	if err != nil {
-// 		c.logger.LogError("%s: failed to create payload string: %v", op, err)
-// 		return
-// 	}
-// 	if err := c.send(*receiverToken, string(payloadString)); err != nil {
-// 		c.logger.LogError("%s: failed to send push: %v", op, err)
-// 		return
-// 	}
-// 	c.logger.LogInfo("%s: success[receiver=%s acceptedBy=%s]", op, receiver, acceptedBy)
-// }
-
-// func (c *appleService) FriendRequestHasBeenReceived(receiver pushNotifications.UserId, sentBy pushNotifications.UserId) {
-// 	const op = "apns.defaultService.FriendRequestHasBeenReceived"
-// 	c.logger.LogInfo("%s: start[receiver=%s sentBy=%s]", op, receiver, sentBy)
-// 	receiverToken, err := c.repository.GetPushToken(pushNotificationsRepository.UserId(receiver))
-// 	if err != nil {
-// 		c.logger.LogError("%s: cannot get receiver token from db err: %v", op, err)
-// 		return
-// 	}
-// 	if receiverToken == nil {
-// 		c.logger.LogInfo("%s: receiver push token is nil", op)
-// 		return
-// 	}
-// 	type Payload struct {
-// 		Sender pushNotifications.UserId `json:"s"`
-// 	}
-// 	body := fmt.Sprintf("From: %s", sentBy)
-// 	payload := Payload{
-// 		Sender: sentBy,
-// 	}
-// 	mutable := 1
-// 	payloadString, err := json.Marshal(Push[Payload]{
-// 		Aps: PushPayload{
-// 			MutableContent: &mutable,
-// 			Alert: PushPayloadAlert{
-// 				Title:    "Got Friend Request",
-// 				Subtitle: nil,
-// 				Body:     &body,
-// 			},
-// 		},
-// 		Data: PushData[Payload]{
-// 			Type:    PushDataTypeGotFriendRequest,
-// 			Payload: &payload,
-// 		},
-// 	})
-// 	if err != nil {
-// 		c.logger.LogError("%s: failed to create payload string: %v", op, err)
-// 		return
-// 	}
-// 	if err := c.send(*receiverToken, string(payloadString)); err != nil {
-// 		c.logger.LogError("%s: failed to send push: %v", op, err)
-// 		return
-// 	}
-// 	c.logger.LogInfo("%s: success[receiver=%s sentBy=%s]", op, receiver, sentBy)
-// }
-
-// func (c *appleService) NewExpenseReceived(receiver pushNotifications.UserId, expense pushNotifications.Expense, author pushNotifications.UserId) {
-// 	const op = "apns.defaultService.NewExpenseReceived"
-// 	c.logger.LogInfo("%s: start[receiver=%s id=%s author=%s]", op, receiver, expense.Id, author)
-// 	receiverToken, err := c.repository.GetPushToken(pushNotificationsRepository.UserId(receiver))
-// 	if err != nil {
-// 		c.logger.LogError("%s: cannot get receiver token from db err: %v", op, err)
-// 		return
-// 	}
-// 	if receiverToken == nil {
-// 		c.logger.LogInfo("%s: receiver push token is nil", op)
-// 		return
-// 	}
-// 	type Payload struct {
-// 		DealId   pushNotifications.ExpenseId `json:"d"`
-// 		AuthorId pushNotifications.UserId    `json:"u"`
-// 		Cost     pushNotifications.Cost      `json:"c"`
-// 	}
-// 	body := fmt.Sprintf("%s: %d", expense.Details, expense.Total)
-// 	cost := expense.Total
-// 	for i := 0; i < len(expense.Shares); i++ {
-// 		if pushNotifications.UserId(expense.Shares[i].UserId) == receiver {
-// 			cost = expense.Shares[i].Cost
-// 		}
-// 	}
-// 	payload := Payload{
-// 		DealId:   pushNotifications.ExpenseId(expense.Id),
-// 		AuthorId: author,
-// 		Cost:     pushNotifications.Cost(cost),
-// 	}
-// 	mutable := 1
-// 	payloadString, err := json.Marshal(Push[Payload]{
-// 		Aps: PushPayload{
-// 			MutableContent: &mutable,
-// 			Alert: PushPayloadAlert{
-// 				Title:    "New Expense Received",
-// 				Subtitle: nil,
-// 				Body:     &body,
-// 			},
-// 		},
-// 		Data: PushData[Payload]{
-// 			Type:    PushDataTypeNewExpenseReceived,
-// 			Payload: &payload,
-// 		},
-// 	})
-// 	if err != nil {
-// 		c.logger.LogError("%s: failed create payload string: %v", op, err)
-// 		return
-// 	}
-// 	if err := c.send(*receiverToken, string(payloadString)); err != nil {
-// 		c.logger.LogError("%s: failed to send push: %v", op, err)
-// 		return
-// 	}
-// 	c.logger.LogInfo("%s: success[receiver=%s id=%s author=%s]", op, receiver, expense.Id, author)
-// }
-
-func (c *appleService) send(token string, payloadString string) error {
+func (c *appleService) Alert(token pushNotifications.Token, title string, subtitle *string, body *string, data interface{}) error {
 	const op = "apns.defaultService.send"
+	c.logger.LogInfo("%s: start[token=%s title=%s subtitle=%s body=%s data=%v]", op, token, title, subtitle, body, data)
+
 	notification := &apns2.Notification{}
-	notification.DeviceToken = token
-	notification.Topic = "com.rzmn.accountydev.app"
-
-	c.logger.LogInfo("%s: sending push: %s", op, payloadString)
-	notification.Payload = payloadString
-
-	res, err := c.client.Push(notification)
-
+	notification.DeviceToken = string(token)
+	notification.Topic = c.bundleId
+	mutable := 1
+	payloadString, err := json.Marshal(Push{
+		Aps: PushPayload{
+			MutableContent: &mutable,
+			Alert: PushPayloadAlert{
+				Title:    title,
+				Subtitle: subtitle,
+				Body:     body,
+			},
+		},
+		Data: data,
+	})
 	if err != nil {
-		c.logger.LogInfo("%s: failed to send notification: %v", op, err)
-		return err
+		return fmt.Errorf("%s: making payload string: %w", op, err)
 	}
-	fmt.Printf("%s: sent %v %v %v\n", op, res.StatusCode, res.ApnsID, res.Reason)
+
+	notification.Payload = payloadString
+	res, err := c.client.Push(notification)
+	if err != nil {
+		return fmt.Errorf("%s: sending notification: %w", op, err)
+	}
+
+	c.logger.LogInfo("%s: success[token=%s result=%v payload=%s]", op, token, res, payloadString)
 	return nil
 }

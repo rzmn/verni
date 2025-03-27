@@ -1,5 +1,7 @@
 package pushNotifications
 
-type UserId string
+type Token string
 
-type Service interface{}
+type Service interface {
+	Alert(token Token, title string, subtitle *string, body *string, data interface{}) error
+}
