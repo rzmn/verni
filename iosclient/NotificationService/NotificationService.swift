@@ -1,11 +1,5 @@
-//
-//  NotificationService.swift
-//  NotificationService
-//
-//  Created by Никита Разумный on 3/27/25.
-//
-
 import UserNotifications
+import Assembly
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -31,5 +25,26 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent)
         }
     }
+}
 
+extension NotificationService {
+    @MainActor private func process(
+        request: UNNotificationRequest,
+        handler: @escaping (UNNotificationContent) -> Void
+    ) async {
+        guard let content = request.content.mutableCopy() as? UNMutableNotificationContent else {
+            return handler(request.content)
+        }
+        bestAttemptContent = content
+        defer {
+            handler(content)
+        }
+        let assembly: Assembly
+        do {
+            assembly = try Assembly()
+        } catch {
+            return
+        }
+        await assembly.appModel.handle(push: content)
+    }
 }

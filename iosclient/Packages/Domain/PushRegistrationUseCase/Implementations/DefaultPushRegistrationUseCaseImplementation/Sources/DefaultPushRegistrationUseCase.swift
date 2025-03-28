@@ -51,7 +51,10 @@ extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
         } catch {
             return logE { "failed to register for push notifications error: \(error)" }
         }
-        
+    }
+    
+    public func unregister() async {
+        // TODO: 
     }
 }
 

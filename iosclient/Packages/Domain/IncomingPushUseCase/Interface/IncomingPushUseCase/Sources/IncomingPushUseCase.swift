@@ -1,16 +1,36 @@
 import Foundation
-import UserNotifications
+import Entities
 
-public struct PushContent: Sendable {
-    public let title: String
-    public let subtitle: String
-    public let body: String
-
-    public init(title: String, subtitle: String, body: String) {
-        self.title = title
-        self.subtitle = subtitle
-        self.body = body
+public enum PushContent: Sendable {
+    public struct SpendingCreated: Sendable {
+        public let spendingName: String
+        public let groupName: String?
+        public let amount: Amount
+        public let currency: Currency
+        
+        public init(
+            spendingName: String,
+            groupName: String?,
+            amount: Amount,
+            currency: Currency
+        ) {
+            self.spendingName = spendingName
+            self.groupName = groupName
+            self.amount = amount
+            self.currency = currency
+        }
     }
+    
+    public struct SpendingGroupCreated: Sendable {
+        public let groupName: String?
+        
+        public init(groupName: String?) {
+            self.groupName = groupName
+        }
+    }
+    
+    case spendingCreated(SpendingCreated)
+    case spendingGroupCreated(SpendingGroupCreated)
 }
 
 public enum ProcessPushError: Error, Sendable {

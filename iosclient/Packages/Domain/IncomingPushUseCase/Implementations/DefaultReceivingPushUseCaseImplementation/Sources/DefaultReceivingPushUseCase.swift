@@ -1,30 +1,26 @@
-import Domain
+import Entities
 import Foundation
 import Logging
 import UserNotifications
-internal import Base
+import Api
+import IncomingPushUseCase
+internal import Convenience
 
 public actor DefaultReceivingPushUseCase {
     public let logger: Logger
-
-    private let usersRepository: UsersRepository
-    private let spendingsRepository: SpendingsRepository
-
+    private let hostId: User.Identifier
     private let decoder = JSONDecoder()
 
     public init(
-        usersRepository: UsersRepository,
-        spendingsRepository: SpendingsRepository,
+        hostId: User.Identifier,
         logger: Logger
     ) {
         self.logger = logger
-        self.usersRepository = usersRepository
-        self.spendingsRepository = spendingsRepository
+        self.hostId = hostId
     }
 }
 
 extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
-
     @MainActor public func handle(
         rawPushPayload: [AnyHashable: Any]
     ) async throws(ProcessPushError) -> PushContent {
@@ -46,34 +42,36 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
             logE { "failed to convert push data due error: \(error)" }
             throw .internalError(InternalError.error("failed to convert push data to typed data", underlying: error))
         }
+        let getGroupName = { [hostId] (groupName: String?, groupMembers: [String: String]) -> String? in
+            if let groupName {
+                return groupName
+            } else {
+                let uidToNameMapping = groupMembers
+                    .filter { $0.key != hostId }
+                if uidToNameMapping.isEmpty {
+                    return nil
+                } else {
+                    return uidToNameMapping.map(\.value).joined(separator: ", ")
+                }
+            }
+        }
         switch payload {
-        case .newExpenseReceived(let payload):
-            return try await handle(payload: payload)
-        }
-    }
-
-    private func handle(
-        payload: PushPayload.NewExpenseReceived
-    ) async throws(ProcessPushError) -> PushContent {
-        Task {
-            async let refreshSpendings = try? spendingsRepository.refreshSpendingCounterparties()
-            async let refreshHistory = try? spendingsRepository.refreshSpendingsHistory(
-                counterparty: payload.authorId
+        case .spendingCreated(let payload):
+            return .spendingCreated(
+                .init(
+                    spendingName: payload.sn,
+                    groupName: getGroupName(payload.gn, payload.pdns.additionalProperties),
+                    amount: Amount(dto: payload.a),
+                    currency: Currency(dto: payload.c)
+                )
             )
-            _ = await [refreshSpendings, refreshHistory] as [any Sendable]
+        case .spendingGroupCreated(let payload):
+            return .spendingGroupCreated(
+                .init(
+                    groupName: getGroupName(payload.gn, payload.pdns.additionalProperties)
+                )
+            )
         }
-        let spending: Spending
-        do {
-            spending = try await spendingsRepository.getSpending(id: payload.spendingId)
-        } catch {
-            logE { "failed to get info error: \(error)" }
-            throw .internalError(InternalError.error("failed to get spending info", underlying: error))
-        }
-        return PushContent(
-            title: "newExpenseReceived",
-            subtitle: "subtitle!!",
-            body: "\(spending.details)"
-        )
     }
 }
 

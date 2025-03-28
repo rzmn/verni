@@ -478,6 +478,191 @@ public enum Components {
             case incorrectCredentials = "incorrectCredentials"
             case privacyViolation = "privacyViolation"
         }
+        /// - Remark: Generated from `#/components/schemas/PushTitle`.
+        @frozen public enum PushTitle: String, Codable, Hashable, Sendable, CaseIterable {
+            case newSpendingsGroup = "newSpendingsGroup"
+            case newSpending = "newSpending"
+        }
+        /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload`.
+        public struct CreateSpendingGroupPushPayload: Codable, Hashable, Sendable {
+            /// Create spending group push payload
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload/csg`.
+            public struct CsgPayload: Codable, Hashable, Sendable {
+                /// Group identifier
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload/csg/gid`.
+                public var gid: Swift.String
+                /// Group name
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload/csg/gn`.
+                public var gn: Swift.String?
+                /// Participant display names
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload/csg/pdns`.
+                public struct PdnsPayload: Codable, Hashable, Sendable {
+                    /// A container of undocumented properties.
+                    public var additionalProperties: [String: Swift.String]
+                    /// Creates a new `PdnsPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - additionalProperties: A container of undocumented properties.
+                    public init(additionalProperties: [String: Swift.String] = .init()) {
+                        self.additionalProperties = additionalProperties
+                    }
+                    public init(from decoder: any Decoder) throws {
+                        additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                    }
+                    public func encode(to encoder: any Encoder) throws {
+                        try encoder.encodeAdditionalProperties(additionalProperties)
+                    }
+                }
+                /// Participant display names
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload/csg/pdns`.
+                public var pdns: Components.Schemas.CreateSpendingGroupPushPayload.CsgPayload.PdnsPayload
+                /// Creates a new `CsgPayload`.
+                ///
+                /// - Parameters:
+                ///   - gid: Group identifier
+                ///   - gn: Group name
+                ///   - pdns: Participant display names
+                public init(
+                    gid: Swift.String,
+                    gn: Swift.String? = nil,
+                    pdns: Components.Schemas.CreateSpendingGroupPushPayload.CsgPayload.PdnsPayload
+                ) {
+                    self.gid = gid
+                    self.gn = gn
+                    self.pdns = pdns
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case gid
+                    case gn
+                    case pdns
+                }
+            }
+            /// Create spending group push payload
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateSpendingGroupPushPayload/csg`.
+            public var csg: Components.Schemas.CreateSpendingGroupPushPayload.CsgPayload
+            /// Creates a new `CreateSpendingGroupPushPayload`.
+            ///
+            /// - Parameters:
+            ///   - csg: Create spending group push payload
+            public init(csg: Components.Schemas.CreateSpendingGroupPushPayload.CsgPayload) {
+                self.csg = csg
+            }
+            public enum CodingKeys: String, CodingKey {
+                case csg
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload`.
+        public struct CreateSpendingPushPayload: Codable, Hashable, Sendable {
+            /// Create spending push payload
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs`.
+            public struct CsPayload: Codable, Hashable, Sendable {
+                /// Group identifier
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/gid`.
+                public var gid: Swift.String
+                /// Group name
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/gn`.
+                public var gn: Swift.String?
+                /// Spending identifier
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/sid`.
+                public var sid: Swift.String
+                /// Spending name
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/sn`.
+                public var sn: Swift.String
+                /// Participant display names
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/pdns`.
+                public struct PdnsPayload: Codable, Hashable, Sendable {
+                    /// A container of undocumented properties.
+                    public var additionalProperties: [String: Swift.String]
+                    /// Creates a new `PdnsPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - additionalProperties: A container of undocumented properties.
+                    public init(additionalProperties: [String: Swift.String] = .init()) {
+                        self.additionalProperties = additionalProperties
+                    }
+                    public init(from decoder: any Decoder) throws {
+                        additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                    }
+                    public func encode(to encoder: any Encoder) throws {
+                        try encoder.encodeAdditionalProperties(additionalProperties)
+                    }
+                }
+                /// Participant display names
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/pdns`.
+                public var pdns: Components.Schemas.CreateSpendingPushPayload.CsPayload.PdnsPayload
+                /// Currency
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/c`.
+                public var c: Swift.String
+                /// Amount
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/a`.
+                public var a: Swift.Int64
+                /// Creates a new `CsPayload`.
+                ///
+                /// - Parameters:
+                ///   - gid: Group identifier
+                ///   - gn: Group name
+                ///   - sid: Spending identifier
+                ///   - sn: Spending name
+                ///   - pdns: Participant display names
+                ///   - c: Currency
+                ///   - a: Amount
+                public init(
+                    gid: Swift.String,
+                    gn: Swift.String? = nil,
+                    sid: Swift.String,
+                    sn: Swift.String,
+                    pdns: Components.Schemas.CreateSpendingPushPayload.CsPayload.PdnsPayload,
+                    c: Swift.String,
+                    a: Swift.Int64
+                ) {
+                    self.gid = gid
+                    self.gn = gn
+                    self.sid = sid
+                    self.sn = sn
+                    self.pdns = pdns
+                    self.c = c
+                    self.a = a
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case gid
+                    case gn
+                    case sid
+                    case sn
+                    case pdns
+                    case c
+                    case a
+                }
+            }
+            /// Create spending push payload
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs`.
+            public var cs: Components.Schemas.CreateSpendingPushPayload.CsPayload
+            /// Creates a new `CreateSpendingPushPayload`.
+            ///
+            /// - Parameters:
+            ///   - cs: Create spending push payload
+            public init(cs: Components.Schemas.CreateSpendingPushPayload.CsPayload) {
+                self.cs = cs
+            }
+            public enum CodingKeys: String, CodingKey {
+                case cs
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/UpdateEmailOperation`.
         public struct UpdateEmailOperation: Codable, Hashable, Sendable {
             /// Update email operation

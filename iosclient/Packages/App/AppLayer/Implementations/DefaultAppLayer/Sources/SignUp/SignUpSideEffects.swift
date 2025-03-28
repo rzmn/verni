@@ -18,6 +18,7 @@ internal import Convenience
     private let emailValidationUseCase: EmailValidationUseCase
     private let passwordValidationUseCase: PasswordValidationUseCase
     private let saveCredentialsUseCase: SaveCredendialsUseCase
+    private let pushRegistry: PushRegistry
     
     private var emailValidationSubject = PassthroughSubject<String, Never>()
     private var passwordValidationSubject = PassthroughSubject<String, Never>()
@@ -34,7 +35,8 @@ internal import Convenience
         authUseCase: any AuthUseCase<HostedDomainLayer>,
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
-        saveCredentialsUseCase: SaveCredendialsUseCase
+        saveCredentialsUseCase: SaveCredendialsUseCase,
+        pushRegistry: PushRegistry
     ) {
         self.store = store
         self.session = session
@@ -42,6 +44,7 @@ internal import Convenience
         self.emailValidationUseCase = emailValidationUseCase
         self.passwordValidationUseCase = passwordValidationUseCase
         self.saveCredentialsUseCase = saveCredentialsUseCase
+        self.pushRegistry = pushRegistry
         resetValidationSubscriptions()
     }
 
@@ -113,14 +116,16 @@ internal import Convenience
 
     private func doSignUp(credentials: Credentials) async {
         do {
+            let domain = try await authUseCase.signup(
+                credentials: credentials
+            )
             let session = await DefaultHostedAppSession(
                 sandbox: session,
-                session: try await authUseCase.signup(
-                    credentials: credentials
-                )
+                session: domain
             )
             Task {
                 await saveCredentialsUseCase.save(email: credentials.email, password: credentials.password)
+                await pushRegistry.attachSession(session: domain)
             }
             store.dispatch(.signUp(AnyHostedAppSession(value: session)))
         } catch {

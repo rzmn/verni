@@ -1,4 +1,5 @@
-import Domain
+import Entities
+import Api
 
 struct Push: Decodable {
     enum CodingKeys: String, CodingKey {
@@ -8,62 +9,36 @@ struct Push: Decodable {
 }
 
 enum PushPayload {
-    case newExpenseReceived(NewExpenseReceived)
+    case spendingCreated(Components.Schemas.CreateSpendingPushPayload.CsPayload)
+    case spendingGroupCreated(Components.Schemas.CreateSpendingGroupPushPayload.CsgPayload)
 }
 
 extension PushPayload: Decodable {
     enum CodingKeys: String, CodingKey {
-        case type = "t"
-        case payload = "p"
-    }
-
-    enum NotificationType: Int, Codable {
-        case friendRequestHasBeenAccepted = 0
-        case newExpenseReceived = 2
+        case spendingCreated = "cs"
+        case spendingGroupCreated = "csg"
     }
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(NotificationType.self, forKey: .type)
-        switch type {
-        case .newExpenseReceived:
-            self = .newExpenseReceived(
-                try container.decode(NewExpenseReceived.self, forKey: .payload)
+        if let payload = try container.decodeIfPresent(
+            Components.Schemas.CreateSpendingPushPayload.CsPayload.self,
+            forKey: .spendingCreated
+        ) {
+            self = .spendingCreated(payload)
+        } else if let payload = try container.decodeIfPresent(
+            Components.Schemas.CreateSpendingGroupPushPayload.CsgPayload.self,
+            forKey: .spendingGroupCreated
+        ) {
+            self = .spendingGroupCreated(payload)
+        } else {
+            throw DecodingError.valueNotFound(
+                PushPayload.self,
+                DecodingError.Context(
+                    codingPath: [CodingKeys.spendingCreated, CodingKeys.spendingGroupCreated],
+                    debugDescription: "no value found for push payload"
+                )
             )
-        }
-    }
-}
-
-extension PushPayload {
-    struct FriendRequestHasBeenAccepted: Decodable {
-        let target: User.Identifier
-
-        enum CodingKeys: String, CodingKey {
-            case target = "t"
-        }
-    }
-}
-
-extension PushPayload {
-    struct GotFriendRequest: Decodable {
-        let sender: User.Identifier
-
-        enum CodingKeys: String, CodingKey {
-            case sender = "s"
-        }
-    }
-}
-
-extension PushPayload {
-    struct NewExpenseReceived: Decodable {
-        let spendingId: Spending.Identifier
-        let authorId: User.Identifier
-        let cost: Int64
-
-        enum CodingKeys: String, CodingKey {
-            case spendingId = "d"
-            case authorId = "u"
-            case cost = "c"
         }
     }
 }

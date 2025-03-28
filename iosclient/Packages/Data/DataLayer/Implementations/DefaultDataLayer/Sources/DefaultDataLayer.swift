@@ -21,7 +21,6 @@ public final class DefaultDataLayer: Sendable {
     
     public init(
         infrastructure: InfrastructureLayer,
-        bundleId: String,
         appGroupId: String
     ) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(

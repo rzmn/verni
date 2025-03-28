@@ -87,7 +87,7 @@ struct AnonymousScreensCoordinator: View {
             case .forgotPassword:
                 break
             case .logIn(let session):
-                store.dispatch(.logIn(session, state))
+                store.dispatch(.onAuthorized(session))
             }
         }(loginTransitions)
     }
@@ -102,7 +102,7 @@ struct AnonymousScreensCoordinator: View {
             case .forgotPassword:
                 break
             case .signUp(let session):
-                store.dispatch(.logIn(session, state))
+                store.dispatch(.onAuthorized(session))
             }
         }(signUpTransitions)
     }

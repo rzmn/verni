@@ -11,6 +11,7 @@ import EmailConfirmationUseCase
 import PushRegistrationUseCase
 import AvatarsRepository
 import OperationsRepository
+import IncomingPushUseCase
 import Logging
 import PersistentStorage
 internal import LoggingExtensions
@@ -23,6 +24,7 @@ internal import DefaultOperationsRepository
 internal import DefaultQRInviteUseCaseImplementation
 internal import DefaultEmailConfirmationUseCaseImplementation
 internal import DefaultPushRegistrationUseCaseImplementation
+internal import DefaultReceivingPushUseCaseImplementation
 internal import Convenience
 
 final class DefaultHostedDomainLayer: Sendable {
@@ -125,6 +127,14 @@ extension DefaultHostedDomainLayer: HostedDomainLayer {
     func pushRegistrationUseCase() -> PushRegistrationUseCase {
         DefaultPushRegistrationUseCase(
             api: dataSession.api,
+            logger: logger
+                .with(scope: .pushNotifications)
+        )
+    }
+    
+    func incomingPushUseCase() -> any ReceivingPushUseCase {
+        DefaultReceivingPushUseCase(
+            hostId: userId,
             logger: logger
                 .with(scope: .pushNotifications)
         )

@@ -23,6 +23,7 @@ actor LogInModel {
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
         saveCredentialsUseCase: SaveCredendialsUseCase,
+        pushRegistry: PushRegistry,
         logger: Logger
     ) async {
         store = await Store(
@@ -36,7 +37,8 @@ actor LogInModel {
                 authUseCase: authUseCase,
                 emailValidationUseCase: emailValidationUseCase,
                 passwordValidationUseCase: passwordValidationUseCase,
-                saveCredentialsUseCase: saveCredentialsUseCase
+                saveCredentialsUseCase: saveCredentialsUseCase,
+                pushRegistry: pushRegistry
             ), keepingUnique: true
         )
         await store.append(

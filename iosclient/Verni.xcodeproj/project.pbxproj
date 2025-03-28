@@ -7,10 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8451802C2D95557600D40F26 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 845180252D95557600D40F26 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		845180332D95596500D40F26 /* Assembly in Frameworks */ = {isa = PBXBuildFile; productRef = 845180322D95596500D40F26 /* Assembly */; };
 		845E3C112D93139400F98577 /* Assembly in Frameworks */ = {isa = PBXBuildFile; productRef = 8456F1432D89EEAE0000D3DE /* Assembly */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		8451802A2D95557600D40F26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 848C21162D461F8C00931669 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 845180242D95557600D40F26;
+			remoteInfo = NotificationService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8451802D2D95557600D40F26 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8451802C2D95557600D40F26 /* NotificationService.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		845180252D95557600D40F26 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		848C211E2D461F8C00931669 /* Verni.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Verni.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -22,9 +49,24 @@
 			);
 			target = 848C211D2D461F8C00931669 /* Verni */;
 		};
+		845180312D95557600D40F26 /* Exceptions for "NotificationService" folder in "NotificationService" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 845180242D95557600D40F26 /* NotificationService */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		845180262D95557600D40F26 /* NotificationService */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				845180312D95557600D40F26 /* Exceptions for "NotificationService" folder in "NotificationService" target */,
+			);
+			path = NotificationService;
+			sourceTree = "<group>";
+		};
 		848C21202D461F8C00931669 /* Verni */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -36,6 +78,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		845180222D95557600D40F26 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				845180332D95596500D40F26 /* Assembly in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		848C211B2D461F8C00931669 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -58,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				848C21202D461F8C00931669 /* Verni */,
+				845180262D95557600D40F26 /* NotificationService */,
 				844C761B2D931376007AB23A /* Frameworks */,
 				848C211F2D461F8C00931669 /* Products */,
 			);
@@ -67,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				848C211E2D461F8C00931669 /* Verni.app */,
+				845180252D95557600D40F26 /* NotificationService.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +126,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		845180242D95557600D40F26 /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 845180302D95557600D40F26 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				845180212D95557600D40F26 /* Sources */,
+				845180222D95557600D40F26 /* Frameworks */,
+				845180232D95557600D40F26 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				845180262D95557600D40F26 /* NotificationService */,
+			);
+			name = NotificationService;
+			packageProductDependencies = (
+				845180322D95596500D40F26 /* Assembly */,
+			);
+			productName = NotificationService;
+			productReference = 845180252D95557600D40F26 /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		848C211D2D461F8C00931669 /* Verni */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 848C21422D461F8C00931669 /* Build configuration list for PBXNativeTarget "Verni" */;
@@ -81,10 +156,12 @@
 				848C211A2D461F8C00931669 /* Sources */,
 				848C211B2D461F8C00931669 /* Frameworks */,
 				848C211C2D461F8C00931669 /* Resources */,
+				8451802D2D95557600D40F26 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8451802B2D95557600D40F26 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				848C21202D461F8C00931669 /* Verni */,
@@ -107,6 +184,9 @@
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					845180242D95557600D40F26 = {
+						CreatedOnToolsVersion = 16.2;
+					};
 					848C211D2D461F8C00931669 = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -130,11 +210,19 @@
 			projectRoot = "";
 			targets = (
 				848C211D2D461F8C00931669 /* Verni */,
+				845180242D95557600D40F26 /* NotificationService */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		845180232D95557600D40F26 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		848C211C2D461F8C00931669 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -145,6 +233,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		845180212D95557600D40F26 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		848C211A2D461F8C00931669 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,7 +249,69 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		8451802B2D95557600D40F26 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 845180242D95557600D40F26 /* NotificationService */;
+			targetProxy = 8451802A2D95557600D40F26 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		8451802E2D95557600D40F26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = NPZKGHFT2A;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.dev.verni.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8451802F2D95557600D40F26 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = NPZKGHFT2A;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.dev.verni.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		848C21402D461F8C00931669 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -281,7 +438,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Verni/Verni.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"Verni/Preview Content\"";
 				DEVELOPMENT_TEAM = NPZKGHFT2A;
 				ENABLE_PREVIEWS = YES;
@@ -297,7 +454,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.dev.verni;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -313,7 +470,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Verni/Verni.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"Verni/Preview Content\"";
 				DEVELOPMENT_TEAM = NPZKGHFT2A;
 				ENABLE_PREVIEWS = YES;
@@ -329,7 +486,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rzmn.dev.verni;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -341,6 +498,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		845180302D95557600D40F26 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8451802E2D95557600D40F26 /* Debug */,
+				8451802F2D95557600D40F26 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		848C21192D461F8C00931669 /* Build configuration list for PBXProject "Verni" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -369,6 +535,11 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		845180322D95596500D40F26 /* Assembly */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 844C76182D931362007AB23A /* XCLocalSwiftPackageReference "Packages/Assembly" */;
+			productName = Assembly;
+		};
 		8456F1432D89EEAE0000D3DE /* Assembly */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Assembly;

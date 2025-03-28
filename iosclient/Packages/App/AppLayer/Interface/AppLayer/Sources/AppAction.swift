@@ -14,8 +14,6 @@ public enum AppAction: Sendable {
     case logoutRequested
     case loggedOut(AnySandboxAppSession)
 
-    case logIn(AnyHostedAppSession, AnonymousState)
-
     case onAuthorized(AnyHostedAppSession)
     
     case onOpenEditProfile

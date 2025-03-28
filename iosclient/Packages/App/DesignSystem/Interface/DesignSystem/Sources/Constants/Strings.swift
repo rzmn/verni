@@ -281,6 +281,14 @@ public extension VerniL10N {
     static var logoutConfirm: Self {
         mapping("logout_confirm")
     }
+    
+    static var pushNewSpending: Self {
+        mapping("push_new_spending")
+    }
+    
+    static var pushNewSpendingGroup: Self {
+        mapping("push_new_spendings_group")
+    }
 }
 
 extension String: VerniL10N {

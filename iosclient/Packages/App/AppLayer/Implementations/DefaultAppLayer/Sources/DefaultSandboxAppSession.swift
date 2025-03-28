@@ -19,7 +19,11 @@ internal import DefaultAuthWelcomeScreen
     private(set) var _signUp: (any ScreenProvider<SignUpEvent<AnyHostedAppSession>, SignUpView<AnyHostedAppSession>, ModalTransition>)!
     let shared: any SharedAppSession
     
-    init(shared: SharedAppSession, session: SandboxDomainLayer) async {
+    init(
+        shared: SharedAppSession,
+        pushRegistry: PushRegistry,
+        session: SandboxDomainLayer
+    ) async {
         self.shared = shared
         let logger = session.infrastructure.logger
             .with(scope: .appLayer(.sandbox))
@@ -33,6 +37,7 @@ internal import DefaultAuthWelcomeScreen
             emailValidationUseCase: session.localEmailValidationUseCase,
             passwordValidationUseCase: session.localPasswordValidationUseCase,
             saveCredentialsUseCase: session.saveCredentialsUseCase,
+            pushRegistry: pushRegistry,
             logger: logger
                 .with(scope: .logIn)
         )
@@ -42,6 +47,7 @@ internal import DefaultAuthWelcomeScreen
             emailValidationUseCase: session.localEmailValidationUseCase,
             passwordValidationUseCase: session.localPasswordValidationUseCase,
             saveCredentialsUseCase: session.saveCredentialsUseCase,
+            pushRegistry: pushRegistry,
             logger: logger
                 .with(scope: .signUp)
         )

@@ -2,18 +2,22 @@ import AppBase
 import Entities
 import AppLayer
 import DomainLayer
+internal import Logging
 
 @MainActor final class AppSideEffects: Sendable {
     private unowned let store: Store<AppState, AppAction>
-    private let domain: @Sendable () async -> SandboxDomainLayer
+    private let domain: Task<SandboxDomainLayer, Never>
+    private let pushRegistry: Task<PushRegistry, Never>
     private var launchTriggered = false
 
     init(
         store: Store<AppState, AppAction>,
-        domain: @Sendable @escaping () async -> SandboxDomainLayer
+        domain: Task<SandboxDomainLayer, Never>,
+        pushRegistry: Task<PushRegistry, Never>
     ) {
         self.store = store
         self.domain = domain
+        self.pushRegistry = pushRegistry
     }
 }
 
@@ -26,16 +30,10 @@ extension AppSideEffects: ActionHandler {
         switch action {
         case .launch:
             launch()
-        case .launched:
-            launched()
-        case .onAuthorized:
-            onAuthorized()
         case .logoutRequested:
             if case .launched(let launched) = store.state, case .authenticated(let state) = launched {
                 self.logout(state.session)
             }
-        case .logIn(let session, _):
-            store.dispatch(.onAuthorized(session))
         case .onUserPreview(let user):
             showUserPreview(user)
         case .onExpenseGroupTap(let id):
@@ -93,18 +91,24 @@ extension AppSideEffects: ActionHandler {
     }
 
     private func doLaunch(session: AnySharedAppSession) async -> AppAction {
-        let sandboxDomain = await domain()
+        let sandboxDomain = await domain.value
+        let pushRegistry = await pushRegistry.value
         let sandbox = await DefaultSandboxAppSession(
             shared: session.value,
+            pushRegistry: pushRegistry,
             session: sandboxDomain
         )
         do {
+            let domain = try await sandboxDomain.authUseCase().awake()
+            Task {
+                await pushRegistry.attachSession(session: domain)
+            }
             return await .launched(
                 .authenticated(
                     AnyHostedAppSession(
                         value: DefaultHostedAppSession(
                             sandbox: sandbox,
-                            session: try sandboxDomain.authUseCase().awake()
+                            session: domain
                         )
                     )
                 )
@@ -120,16 +124,11 @@ extension AppSideEffects: ActionHandler {
         }
     }
 
-    private func launched() {
-        // stub
-    }
-
-    private func onAuthorized() {
-        // stub
-    }
-
     private func logout(_ session: AnyHostedAppSession) {
-        Task.detached {
+        Task {
+            await self.pushRegistry.value.detachSession()
+        }
+        Task {
             await session.value.logout()
             Task { @MainActor in
                 self.store.dispatch(.loggedOut(AnySandboxAppSession(value: session.value.sandbox)))

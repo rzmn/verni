@@ -496,6 +496,28 @@
         }
       }
     },
+    "push_new_spending" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Expense Received"
+          }
+        }
+      }
+    },
+    "push_new_spendings_group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ve been invited to group"
+          }
+        }
+      }
+    },
     "qr_hint_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {

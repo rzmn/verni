@@ -2,7 +2,7 @@ import AppLayer
 import Entities
 internal import Convenience
 
-extension AppModel {
+extension DefaultAppModel {
     static var reducer: @MainActor @Sendable (AppState, AppAction) -> AppState {
         return { state, action in
             switch action {
@@ -15,7 +15,7 @@ extension AppModel {
                 return .launched(.authenticated(initialAuthenticatedState(session: session)))
             case .loggedOut(let session):
                 return .launched(.anonymous(anonymousState(session: session)))
-            case .logoutRequested, .logIn:
+            case .logoutRequested:
                 return state
                 
             // Tab selection

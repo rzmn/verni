@@ -13,29 +13,32 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(path: "../ApiDomainConvenience"),
-        .package(path: "../../Domain"),
-        .package(path: "../../../Data/Api"),
-        .package(path: "../../../Data/PersistentStorage"),
-        .package(path: "../../../Infrastructure/Logging"),
-        .package(path: "../../../Infrastructure/Base"),
+        .local(.currentLayer(.interface("IncomingPushUseCase"))),
+        .local(.currentLayer(.interface("EntitiesApiConvenience"))),
+        .local(.currentLayer(.interface("Entities"))),
+        .local(.data(.interface("Api"))),
+        .local(.infrastructure(.interface("Logging"))),
     ],
     targets: [
         .target(
             name: "DefaultReceivingPushUseCaseImplementation",
             dependencies: [
-                "Domain",
+                "IncomingPushUseCase",
+                "EntitiesApiConvenience",
+                "Entities",
                 "Api",
-                "ApiDomainConvenience",
-                "PersistentStorage",
                 "Logging",
-                "Base",
             ]
         ),
         .testTarget(
             name: "DefaultReceivingPushUseCaseImplementationTests",
             dependencies: [
-                "DefaultReceivingPushUseCaseImplementation", "Domain", "Api", "Logging", "Base",
+                "DefaultReceivingPushUseCaseImplementation",
+                "IncomingPushUseCase",
+                "EntitiesApiConvenience",
+                "Entities",
+                "Api",
+                "Logging",
             ]
         ),
     ]
