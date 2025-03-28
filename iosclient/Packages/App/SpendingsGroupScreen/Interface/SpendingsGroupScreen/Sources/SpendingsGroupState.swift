@@ -59,7 +59,7 @@ public struct SpendingsGroupState: Equatable, Sendable {
             return nil
         } else {
             return preview.balance.map { (currency, value) in
-                currency.formatted(amount: abs(value))
+                currency.formatted(amount: value)
             }.joined(separator: " + ")
         }
     }
