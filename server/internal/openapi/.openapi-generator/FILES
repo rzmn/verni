@@ -39,6 +39,7 @@ go/model_operation_type.go
 go/model_pull_operations_succeeded_response.go
 go/model_push_operations_request.go
 go/model_push_operations_succeeded_response.go
+go/model_push_title.go
 go/model_refresh_session_request.go
 go/model_refresh_succeeded_response.go
 go/model_register_for_push_notifications_request.go

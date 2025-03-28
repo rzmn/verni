@@ -7,7 +7,9 @@ import (
 	"verni/internal/controllers/operations"
 	openapi "verni/internal/openapi/go"
 	operationsRepository "verni/internal/repositories/operations"
+	pushTokens "verni/internal/repositories/pushNotifications"
 	"verni/internal/services/logging"
+	"verni/internal/services/pushNotifications"
 	"verni/internal/services/realtimeEvents"
 )
 
@@ -16,11 +18,15 @@ type OperationsRepository operationsRepository.Repository
 func New(
 	operationsRepository OperationsRepository,
 	realtimeEvents realtimeEvents.Service,
+	pushNotifications pushNotifications.Service,
+	pushTokensRepository pushTokens.Repository,
 	logger logging.Service,
 ) operations.Controller {
 	return &defaultController{
 		operationsRepository: operationsRepository,
 		realtimeEvents:       realtimeEvents,
+		pushNotifications:    pushNotifications,
+		pushTokensRepository: pushTokensRepository,
 		logger:               logger,
 	}
 }
@@ -28,6 +34,8 @@ func New(
 type defaultController struct {
 	operationsRepository OperationsRepository
 	realtimeEvents       realtimeEvents.Service
+	pushNotifications    pushNotifications.Service
+	pushTokensRepository pushTokens.Repository
 	logger               logging.Service
 }
 
@@ -49,7 +57,7 @@ func (c *defaultController) Push(
 	).Perform(); err != nil {
 		return fmt.Errorf("pushing operations to repository: %w", err)
 	}
-	for _, operation := range operationsToPush {
+	for index, operation := range operationsToPush {
 		trackedEntities := operation.Payload.TrackedEntities()
 		userIdsToNotify, err := c.operationsRepository.GetUsers(trackedEntities)
 		if err != nil {
@@ -63,6 +71,25 @@ func (c *defaultController) Push(
 			}
 			c.logger.LogInfo("notifying %s about update, devices to ignore: %v", userToNotify, devicesToIgnore)
 			c.realtimeEvents.NotifyUpdate(realtimeEvents.UserId(userToNotify), devicesToIgnore)
+		}
+		userToNotifyWithoutCurrentUser := common.Filter(userIdsToNotify, func(id operationsRepository.UserId) bool {
+			return id != operationsRepository.UserId(userId)
+		})
+		switch operation.Payload.Type() {
+		case operationsRepository.CreateSpendingGroupOperationPayloadType:
+			if err := c.sendCreateSpendingGroupPush(
+				operations[index].CreateSpendingGroup,
+				userToNotifyWithoutCurrentUser,
+			); err != nil {
+				c.logger.LogError("sending create spending group push: %v", err)
+			}
+		case operationsRepository.CreateSpendingOperationPayloadType:
+			if err := c.sendCreateSpendingPush(
+				operations[index].CreateSpending,
+				userToNotifyWithoutCurrentUser,
+			); err != nil {
+				c.logger.LogError("sending create spending push: %v", err)
+			}
 		}
 	}
 	c.logger.LogInfo("%s: success[user=%s device=%s]", op, userId, deviceId)

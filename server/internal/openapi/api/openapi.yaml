@@ -680,6 +680,11 @@ components:
       - incorrectCredentials
       - privacyViolation
       type: string
+    PushTitle:
+      enum:
+      - newSpendingsGroup
+      - newSpending
+      type: string
     CreateSpendingGroupPushPayload:
       properties:
         csg:
@@ -1070,10 +1075,10 @@ components:
           nullable: true
           type: string
         pdns:
-          description: Participant display names
-          items:
+          additionalProperties:
             type: string
-          type: array
+          description: Participant display names
+          type: object
       required:
       - gid
       - pdns
@@ -1095,10 +1100,10 @@ components:
           description: Spending name
           type: string
         pdns:
-          description: Participant display names
-          items:
+          additionalProperties:
             type: string
-          type: array
+          description: Participant display names
+          type: object
         c:
           description: Currency
           type: string

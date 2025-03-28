@@ -20,7 +20,7 @@ type CreateSpendingGroupPushPayloadCsg struct {
 	Gn *string `json:"gn,omitempty"`
 
 	// Participant display names
-	Pdns []string `json:"pdns"`
+	Pdns map[string]string `json:"pdns"`
 }
 
 // AssertCreateSpendingGroupPushPayloadCsgRequired checks if the required fields are not zero-ed

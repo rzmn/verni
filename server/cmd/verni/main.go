@@ -210,7 +210,7 @@ func main() {
 				var apnsConfig applePushNotifications.ApnsConfig
 				json.Unmarshal(data, &apnsConfig)
 				logger.LogInfo("creating apple apns service with config %v", apnsConfig)
-				service, err := applePushNotifications.New(apnsConfig, logger, pathProvider, repositories.pushRegistry)
+				service, err := applePushNotifications.New(apnsConfig, logger, pathProvider)
 				if err != nil {
 					logger.LogFatal("failed to initialize apple apns service err: %v", err)
 				}
@@ -282,6 +282,8 @@ func main() {
 		operations: defaultOperationsController.New(
 			repositories.operations,
 			services.realtimeEventsService,
+			services.push,
+			repositories.pushRegistry,
 			logger,
 		),
 		users: defaultUsersController.New(

@@ -15,7 +15,11 @@ import (
 	"verni/internal/repositories"
 	operationsRepository "verni/internal/repositories/operations"
 	operationsRepository_mock "verni/internal/repositories/operations/mock"
+	pushNotifications "verni/internal/repositories/pushNotifications"
+	pushNotifications_mock "verni/internal/repositories/pushNotifications/mock"
 	standartOutputLoggingService "verni/internal/services/logging/standartOutput"
+	pushTokens "verni/internal/services/pushNotifications"
+	pushTokens_mock "verni/internal/services/pushNotifications/mock"
 	realtimeEvents "verni/internal/services/realtimeEvents"
 	realtimeEvents_mock "verni/internal/services/realtimeEvents/mock"
 )
@@ -83,7 +87,18 @@ func TestController_Push(t *testing.T) {
 			NotifyUpdateImpl: func(uid realtimeEvents.UserId, ignoringDevices []realtimeEvents.DeviceId) {},
 		}
 
-		controller := defaultController.New(opsRepo, realtimeService, logger)
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
+
+		controller := defaultController.New(opsRepo, realtimeService, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		err := controller.Push([]openapi.SomeOperation{testOperation}, userId, deviceId)
@@ -102,8 +117,18 @@ func TestController_Push(t *testing.T) {
 				}
 			},
 		}
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
 
-		controller := defaultController.New(opsRepo, nil, logger)
+		controller := defaultController.New(opsRepo, nil, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		err := controller.Push([]openapi.SomeOperation{}, "user-1", "device-1")
@@ -147,8 +172,18 @@ func TestController_Pull(t *testing.T) {
 				}, nil
 			},
 		}
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
 
-		controller := defaultController.New(opsRepo, nil, logger)
+		controller := defaultController.New(opsRepo, nil, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		result, err := controller.Pull("user-1", "device-1", openapi.REGULAR)
@@ -166,8 +201,18 @@ func TestController_Pull(t *testing.T) {
 				return nil, errors.New("pull error")
 			},
 		}
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
 
-		controller := defaultController.New(opsRepo, nil, logger)
+		controller := defaultController.New(opsRepo, nil, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		result, err := controller.Pull("user-1", "device-1", openapi.REGULAR)
@@ -195,8 +240,18 @@ func TestController_Pull(t *testing.T) {
 				}, nil
 			},
 		}
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
 
-		controller := defaultController.New(opsRepo, nil, logger)
+		controller := defaultController.New(opsRepo, nil, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		result, err := controller.Pull("user-1", "device-1", openapi.REGULAR)
@@ -220,8 +275,18 @@ func TestController_Confirm(t *testing.T) {
 				}
 			},
 		}
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
 
-		controller := defaultController.New(opsRepo, nil, logger)
+		controller := defaultController.New(opsRepo, nil, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		err := controller.Confirm([]operations.OperationId{"op-1"}, "user-1", "device-1")
@@ -240,8 +305,18 @@ func TestController_Confirm(t *testing.T) {
 				}
 			},
 		}
+		pushNotificationsRepository := &pushNotifications_mock.RepositoryMock{
+			GetPushTokensImpl: func(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+				return map[pushNotifications.UserId][]string{}, nil
+			},
+		}
+		pushNotificationsService := &pushTokens_mock.ServiceMock{
+			AlertImpl: func(token pushTokens.Token, title string, subtitle *string, body *string, data interface{}) error {
+				return nil
+			},
+		}
 
-		controller := defaultController.New(opsRepo, nil, logger)
+		controller := defaultController.New(opsRepo, nil, pushNotificationsService, pushNotificationsRepository, logger)
 
 		// Act
 		err := controller.Confirm([]operations.OperationId{"op-1"}, "user-1", "device-1")

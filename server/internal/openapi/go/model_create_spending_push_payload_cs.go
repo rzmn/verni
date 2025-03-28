@@ -26,7 +26,7 @@ type CreateSpendingPushPayloadCs struct {
 	Sn string `json:"sn"`
 
 	// Participant display names
-	Pdns []string `json:"pdns"`
+	Pdns map[string]string `json:"pdns"`
 
 	// Currency
 	C string `json:"c"`

@@ -3,6 +3,7 @@ package defaultRepository
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"verni/internal/db"
 	"verni/internal/repositories"
 	"verni/internal/repositories/pushNotifications"
@@ -96,4 +97,59 @@ func (c *defaultRepository) GetPushToken(user pushNotifications.UserId, device p
 
 	c.logger.LogInfo("%s: success[user=%v]", op, user)
 	return &token, nil
+}
+
+func (c *defaultRepository) GetPushTokens(userIds []pushNotifications.UserId) (map[pushNotifications.UserId][]string, error) {
+	const op = "repositories.pushNotifications.defaultRepository.GetPushTokens"
+	c.logger.LogInfo("%s: start[userIds=%v]", op, userIds)
+
+	if len(userIds) == 0 {
+		return make(map[pushNotifications.UserId][]string), nil
+	}
+
+	params := make([]interface{}, len(userIds))
+	placeholders := make([]string, len(userIds))
+	for i, userId := range userIds {
+		params[i] = string(userId)
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+
+	query := fmt.Sprintf(`
+		SELECT userId, token 
+		FROM pushTokens 
+		WHERE userId IN (%s)
+		ORDER BY userId`,
+		strings.Join(placeholders, ","))
+
+	rows, err := c.db.Query(query, params...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: executing query: %w", op, err)
+	}
+	defer rows.Close()
+
+	result := make(map[pushNotifications.UserId][]string)
+	for rows.Next() {
+		var userId string
+		var token string
+		if err := rows.Scan(&userId, &token); err != nil {
+			return nil, fmt.Errorf("%s: scanning row: %w", op, err)
+		}
+		uid := pushNotifications.UserId(userId)
+		result[uid] = append(result[uid], token)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: iterating rows: %w", op, err)
+	}
+
+	c.logger.LogInfo("%s: success[users=%v, tokens=%v]", op, len(result), countTokens(result))
+	return result, nil
+}
+
+func countTokens(tokens map[pushNotifications.UserId][]string) int {
+	count := 0
+	for _, t := range tokens {
+		count += len(t)
+	}
+	return count
 }

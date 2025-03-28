@@ -746,6 +746,11 @@ components:
         - alreadyConfirmed
         - incorrectCredentials
         - privacyViolation
+    PushTitle:
+      type: string
+      enum:
+        - "newSpendingsGroup"
+        - "newSpending"
     CreateSpendingGroupPushPayload:
       type: object
       properties:
@@ -762,8 +767,8 @@ components:
               nullable: true
             pdns:
               description: Participant display names
-              type: array
-              items:
+              type: object
+              additionalProperties:
                 type: string
           required:
             - gid
@@ -792,8 +797,8 @@ components:
               type: string
             pdns:
               description: Participant display names
-              type: array
-              items:
+              type: object
+              additionalProperties:
                 type: string
             c:
               description: Currency
