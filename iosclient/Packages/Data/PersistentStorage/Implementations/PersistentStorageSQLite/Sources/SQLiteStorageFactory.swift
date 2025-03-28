@@ -24,7 +24,7 @@ internal import SQLite
         self.environment = try Environment(
             logger: logger,
             fileManager: fileManager,
-            versionLabel: "v1",
+            versionLabel: "v2",
             containerDirectory: dbDirectory
         )
         self.logger = logger
