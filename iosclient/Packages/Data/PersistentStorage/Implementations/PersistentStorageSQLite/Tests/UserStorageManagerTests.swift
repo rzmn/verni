@@ -4,6 +4,7 @@ import TestInfrastructure
 import Convenience
 import Filesystem
 import PersistentStorage
+import AsyncExtensions
 @testable import PersistentStorageSQLite
 
 @Suite
@@ -15,6 +16,7 @@ struct UserStorageManagerTests {
         let infrastructure = TestInfrastructureLayer()
         let manager = try SqliteUserStorageManager(
             logger: infrastructure.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructure.logger,
                 fileManager: infrastructure.fileManager,
@@ -55,6 +57,7 @@ struct UserStorageManagerTests {
         let infrastructure = TestInfrastructureLayer()
         let manager = try SqliteUserStorageManager(
             logger: infrastructure.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructure.logger,
                 fileManager: infrastructure.fileManager,
@@ -87,6 +90,7 @@ struct UserStorageManagerTests {
         let infrastructure = TestInfrastructureLayer()
         let manager = try SqliteUserStorageManager(
             logger: infrastructure.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructure.logger,
                 fileManager: infrastructure.fileManager,
@@ -128,6 +132,7 @@ struct UserStorageManagerTests {
         let infrastructure = TestInfrastructureLayer()
         let manager = try SqliteUserStorageManager(
             logger: infrastructure.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructure.logger,
                 fileManager: infrastructure.fileManager,
@@ -167,6 +172,7 @@ struct UserStorageManagerTests {
         }
         let manager = try SqliteUserStorageManager(
             logger: infrastructureWithFailingRemove.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructureWithFailingRemove.logger,
                 fileManager: infrastructureWithFailingRemove.fileManager,
@@ -207,6 +213,7 @@ struct UserStorageManagerTests {
         }
         let manager = try SqliteUserStorageManager(
             logger: infrastructureWithFailingRemove.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructureWithFailingRemove.logger,
                 fileManager: infrastructureWithFailingRemove.fileManager,
@@ -227,6 +234,7 @@ struct UserStorageManagerTests {
         let infrastructure = TestInfrastructureLayer()
         let manager = try SqliteUserStorageManager(
             logger: infrastructure.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructure.logger,
                 fileManager: infrastructure.fileManager,
@@ -258,6 +266,7 @@ struct UserStorageManagerTests {
         let infrastructure = TestInfrastructureLayer()
         let manager = try SqliteUserStorageManager(
             logger: infrastructure.logger,
+            userDefaults: AsyncExtensions.Atomic(value: .standard),
             environment: .init(
                 logger: infrastructure.logger,
                 fileManager: infrastructure.fileManager,
