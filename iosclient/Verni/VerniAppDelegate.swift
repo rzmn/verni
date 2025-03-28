@@ -25,13 +25,4 @@ class VerniAppDelegate: NSObject, UIApplicationDelegate {
             await assembly.appModel.registerPushToken(token: deviceToken)
         }
     }
-//    
-//    func application(
-//        _ application: UIApplication,
-//        didFailToRegisterForRemoteNotificationsWithError error: Error
-//    ) {
-//        Task { @MainActor in
-//            NotificationManager.shared.handlePushTokenError(error)
-//        }
-//    }
 }

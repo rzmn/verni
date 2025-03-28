@@ -1111,6 +1111,10 @@ components:
           description: Amount
           format: int64
           type: integer
+        u:
+          description: User's amount
+          format: int64
+          type: integer
       required:
       - a
       - c
@@ -1118,6 +1122,7 @@ components:
       - pdns
       - sid
       - sn
+      - u
       type: object
     UpdateEmailOperation_updateEmail:
       description: Update email operation

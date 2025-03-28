@@ -1,4 +1,5 @@
 import Api
+import Foundation
 import AsyncExtensions
 import PersistentStorage
 
@@ -6,6 +7,7 @@ public protocol DataLayer: Sendable {
     var available: [DataLayerPreview] { get async }
     
     var sandbox: DataSession { get }
+    var userDefaults: Atomic<UserDefaults> { get }
     
     func create(
         startupData: Components.Schemas.StartupData,

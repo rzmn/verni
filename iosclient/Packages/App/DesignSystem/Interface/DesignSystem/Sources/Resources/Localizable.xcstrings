@@ -62,7 +62,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ owes you"
+            "value" : "you borrowed %@"
           }
         }
       }
@@ -84,7 +84,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "you owe %@"
+            "value" : "you lent %@"
           }
         }
       }
@@ -700,7 +700,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "you are owed"
+            "value" : "you borrowed"
           }
         }
       }
@@ -733,7 +733,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "you owe"
+            "value" : "you lent"
           }
         }
       }

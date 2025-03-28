@@ -7,13 +7,16 @@ struct SpendingItemView: View {
     @Environment(ColorPalette.self) var colors
     let store: Store<SpendingsGroupState, SpendingsGroupAction>
     private let item: SpendingsGroupState.Item
+    private let counterparty: String?
     
     init(
         store: Store<SpendingsGroupState, SpendingsGroupAction>,
-        item: SpendingsGroupState.Item
+        item: SpendingsGroupState.Item,
+        counterparty: String?
     ) {
         self.store = store
         self.item = item
+        self.counterparty = counterparty
     }
     
     var body: some View {
@@ -36,10 +39,32 @@ struct SpendingItemView: View {
             Text(item.name)
                 .font(.medium(size: 18))
                 .foregroundStyle(colors.text.primary.default)
+            if let whoOwsString {
+                Text(whoOwsString)
+                    .font(.medium(size: 13))
+                    .foregroundStyle(colors.text.primary.default)
+            }
             Text(item.createdAt)
                 .font(.medium(size: 13))
                 .foregroundStyle(colors.text.secondary.default)
             Spacer()
+        }
+    }
+    
+    private var whoOwsString: String? {
+        guard let counterparty else {
+            return nil
+        }
+        if item.diff > 0 {
+            return .spending(
+                paidBy: .you,
+                amount: item.currency.formatted(amount: item.amount)
+            )
+        } else {
+            return .spending(
+                paidBy: counterparty,
+                amount: item.currency.formatted(amount: item.amount)
+            )
         }
     }
     
@@ -109,7 +134,8 @@ extension SpendingsGroupState.Item {
             ),
             reducer: { state, _ in state }
         ),
-        item: .preview
+        item: .preview,
+        counterparty: nil
     )
     .preview(packageClass: ClassToIdentifyBundle.self)
 }

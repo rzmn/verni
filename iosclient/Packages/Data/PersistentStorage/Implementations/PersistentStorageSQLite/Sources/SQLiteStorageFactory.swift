@@ -18,6 +18,7 @@ internal import SQLite
         logger: Logger,
         dbDirectory: URL,
         taskFactory: TaskFactory,
+        userDefaults: AsyncExtensions.Atomic<UserDefaults>,
         fileManager: Filesystem.FileManager
     ) throws {
         self.environment = try Environment(
@@ -34,6 +35,7 @@ internal import SQLite
         )
         self.userStorageHolder = try SqliteUserStorageManager(
             logger: logger,
+            userDefaults: userDefaults,
             environment: environment
         )
     }

@@ -31,7 +31,7 @@ public struct SpendingsGroupState: Equatable, Sendable {
         }
         
         var diffFormatted: String {
-            currency.formatted(amount: diff)
+            currency.formatted(amount: abs(diff))
         }
     }
     

@@ -17,7 +17,8 @@ public actor DefaultPushRegistrationUseCase {
 extension DefaultPushRegistrationUseCase: PushRegistrationUseCase {
     public func askForPushToken() async {
         do {
-            let granted = try await UNUserNotificationCenter.current().requestAuthorization()
+            let granted = try await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge, .provisional])
             if granted {
                 Task { @MainActor in
                     UIApplication.shared.registerForRemoteNotifications()

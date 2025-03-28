@@ -25,6 +25,11 @@ actor PushRegistry {
     }
     
     func attachSession(session: HostedDomainLayer) {
+        Task {
+            await session
+                .pushRegistrationUseCase()
+                .askForPushToken()
+        }
         currentSession = session
         registerTokenForCurrentSession()
     }

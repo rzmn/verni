@@ -81,7 +81,7 @@ public struct SpendingsGroupView: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(store.state.items) { (item: SpendingsGroupState.Item) in
-                        SpendingItemView(store: store, item: item)
+                        SpendingItemView(store: store, item: item, counterparty: store.state.preview.name)
                             .padding(.top, 2)
                             .id(item.id)
                             .transition(.slide)

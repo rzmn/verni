@@ -42,16 +42,16 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
             logE { "failed to convert push data due error: \(error)" }
             throw .internalError(InternalError.error("failed to convert push data to typed data", underlying: error))
         }
-        let getGroupName = { [hostId] (groupName: String?, groupMembers: [String: String]) -> String? in
+        let getGroupName = { [hostId] (groupName: String?, groupMembers: [String: String]) -> PushContent.GroupName? in
             if let groupName {
-                return groupName
+                return .groupName(groupName)
             } else {
                 let uidToNameMapping = groupMembers
                     .filter { $0.key != hostId }
-                if uidToNameMapping.isEmpty {
-                    return nil
+                if uidToNameMapping.count == 1, let counterparty = uidToNameMapping.values.first {
+                    return .opponentName(counterparty)
                 } else {
-                    return uidToNameMapping.map(\.value).joined(separator: ", ")
+                    return nil
                 }
             }
         }
@@ -62,7 +62,8 @@ extension DefaultReceivingPushUseCase: ReceivingPushUseCase {
                     spendingName: payload.sn,
                     groupName: getGroupName(payload.gn, payload.pdns.additionalProperties),
                     amount: Amount(dto: payload.a),
-                    currency: Currency(dto: payload.c)
+                    currency: Currency(dto: payload.c),
+                    share: Amount(dto: payload.u)
                 )
             )
         case .spendingGroupCreated(let payload):

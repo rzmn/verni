@@ -2,6 +2,7 @@ import AuthUseCase
 import DomainLayer
 import Entities
 import Api
+import Foundation
 import DataLayer
 import AsyncExtensions
 import Logging
@@ -16,10 +17,13 @@ actor DefaultAuthUseCase {
 
     init(
         sharedDomain: DefaultSharedDomainLayer,
+        defaults: AsyncExtensions.Atomic<UserDefaults>,
         logger: Logger
     ) {
         self.sharedDomain = sharedDomain
-        self.sessionHost = SessionHost()
+        self.sessionHost = SessionHost(
+            userDefaults: defaults.access { $0 }
+        )
         self.logger = logger
     }
 }

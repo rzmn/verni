@@ -56,6 +56,7 @@ public final class DefaultSandboxDomainLayer: SandboxDomainLayer {
     public func authUseCase() -> any AuthUseCase<HostedDomainLayer> {
         DefaultAuthUseCase(
             sharedDomain: defaultSharedDomainLayer,
+            defaults: defaultSharedDomainLayer.data.userDefaults,
             logger: logger
                 .with(scope: .auth)
         )

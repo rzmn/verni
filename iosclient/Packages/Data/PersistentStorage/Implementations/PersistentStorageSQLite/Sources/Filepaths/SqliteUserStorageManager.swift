@@ -2,6 +2,7 @@ import Foundation
 import Logging
 import Filesystem
 import PersistentStorage
+import AsyncExtensions
 internal import SQLite
 internal import Convenience
 
@@ -11,10 +12,17 @@ internal import Convenience
     private let environment: Environment
     private let idsToInvalidate: IdsHolder
 
-    nonisolated init(logger: Logger, environment: Environment) throws {
+    nonisolated init(
+        logger: Logger,
+        userDefaults: AsyncExtensions.Atomic<UserDefaults>,
+        environment: Environment
+    ) throws {
         self.logger = logger
         self.environment = environment
-        self.idsToInvalidate = IdsHolder(versionLabel: environment.versionLabel)
+        self.idsToInvalidate = IdsHolder(
+            versionLabel: environment.versionLabel,
+            userDefaults: userDefaults
+        )
     }
 }
 
@@ -128,33 +136,37 @@ extension SqliteUserStorageManager: Loggable {}
 extension SqliteUserStorageManager {
     final class IdsHolder: Sendable {
         private let versionLabel: String
+        private let userDefaults: AsyncExtensions.Atomic<UserDefaults>
         
         private var idsToInvalidateKey: String {
             "db_ids_to_invalidate_\(versionLabel)"
-        }
-
-        private var userDefaults: UserDefaults {
-            .standard
         }
         
         var value: Set<String> {
             get {
                 userDefaults
-                    .dictionary(forKey: idsToInvalidateKey)
+                    .access { $0.dictionary(forKey: idsToInvalidateKey) }
                     .flatMap(\.keys)
                     .map(Set.init)
                     .emptyIfNil
             }
             set {
                 userDefaults
-                    .set(newValue.reduce(into: [:]) { dict, item in
-                        dict[item] = true
-                    }, forKey: idsToInvalidateKey)
+                    .access { userDefaults in
+                        userDefaults
+                            .set(newValue.reduce(into: [:]) { dict, item in
+                                dict[item] = true
+                            }, forKey: idsToInvalidateKey)
+                    }
             }
         }
         
-        init(versionLabel: String) {
+        init(
+            versionLabel: String,
+            userDefaults: AsyncExtensions.Atomic<UserDefaults>
+        ) {
             self.versionLabel = versionLabel
+            self.userDefaults = userDefaults
         }
     }
 }

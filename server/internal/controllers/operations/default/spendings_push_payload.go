@@ -117,23 +117,34 @@ func (c *defaultController) sendCreateSpendingPush(
 	if err != nil {
 		return fmt.Errorf("getting display names: %w", err)
 	}
-	return c.sendPush(
-		string(openapi.NEW_SPENDING),
-		nil,
-		nil,
-		openapi.CreateSpendingPushPayload{
-			Cs: openapi.CreateSpendingPushPayloadCs{
-				Gid:  operation.GroupId,
-				Gn:   group.DisplayName,
-				Sid:  operation.SpendingId,
-				Sn:   operation.Name,
-				Pdns: displayNames,
-				C:    operation.Currency,
-				A:    operation.Amount,
-			},
-		},
-		usersToNotify,
-	)
+	for _, user := range usersToNotify {
+		for _, share := range operation.Shares {
+			if share.UserId != string(user) {
+				continue
+			}
+			if err := c.sendPush(
+				string(openapi.NEW_SPENDING),
+				nil,
+				nil,
+				openapi.CreateSpendingPushPayload{
+					Cs: openapi.CreateSpendingPushPayloadCs{
+						Gid:  operation.GroupId,
+						Gn:   group.DisplayName,
+						Sid:  operation.SpendingId,
+						Sn:   operation.Name,
+						Pdns: displayNames,
+						C:    operation.Currency,
+						A:    operation.Amount,
+						U:    share.Amount,
+					},
+				},
+				[]operationsRepository.UserId{user},
+			); err != nil {
+				return fmt.Errorf("error sending push: %w", err)
+			}
+		}
+	}
+	return nil
 }
 
 func (c *defaultController) sendPush(

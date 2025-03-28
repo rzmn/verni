@@ -3,8 +3,10 @@ internal import DefaultLogoutUseCaseImplementation
 import UIKit
 
 actor SessionHost {
-    private var userDefaults: UserDefaults {
-        .standard
+    private let userDefaults: UserDefaults
+    
+    init(userDefaults: UserDefaults) {
+        self.userDefaults = userDefaults
     }
     
     private var activeSessionKey: String {

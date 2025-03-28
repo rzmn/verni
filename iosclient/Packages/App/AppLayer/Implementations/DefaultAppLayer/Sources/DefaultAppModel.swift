@@ -75,19 +75,40 @@ extension DefaultAppModel: AppModel {
             }
         }
         switch content {
-        case .spendingCreated(let spendingCreated):
+        case .spendingCreated(let payload):
             push.title = .pushNewSpending
-            if let groupName = spendingCreated.groupName {
-                push.subtitle = "\(spendingCreated.spendingName) (in \(groupName))"
-            } else {
-                push.subtitle = spendingCreated.spendingName
+            let shareString = { () -> String in
+                if payload.share > 0 {
+                    return .addExpenseYouOwe(counterparty: payload.currency.formatted(amount: abs(payload.share)))
+                } else {
+                    return .addExpenseOwesYou(counterparty: payload.currency.formatted(amount: abs(payload.share)))
+                }
             }
-            push.body = spendingCreated.currency.formatted(amount: spendingCreated.amount)
+            if let groupName = payload.groupName {
+                switch groupName {
+                case .opponentName(let name):
+                    if payload.share > 0 {
+                        push.subtitle = .spending(paidBy: .you, amount: payload.currency.formatted(amount: payload.amount))
+                    } else {
+                        push.subtitle = .spending(paidBy: name, amount: payload.currency.formatted(amount: payload.amount))
+                    }
+                case .groupName(let string):
+                    if payload.share > 0 {
+                        push.subtitle = .spending(paidBy: .you, amount: payload.currency.formatted(amount: payload.amount))
+                    } else {
+                        push.subtitle = .spending(paidBy: "\"\(string)\"", amount: payload.currency.formatted(amount: payload.amount))
+                    }
+                }
+                push.body = shareString()
+            } else {
+                push.subtitle = shareString()
+            }
         case .spendingGroupCreated(let spendingGroupCreated):
             push.title = .pushNewSpendingGroup
             if let groupName = spendingGroupCreated.groupName {
                 push.subtitle = "Group name: \(groupName)"
             }
         }
+        return
     }
 }

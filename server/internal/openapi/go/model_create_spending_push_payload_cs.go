@@ -33,6 +33,9 @@ type CreateSpendingPushPayloadCs struct {
 
 	// Amount
 	A int64 `json:"a"`
+
+	// User's amount
+	U int64 `json:"u"`
 }
 
 // AssertCreateSpendingPushPayloadCsRequired checks if the required fields are not zero-ed
@@ -44,6 +47,7 @@ func AssertCreateSpendingPushPayloadCsRequired(obj CreateSpendingPushPayloadCs) 
 		"pdns": obj.Pdns,
 		"c":    obj.C,
 		"a":    obj.A,
+		"u":    obj.U,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

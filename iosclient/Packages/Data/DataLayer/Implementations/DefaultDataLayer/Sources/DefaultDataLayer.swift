@@ -15,6 +15,7 @@ internal import DefaultServerSideEvents
 public final class DefaultDataLayer: Sendable {
     public let logger: Logger
     public let sandbox: DataSession
+    public let userDefaults: AsyncExtensions.Atomic<UserDefaults>
     
     private let storageFactory: StorageFactory
     private let infrastructure: InfrastructureLayer
@@ -31,18 +32,24 @@ public final class DefaultDataLayer: Sendable {
         self.infrastructure = infrastructure
         self.logger = infrastructure.logger
             .with(scope: .dataLayer(.shared))
+        let appGroupDefaults = UserDefaults(suiteName: appGroupId)
+        userDefaults = .init(
+            value: appGroupDefaults ?? .standard
+        )
         storageFactory = try SQLiteStorageFactory(
             logger: infrastructure.logger.with(
                 scope: .database
             ),
             dbDirectory: permanentCacheDirectory,
             taskFactory: infrastructure.taskFactory,
+            userDefaults: userDefaults,
             fileManager: infrastructure.fileManager
         )
         sandbox = SandboxDataSession(
             storageFactory: storageFactory,
             infrastructure: infrastructure
         )
+
     }
 }
 

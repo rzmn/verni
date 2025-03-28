@@ -611,6 +611,10 @@ public enum Components {
                 ///
                 /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/a`.
                 public var a: Swift.Int64
+                /// User's amount
+                ///
+                /// - Remark: Generated from `#/components/schemas/CreateSpendingPushPayload/cs/u`.
+                public var u: Swift.Int64
                 /// Creates a new `CsPayload`.
                 ///
                 /// - Parameters:
@@ -621,6 +625,7 @@ public enum Components {
                 ///   - pdns: Participant display names
                 ///   - c: Currency
                 ///   - a: Amount
+                ///   - u: User's amount
                 public init(
                     gid: Swift.String,
                     gn: Swift.String? = nil,
@@ -628,7 +633,8 @@ public enum Components {
                     sn: Swift.String,
                     pdns: Components.Schemas.CreateSpendingPushPayload.CsPayload.PdnsPayload,
                     c: Swift.String,
-                    a: Swift.Int64
+                    a: Swift.Int64,
+                    u: Swift.Int64
                 ) {
                     self.gid = gid
                     self.gn = gn
@@ -637,6 +643,7 @@ public enum Components {
                     self.pdns = pdns
                     self.c = c
                     self.a = a
+                    self.u = u
                 }
                 public enum CodingKeys: String, CodingKey {
                     case gid
@@ -646,6 +653,7 @@ public enum Components {
                     case pdns
                     case c
                     case a
+                    case u
                 }
             }
             /// Create spending push payload

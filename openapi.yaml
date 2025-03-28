@@ -807,6 +807,10 @@ components:
               description: Amount
               type: integer
               format: int64
+            u:
+              description: User's amount
+              type: integer
+              format: int64
           required:
             - gid
             - pdns
@@ -814,6 +818,7 @@ components:
             - sn
             - c
             - a
+            - u
       required:
         - cs
     UpdateEmailOperation:
