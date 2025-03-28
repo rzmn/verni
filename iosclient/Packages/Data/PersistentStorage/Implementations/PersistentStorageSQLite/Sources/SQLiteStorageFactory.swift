@@ -19,12 +19,13 @@ internal import SQLite
         dbDirectory: URL,
         taskFactory: TaskFactory,
         userDefaults: AsyncExtensions.Atomic<UserDefaults>,
+        dataVersionLabel: String,
         fileManager: Filesystem.FileManager
     ) throws {
         self.environment = try Environment(
             logger: logger,
             fileManager: fileManager,
-            versionLabel: "v2",
+            versionLabel: dataVersionLabel,
             containerDirectory: dbDirectory
         )
         self.logger = logger

@@ -14,13 +14,16 @@ internal import DefaultInfrastructureLayer
         let infrastructure = DefaultInfrastructureLayer()
         let appGroupId = "group.com.rzmn.dev.verni"
         infrastructure.logger.logI { "initializing assembly for app group id \(appGroupId)" }
+        let dataVersionLabel = "v5"
         let data = try DefaultDataLayer(
             infrastructure: infrastructure,
+            dataVersionLabel: dataVersionLabel,
             appGroupId: appGroupId
         )
         let sandboxDomainLayerTask = Task {
             return await DefaultSandboxDomainLayer(
                 infrastructure: infrastructure,
+                dataVersionLabel: dataVersionLabel,
                 data: data
             ) as (any SandboxDomainLayer)
         }

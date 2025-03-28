@@ -18,11 +18,13 @@ actor DefaultAuthUseCase {
     init(
         sharedDomain: DefaultSharedDomainLayer,
         defaults: AsyncExtensions.Atomic<UserDefaults>,
+        dataVersionLabel: String,
         logger: Logger
     ) {
         self.sharedDomain = sharedDomain
         self.sessionHost = SessionHost(
-            userDefaults: defaults.access { $0 }
+            userDefaults: defaults.access { $0 },
+            dataVersionLabel: dataVersionLabel
         )
         self.logger = logger
     }

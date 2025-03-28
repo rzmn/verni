@@ -4,17 +4,22 @@ import UIKit
 
 actor SessionHost {
     private let userDefaults: UserDefaults
+    private let dataVersionLabel: String
     
-    init(userDefaults: UserDefaults) {
+    init(
+        userDefaults: UserDefaults,
+        dataVersionLabel: String
+    ) {
         self.userDefaults = userDefaults
+        self.dataVersionLabel = dataVersionLabel
     }
     
     private var activeSessionKey: String {
-        "verni_active_session"
+        "verni_active_session_\(dataVersionLabel)"
     }
     
     private var deviceIdKey: String {
-        "verni_active_session"
+        "verni_device_id_\(dataVersionLabel)"
     }
     
     var activeSession: String? {
@@ -29,7 +34,7 @@ actor SessionHost {
     var deviceId: String {
         get async {
             guard let deviceId = userDefaults.string(forKey: deviceIdKey) else {
-                let deviceId = (await UIDevice.current.identifierForVendor ?? UUID()).uuidString
+                let deviceId = UUID().uuidString
                 userDefaults.set(deviceId, forKey: deviceIdKey)
                 return deviceId
             }

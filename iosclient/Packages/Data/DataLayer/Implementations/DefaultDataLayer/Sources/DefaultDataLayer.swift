@@ -22,6 +22,7 @@ public final class DefaultDataLayer: Sendable {
     
     public init(
         infrastructure: InfrastructureLayer,
+        dataVersionLabel: String,
         appGroupId: String
     ) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
@@ -43,6 +44,7 @@ public final class DefaultDataLayer: Sendable {
             dbDirectory: permanentCacheDirectory,
             taskFactory: infrastructure.taskFactory,
             userDefaults: userDefaults,
+            dataVersionLabel: dataVersionLabel,
             fileManager: infrastructure.fileManager
         )
         sandbox = SandboxDataSession(

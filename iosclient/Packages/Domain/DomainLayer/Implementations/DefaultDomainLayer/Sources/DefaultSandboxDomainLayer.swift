@@ -13,12 +13,14 @@ public final class DefaultSandboxDomainLayer: SandboxDomainLayer {
     public let usersRepository: UsersRepository
     public let spendingsRepository: SpendingsRepository
     private let defaultSharedDomainLayer: DefaultSharedDomainLayer
+    private let dataVersionLabel: String
     public var shared: SharedDomainLayer {
         defaultSharedDomainLayer
     }
     
     public init(
         infrastructure: InfrastructureLayer,
+        dataVersionLabel: String,
         data: DataLayer
     ) async {
         let shared: DefaultSharedDomainLayer
@@ -50,6 +52,7 @@ public final class DefaultSandboxDomainLayer: SandboxDomainLayer {
             logger: logger
                 .with(scope: .spendings)
         )
+        self.dataVersionLabel = dataVersionLabel
         logI { "initialized" }
     }
     
@@ -57,6 +60,7 @@ public final class DefaultSandboxDomainLayer: SandboxDomainLayer {
         DefaultAuthUseCase(
             sharedDomain: defaultSharedDomainLayer,
             defaults: defaultSharedDomainLayer.data.userDefaults,
+            dataVersionLabel: dataVersionLabel,
             logger: logger
                 .with(scope: .auth)
         )
