@@ -16,7 +16,7 @@ Verni is an open-source expense sharing app that prioritizes simplicity, privacy
 
 - 🔒 **Privacy First**: Your financial data stays on your device. No tracking, no ads, no data mining.
 - 🌐 **Works Offline**: Full functionality without internet - sync when you're back online
-- 🚀 **Modern Stack**: Go 1.22 backend + Swift 6.0 iOS client with clean architecture
+- 🚀 **Modern Stack**: Swift 6.0, strict concurrency, SwiftUI, async-await, flux, swift testing, clean architecture
 - 💯 **Free Forever**: No premium features, no paywalls - just pure functionality
 - 🔄 **Real-time Sync**: Server-Side Events (SSE) for instant updates across devices
 - 🎯 **Local-First**: Start using without an account, sync data when you're ready
@@ -98,7 +98,7 @@ Both server and client follow clean architecture principles with clear separatio
 ### iOS (Swift)
 - **Data Layer**: Networking, persistence, serialization
 - **Domain Layer**: Business logic and use cases
-- **Presentation Layer**: Redux-pattern UI implementation
+- **Presentation Layer**: flux-like UI implementation
 - **Infrastructure**: System-wide utilities
 
 ## 📚 Documentation
