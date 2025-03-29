@@ -139,7 +139,7 @@ struct Configuration {
 
 ### 3. Build and Run
 
-1. Select your target iOS device/simulator
+1. Select `Verni` target
 2. Build and run the project (⌘R)
 
 ## Next Steps
