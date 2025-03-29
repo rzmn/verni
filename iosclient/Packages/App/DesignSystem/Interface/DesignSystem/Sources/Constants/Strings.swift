@@ -234,6 +234,14 @@ public extension VerniL10N {
         mappingFormat(format: "spending_group_overall_balance", amount)
     }
     
+    static var userPreviewAddFriend: Self {
+        mapping("user_preview_add_friend")
+    }
+    
+    static var userPreviewMe: Self {
+        mapping("user_preview_me")
+    }
+    
     static var addExpenseSplitEqually: Self {
         mapping("add_expense_equally_option")
     }

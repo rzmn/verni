@@ -46,15 +46,35 @@ public struct UserPreviewView: View {
                 )
                 .clipShape(.circle)
                 Text(store.state.user.payload.displayName)
+                    .foregroundStyle(colors.text.primary.default)
                     .font(.medium(size: 32))
                 Spacer()
-                DesignSystem.Button(
-                    config: .init(
-                        style: .primary,
-                        text: "add me"
+                switch store.state.status {
+                case .me:
+                    Text(.userPreviewMe)
+                        .foregroundStyle(colors.text.brand.static)
+                        .font(.medium(size: 24))
+                case .haveGroupInCommon(_, let balance):
+                    Text(
+                        balance.isEmpty
+                            ? .settledUp
+                            : .spendingsOverallBalance(
+                                amount: balance.map { (currency, value) in
+                                    currency.formatted(amount: value)
+                                }.joined(separator: " + ")
+                            )
                     )
-                ) {
-                    store.dispatch(.createSpendingGroup)
+                    .foregroundStyle(colors.text.brand.static)
+                    .font(.medium(size: 24))
+                case .noStatus:
+                    DesignSystem.Button(
+                        config: .init(
+                            style: .primary,
+                            text: .userPreviewAddFriend
+                        )
+                    ) {
+                        store.dispatch(.createSpendingGroup)
+                    }
                 }
                 Spacer()
             }
@@ -84,7 +104,8 @@ private struct ProfilePreview: View {
                                 displayName: "name",
                                 avatar: "123"
                             )
-                        )
+                        ),
+                        status: .noStatus
                         
                     ),
                     reducer: { state, _ in state }

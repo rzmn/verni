@@ -115,6 +115,14 @@ struct ProfileCardView: View {
                         IconButton(
                             config: IconButton.Config(
                                 style: .primary,
+                                icon: .share
+                            )
+                        ) {
+                            store.dispatch(.onShareTap)
+                        }
+                        IconButton(
+                            config: IconButton.Config(
+                                style: .primary,
                                 icon: .question
                             )
                         ) {
@@ -161,7 +169,7 @@ class ClassToIdentifyBundle {}
                     displayName: "name",
                     avatar: nil
                 ),
-                avatarCardFlipCount: 0,
+                avatarCardFlipCount: 1,
                 qrCodeData: nil
             ),
             reducer: { state, _ in state }

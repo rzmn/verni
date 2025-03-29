@@ -770,6 +770,28 @@
           }
         }
       }
+    },
+    "user_preview_add_friend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Friend"
+          }
+        }
+      }
+    },
+    "user_preview_me" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It’s me"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

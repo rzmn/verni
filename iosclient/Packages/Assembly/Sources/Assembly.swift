@@ -18,7 +18,10 @@ internal import DefaultInfrastructureLayer
         guard let apiEndpoint = URL(string: Configuration.endpoint) else {
             throw InternalError.error("failed to initialize api endpoind url")
         }
-        self.urlProvider = UrlProvider(schema: Configuration.appUrlSchema)
+        self.urlProvider = UrlProvider(
+            schema: Configuration.appUrlSchema,
+            host: apiEndpoint
+        )
         let data = try DefaultDataLayer(
             infrastructure: infrastructure,
             dataVersionLabel: Configuration.dataVersionLabel,

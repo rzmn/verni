@@ -84,6 +84,7 @@ actor AddExpenseModel {
             handler: AddExpenseSideEffects(
                 store: store,
                 dataSource: dataSource,
+                usersRepository: usersRepository,
                 spendingsRepository: spendingsRepository
             ),
             keepingUnique: true

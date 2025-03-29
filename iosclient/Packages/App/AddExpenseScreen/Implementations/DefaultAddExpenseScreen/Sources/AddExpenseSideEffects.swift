@@ -1,21 +1,25 @@
 import Entities
 import AddExpenseScreen
+import UsersRepository
 import SpendingsRepository
 import AppBase
 import UIKit
 
 @MainActor final class AddExpenseSideEffects: Sendable {
     private unowned let store: Store<AddExpenseState, AddExpenseAction>
+    private let usersRepository: UsersRepository
     private let spendingsRepository: SpendingsRepository
     private let dataSource: AddExpenseDataSource
 
     init(
         store: Store<AddExpenseState, AddExpenseAction>,
         dataSource: AddExpenseDataSource,
+        usersRepository: UsersRepository,
         spendingsRepository: SpendingsRepository
     ) {
         self.store = store
         self.spendingsRepository = spendingsRepository
+        self.usersRepository = usersRepository
         self.dataSource = dataSource
     }
 }
@@ -97,6 +101,11 @@ extension AddExpenseSideEffects: ActionHandler {
                     )
                 }
             }
+            await usersRepository
+                .updates
+                .subscribeWeak(self) { event in
+                    reload()
+                }
             await spendingsRepository
                 .updates
                 .subscribeWeak(self) { event in

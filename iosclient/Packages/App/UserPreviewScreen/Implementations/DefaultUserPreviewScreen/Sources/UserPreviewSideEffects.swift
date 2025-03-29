@@ -13,6 +13,7 @@ import Logging
     private let usersRepository: UsersRepository
     private let spendingsRepository: SpendingsRepository
     private let usersRemoteDataSource: UsersRemoteDataSource
+    private let dataSource: StatusDataSource
     private let userId: User.Identifier
     private let hostId: User.Identifier
 
@@ -22,6 +23,7 @@ import Logging
         usersRepository: UsersRepository,
         spendingsRepository: SpendingsRepository,
         usersRemoteDataSource: UsersRemoteDataSource,
+        dataSource: StatusDataSource,
         hostId: User.Identifier,
         userId: User.Identifier
     ) {
@@ -30,6 +32,7 @@ import Logging
         self.spendingsRepository = spendingsRepository
         self.logger = logger
         self.usersRemoteDataSource = usersRemoteDataSource
+        self.dataSource = dataSource
         self.userId = userId
         self.hostId = hostId
     }
@@ -56,6 +59,21 @@ extension UserPreviewSideEffects: ActionHandler {
             await usersRepository.storeUserData(user: store.state.user)
             if let info = await usersRepository[userId], case .regular(let user) = info {
                 store.dispatch(.infoUpdated(user))
+            }
+            let reload: @Sendable () -> Void = { [weak self] in
+                guard let self else { return }
+                Task {
+                    if let info = await usersRepository[userId], case .regular(let user) = info {
+                        await store.dispatch(.infoUpdated(user))
+                    }
+                    await store.dispatch(.statusUpdated(await dataSource.status))
+                }
+            }
+            await spendingsRepository.updates.subscribeWeak(self) { _ in
+                reload()
+            }
+            await usersRepository.updates.subscribeWeak(self) { _ in
+                reload()
             }
         }
     }

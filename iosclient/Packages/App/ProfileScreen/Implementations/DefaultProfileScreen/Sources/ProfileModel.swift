@@ -47,6 +47,7 @@ actor ProfileModel {
                 profileRepository: profileRepository,
                 usersRepository: usersRepository,
                 qrUseCase: qrInviteUseCase,
+                logger: logger,
                 urlProvider: urlProvider
             ),
             keepingUnique: true

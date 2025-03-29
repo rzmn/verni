@@ -9,6 +9,8 @@ extension ProfileModel {
                 return state
             case .onAccountSettingsTap:
                 return state
+            case .onShareTap:
+                return state
             case .onNotificationsSettingsTap:
                 return state
             case .onFlipAvatarTap:

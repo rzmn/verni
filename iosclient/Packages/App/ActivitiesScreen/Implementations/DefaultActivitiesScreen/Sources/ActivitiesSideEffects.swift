@@ -6,7 +6,7 @@ import OperationsRepository
 import AppBase
 import UIKit
 
-@MainActor final class AddExpenseSideEffects: Sendable {
+@MainActor final class ActivitiesSideEffects: Sendable {
     private unowned let store: Store<ActivitiesState, ActivitiesAction>
     private let operationsRepository: OperationsRepository
     private let usersRepository: UsersRepository
@@ -25,9 +25,9 @@ import UIKit
     }
 }
 
-extension AddExpenseSideEffects: ActionHandler {
+extension ActivitiesSideEffects: ActionHandler {
     var id: String {
-        "\(AddExpenseSideEffects.self)"
+        "\(ActivitiesSideEffects.self)"
     }
 
     func handle(_ action: ActivitiesAction) {

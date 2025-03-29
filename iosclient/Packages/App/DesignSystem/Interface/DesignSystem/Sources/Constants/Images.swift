@@ -108,6 +108,10 @@ extension Image {
     public static var question: Image {
         Image("question", bundle: .module)
     }
+    
+    public static var share: Image {
+        Image("share", bundle: .module)
+    }
 
     public static var splashTop: Image {
         Image("splash-top", bundle: .module)

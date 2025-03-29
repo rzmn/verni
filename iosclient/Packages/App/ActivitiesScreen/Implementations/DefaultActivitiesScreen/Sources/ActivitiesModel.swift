@@ -32,7 +32,7 @@ actor ActivitiesModel {
             reducer: Self.reducer
         )
         await store.append(
-            handler: AddExpenseSideEffects(
+            handler: ActivitiesSideEffects(
                 store: store,
                 operationsRepository: operationsRepository,
                 usersRepository: usersRepository,

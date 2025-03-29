@@ -9,6 +9,7 @@ public enum ProfileAction: Sendable {
     case onFlipAvatarTap
     case onLogoutTap
     case onNotificationsTap
+    case onShareTap
     case profileInfoUpdated(UserPayload)
     case profileUpdated(Profile)
 
