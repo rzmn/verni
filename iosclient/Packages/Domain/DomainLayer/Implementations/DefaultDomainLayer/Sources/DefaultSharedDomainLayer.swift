@@ -22,7 +22,8 @@ final class DefaultSharedDomainLayer: SharedDomainLayer {
     
     init(
         infrastructure: InfrastructureLayer,
-        data: DataLayer
+        data: DataLayer,
+        webcredentials: String?
     ) async throws {
         self.infrastructure = infrastructure
         self.data = data
@@ -30,12 +31,16 @@ final class DefaultSharedDomainLayer: SharedDomainLayer {
         self.logger = infrastructure.logger
             .with(scope: .domainLayer(.shared))
         
-        self.saveCredentialsUseCase = DefaultSaveCredendialsUseCase(
-            website: "verni.app",
-            logger: logger.with(
-                scope: .saveCredentials
+        if let webcredentials {
+            saveCredentialsUseCase = DefaultSaveCredendialsUseCase(
+                website: webcredentials,
+                logger: logger.with(
+                    scope: .saveCredentials
+                )
             )
-        )
+        } else {
+            saveCredentialsUseCase = EmptySaveCredendialsUseCase()
+        }
         self.localEmailValidationUseCase = LocalValidationUseCases()
         self.localPasswordValidationUseCase = LocalValidationUseCases()
         self.avatarsRepository = await DefaultAvatarsRepository(

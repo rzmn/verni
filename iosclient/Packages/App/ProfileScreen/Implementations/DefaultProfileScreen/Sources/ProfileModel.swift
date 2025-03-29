@@ -19,6 +19,7 @@ actor ProfileModel {
         profileRepository: ProfileRepository,
         usersRepository: UsersRepository,
         qrInviteUseCase: QRInviteUseCase,
+        urlProvider: UrlProvider,
         logger: Logger
     ) async {
         let profile = await profileRepository.profile
@@ -45,7 +46,8 @@ actor ProfileModel {
                 store: store,
                 profileRepository: profileRepository,
                 usersRepository: usersRepository,
-                qrUseCase: qrInviteUseCase
+                qrUseCase: qrInviteUseCase,
+                urlProvider: urlProvider
             ),
             keepingUnique: true
         )

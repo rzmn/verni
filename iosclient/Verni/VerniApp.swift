@@ -6,7 +6,9 @@ struct VerniApp: App {
     
     var body: some Scene {
         WindowGroup {
-            appDelegate.assembly.appModel.view()
+            appDelegate.assembly.appModel
+                .view()
+                .environment(appDelegate.assembly.urlProvider)
         }
     }
 }

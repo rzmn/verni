@@ -3,6 +3,14 @@ import Foundation
 import Security
 import Logging
 
+public struct EmptySaveCredendialsUseCase: SaveCredendialsUseCase {
+    public init() {}
+    
+    public func save(email: String, password: String) async {
+        // empty
+    }
+}
+
 public struct DefaultSaveCredendialsUseCase {
     public let logger: Logger
     private let website: String

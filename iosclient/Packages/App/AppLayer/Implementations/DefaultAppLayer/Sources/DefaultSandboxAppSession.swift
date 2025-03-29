@@ -22,6 +22,7 @@ internal import DefaultAuthWelcomeScreen
     init(
         shared: SharedAppSession,
         pushRegistry: PushRegistry,
+        urlProvider: UrlProvider,
         session: SandboxDomainLayer
     ) async {
         self.shared = shared
@@ -38,6 +39,7 @@ internal import DefaultAuthWelcomeScreen
             passwordValidationUseCase: session.localPasswordValidationUseCase,
             saveCredentialsUseCase: session.saveCredentialsUseCase,
             pushRegistry: pushRegistry,
+            urlProvider: urlProvider,
             logger: logger
                 .with(scope: .logIn)
         )
@@ -48,6 +50,7 @@ internal import DefaultAuthWelcomeScreen
             passwordValidationUseCase: session.localPasswordValidationUseCase,
             saveCredentialsUseCase: session.saveCredentialsUseCase,
             pushRegistry: pushRegistry,
+            urlProvider: urlProvider,
             logger: logger
                 .with(scope: .signUp)
         )

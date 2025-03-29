@@ -43,12 +43,13 @@ public final class SandboxDataSession: DataSession {
 
     nonisolated public init(
         storageFactory: StorageFactory,
-        infrastructure: InfrastructureLayer
+        infrastructure: InfrastructureLayer,
+        apiEndpoint: URL
     ) {
         let logger = infrastructure.logger
             .with(scope: .dataLayer(.sandbox))
         api = DefaultApiFactory(
-            url: Constants.apiEndpoint,
+            url: apiEndpoint,
             taskFactory: infrastructure.taskFactory,
             logger: logger
                 .with(scope: .api),
@@ -57,7 +58,7 @@ public final class SandboxDataSession: DataSession {
                 logger: logger.with(
                     prefix: "[sse]"
                 ),
-                endpoint: Constants.apiEndpoint
+                endpoint: apiEndpoint
             ),
             tokenRepository: nil
         ).create()

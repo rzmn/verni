@@ -17,19 +17,22 @@ public final class DefaultDataLayer: Sendable {
     public let sandbox: DataSession
     public let userDefaults: AsyncExtensions.Atomic<UserDefaults>
     
+    private let apiEndpoint: URL
     private let storageFactory: StorageFactory
     private let infrastructure: InfrastructureLayer
     
     public init(
         infrastructure: InfrastructureLayer,
         dataVersionLabel: String,
-        appGroupId: String
+        appGroupId: String,
+        apiEndpoint: URL
     ) throws {
         guard let permanentCacheDirectory = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: appGroupId
         ) else {
             throw InternalError.error("cannot get required directories for data storage", underlying: nil)
         }
+        self.apiEndpoint = apiEndpoint
         self.infrastructure = infrastructure
         self.logger = infrastructure.logger
             .with(scope: .dataLayer(.shared))
@@ -49,7 +52,8 @@ public final class DefaultDataLayer: Sendable {
         )
         sandbox = SandboxDataSession(
             storageFactory: storageFactory,
-            infrastructure: infrastructure
+            infrastructure: infrastructure,
+            apiEndpoint: apiEndpoint
         )
 
     }
@@ -63,18 +67,21 @@ extension DefaultDataLayer: DataLayer {
         private let storagePreview: UserStoragePreview
         private let sandboxSession: DataSession
         private let taskFactory: TaskFactory
+        private let apiEndpoint: URL
         private let logger: Logger
         
         init(
             storagePreview: UserStoragePreview,
             sandboxSession: DataSession,
             taskFactory: TaskFactory,
+            apiEndpoint: URL,
             logger: Logger
         ) {
             self.storagePreview = storagePreview
             self.sandboxSession = sandboxSession
             self.taskFactory = taskFactory
             self.logger = logger
+            self.apiEndpoint = apiEndpoint
         }
         
         func awake(loggedOutHandler: EventPublisher<Void>) async throws -> (DataSession, UserStorage) {
@@ -86,7 +93,7 @@ extension DefaultDataLayer: DataLayer {
                 accessToken: nil as String?
             )
             let apiFactory = DefaultApiFactory(
-                url: Constants.apiEndpoint,
+                url: apiEndpoint,
                 taskFactory: taskFactory,
                 logger: logger
                     .with(scope: .api),
@@ -95,7 +102,7 @@ extension DefaultDataLayer: DataLayer {
                     logger: logger.with(
                         prefix: "[sse]"
                     ),
-                    endpoint: Constants.apiEndpoint
+                    endpoint: apiEndpoint
                 ),
                 tokenRepository: refreshTokenRepository
             )
@@ -127,6 +134,7 @@ extension DefaultDataLayer: DataLayer {
                             storagePreview: $0,
                             sandboxSession: sandbox,
                             taskFactory: infrastructure.taskFactory,
+                            apiEndpoint: apiEndpoint,
                             logger: infrastructure.logger
                                 .with(scope: .dataLayer(.hosted))
                         )
@@ -173,7 +181,7 @@ extension DefaultDataLayer: DataLayer {
             accessToken: nil as String?
         )
         let apiFactory = DefaultApiFactory(
-            url: Constants.apiEndpoint,
+            url: apiEndpoint,
             taskFactory: infrastructure.taskFactory,
             logger: logger
                 .with(scope: .api),
@@ -182,7 +190,7 @@ extension DefaultDataLayer: DataLayer {
                 logger: logger.with(
                     prefix: "[sse]"
                 ),
-                endpoint: Constants.apiEndpoint
+                endpoint: apiEndpoint
             ),
             tokenRepository: refreshTokenRepository
         )

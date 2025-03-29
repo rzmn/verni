@@ -21,13 +21,15 @@ public final class DefaultSandboxDomainLayer: SandboxDomainLayer {
     public init(
         infrastructure: InfrastructureLayer,
         dataVersionLabel: String,
+        webcredentials: String?,
         data: DataLayer
     ) async {
         let shared: DefaultSharedDomainLayer
         do {
             shared = try await DefaultSharedDomainLayer(
                 infrastructure: infrastructure,
-                data: data
+                data: data,
+                webcredentials: webcredentials
             )
         } catch {
             let message = "failed to init shared domain layer error: \(error)"

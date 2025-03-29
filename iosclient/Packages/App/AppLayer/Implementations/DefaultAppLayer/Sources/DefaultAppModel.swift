@@ -14,12 +14,15 @@ public actor DefaultAppModel {
     private let store: Store<AppState, AppAction>
     private let pushRegistry: Task<PushRegistry, Never>
     private let domain: Task<SandboxDomainLayer, Never>
+    private let urlProvider: UrlProvider
 
     @MainActor public init(
-        domain: Task<SandboxDomainLayer, Never>
+        domain: Task<SandboxDomainLayer, Never>,
+        urlProvider: UrlProvider
     ) {
         CustomFonts.registerCustomFonts(class: DefaultAppModel.self)
         self.domain = domain
+        self.urlProvider = urlProvider
         store = Store(
             state: DefaultAppModel.initialState,
             reducer: DefaultAppModel.reducer
@@ -34,7 +37,8 @@ public actor DefaultAppModel {
             handler: AppSideEffects(
                 store: store,
                 domain: domain,
-                pushRegistry: pushRegistry
+                pushRegistry: pushRegistry,
+                urlProvider: urlProvider
             ),
             keepingUnique: true
         )

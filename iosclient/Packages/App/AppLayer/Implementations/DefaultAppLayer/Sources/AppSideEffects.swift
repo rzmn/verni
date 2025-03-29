@@ -8,16 +8,19 @@ internal import Logging
     private unowned let store: Store<AppState, AppAction>
     private let domain: Task<SandboxDomainLayer, Never>
     private let pushRegistry: Task<PushRegistry, Never>
+    private let urlProvider: UrlProvider
     private var launchTriggered = false
 
     init(
         store: Store<AppState, AppAction>,
         domain: Task<SandboxDomainLayer, Never>,
-        pushRegistry: Task<PushRegistry, Never>
+        pushRegistry: Task<PushRegistry, Never>,
+        urlProvider: UrlProvider
     ) {
         self.store = store
         self.domain = domain
         self.pushRegistry = pushRegistry
+        self.urlProvider = urlProvider
     }
 }
 
@@ -96,6 +99,7 @@ extension AppSideEffects: ActionHandler {
         let sandbox = await DefaultSandboxAppSession(
             shared: session.value,
             pushRegistry: pushRegistry,
+            urlProvider: urlProvider,
             session: sandboxDomain
         )
         do {
@@ -108,7 +112,8 @@ extension AppSideEffects: ActionHandler {
                     AnyHostedAppSession(
                         value: DefaultHostedAppSession(
                             sandbox: sandbox,
-                            session: domain
+                            session: domain,
+                            urlProvider: urlProvider
                         )
                     )
                 )

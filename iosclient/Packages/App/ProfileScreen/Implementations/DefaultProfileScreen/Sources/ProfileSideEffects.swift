@@ -11,17 +11,20 @@ import UIKit
     private let qrUseCase: QRInviteUseCase
     private let profileRepository: ProfileRepository
     private let usersRepository: UsersRepository
+    private let urlProvider: UrlProvider
 
     init(
         store: Store<ProfileState, ProfileAction>,
         profileRepository: ProfileRepository,
         usersRepository: UsersRepository,
-        qrUseCase: QRInviteUseCase
+        qrUseCase: QRInviteUseCase,
+        urlProvider: UrlProvider
     ) {
         self.store = store
         self.profileRepository = profileRepository
         self.usersRepository = usersRepository
         self.qrUseCase = qrUseCase
+        self.urlProvider = urlProvider
     }
 }
 
@@ -46,7 +49,7 @@ extension ProfileSideEffects: ActionHandler {
             guard
                 let anyUser = await usersRepository[profileRepository.profile.userId],
                 case .regular(let user) = anyUser,
-                let url = AppUrl.users(.show(user)).url
+                let url = urlProvider.url(for: .users(.show(user)))
             else {
                 return
             }

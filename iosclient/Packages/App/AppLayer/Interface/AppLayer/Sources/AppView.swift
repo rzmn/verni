@@ -21,6 +21,7 @@ extension View {
 public struct AppView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @ObservedObject private var store: Store<AppState, AppAction>
+    @Environment(UrlProvider.self) private var urlProvider
     @State private var showingDebugMenu = false
 
     @State private var authWelcomeSourceOffset: CGFloat?
@@ -48,7 +49,7 @@ public struct AppView: View {
             .environment(ColorPalette(scheme: colorScheme))
             .environment(PaddingsPalette.default)
             .onOpenURL { url in
-                guard let appUrl = AppUrl(url: url) else {
+                guard let appUrl = urlProvider.item(for: url) else {
                     return
                 }
                 switch appUrl {

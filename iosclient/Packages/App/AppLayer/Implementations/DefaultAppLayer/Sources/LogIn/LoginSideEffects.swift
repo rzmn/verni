@@ -18,6 +18,7 @@ internal import Convenience
     private let passwordValidationUseCase: PasswordValidationUseCase
     private let pushRegistry: PushRegistry
     private let saveCredentialsUseCase: SaveCredendialsUseCase
+    private let urlProvider: UrlProvider
 
     var id: String {
         "\(LoginSideEffects.self)"
@@ -30,6 +31,7 @@ internal import Convenience
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
         saveCredentialsUseCase: SaveCredendialsUseCase,
+        urlProvider: UrlProvider,
         pushRegistry: PushRegistry
     ) {
         self.store = store
@@ -39,6 +41,7 @@ internal import Convenience
         self.passwordValidationUseCase = passwordValidationUseCase
         self.saveCredentialsUseCase = saveCredentialsUseCase
         self.pushRegistry = pushRegistry
+        self.urlProvider = urlProvider
     }
 
     func handle(_ action: LogInAction<AnyHostedAppSession>) {
@@ -72,7 +75,8 @@ internal import Convenience
             )
             let session = await DefaultHostedAppSession(
                 sandbox: session,
-                session: domain
+                session: domain,
+                urlProvider: urlProvider
             )
             Task {
                 await saveCredentialsUseCase.save(email: credentials.email, password: credentials.password)

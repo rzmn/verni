@@ -19,6 +19,7 @@ internal import Convenience
     private let passwordValidationUseCase: PasswordValidationUseCase
     private let saveCredentialsUseCase: SaveCredendialsUseCase
     private let pushRegistry: PushRegistry
+    private let urlProvider: UrlProvider
     
     private var emailValidationSubject = PassthroughSubject<String, Never>()
     private var passwordValidationSubject = PassthroughSubject<String, Never>()
@@ -36,6 +37,7 @@ internal import Convenience
         emailValidationUseCase: EmailValidationUseCase,
         passwordValidationUseCase: PasswordValidationUseCase,
         saveCredentialsUseCase: SaveCredendialsUseCase,
+        urlProvider: UrlProvider,
         pushRegistry: PushRegistry
     ) {
         self.store = store
@@ -45,6 +47,7 @@ internal import Convenience
         self.passwordValidationUseCase = passwordValidationUseCase
         self.saveCredentialsUseCase = saveCredentialsUseCase
         self.pushRegistry = pushRegistry
+        self.urlProvider = urlProvider
         resetValidationSubscriptions()
     }
 
@@ -121,7 +124,8 @@ internal import Convenience
             )
             let session = await DefaultHostedAppSession(
                 sandbox: session,
-                session: domain
+                session: domain,
+                urlProvider: urlProvider
             )
             Task {
                 await saveCredentialsUseCase.save(email: credentials.email, password: credentials.password)

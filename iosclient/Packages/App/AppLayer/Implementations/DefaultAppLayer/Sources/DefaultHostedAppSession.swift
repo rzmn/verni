@@ -30,7 +30,11 @@ final class DefaultHostedAppSession: HostedAppSession {
     var profileEditing: any ProfileEditingScreenProvider
     private let domain: HostedDomainLayer
     
-    init(sandbox: SandboxAppSession, session: HostedDomainLayer) async {
+    init(
+        sandbox: SandboxAppSession,
+        session: HostedDomainLayer,
+        urlProvider: UrlProvider
+    ) async {
         domain = session
         self.sandbox = sandbox
         let logger = session.infrastructure.logger
@@ -39,6 +43,7 @@ final class DefaultHostedAppSession: HostedAppSession {
             profileRepository: session.profileRepository,
             usersRepository: session.usersRepository,
             qrInviteUseCase: session.qrInviteUseCase(),
+            urlProvider: urlProvider,
             logger: logger
                 .with(scope: .profile)
         ).create()

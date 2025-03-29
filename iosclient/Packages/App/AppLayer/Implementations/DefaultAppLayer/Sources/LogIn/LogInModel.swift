@@ -24,6 +24,7 @@ actor LogInModel {
         passwordValidationUseCase: PasswordValidationUseCase,
         saveCredentialsUseCase: SaveCredendialsUseCase,
         pushRegistry: PushRegistry,
+        urlProvider: UrlProvider,
         logger: Logger
     ) async {
         store = await Store(
@@ -38,6 +39,7 @@ actor LogInModel {
                 emailValidationUseCase: emailValidationUseCase,
                 passwordValidationUseCase: passwordValidationUseCase,
                 saveCredentialsUseCase: saveCredentialsUseCase,
+                urlProvider: urlProvider,
                 pushRegistry: pushRegistry
             ), keepingUnique: true
         )
