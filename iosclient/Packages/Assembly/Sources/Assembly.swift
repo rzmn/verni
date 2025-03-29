@@ -14,24 +14,22 @@ internal import DefaultInfrastructureLayer
     
     @MainActor public init() throws {
         let infrastructure = DefaultInfrastructureLayer()
-        let appGroupId = "group.com.rzmn.dev.verni"
-        infrastructure.logger.logI { "initializing assembly for app group id \(appGroupId)" }
-        guard let apiEndpoint = URL(string: "https://verni.app") else {
+        infrastructure.logger.logI { "initializing assembly for app group id \(Configuration.appGroupId)" }
+        guard let apiEndpoint = URL(string: Configuration.endpoint) else {
             throw InternalError.error("failed to initialize api endpoind url")
         }
-        self.urlProvider = UrlProvider(schema: "verni")
-        let dataVersionLabel = "v5"
+        self.urlProvider = UrlProvider(schema: Configuration.appUrlSchema)
         let data = try DefaultDataLayer(
             infrastructure: infrastructure,
-            dataVersionLabel: dataVersionLabel,
-            appGroupId: appGroupId,
+            dataVersionLabel: Configuration.dataVersionLabel,
+            appGroupId: Configuration.appGroupId,
             apiEndpoint: apiEndpoint
         )
         let sandboxDomainLayerTask = Task {
             return await DefaultSandboxDomainLayer(
                 infrastructure: infrastructure,
-                dataVersionLabel: dataVersionLabel,
-                webcredentials: "verni.app",
+                dataVersionLabel: Configuration.dataVersionLabel,
+                webcredentials: Configuration.webcredentials,
                 data: data
             ) as (any SandboxDomainLayer)
         }
