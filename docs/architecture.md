@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-Verni follows a clean architecture pattern with clear separation of concerns across both server and client components.
+Verni follows a clean architecture pattern with clear separation of concerns across both server and client components. 
 
 ```mermaid
 graph TD
@@ -11,6 +11,8 @@ graph TD
     C --> D[Data Access Layer]
     D --> E[Database]
 ```
+
+We conceived our app's architecture to be highly modular. No *abstract* module depends on any *implementation* module, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
 
 ## Server Architecture
 
@@ -59,10 +61,6 @@ graph TD
    - External integrations
    - Cross-cutting concerns
    - Utility functions
-
-### Module Organization 
-
-No *abstract* module depends on any *implementation* module, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
 
 #### Detailed overview of the Presentation Layer
 
