@@ -8,7 +8,7 @@
 ![iOS Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F66e66909acd3cb34a884adb5%2Flatest&query=record.coverage&label=iOS%20Code%20Coverage)
 ![Go Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F67dd1f9c8960c979a575ac87%2Flatest&query=record.coverage&label=Go%20Code%20Coverage)
 
-# Verni - A Modern Expense Sharing App
+# Verni
 
 Verni is an open-source expense sharing app that prioritizes simplicity, privacy, and reliability. Built with modern technologies and a focus on offline-first functionality, Verni helps you manage shared expenses without compromising on user experience or data privacy.
 
@@ -16,10 +16,10 @@ Verni is an open-source expense sharing app that prioritizes simplicity, privacy
 
 - 🔒 **Privacy First**: Your financial data stays on your device. No tracking, no ads, no data mining.
 - 🌐 **Works Offline**: Full functionality without internet - sync when you're back online
-- 🚀 **Modern Stack**: Swift 6.0, strict concurrency, SwiftUI, async-await, flux, swift testing, clean architecture
+- 💅 **Modern Stack**: Swift 6.0, strict concurrency, SwiftUI, async-await, flux, swift testing, clean architecture
 - 💯 **Free Forever**: No premium features, no paywalls - just pure functionality
 - 🔄 **Real-time Sync**: Server-Side Events (SSE) for instant updates across devices
-- 🎯 **Local-First**: Start using without an account, sync data when you're ready
+- 🗄️ **Local-First**: Start using without an account, sync data when you're ready
 
 ## 🎯 Perfect for Contributors Who Want To:
 
