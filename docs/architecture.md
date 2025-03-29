@@ -61,3 +61,5 @@ graph TD
    - Utility functions
 
 ### Module Organization 
+
+No *abstract* module depends on any *implementation* module, which is strictly prohibited to ensure proper encapsulation. It can guarantee that touching implementations will not trigger recompilation of other implementation modules, only that of the final target, which in most cases can leverage incremental compilation.
